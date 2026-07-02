@@ -32,10 +32,10 @@
 | Co-op raid (R0/R1: any seat, any aspect, AI raiders) | ✅ Playable |
 | Netcode (R2) | 🟠 IN FLIGHT (another session: `godot/net/`, `server/`, web export in `dist/`) |
 | **Realms (raids = themed realms; Realm 1 "The Takeover" = AI irony)** | 🟠 Realm 1 in flight via `raid-seals`; solo reskin DE-SCOPED |
-| **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | 🟠 IN FLIGHT (this session, branch `raid-seals` — see §RAID SEALS) |
+| **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | ✅ DONE, merged `ac1aa25` (adds/chains/rand-beats engine + 3 bosses + lobby Seal pick, protocol v2 — see §RAID SEALS) |
 | **Draft 2.0 / slot-verbs / token economy** | 🔴 NEW — planned (see Systems; design: `ASCENSION-STEAL-PLAN.md`) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned |
-| **Maps ("The Topology" — AtO-style node runs)** | 🔴 NEW — design locked (see §MAPS); MAP-1 unclaimed |
+| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1 MERGED (solo PoC on Bulwark, Realm-1 skin) — MAP-2/3 open |
 
 ---
 
@@ -95,7 +95,7 @@
 
 ---
 
-## RAID SEALS — the online boss ladder (first AI-Killer content) — IN FLIGHT (branch `raid-seals`)
+## RAID SEALS — the online boss ladder (first AI-Killer content) — ✅ DONE, MERGED (`ac1aa25`, 2026-07-02)
 
 **Bill's brief (2026-07-02, direct):** the online Rift needs a bigger, more DYNAMIC boss —
 random-but-dodgeable raid damage, interrupt chains, varied timings, a ~10s "everyone
@@ -117,8 +117,7 @@ Theme Bible arc: Mistral easy → Gemini mid → Claude-Mythos finale. Combat se
   interruptible **Hotfix Deployment** HEALS the withdrawn boss — kick it or lose progress);
   enrage 120s = USAGE LIMIT REACHED. Phase names Helpful → Harmless → Honest (ramping mult/speed).
 
-**Engine additions (ALL guarded — solo content must stay byte-identical; frozen-baseline gate
-running per the concurrent-sessions rule):**
+**Engine additions (ALL guarded — solo content byte-identical, gate-proven):**
 - **Add waves**: `AddRes` (`data/add_res.gd`) + `EncounterRes.adds`; `BossState.add_i/add_hp`;
   the boss withdraws between swings, damage routes to the add, main timers freeze; `HEAL_BOSS`
   still heals the main body (medic adds). Checksum gains a `+ add_hp` term (0 solo → identical).
@@ -136,9 +135,32 @@ Bill's direct raid brief):** solo reskin rows de-duped: Warcaller → *LE CHAT, 
 Twin Cantors → *LAMDA & PALM, the Deprecated Twins*; Vorathek stays the rift-beast Seal I, and
 the OPUS row's phase ideas (Helpful/Harmless/Honest + subagent adds) are folded into Seal IV.
 
-**Acceptance bar:** six solo sims byte-identical vs frozen baseline; Vorathek raid checksums
-unchanged per seed; `raid_sim` determinism PASS on all four Seals + sane skill bands
-(Mistral ≥ Gemini ≥ Mythos win rates); `ui_smoke_raid` + `net_smoke` green.
+**VERIFIED (all on frozen snapshots per the concurrent-sessions rule):**
+- Regression gate: all six solo sims **byte-identical** (150 seeds, logs + CSVs) vs the
+  pre-change baseline. Vorathek raid: **expert tier 150/150 checksums identical**; good/sloppy
+  diverge ONLY via one intended change — in RAID (`threat_enabled`-guarded) the Mender's own
+  frame joins its triage list, so the AI healer finally self-heals when personally hit
+  (bands hold: sloppy 98.3 vs 98.0, fewer tank deaths). Solo mender untouched.
+- `sim/raid_probe.gd` (17 asserts): add spawn/route/return, hotfix heals the WITHDRAWN main
+  body (+540), kick-skips-verse, silence-kills-chain, rand-beat victims/`mine` integrity.
+- **300-seed bands** (expert/good/sloppy): Vorathek 100/100/98 · Mistral 100/100/100 (easy,
+  loses nothing but time) · Gemini 100/100/**92** (healer+tank deaths) · Mythos 100/**95**/**43**
+  (healer_death-dominant + dps_wipes — ULTRATHINK is the wall). Determinism PASS ×4 Seals.
+- `ui_smoke_raid` (Seal launches, live add-phase render, banners, quips, lobby Seal row),
+  `net_smoke` (host picks Mistral over the wire → both replicas identical checksums →
+  disconnect/AI-takeover still clean), all five solo UI smokes, three live WSLg runs — green.
+- Fixed along the way: fight-end `casting` clear in `update()` (raid self-cast made
+  Seat→casting→Seat refcount cycles — ObjectDB leaks now 0) and `PoseRig2D.set_highlight`'s
+  draw-lambda null-capture (pre-existing; exposed by wiring RaidStage2D sync/events into the
+  raid HUD, which was silently missing).
+**Run/debug:** `godot --headless --path godot --script res://sim/raid_sim.gd -- --seeds=300
+[--boss=mythos]` · `res://sim/raid_probe.gd` · play: `--autostart=raid[:seat[:aspect[:boss]]]`
+(e.g. `raid:healer:tidecaller:mythos`); online: the HOST cycles the SEAL ⇄ row in the lobby.
+⚠ **Protocol v2**: rebuild/redeploy the server (`server/`) together with clients — v1 builds
+are rejected at the handshake by design.
+**NEXT (unclaimed):** per-Seal robot puppets (variant() tint is the placeholder — CAPTCHA-style
+robot rigs per §Graphics); ally banter events; Riftcore drops when the raid economy lands;
+Trial-Ladder versions of the Seals.
 
 ## MAPS — "THE TOPOLOGY" (Across-the-Obelisk-style run maps) — PLANNED (design locked 2026-07-02)
 
@@ -182,10 +204,26 @@ nodes, not node kinds.
 - Online: map navigation is LOBBY-layer, not combat-layer (between-fight "chosen node" message — cheap for netcode). Server owns the map; **leader picks the route** (party vote = later option).
 
 **Phases:**
-- **MAP-1 (solo PoC, Bulwark):** model + generator + map screen behind a toggle; COMBAT/EVENT/CACHE/COOLING/SEAL; 1 backdoor lock + key; 2 authored events. *Acceptance:* generator determinism (same-seed graph hash ×1000), random-walker completes 500 seeds headless, UI smoke, classic mode byte-identical.
+- **MAP-1 (solo PoC, Bulwark) — ✅ DONE, merged 2026-07-02 (`fd62f7b`).** `game/run_map.gd` (seeded 6-row × 3-lane DAG; quota'd kinds; one locked 401 backdoor + key on a feeder lane; locks gate only optional edges) · `game/map_content.gd` (Realm-1 skin: GPU Shrine caches, water-guzzling Cooling Stations, SIX authored events — careers fair / reservoir / allocation queue / alignment office / severance floor / captcha checkpoint) · `game/ui/map_screen.gd` (circuit-board render, 401→200 OK lock stamps, integrity readout) · `game/ui/map_event_panel.gd` · RunState +map/inventory/hp_frac (persistent integrity: fights start at run HP; events bruise, floor 5%) · Bulwark boss-select "THE TOPOLOGY" entry. **Verified:** `sim/map_sim.gd` determinism/structure/walker ALL PASS (300 seeds; avg 5.9 nodes · 3.65 fights · 28 backdoor runs); `sim/ui_smoke_map.gd` full loop PASS; classic `ui_smoke` PASSED + bulwark_sim determinism PASS ×3 (classic untouched). *Pending:* a WSLg GUI glance at the custom `_draw` (headless can't render it) — screenshot probe is a MAP-2 nicety.
 - **MAP-2 (depth):** tickets, secret rooms, ELITE, MARKET (token stub), 10+ events, art pass.
-- **MAP-3 (RAID FLOOR 1 — "RING 3: THE SHALLOW STACK", after `raid-seals` + net merge):**
-  entry Seal = **VORATHEK** (tutorial fight at the gate) → 3 lanes × ~4 rows → **MISTRAL-7B** (Seal II) as the floor boss. Raid node kinds: SKIRMISH (a trash-pack fight = an **add wave without a boss** — direct reuse of `AddRes`), EVENT, COOLING, CACHE. One 401 backdoor (🔑 API Key on the long lane) that skips a row. *Later floors:* Ring 2 → GEMINI ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard."
+- **MAP-3a (RAID FLOOR 1 — "RING 3: THE SHALLOW STACK", offline) — ✅ DONE, merged 2026-07-02 (`5d4ff47`).**
+  The Seals meet the Topology: **VORATHEK** guards the perimeter login (entry fight) →
+  generated lanes of SKIRMISHES (`RaidContent.make_skirmish` promotes the Seal AddRes packs —
+  BARD.EXE / stray SONNET / stray OPUS subagents — to standalone trash fights; ids reuse the
+  add ids so the stage tints just work) + Realm-1 events/cooling/cache/key → **MISTRAL-7B**
+  as the floor Seal. TOPOLOGY entry on the Rift select; `--autostart=raidmap[:seat[:aspect]]`.
+  **Attrition (the design finding):** per-seat integrity + healer mana carry between nodes,
+  but measured INERT alone — the Mender heals any starting deficit away (probe: 98% vs 98%).
+  The carry that BITES is the **CORRUPTED SECTOR wound**: a death-reboot costs −20% max HP
+  (stacking to 40%) that no heal can fix — only a Cooling Station repairs it. Probe: the gate
+  fight at sloppy drops **98% → 44%** with a corrupted tank+healer. Ring 3 itself is the
+  gentle intro floor by design: bands 100/100/98 (sloppy losses at the gate + a skirmish,
+  avg 3.6 fights/run). Verified: map+run determinism PASS, all four Seal checksums
+  byte-identical (game-layer only), net/ui/map smokes green, live WSLg run clean.
+  **3b (online nav — leader picks the node in the lobby, fracs+wounds ride the spec) is NEXT,
+  unclaimed**; the map dict is wire-serializable by design. Later floors: Ring 2 → GEMINI
+  ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard" —
+  those floors should lean hard on wounds (their fights actually kill raiders).
 - **Acceptance (all phases):** map-gen determinism; solo sims + raid checksums byte-identical with maps off; smokes green.
 
 ## CLASSES
@@ -264,6 +302,7 @@ nodes, not node kinds.
 - ☑ 2026-07-02 · main · Online/R2+R2.5 — DONE, retroactive claim: lockstep netcode (`godot/net/`), deploy kit (`server/`), Windows engine, browser WASM + tunnels. See CLAUDE.md R2/R2.5 entries. *(online session — same session as draft2 below)*
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
 - ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
-- ☐ 2026-07-02 · `map1` · §MAPS MAP-1 — generator + map screen + Realm-1 "The Stack" skin for the PoC (Bill: full computer/GPU/data-center/water/jobs flavor). Files: `game/run_map.gd`, `game/map_content.gd`, `game/ui/map_screen.gd`, `sim/map_sim.gd`, bulwark HUD wiring behind a toggle. *(map session — this one)*
-- ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
+- ☑ 2026-07-02 · `map1` · §MAPS MAP-1 — MERGED to main (`fd62f7b`), all sims/smokes green, plan updated, worktree removed. Realm-1 "The Stack" skin incl. Bill's GPU/data-center/water/jobs flavor (6 events). ⚠ draft2 session: bulwark_hud.gd changed (draft header/`_on_card_taken`/`_on_end` map-mode branches) — merge main in as planned. *(map session)*
+- ☑ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — MERGED to main (`ac1aa25`), full gate + 300-seed bands + probes + smokes green, plan updated, worktree removed. Net touches were additive (`enc` in spec, lobby `boss` msg, **protocol v2 — rebuild the server with the clients**); no conflict with map1/draft2 (tuning_config untouched). *(raid-seals session)*
+- ☑ 2026-07-02 · `raid-map` · §MAPS MAP-3a — MERGED to main (`5d4ff47`), post-merge sanity green, plan updated, worktree removed. Ring 3 raid floor offline: skirmishes from Seal AddRes packs, raid map mode in raid_hud (integrity+mana carry, CORRUPTED SECTOR wounds — the attrition that actually bites, probe 98%→44%), raid_map_sim. Stayed off draft2's surface as claimed. *(raid-seals session)*
 - ☐ 2026-07-02 · `draft2` · §SYSTEMS — Draft 2.0 (Phase A: synergy tags, Haiku/Sonnet/Opus rarity + pity, transform boons, deterministic run-seeded drafts) + Token economy (Phase C: diag-minted Tokens, REROLL/UPSELL). Files: new `game/draft.gd`/`game/ui/draft_screen.gd`/`sim/draft_sim.gd`; `run_state.gd`, all 5 `*_boons.gd` + `*_kit.gd` (guarded one-liners) + `*_hud.gd` (draft/end screens, `_begin_fight` seed), `relic_card.gd`, `palette.gd`, `tuning_config.gd` (4 mint knobs). ⚠ shared-risk w/ `map1` (bulwark HUD) + `raid-seals` (tuning_config) — merging main in before merge-back. Slot-verbs (Phase B) NOT in scope. *(draft2 session)*

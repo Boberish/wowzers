@@ -34,6 +34,7 @@ var _perfect_next := 0.0
 var _melee_gap := 0.0
 var _over_done := false
 var _seat_keys: Array = []
+var _enc_id := "riftmaw"          # to restore the boss body after an add wave
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -46,7 +47,8 @@ func setup(s: CombatState, aspects: Dictionary) -> void:
 	boss_actor = Actor2D.make("riftmaw")
 	boss_actor.scale = Vector2(-1, 1)
 	_world.add_child(boss_actor)
-	boss_actor.variant(String(s.encounter.id))
+	_enc_id = String(s.encounter.id)
+	boss_actor.variant(_enc_id)
 	_seat_keys = RaidNet.SEAT_KEYS.duplicate()
 	actors = []
 	for i in s.seats.size():
@@ -241,6 +243,17 @@ func on_event(ev: Dictionary) -> void:
 		"flow_lost":
 			if a != null:
 				a.slump_react()
+		"add_spawn":
+			# the boss withdraws — the add takes its body slot (placeholder swap)
+			boss_actor.variant(String(ev.get("id", "")))
+			boss_actor.stagger_anim()
+			_star(_boss_chest(), Color("ffb35c"))
+			_punch = maxf(_punch, 1.1)
+		"add_down":
+			boss_actor.variant(_enc_id)
+			boss_actor.stagger_anim()
+			_star(_boss_chest(), Color("e8c05a"))
+			_punch = maxf(_punch, 1.0)
 		_:
 			pass
 

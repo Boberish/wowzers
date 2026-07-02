@@ -198,9 +198,29 @@ JSON frames/s; the server is thin; combat code online == offline.
 
 ## R3 — Raid content + raid economy
 
+**First tranche LANDED (branch `raid-seals`, 2026-07-02): the Machine Seals** — see
+MASTER-PLAN §RAID SEALS. Three new raid bosses (MISTRAL-7B easy / GEMINI ULTRA mid /
+CLAUDE MYTHOS finale) on three guarded engine additions:
+- **Add waves** (`AddRes` + `EncounterRes.adds`, `BossState.add_i/add_hp`): the boss
+  withdraws between swings; damage routes to the add; main timers freeze; `HEAL_BOSS`
+  still heals the withdrawn main body (the Opus medic add). Checksum gains `+add_hp`
+  (0 solo → byte-identical).
+- **Cast chains** (`AbilityRes.chain`): the next verse starts on resolve OR kick — a kick
+  skips ONE verse; a live silence kills the litany. This delivers the "kick rotation"
+  R3 line from the OTHER side: one kicker (cd 5s) cannot cover a 3×2s-verse chain — the
+  Twinfang's kick must join.
+- **Random personal beats** (`StrikeRes.rand_target`): victims rolled at cast start,
+  healer included (pierces untargetability); only the victim can answer.
+Boss picks flow through the fight spec (`enc`) + a lobby host toggle (protocol v2).
+Verified: `sim/raid_probe.gd` (mechanics), `sim/raid_sim.gd` all four Seals
+(per-Seal determinism PASS, riftmaw checksums unchanged), regression gate, all smokes.
+NOTE for raid-healer design: in RAID the Mender's own frame joins its triage list
+(threat_enabled-guarded) — the AI healer self-heals, matching the human HUD.
+
+Still open for later R3:
 - Ensemble bosses that REQUIRE the trinity: tank-swap taunt mechanics (needs 2-tank comps),
-  healer dispels mid-telegraph, kick rotations (two casters alternating interrupts), feints
-  aimed at a random non-tank, marks that must be bloomed/warded pre-emptively.
+  healer dispels mid-telegraph, feints aimed at a random non-tank, marks that must be
+  bloomed/warded pre-emptively.
 - **Riftcores**: raid-only material, deterministic drop per raid boss kill; required for
   Sigil T3 and the sealed Ledger page. Solo trials farm essences; raids prove loadouts.
 - Difficulty tiers = Depth applied to raids; higher Depth → more Riftcores.

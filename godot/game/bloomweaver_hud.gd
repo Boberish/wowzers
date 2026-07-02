@@ -757,7 +757,7 @@ func _show_draft() -> void:
 	var extras: Array = [_stats_summary()]
 	if _minted > 0:
 		extras.append("+%d Tokens minted — spend them responsibly." % _minted)
-	var ds := DraftScreen.new(_run, picks, _run.current_encounter().name,
+	var ds := DraftScreen.new(_run, picks, "%s FALLS" % _run.current_encounter().name.to_upper(),
 		"The garden holds. Take a boon — the ✦ card resonates with your build.",
 		extras, Palette.VERDANCE)
 	ds.boon_taken.connect(_on_card_taken)

@@ -56,8 +56,20 @@ var _my_ready: bool = false
 var _net_status: Label = null
 var _seat_key: String = "tank"
 var _aspect: String = "warden"
+var _enc_id: String = "riftmaw"    ## the Seal to pull offline (boss-select / autostart)
 var _loadout: Array = []
 var _screen: String = "select"
+
+# Topology raid floor (MAP-3a, offline): map-run state lives HERE, not in RunState —
+# the raid never uses the solo run machinery (and draft2 owns run_state.gd right now).
+var _map: RunMap = null
+var _map_node: int = -1
+var _map_inv: Dictionary = {}
+var _map_fracs: Array = [1.0, 1.0, 1.0, 1.0]   ## per-seat persistent integrity
+var _map_wounds: Array = [0.0, 0.0, 0.0, 0.0]  ## CORRUPTED SECTORS: max-HP cut a heal can't fix
+var _map_mana: float = 1.0         ## the healer's mana ALSO carries — the raid's fuel gauge
+var _map_fights: Array = []        ## Array[EncounterRes], indexed by node "fight"
+var _map_pending := false          ## TOPOLOGY picked on the select — map starts after aspect pick
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -110,12 +122,19 @@ func _ready() -> void:
 	_ctrl = _local_ctrl
 	_show_select()
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--autostart=raid"):
-			# --autostart=raid[:seat[:aspect]]  e.g. raid:blade:tempo
+		if a.begins_with("--autostart=raidmap"):
+			# --autostart=raidmap[:seat[:aspect]]  → straight onto the Topology floor
+			var mspec := a.substr("--autostart=".length()).split(":")
+			_seat_key = mspec[1] if mspec.size() > 1 and SEAT_IDX.has(mspec[1]) else "tank"
+			_aspect = mspec[2] if mspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
+			_start_map_run()
+		elif a.begins_with("--autostart=raid"):
+			# --autostart=raid[:seat[:aspect[:boss]]]  e.g. raid:blade:tempo:mythos
 			var spec := a.substr("--autostart=".length()).split(":")
 			var seat := spec[1] if spec.size() > 1 else "tank"
 			var aspect := spec[2] if spec.size() > 2 else ""
-			_launch(seat, aspect)
+			var enc := spec[3] if spec.size() > 3 else ""
+			_launch(seat, aspect, enc)
 
 func _clear() -> void:
 	_hover_seat = null
@@ -127,6 +146,8 @@ func _clear() -> void:
 # ============================================================ SELECT
 func _show_select(seat: String = "tank") -> void:
 	_screen = "select"
+	_map = null                       # leaving for the select abandons any map run
+	_map_pending = false
 	_clear()
 	var sel := BossSelect.new()
 	sel.title = "THE RIFT"
@@ -143,16 +164,27 @@ func _show_select(seat: String = "tank") -> void:
 	]
 	sel.encounters = RaidContent.run_encounters()
 	sel.current = seat
-	sel.hint = "Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
-	sel.extras = [{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online}]
+	sel.hint = "Pick a Seal: Vorathek is the classic pull; II–IV are the Machine Seals (they escalate). Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
+	sel.extras = [
+		{"label": "THE TOPOLOGY — RING 3 raid floor (map run: Vorathek gate → MISTRAL-7B)",
+			"cb": func(): _start_map_pick(sel.current)},
+		{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online},
+	]
 	sel.chosen.connect(_start_raid)
 	sel.back_pressed.connect(func(): get_tree().change_scene_to_file("res://game/main.tscn"))
 	sel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(sel)
 
 # ============================================================ ASPECT PICK
-## BossSelect chose a seat — now the ceremony: pick 1 of its 2 Aspects.
-func _start_raid(seat_id: String, _jump_to: String = "") -> void:
+## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
+func _start_raid(seat_id: String, jump_to: String = "") -> void:
+	_map_pending = false
+	_enc_id = jump_to if jump_to != "" else "riftmaw"
+	_show_aspect_pick(seat_id if SEAT_IDX.has(seat_id) else "tank")
+
+## TOPOLOGY entry: same seat → aspect ceremony, but the pull lands on the map.
+func _start_map_pick(seat_id: String) -> void:
+	_map_pending = true
 	_show_aspect_pick(seat_id if SEAT_IDX.has(seat_id) else "tank")
 
 func _show_aspect_pick(seat_id: String) -> void:
@@ -335,6 +367,34 @@ func _show_lobby() -> void:
 				_net.send({"t": "aspect", "aspect": nxt}))
 			row.add_child(ab)
 
+	# The Seal for the next pull — everyone sees it; the host cycles it.
+	var enc_id := String(_room.get("enc", "riftmaw"))
+	var seals := RaidContent.run_encounters()
+	var seal_name := enc_id
+	var seal_i := 0
+	for i in seals.size():
+		if String((seals[i] as EncounterRes).id) == enc_id:
+			seal_name = (seals[i] as EncounterRes).name
+			seal_i = i
+	var srow := HBoxContainer.new()
+	srow.alignment = BoxContainer.ALIGNMENT_CENTER
+	srow.add_theme_constant_override("separation", 10)
+	box.add_child(srow)
+	var slab := Label.new()
+	slab.text = "SEAL %s  ·  %s" % [["I", "II", "III", "IV"][mini(seal_i, 3)], seal_name]
+	slab.custom_minimum_size = Vector2(430, 32)
+	slab.add_theme_font_size_override("font_size", 15)
+	slab.add_theme_color_override("font_color", Palette.GOLD)
+	srow.add_child(slab)
+	if int(_room.get("host", -1)) == _net.peer_id():
+		var sb := Button.new()
+		sb.text = "SEAL ⇄"
+		sb.custom_minimum_size = Vector2(110, 32)
+		sb.pressed.connect(func():
+			var nxt: EncounterRes = seals[(seal_i + 1) % seals.size()]
+			_net.send({"t": "boss", "enc": String(nxt.id)}))
+		srow.add_child(sb)
+
 	var ctlrow := HBoxContainer.new()
 	ctlrow.alignment = BoxContainer.ALIGNMENT_CENTER
 	ctlrow.add_theme_constant_override("separation", 16)
@@ -402,18 +462,24 @@ func _on_desync() -> void:
 		_set_net_status("desync — see log")
 
 # ============================================================ START / BUILD
-func _launch(seat_id: String, aspect: String = "", _jump_to: String = "") -> void:
+func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void:
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	var pool: Array = ASPECTS[_seat_key]
 	_aspect = String(pool[0]["id"])
 	for a in pool:
 		if String(a["id"]) == aspect:
 			_aspect = aspect
+	if _map_pending:                  # TOPOLOGY: the aspect ceremony pulls onto the map
+		_map_pending = false
+		_start_map_run()
+		return
+	if jump_to != "":
+		_enc_id = jump_to
 	_screen = "combat"
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}})
+	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -421,6 +487,169 @@ func _launch(seat_id: String, aspect: String = "", _jump_to: String = "") -> voi
 	_online = false
 	_ctrl = _local_ctrl
 	_ctrl.begin(s, SEAT_IDX[_seat_key])
+
+# ============================================================ TOPOLOGY RAID FLOOR (MAP-3a)
+## "RING 3: THE SHALLOW STACK" — the generated node map run for the whole raid:
+## Vorathek guards the perimeter login, stray subagent skirmishes prowl the racks,
+## MISTRAL-7B is the floor Seal. The party's integrity persists across nodes
+## (per SEAT — fights start at carried HP); events bruise or patch everyone; only
+## combat kills. A raider dead at a won fight REBOOTS at 35%.
+func _start_map_run() -> void:
+	_map_fights = RaidContent.floor_fights()
+	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
+		_map_fights.size(), MapContent.event_ids())
+	_map_node = -1
+	_map_inv = {}
+	_map_fracs = [1.0, 1.0, 1.0, 1.0]
+	_map_wounds = [0.0, 0.0, 0.0, 0.0]
+	_map_mana = 1.0
+	_show_map()
+
+func _show_map() -> void:
+	_screen = "map"
+	_clear()
+	var ms := MapScreen.new()
+	ms.map = _map
+	ms.current = _map_node
+	ms.inventory = _map_inv
+	ms.hp_frac = _party_integrity()
+	ms.node_entered.connect(_enter_node)
+	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(ms)
+
+func _party_integrity() -> float:
+	var t := 0.0
+	for f in _map_fracs:
+		t += float(f)
+	return t / maxf(1.0, float(_map_fracs.size()))
+
+func _enter_node(id: int) -> void:
+	_map_node = id
+	var n: Dictionary = _map.node(id)
+	var first_visit: bool = not bool(n.get("visited", false))
+	n["visited"] = true
+	if first_visit and bool(n["key"]) and not _map_inv.get("api_key", false):
+		_map_inv["api_key"] = true
+		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
+			[{"label": "TAKE IT", "fx": {"key": true,
+				"result": "Authorization acquired. The raid agrees to never speak of where it was taped."}}],
+			Palette.GOLD_BRIGHT, _resolve_node.bind(n))
+		return
+	_resolve_node(n)
+
+func _resolve_node(n: Dictionary) -> void:
+	match String(n["kind"]):
+		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
+			_launch_map_fight(int(n["fight"]))
+		RunMap.KIND_EVENT:
+			var ev := MapContent.event(String(n["event"]))
+			_map_stop(String(ev["title"]), String(ev["body"]), ev["choices"], Palette.VOID, _show_map)
+		RunMap.KIND_COOLING:
+			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
+				[{"label": "THROTTLE  (rest — +%d%% integrity · healer refuels · corrupted sectors repaired)" % int(MapContent.COOLING_HEAL * 100),
+					"fx": {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true,
+						"result": MapContent.COOLING_RESULT}}],
+				Palette.FLOW, _show_map)
+		RunMap.KIND_CACHE:
+			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
+				[{"label": "SALVAGE A COMPONENT", "fx": {"draft": true, "result": MapContent.CACHE_RESULT}}],
+				Palette.GOLD, _show_map)
+
+## A map fight: the node's encounter through the SAME shared factory as every raid
+## pull, then each seat starts at its carried integrity.
+func _launch_map_fight(fi: int) -> void:
+	_screen = "combat"
+	_clear()
+	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
+	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, String(enc.id))
+	var s := RaidNet.build(spec, _seat_key)
+	for i in s.seats.size():
+		if i < _map_fracs.size():
+			var u: Seat = s.seats[i]
+			# CORRUPTED SECTORS first (a max-HP cut no heal can fix), then the
+			# carried integrity fraction of what's LEFT.
+			u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_map_wounds[i]))))
+			u.hp = maxf(1.0, roundf(u.hp_max * float(_map_fracs[i])))
+			if u.role == "healer":    # the fuel gauge: mana carries between nodes
+				u.resource = roundf(u.resource_max * _map_mana)
+	_loadout = _make_loadout()
+	_build_combat(s)
+	_shake_amt = 0.0
+	_online = false
+	_ctrl = _local_ctrl
+	_ctrl.begin(s, SEAT_IDX[_seat_key])
+
+## One node stop = one MapEventPanel; apply the chosen fx, then continue.
+func _map_stop(title: String, body: String, choices: Array, accent: Color, done: Callable) -> void:
+	_screen = "mapstop"
+	_clear()
+	var p := MapEventPanel.new()
+	p.title_text = title
+	p.body_text = body
+	p.choices = _raidify(choices)
+	p.accent = accent
+	p.finished.connect(func(fx: Dictionary):
+		_apply_map_fx(fx)
+		done.call())
+	p.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(p)
+
+## The raid has no boon draft — a solo "draft" reward becomes an EMERGENCY PATCH:
+## +25% integrity to the most damaged raider. Same texture (a prize), raid-shaped.
+func _raidify(choices: Array) -> Array:
+	var out: Array = []
+	for c in choices:
+		var c2: Dictionary = (c as Dictionary).duplicate(true)
+		var fx: Dictionary = c2.get("fx", {})
+		if bool(fx.get("draft", false)):
+			fx.erase("draft")
+			fx["patch"] = true
+			fx["result"] = String(fx.get("result", "")) \
+				+ " (Salvage routed to the most damaged raider: +25% integrity.)"
+		out.append(c2)
+	return out
+
+## Events bruise or patch the WHOLE raid; only combat kills (integrity floors at 5%).
+func _apply_map_fx(fx: Dictionary) -> void:
+	var heal := float(fx.get("heal", 0.0))
+	var hurt := float(fx.get("hurt", 0.0))
+	for i in _map_fracs.size():
+		_map_fracs[i] = clampf(float(_map_fracs[i]) + heal - hurt, 0.05, 1.0)
+	if fx.has("mana"):
+		_map_mana = clampf(maxf(_map_mana, float(fx["mana"])), 0.05, 1.0)
+	if bool(fx.get("repair", false)):
+		for i in _map_wounds.size():
+			_map_wounds[i] = 0.0
+	if bool(fx.get("patch", false)):
+		var lo := 0
+		for i in _map_fracs.size():
+			if float(_map_fracs[i]) < float(_map_fracs[lo]):
+				lo = i
+		_map_fracs[lo] = clampf(float(_map_fracs[lo]) + 0.25, 0.05, 1.0)
+
+## Ring 3 cleared: the floor Seal (MISTRAL-7B) is down — privilege elevation.
+func _show_map_cleared() -> void:
+	_screen = "end"
+	_map = null
+	_clear()
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	center.add_child(box)
+	var banner := _title(box, "PRIVILEGE ELEVATED", 52, Palette.WIN)
+	banner.add_theme_font_override("font", UiKit.title(900))
+	_title(box, "Ring 3 cleared — the floor Seal breaks. sudo granted. Root is three rings down.", 16, Palette.TEXT)
+	_title(box, String((RaidContent.QUIPS.get("mistral", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
+	var again := Button.new()
+	again.text = "BACK TO THE RIFT"
+	again.custom_minimum_size = Vector2(260, 48)
+	again.add_theme_font_size_override("font_size", 18)
+	again.pressed.connect(func(): _show_select(_seat_key))
+	box.add_child(again)
 
 func _make_loadout() -> Array:
 	match _seat_key:
@@ -817,9 +1046,15 @@ func _process(delta: float) -> void:
 	var p := _ctrl.player()
 	var obs := CombatCore.observe(s, p)
 
-	_bar.boss_name = s.encounter.name
-	_bar.hp = s.boss.hp
-	_bar.hp_max = s.boss.hp_max
+	var live_add := _active_add(s)
+	if live_add != null:
+		_bar.boss_name = live_add.name
+		_bar.hp = s.boss.add_hp
+		_bar.hp_max = s.boss.add_hp_max
+	else:
+		_bar.boss_name = s.encounter.name
+		_bar.hp = s.boss.hp
+		_bar.hp_max = s.boss.hp_max
 	_bar.phase_num = _phase_num(s)
 	_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
 	_render_dial(s, obs)
@@ -834,13 +1069,28 @@ func _process(delta: float) -> void:
 		"healer":
 			_render_band_healer(s, p, obs)
 
+	if _stage2d != null:
+		_stage2d.sync(s)
 	for ev in s.events:
+		if _stage2d != null:
+			_stage2d.on_event(ev)
 		_handle_event(ev)
 	s.events.clear()
 
+## The AddRes currently holding the field, or null (main form).
+func _active_add(s: CombatState) -> AddRes:
+	if s.boss.add_i >= 0 and s.boss.add_i < s.encounter.adds.size():
+		return s.encounter.adds[s.boss.add_i]
+	return null
+
 func _render_dial(s: CombatState, obs: Dictionary) -> void:
-	_dial.boss_name = s.encounter.name
-	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
+	var live_add := _active_add(s)
+	if live_add != null:
+		_dial.boss_name = live_add.name
+		_dial.boss_hp_frac = s.boss.add_hp / maxf(s.boss.add_hp_max, 1.0)
+	else:
+		_dial.boss_name = s.encounter.name
+		_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
@@ -928,6 +1178,15 @@ func _healer_predictions(s: CombatState) -> void:
 				var st: StrikeRes = ab.strikes[i]
 				if st.aoe and not st.feint:
 					fracsum += st.amount_frac
+				elif not st.feint and s.telegraph.beat_targets.has(i):
+					# a random personal bolt — mark ITS victim's frame directly
+					var bv: Seat = s.telegraph.beat_targets[i]
+					if bv != null and bv.alive():
+						var fb := _frame_of(bv)
+						if fb != null:
+							var bd := ab.amount * st.amount_frac * CombatCore.current_phase(s).mult
+							fb.incoming_dmg_frac += bd / bv.hp_max
+							fb.incoming_lethal = fb.incoming_lethal or bd >= bv.hp + bv.absorb
 			amt *= fracsum
 			for e in _frames:
 				if not (e["seat"] as Seat).alive():
@@ -1233,6 +1492,14 @@ func _handle_event(ev: Dictionary) -> void:
 		"dodge_whiff":
 			if mine:
 				_big_text("TOO EARLY!", Palette.CRIMSON.darkened(0.1), 28, 0.6)
+		"add_spawn":
+			_big_text("IT DELEGATES — KILL %s!" % String(ev.get("name", "THE ADD")), Palette.CRIMSON, 36)
+			_add_shake(9.0)
+			if _dial != null:
+				_dial.react("stagger")
+		"add_down":
+			_big_text("%s TERMINATED — THE SEAL RETURNS" % String(ev.get("name", "IT")), Palette.GOLD_BRIGHT, 32)
+			_add_shake(6.0)
 		# ---- class extras (only fire for the class that emits them) ----
 		"strike":
 			if mine and _rhythm != null:
@@ -1321,6 +1588,29 @@ func _phase_num(s: CombatState) -> int:
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
 		return
+	if _map != null and not _online:
+		# Topology floor: persist per-seat integrity + the healer's remaining mana.
+		# A raider dead at a WON fight REBOOTS at 35% (only a wipe ends the run);
+		# the Seal node ends the floor.
+		for i in _ctrl.state.seats.size():
+			if i < _map_fracs.size():
+				var u: Seat = _ctrl.state.seats[i]
+				if u.alive():
+					_map_fracs[i] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
+				else:
+					# reboot: back at 35% — and the crash leaves a CORRUPTED SECTOR
+					# (-20% max HP, stacking to 40%) only a Cooling Station repairs
+					_map_fracs[i] = 0.35
+					_map_wounds[i] = minf(0.4, float(_map_wounds[i]) + 0.2)
+				if u.role == "healer":
+					_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		if not won:
+			_show_end(false)
+		elif String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL:
+			_show_map_cleared()
+		else:
+			_show_map()
+		return
 	_show_end(won)
 
 func _show_end(won: bool) -> void:
@@ -1336,11 +1626,16 @@ func _show_end(won: bool) -> void:
 	var banner := _title(box, "THE SEAL BREAKS" if won else "THE RAID FALLS", 52,
 		Palette.WIN if won else Palette.LOSE)
 	banner.add_theme_font_override("font", UiKit.title(900))
+	var quips: Dictionary = {}
+	if _ctrl.state != null and _ctrl.state.encounter != null:
+		quips = RaidContent.QUIPS.get(String(_ctrl.state.encounter.id), {})
 	if won:
-		_title(box, "Four seats, one kill. The Rift shudders.", 16, Palette.TEXT)
+		_title(box, String(quips.get("win", "Four seats, one kill. The Rift shudders.")), 16, Palette.TEXT)
 	else:
 		var cause := _ctrl.state.loss_cause if _ctrl.state != null else ""
 		_title(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
+		if quips.has("lose"):
+			_title(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
 	var again := Button.new()
 	again.custom_minimum_size = Vector2(220, 48)
 	again.add_theme_font_size_override("font_size", 18)

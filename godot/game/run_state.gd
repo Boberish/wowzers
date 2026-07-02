@@ -19,6 +19,12 @@ var draft_rng: DetRng = null      ## draft/economy stream — never state.rng, n
 var tokens: int = 0               ## skill-minted draft currency ("spend them responsibly")
 var pity_opus: int = 0            ## drafts since an opus was OFFERED while one was offerable
 
+# ---- Topology map mode (MASTER-PLAN §MAPS; map == null ⇒ classic linear run, untouched)
+var map: RunMap = null            ## the generated node map for this run
+var map_node: int = -1            ## current node id (-1 = not entered yet)
+var inventory: Dictionary = {}    ## map pickups ({"api_key": true, ...})
+var hp_frac: float = 1.0          ## persistent integrity across map nodes (fights start here)
+
 static func start(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("bulwark", aspect, seed_v)
 	r.loadout = ["cleave", "rampage", "fortify", ("vindicate" if aspect == "warden" else "avalanche")]

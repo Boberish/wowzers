@@ -199,15 +199,16 @@ func jolt(amt: float) -> void:
 ## The boss's gaze (raid): a floating gold diamond over this actor's head.
 func set_highlight(on: bool) -> void:
 	if on and _hl == null:
-		_hl = Node2D.new()
-		_hl.position = Vector2(0, highlight_y)
-		_hl.draw.connect(func():
+		var hl := Node2D.new()               # captured LOCAL: the lambda must not read
+		hl.position = Vector2(0, highlight_y)  # _hl, which is nulled on toggle-off while
+		hl.draw.connect(func():               # the freeing node still emits a last draw
 			var c := Color("ffdc93")
-			_hl.draw_colored_polygon(PackedVector2Array([Vector2(0, -9), Vector2(7, 0),
+			hl.draw_colored_polygon(PackedVector2Array([Vector2(0, -9), Vector2(7, 0),
 				Vector2(0, 9), Vector2(-7, 0)]), c)
 			c.a = 0.4
-			_hl.draw_arc(Vector2.ZERO, 13.0, 0.0, TAU, 20, c, 2.0, true))
-		add_child(_hl)
+			hl.draw_arc(Vector2.ZERO, 13.0, 0.0, TAU, 20, c, 2.0, true))
+		add_child(hl)
+		_hl = hl
 	elif not on and _hl != null:
 		_hl.queue_free()
 		_hl = null

@@ -57,7 +57,15 @@ static func update(s: CombatState) -> void:
 	_apply_group_damage(s, s.dt)           # 5. stat-block allies chip the boss
 	_apply_enrage(s, s.dt)                 # 6. hard-timer ramp
 	_check_end(s)                          # 7. win/lose
-	s.checksum = (s.checksum * 1000003 + int(s.boss.hp * 100.0) + s.tick) & 0x7FFFFFFFFFFFFFFF
+	if s.over:
+		# A fight ending mid-cast can strand seat.casting.target == the seat itself
+		# (raid healer self-cast) — a Seat -> Dictionary -> Seat refcount cycle that
+		# never frees. Nothing reads cast bars after `over`; not in the checksum.
+		for seat in s.seats:
+			seat.casting = {}
+	# add_hp is 0.0 whenever no add holds the field, so the extra term keeps every
+	# pre-add fight's checksum byte-identical while covering add fights against drift.
+	s.checksum = (s.checksum * 1000003 + int(s.boss.hp * 100.0) + int(s.boss.add_hp * 100.0) + s.tick) & 0x7FFFFFFFFFFFFFFF
 
 # --------------------------------------------------------------------------
 # Player / AI input
@@ -142,6 +150,7 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			for i in s.telegraph.ability.strikes.size():
 				var st: StrikeRes = s.telegraph.ability.strikes[i]
 				var a: Dictionary = s.telegraph.answers.get(i, {})
+				var bv := _beat_victim(s.telegraph, i)
 				beats.append({
 					"at": st.at,
 					"remaining": float((s.telegraph.start_tick + to_ticks(st.at, s.config.fixed_hz)) - s.tick) * s.dt,
@@ -149,7 +158,8 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 					"feint": st.feint,
 					"aoe": st.aoe,
 					"guard": st.guard,
-					"mine": st.aoe or s.telegraph.target == seat,
+					"mine": st.aoe or bv == seat,
+					"victim": ("" if st.aoe or bv == null else bv.unit_name),
 					"resolved": i < s.telegraph.next_strike,
 					"answered": a.has(seat),
 					"grade": int(a.get(seat, -1)),
@@ -165,6 +175,10 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	}
 	if s.threat_enabled:
 		base["aggro_me"] = _threat_target(s) == seat   # raid: am I the boss's victim?
+	if s.boss.add_i >= 0:
+		var ad: AddRes = s.encounter.adds[s.boss.add_i]
+		base["add"] = {"name": ad.name,
+			"hp_frac": s.boss.add_hp / maxf(1.0, s.boss.add_hp_max)}
 	if seat.kit != null:
 		base.merge(seat.kit.observe(s, seat), true)
 	return base
@@ -186,14 +200,20 @@ static func current_phase(s: CombatState) -> PhaseRes:
 static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	var enc := s.encounter
 
+	# Add waves (raid): form transitions happen only BETWEEN swings, never mid-telegraph.
+	if s.telegraph == null and not enc.adds.is_empty():
+		_update_form(s)
+
 	# Continuous, untelegraphed melee — keeps ticking even during a telegraph.
-	if not enc.melee.is_empty():
+	# While an add holds the field, its own melee (possibly none) replaces the boss's.
+	var melee: Dictionary = enc.melee if s.boss.add_i < 0 else (enc.adds[s.boss.add_i] as AddRes).melee
+	if not melee.is_empty():
 		s.boss.melee_timer -= 1
 		while s.boss.melee_timer <= 0:
-			var mn := float(enc.melee.get("min", 10.0))
-			var mx := float(enc.melee.get("max", 15.0))
+			var mn := float(melee.get("min", 10.0))
+			var mx := float(melee.get("max", 15.0))
 			_damage(s, _tank_target(s), s.rng.next_range(mn, mx), &"melee")
-			s.boss.melee_timer += to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
+			s.boss.melee_timer += to_ticks(float(melee.get("every", 1.5)), s.config.fixed_hz)
 
 	# A telegraph is winding up: advance it; resolve on completion. Ability timers
 	# are FROZEN meanwhile (faithful to the prototypes — only one swing at a time).
@@ -205,12 +225,16 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 			_resolve_telegraph(s, ph)
 		return
 
-	# Tick every ability timer; pick the most-overdue. `danger` (e.g. a crush) wins ties.
+	# Tick every ACTIVE ability timer (the add's while one holds the field — the
+	# withdrawn boss's own timers freeze, exactly as during a telegraph); pick the
+	# most-overdue. `danger` (e.g. a crush) wins ties.
 	# While the boss is silenced (Voidcaller) it can't START interruptible casts — those
 	# are held (timer nudged) so pulses/channels still fire.
 	var silenced := s.tick < s.boss.silenced_until_tick
+	var abilities: Array = enc.abilities if s.boss.add_i < 0 else (enc.adds[s.boss.add_i] as AddRes).abilities
 	var best: AbilityRes = null
-	for ab in enc.abilities:
+	for ab_v in abilities:
+		var ab: AbilityRes = ab_v
 		s.boss.ability_timer[ab.id] = int(s.boss.ability_timer[ab.id]) - 1
 		if int(s.boss.ability_timer[ab.id]) <= 0:
 			if silenced and ab.response == AbilityRes.Response.INTERRUPTIBLE:
@@ -221,15 +245,76 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	if best != null:
 		var gap := best.cd / maxf(0.01, ph.speed) + s.rng.next_float() * best.jitter
 		s.boss.ability_timer[best.id] = to_ticks(gap, s.config.fixed_hz)
-		var tg := Telegraph.new()
-		tg.ability = best
-		tg.start_tick = s.tick
-		var dur := best.cast
-		for st in best.strikes:             # a string never ends before its last beat
-			dur = maxf(dur, float((st as StrikeRes).at))
-		tg.dur_ticks = to_ticks(dur, s.config.fixed_hz)
-		tg.target = _pick_target(s, best)   # tank for busters, random dps for marks
-		s.telegraph = tg
+		_start_telegraph(s, best)
+
+## Begin a telegraph for `ab` — shared by the scheduler and chain links. Its
+## rand_target beats roll their victims NOW so the wind-up shows who is marked.
+static func _start_telegraph(s: CombatState, ab: AbilityRes) -> void:
+	var tg := Telegraph.new()
+	tg.ability = ab
+	tg.start_tick = s.tick
+	var dur := ab.cast
+	for st in ab.strikes:               # a string never ends before its last beat
+		dur = maxf(dur, float((st as StrikeRes).at))
+	tg.dur_ticks = to_ticks(dur, s.config.fixed_hz)
+	tg.target = _pick_target(s, ab)     # tank for busters, random dps for marks
+	for i in ab.strikes.size():
+		if (ab.strikes[i] as StrikeRes).rand_target:
+			tg.beat_targets[i] = _random_raider(s)
+	if not ab.chain.is_empty():
+		tg.chain_src = ab
+		tg.chain_i = 0
+	s.telegraph = tg
+
+## Add waves (raid). Main form: crossing a wave's HP threshold spawns its add — the
+## boss withdraws (timers frozen, HP untouchable) while the add fights with its own
+## HP pool, melee, and abilities. Add form: the add dying gives the field back.
+static func _update_form(s: CombatState) -> void:
+	var enc := s.encounter
+	if s.boss.add_i >= 0:
+		if s.boss.add_hp <= 0.0:
+			var down: AddRes = enc.adds[s.boss.add_i]
+			s.boss.add_i = -1
+			s.boss.add_hp = 0.0
+			s.boss.add_hp_max = 0.0
+			if not enc.melee.is_empty():
+				s.boss.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
+			_emit(s, {"t": "add_down", "id": down.id, "name": down.name})
+		return
+	var frac := s.boss.hp / s.boss.hp_max
+	for i in enc.adds.size():
+		var ad: AddRes = enc.adds[i]
+		if frac <= ad.at and not s.boss.adds_spawned.has(i):
+			s.boss.adds_spawned[i] = true
+			s.boss.add_i = i
+			s.boss.add_hp = float(ad.hp)
+			s.boss.add_hp_max = float(ad.hp)
+			var j := 0
+			for ab_v in ad.abilities:   # stagger the add's openers like create_state does
+				var ab: AbilityRes = ab_v
+				s.boss.ability_timer[ab.id] = to_ticks(
+					1.0 + float(j) * 1.2 + s.rng.next_float() * (ab.cd * 0.25), s.config.fixed_hz)
+				j += 1
+			if not ad.melee.is_empty():
+				s.boss.melee_timer = to_ticks(float(ad.melee.get("every", 1.5)), s.config.fixed_hz)
+			_emit(s, {"t": "add_spawn", "id": ad.id, "name": ad.name})
+			return
+
+## Cast chains (raid): the next link starts the MOMENT the previous resolved or was
+## kicked — a kick skips ONE verse, it doesn't end the litany. A live silence does
+## (the Silencer's fantasy). Returns true if a new link replaced the telegraph.
+static func _advance_chain(s: CombatState) -> bool:
+	var tg := s.telegraph
+	if tg == null or tg.chain_src == null or tg.chain_i >= tg.chain_src.chain.size():
+		return false
+	if s.tick < s.boss.silenced_until_tick:
+		return false
+	var src := tg.chain_src
+	var next_i := tg.chain_i
+	_start_telegraph(s, src.chain[next_i] as AbilityRes)
+	s.telegraph.chain_src = src
+	s.telegraph.chain_i = next_i + 1
+	return true
 
 static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 	var ab := s.telegraph.ability
@@ -309,15 +394,19 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 				if ti >= 0:
 					s.boss.threat[ti] = 0.0
 					_emit(s, {"t": "threat_drop", "seat": top, "player": top.is_player})
-	s.telegraph = null
+	if not _advance_chain(s):          # a resolved chain verse flows into the next
+		s.telegraph = null
 
 ## Cancel the current telegraph (Shockwave / Avalanche / Vindicate-interrupt).
+## Kicking a CHAIN verse skips that verse only — the litany continues.
 static func stagger_boss(s: CombatState) -> void:
 	if s.telegraph != null:
 		# View juice: denying a heal cast is the payoff moment; flag it so the HUD
 		# can pop "DENIED!" vs a plain "STAGGERED!".
 		_emit(s, {"t": "staggered",
 			"was_heal": s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS})
+		if _advance_chain(s):
+			return
 	s.telegraph = null
 
 # --------------------------------------------------------------------------
@@ -366,13 +455,18 @@ static func _next_answerable(tg: Telegraph, seat: Seat) -> int:
 		var st: StrikeRes = tg.ability.strikes[i]
 		if st.guard == StrikeRes.Guard.UNANSWERABLE:
 			continue
-		if not st.aoe and tg.target != seat:
+		if not st.aoe and _beat_victim(tg, i) != seat:
 			continue
 		var a: Dictionary = tg.answers.get(i, {})
 		if a.has(seat):
 			continue
 		return i
 	return -1
+
+## The victim of a non-aoe beat: its rolled rand_target raider if the beat has one,
+## else the telegraph's target (all pre-raid strings — behavior unchanged).
+static func _beat_victim(tg: Telegraph, i: int) -> Seat:
+	return tg.beat_targets.get(i, tg.target)
 
 ## Progressive resolution: each beat lands at its own impact tick inside the
 ## wind-up; the telegraph clears after the LAST beat. Boss ability timers stay
@@ -387,7 +481,8 @@ static func _advance_string(s: CombatState, ph: PhaseRes) -> void:
 		tg.next_strike += 1
 	if tg.next_strike >= tg.ability.strikes.size() \
 			and s.tick >= tg.start_tick + tg.dur_ticks:
-		s.telegraph = null
+		if not _advance_chain(s):
+			s.telegraph = null
 
 ## One beat lands. `aoe` beats hit EVERY living seat — the healer included (the
 ## only damage in the game that reaches a healer). Stat-block allies can't press,
@@ -404,8 +499,11 @@ static func _resolve_strike(s: CombatState, ph: PhaseRes, idx: int) -> void:
 			if seat.alive():
 				victims.append(seat)
 	else:
-		var t := tg.target
-		if t == null or not t.alive():
+		var t: Seat = _beat_victim(tg, idx)
+		if tg.beat_targets.has(idx):
+			if t == null or not t.alive():
+				t = null                # a personal bolt aimed at the fallen fizzles
+		elif t == null or not t.alive():
 			t = _tank_target(s)
 		if t != null:
 			victims.append(t)
@@ -431,7 +529,8 @@ static func _resolve_strike(s: CombatState, ph: PhaseRes, idx: int) -> void:
 			if seat.kit != null:
 				seat.kit.on_strike_result(s, seat, tg.ability, st, StrikeRes.Grade.MISS)
 		if d > 0.0:
-			_damage(s, seat, d, tg.ability.id, st.size, st.aoe)
+			# rand_target beats pierce like aoe — a personal bolt CAN find the healer
+			_damage(s, seat, d, tg.ability.id, st.size, st.aoe or tg.beat_targets.has(idx))
 		else:
 			_emit(s, {"t": "negate", "player": seat.is_player, "size": st.size, "feint": false})
 	_emit(s, {"t": "strike_landed", "idx": idx})
@@ -473,7 +572,10 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float) -> float:
 	if seat != null and seat.kit != null:
 		mult = seat.kit.outgoing_mult(seat)
 	var d := roundf(raw * mult)
-	s.boss.hp = maxf(0.0, s.boss.hp - d)
+	if s.boss.add_i >= 0:
+		s.boss.add_hp = maxf(0.0, s.boss.add_hp - d)   # an add holds the field — it eats the hit
+	else:
+		s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if s.threat_enabled and seat != null and d > 0.0:
 		_add_threat(s, seat, d * (s.config.threat_tank_mult if seat.role == "tank" else 1.0))
 	if d > 0.0:
@@ -600,9 +702,12 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			total += seat.dps * f
 			if s.threat_enabled:
 				_add_threat(s, seat, seat.dps * f * dt)
-	s.boss.hp -= total * dt
-	if s.boss.hp < 0.0:
-		s.boss.hp = 0.0
+	if s.boss.add_i >= 0:
+		s.boss.add_hp = maxf(0.0, s.boss.add_hp - total * dt)
+	else:
+		s.boss.hp -= total * dt
+		if s.boss.hp < 0.0:
+			s.boss.hp = 0.0
 
 static func _apply_enrage(s: CombatState, dt: float) -> void:
 	var e := s.encounter.enrage_at
@@ -763,6 +868,18 @@ static func _random_dps(s: CombatState) -> Seat:
 	var pool := _living_dps(s)
 	if pool.is_empty():
 		return _tank_target(s)
+	return pool[s.rng.next_u32() % pool.size()]
+
+## A random LIVING raider, the healer included — rand_target beats are the one
+## mechanic that can find anyone. Deterministic via the state rng (rolled only
+## when a rand_target beat exists, so non-raid rng order is untouched).
+static func _random_raider(s: CombatState) -> Seat:
+	var pool: Array = []
+	for seat in s.seats:
+		if seat.alive():
+			pool.append(seat)
+	if pool.is_empty():
+		return null
 	return pool[s.rng.next_u32() % pool.size()]
 
 static func _healer(s: CombatState) -> Seat:

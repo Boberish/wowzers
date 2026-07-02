@@ -37,6 +37,7 @@ func _make_room(code: String) -> Dictionary:
 		"phase": "lobby",              # "lobby" | "fight"
 		"players": {},                 # peer_id -> {name, seat(""), aspect(""), ready}
 		"host": 0,
+		"enc": "riftmaw",              # the Seal the host picked (see RaidContent Seals)
 		"spec": {},
 		"state": null,                 # CombatState during a fight
 		"accum": 0.0,
@@ -138,6 +139,8 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_aspect(id, String(msg.get("aspect", "")))
 		"ready":
 			_ready_flag(id, bool(msg.get("on", false)))
+		"boss":
+			_boss_pick(id, String(msg.get("enc", "")))
 		"start":
 			_start_fight(id)
 		"input":
@@ -179,6 +182,17 @@ func _ready_flag(id: int, on: bool) -> void:
 		return
 	room["players"][id]["ready"] = on
 	_broadcast_room(room)
+
+## Host picks the Seal (boss) for the next pull. Validated against the roster.
+func _boss_pick(id: int, enc: String) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "lobby" or room["host"] != id:
+		return
+	for e in RaidContent.run_encounters():
+		if String((e as EncounterRes).id) == enc:
+			room["enc"] = enc
+			_broadcast_room(room)
+			return
 
 func _valid_aspects(seat: String) -> Array:
 	match seat:
@@ -228,7 +242,7 @@ func _start_fight(id: int) -> void:
 			_send(id, {"t": "err", "msg": "%s isn't ready" % pl["name"]})
 			return
 		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false}
-	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, seat_cfg)
+	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, seat_cfg, String(room["enc"]))
 	room["spec"] = spec
 	room["state"] = RaidNet.build(spec, "")
 	room["phase"] = "fight"
@@ -281,4 +295,4 @@ func _broadcast_room(room: Dictionary) -> void:
 		players.append({"id": pid, "name": pl["name"], "seat": pl["seat"],
 			"aspect": pl["aspect"], "ready": pl["ready"]})
 	_broadcast(room, {"t": "room", "code": room["code"], "phase": room["phase"],
-		"host": room["host"], "players": players})
+		"host": room["host"], "enc": String(room["enc"]), "players": players})

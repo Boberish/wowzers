@@ -10,7 +10,7 @@ signal boon_taken(boon: Dictionary)
 
 var _run                       # RunState
 var _offers: Array = []
-var _boss_name: String
+var _headline: String          # rendered verbatim ("THE GATEKEEPER FALLS", "SALVAGE — TAKE ONE")
 var _flavor: String
 var _extra: Array = []
 var _extra_col: Color
@@ -19,11 +19,11 @@ var _tokens_lbl: Label
 var _row: HBoxContainer
 var _reroll: Button
 
-func _init(run, offers: Array, boss_name: String, flavor: String, extra_lines: Array = [],
+func _init(run, offers: Array, headline: String, flavor: String, extra_lines: Array = [],
 		extra_color: Color = Palette.STEEL) -> void:
 	_run = run
 	_offers = offers
-	_boss_name = boss_name
+	_headline = headline
 	_flavor = flavor
 	_extra = extra_lines
 	_extra_col = extra_color
@@ -40,7 +40,7 @@ func _ready() -> void:
 	head.offset_bottom = 200.0
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(head)
-	var hl := _label(head, "%s FALLS" % _boss_name.to_upper(), 30, Palette.GOLD)
+	var hl := _label(head, _headline, 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	_label(head, _flavor, 15, Palette.TEXT_DIM)
 	for line in _extra:

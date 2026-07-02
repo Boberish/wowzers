@@ -215,7 +215,12 @@ func _laststand(s: CombatState, seat: Seat) -> void:
 func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var party: Array = []
 	for u in s.seats:
-		if u.role != "healer":
+		# In a RAID the healer is personally hittable (rand-target bolts, aoe doom
+		# beats), so its own frame joins the triage list — the AI can finally
+		# self-heal, matching the human raid HUD's self-castable own frame.
+		# threat_enabled-guarded: solo mender behavior (and its tuned bands)
+		# stays byte-identical.
+		if u.role != "healer" or (s.threat_enabled and u == seat):
 			party.append({"seat": u, "name": u.unit_name, "role": u.role,
 				"frac": u.hp_frac(), "hp": u.hp, "max": u.hp_max, "absorb": u.absorb,
 				"debuff": not u.debuff.is_empty(), "hots": u.hots.size(), "dead": not u.alive()})

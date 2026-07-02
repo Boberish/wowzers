@@ -15,6 +15,10 @@ extends Resource
 @export var phases: Array[PhaseRes] = []
 @export var abilities: Array[AbilityRes] = []
 
+## ADD WAVES (raid): each AddRes spawns once when the boss's HP fraction crosses
+## its `at` — the boss withdraws until the add dies. Empty = no adds (all solo content).
+@export var adds: Array = []           ## Array of AddRes
+
 ## Hard timer (seconds). After this, escalating raid-wide damage forces a kill.
 ## -1 = no enrage.
 @export var enrage_at: float = -1.0

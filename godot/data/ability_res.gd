@@ -63,3 +63,9 @@ enum Size { NONE, LIGHT, HEAVY, CRUSH }
 
 # --- EMPOWER_BOSS payload ---
 @export var buff: float = 0.0           ## damage buff added to the boss on resolve
+
+## CAST CHAIN (raid): after this telegraph RESOLVES or is KICKED, the next link
+## starts immediately (a kick SKIPS one verse — it doesn't end the litany; a
+## silence kills the whole chain). Only the opener carries the array; links leave
+## it empty. Empty = classic single cast (all solo content).
+@export var chain: Array = []           ## Array of AbilityRes
