@@ -696,24 +696,30 @@ func _toggle_book() -> void:
 		_book.queue_free()
 		_book = null
 		return
-	_book = _panel(Palette.BG1.darkened(-0.0))
-	_book.self_modulate = Color(1, 1, 1, 0.98)
-	_place(_book, 0.5, 0.5, 0.5, 0.5, -280, -220, 280, 220)
+	var verb: String = VERB.get(_run.aspect, "GUARD")
+	var gtip := "Parry a swing inside its window to negate it, reflect damage, and bank Counter." \
+		if _run.aspect == "warden" else \
+		"Dodge a swing inside its window to negate it — but it dumps your Momentum, so dodge only what you must."
+	var abilities: Array = [{"icon": "guard", "name": verb, "key": "SPC",
+		"stats": "own cooldown  ·  off the GCD", "tip": gtip}]
+	for i in _run.loadout.size():
+		var id: String = _run.loadout[i]
+		var info: Dictionary = ABILITY_TIPS.get(id, {"stats": "", "tip": ""})
+		abilities.append({"icon": id, "name": ABILITY_NAMES.get(id, id), "key": str(i + 1),
+			"stats": String(info["stats"]), "tip": String(info["tip"])})
+	_book = Grimoire.new("THE BULWARK — %s" % _run.aspect.to_upper(), abilities, _boon_dicts(),
+		Palette.STEEL if _run.aspect == "warden" else Palette.MOMENTUM)
+	_book.closed.connect(_toggle_book)
 	_ui.add_child(_book)
-	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 20)
-	v.add_theme_constant_override("separation", 6)
-	_book.add_child(v)
-	_title(v, "SPELLBOOK", 22, Palette.GOLD)
-	_title(v, "Abilities", 14, Palette.STEEL)
-	for id in _run.loadout:
-		_title(v, "  %s" % ABILITY_NAMES.get(id, id), 14, Palette.TEXT)
-	_title(v, "Boons", 14, Palette.STEEL)
-	if _run.boons.is_empty():
-		_title(v, "  (none yet — win a fight to draft one)", 13, Palette.TEXT_DIM)
+
+func _boon_dicts() -> Array:
+	var out: Array = []
 	for id in _run.boons:
-		_title(v, "  * %s" % _boon_title(id), 13, Palette.TEXT)
-	_title(v, "press S to close", 12, Palette.TEXT_DIM)
+		for pool in [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]:
+			for b in pool:
+				if b["id"] == id:
+					out.append(b)
+	return out
 
 func _boon_title(id: String) -> String:
 	for pool in [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]:

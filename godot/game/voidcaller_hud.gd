@@ -580,24 +580,27 @@ func _toggle_book() -> void:
 		_book.queue_free()
 		_book = null
 		return
-	_book = _panel(Palette.BG1)
-	_book.self_modulate = Color(1, 1, 1, 0.98)
-	_place(_book, 0.5, 0.5, 0.5, 0.5, -280, -220, 280, 220)
+	var abilities: Array = [{"icon": "kick", "name": "KICK", "key": "SPC",
+		"stats": "5.0s cd  ·  clean = last slice of the cast",
+		"tip": "Cut the boss's cast short. A CLEAN kick (inside the bright window) pays your Aspect; a whiffed press still burns the cooldown."}]
+	for i in _run.loadout.size():
+		var id: String = _run.loadout[i]
+		var info: Dictionary = ABILITY_TIPS.get(id, {"stats": "", "tip": ""})
+		abilities.append({"icon": id, "name": ABILITY_NAMES.get(id, id), "key": str(i + 1),
+			"stats": String(info["stats"]), "tip": String(info["tip"])})
+	_book = Grimoire.new("THE VOIDCALLER — %s" % _run.aspect.to_upper(), abilities, _boon_dicts(),
+		Palette.VOID)
+	_book.closed.connect(_toggle_book)
 	_ui.add_child(_book)
-	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 20)
-	v.add_theme_constant_override("separation", 6)
-	_book.add_child(v)
-	_title(v, "SPELLBOOK", 22, Palette.GOLD)
-	_title(v, "Abilities", 14, Palette.VOID)
-	for id in _run.loadout:
-		_title(v, "  %s" % ABILITY_NAMES.get(id, id), 14, Palette.TEXT)
-	_title(v, "Boons", 14, Palette.VOID)
-	if _run.boons.is_empty():
-		_title(v, "  (none yet — win a fight to attune one)", 13, Palette.TEXT_DIM)
+
+func _boon_dicts() -> Array:
+	var out: Array = []
 	for id in _run.boons:
-		_title(v, "  * %s" % _boon_title(id), 13, Palette.TEXT)
-	_title(v, "press S to close", 12, Palette.TEXT_DIM)
+		for pool in [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]:
+			for b in pool:
+				if b["id"] == id:
+					out.append(b)
+	return out
 
 func _boon_title(id: String) -> String:
 	for pool in [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]:
