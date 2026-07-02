@@ -43,7 +43,7 @@ var _window := 0.0            ## classic parry window / kick clean window (secon
 var _perfect_w := 0.14
 var _good_w := 0.34
 var _graze_w := 0.5
-var _ready := true            ## the relevant press (defense / dodge) is available
+var _press_ok := true         ## the relevant press (defense / dodge) is available
 var _beats: Array = []        ## string comets: {rem,size,feint,aoe,mine,answered,resolved,grade,victim}
 var _combo_i := 0
 var _combo_n := 0
@@ -123,7 +123,7 @@ func feed(s: CombatState, obs: Dictionary, classic_window: float) -> void:
 func _feed_classic(tg: Dictionary, obs: Dictionary, classic_window: float) -> void:
 	_beats = []
 	_combo_n = 0
-	_ready = true
+	_press_ok = true
 	_mine = bool(tg.get("targets_me", true))
 	_size = int(tg.get("size", 0))
 	_window = classic_window
@@ -132,24 +132,24 @@ func _feed_classic(tg: Dictionary, obs: Dictionary, classic_window: float) -> vo
 	_next_feint = _classic_feint
 	if _classic_feint:
 		_kind = "feint"
-		_ready = bool(obs.get("defense_ready", true))
+		_press_ok = bool(obs.get("defense_ready", true))
 	elif bool(tg.get("interruptible", false)):
 		_kind = "kick"
-		_ready = bool(obs.get("defense_ready", true))
+		_press_ok = bool(obs.get("defense_ready", true))
 	elif bool(tg.get("heal", false)):
 		_kind = "heal"
 	elif bool(tg.get("empower", false)):
 		_kind = "empower"
 	elif _classic_defensible:
 		_kind = "classic"
-		_ready = bool(obs.get("defense_ready", true))
+		_press_ok = bool(obs.get("defense_ready", true))
 	else:
 		_kind = "brace"
 
 func _feed_string(beats_src: Array, obs: Dictionary) -> void:
 	_kind = "string"
 	_classic_defensible = false
-	_ready = bool(obs.get("dodge_ready", true))
+	_press_ok = bool(obs.get("dodge_ready", true))
 	_combo_n = beats_src.size()
 	_combo_i = _combo_n
 	_next_feint = false
@@ -385,7 +385,7 @@ func _draw() -> void:
 	_draw_gate(gx, ty, th)
 	if _active:
 		_draw_comets(tx, gx, ty, th)
-	if _active and _mine and not _ready and _kind != "heal" and _kind != "empower" \
+	if _active and _mine and not _press_ok and _kind != "heal" and _kind != "empower" \
 			and _kind != "brace" and not _next_feint:
 		_draw_lockout(tx, tw, ty, th)
 
@@ -439,7 +439,7 @@ func _next_size() -> int:
 
 func _in_window() -> bool:
 	return _mine and not _next_feint and _rem <= (_window if _kind != "string" else _good_w) \
-		and _rem > 0.0 and _ready
+		and _rem > 0.0 and _press_ok
 
 ## The graded bands before the gate. Strings: mint PERFECT / gold GOOD / steel
 ## GRAZE at constant px width. Classic: the true answer window in gold + the
@@ -622,7 +622,7 @@ func _draw_verdict_line(tx: float, tw: float, ty: float, th: float, font: Font) 
 		cue = ">>  %s  <<" % ("DODGE" if _kind == "string" else verb)
 		cc = Palette.GOLD_BRIGHT
 		cc.a = 0.6 + 0.4 * sin(_pulse * 2.0)
-	elif not _ready:
+	elif not _press_ok:
 		cue = "recharging…"
 		cc = Palette.CRIMSON.darkened(0.2)
 	else:
