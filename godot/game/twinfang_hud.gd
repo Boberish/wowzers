@@ -72,7 +72,7 @@ func _ready() -> void:
 	add_child(_ui)
 	_ctrl = CombatController.new()
 	add_child(_ctrl)
-	_ctrl.encounter_ended.connect(_on_end)
+	_ctrl.encounter_ended.connect(_on_end_moment)
 	_show_select()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart="):
@@ -327,6 +327,7 @@ func _process(delta: float) -> void:
 	_bar.hp_max = s.boss.hp_max
 	_bar.phase_num = _phase_num(s)
 	_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
+	_bar.enrage_in = (s.encounter.enrage_at - float(s.tick) * s.dt) if s.encounter.enrage_at > 0.0 else INF
 	_dial.boss_name = s.encounter.name
 	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
@@ -551,19 +552,33 @@ func _big_text(text: String, col: Color, fs: int = 40, life: float = 0.7) -> voi
 	tw.chain().tween_callback(l.queue_free)
 
 func _float_num(text: String, pos: Vector2, color: Color, dy: float) -> void:
+	# damage text with WEIGHT: numerals scale with magnitude, drift as they rise,
+	# hold bright for a beat and fade late (Cinzel display numerals)
+	var mag := absf(text.to_float())
+	var fs := 17
+	if mag >= 200.0:
+		fs = 30
+	elif mag >= 90.0:
+		fs = 25
+	elif mag >= 40.0:
+		fs = 21
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 20)
+	l.add_theme_font_override("font", UiKit.display(750))
+	l.add_theme_font_size_override("font_size", fs)
 	l.add_theme_color_override("font_color", color)
-	l.position = pos
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	l.add_theme_constant_override("shadow_offset_y", 2)
+	l.position = pos + Vector2(randf_range(-8.0, 8.0), 0.0)
 	_fx.add_child(l)
 	var tw := create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(l, "position:y", pos.y + dy, 0.7)
-	tw.tween_property(l, "modulate:a", 0.0, 0.7).set_trans(Tween.TRANS_QUAD)
+	tw.tween_property(l, "position:y", l.position.y + dy, 0.8) \
+		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(l, "position:x", l.position.x + randf_range(-14.0, 14.0), 0.8)
+	tw.tween_property(l, "modulate:a", 0.0, 0.45).set_delay(0.35)
 	tw.chain().tween_callback(l.queue_free)
 
-# ============================================================ TOOLTIPS
 func _show_ability_tip(i: int) -> void:
 	if i < 0 or i >= _run.loadout.size():
 		return
@@ -747,3 +762,17 @@ func _place(node: Control, al: float, at: float, ar: float, ab: float,
 	node.offset_top = ot
 	node.offset_right = orr
 	node.offset_bottom = ob
+
+
+## The fight-end BEAT: SLAIN / YOU FALL slams over the arena for a breath,
+## THEN the normal end flow (draft / end screen / map) runs. Headless runs
+## (smokes, sims) skip the beat entirely.
+func _on_end_moment(won: bool) -> void:
+	if _screen != "combat" or DisplayServer.get_name() == "headless":
+		_on_end(won)
+		return
+	var bname := _ctrl.state.encounter.name if _ctrl != null and _ctrl.state != null else ""
+	KillMoment.play(_ui, won, bname)
+	get_tree().create_timer(1.25).timeout.connect(func():
+		if _screen == "combat":
+			_on_end(won))

@@ -10,12 +10,16 @@ var hp: float = 0.0
 var hp_max: float = 1.0
 var phase_num: int = 1
 var phase_ats: Array = []      # phase .at thresholds (for notch marks)
+var enrage_in: float = INF     # seconds until enrage; <=0 = ENRAGED; INF = no enrage timer
 
 const BARH := 26.0
 var _bar: ColorRect
 var _chip: float = 1.0
 var _chip_hold: float = 0.0
 var _last_frac: float = 1.0
+var _last_phase: int = 1
+var _pflash: float = 0.0       # gold pulse when a phase threshold is crossed
+var _t: float = 0.0
 
 func _ready() -> void:
 	_bar = UiKit.make_bar(self, Palette.CRIMSON)
@@ -38,6 +42,11 @@ func _process(delta: float) -> void:
 		else:
 			_chip = maxf(frac, _chip - delta * 0.6)
 	_last_frac = frac
+	_t += delta
+	if phase_num > _last_phase:
+		_pflash = 1.0            # a threshold broke — the plate registers it
+	_last_phase = phase_num
+	_pflash = maxf(0.0, _pflash - delta * 1.6)
 	if _bar != null:
 		_bar.position = Vector2(0, size.y - BARH)
 		_bar.size = Vector2(size.x, BARH)
@@ -106,3 +115,28 @@ func _draw() -> void:
 	UiKit.text_shadowed(self, UiKit.display(600), Vector2(0, top + 18.0),
 		"%d / %d" % [int(round(hp)), int(round(hp_max))],
 		HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["LABEL"], Palette.GOLD_BRIGHT)
+
+	# --- phase-break flash: the whole bar pulses gold as a threshold falls ---
+	if _pflash > 0.0:
+		var pf := Palette.GOLD_BRIGHT
+		pf.a = 0.35 * _pflash
+		draw_rect(Rect2(0, top, size.x, BARH), pf)
+		pf.a = 0.8 * _pflash
+		draw_rect(Rect2(-2, top - 2, size.x + 4, BARH + 4), pf, false, 2.0)
+
+	# --- the enrage clock: the deadliest timer in the game, finally visible ---
+	if enrage_in <= 12.0 and enrage_in < INF:
+		var ey := size.y + 14.0
+		if enrage_in > 0.0:
+			var urgency := clampf(1.0 - enrage_in / 12.0, 0.0, 1.0)
+			var wc := Palette.CRIMSON.lerp(Palette.HEAVY, 0.35 * (1.0 - urgency))
+			wc.a = 0.55 + 0.45 * sin(_t * (3.0 + 5.0 * urgency))
+			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(0, ey),
+				"◆ ENRAGE · %.0fs" % ceilf(enrage_in), HORIZONTAL_ALIGNMENT_CENTER,
+				size.x, UiKit.SIZE["CAPTION"], wc)
+		else:
+			var bc := Palette.CRIMSON
+			bc.a = 0.7 + 0.3 * sin(_t * 6.0)
+			UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, ey),
+				"— ENRAGED —", HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["LABEL"], bc)
+			draw_rect(Rect2(-2, top - 2, size.x + 4, BARH + 4), bc, false, 1.6)
