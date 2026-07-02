@@ -35,6 +35,7 @@
 | **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | 🟠 IN FLIGHT (this session, branch `raid-seals` — see §RAID SEALS) |
 | **Draft 2.0 / slot-verbs / token economy** | 🔴 NEW — planned (see Systems; design: `ASCENSION-STEAL-PLAN.md`) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned |
+| **Maps ("The Topology" — AtO-style node runs)** | 🔴 NEW — design locked (see §MAPS); MAP-1 unclaimed |
 
 ---
 
@@ -131,6 +132,53 @@ the OPUS row's phase ideas (Helpful/Harmless/Honest + subagent adds) are folded 
 unchanged per seed; `raid_sim` determinism PASS on all four Seals + sane skill bands
 (Mistral ≥ Gemini ≥ Mythos win rates); `ui_smoke_raid` + `net_smoke` green.
 
+## MAPS — "THE TOPOLOGY" (Across-the-Obelisk-style run maps) — PLANNED (design locked 2026-07-02)
+
+**Bill's brief (direct):** AtO-inspired randomly generated node maps — connected nodes, shortcuts,
+long-cuts, extra rooms; pick up keys / do "quests" along the way; gates that need stuff you found
+earlier; all in theme. First concrete target: **the online raid map, Level 1, built on §RAID SEALS.**
+
+**The fiction (theme):** every map is a NETWORK DIAGRAM — nodes are machines, edges are cables,
+the map screen looks like a circuit board (Gilded Reliquary gold → copper-trace accents here).
+The raid campaign is a **privilege-escalation attack**: floors are protection RINGS
+(Ring 3 user-space → Ring 0 root), each Seal kill elevates your privileges, and CLAUDE MYTHOS
+sits at root. Fog of war = *unindexed*.
+
+**Map naming (locked)**
+- **Keys = ACCESS KEYS** (🔑 "API Key", "SSH Key", "Admin Badge"). Locked gate = **"401 UNAUTHORIZED"** door.
+- **Shortcuts = BACKDOORS** — faster, but may trigger "INTRUSION DETECTED" (ambush risk).
+- **Long routes = "Legacy Code"** — more nodes, more loot, more attrition.
+- **Extra/secret rooms = SERVER ROOMS / THE CACHE** ("cache hit!").
+- **Rest node = COOLING STATION** (heal; "thermal throttling recommended").
+- **Shop node = THE PROMPT MARKET** (spend TOKENS — Systems C).
+- **Quests = TICKETS** ("TICKET-137: printer is on fire") — pick up at one node, resolve at a later one, closing a ticket pays out; finish all = "sprint retro" bonus.
+- **Seal kill = PRIVILEGE ELEVATION** (map-wide unlock; Ring 0 needs all credential shards).
+
+**Node kinds (v1):** COMBAT · ELITE (Trial-Ladder v+1 boss now; aura-add elite when built) ·
+EVENT (scripted; may grant key/ticket/tokens/boon; some are **micro-skill-checks reusing the
+combat engine** — e.g. a CAPTCHA gate fires ONE telegraph: "prove you are human: dodge this") ·
+CACHE (treasure) · COOLING (rest) · MARKET · **SEAL** (act boss). Keys/tickets are payloads on
+nodes, not node kinds.
+
+**Generation rules (all seeded — same seed ⇒ same map):**
+- Layered DAG per act: ~4 rows × 3 lanes, forward edges + a few cross-links, all lanes reconverge at the Seal. Node-kind mix quota'd per act (≥1 COOLING, ≥1 EVENT, ≤1 MARKET…).
+- **Locks only gate OPTIONAL content** (backdoors, server rooms) — the mandatory path never needs a key ⇒ completability is guaranteed by construction, no solver needed (v1 invariant; revisit for v2 quest-gated acts).
+- Key nodes are placed on a lane that can reach their lock on the same run; backdoor edges skip 1–2 rows straight toward the Seal.
+- Tickets are either pickup/turn-in pairs (both reachable on every lane past the pickup) or route-agnostic objectives ("clear 2 COMBATs without avoidable damage").
+- Map RNG is its OWN `DetRng` stream seeded from the run seed — combat streams untouched.
+
+**Engineering (game-layer only — CombatCore untouched):**
+- `game/run_map.gd` — `MapNode {id, kind, edges, payload, flags}` + seeded generator; `RunState` gains `map / node_id / inventory` (keys, tickets, tokens). Linear `encounters` chain stays as "classic mode" fallback.
+- `game/ui/map_screen.gd` — circuit-board map render (calm StageBackdrop variant), route preview, inventory strip.
+- Online: map navigation is LOBBY-layer, not combat-layer (between-fight "chosen node" message — cheap for netcode). Server owns the map; **leader picks the route** (party vote = later option).
+
+**Phases:**
+- **MAP-1 (solo PoC, Bulwark):** model + generator + map screen behind a toggle; COMBAT/EVENT/CACHE/COOLING/SEAL; 1 backdoor lock + key; 2 authored events. *Acceptance:* generator determinism (same-seed graph hash ×1000), random-walker completes 500 seeds headless, UI smoke, classic mode byte-identical.
+- **MAP-2 (depth):** tickets, secret rooms, ELITE, MARKET (token stub), 10+ events, art pass.
+- **MAP-3 (RAID FLOOR 1 — "RING 3: THE SHALLOW STACK", after `raid-seals` + net merge):**
+  entry Seal = **VORATHEK** (tutorial fight at the gate) → 3 lanes × ~4 rows → **MISTRAL-7B** (Seal II) as the floor boss. Raid node kinds: SKIRMISH (a trash-pack fight = an **add wave without a boss** — direct reuse of `AddRes`), EVENT, COOLING, CACHE. One 401 backdoor (🔑 API Key on the long lane) that skips a row. *Later floors:* Ring 2 → GEMINI ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard."
+- **Acceptance (all phases):** map-gen determinism; solo sims + raid checksums byte-identical with maps off; smokes green.
+
 ## CLASSES
 
 **Now:** 5 classes done & verified (2 tanks-of-verbs pattern: mitigate/keep-alive/rhythm/interrupt/anticipate). Aspect pairs everywhere. Raid seats for all 4 roles.
@@ -205,4 +253,5 @@ unchanged per seed; `raid_sim` determinism PASS on all four Seals + sane skill b
 
 - ☐ 2026-07-02 · (unassigned) · Online/R2 — in flight by a concurrent session (pre-dates this log; that session should claim retroactively).
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
+- ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); MAP-1 implementation is OPEN to claim. Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
 - ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
