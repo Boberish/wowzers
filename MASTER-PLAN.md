@@ -300,6 +300,8 @@ nodes, not node kinds.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-02 · `raid-dmg-juice` · §GRAPHICS — port the damage-number juice to the RAID HUD (the user plays raid, not solo). Shared `game/ui/damage_numbers.gd` helper (single source of truth; solo Twinfang refactored onto it), add `seat` to Twinfang `_deal`'s boss_hit emit so the raid can attribute hits, `raid_hud` boss_hit → your damage source-coloured+big+crits, allies' dim/ambient. Files: new `game/ui/damage_numbers.gd`, `data/twinfang/twinfang_kit.gd` (one event field), `game/raid_hud.gd`, `game/twinfang_hud.gd`. View-only, byte-identical checksums. *(this session)*
+
 - ☑ 2026-07-02 · main · Online/R2+R2.5 — DONE, retroactive claim: lockstep netcode (`godot/net/`), deploy kit (`server/`), Windows engine, browser WASM + tunnels. See CLAUDE.md R2/R2.5 entries. *(online session — same session as draft2 below)*
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
 - ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
