@@ -331,6 +331,15 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var accent := _accent()
 
+	# ---- glass backing plate: the instrument holds its own against the stage ----
+	var plate := StyleBoxFlat.new()
+	plate.bg_color = Color(0.030, 0.026, 0.052, 0.62)
+	plate.set_corner_radius_all(9)
+	plate.border_color = Color(Palette.EDGE.r, Palette.EDGE.g, Palette.EDGE.b, 0.8)
+	plate.set_border_width_all(1)
+	draw_style_box(plate, Rect2(tx - 8.0, ty - (10.0 if compact else 22.0),
+		tw + 16.0, th + (44.0 if compact else 56.0)))
+
 	# ---- header: cast-name plaque · combo counter · impact countdown ----
 	var plaque := _name.to_upper() if _active else "THE JUDGE WAITS"
 	if _kind == "heal":
@@ -346,7 +355,7 @@ func _draw() -> void:
 		if _active and _mine and _rem > 0.02:
 			var cnt := ("%.1f" % _rem) if _rem >= 1.0 else ("%.2f" % _rem)
 			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0.0, 16.0), cnt,
-				HORIZONTAL_ALIGNMENT_RIGHT, size.x - 16.0, UiKit.SIZE["LABEL"],
+				HORIZONTAL_ALIGNMENT_RIGHT, size.x - 30.0, UiKit.SIZE["LABEL"],
 				accent if _rem <= _good_w else Palette.TEXT_DIM)
 
 	# ---- the recessed glass channel ----
@@ -373,9 +382,12 @@ func _draw() -> void:
 		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(tx + 12.0, ty + th * 0.5 + 5.0),
 			label, HORIZONTAL_ALIGNMENT_LEFT, tw - 24.0, UiKit.SIZE["CAPTION"], nc)
 		if _active and _mine and _rem > 0.02:
+			# countdown lives INSIDE the channel, tucked before the gate (the
+			# compact judge sits under the healers' bind-hint line — no headroom)
 			var cnt2 := ("%.1f" % _rem) if _rem >= 1.0 else ("%.2f" % _rem)
-			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0.0, ty - 4.0), cnt2,
-				HORIZONTAL_ALIGNMENT_RIGHT, size.x - 16.0, UiKit.SIZE["CAPTION"],
+			UiKit.text_shadowed(self, UiKit.display(700, 1),
+				Vector2(gx - 196.0, ty + th * 0.5 + 5.0), cnt2,
+				HORIZONTAL_ALIGNMENT_RIGHT, 60.0, UiKit.SIZE["CAPTION"],
 				accent if _rem <= _good_w else Palette.TEXT_DIM)
 
 	if _active:
