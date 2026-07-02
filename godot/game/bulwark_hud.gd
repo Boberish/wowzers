@@ -143,8 +143,7 @@ func _begin_fight() -> void:
 	_build_combat()
 	_shake_amt = 0.0
 	_flash_a = 0.0
-	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	_ctrl.begin(BulwarkContent.build_fight(_run, run_seed))
+	_ctrl.begin(BulwarkContent.build_fight(_run, _run.fight_seed()))
 	if _run.map != null:                       # map mode: fights start at run integrity
 		var s0: Seat = _ctrl.state.seats[0]
 		s0.hp = maxf(1.0, s0.hp_max * _run.hp_frac)
@@ -720,7 +719,7 @@ func _boon_title(id: String) -> String:
 func _show_draft() -> void:
 	_screen = "draft"
 	_clear()
-	var picks := BulwarkBoons.roll(_run)
+	var picks := Draft.roll_offers(_run)
 	if picks.is_empty():
 		if _draft_to_map:                      # map mode: pool exhausted → back to the map
 			_draft_to_map = false
@@ -730,32 +729,18 @@ func _show_draft() -> void:
 		_run.enc_index += 1
 		_begin_fight()
 		return
-	var head := VBoxContainer.new()
-	head.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -400, 60, 400, 160)
-	_ui.add_child(head)
+	var extras: Array = []
+	if _minted > 0:
+		extras.append("+%d Tokens minted — spend them responsibly." % _minted)
 	var hl_text := _draft_header if _draft_header != "" else "%s FALLS" % _run.current_encounter().name.to_upper()
 	_draft_header = ""
-	var hl := _title(head, hl_text, 30, Palette.GOLD)
-	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "Reforge — take one. Your Aspect's picks are weighted in.", 15, Palette.TEXT_DIM)
-
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 24)
-	_place(row, 0.5, 0.5, 0.5, 0.5, -380, -165, 380, 165)
-	_ui.add_child(row)
-	for b in picks:
-		row.add_child(_make_card(b))
-
-func _make_card(boon: Dictionary) -> Control:
-	var card := RelicCard.new(String(boon["title"]), String(boon["desc"]), String(boon["type"]))
-	card.taken.connect(_on_card_taken.bind(boon))
-	return card
+	var ds := DraftScreen.new(_run, picks, hl_text,
+		"Reforge — take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
+	ds.boon_taken.connect(_on_card_taken)
+	_ui.add_child(ds)
 
 func _on_card_taken(boon: Dictionary) -> void:
-	BulwarkBoons.apply(boon, _run)
+	Draft.take(_run, boon)
 	if _draft_to_map:                          # map mode: drafts hand back to the map
 		_draft_to_map = false
 		_show_map()
@@ -844,9 +829,13 @@ func _apply_map_fx(fx: Dictionary) -> void:
 		0.05, 1.0)
 
 # ============================================================ END
+var _minted := 0
+
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
 		return
+	_minted = Draft.mint(_ctrl.state, _run.char_class) if won else 0
+	_run.tokens += _minted
 	if _run.map != null:                       # map mode: persist integrity, route by node
 		var s0: Seat = _ctrl.state.seats[0]
 		_run.hp_frac = clampf(s0.hp / maxf(1.0, s0.hp_max), 0.0, 1.0)
@@ -879,6 +868,8 @@ func _show_end(won: bool) -> void:
 		_title(box, "You held the line as the %s." % _run.aspect.capitalize(), 16, Palette.TEXT)
 	else:
 		_title(box, "%s ground you down. Reforge and try again." % _run.current_encounter().name, 16, Palette.TEXT)
+	_title(box, "TOKENS · %d held%s" % [_run.tokens,
+		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM)
 	var again := Button.new()
 	again.text = "PICK A FIGHT"
 	again.custom_minimum_size = Vector2(220, 48)

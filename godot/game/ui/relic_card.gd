@@ -2,7 +2,10 @@
 ## with an engraved double border and filigree corners, a cut type-gem seated in a
 ## radiant setting at the head, the title in tracked Cinzel, the body in Spectral, and
 ## a "TAKE" ribbon at the foot. Hovering lifts the card and ignites its edge glow.
-## Emits `taken` on click; the HUD applies the boon.
+## Draft 2.0: the card carries its RARITY (Haiku prints nothing — the quiet default;
+## Sonnet/Opus tint the border + caption, Opus adds a pulsing outer ring) and a SYNERGY
+## mark (✦ glyphs in the top corners — the offer resonates with your build; the draft
+## screen's flavor line explains the glyph). Emits `taken` on click; the HUD applies.
 class_name RelicCard
 extends GlassPanel
 
@@ -11,18 +14,25 @@ signal taken
 var title: String = ""
 var body: String = ""
 var kind: String = "upgrade"       # "spell" / "upgrade" / "relic" — tints the gem
+var rarity: String = "haiku"       # "haiku" / "sonnet" / "opus" — tints the frame
+var synergy: bool = false          # slot-0 resonance mark
 var _accent: Color
+var _rcol: Color
 var _hover := 0.0
 var _hovered := false
 var _pulse := 0.0
 var _body_lbl: Label
 
-func _init(p_title: String, p_body: String, p_kind: String) -> void:
+func _init(p_title: String, p_body: String, p_kind: String,
+		p_rarity: String = "haiku", p_synergy: bool = false) -> void:
 	title = p_title
 	body = p_body
 	kind = p_kind
+	rarity = p_rarity
+	synergy = p_synergy
 	_accent = Palette.type_color(p_kind)
-	super._init("CARD", _accent)
+	_rcol = Palette.rarity_color(p_rarity)
+	super._init("CARD", _rcol if rarity != "haiku" else _accent)
 	custom_minimum_size = Vector2(230, 300)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
@@ -61,7 +71,7 @@ func _gui_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	_pulse += delta * 3.0
 	var target := 1.0 if _hovered else 0.0
-	if absf(target - _hover) > 0.002:
+	if absf(target - _hover) > 0.002 or rarity == "opus":
 		_hover += (target - _hover) * clampf(delta * 12.0, 0.0, 1.0)
 		pivot_offset = size * 0.5
 		scale = Vector2.ONE * (1.0 + 0.03 * _hover)
@@ -71,16 +81,33 @@ func _draw() -> void:
 	var w := size.x
 	var h := size.y
 
-	# engraved double border + filigree corners
+	# engraved double border + filigree corners (Sonnet/Opus tint the engraving)
 	var inset := 7.0
-	var bcol := Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.55 + 0.35 * _hover)
+	var base_b := Palette.GOLD_DIM if rarity == "haiku" else Palette.GOLD_DIM.lerp(_rcol, 0.65)
+	var bcol := Color(base_b.r, base_b.g, base_b.b, 0.55 + 0.35 * _hover)
 	draw_rect(Rect2(inset, inset, w - inset * 2.0, h - inset * 2.0), bcol, false, 1.2)
-	var b2 := Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.20 + 0.5 * _hover)
+	var base_b2 := Palette.GOLD if rarity == "haiku" else Palette.GOLD.lerp(_rcol, 0.5)
+	var b2 := Color(base_b2.r, base_b2.g, base_b2.b, 0.20 + 0.5 * _hover)
 	draw_rect(Rect2(inset + 3.0, inset + 3.0, w - (inset + 3.0) * 2.0, h - (inset + 3.0) * 2.0), b2, false, 1.0)
 	UiKit.filigree_corner(self, Vector2(inset, inset), Vector2(1, 1), 10.0)
 	UiKit.filigree_corner(self, Vector2(w - inset, inset), Vector2(-1, 1), 10.0)
 	UiKit.filigree_corner(self, Vector2(inset, h - inset), Vector2(1, -1), 10.0)
 	UiKit.filigree_corner(self, Vector2(w - inset, h - inset), Vector2(-1, -1), 10.0)
+
+	# Opus: a slow-breathing outer ring — the chase tier announces itself
+	if rarity == "opus":
+		var pa := 0.22 + 0.14 * (0.5 + 0.5 * sin(_pulse * 0.8))
+		draw_rect(Rect2(inset - 3.0, inset - 3.0, w - (inset - 3.0) * 2.0, h - (inset - 3.0) * 2.0),
+			Color(_rcol.r, _rcol.g, _rcol.b, pa), false, 2.0)
+
+	# Synergy: resonance glyphs in the top corners (the draft header explains ✦)
+	if synergy:
+		var sc := Palette.GOLD_BRIGHT
+		sc.a = 0.75 + 0.25 * sin(_pulse * 1.4)
+		UiKit.text_shadowed(self, UiKit.display(700, 0), Vector2(inset + 8.0, inset + 17.0), "✦",
+			HORIZONTAL_ALIGNMENT_LEFT, 30, UiKit.SIZE["CAPTION"] + 2, sc)
+		UiKit.text_shadowed(self, UiKit.display(700, 0), Vector2(w - inset - 38.0, inset + 17.0), "✦",
+			HORIZONTAL_ALIGNMENT_RIGHT, 30, UiKit.SIZE["CAPTION"] + 2, sc)
 
 	# the type gem in a radiant setting
 	var gc := Vector2(w * 0.5, 46.0)
@@ -102,9 +129,11 @@ func _draw() -> void:
 	draw_line(pts[3], pts[0], Palette.GOLD, 1.4, true)
 	draw_circle(gc + Vector2(-gr * 0.22, -gr * 0.3), gr * 0.18, Color(1, 1, 1, 0.8))
 
-	# kind caption + title
-	UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(0, 78.0), kind.to_upper(),
-		HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["CAPTION"], _accent)
+	# kind caption (rarity-stamped for Sonnet/Opus) + title
+	var caption := kind.to_upper() if rarity == "haiku" else "%s · %s" % [rarity.to_upper(), kind.to_upper()]
+	var ccol := _accent if rarity == "haiku" else _rcol
+	UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(0, 78.0), caption,
+		HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["CAPTION"], ccol)
 	UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(10, 104.0), title,
 		HORIZONTAL_ALIGNMENT_CENTER, w - 20, UiKit.SIZE["HEADER"], Palette.GOLD.lerp(Palette.GOLD_BRIGHT, 0.4))
 

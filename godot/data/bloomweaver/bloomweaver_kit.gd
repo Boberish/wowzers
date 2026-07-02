@@ -286,6 +286,12 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied
 			CombatCore.damage_boss(s, healer, cfg.perfect_burst)
 			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + cfg.perfect_burst
 		healer.vars["stat_perfect"] = int(healer.vars.get("stat_perfect", 0)) + 1
+		CombatCore._bump_diag(s, healer, "perfect_ward")   # class-signature skill signal (token mint)
+		if _b("evergreencycle") and target != null and target.role != "healer" and target.alive():
+			if _find_growth(target) >= 0:                  # Opus: the ward seeds itself
+				_refresh_growth(s, target)
+			else:
+				_plant(s, healer, target)
 		CombatCore.emit_event(s, {"t": "perfect_ward", "seat": target})
 
 # ---------------------------------------------------------------- observation

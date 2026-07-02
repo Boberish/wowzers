@@ -38,12 +38,12 @@ func _widgets() -> bool:
 
 func _draft() -> bool:
 	var run := RunState.start_voidcaller("disruptor")
-	var picks := VoidcallerBoons.roll(run)
+	var picks := Draft.roll_offers(run)
 	if picks.size() != 3:
 		print("  draft: FAIL — expected 3 picks, got %d" % picks.size()); return false
-	VoidcallerBoons.apply(picks[0], run)
+	Draft.take(run, picks[0])
 	var vrun := RunState.start_voidcaller("silencer")
-	var vp := VoidcallerBoons.roll(vrun)
+	var vp := Draft.roll_offers(vrun)
 	print("  draft: disruptor 3 (applied '%s'), silencer %d -> %s" % [
 		picks[0]["title"], vp.size(), ("ok" if vp.size() == 3 else "FAIL")])
 	return picks.size() == 3 and vp.size() == 3

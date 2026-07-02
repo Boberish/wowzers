@@ -44,6 +44,13 @@ extends Resource
 @export var taunt_dur: float = 3.0           ## taunt forces the boss onto you this long, seconds
 @export var taunt_threat_bonus: float = 1.1  ## taunt also sets your threat to top × this
 
+# --- Draft 2.0 token mint (game layer reads state.diag at fight end — see game/draft.gd;
+#     diag is deterministic and never in the checksum, so these can't shift combat) ---
+@export var mint_per_grades: int = 3         ## PERFECT dodges + held feints per Token
+@export var mint_per_signature: int = 4      ## class-signature skill events per Token
+@export var mint_flawless_bonus: int = 1     ## bonus Token: no miss/bait/whiff all fight
+@export var mint_cap: int = 3                ## max Tokens minted per fight
+
 func dt() -> float:
 	return 1.0 / float(fixed_hz)
 
