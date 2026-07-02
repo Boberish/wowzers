@@ -138,6 +138,7 @@ func _ready() -> void:
 			_launch(seat, aspect, enc)
 
 func _clear() -> void:
+	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	_hover_seat = null
 	_focus_seat = null
 	_stage2d = null
@@ -711,6 +712,9 @@ func _build_combat(s: CombatState) -> void:
 	_judge.verb = _verb()
 	_place(_judge, 0.72, 0, 0.72, 0, -260, 648, 260, 752)
 	_shake_root.add_child(_judge)
+
+	# every fight opens with a ceremony: the boss's name-card burns in and off
+	BossIntro.play(_ui, s.encounter.name)
 
 	# THE RAID — reliquary frames down the left. Gold-lit = the boss's victim;
 	# for the Mender seat the frames are also your click-cast targets.

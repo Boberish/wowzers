@@ -79,6 +79,7 @@ func _ready() -> void:
 				_start_run(parts[0], parts[1] if parts.size() > 1 else "")
 
 func _clear() -> void:
+	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	for c in _ui.get_children():
 		c.queue_free()
 
@@ -157,6 +158,9 @@ func _build_combat() -> void:
 	_judge.compact = true
 	_place(_judge, 0.5, 0, 0.5, 0, -280, 634, 280, 714)
 	_ui.add_child(_judge)
+
+	# every fight opens with a ceremony: the boss's name-card burns in and off
+	BossIntro.play(_ui, _run.current_encounter().name)
 
 	# raid frames — the whole raid, YOU included: aoe strike beats (M7) hit the
 	# healer too, so your own HP is a frame like everyone else's (and self-castable).

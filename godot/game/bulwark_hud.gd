@@ -92,6 +92,7 @@ func _ready() -> void:
 			_start_run(spec[0], spec[1] if spec.size() > 1 else "")
 
 func _clear() -> void:
+	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	_book = null
 	_stage3d = null
 	for c in _ui.get_children():
@@ -192,6 +193,9 @@ func _build_combat() -> void:
 	_judge.verb = VERB.get(_run.aspect, "DEFEND")
 	_place(_judge, 0.5, 0, 0.5, 0, -330, 664, 330, 768)
 	_shake_root.add_child(_judge)
+
+	# every fight opens with a ceremony: the boss's name-card burns in and off
+	BossIntro.play(_ui, _run.current_encounter().name)
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
