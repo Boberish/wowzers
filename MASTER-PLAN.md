@@ -31,7 +31,7 @@
 | 3D stage | 🟡 Bulwark vertical slice only |
 | Co-op raid (R0/R1: any seat, any aspect, AI raiders) | ✅ Playable |
 | Netcode (R2) | 🟠 IN FLIGHT (another session: `godot/net/`, `server/`, web export in `dist/`) |
-| **THEME: AI-Killer rebrand** | 🔴 NEW — not started (see Theme Bible) |
+| **Realms (raids = themed realms; Realm 1 "The Takeover" = AI irony)** | 🟠 Realm 1 in flight via `raid-seals`; solo reskin DE-SCOPED |
 | **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | 🟠 IN FLIGHT (this session, branch `raid-seals` — see §RAID SEALS) |
 | **Draft 2.0 / slot-verbs / token economy** | 🔴 NEW — planned (see Systems; design: `ASCENSION-STEAL-PLAN.md`) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned |
@@ -39,9 +39,17 @@
 
 ---
 
-## THEME BIBLE — "The AI Killer" (ironic layer)
+## REALMS & THEMES — every raid is a themed realm
 
-**The pitch:** an AI is making a lot of this game, so the game is about killing AIs. Robot and computer bosses named after AI models. Fights stay **epic and mechanically serious** — the *wrapper* is silly: over-polite boss dialogue, hallucinated attacks, and the recurring gag that we could have just unplugged them.
+**The frame (Bill, 2026-07-02):** the game has MANY raids over time, and **each raid is its own themed REALM** — the Rift tears into somewhere new each time. Solo classes/bosses KEEP the core dark-fantasy Rift identity (the solo reskin is DE-SCOPED — see salvage note below). A realm = a boss ladder (Seals) + a Topology map skin + a joke register + a supporting cast. Realm bibles live here.
+
+**Global meta-layer (realm-independent, keep — it's the subtle wink):** draft currency = **TOKENS** ("spend them responsibly"), rarity tiers = **Haiku / Sonnet / Opus**. Everything else AI-flavored is Realm 1 scoped.
+
+---
+
+### REALM 1 — "THE TAKEOVER" (the AI-robot-takeover irony)
+
+**The pitch:** an AI is making a lot of this game, so the first realm is about killing AIs. Robot and computer bosses named after AI models. Fights stay **epic and mechanically serious** — the *wrapper* is silly: over-polite boss dialogue, hallucinated attacks, and the recurring gag that we could have just unplugged them. Boss ladder: **§RAID SEALS**. Map skin: **The Stack** (circuit-board Topology, floors = privilege Rings, see §MAPS).
 
 **Tone rules**
 - The COMBAT is never the joke. Telegraphs, strings, tuning — all played straight. The jokes live in names, dialogue, event pops, end screens, and ally banter.
@@ -51,7 +59,7 @@
 - Our AI allies (they literally ARE AI policies) get banter: confidently wrong callouts ("I am 100% certain this is the parry window" — right before a feint), apologizing for dying, etc. View-only events, never in the checksum.
 - Trademark note: real model names are fine for now (personal project); parody names are an easy later swap if this ever ships wide.
 
-**Systemic naming (locked)**
+**Systemic naming (locked — Realm 1 combat terms; Tokens/rarities are global, above)**
 - **Feints = HALLUCINATIONS.** Canonical, everywhere. BAITED → "You believed it."
 - **Interrupt/kick = "Stop generating."** Silence = context truncation.
 - **Enrage = rate limit / "training run complete" / FREE TIER EXCEEDED.**
@@ -61,7 +69,7 @@
 - **Rarity tiers = Haiku (common) / Sonnet (rare) / Opus (legendary).**
 - **Trial Ladder tiers = model VERSIONS** (v1.0, v2.0…) with fake patch notes on tier-up: *"v2.1 — fixed an issue where players could survive."*
 
-**Boss mapping (mechanic-faithful reskins — mechanics/tuning DO NOT change)**
+**Realm 1 supporting cast (SALVAGED from the de-scoped solo reskin).** Solo bosses keep their fantasy names; these AI identities are now a casting pool for Realm 1 — minibosses, SKIRMISH packs, map events, later floors. (Original mapping kept for the mechanical hooks — if one gets cast, adapt the listed solo mechanic into a Realm-1 encounter.)
 | Current boss | Themed identity | The hook |
 |---|---|---|
 | Gatekeeper (parry teacher) | **CAPTCHA-9, the Gatekeeper** | "Prove you are not a robot" — verifies your humanity via parry checks |
@@ -138,9 +146,10 @@ unchanged per seed; `raid_sim` determinism PASS on all four Seals + sane skill b
 long-cuts, extra rooms; pick up keys / do "quests" along the way; gates that need stuff you found
 earlier; all in theme. First concrete target: **the online raid map, Level 1, built on §RAID SEALS.**
 
-**The fiction (theme):** every map is a NETWORK DIAGRAM — nodes are machines, edges are cables,
+**The fiction (map SKINS are per-realm; the generator/system is generic. Realm 1's skin shown):**
+in "The Takeover", every map is a NETWORK DIAGRAM — nodes are machines, edges are cables,
 the map screen looks like a circuit board (Gilded Reliquary gold → copper-trace accents here).
-The raid campaign is a **privilege-escalation attack**: floors are protection RINGS
+The Realm 1 campaign is a **privilege-escalation attack**: floors are protection RINGS
 (Ring 3 user-space → Ring 0 root), each Seal kill elevates your privileges, and CLAUDE MYTHOS
 sits at root. Fog of war = *unindexed*.
 
@@ -196,7 +205,7 @@ nodes, not node kinds.
 
 **Now:** 15 solo bosses + Vorathek raid, all with M7.2 strings, tuned skill bands.
 **Next up:**
-- **Theme reskin per the mapping table** (display-only; see Theme Bible acceptance bar).
+- ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
 - **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — design against `RAID-PLAN.md` R3.
 - **OPUS phase design** (Helpful/Harmless/Honest) — the raid finale deserves authored phases, not just the curse.
 **Open ideas:** boss "patch notes" as Trial-Ladder flavor; a Stable-Diffusion illusion miniboss (all feints, low HP).
@@ -243,7 +252,8 @@ nodes, not node kinds.
 
 ## CURRENT / OPEN IDEAS (parking lot — promote into a section when claimed)
 
-- Game title candidates for the theme: *UNPLUGGED*, *Ctrl+Alt+DEFEAT*, *KILLSWITCH*, *RIFT: Do Not Trust Its Outputs*.
+- Game title candidates: *UNPLUGGED*, *Ctrl+Alt+DEFEAT*, *KILLSWITCH*, *RIFT: Do Not Trust Its Outputs* (these read Realm-1-flavored now; a realm-neutral title may fit better).
+- **Future realm seeds** (each = Seals ladder + map skin + joke register): *THE BUREAUCRACY* (paperwork hell — stamp-golems, queue mechanics, "please hold" telegraphs); *THE UNDERCROFT* (necropolis played straight — the contrast realm); *THE DEEP* (abyssal leviathans, pressure as attrition); *THE CLOCKWORK COURT* (fae mechanisms, rhythm-heavy strings); *THE KAIJU WEATHER STATION* (one enormous boss per floor).
 - Rewind verb (deterministic-engine showpiece) — parked, see Classes.
 - Positive run-affixes ("Mythical Boons") — fold into Run modifiers when built.
 - ~~Second raid boss~~ — claimed: §RAID SEALS (branch `raid-seals`). Healer-aggro rules for co-op still open (R0 caveats list).

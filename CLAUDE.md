@@ -5,7 +5,7 @@ A co-op roguelike built on **MMO trinity combat with movement removed**, replace
 The four browser prototypes in `poc/` are the **executable design spec**. Port the *behavior*, not the JS. Lift the tuned numbers as starting values, then rebalance in-engine.
 
 ## ⚠ COORDINATION — read `MASTER-PLAN.md` FIRST (as of 2026-07-02)
-All work is now coordinated through **`MASTER-PLAN.md`**: current status by category (classes/bosses/systems/graphics/online/…), open ideas, claims, and the **AI-Killer theme bible** (robot/AI-model bosses, ironic layer — Mistral easy → Gemini mid → Claude-mythos finale). CLAUDE.md keeps the stable rules + history; the master plan is the living state. Workflow for EVERY task:
+All work is now coordinated through **`MASTER-PLAN.md`**: current status by category (classes/bosses/systems/graphics/online/…), open ideas, claims, and the **realm bibles** (each raid = a themed REALM; solo stays rift-fantasy. Realm 1 "The Takeover" = the ironic AI takeover: Mistral easy → Gemini mid → Claude-mythos finale). CLAUDE.md keeps the stable rules + history; the master plan is the living state. Workflow for EVERY task:
 1. Read `MASTER-PLAN.md`; claim your work in its Coordination Log before starting.
 2. Work in a **git worktree** (`git worktree add ../wow-<task> -b <task>`), never directly on `main`. Commit early/often; merge `main` into your branch often so parallel sessions never drift far.
 3. Verify (your section's acceptance bar: sims/smokes, determinism, byte-identical for engine touches), merge back to `main`.

@@ -74,7 +74,7 @@ Ascension Mythic+ / Raid Trials / Manastorm: replayable content at **infinitely 
 - Keep the "no lockouts, rebalance the boss instead" rule tractable for the balance sims (`sim/*_sim.gd`).
 
 ## Theme addendum (2026-07-02)
-The game is getting an ironic **AI-Killer theme** (see `MASTER-PLAN.md` → Theme Bible). Hooks into this plan: rarity tiers are named **Haiku/Sonnet/Opus** (#5), the skill-minted draft currency is literally **Tokens** (#4), the Trial Ladder is presented as boss **versions** with fake patch notes (#6), and feints are canonically **hallucinations**. Scoping rule for #3 (locked): draft pools stay per-class; mods express through UI the class already has; cross-aspect bleed is rare spice only where the class UI supports it.
+Raids are now **themed REALMS** (see `MASTER-PLAN.md` → Realms & Themes); Realm 1 "The Takeover" carries the ironic AI theme, solo stays rift-fantasy. Still GLOBAL from this plan: rarity tiers named **Haiku/Sonnet/Opus** (#5) and the skill-minted draft currency as **Tokens** (#4). Realm-1-scoped: Trial-Ladder boss **versions** with fake patch notes (#6), feints-as-**hallucinations**. Scoping rule for #3 (locked): draft pools stay per-class; mods express through UI the class already has; cross-aspect bleed is rare spice only where the class UI supports it.
 
 ## Non-negotiables (do not break)
 - `CombatCore` stays a **pure, deterministic, Node-free reducer** (fixed 30Hz, integer-tick truth, one seeded PRNG, all tuning in `TuningConfig`). Every new system must be sim-able headless.
