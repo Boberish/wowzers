@@ -72,6 +72,7 @@ func _initialize() -> void:
 
 	_prove_ally_path(seeds)
 	_prove_feint_gate(seeds)
+	_prove_guard_mods(seeds)
 
 	_write_csv(out_path, rows)
 	print("wrote %d rows -> %s" % [rows.size(), ProjectSettings.globalize_path(out_path)])
@@ -91,15 +92,17 @@ func _encounter(name: String) -> EncounterRes:
 			return BulwarkContent.make_gatekeeper()
 
 func _run_one(seed: int, enc_name: String, aspect: String, slack: float,
-		perfect_reads: bool = false) -> Dictionary:
+		perfect_reads: bool = false, boons: Dictionary = {}) -> Dictionary:
 	var cfg := BulwarkContent.make_config()
 	var bcfg := BulwarkContent.make_bulwark_config()
-	var s := BulwarkContent.make_state(seed, aspect, cfg, bcfg, _encounter(enc_name))
+	var s := BulwarkContent.make_state(seed, aspect, cfg, bcfg, _encounter(enc_name), boons)
 	var pol := s.seats[0].policy as BulwarkPolicy
 	pol.reaction_slack = slack
 	pol.perfect_feint_read = perfect_reads
 	pol.rng = DetRng.new(seed * 2749 + 1337)   # separate reproducible read-stream
-	return _run(s)
+	var r := _run(s)
+	r["guard_procs"] = int(s.seats[0].vars.get("guard_procs", 0))
+	return r
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)
@@ -195,6 +198,45 @@ func _prove_feint_gate(seeds: int) -> void:
 		fwr, pwr, pwr - fwr])
 	print("  avg baits/run %.2f   (if this is ~0 or the gap is small, the feint mechanic is inert)" % [
 		bait_sum / float(seeds)])
+	print("")
+
+## Phase B probe: the slot-verb Guard mods change the fight and stay deterministic.
+## Paired seeds on the Duelist @loose — boonless vs a modded build (trigThird +
+## trigRead + payReflect + payHeal + Twin Guard). The mods only ADD power, so the
+## modded win-rate must never drop; guard_procs proves the payloads actually fire.
+func _prove_guard_mods(seeds: int) -> void:
+	var mods := {"trigThird": true, "trigRead": true, "payReflect": true,
+		"payHeal": true, "propCharge": true}
+	var base_wins := 0
+	var mod_wins := 0
+	var base_ttk := 0.0
+	var mod_ttk := 0.0
+	var proc_sum := 0.0
+	for seed in range(1, seeds + 1):
+		var a := _run_one(seed, "duelist", "warden", 0.12)
+		var b := _run_one(seed, "duelist", "warden", 0.12, false, mods)
+		proc_sum += float(b["guard_procs"])
+		if a["won"]:
+			base_wins += 1
+			base_ttk += float(a["ttk_sec"])
+		if b["won"]:
+			mod_wins += 1
+			mod_ttk += float(b["ttk_sec"])
+	var bwr := 100.0 * float(base_wins) / float(seeds)
+	var mwr := 100.0 * float(mod_wins) / float(seeds)
+	var bavg := (base_ttk / float(base_wins)) if base_wins > 0 else 0.0
+	var mavg := (mod_ttk / float(mod_wins)) if mod_wins > 0 else 0.0
+	var d1 := _run_one(17, "duelist", "warden", 0.12, false, mods)
+	var d2 := _run_one(17, "duelist", "warden", 0.12, false, mods)
+	var det: bool = d1["checksum"] == d2["checksum"] and d1["ttk_sec"] == d2["ttk_sec"]
+	print("guard-mods probe (Duelist / Warden @loose, boonless vs modded build):")
+	print("  boonless %.1f%% (TTK %.1fs)   modded %.1f%% (TTK %.1fs)   -> %s" % [
+		bwr, bavg, mwr, mavg,
+		("PASS (mods never cost wins)" if mwr >= bwr else "FAIL (modded win-rate DROPPED)")])
+	print("  avg guard procs/run %.2f   -> %s" % [proc_sum / float(seeds),
+		("PASS (payloads fire)" if proc_sum > 0.0 else "FAIL (proc engine inert)")])
+	print("  modded determinism seed 17 == seed 17 -> %s   (checksum %d)" % [
+		("PASS" if det else "FAIL"), d1["checksum"]])
 	print("")
 
 func _write_csv(path: String, rows: Array) -> void:
