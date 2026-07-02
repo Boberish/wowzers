@@ -56,3 +56,12 @@ extends Resource
 func order(aspect: String) -> Array:
 	return ["growth", "bark", "overgrowth", "lash", "saprot", "lifesurge",
 		("wildbloom" if aspect == "wildgrove" else "briarheart")]
+
+# Phase B slot-verb GARDEN mods (build-your-Garden; entries with `slot` in BloomweaverBoons).
+# Innate proc = every cashed BLOOM (Lifesurge mass-blooms count individually).
+@export var mod_thorn: float = 18.0          ## bwPayThorn dmg per proc
+@export var mod_sap: float = 8.0             ## bwPaySap per proc
+@export var mod_mend: float = 15.0           ## bwPayMend heal (proc target / lowest ally)
+@export var mod_trig_sap: float = 8.0        ## built-in Sap on a drafted trigger fire
+@export var mod_tick_mult: float = 0.88      ## bwPropQuick Growth tick-interval multiplier
+@export var mod_garden_need: int = 3         ## bwPropDeepGarden: payloads ×2 at this many Growths

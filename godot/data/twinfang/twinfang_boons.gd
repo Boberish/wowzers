@@ -1,7 +1,10 @@
-## The Twinfang draft pool — the upgrades/relics/spell from poc/twinfang.html plus the
-## Opus transform, as data. Effects are implemented in TwinfangKit (keyed by these ids).
-## Draft 2.0: `rarity` = offer frequency (never a cap), `tags` = synergy vocabulary;
-## the roll lives in the shared engine (Draft).
+## The Twinfang draft pool — the upgrades/relics/spell from poc/twinfang.html, the Opus
+## transform, and the Phase-B SLOT-VERB mods (build-your-RHYTHM), as data. Effects are
+## implemented in TwinfangKit (keyed by these ids). Draft 2.0: `rarity` = offer frequency
+## (never a cap), `tags` = synergy vocabulary; the roll lives in the shared engine (Draft).
+## Slot-verbs: entries with `slot` are RHYTHM MOD PIECES — the innate proc moment is
+## every PERFECT Strike; triggers add moments, payloads fire on EVERY proc, properties
+## reshape the verb. NO LOCKOUTS — all pieces stack.
 class_name TwinfangBoons
 extends RefCounted
 
@@ -12,6 +15,15 @@ const SHARED := [
 	{"id": "execute", "type": "relic", "rarity": "sonnet", "tags": ["combo"], "title": "Finish It", "desc": "Below 35% boss HP, your damage is +30%."},
 	{"id": "flurry", "type": "spell", "rarity": "sonnet", "tags": ["combo"], "title": "Flurry", "desc": "New spell (5): 28 energy for a 3-hit, +2 combo burst. Fast points under pressure."},
 	{"id": "dancersgrace", "type": "relic", "rarity": "opus", "tags": ["perfect", "flow", "combo"], "title": "Dancer's Grace", "desc": "A PERFECT dodge primes your blades — the next Strike is automatically Perfect."},
+	# --- Rhythm mod pieces (Phase B slot-verbs) ---
+	{"id": "tfTrigEvade", "slot": "trigger", "type": "relic", "rarity": "sonnet", "tags": ["dodge", "perfect"], "title": "Ghost Step", "desc": "New proc moment: a clean dodge also triggers your Rhythm payloads (+6 energy)."},
+	{"id": "tfTrigSpender", "slot": "trigger", "type": "relic", "rarity": "sonnet", "tags": ["combo", "perfect"], "title": "Killing Tempo", "desc": "New proc moment: a full 5-point finisher triggers your payloads (+6 energy)."},
+	{"id": "tfTrigBeat", "slot": "trigger", "type": "relic", "rarity": "sonnet", "tags": ["dodge", "perfect"], "title": "Beat Dancer", "desc": "New proc moment: a PERFECT combo-beat dodge triggers your payloads (+6 energy)."},
+	{"id": "tfPayLash", "slot": "payload", "type": "relic", "rarity": "sonnet", "tags": ["perfect", "flow"], "title": "Razor Echo", "desc": "Rhythm payload: every proc cuts the boss for 6."},
+	{"id": "tfPayEnergy", "slot": "payload", "type": "relic", "rarity": "haiku", "tags": ["perfect", "flow"], "title": "Quickblood", "desc": "Rhythm payload: every proc restores 3 energy."},
+	{"id": "tfPayLeech", "slot": "payload", "type": "relic", "rarity": "haiku", "tags": ["perfect"], "title": "Red Harvest", "desc": "Rhythm payload: every proc mends you for 5."},
+	{"id": "tfPropWindow", "slot": "property", "type": "upgrade", "rarity": "haiku", "tags": ["perfect", "flow"], "title": "Wide Tempo", "desc": "Rhythm property: the PERFECT window is 20% wider on each side."},
+	{"id": "tfPropTwinStep", "slot": "property", "type": "upgrade", "rarity": "opus", "tags": ["dodge", "perfect"], "title": "Twin Step", "desc": "Rhythm property: a SECOND dodge charge — step twice back-to-back; the spare returns after 6s."},
 ]
 const TEMPO := [
 	{"id": "encore", "type": "upgrade", "rarity": "sonnet", "tags": ["flow"], "title": "Encore", "desc": "Double-hit (Tier 1) kicks in at Flow 2 instead of 3."},
@@ -48,3 +60,26 @@ static func apply(b: Dictionary, run) -> void:
 			run.loadout.append(b["id"])
 	else:
 		run.boons[b["id"]] = true
+
+## Assembled "YOUR RHYTHM" display lines (tooltips / tome). Empty when no mod pieces
+## are drafted. Numbers mirror TwinfangConfig mod_* defaults.
+static func verb_summary(boons: Dictionary, _aspect: String) -> Array:
+	var trig: Array = []
+	var pay: Array = []
+	var prop: Array = []
+	if boons.get("tfTrigEvade", false): trig.append("clean dodge")
+	if boons.get("tfTrigSpender", false): trig.append("5-point finisher")
+	if boons.get("tfTrigBeat", false): trig.append("PERFECT beat")
+	if boons.get("tfPayLash", false): pay.append("cut 6")
+	if boons.get("tfPayEnergy", false): pay.append("+3 energy")
+	if boons.get("tfPayLeech", false): pay.append("mend 5")
+	if boons.get("tfPropWindow", false): prop.append("window +20%")
+	if boons.get("tfPropTwinStep", false): prop.append("2 dodge charges")
+	if trig.is_empty() and pay.is_empty() and prop.is_empty():
+		return []
+	var out: Array = []
+	out.append("Proc moments: PERFECT Strike" + ("" if trig.is_empty() else " · " + " · ".join(trig)))
+	out.append("On every proc: " + (" · ".join(pay) if not pay.is_empty() else "(no payloads drafted yet)"))
+	if not prop.is_empty():
+		out.append("Properties: " + " · ".join(prop))
+	return out

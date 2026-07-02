@@ -650,7 +650,7 @@ func _show_guard_tip() -> void:
 	if not gl.is_empty():
 		desc += "\n" + "\n".join(gl)          # Phase B: the assembled YOUR GUARD rules
 	_tip_desc.text = desc
-	_position_tip_above(_guard, 116.0 + 17.0 * gl.size())
+	_position_tip_above(_guard, 116.0 + (24.0 + 44.0 * gl.size()) if not gl.is_empty() else 116.0)
 
 func _hide_tip() -> void:
 	if _tip != null:

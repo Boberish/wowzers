@@ -403,6 +403,8 @@ func _process(delta: float) -> void:
 	var dcd_ticks := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd_ticks, 0.0, 1.0)
+	_guard.charges = int(obs.get("guard_charges", 0))          # Twin Step pips
+	_guard.charges_max = int(obs.get("guard_charges_max", 0))
 
 	if _stage2d != null:
 		_stage2d.sync(s, obs, p)
@@ -697,16 +699,19 @@ func _show_spec_tip() -> void:
 func _show_guard_tip() -> void:
 	_tip_title.text = "Dodge"
 	_tip_stats.text = "Space  ·  2.4s cooldown"
-	_tip_desc.text = "Evade a telegraphed swing in its window. Getting HIT by a swing wipes your Flow — so dodging protects your damage as much as your health."
-	_position_tip_above(_guard)
+	var desc := "Evade a telegraphed swing in its window. Getting HIT by a swing wipes your Flow — so dodging protects your damage as much as your health."
+	var gl := TwinfangBoons.verb_summary(_run.boons, _run.aspect)
+	if not gl.is_empty():
+		desc += "\n" + "\n".join(gl)          # Phase B: the assembled YOUR RHYTHM rules
+	_tip_desc.text = desc
+	_position_tip_above(_guard, 120.0 + (24.0 + 44.0 * gl.size()) if not gl.is_empty() else 120.0)
 
 func _hide_tip() -> void:
 	if _tip != null:
 		_tip.visible = false
 
-func _position_tip_above(node: Control) -> void:
+func _position_tip_above(node: Control, h: float = 120.0) -> void:
 	var w := 250.0
-	var h := 120.0
 	var gp := node.global_position
 	var x := clampf(gp.x + node.size.x * 0.5 - w * 0.5, 8.0, size.x - w - 8.0)
 	var y := maxf(8.0, gp.y - h - 8.0)
@@ -728,9 +733,13 @@ func _toggle_book() -> void:
 		_book.queue_free()
 		_book = null
 		return
+	var dtip := "Dodge a swing in its window — it protects your FLOW, not just your health. A landed swing wipes the rhythm."
+	var dgl := TwinfangBoons.verb_summary(_run.boons, _run.aspect)
+	if not dgl.is_empty():
+		dtip += "\n" + "\n".join(dgl)         # Phase B: the assembled YOUR RHYTHM rules
 	var abilities: Array = [{"icon": "dodge", "name": "DODGE", "key": "SPC",
 		"stats": "0.55s window  ·  2.4s cd",
-		"tip": "Dodge a swing in its window — it protects your FLOW, not just your health. A landed swing wipes the rhythm."}]
+		"tip": dtip}]
 	for i in _run.loadout.size():
 		var id: String = _run.loadout[i]
 		var info: Dictionary = ABILITY_TIPS.get(id, {"stats": "", "tip": ""})

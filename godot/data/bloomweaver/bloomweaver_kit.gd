@@ -89,6 +89,8 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 		_strike: StrikeRes, grade: int) -> void:
 	if grade == StrikeRes.Grade.PERFECT:
 		seat.resource = minf(cfg.sap_max, seat.resource + cfg.strike_perfect_sap)
+		if _b("bwTrigBeat"):
+			_bw_trigger(_s, seat, null, "beat")   # Phase B: PERFECT beat = proc moment
 
 # ---------------------------------------------------------------- dispatch
 func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) -> bool:
@@ -191,10 +193,18 @@ func _garden_count(s: CombatState) -> int:
 	return n
 
 func _plant(s: CombatState, seat: Seat, u: Seat) -> void:
+	var ev := _tt(s, cfg.growth_every)
+	if _b("bwPropQuick"):
+		ev = maxi(1, int(ceil(float(ev) * cfg.mod_tick_mult)))   # Phase B: Quickening
 	u.hots.append({"gid": "growth", "tick": cfg.growth_tick,
-		"every": _tt(s, cfg.growth_every), "acc": 0, "left": _tt(s, _growth_dur()),
+		"every": ev, "acc": 0, "left": _tt(s, _growth_dur()),
 		"caster_i": s.seats.find(seat)})
 	seat.vars["stat_planted"] = int(seat.vars.get("stat_planted", 0)) + 1
+	if _b("bwTrigPlant"):
+		var n := int(seat.vars.get("plant_count", 0)) + 1
+		seat.vars["plant_count"] = n
+		if n % 3 == 0:
+			_bw_trigger(s, seat, u, "plant")   # Phase B: every 3rd Growth = proc moment
 
 func _refresh_growth(s: CombatState, u: Seat) -> void:
 	var i := _find_growth(u)
@@ -217,6 +227,7 @@ func _bloom(s: CombatState, seat: Seat, u: Seat, mult: float = -1.0) -> void:
 	u.hots.remove_at(i)
 	var eff := CombatCore.heal_unit(s, u, amt, seat)
 	seat.vars["stat_blooms"] = int(seat.vars.get("stat_blooms", 0)) + 1
+	_garden_proc(s, seat, u, "bloom")   # Phase B: the innate proc moment
 	CombatCore.emit_event(s, {"t": "bloom", "seat": u, "amt": int(eff)})
 
 func _lifesurge(s: CombatState, seat: Seat) -> void:
@@ -292,7 +303,49 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied
 				_refresh_growth(s, target)
 			else:
 				_plant(s, healer, target)
+		if _b("bwTrigPerfect"):
+			_bw_trigger(s, healer, target, "perfect")      # Phase B: Perfect Ward = proc moment
 		CombatCore.emit_event(s, {"t": "perfect_ward", "seat": target})
+
+# ---------------------------------------------------------------- slot-verb Garden mods
+# Phase B (build-your-Garden): the innate proc moment is every cashed BLOOM (Lifesurge
+# mass-blooms count individually); TRIGGER pieces add moments, PAYLOAD pieces fire on
+# every proc, PROPERTY pieces reshape the verb. Deep Garden (opus) doubles the payloads
+# while the garden is full. NO LOCKOUTS. All _b()-gated — boonless sims byte-identical.
+
+func _has_payloads() -> bool:
+	return _b("bwPayThorn") or _b("bwPaySap") or _b("bwPayMend")
+
+## A drafted trigger fired: built-in Sap sip + one proc moment.
+func _bw_trigger(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
+	seat.resource = minf(cfg.sap_max, seat.resource + cfg.mod_trig_sap)
+	_garden_proc(s, seat, target, source)
+
+## One proc moment: fire every drafted payload once (twice under a full Deep Garden).
+func _garden_proc(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
+	if not _has_payloads():
+		return
+	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic
+	var times := 2 if (_b("bwPropDeepGarden") and _garden_count(s) >= cfg.mod_garden_need) else 1
+	for _i in times:
+		if _b("bwPayThorn"):
+			CombatCore.damage_boss(s, seat, cfg.mod_thorn)
+		if _b("bwPaySap"):
+			seat.resource = minf(cfg.sap_max, seat.resource + cfg.mod_sap)
+		if _b("bwPayMend"):
+			var tgt := target if (target != null and target.alive() and target.role != "healer") \
+				else _lowest_ally(s)
+			if tgt != null:
+				CombatCore.heal_unit(s, tgt, cfg.mod_mend, seat)
+	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
+
+func _lowest_ally(s: CombatState) -> Seat:
+	var best: Seat = null
+	for u in s.seats:
+		if u.role != "healer" and u.alive():
+			if best == null or u.hp_frac() < best.hp_frac():
+				best = u
+	return best
 
 # ---------------------------------------------------------------- observation
 func observe(s: CombatState, seat: Seat) -> Dictionary:

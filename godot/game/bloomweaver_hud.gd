@@ -851,9 +851,15 @@ func _build_tooltip() -> void:
 func _show_tip(id: String, rune: AbilityRune) -> void:
 	var real := _signature() if (id == "wildbloom" or id == "briarheart") else id
 	_tip_title.text = String(_bcfg.spells.get(real, {}).get("name", real))
-	_tip_desc.text = String(SPELL_TIPS.get(real, ""))
-	var w := 260.0
+	var desc := String(SPELL_TIPS.get(real, ""))
 	var h := 110.0
+	if real == "growth":                      # Phase B: YOUR GARDEN rides the Growth/Bloom verb
+		var gl := BloomweaverBoons.verb_summary(_run.boons, _run.aspect)
+		if not gl.is_empty():
+			desc += "\n" + "\n".join(gl)
+			h += 24.0 + 44.0 * gl.size()
+	_tip_desc.text = desc
+	var w := 260.0
 	var gp := rune.global_position
 	_tip.position = Vector2(clampf(gp.x + rune.size.x * 0.5 - w * 0.5, 8.0, size.x - w - 8.0), maxf(8.0, gp.y - h - 8.0))
 	_tip.size = Vector2(w, h)

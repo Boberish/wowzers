@@ -38,6 +38,12 @@ func defense_cd() -> float:
 	return cfg.int_cd_snap if _b("quickint") else cfg.int_cd
 
 func on_defense_press(s: CombatState, seat: Seat) -> void:
+	# Twin Void (Phase B): the engine just charged the kick cooldown — a spare charge
+	# eats it (even on a whiff — faithful to the whiffed-kick-burns-cd rule).
+	if _b("vcPropTwinVoid") and int(seat.vars.get("kick_spare", 1)) > 0:
+		seat.vars["kick_spare"] = int(seat.vars.get("kick_spare", 1)) - 1
+		seat.defense_ready_tick = s.tick
+		seat.vars["kick_recharge_tick"] = s.tick + _tt(s, cfg.mod_void_recharge)
 	_do_interrupt(s, seat, "space")
 
 ## Interrupt the boss's current cast. `source` is "space" or an interrupt-spell id.
@@ -46,7 +52,7 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 		CombatCore.emit_event(s, {"t": "int_whiff", "player": seat.is_player})
 		return
 	var rem := float(s.telegraph.start_tick + s.telegraph.dur_ticks - s.tick) * s.dt
-	var clean := rem <= cfg.clean_zone
+	var clean := rem <= cfg.clean_zone * (cfg.mod_zone_mult if _b("vcPropZone") else 1.0)
 	var was_heal := s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS
 	var denied_heal := float(s.telegraph.ability.amount) if was_heal else 0.0
 	CombatCore.stagger_boss(s)                        # cancels the cast (emits "staggered")
@@ -81,6 +87,12 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 			_apply_silence(s, cfg.sil_spell_dur, cfg.expose_amt if aspect == "silencer" else 0.0)
 		if aspect == "disruptor":
 			_gain_backlash(seat, 1)
+	# Phase B: a landed kick is the innate proc moment; CLEAN/DENY triggers add more.
+	_kick_proc(s, seat, "kick")
+	if _b("vcTrigClean") and clean:
+		_vc_trigger(s, seat, "clean")
+	if _b("vcTrigDeny") and was_heal:
+		_vc_trigger(s, seat, "deny")
 	CombatCore.emit_event(s, {"t": "interrupt", "player": seat.is_player, "clean": clean, "was_heal": was_heal})
 
 func _apply_silence(s: CombatState, dur_sec: float, expose: float) -> void:
@@ -119,6 +131,8 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 	match grade:
 		StrikeRes.Grade.PERFECT:
 			_gain_focus(seat, cfg.strike_perfect_focus)
+			if _b("vcTrigBeat"):
+				_vc_trigger(_s, seat, "beat")   # Phase B: PERFECT beat = proc moment
 		StrikeRes.Grade.READ:
 			_gain_focus(seat, cfg.strike_read_focus)
 		_:
@@ -129,6 +143,10 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 # --------------------------------------------------------------------------
 
 func upkeep(s: CombatState, seat: Seat) -> void:
+	# Twin Void: the spent spare kick charge returns after mod_void_recharge seconds.
+	if _b("vcPropTwinVoid") and int(seat.vars.get("kick_spare", 1)) < 1 \
+			and s.tick >= int(seat.vars.get("kick_recharge_tick", 0)):
+		seat.vars["kick_spare"] = 1
 	if not seat.casting.is_empty():
 		var c := seat.casting
 		if s.tick - int(c["start_tick"]) >= int(c["dur_ticks"]):
@@ -258,12 +276,38 @@ func _int_spell(s: CombatState, seat: Seat, id: String) -> bool:
 	_do_interrupt(s, seat, id)
 	return true
 
+# ---------------------------------------------------------------- slot-verb Kick mods
+# Phase B (build-your-Kick): the innate proc moment is every LANDED interrupt; TRIGGER
+# pieces add moments, PAYLOAD pieces fire on every proc, PROPERTY pieces reshape the
+# verb. NO LOCKOUTS. All _b()-gated — boonless sims stay byte-identical.
+
+func _has_payloads() -> bool:
+	return _b("vcPayVoid") or _b("vcPayFocus") or _b("vcPayMend")
+
+## A drafted trigger fired: built-in focus sip + one proc moment.
+func _vc_trigger(s: CombatState, seat: Seat, source: String) -> void:
+	_gain_focus(seat, cfg.mod_trig_focus)
+	_kick_proc(s, seat, source)
+
+## One proc moment: fire every drafted payload once (payVoid rides Exposed via _deal).
+func _kick_proc(s: CombatState, seat: Seat, source: String) -> void:
+	if not _has_payloads():
+		return
+	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic
+	if _b("vcPayVoid"):
+		_deal(s, seat, cfg.mod_void)
+	if _b("vcPayFocus"):
+		_gain_focus(seat, cfg.mod_focus)
+	if _b("vcPayMend"):
+		_heal(seat, cfg.mod_mend)
+	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
+
 # --------------------------------------------------------------------------
 # Observation (policy + HUD)
 # --------------------------------------------------------------------------
 
 func observe(s: CombatState, seat: Seat) -> Dictionary:
-	return {
+	var out := {
 		"tick": s.tick,
 		"aspect": aspect,
 		"focus": seat.resource,
@@ -283,3 +327,8 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"dmg_buff": s.boss.dmg_buff,
 		"kicks": int(seat.vars.get("kicks", 0)),
 	}
+	if _b("vcPropTwinVoid"):   # Twin Void charge pips (Phase B)
+		out["guard_charges"] = int(seat.vars.get("kick_spare", 1)) \
+			+ (1 if s.tick >= seat.defense_ready_tick else 0)
+		out["guard_charges_max"] = 2
+	return out

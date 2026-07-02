@@ -58,3 +58,12 @@ func loadout(aspect: String) -> Array:
 	if aspect == "disruptor":
 		return ["bolt", "fracture", "barrier", "overload"]
 	return ["bolt", "fracture", "barrier", "quietus"]
+
+# Phase B slot-verb KICK mods (build-your-Kick; entries with `slot` in VoidcallerBoons).
+# Innate proc = every LANDED interrupt — kicks are rare, so payloads are chunky.
+@export var mod_void: float = 30.0           ## vcPayVoid dmg per proc
+@export var mod_focus: float = 12.0          ## vcPayFocus per proc
+@export var mod_mend: float = 20.0           ## vcPayMend heal per proc
+@export var mod_trig_focus: float = 8.0      ## built-in focus on a drafted trigger fire
+@export var mod_zone_mult: float = 1.35      ## vcPropZone clean-zone multiplier
+@export var mod_void_recharge: float = 8.0   ## vcPropTwinVoid spare-kick recharge, seconds
