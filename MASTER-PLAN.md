@@ -263,5 +263,6 @@ nodes, not node kinds.
 
 - ☐ 2026-07-02 · (unassigned) · Online/R2 — in flight by a concurrent session (pre-dates this log; that session should claim retroactively).
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
-- ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); MAP-1 implementation is OPEN to claim. Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
+- ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
+- ☐ 2026-07-02 · `map1` · §MAPS MAP-1 — generator + map screen + Realm-1 "The Stack" skin for the PoC (Bill: full computer/GPU/data-center/water/jobs flavor). Files: `game/run_map.gd`, `game/map_content.gd`, `game/ui/map_screen.gd`, `sim/map_sim.gd`, bulwark HUD wiring behind a toggle. *(map session — this one)*
 - ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
