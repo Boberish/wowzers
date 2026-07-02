@@ -66,6 +66,7 @@ func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 	if _ability != null and _ability.feint:
 		_feint_baited(s, seat)
 		return
+	CombatCore._bump_diag(s, seat, "negate")   # class-signature skill signal (token mint)
 	if aspect == "warden":
 		var refl := cfg.parry_reflect * (2.0 if _b("perfectReflect") else 1.0)
 		CombatCore.damage_boss(s, seat, refl)

@@ -252,6 +252,7 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	var base := float(a["dmg"])
 	var cp := int(a["cp"])
 	if perfect:
+		CombatCore._bump_diag(s, seat, "perfect_strike")   # class-signature skill signal (token mint)
 		base = roundf(base * 1.6)
 		cp = 2
 		var crit := false

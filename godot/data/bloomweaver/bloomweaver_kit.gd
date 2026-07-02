@@ -286,6 +286,7 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied
 			CombatCore.damage_boss(s, healer, cfg.perfect_burst)
 			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + cfg.perfect_burst
 		healer.vars["stat_perfect"] = int(healer.vars.get("stat_perfect", 0)) + 1
+		CombatCore._bump_diag(s, healer, "perfect_ward")   # class-signature skill signal (token mint)
 		CombatCore.emit_event(s, {"t": "perfect_ward", "seat": target})
 
 # ---------------------------------------------------------------- observation

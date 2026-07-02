@@ -50,6 +50,8 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 	var was_heal := s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS
 	CombatCore.stagger_boss(s)                        # cancels the cast (emits "staggered")
 	seat.vars["kicks"] = int(seat.vars.get("kicks", 0)) + 1
+	if clean:
+		CombatCore._bump_diag(s, seat, "clean_kick")  # class-signature skill signal (token mint)
 	_heal(seat, cfg.int_heal)
 
 	if source == "space":

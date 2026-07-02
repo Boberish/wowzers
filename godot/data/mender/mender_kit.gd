@@ -131,6 +131,7 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 					CombatCore.heal_unit(s, u, float(sp["heal"]), seat)
 		"dispel":
 			target.debuff = {}
+			CombatCore._bump_diag(s, seat, "dispel")   # class-signature skill signal (token mint)
 		"medit":
 			seat.resource = minf(cfg.mana_max, seat.resource + float(sp["restore"]))
 		"surge":
