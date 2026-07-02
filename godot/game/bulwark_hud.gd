@@ -410,6 +410,8 @@ func _process(delta: float) -> void:
 	var dcd_ticks := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.2)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd_ticks, 0.0, 1.0)
+	_guard.charges = int(obs.get("guard_charges", 0))          # Twin Guard pips
+	_guard.charges_max = int(obs.get("guard_charges_max", 0))
 
 	if _stage3d != null:
 		_stage3d.sync(s, obs, p)
@@ -631,19 +633,23 @@ func _do_guard() -> void:
 func _show_guard_tip() -> void:
 	_tip_title.text = VERB.get(_run.aspect, "GUARD")
 	_tip_stats.text = "Space  ·  own cooldown, not your GCD"
+	var desc: String
 	if _run.aspect == "warden":
-		_tip_desc.text = "Parry a swing inside its window to negate it, reflect damage, and bank Counter."
+		desc = "Parry a swing inside its window to negate it, reflect damage, and bank Counter."
 	else:
-		_tip_desc.text = "Dodge a swing inside its window to negate it — but it dumps your Momentum, so dodge only what you must."
-	_position_tip_above(_guard)
+		desc = "Dodge a swing inside its window to negate it — but it dumps your Momentum, so dodge only what you must."
+	var gl := BulwarkBoons.guard_summary(_run.boons, _run.aspect)
+	if not gl.is_empty():
+		desc += "\n" + "\n".join(gl)          # Phase B: the assembled YOUR GUARD rules
+	_tip_desc.text = desc
+	_position_tip_above(_guard, 116.0 + 17.0 * gl.size())
 
 func _hide_tip() -> void:
 	if _tip != null:
 		_tip.visible = false
 
-func _position_tip_above(node: Control) -> void:
+func _position_tip_above(node: Control, h: float = 116.0) -> void:
 	var w := 250.0
-	var h := 116.0
 	var gp := node.global_position
 	var x := clampf(gp.x + node.size.x * 0.5 - w * 0.5, 8.0, size.x - w - 8.0)
 	var y := maxf(8.0, gp.y - h - 8.0)
@@ -706,6 +712,11 @@ func _toggle_book() -> void:
 		_title(v, "  (none yet — win a fight to draft one)", 13, Palette.TEXT_DIM)
 	for id in _run.boons:
 		_title(v, "  * %s" % _boon_title(id), 13, Palette.TEXT)
+	var gl := BulwarkBoons.guard_summary(_run.boons, _run.aspect)
+	if not gl.is_empty():
+		_title(v, "Your Guard", 14, Palette.STEEL)
+		for line in gl:
+			_title(v, "  %s" % line, 13, Palette.TEXT)
 	_title(v, "press S to close", 12, Palette.TEXT_DIM)
 
 func _boon_title(id: String) -> String:

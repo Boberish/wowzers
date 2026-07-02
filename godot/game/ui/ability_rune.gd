@@ -23,6 +23,8 @@ var accent: Color = Palette.GOLD   # glyph/glow tint when usable
 var affordable: bool = true
 var usable: bool = true            # off GCD / not on cooldown
 var cd_frac: float = 0.0          # 0 = ready, 1 = full cooldown
+var charges: int = 0              # multi-charge verbs (Twin Guard): ready count
+var charges_max: int = 0          # 0/1 = no pips drawn
 
 var _pulse: float = 0.0
 var _hover: float = 0.0           # eased 0..1 hover emphasis
@@ -183,6 +185,19 @@ func _draw() -> void:
 		var ring := _oct(fr.grow(2.0 + 7.0 * (1.0 - _press_k)))
 		for i in 8:
 			draw_line(ring[i], ring[(i + 1) % 8], pk, 1.8, true)
+
+	# ---- charge pips (multi-charge verbs, e.g. Twin Guard): gems at the socket's foot ----
+	if charges_max > 1:
+		var pw := 11.0
+		var px := c.x - pw * float(charges_max - 1) * 0.5
+		var py := fr.end.y - 8.0
+		for i in charges_max:
+			var pc := Vector2(px + pw * float(i), py)
+			if i < charges:
+				draw_circle(pc, 3.0, accent.lerp(Color.WHITE, 0.25))
+				draw_arc(pc, 4.4, 0.0, TAU, 12, Palette.GOLD_BRIGHT, 1.0, true)
+			else:
+				draw_arc(pc, 3.0, 0.0, TAU, 12, Palette.GOLD_DIM, 1.2, true)
 
 	# ---- out of resource (but off cd): a pulsing crimson want-line at the foot ----
 	if usable and not affordable:

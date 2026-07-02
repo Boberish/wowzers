@@ -30,7 +30,28 @@ func _initialize() -> void:
 			"setup": func(h): h._start_run("wildgrove"); _stage(h); h._show_draft(), "wait": 25},
 		{"name": "end_tokens", "scene": "res://game/bulwark_main.tscn",
 			"setup": func(h): h._start_run("warden"); _stage(h); h._show_end(true), "wait": 20},
+		# Phase B slot-verbs: a draft with a LOCKED card, the modded spellbook
+		# (YOUR GUARD assembled rules), and Twin Guard charge pips live in combat.
+		{"name": "b_draft_locked", "scene": "res://game/bulwark_main.tscn",
+			"setup": func(h): h._start_run("warden"); _stage(h); h._show_draft(); _lock_one(h), "wait": 25},
+		{"name": "b_spellbook_guard", "scene": "res://game/bulwark_main.tscn",
+			"setup": func(h): h._start_run("warden"); _modded(h); h._toggle_book(), "wait": 20},
+		{"name": "b_charge_pips", "scene": "res://game/bulwark_main.tscn",
+			"setup": func(h): h._start_run("warden"); _modded(h), "wait": 60},
 	]
+
+## Lock slot 1 on the live DraftScreen (the ◆ HELD banner + LOCKED button state).
+func _lock_one(h) -> void:
+	for c in h._ui.get_children():
+		if c is DraftScreen:
+			c._locked = [1]
+			c._rebuild()
+
+## A modded Guard build (2 triggers + 2 payloads + Twin Guard), fight rebuilt with it.
+func _modded(h) -> void:
+	for id in ["trigThird", "trigRead", "payReflect", "payHeal", "propCharge"]:
+		h._run.boons[id] = true
+	h._begin_fight()
 
 ## Reproducible + showcase state: seeded draft stream, Tokens to spend, a fresh mint
 ## line, and pity at the hard threshold (slot 2 is forced Opus).
