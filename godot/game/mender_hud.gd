@@ -75,7 +75,7 @@ func _ready() -> void:
 	add_child(_ui)
 	_ctrl = CombatController.new()
 	add_child(_ctrl)
-	_ctrl.encounter_ended.connect(_on_end)
+	_ctrl.encounter_ended.connect(_on_end_moment)
 	_show_select()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart="):
@@ -450,6 +450,7 @@ func _process(_delta: float) -> void:
 	_bar.hp_max = s.boss.hp_max
 	_bar.phase_num = _phase_num(s)
 	_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
+	_bar.enrage_in = (s.encounter.enrage_at - float(s.tick) * s.dt) if s.encounter.enrage_at > 0.0 else INF
 	_dial.boss_name = s.encounter.name
 	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
@@ -890,3 +891,17 @@ func _place(node: Control, al: float, at: float, ar: float, ab: float,
 		ol: float, ot: float, orr: float, ob: float) -> void:
 	node.anchor_left = al; node.anchor_top = at; node.anchor_right = ar; node.anchor_bottom = ab
 	node.offset_left = ol; node.offset_top = ot; node.offset_right = orr; node.offset_bottom = ob
+
+
+## The fight-end BEAT: SLAIN / YOU FALL slams over the arena for a breath,
+## THEN the normal end flow (draft / end screen / map) runs. Headless runs
+## (smokes, sims) skip the beat entirely.
+func _on_end_moment(won: bool) -> void:
+	if _screen != "combat" or DisplayServer.get_name() == "headless":
+		_on_end(won)
+		return
+	var bname := _ctrl.state.encounter.name if _ctrl != null and _ctrl.state != null else ""
+	KillMoment.play(_ui, won, bname)
+	get_tree().create_timer(1.25).timeout.connect(func():
+		if _screen == "combat":
+			_on_end(won))
