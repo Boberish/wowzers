@@ -16,6 +16,8 @@ var body: String = ""
 var kind: String = "upgrade"       # "spell" / "upgrade" / "relic" — tints the gem
 var rarity: String = "haiku"       # "haiku" / "sonnet" / "opus" — tints the frame
 var synergy: bool = false          # slot-0 resonance mark
+var slot: String = ""              # Guard mod piece: "trigger"/"payload"/"property" (caption)
+var locked: bool = false           # LOCK spend: held through rerolls (drawn state)
 var _accent: Color
 var _rcol: Color
 var _hover := 0.0
@@ -24,12 +26,13 @@ var _pulse := 0.0
 var _body_lbl: Label
 
 func _init(p_title: String, p_body: String, p_kind: String,
-		p_rarity: String = "haiku", p_synergy: bool = false) -> void:
+		p_rarity: String = "haiku", p_synergy: bool = false, p_slot: String = "") -> void:
 	title = p_title
 	body = p_body
 	kind = p_kind
 	rarity = p_rarity
 	synergy = p_synergy
+	slot = p_slot
 	_accent = Palette.type_color(p_kind)
 	_rcol = Palette.rarity_color(p_rarity)
 	super._init("CARD", _rcol if rarity != "haiku" else _accent)
@@ -100,6 +103,15 @@ func _draw() -> void:
 		draw_rect(Rect2(inset - 3.0, inset - 3.0, w - (inset - 3.0) * 2.0, h - (inset - 3.0) * 2.0),
 			Color(_rcol.r, _rcol.g, _rcol.b, pa), false, 2.0)
 
+	# LOCKED (held through rerolls): a bright banner at the very top + firm border
+	if locked:
+		var lcol := Palette.GOLD_BRIGHT
+		lcol.a = 0.9
+		UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(0, 20.0), "◆ HELD ◆",
+			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["CAPTION"], lcol)
+		draw_rect(Rect2(5.0, 5.0, w - 10.0, h - 10.0),
+			Color(lcol.r, lcol.g, lcol.b, 0.5), false, 1.6)
+
 	# Synergy: resonance glyphs in the top corners (the draft header explains ✦)
 	if synergy:
 		var sc := Palette.GOLD_BRIGHT
@@ -129,8 +141,9 @@ func _draw() -> void:
 	draw_line(pts[3], pts[0], Palette.GOLD, 1.4, true)
 	draw_circle(gc + Vector2(-gr * 0.22, -gr * 0.3), gr * 0.18, Color(1, 1, 1, 0.8))
 
-	# kind caption (rarity-stamped for Sonnet/Opus) + title
-	var caption := kind.to_upper() if rarity == "haiku" else "%s · %s" % [rarity.to_upper(), kind.to_upper()]
+	# kind caption (rarity-stamped for Sonnet/Opus; Guard mods show their SLOT) + title
+	var kword := ("GUARD %s" % slot.to_upper()) if slot != "" else kind.to_upper()
+	var caption := kword if rarity == "haiku" else "%s · %s" % [rarity.to_upper(), kword]
 	var ccol := _accent if rarity == "haiku" else _rcol
 	UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(0, 78.0), caption,
 		HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["CAPTION"], ccol)

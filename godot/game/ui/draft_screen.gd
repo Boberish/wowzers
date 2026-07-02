@@ -10,6 +10,7 @@ signal boon_taken(boon: Dictionary)
 
 var _run                       # RunState
 var _offers: Array = []
+var _locked: Array = []        # LOCKED offer indices (held through rerolls)
 var _headline: String          # rendered verbatim ("THE GATEKEEPER FALLS", "SALVAGE — TAKE ONE")
 var _flavor: String
 var _extra: Array = []
@@ -82,7 +83,8 @@ func _rebuild() -> void:
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
 		col.add_theme_constant_override("separation", 8)
 		var card := RelicCard.new(String(b["title"]), String(b["desc"]), String(b["type"]),
-			Draft.rarity(b), i == 0 and Draft.matches(b, _run))
+			Draft.rarity(b), i == 0 and Draft.matches(b, _run), String(b.get("slot", "")))
+		card.locked = i in _locked
 		card.taken.connect(_on_taken.bind(i))
 		col.add_child(card)
 		var up := Button.new()
@@ -95,6 +97,20 @@ func _rebuild() -> void:
 			up.disabled = true
 			up.modulate = Color(1, 1, 1, 0.35)
 		col.add_child(up)
+		var lk := Button.new()
+		lk.custom_minimum_size = Vector2(150, 30)
+		lk.add_theme_font_size_override("font_size", 12)
+		if i in _locked:
+			lk.text = "◆ LOCKED — release"
+			lk.pressed.connect(_on_unlock.bind(i))
+		elif _run.tokens >= Draft.LOCK_COST:
+			lk.text = "LOCK · %d ⏣" % Draft.LOCK_COST
+			lk.pressed.connect(_on_lock.bind(i))
+		else:
+			lk.text = "LOCK · %d ⏣" % Draft.LOCK_COST
+			lk.disabled = true
+			lk.modulate = Color(1, 1, 1, 0.35)
+		col.add_child(lk)
 		_row.add_child(col)
 	var t: int = _run.tokens
 	_tokens_lbl.text = "TOKENS · %d — spend them responsibly" % t
@@ -105,8 +121,18 @@ func _rebuild() -> void:
 func _on_taken(i: int) -> void:
 	boon_taken.emit(_offers[i])
 
+## LOCK: pay once to hold a card through rerolls (release is free, no refund).
+func _on_lock(i: int) -> void:
+	if Draft.lock(_run):
+		_locked.append(i)
+	_rebuild()
+
+func _on_unlock(i: int) -> void:
+	_locked.erase(i)
+	_rebuild()
+
 func _on_reroll() -> void:
-	var next := Draft.reroll(_run)
+	var next := Draft.reroll_kept(_run, _offers, _locked)
 	if not next.is_empty():
 		_offers = next
 	_rebuild()

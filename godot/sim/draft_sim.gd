@@ -27,6 +27,7 @@ func _initialize() -> void:
 	_test_synergy()
 	_test_pity()
 	_test_spend_legality()
+	_test_lock()
 	_test_mint_table()
 	_test_mint_integration()
 	if _fails > 0:
@@ -163,6 +164,65 @@ func _ids(offers: Array) -> String:
 	for o in offers:
 		out += String(o["id"]) + ","
 	return out
+
+## Phase B — LOCK · 1⏣ holds a card through a reroll (reroll_kept redraws the rest).
+func _test_lock() -> void:
+	print("-- LOCK (hold through reroll)")
+	for cls in CLASSES:
+		var aspect: String = CLASSES[cls][0]
+		var t1 := _lock_transcript(cls, aspect, 4242)
+		var t2 := _lock_transcript(cls, aspect, 4242)
+		_check(t1 == t2, "%s lock transcript reproduces" % cls)
+		# hold semantics: the locked card survives verbatim and is never duplicated
+		var run := _start(cls, aspect, 555)
+		run.tokens = 10
+		var offers := Draft.roll_offers(run)
+		var held: Dictionary = offers[1]
+		var paid := Draft.lock(run)
+		var next := Draft.reroll_kept(run, offers, [1])
+		var survived: bool = next.size() == offers.size() and next[1]["id"] == held["id"]
+		var dup := 0
+		for o in next:
+			if o["id"] == held["id"]:
+				dup += 1
+		_check(paid and survived and dup == 1 and run.tokens == 8,
+			"%s locked card held, not duplicated, costs paid" % cls)
+		# broke: lock AND kept-reroll refused, zero tokens, NO rng consumed
+		var ctrl := _start(cls, aspect, 777)
+		var c1 := Draft.roll_offers(ctrl)
+		var c2 := Draft.roll_offers(ctrl)
+		var probe := _start(cls, aspect, 777)
+		var p1 := Draft.roll_offers(probe)
+		var lk := Draft.lock(probe)
+		var rr := Draft.reroll_kept(probe, p1, [0])
+		var p2 := Draft.roll_offers(probe)
+		_check((not lk) and rr.is_empty() and probe.tokens == 0 \
+			and _ids(p1) == _ids(c1) and _ids(p2) == _ids(c2),
+			"%s broke lock/kept-reroll refused, no rng" % cls)
+	# equivalence: reroll_kept with no locks consumes the identical rng stream as reroll
+	var a := _start("bulwark", "warden", 888)
+	a.tokens = 3
+	var _ao := Draft.roll_offers(a)
+	var ar := Draft.reroll(a)
+	var b := _start("bulwark", "warden", 888)
+	b.tokens = 3
+	var bo := Draft.roll_offers(b)
+	var br := Draft.reroll_kept(b, bo, [])
+	_check(_ids(ar) == _ids(br) and a.tokens == b.tokens, "reroll_kept([]) == classic reroll stream")
+
+## Scripted lock scenario: lock slot 2, kept-reroll, lock slot 0 too, kept-reroll again.
+func _lock_transcript(cls: String, aspect: String, seed_v: int) -> String:
+	var run := _start(cls, aspect, seed_v)
+	run.tokens = 6
+	var offers := Draft.roll_offers(run)
+	Draft.lock(run)
+	offers = Draft.reroll_kept(run, offers, [2])
+	Draft.lock(run)
+	offers = Draft.reroll_kept(run, offers, [0, 2])
+	var out := ""
+	for o in offers:
+		out += "%s/%s " % [o["id"], Draft.rarity(o)]
+	return out + "t%d p%d" % [run.tokens, run.pity_opus]
 
 func _test_mint_table() -> void:
 	print("-- mint formula (synthetic diags, exact values)")
