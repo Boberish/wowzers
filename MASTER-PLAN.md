@@ -261,8 +261,9 @@ nodes, not node kinds.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-02 · (unassigned) · Online/R2 — in flight by a concurrent session (pre-dates this log; that session should claim retroactively).
+- ☑ 2026-07-02 · main · Online/R2+R2.5 — DONE, retroactive claim: lockstep netcode (`godot/net/`), deploy kit (`server/`), Windows engine, browser WASM + tunnels. See CLAUDE.md R2/R2.5 entries. *(online session — same session as draft2 below)*
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
 - ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
 - ☐ 2026-07-02 · `map1` · §MAPS MAP-1 — generator + map screen + Realm-1 "The Stack" skin for the PoC (Bill: full computer/GPU/data-center/water/jobs flavor). Files: `game/run_map.gd`, `game/map_content.gd`, `game/ui/map_screen.gd`, `sim/map_sim.gd`, bulwark HUD wiring behind a toggle. *(map session — this one)*
 - ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
+- ☐ 2026-07-02 · `draft2` · §SYSTEMS — Draft 2.0 (Phase A: synergy tags, Haiku/Sonnet/Opus rarity + pity, transform boons, deterministic run-seeded drafts) + Token economy (Phase C: diag-minted Tokens, REROLL/UPSELL). Files: new `game/draft.gd`/`game/ui/draft_screen.gd`/`sim/draft_sim.gd`; `run_state.gd`, all 5 `*_boons.gd` + `*_kit.gd` (guarded one-liners) + `*_hud.gd` (draft/end screens, `_begin_fight` seed), `relic_card.gd`, `palette.gd`, `tuning_config.gd` (4 mint knobs). ⚠ shared-risk w/ `map1` (bulwark HUD) + `raid-seals` (tuning_config) — merging main in before merge-back. Slot-verbs (Phase B) NOT in scope. *(draft2 session)*
