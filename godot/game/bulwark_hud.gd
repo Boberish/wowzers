@@ -136,8 +136,7 @@ func _begin_fight() -> void:
 	_build_combat()
 	_shake_amt = 0.0
 	_flash_a = 0.0
-	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	_ctrl.begin(BulwarkContent.build_fight(_run, run_seed))
+	_ctrl.begin(BulwarkContent.build_fight(_run, _run.fight_seed()))
 
 func _build_combat() -> void:
 	# the physical fight: knight + boss on a 3D dais, behind every HUD widget,
@@ -697,42 +696,32 @@ func _boon_title(id: String) -> String:
 func _show_draft() -> void:
 	_screen = "draft"
 	_clear()
-	var picks := BulwarkBoons.roll(_run)
+	var picks := Draft.roll_offers(_run)
 	if picks.is_empty():
 		_run.enc_index += 1
 		_begin_fight()
 		return
-	var head := VBoxContainer.new()
-	head.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -400, 60, 400, 160)
-	_ui.add_child(head)
-	var hl := _title(head, "%s FALLS" % _run.current_encounter().name.to_upper(), 30, Palette.GOLD)
-	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "Reforge — take one. Your Aspect's picks are weighted in.", 15, Palette.TEXT_DIM)
-
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 24)
-	_place(row, 0.5, 0.5, 0.5, 0.5, -380, -165, 380, 165)
-	_ui.add_child(row)
-	for b in picks:
-		row.add_child(_make_card(b))
-
-func _make_card(boon: Dictionary) -> Control:
-	var card := RelicCard.new(String(boon["title"]), String(boon["desc"]), String(boon["type"]))
-	card.taken.connect(_on_card_taken.bind(boon))
-	return card
+	var extras: Array = []
+	if _minted > 0:
+		extras.append("+%d Tokens minted — spend them responsibly." % _minted)
+	var ds := DraftScreen.new(_run, picks, _run.current_encounter().name,
+		"Reforge — take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
+	ds.boon_taken.connect(_on_card_taken)
+	_ui.add_child(ds)
 
 func _on_card_taken(boon: Dictionary) -> void:
-	BulwarkBoons.apply(boon, _run)
+	Draft.take(_run, boon)
 	_run.enc_index += 1
 	_begin_fight()
 
 # ============================================================ END
+var _minted := 0
+
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
 		return
+	_minted = Draft.mint(_ctrl.state, _run.char_class) if won else 0
+	_run.tokens += _minted
 	if won and not _run.is_last():
 		_show_draft()
 	else:
@@ -754,6 +743,8 @@ func _show_end(won: bool) -> void:
 		_title(box, "You held the line as the %s." % _run.aspect.capitalize(), 16, Palette.TEXT)
 	else:
 		_title(box, "%s ground you down. Reforge and try again." % _run.current_encounter().name, 16, Palette.TEXT)
+	_title(box, "TOKENS · %d held%s" % [_run.tokens,
+		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM)
 	var again := Button.new()
 	again.text = "PICK A FIGHT"
 	again.custom_minimum_size = Vector2(220, 48)

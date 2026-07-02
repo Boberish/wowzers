@@ -121,8 +121,7 @@ func _start_run(aspect: String, jump_to: String = "") -> void:
 func _begin_fight() -> void:
 	_screen = "combat"
 	_clear()
-	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	_ctrl.begin(BloomweaverContent.build_fight(_run, run_seed))
+	_ctrl.begin(BloomweaverContent.build_fight(_run, _run.fight_seed()))
 	_hover_seat = null
 	_focus_seat = null
 	_stat_eff = 0.0; _stat_over = 0.0; _stat_dmg = 0.0
@@ -735,9 +734,13 @@ func _phase_num(s: CombatState) -> int:
 	return n
 
 # ============================================================ DRAFT / END
+var _minted := 0
+
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
 		return
+	_minted = Draft.mint(_ctrl.state, _run.char_class) if won else 0
+	_run.tokens += _minted
 	if won and not _run.is_last():
 		_show_draft()
 	else:
@@ -746,35 +749,22 @@ func _on_end(won: bool) -> void:
 func _show_draft() -> void:
 	_screen = "draft"
 	_clear()
-	var picks := BloomweaverBoons.roll(_run)
+	var picks := Draft.roll_offers(_run)
 	if picks.is_empty():
 		_run.enc_index += 1
 		_begin_fight()
 		return
-	var head := VBoxContainer.new()
-	head.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -420, 60, 420, 160)
-	_ui.add_child(head)
-	var hl := _label(head, "%s FALLS" % _run.current_encounter().name.to_upper(), 30, Palette.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
-	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_label(head, "The garden holds. Take a boon — your Aspect's picks are weighted in.", 15, Palette.TEXT_DIM, HORIZONTAL_ALIGNMENT_CENTER)
-	_label(head, _stats_summary(), 13, Palette.VERDANCE, HORIZONTAL_ALIGNMENT_CENTER)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 20)
-	_place(row, 0.5, 0.5, 0.5, 0.5, -380, -165, 380, 165)
-	_ui.add_child(row)
-	for b in picks:
-		row.add_child(_make_card(b))
-
-func _make_card(boon: Dictionary) -> Control:
-	var card := RelicCard.new(String(boon["title"]), String(boon["desc"]), String(boon["type"]))
-	card.taken.connect(_on_card_taken.bind(boon))
-	return card
+	var extras: Array = [_stats_summary()]
+	if _minted > 0:
+		extras.append("+%d Tokens minted — spend them responsibly." % _minted)
+	var ds := DraftScreen.new(_run, picks, _run.current_encounter().name,
+		"The garden holds. Take a boon — the ✦ card resonates with your build.",
+		extras, Palette.VERDANCE)
+	ds.boon_taken.connect(_on_card_taken)
+	_ui.add_child(ds)
 
 func _on_card_taken(boon: Dictionary) -> void:
-	BloomweaverBoons.apply(boon, _run)
+	Draft.take(_run, boon)
 	_run.enc_index += 1
 	_begin_fight()
 
@@ -800,6 +790,8 @@ func _show_end(won: bool) -> void:
 	else:
 		_label(box, "%s overwhelmed the garden." % _run.current_encounter().name, 16, Palette.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(box, _stats_summary(), 14, Palette.VERDANCE, HORIZONTAL_ALIGNMENT_CENTER)
+	_label(box, "TOKENS · %d held%s" % [_run.tokens,
+		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM, HORIZONTAL_ALIGNMENT_CENTER)
 	var again := Button.new()
 	again.text = "NEW RUN"
 	again.custom_minimum_size = Vector2(200, 48)

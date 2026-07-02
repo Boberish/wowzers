@@ -59,6 +59,20 @@ static var SPELL := Color("6fb2c9")
 static var UPGRADE := Color("d0a94f")
 static var RELIC := Color("b072c9")
 
+# Draft 2.0 rarity tiers (Haiku / Sonnet / Opus — offer frequency, never a power cap)
+static var HAIKU := Color("8fa3ad")        # quiet steel — the everyday tier
+static var SONNET := Color("e6b463")       # gilded — the strong tier
+static var OPUS := Color("d98fff")         # radiant violet — the chase tier
+
+static func rarity_color(r: String) -> Color:
+	match r:
+		"opus":
+			return OPUS
+		"sonnet":
+			return SONNET
+		_:
+			return HAIKU
+
 static func size_color(size: int) -> Color:
 	match size:
 		AbilityRes.Size.CRUSH:
