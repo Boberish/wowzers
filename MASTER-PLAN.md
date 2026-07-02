@@ -287,6 +287,30 @@ nodes, not node kinds.
 **Next up:** CI-ish script that runs all sims + smokes in one command (the merge-back gate, `tools/verify-all.sh`); decide CSV output home (`godot/out/` is gitignored).
 **Open ideas:** auto-post sim bands into this file; seed-verified replay files for leaderboards.
 
+## CODE AUDIT — open findings that NEED A DECISION (2026-07-03)
+
+A fan-out audit (11 scoped agents + adversarial verify) ran 2026-07-03. The **24 non-controversial
+fixes are DONE + merged** (`fd512f8`: dead code, per-frame perf, DRY — all byte-identical, see
+Coordination Log). These **13 are confirmed real but change gameplay/checksums or are architectural**
+— they need Bill's call, so they're parked here (severity in caps):
+
+**Correctness bugs (in drafted-boon / raid paths):**
+- **HIGH — Mender `overflow` boon can SHRINK a shield** (`mender_kit.gd` on_overheal): the `minf(absorb+…, hp_max*0.5)` collapses an already-larger ward (post-Surge/Ward) down to half. Fix: only ever grow. Changes checksums when `overflow` is drafted → needs a mender balance re-run.
+- **MED — Bulwark `payExpose` boon is inert solo** (`bulwark_kit.gd` _guard_proc): writes boss-level expose fields only the Voidcaller reads; a solo tank's "Sunder Guard" does nothing. Fix: per-seat expose in `outgoing_mult`. Checksum change when drafted.
+- **MED — `fight_seed()` collides in Topology map mode** (`run_state.gd`): two combat nodes with the same fight index reseed identically → replayed telegraphs/melee. Fix: fold `map_node` in (guarded so `map==null` stays byte-identical). Gameplay-visible (more variety) for map runs only.
+
+**Netcode robustness (architectural):**
+- **MED — desync checksum covers only boss HP + tick** (`combat_core.gd` :68): excludes seat HP/resources/absorb, threat, and `rng._state` — the lockstep detector can't see non-boss drift until it reaches boss HP. Two paths: (a) fold seat state + `rng.state_hash()` into `state.checksum` (strongest, but **rebaselines every sim checksum** — a coordinated change), or (b) a **net-layer-only** integrity hash on the existing 30-tick cadence (additive, keeps all sim baselines byte-identical). *Recommend (b).*
+- **MED — `seat.casting` holds a live Seat ref → RefCounted self-cycle** (`seat.gd`): a raid healer self-cast leaks the seat on Esc-mid-cast (only cleared on fight-over). Definitive fix: store `target_i` (index), mirroring `absorb_owner_i`/HoT `caster_i` — touches mender/bloom kits + HUD readers. (An interim `casting={}` teardown stopgap exists but the index fix is the right one.)
+
+**Bigger DRY refactors (safe but larger churn — deliberate, not drive-by):**
+- Sim harness: `_arg`/`_fmt`/`_write_csv` are md5-identical across 9 sims → a shared `sim/sim_util.gd`.
+- HUD factories: `_place` (×6), `_title`/`_label`/`_gap`/`_panel` (×4-6) → shared UiKit helpers.
+
+**Deeper coverage the audit flagged as NOT swept (future audits):** cross-platform float/`Dictionary`-iteration determinism (the real WASM-vs-native lockstep risk); `net_server` adversarial input hardening (malformed/oversized frames, claim races); a systematic boon×aspect correctness sweep (only 2 of ~60 effects were hand-checked — both were bugs); HUD/stage teardown tween/Node leak audit on Esc-mid-fight; config/save (`rift_net.cfg`, binds JSON) versioning + corruption handling.
+
+**Acceptance for any of these:** determinism PASS; byte-identical where the change is meant to be neutral; a fresh baseline documented where it legitimately shifts checksums (boon/map changes); smokes green.
+
 ---
 
 ## CURRENT / OPEN IDEAS (parking lot — promote into a section when claimed)
@@ -319,3 +343,4 @@ nodes, not node kinds.
 - ☑ 2026-07-02 · `slot-verbs` · §SYSTEMS Phase B — MERGED to main (`7860efa`): build-your-Guard PoC (cross-product TRIGGER×PAYLOAD×PROPERTY pieces, opus Twin Guard) + LOCK·1⏣ hold-through-reroll. Gates: 6 sims **byte-identical** boonless vs fresh baselines · `_prove_guard_mods` 74.2%→92.5% + determinism PASS · draft_sim ALL OK (5-class LOCK matrix) · 5 smokes · WSLg shots (locked draft / Grimoire YOUR GUARD / live charge pips). Merge grafted YOUR GUARD into the new Grimoire tome's guard entry. Plan updated; port-to-other-verbs is the open §SYSTEMS follow-up. *(draft2 session)*
 - ☑ 2026-07-02 · `twinfang-dmg-juice` · §GRAPHICS — MERGED to main (`c76355e`). Twinfang damage numbers now read by SOURCE: `twinfang_kit._deal` tags every `boss_hit` with a `kind` (view-only, twinfang_sim **byte-identical** vs main ×2 — before & after merging slot-verbs-port in); `twinfang_hud._dmg_num`/`DMG_STYLE` colours autos gold, Eviscerate/Flurry ember, Coup mint, Rupture green — all bigger + longer (1.15–1.85s) with a scale-punch, and CRITS slam bold (Cinzel 900) + outline + hard punch + spark-ring (`_crit_burst`) + flash/shake. Rotating spawn LANES (odd staggered down) so combo bursts fan out instead of piling up. Merged cleanly under slot-verbs-port (different regions in both shared files). Verified: byte-identical sim, UI smoke, 12-path crit probe, WSLg screenshots (realistic + burst both legible). **Pattern is portable** — the other 4 classes could tag their damage sources the same way if wanted. *(this session)*
 - ☑ 2026-07-02 · `slot-verbs-port` · §SYSTEMS Phase B port — MERGED to main: build-your-verb for the OTHER FOUR classes (RHYTHM/KICK/TRIAGE/GARDEN engines, 32 pieces, 4 opus transforms incl. Twin Step/Twin Void charges + Benediction + Deep Garden). Gates: 6 sims **byte-identical** boonless vs fresh baselines · 4 probes PASS (rhythm 54.2→92.5, kick 80.8→100, triage 71.7→90.8, garden 78.3→84.2, all det) · draft_sim ALL OK · 5 smokes ×3 · WSLg (YOUR RHYTHM tooltip in-frame + Twin Step/Void pips). Merged juice2's `_on_end_moment` cleanly. §SYSTEMS Phase B now fully closed — slot-verbs live on ALL FIVE verbs. *(draft2 session)*
+- ☑ 2026-07-03 · `audit-cleanup` · §TOOLING/Audit — **Code audit + non-controversial cleanup — MERGED to main (`fd512f8`)**, synced to Windows. Fan-out audit (11 scoped agents → adversarial verify → synth): 60 findings, 24 verified auto-safe APPLIED, 13 confirmed-but-need-a-decision PARKED (see §CODE AUDIT). Applied = dead code (AspectRes/UpgradeRes/ui_orb.gdshader + ~10 dead helpers/consts), per-frame perf (core `_apply_inputs` empty-queue skip; phase_ats/progress/enrage-colour set-once; pose_rig glow-guard + default-alloc hoist), DRY (`_float_num`→DamageNumbers, `_phase_num`→BossBar.phase_index, draft build_tags hoist), raid `_barrage` feint. Net −179 lines. Gates: 6 solo sims + raid Riftmaw/Gemini checksums **byte-identical**, draft_sim OK, 7 UI smokes green, WSLg renders clean. *(this session)*
