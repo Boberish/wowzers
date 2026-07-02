@@ -73,11 +73,12 @@ static func build_tags(run) -> Dictionary:
 	return t
 
 static func matches(b: Dictionary, run) -> bool:
-	var tags: Array = b.get("tags", [])
-	if tags.is_empty():
-		return false
-	var bt := build_tags(run)
-	for tag in tags:
+	return _matches_tags(b, build_tags(run))
+
+## Does boon `b` share a tag with the pre-built tag set `bt`? Hoist `build_tags(run)`
+## once per roll and call this in loops instead of matches() (which rebuilds it each call).
+static func _matches_tags(b: Dictionary, bt: Dictionary) -> bool:
+	for tag in b.get("tags", []):
 		if bt.has(String(tag)):
 			return true
 	return false
@@ -95,8 +96,9 @@ static func roll_offers(run) -> Array:
 		return []
 	var offers: Array = []
 	var syn: Array = []
+	var bt := build_tags(run)                # once per roll, not once per candidate
 	for b in avail:
-		if matches(b, run):
+		if _matches_tags(b, bt):
 			syn.append(b)
 	if syn.is_empty():
 		syn = avail
@@ -145,6 +147,7 @@ static func reroll_kept(run, offers: Array, locked: Array) -> Array:
 		return []
 	run.tokens -= REROLL_COST
 	var avail := offerable(run)
+	var bt := build_tags(run)                # once, reused by the synergy-slot filter below
 	var out: Array = []
 	for i in offers.size():
 		out.append(offers[i] if i in locked else null)
@@ -161,7 +164,7 @@ static func reroll_kept(run, offers: Array, locked: Array) -> Array:
 		if i == 0:
 			var syn: Array = []
 			for b in rest:
-				if matches(b, run):
+				if _matches_tags(b, bt):
 					syn.append(b)
 			if not syn.is_empty():
 				rest = syn

@@ -327,8 +327,9 @@ func _process(delta: float) -> void:
 	_bar.boss_name = s.encounter.name
 	_bar.hp = s.boss.hp
 	_bar.hp_max = s.boss.hp_max
-	_bar.phase_num = _phase_num(s)
-	_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
+	_bar.phase_num = BossBar.phase_index(s)
+	if _bar.phase_ats.is_empty():	# immutable per fight; set once (bar is fresh each fight)
+		_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
 	_bar.enrage_in = (s.encounter.enrage_at - float(s.tick) * s.dt) if s.encounter.enrage_at > 0.0 else INF
 	_dial.boss_name = s.encounter.name
 	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
@@ -554,32 +555,7 @@ func _big_text(text: String, col: Color, fs: int = 40, life: float = 0.7) -> voi
 	tw.chain().tween_callback(l.queue_free)
 
 func _float_num(text: String, pos: Vector2, color: Color, dy: float) -> void:
-	# damage text with WEIGHT: numerals scale with magnitude, drift as they rise,
-	# hold bright for a beat and fade late (Cinzel display numerals)
-	var mag := absf(text.to_float())
-	var fs := 17
-	if mag >= 200.0:
-		fs = 30
-	elif mag >= 90.0:
-		fs = 25
-	elif mag >= 40.0:
-		fs = 21
-	var l := Label.new()
-	l.text = text
-	l.add_theme_font_override("font", UiKit.display(750))
-	l.add_theme_font_size_override("font_size", fs)
-	l.add_theme_color_override("font_color", color)
-	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
-	l.add_theme_constant_override("shadow_offset_y", 2)
-	l.position = pos + Vector2(randf_range(-8.0, 8.0), 0.0)
-	_fx.add_child(l)
-	var tw := create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(l, "position:y", l.position.y + dy, 0.8) \
-		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-	tw.tween_property(l, "position:x", l.position.x + randf_range(-14.0, 14.0), 0.8)
-	tw.tween_property(l, "modulate:a", 0.0, 0.45).set_delay(0.35)
-	tw.chain().tween_callback(l.queue_free)
+	DamageNumbers.float_num(_fx, text, pos, color, dy)
 
 ## Outgoing boss-damage numerals — the shared DamageNumbers helper does the styling
 ## (source colour, size, longer life, scale-punch, crit outline + spark ring, lane
@@ -631,13 +607,6 @@ func _position_tip_above(node: Control, h: float = 120.0) -> void:
 	_tip.size = Vector2(w, h)
 	_tip.visible = true
 
-func _phase_num(s: CombatState) -> int:
-	var fr := s.boss.hp / s.boss.hp_max
-	var n := 1
-	for i in s.encounter.phases.size():
-		if s.encounter.phases[i].at >= fr:
-			n = i + 1
-	return n
 
 # ============================================================ SPELLBOOK
 func _toggle_book() -> void:
@@ -670,13 +639,6 @@ func _boon_dicts() -> Array:
 				if b["id"] == id:
 					out.append(b)
 	return out
-
-func _boon_title(id: String) -> String:
-	for pool in [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]:
-		for b in pool:
-			if b["id"] == id:
-				return b["title"]
-	return id
 
 # ============================================================ DRAFT
 func _show_draft() -> void:

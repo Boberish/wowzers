@@ -5,7 +5,7 @@
 ## verses, doom beats, add waves, hotfix healing), and probes that THREAT is
 ## load-bearing on the classic Seal.
 ##
-##   godot --headless --path godot --script res://sim/raid_sim.gd -- --seeds=300
+##   godot --headless --path godot --script res://sim/raid_sim.gd -- --seeds=200
 ##   optional: --boss=riftmaw|mistral|gemini|mythos (default: all)
 extends SceneTree
 

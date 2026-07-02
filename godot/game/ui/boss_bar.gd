@@ -12,6 +12,16 @@ var phase_num: int = 1
 var phase_ats: Array = []      # phase .at thresholds (for notch marks)
 var enrage_in: float = INF     # seconds until enrage; <=0 = ENRAGED; INF = no enrage timer
 
+## The 1-based phase index for the current boss HP (shared by every HUD; was copy-
+## pasted as _phase_num into all six). Pure view helper, mirrors the display logic.
+static func phase_index(s: CombatState) -> int:
+	var fr := s.boss.hp / s.boss.hp_max
+	var n := 1
+	for i in s.encounter.phases.size():
+		if s.encounter.phases[i].at >= fr:
+			n = i + 1
+	return n
+
 const BARH := 26.0
 var _bar: ColorRect
 var _chip: float = 1.0

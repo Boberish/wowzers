@@ -13,7 +13,6 @@ static var EDGE := Color("2c2436")
 static var FILL_TOP := Color("1c1a28")     # glass fill top edge
 static var FILL_BOT := Color("0d0c15")     # glass fill bottom edge
 static var WELL_TOP := Color("10101a")     # recessed well variant top
-static var GLASS_GRAIN := Color("201d2e")  # frosted grain tint
 
 static var GOLD := Color("e6b463")
 static var GOLD_BRIGHT := Color("ffdc93")

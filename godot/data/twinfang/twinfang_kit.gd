@@ -200,7 +200,7 @@ func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringNam
 ## (+1 Flow); a GOOD one pays a little energy; holding a feint keeps the song
 ## going. A LANDED beat wipes Flow through on_damage_taken above (beats carry a
 ## Size) — dodging protects the solo, exactly like dodging a swing does.
-func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
+func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
 		_strike: StrikeRes, grade: int) -> void:
 	match grade:
 		StrikeRes.Grade.PERFECT:
@@ -208,7 +208,7 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 			if _b("dancersgrace"):
 				seat.vars["next_perfect"] = true   # Opus: a perfect dodge primes the blades
 			if _b("tfTrigBeat"):
-				_tf_trigger(_s, seat, "beat")      # Phase B: PERFECT beat = proc moment
+				_tf_trigger(s, seat, "beat")       # Phase B: PERFECT beat = proc moment
 		StrikeRes.Grade.GOOD:
 			_gain_energy(seat, cfg.strike_good_energy)
 		StrikeRes.Grade.READ:

@@ -45,6 +45,7 @@ var _progress: Label
 # performance meters
 var _meter: Label
 var _enrage_lbl: Label
+var _enrage_col := Color(0, 0, 0, 0)   # cached enrage-label colour (apply override only on change)
 var _gcd_cursor: GcdCursor
 var _stat_eff: float = 0.0
 var _stat_over: float = 0.0
@@ -232,6 +233,7 @@ func _build_combat() -> void:
 	_meter = _label(_ui, "", 12, Palette.VERDANCE, HORIZONTAL_ALIGNMENT_LEFT)
 	_place(_meter, 0, 1, 0, 1, 48, -202, 380, -180)
 	_enrage_lbl = _label(_ui, "", 14, Palette.TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	_enrage_col = Color(0, 0, 0, 0)   # fresh label each fight — re-apply the colour once
 	_place(_enrage_lbl, 1, 0, 1, 0, -250, 44, -18, 66)
 
 	_ui.add_child(_fx)
@@ -450,15 +452,13 @@ func _process(_delta: float) -> void:
 	_bar.boss_name = s.encounter.name
 	_bar.hp = s.boss.hp
 	_bar.hp_max = s.boss.hp_max
-	_bar.phase_num = _phase_num(s)
-	_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
+	_bar.phase_num = BossBar.phase_index(s)
+	if _bar.phase_ats.is_empty():	# immutable per fight; set once (bar is fresh each fight)
+		_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
 	_bar.enrage_in = (s.encounter.enrage_at - float(s.tick) * s.dt) if s.encounter.enrage_at > 0.0 else INF
 	_dial.boss_name = s.encounter.name
 	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
-
-	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
-	_dial.enraged = s.encounter.enrage_at > 0.0 and s.time() >= s.encounter.enrage_at
 
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
@@ -583,12 +583,16 @@ func _process(_delta: float) -> void:
 	var en := s.encounter.enrage_at
 	if en > 0.0:
 		var left := en - s.time()
+		var col: Color
 		if left > 0.0:
 			_enrage_lbl.text = "ENRAGE in %ds" % int(ceil(left))
-			_enrage_lbl.add_theme_color_override("font_color", Palette.CRIMSON if left < 15.0 else Palette.TEXT_DIM)
+			col = Palette.CRIMSON if left < 15.0 else Palette.TEXT_DIM
 		else:
 			_enrage_lbl.text = "!! ENRAGED !!"
-			_enrage_lbl.add_theme_color_override("font_color", Palette.CRIMSON)
+			col = Palette.CRIMSON
+		if col != _enrage_col:               # theme override only on change (was every frame)
+			_enrage_lbl.add_theme_color_override("font_color", col)
+			_enrage_col = col
 	else:
 		_enrage_lbl.text = ""
 
@@ -746,13 +750,6 @@ func _banner(text: String, col: Color) -> void:
 	tw.tween_property(l, "modulate:a", 0.0, 1.0).set_delay(0.3)
 	tw.chain().tween_callback(l.queue_free)
 
-func _phase_num(s: CombatState) -> int:
-	var fr := s.boss.hp / s.boss.hp_max
-	var n := 1
-	for i in s.encounter.phases.size():
-		if s.encounter.phases[i].at >= fr:
-			n = i + 1
-	return n
 
 # ============================================================ DRAFT / END
 var _minted := 0
@@ -901,16 +898,6 @@ func _add_vignette() -> void:
 	v.set_anchors_preset(Control.PRESET_FULL_RECT)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(v)
-
-func _round_bar(bar: ProgressBar, fill_color: Color) -> void:
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Palette.BG0
-	bg.set_corner_radius_all(6)
-	bar.add_theme_stylebox_override("background", bg)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = fill_color
-	fill.set_corner_radius_all(6)
-	bar.add_theme_stylebox_override("fill", fill)
 
 func _place(node: Control, al: float, at: float, ar: float, ab: float,
 		ol: float, ot: float, orr: float, ob: float) -> void:

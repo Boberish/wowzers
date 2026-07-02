@@ -19,7 +19,6 @@ var _world: Node2D
 var _fxl: Node2D              # VFX layer above the puppets
 var _aspect := "tempo"
 var _boss_id := ""
-var _t := 0.0
 var _punch := 0.0             # world zoom-kick (decays)
 var _pending: Array = []      # scheduled one-shots
 var _cur_beats: Array = []
@@ -216,7 +215,6 @@ func _player_ability(id: String) -> void:
 
 # ============================================================ scheduler + camera punch
 func _process(delta: float) -> void:
-	_t += delta
 	_perfect_next = maxf(0.0, _perfect_next - delta)
 	var keep: Array = []
 	for job in _pending:

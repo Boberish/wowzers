@@ -53,7 +53,3 @@ extends Resource
 
 func dt() -> float:
 	return 1.0 / float(fixed_hz)
-
-## Deep-ish copy so a sweep can tweak one field without mutating the shared config.
-func clone() -> TuningConfig:
-	return duplicate(true) as TuningConfig

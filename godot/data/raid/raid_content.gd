@@ -79,6 +79,7 @@ static func _barrage(id: StringName, name: String, amount: float,
 		st.at = float(b.get("at", 1.0))
 		st.amount_frac = float(b.get("frac", 0.0))
 		st.size = int(b.get("size", AbilityRes.Size.HEAVY))
+		st.feint = bool(b.get("feint", false))     # honour a fake beat like the solo twins do
 		st.aoe = true
 		a.strikes.append(st)
 	return a

@@ -5,7 +5,7 @@
 ## per-seat integrity carried between nodes, events applied, dead raiders
 ## rebooting at 35% after won fights. Prints clear rates + attrition.
 ##
-##   godot --headless --path godot --script res://sim/raid_map_sim.gd -- --seeds=100
+##   godot --headless --path godot --script res://sim/raid_map_sim.gd -- --seeds=60
 extends SceneTree
 
 const FIGHT_CAP_SEC := 240.0

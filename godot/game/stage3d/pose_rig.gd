@@ -19,6 +19,7 @@ var _poses: Dictionary = {}        # name -> {joint: [Quaternion, Vector3]}
 
 # pose blender
 var _from: Dictionary = {}         # joint -> [Quaternion, Vector3] at blend start
+const _DEF_JV := [Quaternion.IDENTITY, Vector3.ZERO]   # shared read-only default (no per-call alloc)
 var _to_pose: String = "idle"
 var _t: float = 0.0
 var _dur: float = 0.3
@@ -218,7 +219,7 @@ func _process(delta: float) -> void:
 	var e := _ease_val(pr, _easing)
 
 	for jn in _joints:
-		var from: Array = _from.get(jn, [Quaternion.IDENTITY, Vector3.ZERO])
+		var from: Array = _from.get(jn, _DEF_JV)
 		var to: Array = _pose_val(_to_pose, jn)
 		var q: Quaternion = (from[0] as Quaternion).slerp(to[0], e)
 		var p: Vector3 = (from[1] as Vector3).lerp(to[1], e)
@@ -262,8 +263,10 @@ func _sample(jn: String) -> Array:
 	return [n.quaternion, n.position - (_rest[jn] as Vector3)]
 
 func _pose_val(pname: String, jn: String) -> Array:
-	var p: Dictionary = _poses.get(pname, {})
-	return p.get(jn, [Quaternion.IDENTITY, Vector3.ZERO])
+	var p = _poses.get(pname)                # untyped: single-arg get returns null if absent
+	if p == null:
+		return _DEF_JV
+	return p.get(jn, _DEF_JV)
 
 static func _ease_val(t: float, kind: String) -> float:
 	match kind:

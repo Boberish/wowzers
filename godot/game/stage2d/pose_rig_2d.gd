@@ -76,6 +76,7 @@ var _parts: Dictionary = {}        # name -> Limb (glow/flash targets)
 var _poses: Dictionary = {}        # name -> {joint: [rot_rad, Vector2]}
 
 var _from: Dictionary = {}
+const _DEF_JV := [0.0, Vector2.ZERO]   # shared read-only default joint value (no per-call alloc)
 var _to_pose: String = "idle"
 var _t: float = 0.0
 var _dur: float = 0.3
@@ -222,7 +223,9 @@ func flash_part(part: String, col: Color, amt := 1.0) -> void:
 
 func part_glow(part: String, col: Color, amt: float) -> void:
 	var l: Limb = _parts.get(part)
-	if l != null:
+	# skip the redraw when the glow is unchanged (static rage / latched idle glow /
+	# full-or-empty resources) — exact equality, so a genuine per-frame frac still redraws
+	if l != null and (amt != l.glow or col != l.glow_col):
 		l.glow_col = col
 		l.glow = amt
 		l.queue_redraw()
@@ -240,7 +243,7 @@ func _process(delta: float) -> void:
 	var e := _ease_val(pr, _easing)
 
 	for jn in _joints:
-		var from: Array = _from.get(jn, [0.0, Vector2.ZERO])
+		var from: Array = _from.get(jn, _DEF_JV)
 		var to: Array = _pose_val(_to_pose, jn)
 		var r := lerp_angle(float(from[0]), float(to[0]), e)
 		var p: Vector2 = (from[1] as Vector2).lerp(to[1], e)
@@ -276,8 +279,10 @@ func _sample(jn: String) -> Array:
 	return [n.rotation, n.position - (_rest[jn] as Vector2)]
 
 func _pose_val(pname: String, jn: String) -> Array:
-	var p: Dictionary = _poses.get(pname, {})
-	return p.get(jn, [0.0, Vector2.ZERO])
+	var p = _poses.get(pname)                # untyped: single-arg get returns null if absent
+	if p == null:
+		return _DEF_JV
+	return p.get(jn, _DEF_JV)
 
 static func _ease_val(t: float, kind: String) -> float:
 	match kind:

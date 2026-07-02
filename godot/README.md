@@ -14,7 +14,6 @@ core/            the pure, deterministic engine (no rendering / clock / unseeded
 data/            authored content as Resources (.tres-ready schema)
   tuning_config.gd every balance number (swept by the sim)
   encounter_res.gd / ability_res.gd / phase_res.gd   data-driven bosses
-  aspect_res.gd / upgrade_res.gd                     roguelite schema (used from M1)
   m0_content.gd    the M0 dummy boss + party, built in code
 sim/
   sim_runner.gd    headless batch sim -> CSV + win-rate bands

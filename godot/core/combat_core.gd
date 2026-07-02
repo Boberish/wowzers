@@ -116,6 +116,8 @@ static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 			pass
 
 static func _apply_inputs(s: CombatState) -> void:
+	if s.input_queue.is_empty():
+		return                              # the common case — no per-tick Array churn
 	var remaining: Array = []
 	for e in s.input_queue:
 		if e["tick"] == s.tick:

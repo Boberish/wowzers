@@ -25,10 +25,10 @@ var boss_actor: Actor2D
 
 var _world: Node2D
 var _fxl: Node2D
-var _t := 0.0
 var _punch := 0.0
 var _pending: Array = []
 var _last_kind := ""
+var _string_live := false         # a string telegraph is winding up THIS frame (set in sync)
 var _dead: Dictionary = {}        # seat index -> died latch
 var _perfect_next := 0.0
 var _melee_gap := 0.0
@@ -105,6 +105,9 @@ func sync(s: CombatState) -> void:
 		return
 
 	# --- boss coil from the live telegraph ---
+	# track string-live explicitly (was inferred from _last_kind=="cut", which never
+	# reset — the boss stopped acting between a string's end and the next classic cast)
+	_string_live = s.telegraph != null and not s.telegraph.ability.strikes.is_empty()
 	if s.telegraph == null:
 		boss_actor.windup(_last_kind if _last_kind != "" else "heavy",
 			maxf(0.0, (boss_actor as PoseRig2D).windup_amt - 0.12) if boss_actor is PoseRig2D else 0.0)
@@ -186,7 +189,7 @@ func on_event(ev: Dictionary) -> void:
 			if a != null:
 				a.evade_react()
 				_ghost(a.position)
-				if String(ev.get("t", "")) == "negate" and not _string_live():
+				if not _string_live:
 					boss_actor.swing("crush" if int(ev.get("size", 0)) >= 3 else "heavy")
 					_punch = maxf(_punch, 0.6)
 		"strike_graded":
@@ -214,7 +217,7 @@ func on_event(ev: Dictionary) -> void:
 				return
 			var sz := int(ev.get("size", 0))
 			a.hit_react(amt >= 60.0)
-			if _string_live():
+			if _string_live:
 				pass
 			elif sz > 0:
 				boss_actor.swing("crush" if sz >= 3 else "heavy")
@@ -257,9 +260,6 @@ func on_event(ev: Dictionary) -> void:
 		_:
 			pass
 
-func _string_live() -> bool:
-	return _last_kind == "cut"
-
 func _fire(a: Actor2D, id: String) -> void:
 	var flourish := _perfect_next > 0.0 and id == "strike"
 	_perfect_next = 0.0
@@ -276,7 +276,6 @@ func _fire(a: Actor2D, id: String) -> void:
 
 # ============================================================ scheduler + punch
 func _process(delta: float) -> void:
-	_t += delta
 	_perfect_next = maxf(0.0, _perfect_next - delta)
 	_melee_gap = maxf(0.0, _melee_gap - delta)
 	var keep: Array = []

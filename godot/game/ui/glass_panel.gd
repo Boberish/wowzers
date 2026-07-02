@@ -52,8 +52,5 @@ func _layout() -> void:
 	_rect.size = size + Vector2(PAD * 2.0, PAD * 2.0)
 	_mat.set_shader_parameter("rect_px", _rect.size)
 
-func set_accent(c: Color) -> void:
-	_mat.set_shader_parameter("accent_color", c)
-
 func set_active(on: bool) -> void:
 	_mat.set_shader_parameter("glow_boost", _glow_base * (2.2 if on else 1.0))

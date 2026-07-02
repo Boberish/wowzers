@@ -122,3 +122,34 @@ static func _crit_burst(layer: Control, pos: Vector2, col: Color) -> void:
 		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
 	tw.tween_method(func(av): st["a"] = av, 0.95, 0.0, 0.42)
 	tw.chain().tween_callback(n.queue_free)
+
+## Lightweight floating text (damage TAKEN, boss heals, misc pops) — magnitude-scaled
+## Cinzel numerals that drift `dy` and fade late. Shared by every HUD (was copy-pasted
+## into each). `layer` owns the tween + the freed Label. View-only.
+static func float_num(layer: Control, text: String, pos: Vector2, color: Color, dy: float) -> void:
+	if layer == null:
+		return
+	var mag := absf(text.to_float())
+	var fs := 17
+	if mag >= 200.0:
+		fs = 30
+	elif mag >= 90.0:
+		fs = 25
+	elif mag >= 40.0:
+		fs = 21
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_override("font", UiKit.display(750))
+	l.add_theme_font_size_override("font_size", fs)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	l.add_theme_constant_override("shadow_offset_y", 2)
+	l.position = pos + Vector2(randf_range(-8.0, 8.0), 0.0)
+	layer.add_child(l)
+	var tw := layer.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(l, "position:y", l.position.y + dy, 0.8) \
+		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(l, "position:x", l.position.x + randf_range(-14.0, 14.0), 0.8)
+	tw.tween_property(l, "modulate:a", 0.0, 0.45).set_delay(0.35)
+	tw.chain().tween_callback(l.queue_free)

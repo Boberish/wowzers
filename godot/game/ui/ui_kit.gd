@@ -1,5 +1,5 @@
 ## UiKit — the Gilded Arcane Glass shared toolkit. One virtual light (top-left), one
-## gold gradient, four shared shader PROGRAMS (each compiles once; every widget makes
+## gold gradient, shared shader PROGRAMS (each compiles once; every widget makes
 ## its own ShaderMaterial but points at the shared Shader). Tokens + draw helpers live
 ## here so the whole UI reads as one intentional system, not per-widget one-offs.
 class_name UiKit
@@ -7,7 +7,6 @@ extends RefCounted
 
 # --- shared shader programs (compile once — kind to the WebGL2 warm-up budget) ---
 const BAR_SHADER := preload("res://game/ui/ui_bar.gdshader")
-const ORB_SHADER := preload("res://game/ui/ui_orb.gdshader")
 const BG_SHADER := preload("res://game/ui/background.gdshader")
 
 # --- the one virtual light + gold ramp ---
@@ -143,46 +142,11 @@ static func make_bar(parent: CanvasItem, accent: Color) -> ColorRect:
 	parent.add_child(r)
 	return r
 
-static func set_bar_accent(bar: ColorRect, accent: Color) -> void:
-	var m: ShaderMaterial = bar.material
-	m.set_shader_parameter("col_deep", accent.darkened(0.55))
-	m.set_shader_parameter("col_mid", accent)
-	m.set_shader_parameter("col_bright", accent.lightened(0.24))
-	m.set_shader_parameter("col_leading", accent.lightened(0.5))
-	m.set_shader_parameter("col_chip", accent.lightened(0.35))
-
 static func set_bar(bar: ColorRect, frac: float, chip: float = -1.0) -> void:
 	var m: ShaderMaterial = bar.material
 	m.set_shader_parameter("rect_size", bar.size)
 	m.set_shader_parameter("fill_frac", clampf(frac, 0.0, 1.0))
 	m.set_shader_parameter("chip_frac", clampf(maxf(chip, frac), 0.0, 1.0))
-
-# ---------------------------------------------------------------- orbs / coins
-## Glass-gem rim/specular OVERLAY over a LiquidOrb (transparent body). Topmost child.
-static func orb_overlay(host: Control) -> ColorRect:
-	var r := ColorRect.new()
-	r.set_anchors_preset(Control.PRESET_FULL_RECT)
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var m := ShaderMaterial.new()
-	m.shader = ORB_SHADER
-	m.set_shader_parameter("mode", 0)
-	r.material = m
-	host.add_child(r)
-	return r
-
-## Opaque domed metal COIN behind a rune / dial gem. accent tints the dome faintly.
-static func coin(host: Control, accent: Color) -> ColorRect:
-	var r := ColorRect.new()
-	r.set_anchors_preset(Control.PRESET_FULL_RECT)
-	r.show_behind_parent = true
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var m := ShaderMaterial.new()
-	m.shader = ORB_SHADER
-	m.set_shader_parameter("mode", 1)
-	m.set_shader_parameter("accent_tint", accent)
-	r.material = m
-	host.add_child(r)
-	return r
 
 # ---------------------------------------------------------------- _draw helpers
 ## Shadowed text: a BG0 drop pass then the fill. Every string in the game goes through
@@ -239,12 +203,6 @@ static func crit_throb(frac: float, phase: float, threshold: float = 0.25) -> fl
 	if frac >= threshold:
 		return 0.0
 	return (1.0 - frac / threshold) * (0.5 + 0.5 * sin(phase * 4.0))
-
-static func role_color(role: String) -> Color:
-	match role:
-		"tank": return Palette.STEEL
-		"healer": return Palette.WIN
-		_: return Palette.GOLD_DIM
 
 ## Ornamental wing flourish for medallion gauges: three tapering, fading gold strokes
 ## sweeping out from a core, with a gem at the leading tip. s = -1 (left) / +1 (right).

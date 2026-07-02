@@ -39,13 +39,6 @@ var _over_done := false
 var _melee_gap := 0.0
 var _soft_gpu := false       # WSLg/llvmpipe: software GL — degrade to stay playable
 
-const ABILITY_FX := {
-	"cleave": {"kind": "slash"}, "rampage": {"kind": "slam"},
-	"bloodthirst": {"kind": "thrust"}, "vindicate": {"kind": "thrust"},
-	"avalanche": {"kind": "slam"}, "shockwave": {"kind": "slam"},
-	"fortify": {"kind": "cast"},
-}
-
 func _init(aspect: String, boss_id: String) -> void:
 	_aspect = aspect
 	_boss_id = boss_id
