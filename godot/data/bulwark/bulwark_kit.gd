@@ -1,0 +1,299 @@
+## BulwarkKit — the Tank class behaviour, ported from poc/bulwark.html. Handles both
+## Aspects and the full draft pool: `boons` (a set of upgrade/relic ids) modifies the
+## kit's behaviour throughout. Pure/deterministic.
+class_name BulwarkKit
+extends ClassKit
+
+var aspect: String = "warden"          ## "warden" | "juggernaut"
+var cfg: BulwarkConfig
+var boons: Dictionary = {}             ## id -> true (acquired upgrades/relics)
+
+func _init(_aspect: String, _cfg: BulwarkConfig) -> void:
+	aspect = _aspect
+	cfg = _cfg
+
+func _b(id: String) -> bool:
+	return bool(boons.get(id, false))
+
+# effective (boon-modified) Momentum params
+func _mom_max() -> int:
+	return 14 if _b("unstoppable") else cfg.mom_max
+func _mom_delay() -> float:
+	return 3.6 if _b("snowball") else cfg.mom_delay
+func _mom_decay_step() -> float:
+	return 1.0 if _b("snowball") else cfg.mom_decay_step
+
+# --- defensive params ---
+func _def() -> Dictionary:
+	return cfg.def_warden if aspect == "warden" else cfg.def_jugg
+func defense_active() -> float:
+	return _def()["active"]
+func defense_cd() -> float:
+	return _def()["cd"]
+
+func _tt(s: CombatState, seconds: float) -> int:
+	return CombatCore.to_ticks(seconds, s.config.fixed_hz)
+
+# --- per-tick upkeep: exposed-window flag + Juggernaut Momentum decay ---
+func upkeep(s: CombatState, seat: Seat) -> void:
+	# Duelist reward: correctly holding a Feint leaves the boss briefly Exposed.
+	# Maintain a bool here so outgoing_mult (which has no tick) can read it.
+	seat.vars["exposed"] = s.tick < int(seat.vars.get("exposed_until_tick", 0))
+	if aspect != "juggernaut":
+		return
+	var mo := int(seat.vars.get("momentum", 0))
+	if mo <= 0:
+		return
+	var since := float(s.tick - int(seat.vars.get("last_aggro_tick", 0))) * s.dt
+	if since > _mom_delay():
+		var acc := float(seat.vars.get("mom_decay_acc", 0.0)) + s.dt
+		var step := _mom_decay_step()
+		while acc >= step and mo > 0:
+			acc -= step
+			mo -= 1
+		seat.vars["mom_decay_acc"] = acc
+		seat.vars["momentum"] = mo
+
+# --- defensive press: Juggernaut dumps (or halves) Momentum ---
+func on_defense_press(_s: CombatState, seat: Seat) -> void:
+	if aspect == "juggernaut":
+		var mo := int(seat.vars.get("momentum", 0))
+		seat.vars["momentum"] = int(mo / 2) if _b("sureFoot") else 0
+
+# --- a defensible swing was negated. FEINT: the negate was a bait — punish it.
+#     Otherwise: Warden reflects + banks Counter + Riposte. ---
+func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
+	if _ability != null and _ability.feint:
+		_feint_baited(s, seat)
+		return
+	if aspect == "warden":
+		var refl := cfg.parry_reflect * (2.0 if _b("perfectReflect") else 1.0)
+		CombatCore.damage_boss(s, seat, refl)
+		_gain_counter(seat, 2 if _b("deepCounter") else cfg.parry_counter)
+		_gain_rage(seat, cfg.parry_rage)
+		seat.vars["riposte_until_tick"] = s.tick + _tt(s, cfg.riposte_dur)
+		if _b("riposteChain"):
+			seat.defense_ready_tick = s.tick + _tt(s, 0.1)   # near-instant re-parry
+
+# --- M7 string beats: grade payoffs. PERFECT = the riposte fantasy (Warden banks
+#     Counter + opens the Riposte window; Jugg banks Momentum). BAITED wipes the
+#     riposte window — the real cost is the dodge lockout eating the next beat.
+#     READ mirrors the whole-swing feint hold, scaled down for a single beat. ---
+func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
+		_strike: StrikeRes, grade: int) -> void:
+	match grade:
+		StrikeRes.Grade.PERFECT:
+			_gain_rage(seat, cfg.strike_perfect_rage)
+			if aspect == "warden":
+				_gain_counter(seat, cfg.strike_perfect_counter)
+				seat.vars["riposte_until_tick"] = s.tick + _tt(s, cfg.riposte_dur)
+			else:
+				_gain_momentum(s, seat, cfg.strike_perfect_momentum)
+		StrikeRes.Grade.GOOD:
+			_gain_rage(seat, cfg.strike_good_rage)
+			if aspect == "juggernaut":
+				_gain_momentum(s, seat, 1)
+		StrikeRes.Grade.BAITED:
+			seat.vars["baits"] = int(seat.vars.get("baits", 0)) + 1   # sim diagnostic
+			if aspect == "warden":
+				seat.vars["riposte_until_tick"] = 0
+		StrikeRes.Grade.READ:
+			_gain_rage(seat, cfg.strike_read_rage)
+			seat.vars["exposed_until_tick"] = maxi(int(seat.vars.get("exposed_until_tick", 0)),
+				s.tick + _tt(s, cfg.strike_read_exposed))
+		_:
+			pass
+
+# --- incoming damage: Fortify/Vindicate DR, then Juggernaut Momentum mitigation ---
+func modify_incoming(s: CombatState, seat: Seat, dmg: float, _source: StringName, size: int) -> float:
+	var d := dmg
+	if s.tick < seat.dr_until_tick:
+		d *= (1.0 - seat.dr)
+	if aspect == "juggernaut":
+		var mo := int(seat.vars.get("momentum", 0))
+		var mit := mo * cfg.mom_dr
+		if _b("overrun") and size == AbilityRes.Size.CRUSH and mo >= 8:
+			mit += 0.40
+		d *= (1.0 - clampf(mit, 0.0, cfg.mom_dr_cap))
+	return d
+
+# --- damage taken generates rage (all specs) and Momentum (Juggernaut) ---
+func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName, size: int) -> void:
+	var fury := 1.3 if _b("furyGain") else 1.0
+	_gain_rage(seat, roundf(dmg * cfg.rage_from_dmg * fury))
+	if aspect == "juggernaut":
+		var mg := 3 if (_b("bulldoze") and size >= AbilityRes.Size.HEAVY) else 1
+		_gain_momentum(s, seat, mg)
+	# Duelist: taking Feint damage means you correctly HELD (a parried feint is
+	# negated → never reaches here). Reward the read: bonus rage + Exposed window.
+	# Keyed off the ability's feint flag (not its id) so EVERY feint — heavy Feint
+	# AND crush Bluff — pays out.
+	# CO-OP CAVEAT: routed through on_damage_taken, which only fires when d > 0. Solo
+	# Bulwark has no absorb, so this is always correct today; if a Mender ward ever
+	# fully eats a feint's small hit in co-op, the hold reward would be skipped —
+	# revisit via a resolution-time hook if/when tanks can carry absorbs.
+	if _is_feint(s, source):
+		_gain_rage(seat, cfg.feint_read_rage)
+		seat.vars["exposed_until_tick"] = s.tick + _tt(s, cfg.feint_exposed_dur)
+		CombatCore.emit_event(s, {"t": "read", "player": seat.is_player})
+
+# Is this ability id a Feint? Reads the authoritative flag off the encounter data
+# so the kit never has to hardcode which swings are feints.
+func _is_feint(s: CombatState, id: StringName) -> bool:
+	for ab in s.encounter.abilities:
+		if ab.id == id:
+			return ab.feint
+	return false
+
+# --- outgoing damage multiplier: Exposed (Duelist) + Juggernaut Momentum + Last Stand ---
+func outgoing_mult(seat: Seat) -> float:
+	var m := 1.0
+	if bool(seat.vars.get("exposed", false)):
+		m *= cfg.feint_exposed_mult
+	if aspect == "juggernaut":
+		m *= 1.0 + float(int(seat.vars.get("momentum", 0))) * cfg.mom_dmg
+	if _b("execute") and seat.hp_max > 0.0 and seat.hp / seat.hp_max < 0.35:
+		m *= 1.35
+	return m
+
+# You pressed guard on a Feint. The bait connects: eat a chunk, lose your spec
+# resource (Counter / Momentum), and your guard is disrupted for a beat.
+func _feint_baited(s: CombatState, seat: Seat) -> void:
+	seat.vars["baits"] = int(seat.vars.get("baits", 0)) + 1   # sim diagnostic
+	seat.hp = maxf(0.0, seat.hp - cfg.feint_bait_dmg)
+	if aspect == "warden":
+		seat.vars["counter"] = 0
+		seat.vars["riposte_until_tick"] = 0
+	else:
+		seat.vars["momentum"] = 0
+		seat.vars["mom_decay_acc"] = 0.0
+	seat.defense_ready_tick = maxi(seat.defense_ready_tick, s.tick + _tt(s, cfg.feint_lockout))
+
+# --- abilities ---
+func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null) -> bool:
+	if String(id) == "challenge":
+		return _challenge(s, seat)      # raid taunt — off-GCD (checked before the gate)
+	if s.tick < seat.gcd_until_tick:
+		return false
+	match String(id):
+		"vindicate":
+			return _vindicate(s, seat)
+		"avalanche":
+			return _avalanche(s, seat)
+		_:
+			return _generic(s, seat, String(id))
+
+## Challenge (raid-only taunt): force the boss onto you and jump the threat table.
+## Off-GCD with its own cooldown, WoW-style. No solo loadout/policy ever presses it,
+## and CombatCore.taunt() no-ops unless threat is enabled — solo stays byte-identical.
+func _challenge(s: CombatState, seat: Seat) -> bool:
+	if not s.threat_enabled:
+		return false
+	if s.tick < int(seat.cooldowns.get("challenge", 0)):
+		return false
+	CombatCore.taunt(s, seat)
+	seat.cooldowns["challenge"] = s.tick + _tt(s, cfg.challenge_cd)
+	seat.vars["taunts"] = int(seat.vars.get("taunts", 0)) + 1   # raid-sim diagnostic
+	return true
+
+func _generic(s: CombatState, seat: Seat, id: String) -> bool:
+	var ab: Dictionary = cfg.abilities.get(id, {})
+	if ab.is_empty():
+		return false
+	var cost := float(ab.get("cost", 0.0))
+	if seat.resource < cost:
+		return false
+	seat.resource -= cost
+	var dmg := float(ab.get("dmg", 0.0))
+	if id == "rampage" and _b("rampagePlus"):
+		dmg += 45.0
+	var riposted := false
+	if aspect == "warden" and s.tick < int(seat.vars.get("riposte_until_tick", 0)) \
+			and (id == "cleave" or id == "rampage") and dmg > 0.0:
+		dmg += cfg.riposte_bonus
+		riposted = true
+		seat.vars["riposte_until_tick"] = 0
+	if dmg > 0.0:
+		CombatCore.damage_boss(s, seat, dmg)
+	if ab.has("lifesteal"):
+		_heal(seat, roundf(dmg * float(ab["lifesteal"])))
+	if ab.has("heal"):
+		_heal(seat, float(ab["heal"]))
+	if ab.has("dr"):
+		seat.dr = float(ab["dr"])
+		seat.dr_until_tick = s.tick + _tt(s, float(ab["drDur"]))
+		if _b("fortRage"):
+			_gain_rage(seat, 20.0)
+	if bool(ab.get("stagger", false)) and s.telegraph != null:
+		CombatCore.stagger_boss(s)
+	if id == "cleave":
+		_gain_rage(seat, float(ab.get("rage", 0.0)))
+	if riposted and _b("riposteHeal"):
+		_heal(seat, 60.0)
+	if aspect == "juggernaut" and dmg > 0.0:
+		_gain_momentum(s, seat, 1)
+	_set_gcd(s, seat, float(ab.get("gcd", cfg.gcd)), id)
+	return true
+
+func _vindicate(s: CombatState, seat: Seat) -> bool:
+	var c := int(seat.vars.get("counter", 0))
+	if c < 1:
+		return false
+	CombatCore.damage_boss(s, seat, cfg.vindicate_dmg_per * float(c))
+	seat.vars["counter"] = 0
+	seat.dr = cfg.vindicate_dr
+	seat.dr_until_tick = s.tick + _tt(s, cfg.vindicate_dr_dur)
+	if _b("vindInterrupt") and s.telegraph != null:
+		CombatCore.stagger_boss(s)
+	_set_gcd(s, seat, cfg.gcd, "vindicate")
+	return true
+
+func _avalanche(s: CombatState, seat: Seat) -> bool:
+	if seat.resource < cfg.avalanche_cost:
+		return false
+	var mo := int(seat.vars.get("momentum", 0))
+	if mo < 1:
+		return false
+	seat.resource -= cfg.avalanche_cost
+	var dealt := CombatCore.damage_boss(s, seat, cfg.avalanche_dmg_per * float(mo))
+	if _b("landslide"):
+		_heal(seat, roundf(dealt * 0.4))
+	if s.telegraph != null:
+		CombatCore.stagger_boss(s)
+	seat.vars["momentum"] = 0
+	_set_gcd(s, seat, cfg.gcd, "avalanche")
+	return true
+
+func _set_gcd(s: CombatState, seat: Seat, gcd: float, id: String) -> void:
+	var until := s.tick + _tt(s, gcd)
+	seat.gcd_until_tick = until
+	seat.cooldowns[id] = until
+
+# --- resource helpers ---
+func _gain_rage(seat: Seat, x: float) -> void:
+	seat.resource = clampf(seat.resource + x, 0.0, seat.resource_max)
+func _gain_counter(seat: Seat, x: int) -> void:
+	seat.vars["counter"] = clampi(int(seat.vars.get("counter", 0)) + x, 0, cfg.counter_max)
+func _gain_momentum(s: CombatState, seat: Seat, x: int) -> void:
+	seat.vars["momentum"] = clampi(int(seat.vars.get("momentum", 0)) + x, 0, _mom_max())
+	seat.vars["last_aggro_tick"] = s.tick
+	seat.vars["mom_decay_acc"] = 0.0
+func _heal(seat: Seat, x: float) -> void:
+	seat.hp = clampf(seat.hp + x, 0.0, seat.hp_max)
+
+# --- observation for policies / HUD ---
+func observe(s: CombatState, seat: Seat) -> Dictionary:
+	var out := {
+		"rage": seat.resource,
+		"rage_max": seat.resource_max,
+		"counter": int(seat.vars.get("counter", 0)),
+		"momentum": int(seat.vars.get("momentum", 0)),
+		"momentum_max": _mom_max(),
+		"riposte_active": s.tick < int(seat.vars.get("riposte_until_tick", 0)),
+		"aspect": aspect,
+		"def_zone": _def()["zone"],
+		"def_cd": _def()["cd"],
+	}
+	if s.threat_enabled:
+		out["challenge_ready"] = s.tick >= int(seat.cooldowns.get("challenge", 0))
+	return out

@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift · Bulwark — Warden & Juggernaut specs</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0e131f; --line:#1e2838;
+    --ink:#e6ecf5; --muted:#8695ac; --dim:#5b6b84;
+    --hp:#49c46a; --hp-mid:#e0b23a; --hp-low:#d9483f;
+    --rage:#e0574c; --rage2:#8a251d;
+    --gold:#e8c86a; --danger:#e0574c; --heal:#6fe0a0; --over:#6b7688;
+    --dodge:#57c7e0; --parry:#e8c86a; --counter:#e8c86a; --riposte:#ffd76a;
+    --momentum:#e07a3d; --momentum2:#8a3d16; --block:#b48ee8;
+    --font:"Segoe UI",system-ui,sans-serif; --mono:"SFMono-Regular",ui-monospace,"Consolas",monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 700px at 50% -10%, #1620320a, #070a11 70%), var(--bg);
+    color:var(--ink); font-family:var(--font); user-select:none; -webkit-user-select:none;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  #app{width:min(1100px,98vw); height:min(778px,98vh); position:relative; display:flex; flex-direction:column; gap:11px; padding:14px;}
+
+  #boss{background:linear-gradient(180deg,#161d2e,#10151f); border:1px solid var(--line); border-radius:10px; padding:12px 14px; position:relative}
+  #boss .row{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px}
+  #boss .name{font-size:19px; font-weight:700}
+  #boss .phase{font:600 11px var(--mono); color:var(--gold); letter-spacing:1px; text-transform:uppercase}
+  .bossbar{height:16px; background:#0a0e16; border:1px solid #2a2016; border-radius:5px; overflow:hidden; position:relative}
+  .bossbar > i{display:block; height:100%; background:linear-gradient(90deg,#8a2b22,#c9463a); transition:width .12s linear}
+  .bosshp{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:600 11px var(--mono); color:#ffe; text-shadow:0 1px 2px #000}
+
+  #swing{margin-top:10px; height:40px; background:#0a0e16; border:1px solid var(--line); border-radius:7px; position:relative; overflow:hidden}
+  #swing .fill{position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#5a4a1e,#e8c86a); transition:width .05s linear}
+  #swing.heavy .fill{background:linear-gradient(90deg,#6e3a1d,#e09a3d)}
+  #swing.crush .fill{background:linear-gradient(90deg,#6e241d,#e0574c)}
+  #swing .zone{position:absolute; top:0; bottom:0; right:0; background:repeating-linear-gradient(45deg,#e0574c33,#e0574c33 6px,#e0574c22 6px,#e0574c22 12px); border-left:2px dashed #e0574c; display:none}
+  #swing.armed .zone{display:block}
+  #swing .label{position:absolute; inset:0; display:flex; align-items:center; gap:10px; padding:0 14px; z-index:2}
+  #swing .tag{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; padding:2px 7px; border-radius:4px; background:#00000066}
+  #swing .sname{font:700 14px var(--font); color:#fff; text-shadow:0 1px 2px #000}
+  #swing .cd{margin-left:auto; font:700 13px var(--mono); color:#fff}
+  #swing .prompt{position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:3; font:800 16px var(--mono); letter-spacing:3px; color:#fff; text-shadow:0 0 10px #e0574c,0 1px 2px #000}
+  #swing.nowdodge .prompt{display:flex; animation:flash .3s steps(2) infinite}
+  @keyframes flash{50%{opacity:.4}}
+  #swing.idle .label .sname{color:var(--dim)}
+
+  #you{flex:1; display:flex; gap:12px; min-height:0}
+  #self{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:15px 18px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:12px}
+  #self.fortified{box-shadow:inset 0 0 0 2px #b48ee855, 0 0 22px #b48ee822}
+  #self.riposteglow{box-shadow:inset 0 0 0 2px #ffd76a66, 0 0 24px #ffd76a33}
+  #self.hurt{animation:hurt .3s} @keyframes hurt{0%{box-shadow:inset 0 0 0 3px #e0574c}100%{}}
+  #self .who{display:flex; align-items:center; justify-content:space-between}
+  #self .who .nm{font-size:20px; font-weight:700}
+  #self .who .spec{font:600 11px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--gold)}
+  .st{display:flex; gap:6px}
+  .badge{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; padding:3px 8px; border-radius:5px}
+  .badge.fort{background:var(--block); color:#0b0f17} .badge.dodge{background:var(--dodge); color:#0b0f17}
+  .badge.riposte{background:var(--riposte); color:#0b0f17} .badge.mom{background:var(--momentum); color:#0b0f17}
+  .barwrap{display:flex; flex-direction:column; gap:4px}
+  .barwrap .lab{display:flex; justify-content:space-between; font:600 11px var(--mono); color:var(--muted)}
+  .bigbar{height:18px; background:#0a0e16; border:1px solid #10151f; border-radius:5px; position:relative; overflow:hidden}
+  .bigbar > .fill{position:absolute; left:0; top:0; bottom:0; transition:width .1s linear, background .2s}
+  .bigbar > .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 10px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:2}
+  #hpfill{background:var(--hp)} #ragefill{background:linear-gradient(90deg,var(--rage2),var(--rage))}
+
+  /* spec resource row */
+  #specrow{min-height:26px; display:flex; align-items:center; gap:10px}
+  #specrow .rlab{font:600 11px var(--mono); color:var(--muted); min-width:74px}
+  .cpips{display:flex; gap:6px}
+  .cpip{width:19px; height:19px; background:#0a0e16; border:1px solid #3a3320; transform:rotate(45deg); border-radius:4px}
+  .cpip.on{background:var(--counter); border-color:#f0d890; box-shadow:0 0 8px #e8c86a88}
+  .mombar{flex:1; height:20px; background:#0a0e16; border:1px solid #2a1c12; border-radius:5px; position:relative; overflow:hidden; display:flex}
+  .mombar .mfill{position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,var(--momentum2),var(--momentum)); transition:width .12s linear}
+  .mombar .mnotch{flex:1; border-right:1px solid #00000055; z-index:2}
+  .mombar .mtxt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 11px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:3}
+  #specrow .rval{font:700 13px var(--mono); color:var(--gold)}
+
+  #dodgeState{display:flex; align-items:center; gap:12px}
+  .dpie{width:42px; height:42px; border-radius:50%; background:#0a0e16; border:1px solid var(--line); position:relative; flex:none}
+  .dpie .w{position:absolute; inset:2px; border-radius:50%}
+  .dpie.ready{border-color:var(--dodge); box-shadow:0 0 10px #57c7e055}
+  .dpie.ready.parry{border-color:var(--parry); box-shadow:0 0 10px #e8c86a55}
+  .dpie.active{border-color:#fff; box-shadow:0 0 16px var(--dodge)}
+  .dhint{font:600 11px var(--mono); color:var(--muted)} .dhint b{color:var(--dodge)} .dhint.parry b{color:var(--parry)}
+
+  .fct{position:absolute; font:800 17px var(--mono); pointer-events:none; z-index:6; animation:fct 1s ease-out forwards; text-shadow:0 1px 3px #000}
+  @keyframes fct{0%{opacity:0; transform:translateY(6px) scale(.8)}15%{opacity:1}100%{opacity:0; transform:translateY(-30px) scale(1.05)}}
+
+  #side{width:200px; display:flex; flex-direction:column; gap:10px}
+  .card{background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:11px}
+  .card h4{margin:0 0 8px; font:600 11px var(--mono); letter-spacing:1px; text-transform:uppercase; color:var(--muted)}
+  .stat{display:flex; justify-content:space-between; align-items:baseline; margin:5px 0; font-size:13px}
+  .stat b{font:700 15px var(--mono)} .kill{color:var(--gold)}
+  #log{flex:1; overflow:hidden; font:12px var(--mono); line-height:1.5; color:var(--muted); display:flex; flex-direction:column-reverse}
+  #log .hl{color:var(--ink)} #log .bad{color:var(--danger)} #log .good{color:var(--heal)} #log .dodge{color:var(--dodge)} #log .parry{color:var(--parry)} #log .mom{color:var(--momentum)}
+
+  #bottom{display:flex; flex-direction:column; gap:8px}
+  #abilities{display:flex; gap:8px}
+  .ab{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:8px 6px 7px; position:relative; cursor:pointer; text-align:center; overflow:hidden; transition:border-color .1s}
+  .ab:hover{border-color:#3a5b8c}
+  .ab.dodgebtn{flex:0 0 116px; background:#0d1a22; border-color:#1d3a48}
+  .ab.dodgebtn.ready{border-color:var(--dodge)} .ab.dodgebtn.ready.parry{border-color:var(--parry); background:#1c1808}
+  .ab.dodgebtn.active{border-color:#fff; box-shadow:0 0 14px var(--dodge)}
+  .ab.riposte{border-color:var(--riposte); box-shadow:0 0 14px #ffd76a44; background:#1c1808}
+  .ab .key{position:absolute; top:4px; left:6px; font:700 11px var(--mono); color:var(--gold); z-index:2}
+  .ab .nm{font-size:13px; font-weight:600; margin-top:9px; position:relative; z-index:2}
+  .ab .meta{font:600 10px var(--mono); color:var(--muted); margin-top:3px; position:relative; z-index:2}
+  .ab .meta .ragec{color:var(--rage)}
+  .ab .cdsweep{position:absolute; inset:0; border-radius:9px; opacity:0; pointer-events:none; z-index:1}
+  .ab.norage{opacity:.5} .ab.empty{opacity:.3; cursor:default; border-style:dashed}
+
+  #tooltip{position:fixed; display:none; transform:translate(-50%,-100%); z-index:50; pointer-events:none; width:235px; background:#0c1220; border:1px solid #2c3a52; border-radius:10px; padding:11px 13px; box-shadow:0 12px 30px #000a; text-align:left}
+  #tooltip .tt-name{font-weight:700; font-size:15px; color:#fff; margin-bottom:3px}
+  #tooltip .tt-stats{font:600 11px var(--mono); color:var(--gold); margin-bottom:7px}
+  #tooltip .tt-desc{font-size:12.5px; line-height:1.5; color:var(--muted)} #tooltip .tt-desc b{color:var(--ink)}
+
+  .overlay{position:absolute; inset:0; background:#070a11ee; z-index:30; display:flex; align-items:center; justify-content:center; border-radius:12px; backdrop-filter:blur(2px)}
+  .panel{width:min(680px,94%); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px 30px; text-align:center}
+  .panel h1{margin:0 0 6px; font-size:25px} .panel h1.win{color:var(--heal)} .panel h1.lose{color:var(--danger)}
+  .panel p{color:var(--muted); font-size:14px; line-height:1.6; margin:8px 0}
+  .panel .keys{font:12px var(--mono); color:var(--dim); background:#0a0e16; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:13px 0; text-align:left; line-height:1.9}
+  .panel .keys b{color:var(--gold)} .panel .keys .d{color:var(--dodge)} .panel .keys .p{color:var(--parry)} .panel .keys .m{color:var(--momentum)}
+  button.big{background:linear-gradient(180deg,#c9a23d,#8a6a1d); color:#111; border:0; padding:11px 26px; border-radius:9px; font-size:15px; font-weight:700; cursor:pointer; margin-top:6px}
+  button.big:hover{filter:brightness(1.08)}
+
+  /* aspect + draft cards */
+  .choices{display:flex; gap:14px; margin-top:16px}
+  .choice{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:16px 14px; cursor:pointer; transition:.12s; text-align:left}
+  .choice:hover{border-color:var(--gold); transform:translateY(-3px)}
+  .choice .cty{font:600 9px var(--mono); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px}
+  .choice.spell .cty{color:var(--dodge)} .choice.upgrade .cty{color:var(--gold)} .choice.relic .cty{color:var(--block)}
+  .choice .ct{font-weight:700; margin-bottom:6px; font-size:14px} .choice .cd{font-size:12px; color:var(--muted); line-height:1.5}
+  .aspect{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:18px 18px; cursor:pointer; transition:.14s; text-align:left}
+  .aspect:hover{transform:translateY(-4px)}
+  .aspect.warden:hover{border-color:var(--parry); box-shadow:0 10px 30px #e8c86a22}
+  .aspect.jugg:hover{border-color:var(--momentum); box-shadow:0 10px 30px #e07a3d22}
+  .aspect .an{font-size:18px; font-weight:700; margin-bottom:2px}
+  .aspect.warden .an{color:var(--parry)} .aspect.jugg .an{color:var(--momentum)}
+  .aspect .atl{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:10px}
+  .aspect .ad{font-size:13px; color:var(--muted); line-height:1.55}
+  .aspect .ad b{color:var(--ink)}
+  .ctrlbtn{background:#1a2436; color:var(--ink); border:1px solid var(--line); border-radius:7px; font:600 12px var(--mono); padding:5px 12px; cursor:pointer} .ctrlbtn:hover{border-color:#3a5b8c}
+  .hint{position:absolute; bottom:130px; left:50%; transform:translateX(-50%); background:#000c; color:#ffd; font:600 12px var(--mono); padding:6px 12px; border-radius:6px; opacity:0; transition:.2s; pointer-events:none; z-index:20}
+  .hint.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="boss">
+    <div class="row">
+      <div class="name" id="bossname">The Gatekeeper</div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="phase" id="phase">Fight 1</div>
+        <button class="ctrlbtn" id="pauseBtn">Pause</button>
+      </div>
+    </div>
+    <div class="bossbar"><i id="bosshpfill"></i><div class="bosshp" id="bosshptext"></div></div>
+    <div id="swing" class="idle">
+      <div class="fill" id="swingfill"></div><div class="zone" id="swingzone"></div>
+      <div class="label"><span class="tag" id="swingtag">—</span><span class="sname" id="swingname">watching you</span><span class="cd" id="swingcd"></span></div>
+      <div class="prompt" id="swingprompt">DODGE</div>
+    </div>
+  </div>
+
+  <div id="you">
+    <div id="self">
+      <div class="who"><span class="nm">The Bulwark <span class="spec" id="specname"></span></span><span class="st" id="selfbadges"></span></div>
+      <div class="barwrap"><div class="lab"><span>Health</span><span></span></div>
+        <div class="bigbar"><div class="fill" id="hpfill"></div><div class="txt" id="hptxt"></div></div></div>
+      <div class="barwrap"><div class="lab"><span>Rage</span><span id="ragelab">damage taken → rage</span></div>
+        <div class="bigbar"><div class="fill" id="ragefill"></div><div class="txt" id="ragetxt"></div></div></div>
+      <div id="specrow"></div>
+      <div id="dodgeState">
+        <div class="dpie" id="dodgepie"><div class="w" id="dodgewedge"></div></div>
+        <div class="dhint" id="dodgehint">Tap <b>Space</b> as a swing enters the red zone</div>
+      </div>
+    </div>
+    <div id="side">
+      <div class="card"><h4>Fight</h4>
+        <div class="stat"><span>Your DPS</span><b id="ydps">0</b></div>
+        <div class="stat"><span>Est. kill in</span><b class="kill" id="etk">—</b></div>
+      </div>
+      <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:0"><h4>Combat log</h4><div id="log"></div></div>
+    </div>
+  </div>
+
+  <div id="bottom"><div id="abilities"></div></div>
+  <div class="hint" id="hint"></div>
+  <div id="tooltip"></div>
+
+  <div class="overlay" id="startOv">
+    <div class="panel">
+      <h1>The Bulwark</h1>
+      <p>The tank, no character to steer — just the fight. Damage you take becomes <b style="color:var(--rage)">Rage</b>, which fuels your Cleave, Rampage and Fortify. But how you <i>survive</i> is a choice: pick an Aspect.</p>
+      <button class="big" id="startBtn">Choose your Aspect</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="aspectOv" style="display:none">
+    <div class="panel">
+      <h1 style="color:var(--gold)">Choose your Aspect</h1>
+      <p>Two ways to hold the line. This decides your signature mechanic and biases what you're offered between fights.</p>
+      <div class="choices">
+        <div class="aspect warden" id="pickWarden">
+          <div class="an">The Warden</div><div class="atl">Parry → Riposte · precision</div>
+          <div class="ad"><b>Space becomes Parry</b> — a tighter window than a dodge, but landing one <b>reflects</b> damage, banks a <b>Counter</b>, and opens a <b>Riposte</b>: your next Cleave hits like a truck. Chain parries, then spend Counter on <b>Vindicate</b> to make the boss reel. Reactive, offensive, all about reading the swing.</div>
+        </div>
+        <div class="aspect jugg" id="pickJugg">
+          <div class="an">The Juggernaut</div><div class="atl">Momentum · greed</div>
+          <div class="ad"><b>Every hit you deal or eat builds Momentum</b> — more damage <i>and</i> more mitigation, the higher you ride. But dodging <b>dumps</b> it, so each big swing is a bet: bail and lose your snowball, or eat it and trust your stacks. Cash out with <b>Avalanche</b> before something you can't afford to eat.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="draftOv" style="display:none">
+    <div class="panel"><h1 style="color:var(--gold)">Reforge</h1><p id="draftSub">Take one before the next fight.</p><div class="choices" id="choices"></div></div>
+  </div>
+  <div class="overlay" id="endOv" style="display:none">
+    <div class="panel"><h1 id="endTitle"></h1><p id="endBody"></p><button class="big" id="againBtn">Run it back</button></div>
+  </div>
+  <div class="overlay" id="pauseOv" style="display:none">
+    <div class="panel"><h1>Paused</h1><p>The boss will wait.</p><button class="big" id="resumeBtn">Resume</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=n=>Math.round(n).toString();
+
+// ---------- Config ----------
+const GCD=1.0, HP_MAX=520, RAGE_MAX=100;
+// spec-driven defensive params (set in applySpec)
+let DEF={active:0.55, zone:0.42, cd:2.2, verb:"Dodge"};
+// warden
+const PARRY_REFLECT=50, RIPOSTE_DUR=2.6, RIPOSTE_BONUS=95, COUNTER_MAX=5;
+// juggernaut
+const MOM_DMG=0.06, MOM_DR=0.025;
+let MOM_MAX=10, MOM_DELAY=2.5, MOM_DECAY_STEP=0.5; // -1 stack per step after delay
+
+// ---------- Abilities ----------
+const ABILITIES={
+  cleave:{key:"1", name:"Cleave", cost:0, gcd:GCD, dmg:42, rage:6,
+    tip:"Free filler. <b>42</b> damage, +6 rage. During <b>Riposte</b> it hits for far more — parry, then Cleave into the opening."},
+  rampage:{key:"2", name:"Rampage", cost:40, gcd:GCD, dmg:130,
+    tip:"Rage dump. <b>40 rage → 130</b> damage. Your throughput."},
+  fortify:{key:"3", name:"Fortify", cost:30, gcd:GCD, heal:130, dr:0.30, drDur:3.5,
+    tip:"<b>30 rage</b> → heal 130 and take 30% less for 3.5s. Rage into defense."},
+  vindicate:{key:"4", name:"Vindicate", cost:0, gcd:GCD, spec:"warden",
+    tip:"Spends all <b>Counter</b> (banked from parries) for <b>40 damage each</b> and a brief 25% damage reduction. The payoff for chaining clean parries."},
+  avalanche:{key:"4", name:"Avalanche", cost:20, gcd:GCD, spec:"juggernaut",
+    tip:"Spends all <b>Momentum</b> for <b>30 damage per stack</b> and staggers the boss's current swing. Cash out the snowball right before something you can't eat."},
+  bloodthirst:{key:"5", name:"Bloodthirst", cost:25, gcd:GCD, dmg:80, lifesteal:0.6,
+    tip:"<b>25 rage → 80</b> damage, heals 60% of it. Sustain by attacking."},
+  shockwave:{key:"5", name:"Shockwave", cost:50, gcd:GCD, dmg:55, stagger:true,
+    tip:"<b>50 rage → 55</b> damage and interrupts the boss's swing. Panic button."},
+};
+const SPELL_CAP=5;
+
+// ---------- Encounters ----------
+const ENCOUNTERS=[
+  { id:"gatekeeper", name:"The Gatekeeper", hp:1950,
+    intro:"The Gatekeeper teaches the rhythm. Small jabs are rage you can bank; the wind-up Slam is what your defense is for.",
+    phases:[{at:1,mult:1,speed:1},{at:0.4,mult:1.15,speed:1.15}],
+    swings:[
+      {id:"jab", name:"Jab", size:"light", tag:"Light", tel:1.3, dmg:22, cd:2.1, jitter:.6, dodgeable:true},
+      {id:"slam", name:"Slam", size:"heavy", tag:"Heavy", tel:2.0, dmg:112, cd:5.0, jitter:1.3, dodgeable:true},
+      {id:"quake", name:"Quake", size:"crush", tag:"Unavoidable", tel:2.6, dmg:60, cd:12, jitter:2, dodgeable:false},
+    ],
+  },
+  { id:"warcaller", name:"The Warcaller", hp:2500,
+    intro:"Faster and meaner. Slams come in pairs — you can only answer one, so commit to the other on purpose. Below 40% it frenzies.",
+    phases:[{at:1,mult:1,speed:1},{at:0.6,mult:1.12,speed:1.1},{at:0.4,mult:1.3,speed:1.3}],
+    swings:[
+      {id:"jab", name:"Jab", size:"light", tag:"Light", tel:1.15, dmg:24, cd:1.9, jitter:.5, dodgeable:true},
+      {id:"slam", name:"Cleaver", size:"heavy", tag:"Heavy", tel:1.8, dmg:96, cd:4.4, jitter:1.2, dodgeable:true},
+      {id:"crush", name:"Skullcrack", size:"crush", tag:"Crush", tel:2.5, dmg:178, cd:12, jitter:2, dodgeable:true},
+      {id:"roar", name:"War Roar", size:"crush", tag:"Unavoidable", tel:2.2, dmg:52, cd:15, jitter:3, dodgeable:false},
+    ],
+  },
+];
+
+// ---------- State ----------
+let S;
+function newState(){
+  return {
+    running:false, paused:false, over:false, time:0, encIndex:0, spec:null,
+    boss:{hp:ENCOUNTERS[0].hp, def:ENCOUNTERS[0]},
+    swingTimers:{}, tg:null,
+    player:{hp:HP_MAX, rage:0, gcd:0, dodgeReadyAt:0, dodgingUntil:0, drUntil:0, dr:0,
+      counter:0, riposteUntil:0, momentum:0, lastAggro:0, momDecayAcc:0},
+    cds:{}, loadout:["cleave","rampage","fortify"], upgrades:{}, relics:{}, _ydps:0,
+  };
+}
+
+// ---------- Spec setup ----------
+function applySpec(spec){
+  S.spec=spec;
+  if(spec==="warden"){
+    DEF={active:0.34, zone:0.30, cd:2.0, verb:"Parry"};
+    if(!S.loadout.includes("vindicate")) S.loadout.splice(3,0,"vindicate");
+  } else {
+    DEF={active:0.55, zone:0.42, cd:2.2, verb:"Dodge"};
+    MOM_MAX=10; MOM_DELAY=2.5; MOM_DECAY_STEP=0.5;
+    if(!S.loadout.includes("avalanche")) S.loadout.splice(3,0,"avalanche");
+  }
+}
+
+// ---------- Boss engine ----------
+function bossMax(){ return S.boss.def.hp; }
+function curPhaseIdx(){ const f=S.boss.hp/S.boss.def.hp, ph=S.boss.def.phases; let i=0; for(let k=0;k<ph.length;k++) if(f<=ph[k].at) i=k; return i; }
+function curPhase(){ return S.boss.def.phases[curPhaseIdx()]; }
+function phaseMult(){ return curPhase().mult; }
+function phaseNum(){ return curPhaseIdx()+1; }
+function initEncounter(def){
+  S.boss={hp:def.hp, def};
+  S.swingTimers={}; def.swings.forEach((sw,i)=>{ S.swingTimers[sw.id]=2 + i*1.5 + Math.random()*(sw.cd*0.3); });
+  S.tg=null;
+}
+function bossThink(dt){
+  const def=S.boss.def, m=phaseMult(), speed=curPhase().speed;
+  if(S.tg){ S.tg.elapsed+=dt; if(S.tg.elapsed>=S.tg.dur){ const cb=S.tg.onResolve; S.tg=null; cb(); } return; }
+  let due=null;
+  for(const sw of def.swings){ S.swingTimers[sw.id]-=dt; if(S.swingTimers[sw.id]<=0){ if(!due || (sw.size==="crush"&&due.size!=="crush")) due=sw; } }
+  if(due){
+    S.swingTimers[due.id]=due.cd/speed + Math.random()*(due.jitter||0);
+    const dmg=Math.round(due.dmg*m);
+    S.tg={ name:due.name, tag:due.tag, size:due.size, dur:due.tel, elapsed:0, dodgeable:due.dodgeable, onResolve:()=>resolveSwing(due,dmg) };
+  }
+}
+function resolveSwing(sw, dmg){
+  const negated = sw.dodgeable && S.time<S.player.dodgingUntil;
+  if(negated){
+    if(S.spec==="warden"){
+      let refl=PARRY_REFLECT*(S.relics.perfectReflect?2:1);
+      damageBoss(refl); fctSelf("PARRY!","var(--parry)"); log("Parried the "+sw.name+" — reflected "+Math.round(refl)+".","parry");
+      gainCounter(S.upgrades.deepCounter?2:1); gainRage(14);
+      S.player.riposteUntil=S.time+RIPOSTE_DUR;
+      if(S.relics.riposteChain) S.player.dodgeReadyAt=S.time+0.1; // cheap re-parry on chain
+    } else {
+      fctSelf("DODGE","var(--dodge)"); log("You dodge the "+sw.name+".","dodge");
+      if(S.relics.dodgeRage) gainRage(16);
+    }
+  } else {
+    takeHit(dmg, sw);
+  }
+}
+
+// ---------- Player: damage taken / resources ----------
+function gainRage(x){ S.player.rage=clamp(S.player.rage+x,0,RAGE_MAX); }
+function gainCounter(x){ S.player.counter=clamp(S.player.counter+x,0,COUNTER_MAX); }
+function gainMomentum(x){ S.player.momentum=clamp(S.player.momentum+x,0,MOM_MAX); S.player.lastAggro=S.time; S.player.momDecayAcc=0; }
+function takeHit(dmg, sw){
+  let d=dmg;
+  if(S.time<S.player.drUntil) d*=(1-S.player.dr);
+  if(S.spec==="juggernaut"){
+    let dr=S.player.momentum*MOM_DR;
+    if(S.relics.overrun && sw.size==="crush" && S.player.momentum>=8) dr+=0.40;
+    d*=(1-clamp(dr,0,0.85));
+  }
+  d=Math.round(d);
+  S.player.hp-=d; fctSelf("−"+d,"var(--danger)");
+  const s=document.getElementById("self"); if(s){ s.classList.add("hurt"); setTimeout(()=>{ const x=document.getElementById("self"); if(x)x.classList.remove("hurt"); },300); }
+  gainRage(Math.round(d*0.42*(S.relics.furyGain?1.3:1)));
+  if(S.spec==="juggernaut"){ let mg=1; if(S.upgrades.bulldoze && (sw.size==="heavy"||sw.size==="crush")) mg=3; gainMomentum(mg); }
+  if(S.player.hp<=0){ S.player.hp=0; endGame(false,"You went down under "+S.boss.def.name+". Too many big swings landed, or the fight dragged long enough to grind you out."); }
+}
+
+// ---------- Player abilities ----------
+function ready(name){ return (S.cds[name]||0)<=S.time; }
+function specDmgMult(){ return S.spec==="juggernaut" ? (1+S.player.momentum*MOM_DMG) : 1; }
+function damageBoss(x){
+  let d=x*specDmgMult();
+  if(S.relics.execute && S.player.hp/HP_MAX<0.35) d*=1.35;
+  d=Math.round(d); S.boss.hp=Math.max(0,S.boss.hp-d); fctBoss("−"+d,"var(--gold)"); return d;
+}
+function heal(x){ const b=S.player.hp; S.player.hp=clamp(S.player.hp+x,0,HP_MAX); const e=Math.round(S.player.hp-b); if(e>0) fctSelf("+"+e,"var(--heal)"); }
+function tryDefense(){
+  if(!S.running||S.over||S.paused) return;
+  if(S.player.dodgeReadyAt>S.time){ hint(DEF.verb+" recharging"); return; }
+  if(S.spec==="juggernaut" && S.player.momentum>0){
+    if(S.relics.sureFoot){ S.player.momentum=Math.floor(S.player.momentum/2); log("Dodge — Momentum halved.","mom"); }
+    else { S.player.momentum=0; log("Dodge — Momentum dumped.","mom"); }
+  }
+  S.player.dodgingUntil=S.time+DEF.active; S.player.dodgeReadyAt=S.time+DEF.cd;
+}
+function tryAbility(name){
+  if(!S.running||S.over||S.paused) return;
+  if(!S.loadout.includes(name)) return;
+  const a=ABILITIES[name]; if(S.player.gcd>S.time) return;
+
+  if(name==="vindicate"){
+    if(S.player.counter<1){ hint("No Counter banked"); return; }
+    const c=S.player.counter; damageBoss(40*c); S.player.counter=0;
+    S.player.dr=0.25; S.player.drUntil=S.time+3;
+    if(S.relics.vindInterrupt && S.tg){ S.tg=null; log("Vindicate interrupts!","good"); }
+    log("Vindicate — "+c+" Counter spent, the boss reels.","hl");
+    S.player.gcd=S.time+GCD; S.cds[name]=S.time+GCD; return;
+  }
+  if(name==="avalanche"){
+    if(S.player.rage<a.cost){ hint("Not enough rage"); return; }
+    if(S.player.momentum<1){ hint("No Momentum"); return; }
+    S.player.rage-=a.cost; const mo=S.player.momentum; const dealt=damageBoss(30*mo);
+    if(S.relics.landslide) heal(Math.round(dealt*0.4));
+    if(S.tg){ S.tg=null; log("Avalanche — "+mo+" Momentum spent, boss staggered.","mom"); } else log("Avalanche — "+mo+" Momentum spent.","mom");
+    S.player.momentum=0;
+    S.player.gcd=S.time+GCD; S.cds[name]=S.time+GCD; return;
+  }
+
+  let cost=a.cost;
+  if(S.player.rage<cost){ hint("Not enough rage"); return; }
+  S.player.rage-=cost;
+  let dmg=a.dmg||0;
+  if(name==="rampage") dmg+=(S.upgrades.rampagePlus?45:0);
+  // Warden riposte: empower next Cleave (or Rampage)
+  let riposted=false;
+  if(S.spec==="warden" && S.time<S.player.riposteUntil && (name==="cleave"||name==="rampage") && dmg>0){
+    dmg+=RIPOSTE_BONUS; riposted=true; S.player.riposteUntil=0;
+    if(S.upgrades.riposteHeal) heal(60);
+    fctSelf("RIPOSTE","var(--riposte)");
+  }
+  if(dmg>0) damageBoss(dmg);
+  if(a.lifesteal) heal(Math.round(dmg*a.lifesteal));
+  if(a.heal) heal(a.heal);
+  if(a.dr){ S.player.dr=a.dr; S.player.drUntil=S.time+a.drDur; if(S.upgrades.fortRage) gainRage(20); }
+  if(a.stagger && S.tg){ S.tg=null; log("Shockwave staggers "+S.boss.def.name+".","good"); }
+  if(name==="cleave") gainRage(a.rage);
+  if(S.spec==="juggernaut" && dmg>0) gainMomentum(1);
+  if(riposted) log("Riposte! Cleave lands for "+dmg+".","parry");
+  S.cds[name]=S.time+(a.gcd||GCD); S.player.gcd=S.time+(a.gcd||GCD);
+}
+
+// ---------- Loop ----------
+let last=0;
+function frame(t){ requestAnimationFrame(frame); const now=t/1000; let dt=last?now-last:0; last=now; if(dt>0.1)dt=0.1; if(S.running&&!S.over&&!S.paused) update(dt); render(); }
+function update(dt){
+  S.time+=dt;
+  // momentum decay
+  if(S.spec==="juggernaut" && S.player.momentum>0){
+    if(S.time-S.player.lastAggro>MOM_DELAY){ S.player.momDecayAcc+=dt; if(S.player.momDecayAcc>=MOM_DECAY_STEP){ S.player.momDecayAcc-=MOM_DECAY_STEP; S.player.momentum=Math.max(0,S.player.momentum-1); } }
+  }
+  bossThink(dt);
+  if(S.boss.hp<=0){
+    if(S.encIndex>=ENCOUNTERS.length-1) endGame(true,"Run cleared as the "+(S.spec==="warden"?"Warden — reading swings, reflecting them back, riposting into the openings":"Juggernaut — riding the snowball and cashing out before the big hits")+".");
+    else { S.running=false; log(S.boss.def.name+" falls!","good"); openDraft(); }
+    return;
+  }
+  tickDps(dt);
+}
+let _lastBossHp=null,_dpsSamples=[];
+function tickDps(dt){ if(_lastBossHp==null){_lastBossHp=S.boss.hp;return;} const dealt=Math.max(0,_lastBossHp-S.boss.hp); _lastBossHp=S.boss.hp; _dpsSamples.push([dealt,dt]); if(_dpsSamples.length>60)_dpsSamples.shift(); let d=0,t=0; _dpsSamples.forEach(s=>{d+=s[0];t+=s[1];}); S._ydps=t>0?d/t:0; }
+
+// ---------- Render ----------
+function hpColor(f){ return f>0.5?"var(--hp)":f>0.25?"var(--hp-mid)":"var(--hp-low)"; }
+function render(){
+  const bmax=bossMax(), bf=clamp(S.boss.hp/bmax,0,1);
+  $("#bossname").textContent=S.boss.def.name; $("#bosshpfill").style.width=(bf*100)+"%"; $("#bosshptext").textContent=fmt(S.boss.hp)+" / "+bmax;
+  $("#phase").textContent="Fight "+(S.encIndex+1)+"/"+ENCOUNTERS.length+" · Phase "+phaseNum();
+
+  const sw=$("#swing");
+  if(S.tg){
+    const frac=S.tg.elapsed/S.tg.dur; sw.className=S.tg.size;
+    $("#swingfill").style.width=(frac*100)+"%"; $("#swingtag").textContent=S.tg.tag; $("#swingname").textContent=S.tg.name; $("#swingcd").textContent=(S.tg.dur-S.tg.elapsed).toFixed(1)+"s";
+    const zoneStart=(S.tg.dur-DEF.zone)/S.tg.dur; $("#swingzone").style.width=((1-zoneStart)*100)+"%";
+    sw.classList.toggle("armed", S.tg.dodgeable);
+    const inZone=S.tg.dodgeable && (S.tg.dur-S.tg.elapsed)<=DEF.zone;
+    sw.classList.toggle("nowdodge", inZone && S.player.dodgeReadyAt<=S.time);
+    $("#swingprompt").textContent=DEF.verb.toUpperCase();
+  } else { sw.className="idle"; $("#swingfill").style.width="0%"; $("#swingtag").textContent="—"; $("#swingname").textContent="watching you"; $("#swingcd").textContent=""; }
+
+  const hpF=clamp(S.player.hp/HP_MAX,0,1);
+  $("#hpfill").style.width=(hpF*100)+"%"; $("#hpfill").style.background=hpColor(hpF); $("#hptxt").textContent=fmt(S.player.hp)+" / "+HP_MAX;
+  $("#ragefill").style.width=(S.player.rage/RAGE_MAX*100)+"%"; $("#ragetxt").textContent=fmt(S.player.rage)+" / "+RAGE_MAX;
+
+  const fort=S.time<S.player.drUntil, ripo=S.spec==="warden"&&S.time<S.player.riposteUntil;
+  $("#self").classList.toggle("fortified", fort && !ripo); $("#self").classList.toggle("riposteglow", ripo);
+  let b="";
+  if(ripo) b+='<span class="badge riposte">Riposte</span>';
+  if(fort) b+='<span class="badge fort">Fortified</span>';
+  if(S.time<S.player.dodgingUntil) b+='<span class="badge '+(S.spec==="warden"?"riposte":"dodge")+'">'+(S.spec==="warden"?"Parrying":"Dodging")+'</span>';
+  if(S.spec==="juggernaut"&&S.player.momentum>=7) b+='<span class="badge mom">Rolling</span>';
+  $("#selfbadges").innerHTML=b;
+
+  renderSpecRow(ripo);
+
+  const dLeft=Math.max(0,S.player.dodgeReadyAt-S.time), dFrac=clamp(dLeft/DEF.cd,0,1);
+  const dp=$("#dodgepie"), dw=$("#dodgewedge");
+  if(S.time<S.player.dodgingUntil){ dp.className="dpie active"; dw.style.background=S.spec==="warden"?"var(--parry)":"var(--dodge)"; }
+  else if(dFrac>0){ dp.className="dpie"; const deg=dFrac*360; dw.style.background="conic-gradient(#2a3646 "+deg+"deg,#0a0e16 "+deg+"deg 360deg)"; }
+  else { dp.className="dpie ready"+(S.spec==="warden"?" parry":""); dw.style.background="transparent"; }
+
+  $("#ydps").textContent=fmt(S._ydps); const etk=(S._ydps>0)?(S.boss.hp/S._ydps):Infinity; $("#etk").textContent=isFinite(etk)?etk.toFixed(0)+"s":"—";
+  abRender();
+}
+function renderSpecRow(ripo){
+  const row=$("#specrow");
+  if(S.spec==="warden"){
+    if(row.dataset.spec!=="warden"){ row.dataset.spec="warden"; row.innerHTML='<span class="rlab">Counter</span><span class="cpips" id="cpips"></span><span class="rval" id="ripostetag"></span>'; }
+    const pips=$("#cpips"); if(pips.children.length!==COUNTER_MAX){ pips.innerHTML=""; for(let i=0;i<COUNTER_MAX;i++){ const d=document.createElement("div"); d.className="cpip"; pips.appendChild(d);} }
+    for(let i=0;i<COUNTER_MAX;i++) pips.children[i].className="cpip"+(i<S.player.counter?" on":"");
+    $("#ripostetag").textContent=ripo?"RIPOSTE — Cleave empowered":"";
+  } else if(S.spec==="juggernaut"){
+    if(row.dataset.spec!=="jugg"){ row.dataset.spec="jugg"; row.innerHTML='<span class="rlab">Momentum</span><div class="mombar" id="mombar"><div class="mfill" id="mfill"></div><div class="mtxt" id="mtxt"></div></div>'; }
+    const f=clamp(S.player.momentum/MOM_MAX,0,1); $("#mfill").style.width=(f*100)+"%";
+    $("#mtxt").textContent=S.player.momentum+" / "+MOM_MAX+"  ·  +"+Math.round(S.player.momentum*MOM_DMG*100)+"% dmg / +"+Math.round(S.player.momentum*MOM_DR*100)+"% mit";
+  }
+}
+function abRender(){
+  S.loadout.forEach(name=>{
+    const el=abEls[name]; if(!el) return; const a=ABILITIES[name];
+    const gcdBlock=S.player.gcd>S.time; let remain=0,total=GCD;
+    if(!ready(name)){ remain=S.cds[name]-S.time; total=a.gcd||GCD; } else if(gcdBlock){ remain=S.player.gcd-S.time; total=GCD; }
+    const frac=clamp(remain/total,0,1);
+    if(frac>0){ const deg=frac*360; el.sweep.style.background="conic-gradient(rgba(6,9,16,.66) "+deg+"deg,transparent "+deg+"deg 360deg)"; el.sweep.style.opacity=1; } else el.sweep.style.opacity=0;
+    let poor=S.player.rage<a.cost;
+    if(name==="vindicate") poor=S.player.counter<1;
+    if(name==="avalanche") poor=S.player.rage<a.cost||S.player.momentum<1;
+    el.root.classList.toggle("norage", poor);
+    const ripoOn=S.spec==="warden"&&S.time<S.player.riposteUntil&&(name==="cleave"||name==="rampage");
+    el.root.classList.toggle("riposte", ripoOn);
+  });
+  const db=abEls.__dodge;
+  if(db){
+    if(S.time<S.player.dodgingUntil) db.root.className="ab dodgebtn active";
+    else if(S.player.dodgeReadyAt<=S.time) db.root.className="ab dodgebtn ready"+(S.spec==="warden"?" parry":"");
+    else db.root.className="ab dodgebtn";
+    const dLeft=Math.max(0,S.player.dodgeReadyAt-S.time), dFrac=clamp(dLeft/DEF.cd,0,1);
+    if(dFrac>0){ const deg=dFrac*360; db.sweep.style.background="conic-gradient(rgba(6,9,16,.66) "+deg+"deg,transparent "+deg+"deg 360deg)"; db.sweep.style.opacity=1; } else db.sweep.style.opacity=0;
+  }
+}
+
+// ---------- FCT + log ----------
+function fctBoss(t,c){ spawn($("#boss"),t,c,30+Math.random()*40,50); }
+function fctSelf(t,c){ spawn($("#self"),t,c,30+Math.random()*40,36); }
+function spawn(p,t,c,l,tp){ const d=document.createElement("div"); d.className="fct"; d.textContent=t; d.style.color=c; d.style.left=l+"%"; d.style.top=tp+"%"; p.appendChild(d); setTimeout(()=>d.remove(),1000); }
+function log(m,cls){ const d=document.createElement("div"); if(cls)d.className=cls; d.textContent=m; const L=$("#log"); L.prepend(d); while(L.children.length>40) L.lastChild.remove(); }
+let hintT; function hint(m){ const h=$("#hint"); h.textContent=m; h.classList.add("show"); clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove("show"),900); }
+
+// ---------- Build abilities ----------
+const abEls={};
+function buildAbilities(){
+  const bar=$("#abilities"); bar.innerHTML=""; for(const k in abEls) delete abEls[k];
+  const d=document.createElement("div"); d.className="ab dodgebtn";
+  d.innerHTML='<div class="cdsweep"></div><span class="key">Spc</span><div class="nm" style="color:'+(S.spec==="warden"?"var(--parry)":"var(--dodge)")+'">'+DEF.verb+'</div><div class="meta">timed · '+DEF.cd+'s cd</div>';
+  bar.appendChild(d); abEls.__dodge={root:d, sweep:d.querySelector(".cdsweep")}; d.addEventListener("click",tryDefense);
+  d.addEventListener("mouseenter",()=>showTipRaw(DEF.verb, "timed window · "+DEF.cd+"s cd", S.spec==="warden"
+    ? "Tighter than a dodge. Land it as the swing hits the red zone to <b>reflect</b> damage, bank a Counter, and open a Riposte. Miss and you eat the hit."
+    : "Negate a swing — but it <b>dumps your Momentum</b>. Your bail-out for hits you can't afford to eat.", d));
+  d.addEventListener("mouseleave",hideTip);
+  S.loadout.forEach(name=>{
+    const a=ABILITIES[name]; const el=document.createElement("div"); el.className="ab";
+    el.innerHTML='<div class="cdsweep"></div><span class="key">'+a.key+'</span><div class="nm">'+a.name+'</div><div class="meta">'+abMeta(a)+'</div>';
+    bar.appendChild(el); abEls[name]={root:el, sweep:el.querySelector(".cdsweep")};
+    el.addEventListener("click",()=>tryAbility(name)); el.addEventListener("mouseenter",()=>showTip(name,el)); el.addEventListener("mouseleave",hideTip);
+  });
+  for(let i=S.loadout.length;i<SPELL_CAP;i++){ const el=document.createElement("div"); el.className="ab empty"; el.innerHTML='<div class="nm">—</div><div class="meta">empty</div>'; bar.appendChild(el); }
+}
+function abMeta(a){ const p=[]; if(a.spec==="warden") p.push("spend Counter"); else if(a.spec==="juggernaut") p.push("spend Momentum"); else if(a.dmg) p.push(a.dmg+" dmg"); if(a.heal) p.push("+"+a.heal); if(a.cost>0) p.push('<span class="ragec">'+a.cost+'r</span>'); else if(a.rage) p.push('+'+a.rage+'r'); return p.join(" · "); }
+function statsLine(a){ const p=[]; p.push(a.cost>0?a.cost+" rage":"no rage"); if(a.rage) p.push("+"+a.rage+" rage"); p.push("1.0s GCD"); return p.join("  ·  "); }
+function showTip(name,el){ const a=ABILITIES[name]; showTipRaw(a.name, statsLine(a), a.tip, el); }
+function showTipRaw(n,s,desc,el){ const tip=$("#tooltip"); tip.innerHTML='<div class="tt-name">'+n+'</div><div class="tt-stats">'+s+'</div><div class="tt-desc">'+desc+'</div>'; const r=el.getBoundingClientRect(); tip.style.left=(r.left+r.width/2)+"px"; tip.style.top=(r.top-10)+"px"; tip.style.display="block"; }
+function hideTip(){ $("#tooltip").style.display="none"; }
+
+// ---------- Draft (spec-biased) ----------
+const SHARED=[
+  {type:"upgrade", id:"rampagePlus", t:"Heavy Rampage", d:"Rampage deals +45 damage.", ok:()=>S.loadout.includes("rampage")&&!S.upgrades.rampagePlus, apply:()=>S.upgrades.rampagePlus=true},
+  {type:"upgrade", id:"fortRage", t:"Steadfast", d:"Fortify also grants 20 rage on use.", ok:()=>S.loadout.includes("fortify")&&!S.upgrades.fortRage, apply:()=>S.upgrades.fortRage=true},
+  {type:"relic", id:"furyGain", t:"Spite", d:"Damage taken grants 30% more rage.", ok:()=>!S.relics.furyGain, apply:()=>S.relics.furyGain=true},
+  {type:"relic", id:"execute", t:"Last Stand", d:"Below 35% HP, your damage is +35%.", ok:()=>!S.relics.execute, apply:()=>S.relics.execute=true},
+  {type:"spell", id:"bloodthirst", t:"Bloodthirst", d:"New spell: 25 rage → 80 damage, heals 60% of it.", ok:()=>S.loadout.length<SPELL_CAP&&!S.loadout.includes("bloodthirst"), apply:()=>addSpell("bloodthirst")},
+  {type:"spell", id:"shockwave", t:"Shockwave", d:"New spell: 50 rage → 55 damage, interrupts a swing.", ok:()=>S.loadout.length<SPELL_CAP&&!S.loadout.includes("shockwave"), apply:()=>addSpell("shockwave")},
+];
+const WARDEN_REWARDS=[
+  {type:"upgrade", id:"deepCounter", t:"Deep Counter", d:"Each parry banks +2 Counter instead of 1.", ok:()=>!S.upgrades.deepCounter, apply:()=>S.upgrades.deepCounter=true},
+  {type:"upgrade", id:"riposteHeal", t:"Vengeful Guard", d:"Landing a Riposte also heals you 60.", ok:()=>!S.upgrades.riposteHeal, apply:()=>S.upgrades.riposteHeal=true},
+  {type:"relic", id:"perfectReflect", t:"Mirror Edge", d:"Parries reflect double damage.", ok:()=>!S.relics.perfectReflect, apply:()=>S.relics.perfectReflect=true},
+  {type:"relic", id:"vindInterrupt", t:"Judgement", d:"Vindicate also interrupts the boss's current swing.", ok:()=>!S.relics.vindInterrupt, apply:()=>S.relics.vindInterrupt=true},
+  {type:"relic", id:"riposteChain", t:"Flowing Guard", d:"A parry nearly refunds its own cooldown — chain them.", ok:()=>!S.relics.riposteChain, apply:()=>S.relics.riposteChain=true},
+];
+const JUGG_REWARDS=[
+  {type:"upgrade", id:"unstoppable", t:"Unstoppable", d:"Momentum cap +4 (ride to 14).", ok:()=>!S.upgrades.unstoppable, apply:()=>{S.upgrades.unstoppable=true; MOM_MAX=14;}},
+  {type:"upgrade", id:"snowball", t:"Snowball", d:"Momentum starts decaying later and falls off slower.", ok:()=>!S.upgrades.snowball, apply:()=>{S.upgrades.snowball=true; MOM_DELAY=3.6; MOM_DECAY_STEP=1.0;}},
+  {type:"upgrade", id:"bulldoze", t:"Bulldoze", d:"Eating a heavy or crush swing grants +3 Momentum.", ok:()=>!S.upgrades.bulldoze, apply:()=>S.upgrades.bulldoze=true},
+  {type:"relic", id:"landslide", t:"Landslide", d:"Avalanche heals you for 40% of its damage.", ok:()=>!S.relics.landslide, apply:()=>S.relics.landslide=true},
+  {type:"relic", id:"sureFoot", t:"Sure-Footed", d:"Dodging only halves Momentum instead of dumping it.", ok:()=>!S.relics.sureFoot, apply:()=>S.relics.sureFoot=true},
+  {type:"relic", id:"overrun", t:"Overrun", d:"At 8+ Momentum, take 40% less from Crush swings.", ok:()=>!S.relics.overrun, apply:()=>S.relics.overrun=true},
+];
+function specPool(){ return (S.spec==="warden"?WARDEN_REWARDS:JUGG_REWARDS); }
+function addSpell(id){ if(!S.loadout.includes(id)&&S.loadout.length<SPELL_CAP){ S.loadout.push(id); buildAbilities(); } }
+function openDraft(){
+  $("#draftSub").textContent=S.boss.def.name+" falls. Take one — your Aspect's picks are weighted in.";
+  const sp=specPool().filter(r=>r.ok()), sh=SHARED.filter(r=>r.ok());
+  const spShuf=[...sp].sort(()=>Math.random()-0.5), shShuf=[...sh].sort(()=>Math.random()-0.5);
+  let pick=[...spShuf.slice(0,2)];                     // up to 2 Aspect-flavored
+  const rest=[...shShuf, ...spShuf.slice(2)];          // then shared, then leftover spec
+  while(pick.length<3 && rest.length) pick.push(rest.shift());
+  const box=$("#choices"); box.innerHTML="";
+  pick.slice(0,3).forEach(r=>{ const c=document.createElement("div"); c.className="choice "+r.type;
+    c.innerHTML='<div class="cty">'+r.type+'</div><div class="ct">'+r.t+'</div><div class="cd">'+r.d+'</div>';
+    c.addEventListener("click",()=>{ r.apply(); log("Reforged: "+r.t,"good"); $("#draftOv").style.display="none"; startEncounter(S.encIndex+1); });
+    box.appendChild(c); });
+  S.running=false; $("#draftOv").style.display="flex";
+}
+
+// ---------- Flow ----------
+function endGame(win,msg){ if(S.over)return; S.over=true; S.running=false;
+  $("#endTitle").textContent=win?"Run cleared":"Defeated"; $("#endTitle").className=win?"win":"lose";
+  $("#endBody").textContent=msg+"  (Time: "+Math.round(S.time)+"s.)"; $("#endOv").style.display="flex"; }
+function startEncounter(i){
+  S.encIndex=i; const def=ENCOUNTERS[i]; initEncounter(def);
+  S.player.hp=HP_MAX; S.player.rage=0; S.player.gcd=0; S.player.dodgeReadyAt=0; S.player.dodgingUntil=0; S.player.drUntil=0;
+  S.player.counter=0; S.player.riposteUntil=0; S.player.momentum=0; S.player.lastAggro=0; S.player.momDecayAcc=0;
+  S.cds={}; S.time=0; _lastBossHp=null; _dpsSamples=[]; S._ydps=0;
+  S.paused=false; $("#pauseOv").style.display="none"; $("#pauseBtn").textContent="Pause";
+  buildAbilities(); log(def.intro,"hl"); S.running=true;
+}
+function startGame(spec){
+  S=newState(); applySpec(spec);
+  $("#specname").textContent="· "+(spec==="warden"?"Warden":"Juggernaut");
+  $("#startOv").style.display="none"; $("#aspectOv").style.display="none"; $("#endOv").style.display="none"; $("#draftOv").style.display="none"; $("#pauseOv").style.display="none";
+  $("#log").innerHTML=""; $("#pauseBtn").textContent="Pause";
+  $("#dodgehint").innerHTML = spec==="warden" ? 'Tap <b>Space</b> to <b>Parry</b> as a swing hits the red zone — reflect + Riposte' : 'Tap <b>Space</b> to dodge — but it dumps your Momentum';
+  $("#dodgehint").className = "dhint"+(spec==="warden"?" parry":"");
+  startEncounter(0);
+}
+function setPause(p){ if(!S.running||S.over)return; S.paused=p; $("#pauseOv").style.display=p?"flex":"none"; $("#pauseBtn").textContent=p?"Resume":"Pause"; }
+function togglePause(){ setPause(!S.paused); }
+
+// ---------- Input ----------
+document.addEventListener("keydown",e=>{
+  if(!S) return; const k=e.key.toLowerCase();
+  if(k===" "||e.code==="Space"){ e.preventDefault(); tryDefense(); return; }
+  if(k==="p"||k==="escape"){ e.preventDefault(); togglePause(); return; }
+  if(!S.running||S.paused) return;
+  const name=S.loadout.find(n=>ABILITIES[n].key===k);
+  if(name){ e.preventDefault(); tryAbility(name); }
+});
+$("#startBtn").addEventListener("click",()=>{ $("#startOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pickWarden").addEventListener("click",()=>startGame("warden"));
+$("#pickJugg").addEventListener("click",()=>startGame("juggernaut"));
+$("#againBtn").addEventListener("click",()=>{ $("#endOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pauseBtn").addEventListener("click",togglePause);
+$("#resumeBtn").addEventListener("click",()=>setPause(false));
+
+S=newState(); render();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

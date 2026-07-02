@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift-Mender — no-movement healer prototype</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0e131f; --line:#1e2838;
+    --ink:#e6ecf5; --muted:#8695ac; --dim:#5b6b84;
+    --mana:#3d7be8; --mana2:#2456b8;
+    --hp:#49c46a; --hp-mid:#e0b23a; --hp-low:#d9483f;
+    --absorb:#e9d98a; --hot:#5ad6a0; --debuff:#c05bd6;
+    --gold:#e8c86a; --danger:#e0574c; --heal:#6fe0a0; --over:#6b7688;
+    --tank:#4a90d9; --dps1:#e8933d; --dps2:#3dd6c4; --dps3:#b48ee8;
+    --font: "Segoe UI", system-ui, sans-serif;
+    --mono: "SFMono-Regular", ui-monospace, "Consolas", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%, #16203200, #070a11 70%), var(--bg);
+    color:var(--ink); font-family:var(--font);
+    display:flex; align-items:center; justify-content:center;
+    user-select:none; -webkit-user-select:none; overflow:hidden;
+  }
+  #app{width:min(1180px,98vw); height:min(760px,98vh); position:relative;
+    display:flex; flex-direction:column; gap:10px; padding:12px;}
+
+  /* ---- Boss / telegraph strip (the signature surface) ---- */
+  #boss{background:linear-gradient(180deg,#161d2e,#10151f); border:1px solid var(--line);
+    border-radius:10px; padding:12px 14px; position:relative; overflow:hidden;}
+  #boss .row{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px}
+  #boss .name{font-size:19px; font-weight:700; letter-spacing:.3px}
+  #boss .phase{font:600 11px var(--mono); color:var(--gold); letter-spacing:1px; text-transform:uppercase}
+  .bossbar{height:16px; background:#0a0e16; border:1px solid #2a2016; border-radius:5px; overflow:hidden; position:relative}
+  .bossbar > i{display:block; height:100%; width:100%; background:linear-gradient(90deg,#8a2b22,#c9463a); transition:width .12s linear}
+  .bosshp{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font:600 11px var(--mono); color:#ffe; text-shadow:0 1px 2px #000}
+
+  #telegraph{margin-top:10px; height:34px; background:#0a0e16; border:1px solid var(--line);
+    border-radius:7px; position:relative; overflow:hidden; display:flex; align-items:center}
+  #telegraph .fill{position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg,#5a4a1e,#e8c86a); opacity:.9; transition:width .08s linear}
+  #telegraph.danger .fill{background:linear-gradient(90deg,#6e241d,#e0574c)}
+  #telegraph .label{position:relative; z-index:2; padding:0 12px; font:700 13px var(--font);
+    letter-spacing:.4px; color:#fff; text-shadow:0 1px 2px #000; display:flex; gap:8px; align-items:center; width:100%}
+  #telegraph .tag{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px;
+    padding:2px 6px; border-radius:4px; background:#00000055}
+  #telegraph .cd{margin-left:auto; font:600 12px var(--mono)}
+  #telegraph.idle .label{color:var(--dim)}
+
+  /* ---- Middle: raid frames + right column ---- */
+  #mid{flex:1; display:flex; gap:10px; min-height:0}
+  #raid{flex:1; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:10px}
+  .frame{background:var(--panel); border:1px solid var(--line); border-radius:9px;
+    padding:10px 11px; position:relative; cursor:pointer; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:center; transition:box-shadow .1s, border-color .1s}
+  .frame:hover{border-color:#3a5b8c}
+  .frame.hover{box-shadow:0 0 0 2px #7fb4ff88 inset, 0 0 14px #2b70d955}
+  .frame.dead{opacity:.35; filter:grayscale(1); cursor:default}
+  .frame .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:7px}
+  .frame .who{display:flex; align-items:center; gap:8px; font-weight:600; font-size:14px}
+  .frame .dot{width:9px; height:9px; border-radius:50%}
+  .frame .role{font:600 9px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--dim)}
+  .hpbar{height:22px; border-radius:5px; background:#0a0e16; border:1px solid #10151f; position:relative; overflow:hidden}
+  .hpbar > .hpfill{position:absolute; left:0; top:0; bottom:0; width:100%; transition:width .1s linear, background .2s}
+  .hpbar > .absorb{position:absolute; top:0; bottom:0; background:repeating-linear-gradient(115deg,#e9d98a,#e9d98a 5px,#d8c46a 5px,#d8c46a 10px); opacity:.85}
+  .hpbar > .healabs{position:absolute; top:0; bottom:0; z-index:2;
+    background:repeating-linear-gradient(115deg,#8a3fb0,#8a3fb0 5px,#6d2f8c 5px,#6d2f8c 10px); opacity:.9}
+  .hpbar > .hptext{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font:600 11px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:3}
+  .frame .effects{position:absolute; top:8px; right:10px; display:flex; gap:4px}
+  .eff{width:16px; height:16px; border-radius:4px; font:700 10px var(--mono); display:flex; align-items:center; justify-content:center; color:#0b0f17}
+  .eff.hot{background:var(--hot)} .eff.debuff{background:var(--debuff); color:#fff}
+  .eff.ward{background:var(--absorb)} .eff.absorbheal{background:#8a3fb0; color:#fff}
+  /* marked for a lethal nuke — pre-shield this frame */
+  .frame.marked{border-color:var(--danger); box-shadow:0 0 0 2px var(--danger) inset, 0 0 18px #e0574c88; animation:markpulse .6s ease-in-out infinite alternate}
+  @keyframes markpulse{from{box-shadow:0 0 0 2px var(--danger) inset, 0 0 10px #e0574c66} to{box-shadow:0 0 0 2px #ff8a80 inset, 0 0 24px #e0574caa}}
+  .frame .marktag{position:absolute; top:3px; left:50%; transform:translateX(-50%); z-index:5;
+    font:700 9px var(--mono); letter-spacing:1.5px; color:#fff; background:var(--danger);
+    padding:2px 8px; border-radius:4px; opacity:0; text-transform:uppercase; box-shadow:0 2px 6px #000a}
+  .frame.marked .marktag{opacity:1}
+  /* floating combat text */
+  .fct{position:absolute; left:50%; top:40%; transform:translateX(-50%); font:700 15px var(--mono);
+    pointer-events:none; z-index:6; animation:fct 1s ease-out forwards; text-shadow:0 1px 3px #000}
+  @keyframes fct{0%{opacity:0; transform:translate(-50%,4px) scale(.8)} 15%{opacity:1}
+    100%{opacity:0; transform:translate(-50%,-26px) scale(1)}}
+
+  #side{width:230px; display:flex; flex-direction:column; gap:10px}
+  .card{background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:11px}
+  .card h4{margin:0 0 8px; font:600 11px var(--mono); letter-spacing:1px; text-transform:uppercase; color:var(--muted)}
+  .stat{display:flex; justify-content:space-between; align-items:baseline; margin:5px 0; font-size:13px}
+  .stat b{font:700 15px var(--mono)}
+  .kill{color:var(--gold)}
+  #log{flex:1; overflow:hidden; font:12px var(--mono); line-height:1.5; color:var(--muted); display:flex; flex-direction:column-reverse}
+  #log div{opacity:.9}
+  #log .hl{color:var(--ink)} #log .bad{color:var(--danger)} #log .good{color:var(--heal)}
+
+  /* ---- Bottom: mana + cast + ability bar ---- */
+  #bottom{display:flex; flex-direction:column; gap:8px}
+  .bars{display:flex; gap:10px; align-items:center}
+  #mana{flex:1; height:18px; background:#0a0e16; border:1px solid var(--line); border-radius:5px; position:relative; overflow:hidden}
+  #mana > i{display:block; height:100%; background:linear-gradient(90deg,var(--mana2),var(--mana)); transition:width .1s linear}
+  #mana .t{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:600 11px var(--mono); color:#dfe; text-shadow:0 1px 2px #000}
+  /* GCD pie (radial swipe) + big cast bar */
+  #castrow{display:flex; align-items:stretch; gap:12px}
+  .gcd-wrap{display:flex; flex-direction:column; align-items:center; gap:3px; flex:none; justify-content:center}
+  .gcd-pie{width:52px; height:52px; border-radius:50%; background:#0a0e16;
+    border:1px solid var(--line); position:relative; box-shadow:inset 0 0 8px #0008}
+  .gcd-pie .wedge{position:absolute; inset:2px; border-radius:50%; background:transparent}
+  .gcd-pie.ready{border-color:#2f6a44}
+  .gcd-pie.ready::after{content:""; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 1px #49c46a55}
+  .gcd-cap{font:700 9px var(--mono); letter-spacing:1.5px; color:var(--dim)}
+  #castbar{flex:1; height:52px; background:#0a0e16; border:1px solid var(--line);
+    border-radius:9px; position:relative; overflow:hidden; transition:border-color .12s, box-shadow .12s}
+  #castbar.active{border-color:var(--gold); box-shadow:0 0 16px #e8c86a33, inset 0 0 20px #e8c86a14}
+  #castbar .cfill{position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg,#7d52b8,#c99a3e); transition:width .05s linear}
+  #castbar.active .cfill{box-shadow:0 0 12px #e8c86a55}
+  #castbar .clabel{position:absolute; inset:0; display:flex; align-items:center; gap:10px;
+    padding:0 16px; z-index:2}
+  #castbar .cname{font:700 17px var(--font); color:#fff; text-shadow:0 1px 3px #000}
+  #castbar .ctarget{font:600 13px var(--mono); color:#ffe9b8; text-shadow:0 1px 2px #000}
+  #castbar .ctime{margin-left:auto; font:700 18px var(--mono); color:#fff; text-shadow:0 1px 2px #000}
+  #castbar.idle .cname{color:var(--dim); font-weight:600; font-size:14px}
+  #castbar.idle .ctarget,#castbar.idle .ctime{display:none}
+  /* pause / control button */
+  .ctrlbtn{background:#1a2436; color:var(--ink); border:1px solid var(--line); border-radius:7px;
+    font:600 12px var(--mono); padding:5px 12px; cursor:pointer; letter-spacing:.5px}
+  .ctrlbtn:hover{border-color:#3a5b8c; background:#22304a}
+  #abilities{display:flex; gap:8px}
+  .ab{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:8px 6px 7px;
+    position:relative; cursor:pointer; text-align:center; overflow:hidden; transition:border-color .1s}
+  .ab:hover{border-color:#3a5b8c}
+  .ab .key{position:absolute; top:4px; left:6px; font:700 11px var(--mono); color:var(--gold)}
+  .ab .nm{font-size:13px; font-weight:600; margin-top:9px}
+  .ab .meta{font:600 10px var(--mono); color:var(--muted); margin-top:3px}
+  .ab .mana{color:var(--mana)}
+  .ab .cdsweep{position:absolute; inset:0; border-radius:9px; opacity:0; pointer-events:none; z-index:1}
+  .ab .cdnum{position:absolute; bottom:3px; right:6px; font:700 12px var(--mono); color:#eaf; opacity:0;
+    text-shadow:0 1px 3px #000, 0 0 4px #000; pointer-events:none; z-index:2}
+  .ab .nm,.ab .meta,.ab .key{position:relative; z-index:2}
+  .ab.nomana{opacity:.5}
+
+  /* --- Aspect additions --- */
+  #specbar{flex:0 0 200px; height:18px; background:#0a0e16; border:1px solid var(--line); border-radius:5px; position:relative; overflow:hidden}
+  #specbar > i{display:block; height:100%; width:0%; transition:width .12s linear}
+  #specbar.tide > i{background:linear-gradient(90deg,#1c6a8a,#49c9e0)}
+  #specbar.brink > i{background:linear-gradient(90deg,#8a2b3a,#e0574c)}
+  #specbar .t{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:600 11px var(--mono); color:#eef; text-shadow:0 1px 2px #000}
+  .frame.bloodied{border-color:#e0574c; box-shadow:0 0 0 1px #e0574c88 inset, 0 0 16px #e0574c55; animation:bloodpulse .8s ease-in-out infinite alternate}
+  @keyframes bloodpulse{from{box-shadow:0 0 0 1px #e0574c66 inset, 0 0 8px #e0574c44} to{box-shadow:0 0 0 1px #ff6a5f inset, 0 0 20px #e0574c88}}
+  .frame .bloodtag{position:absolute; top:3px; left:50%; transform:translateX(-50%); z-index:5; font:700 8px var(--mono); letter-spacing:1px; text-transform:uppercase; color:#ff8a80; opacity:0; transition:.15s}
+  .frame.bloodied .bloodtag{opacity:1}
+  .aspect{flex:1; background:var(--panel2,#0e131f); border:1px solid var(--line); border-radius:12px; padding:18px; cursor:pointer; transition:.14s; text-align:left}
+  .aspect:hover{transform:translateY(-4px)}
+  .aspect.tide:hover{border-color:#49c9e0; box-shadow:0 10px 30px #49c9e022}
+  .aspect.brink:hover{border-color:#e0574c; box-shadow:0 10px 30px #e0574c22}
+  .aspect .an{font-size:18px; font-weight:700; margin-bottom:2px}
+  .aspect.tide .an{color:#49c9e0} .aspect.brink .an{color:#e0574c}
+  .aspect .atl{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--muted,#8695ac); margin-bottom:10px}
+  .aspect .ad{font-size:12.5px; color:var(--muted,#8695ac); line-height:1.55} .aspect .ad b{color:var(--ink)}
+  .ab.active{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset}
+  /* tooltip */
+  #tooltip{position:fixed; display:none; transform:translate(-50%,-100%); z-index:50; pointer-events:none;
+    width:240px; background:#0c1220; border:1px solid #2c3a52; border-radius:10px;
+    padding:11px 13px; box-shadow:0 12px 30px #000a; text-align:left}
+  #tooltip .tt-name{font-weight:700; font-size:15px; color:#fff; margin-bottom:3px}
+  #tooltip .tt-stats{font:600 11px var(--mono); color:var(--gold); margin-bottom:7px; letter-spacing:.3px}
+  #tooltip .tt-desc{font-size:12.5px; line-height:1.5; color:var(--muted)}
+  #tooltip .tt-desc b{color:var(--ink)}
+
+  /* overlays */
+  .overlay{position:absolute; inset:0; background:#070a11ee; z-index:30; display:flex; align-items:center; justify-content:center;
+    border-radius:12px; backdrop-filter:blur(2px)}
+  .panel{width:min(560px,92%); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:26px 28px; text-align:center}
+  .panel h1{margin:0 0 6px; font-size:26px}
+  .panel h1.win{color:var(--heal)} .panel h1.lose{color:var(--danger)}
+  .panel p{color:var(--muted); font-size:14px; line-height:1.6; margin:8px 0}
+  .panel .keys{font:12px var(--mono); color:var(--dim); background:#0a0e16; border:1px solid var(--line);
+    border-radius:8px; padding:10px 12px; margin:14px 0; text-align:left; line-height:1.9}
+  .panel .keys b{color:var(--gold)}
+  button.big{background:linear-gradient(180deg,#2b6fd9,#1d4fa8); color:#fff; border:0; padding:11px 26px;
+    border-radius:9px; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px}
+  button.big:hover{filter:brightness(1.1)}
+  .choices{display:flex; gap:12px; margin-top:16px}
+  .choice{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:16px 12px; cursor:pointer; transition:.12s}
+  .choice:hover{border-color:var(--gold); transform:translateY(-3px)}
+  .choice .ct{font-weight:700; color:var(--gold); margin-bottom:6px; font-size:14px}
+  .choice .cd{font-size:12px; color:var(--muted); line-height:1.5}
+  .hint{position:absolute; bottom:132px; left:50%; transform:translateX(-50%); background:#000a; color:#ffd;
+    font:600 12px var(--mono); padding:6px 12px; border-radius:6px; opacity:0; transition:.2s; pointer-events:none; z-index:20}
+  .hint.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Boss + telegraph -->
+  <div id="boss">
+    <div class="row">
+      <div class="name" id="bossname">The Rendmaw</div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="phase" id="phase">Phase 1</div>
+        <button class="ctrlbtn" id="pauseBtn">Pause</button>
+      </div>
+    </div>
+    <div class="bossbar"><i id="bosshpfill"></i><div class="bosshp" id="bosshptext"></div></div>
+    <div id="telegraph" class="idle">
+      <div class="fill" id="tgfill"></div>
+      <div class="label"><span class="tag" id="tgtag">—</span><span id="tgname">No cast</span><span class="cd" id="tgcd"></span></div>
+    </div>
+  </div>
+
+  <!-- Raid frames + side -->
+  <div id="mid">
+    <div id="raid"></div>
+    <div id="side">
+      <div class="card">
+        <h4>Raid Throughput</h4>
+        <div class="stat"><span>Group DPS</span><b id="rdps">0</b></div>
+        <div class="stat"><span>Est. kill in</span><b class="kill" id="etk">—</b></div>
+      </div>
+      <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:0">
+        <h4>Combat log</h4>
+        <div id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bars + abilities -->
+  <div id="bottom">
+    <div class="bars">
+      <div id="mana"><i id="manafill"></i><div class="t" id="manatext"></div></div>
+      <div id="specbar" style="display:none"><i id="specfill"></i><div class="t" id="spectext"></div></div>
+    </div>
+    <div id="castrow">
+      <div class="gcd-wrap">
+        <div class="gcd-pie" id="gcdpie"><div class="wedge" id="gcdwedge"></div></div>
+        <span class="gcd-cap">GCD</span>
+      </div>
+      <div id="castbar" class="idle">
+        <div class="cfill" id="castfill"></div>
+        <div class="clabel">
+          <span class="cname" id="castname">No cast</span>
+          <span class="ctarget" id="casttarget"></span>
+          <span class="ctime" id="casttime"></span>
+        </div>
+      </div>
+    </div>
+    <div id="abilities"></div>
+  </div>
+
+  <div class="hint" id="hint"></div>
+  <div id="tooltip"></div>
+
+  <!-- Pause overlay -->
+  <div class="overlay" id="pauseOv" style="display:none">
+    <div class="panel">
+      <h1>Paused</h1>
+      <p>Take a breath. The Rendmaw will wait.</p>
+      <button class="big" id="resumeBtn">Resume</button>
+    </div>
+  </div>
+
+  <!-- Start overlay -->
+  <div class="overlay" id="startOv">
+    <div class="panel">
+      <h1>The Mender — Aspects</h1>
+      <p>You are the healer. You don't steer a character — you keep the party alive while they burn the boss down. Ally damage tracks their health, so the fight ends before your mana does. Two Aspects change <i>how</i> you keep them alive — one plays a beat ahead, one plays a beat behind, on purpose.</p>
+      <div class="keys">
+        <b>Click-cast:</b> hover a frame, press the ability number — casts on that ally.<br>
+        <b>1</b> Flash · fast, pricey  &nbsp; <b>2</b> Mend · slow, efficient &nbsp; <b>3</b> Renew · instant HoT<br>
+        <b>4</b> Ward · instant shield &nbsp; <b>5</b> Cascade · 3 lowest &nbsp; <b>6</b> Wellspring · raid burst<br>
+        <b>Q</b> Dispel &nbsp; <b>E</b> Meditate &nbsp; <b>7</b> your Aspect's signature<br>
+        <span style="color:var(--gold)">Read the telegraph bar — pre-empt what's coming, don't just react.</span>
+      </div>
+      <button class="big" id="startBtn">Choose your Aspect</button>
+    </div>
+  </div>
+
+  <!-- Aspect pick overlay -->
+  <div class="overlay" id="aspectOv" style="display:none">
+    <div class="panel">
+      <h1 style="color:var(--gold)">Choose your Aspect</h1>
+      <p>Both keep the raid alive. They could not disagree more about how.</p>
+      <div class="choices">
+        <div class="aspect tide" id="pickTide">
+          <div class="an">The Tidecaller</div><div class="atl">Reservoir · anticipate</div>
+          <div class="ad">Overhealing isn't wasted — it <b>banks</b> into a Reservoir. Top people off early, cast a beat <b>ahead</b>, and when you see the telegraph, <b>Surge</b> the whole bank into shields right before it lands. The calm, foresighted healer: nothing you cast is ever spilled.</div>
+        </div>
+        <div class="aspect brink" id="pickBrink">
+          <div class="an">The Brinkwarden</div><div class="atl">Nerve · gamble</div>
+          <div class="ad">Your heals get <b>huge and nearly free</b> the <b>lower</b> the target — so you let allies ride dangerously low and catch them at the last instant. Bloodied allies even hit <b>harder</b>, and holding them in the red builds <b>Nerve</b> for a raid-saving <b>Last Stand</b>. Play a beat <b>behind</b>, on purpose. Misjudge by half a second and someone dies.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Draft overlay -->
+  <div class="overlay" id="draftOv" style="display:none">
+    <div class="panel">
+      <h1 style="color:var(--gold)">Second Wind</h1>
+      <p id="draftSub">Choose one upgrade before the next fight.</p>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+
+  <!-- End overlay -->
+  <div class="overlay" id="endOv" style="display:none">
+    <div class="panel">
+      <h1 id="endTitle"></h1>
+      <p id="endBody"></p>
+      <button class="big" id="againBtn">Run it back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+// ---------- Config ----------
+const GCD = 1.2;
+const MANA_MAX = 900;
+const MANA_REGEN = 8;      // per second, base
+
+// ---------- Aspect constants ----------
+// Tidecaller — anticipate: overhealing banks into a Reservoir you dump before a spike
+const TIDE_CONV = 0.55;        // fraction of overheal routed to the Reservoir
+const RESERVOIR_MAX = 520;
+// Brinkwarden — gamble: heals scale up & get cheaper the LOWER the target; bloodied allies hit harder
+const BRINK_HEAL_SCALE = 1.5;  // heal ×(1 + (1-hp%)*scale)  → 2.5× at 0%, 1× at full
+const BRINK_MANA_DISC  = 0.55; // mana ×(1 - (1-hp%)*disc)   → pay 45% at 0%, full price topped off
+const BLOOD_THRESH = 0.40;     // at/under this, an ally is "bloodied"
+const NERVE_MAX = 100;
+const NERVE_RATE = 7;          // Nerve/sec per bloodied ally
+const LS_HEAL = 2.6, LS_DR = 0.45, LS_DUR = 3.0;  // Last Stand: heal = Nerve×LS_HEAL to all + DR
+
+const ABILITIES = {
+  flash:{key:"1", name:"Flash Heal", cast:1.5, mana:22, heal:70,  cd:0,  target:true,  desc:"70 · 22m",
+    tip:"Fast panic heal. Restores <b>70</b> health. About <b>3.2 HP per mana</b> — inefficient, so this is your emergency button, not your filler."},
+  mend: {key:"2", name:"Mend",   cast:2.6, mana:16, heal:95,  cd:0,  target:true,  desc:"95 · 16m",
+    tip:"Efficient filler. Restores <b>95</b> health. About <b>6 HP per mana</b> — your mana-sustainable workhorse. Slow cast leaves you exposed."},
+  renew:{key:"3", name:"Renew",  cast:0,   mana:18, hot:{tick:12,every:1.5,dur:9}, cd:0, target:true, desc:"HoT · 18m",
+    tip:"Instant heal-over-time. <b>12</b> every 1.5s for 9s (~<b>72</b> total). Cast it <b>before</b> predictable damage so the ticks land as it arrives."},
+  ward: {key:"4", name:"Ward",   cast:0,   mana:20, absorb:60, dur:6, cd:0, target:true, desc:"60 abs · 20m",
+    tip:"Instant shield. Absorbs <b>60</b> damage for 6s. <b>Never overheals</b> — the correct answer to a telegraph you can see coming."},
+  cascade:{key:"5",name:"Cascade",cast:2.0,mana:40, heal:45, lowest:3, cd:0, target:false, desc:"3× 45 · 40m",
+    tip:"Smart AoE. Heals the <b>3 lowest</b> allies for <b>45</b> each. No target needed. Your recovery tool after a Rending Nova."},
+  well: {key:"6", name:"Wellspring",cast:0,mana:30, heal:90, all:true, cd:30, target:false, desc:"raid · 30cd",
+    tip:"Raid cooldown. Instantly heals <b>all</b> allies for <b>90</b>. 30s cooldown. Save it for a big overlapping burst window."},
+  dispel:{key:"q",name:"Dispel", cast:0, mana:10, cd:8, offgcd:true, target:true, desc:"cleanse · 8cd",
+    tip:"Cleanse. Removes the <b>Hex</b> DoT from a target. Instant and <b>off the GCD</b>, so it never costs you a heal. 8s cooldown."},
+  medit:{key:"e", name:"Meditate",cast:0, mana:0, restore:280, cd:45, offgcd:true, target:false, desc:"+280m · 45cd",
+    tip:"Mana burst. Restores <b>280 mana</b> instantly, off the GCD. 45s cooldown. Fire it <b>before</b> you bottom out, not after."},
+  // --- Tidecaller signature ---
+  surge:{key:"7", name:"Surge", cast:0, mana:15, cd:0, target:false, spec:"tidecaller", desc:"spend Reservoir",
+    tip:"<b>Tidecaller.</b> Spend your entire <b>Reservoir</b>, splitting it as an <b>absorb shield</b> across the living raid. Overhealing was never wasted — it was saved for the spike you saw coming. Cast it <b>just before</b> a telegraphed hit."},
+  // --- Brinkwarden signature ---
+  laststand:{key:"7", name:"Last Stand", cast:0, mana:20, cd:0, target:false, spec:"brinkwarden", desc:"spend Nerve",
+    tip:"<b>Brinkwarden.</b> Spend all <b>Nerve</b> for a raid-wide clutch heal (scales with Nerve, and — like all your heals — with how <b>low</b> people are) plus <b>45% damage reduction for 3s</b>. The reward for living on the edge."},
+};
+const BASE_ORDER = ["flash","mend","renew","ward","cascade","well","dispel","medit"];
+let ORDER = BASE_ORDER.slice();
+
+// ---------- Encounters (data-driven) ----------
+// Each boss is pure data: a continuous melee, a set of telegraphed abilities
+// (cast = telegraph length, cd = cadence), and HP-threshold phases that ramp it.
+// resolve(m) runs when the telegraph completes; m is the current phase multiplier.
+const ENCOUNTERS = [
+  {
+    id:"rendmaw", name:"The Rendmaw", hp:2600,
+    intro:"You pull the Rendmaw — spiky and punishing. It wants your tank dead. Watch the red bar and pre-mitigate.",
+    melee:{every:1.4, min:14, max:21},
+    phases:[{at:1,mult:1,speed:1},{at:0.55,mult:1.15,speed:1.05},{at:0.28,mult:1.3,speed:1.1}],
+    abilities:[
+      {id:"crush", name:"Maw Crush", tag:"Tankbuster", cast:2.5, cd:12, jitter:2, danger:true,
+        resolve:m=>{ dmgTank(125*m); log("Maw Crush smashes the tank.","bad"); }},
+      {id:"nova",  name:"Rending Nova", tag:"Raid AoE", cast:3.0, cd:14, jitter:2,
+        resolve:m=>{ dmgAll(30*m,"nova"); log("Rending Nova rips through the group.","bad"); }},
+      {id:"hex",   name:"Hex", tag:"Curse", cast:1.8, cd:16, jitter:3,
+        resolve:m=>{ applyDotRandom(1,{tick:9*m,dur:9}); log("A curse takes hold — dispel it.","bad"); }},
+    ],
+  },
+  {
+    id:"rotweaver", name:"The Rotweaver", hp:2600,
+    intro:"The Rotweaver barely touches your tank — it rots the whole group. Relentless attrition: pre-cast HoTs, lean on Cascade & Wellspring, and accept you can't cleanse every DoT.",
+    melee:{every:1.7, min:8, max:13},
+    phases:[{at:1,mult:1,speed:1},{at:0.5,mult:1.3,speed:1.15}],
+    abilities:[
+      {id:"spore",     name:"Spore Burst", tag:"Raid AoE", cast:1.8, cd:7, jitter:1.5,
+        resolve:m=>{ dmgAll(20*m,"spore"); }},
+      {id:"contagion", name:"Contagion", tag:"Spreading Rot", cast:1.6, cd:11, jitter:2,
+        resolve:m=>{ applyDotRandom(2,{tick:8*m,dur:8}); log("Contagion spreads to two allies.","bad"); }},
+      {id:"virulence", name:"Virulence", tag:"Raid DoT", cast:2.5, cd:18, jitter:3, danger:true,
+        resolve:m=>{ applyDotAll({tick:6*m,dur:6}); log("Virulence — rot grips the whole group.","bad"); }},
+    ],
+  },
+  {
+    id:"choir", name:"The Hollow Choir", hp:3800,
+    intro:"The Hollow Choir sings four deaths at once. It MARKS a victim for a lethal nuke (pre-shield the named target), buries heals under absorb, and there is a hard enrage — sloppy healing means the clock kills you. Keep DPS topped so it dies first.",
+    melee:{every:1.5, min:12, max:18},
+    enrage:{at:80},
+    phases:[{at:1,mult:1,speed:1},{at:0.6,mult:1.2,speed:1.1},{at:0.3,mult:1.45,speed:1.25}],
+    abilities:[
+      {id:"dissonance", name:"Dissonance", tag:"Marked Nuke", cast:3.0, cd:12, jitter:2, danger:true,
+        mark:()=>randomDps(),
+        resolve:(m,t)=>{ dmgUnit(t,85*m); if(t) log("Dissonance detonates on "+t.name+".","bad"); }},
+      {id:"requiem", name:"Requiem", tag:"Raid AoE", cast:2.6, cd:14, jitter:2,
+        resolve:m=>{ dmgAll(28*m,"requiem"); log("Requiem washes over the group.","bad"); }},
+      {id:"chorus", name:"Grave Chorus", tag:"Heal Absorb", cast:2.0, cd:13, jitter:2,
+        resolve:m=>{ const t=randomDps(); if(t){ applyHealAbsorb(t, Math.round(70*m)); dmgUnit(t,20*m);
+          log(t.name+" is smothered — heal through the absorb.","bad"); } }},
+      {id:"dirge", name:"Dirge", tag:"Curse", cast:1.6, cd:15, jitter:3,
+        resolve:m=>{ applyDotRandom(2,{tick:7*m,dur:8}); log("A dirge festers on two allies.","bad"); }},
+    ],
+  },
+];
+ENCOUNTERS.length = 2;  // spec slice: Rendmaw (spike) + Rotweaver (attrition) — enough to contrast the Aspects
+
+// ---------- State ----------
+let S;
+function newState(){
+  return {
+    running:false, paused:false, time:0, over:false, encIndex:0,
+    spec:null, reservoir:0, nerve:0, raidDR:null,
+    boss:{hp:ENCOUNTERS[0].hp, def:ENCOUNTERS[0]},
+    meleeTimer:0, abilityTimers:{},
+    player:{mana:MANA_MAX, gcd:0, cast:null, regenMult:1},
+    cds:{}, // ability -> ready time
+    hover:null, focus:null,
+    upgrades:{},
+    party:[
+      {id:"bront", name:"Bront",  role:"Tank",   color:"var(--tank)", max:300, hp:300, dps:8,  absorb:0, hots:[], debuff:null, dead:false},
+      {id:"kael",  name:"Kaelen", role:"Melee",  color:"var(--dps1)", max:120, hp:120, dps:22, absorb:0, hots:[], debuff:null, dead:false},
+      {id:"mira",  name:"Mira",   role:"Caster", color:"var(--dps2)", max:110, hp:110, dps:22, absorb:0, hots:[], debuff:null, dead:false},
+      {id:"sylas", name:"Sylas",  role:"Caster", color:"var(--dps3)", max:110, hp:110, dps:22, absorb:0, hots:[], debuff:null, dead:false},
+    ],
+    tg:null, // {name,tag,dur,elapsed,danger,onResolve}
+  };
+}
+
+// ---------- Boss engine (generic, data-driven) ----------
+function bossMax(){ return S.boss.def.hp; }
+function curPhaseIdx(){ const f=S.boss.hp/S.boss.def.hp; const ph=S.boss.def.phases; let idx=0;
+  for(let i=0;i<ph.length;i++){ if(f<=ph[i].at) idx=i; } return idx; }
+function curPhase(){ return S.boss.def.phases[curPhaseIdx()]; }
+function phaseMult(){ return curPhase().mult; }
+function phaseNum(){ return curPhaseIdx()+1; }
+
+function startCast(name,tag,dur,danger,onResolve){
+  S.tg={name,tag,dur,elapsed:0,danger,onResolve};
+}
+
+// effect helpers used by encounter resolve() functions
+function livingDps(){ return S.party.filter(a=>!a.dead && a.role!=="Tank"); }
+function randomDps(){ const p=livingDps(); return p[Math.floor(Math.random()*p.length)]||null; }
+function lowestAlly(){ return S.party.filter(a=>!a.dead).sort((x,y)=>x.hp/x.max-y.hp/y.max)[0]||null; }
+function dmgTank(x){ const t=S.party[0]; if(t && !t.dead) damage(t,x,"crush"); }
+function dmgAll(x,src){ S.party.forEach(a=>{ if(!a.dead) damage(a,x,src||"aoe"); }); }
+function dmgRandomDps(x,n){ const pool=livingDps();
+  for(let i=0;i<n && pool.length;i++){ const k=Math.floor(Math.random()*pool.length); damage(pool[k],x,"spike"); pool.splice(k,1); } }
+function dmgUnit(u,x){ if(u && !u.dead) damage(u,x,"mark"); }
+function applyDotRandom(n,def){
+  let pool=S.party.filter(a=>!a.dead && a.role!=="Tank" && !a.debuff);
+  if(pool.length<n) pool=pool.concat(S.party.filter(a=>!a.dead && a.role!=="Tank" && a.debuff)); // allow refresh if not enough clean targets
+  for(let i=0;i<n && pool.length;i++){ const k=Math.floor(Math.random()*pool.length); const t=pool[k]; pool.splice(k,1);
+    t.debuff={tick:def.tick, every:def.every||1.5, acc:0, left:def.dur}; } }
+function applyDotAll(def){ S.party.forEach(a=>{ if(!a.dead) a.debuff={tick:def.tick, every:def.every||1.5, acc:0, left:def.dur}; }); }
+function applyHealAbsorb(u,amt){ if(u && !u.dead) u.healAbsorb=(u.healAbsorb||0)+amt; }
+
+// ---------- Aspect mechanics ----------
+function applySpec(spec){
+  S.spec=spec;
+  const sig = spec==="tidecaller" ? "surge" : "laststand";
+  ORDER = [...BASE_ORDER, sig];
+}
+function frac(u){ return u.max>0 ? u.hp/u.max : 0; }
+function bloodied(u){ return !u.dead && frac(u) <= BLOOD_THRESH; }
+// Brinkwarden: heals scale UP as target gets lower
+function brinkHealMult(u){ return S.spec==="brinkwarden" ? (1 + (1-frac(u))*BRINK_HEAL_SCALE) : 1; }
+// Brinkwarden: single-target heals get CHEAPER on low targets
+function brinkManaMult(u){ return (S.spec==="brinkwarden" && u) ? (1 - (1-frac(u))*BRINK_MANA_DISC) : 1; }
+function resCap(){ return S.upgrades && S.upgrades.deepwell ? 900 : RESERVOIR_MAX; }
+// Brinkwarden: bloodied allies deal more damage — the lower, the harder (and the deadlier the gamble)
+function brinkDpsFactor(u){
+  const f=frac(u); const pact = (S.upgrades && S.upgrades.bloodpact) ? 0.35 : 0;
+  if(bloodied(u)) return 0.9 + (BLOOD_THRESH - f)*1.5 + pact;   // 0.9 at 40% → 1.5 at 0% (+pact)
+  return 0.3 + 0.7*f;
+}
+
+function initEncounter(def){
+  S.boss={hp:def.hp, def};
+  S.meleeTimer = def.melee ? def.melee.every*0.6 : Infinity;
+  S.abilityTimers={};
+  def.abilities.forEach((ab,idx)=>{ S.abilityTimers[ab.id] = 3 + idx*2 + Math.random()*(ab.cd*0.3); });
+  S.tg=null; S.enraged=false; S.enrageStacks=0; S.enrageTimer=0;
+}
+
+function bossThink(dt){
+  const def=S.boss.def, m=phaseMult(), speed=curPhase().speed;
+  // hard enrage — once the clock runs out, ramping raid-wide damage that will wipe the group
+  if(def.enrage){
+    if(!S.enraged && S.time>=def.enrage.at){ S.enraged=true; S.enrageTimer=0;
+      log(def.name+" ENRAGES — burn it down NOW.","bad"); }
+    if(S.enraged){ S.enrageTimer-=dt;
+      if(S.enrageTimer<=0){ S.enrageTimer=1.0; S.enrageStacks++;
+        dmgAll(12+S.enrageStacks*7, "enrage"); } }
+  }
+  // continuous melee on the tank (not telegraphed)
+  if(def.melee){ S.meleeTimer-=dt;
+    if(S.meleeTimer<=0){ S.meleeTimer = def.melee.every/speed;
+      const t=S.party[0];
+      if(t && !t.dead) damage(t,(def.melee.min+Math.random()*(def.melee.max-def.melee.min))*m,"melee"); } }
+  // if a telegraph is in progress, advance it and resolve
+  if(S.tg){ S.tg.elapsed+=dt;
+    if(S.tg.elapsed>=S.tg.dur){ const cb=S.tg.onResolve; S.tg=null; cb(); }
+    return; }
+  // tick ability cadences and pick the most-due (danger has priority)
+  let due=null;
+  for(const ab of def.abilities){ S.abilityTimers[ab.id]-=dt;
+    if(S.abilityTimers[ab.id]<=0){ if(!due || (ab.danger && !due.danger)) due=ab; } }
+  if(due){
+    S.abilityTimers[due.id] = due.cd/speed + Math.random()*(due.jitter||0);
+    const mark = due.mark ? due.mark() : null;   // victim chosen at cast START, shown during telegraph
+    startCast(due.name, due.tag, due.cast, !!due.danger, ()=>due.resolve(m, mark));
+    if(mark && S.tg){ S.tg.markId=mark.id; S.tg.markName=mark.name; }
+  }
+}
+
+function resetParty(){
+  S.party.forEach(u=>{ u.hp=u.max; u.absorb=0; u.wardLeft=0; u.hots=[]; u.debuff=null; u.healAbsorb=0; u.dead=false; });
+}
+
+// ---------- Damage / heal core ----------
+function damage(u, amt, src){
+  if(u.dead) return;
+  if(S.raidDR && S.time < S.raidDR.until) amt *= (1 - S.raidDR.amt);   // Brinkwarden: Last Stand
+  amt=Math.round(amt);
+  if(u.absorb>0){ const ab=Math.min(u.absorb,amt); u.absorb-=ab; amt-=ab;
+    if(ab>0) fct(u,"−"+ab,"var(--absorb)"); if(u.absorb<=0) u.wardLeft=0; }
+  if(amt<=0) return;
+  u.hp-=amt; fct(u,"−"+amt,"var(--danger)");
+  if(u.hp<=0){ u.hp=0; u.dead=true; onDeath(u); }
+}
+function healUnit(u, amt){
+  if(u.dead) return 0;
+  amt=Math.round(amt * brinkHealMult(u));   // Brinkwarden: bigger the lower they are
+  // heal-absorb eats healing first (not dispellable — you must heal through it)
+  if(u.healAbsorb>0){ const a=Math.min(u.healAbsorb,amt); u.healAbsorb-=a; amt-=a;
+    if(a>0) fct(u,"⊘"+a,"var(--debuff)",true); }
+  if(amt<=0) return 0;
+  const missing=u.max-u.hp; const eff=Math.min(missing,amt); const over=amt-eff;
+  u.hp+=eff;
+  if(u.upgOverflow && over>0){ const sh=Math.round(over*0.3); u.absorb=Math.min(u.absorb+sh, u.max*0.5); }
+  // Tidecaller: overhealing is banked, not wasted
+  if(S.spec==="tidecaller" && over>0){ const conv=(S.upgrades&&S.upgrades.deepwell)?0.75:TIDE_CONV; S.reservoir=Math.min(resCap(), S.reservoir + over*conv); }
+  if(eff>0) fct(u,"+"+eff,"var(--heal)");
+  if(over>0) fct(u,"+"+over,"var(--over)",true);
+  return eff;
+}
+function onDeath(u){
+  log(u.name+" has died.","bad");
+  const boss=S.boss.def.name;
+  if(u.role==="Tank"){ endGame(false,"Your tank fell. Without a wall, "+boss+" tore through the group in seconds."); }
+  else if(S.party.filter(a=>!a.dead && a.role!=="Tank").length===0){
+    endGame(false,"All your damage dealers are dead. "+boss+" will never fall now — you're only delaying the wipe.");
+  }
+}
+
+// ---------- Player casting ----------
+function ready(name){ return (S.cds[name]||0) <= S.time; }
+function canPay(a){ return S.player.mana >= a.mana; }
+function tryCast(name){
+  if(!S.running||S.over||S.paused) return;
+  const a=ABILITIES[name]; if(!a) return;
+  if(!a.offgcd && S.player.gcd>S.time){ return; }
+  if(!ready(name)){ return; }
+  if(!canPay(a)){ hint("Not enough mana"); return; }
+  // target resolve
+  let target=null;
+  if(a.target){
+    target = S.hover || S.focus;
+    if(!target){ hint("Hover an ally to cast "+a.name); return; }
+    if(target.dead){ hint(target.name+" is dead"); return; }
+    if(name==="dispel" && !target.debuff){ hint("No debuff to cleanse there"); return; }
+  }
+  if(a.cast>0){
+    // begin a cast (cancels any current cast)
+    S.player.cast={name, target, elapsed:0, dur:a.cast};
+  } else {
+    resolve(name, target);
+  }
+}
+function resolve(name, target){
+  const a=ABILITIES[name];
+  if(a.target && (!target || target.dead)) return;
+  // signature abilities
+  if(name==="surge"){
+    const living=S.party.filter(u=>!u.dead);
+    if(S.reservoir<=1){ hint("Reservoir empty — overheal to fill it"); return; }
+    if(S.player.mana<a.mana){ hint("Not enough mana"); return; }
+    S.player.mana-=a.mana;
+    const per=Math.round(S.reservoir/Math.max(1,living.length));
+    living.forEach(u=>{ u.absorb=Math.min(u.absorb+per, u.max); u.wardLeft=Math.max(u.wardLeft||0, 8);
+      if(S.upgrades && S.upgrades.floodgate) healUnit(u, Math.round(per*0.25)); });
+    log("Surge — the Reservoir breaks over the raid ("+per+" shield each).","good");
+    S.reservoir=0; S.player.gcd=S.time+GCD; return;
+  }
+  if(name==="laststand"){
+    if(S.nerve<=1){ hint("No Nerve — hold allies low to build it"); return; }
+    if(S.player.mana<a.mana){ hint("Not enough mana"); return; }
+    S.player.mana-=a.mana;
+    const base=Math.round(S.nerve*LS_HEAL);
+    S.party.forEach(u=>{ if(!u.dead) healUnit(u, base); });   // per-target brink scaling applies inside healUnit
+    S.raidDR={amt:LS_DR, until:S.time+LS_DUR};
+    if(S.upgrades && S.upgrades.secondwind){ S.party.forEach(u=>{ if(!u.dead) u.debuff=null; }); }
+    log("LAST STAND — the raid holds the line ("+Math.round(LS_DR*100)+"% DR, "+LS_DUR+"s).","good");
+    S.nerve=0; S.player.gcd=S.time+GCD; return;
+  }
+  // Brinkwarden: single-target heals are cheaper on low targets
+  let payMana=a.mana;
+  if(a.target && target && (a.heal!=null || a.hot)) payMana=Math.round(a.mana*brinkManaMult(target));
+  S.player.mana-=payMana;
+  if(a.restore){ S.player.mana=Math.min(MANA_MAX,S.player.mana+a.restore); log("You meditate — mana restored.","good"); }
+  if(a.heal!=null){
+    if(a.all){ S.party.forEach(u=>{ if(!u.dead) healUnit(u,a.heal); }); log("Wellspring surges through the raid.","good"); }
+    else if(a.lowest){ const n=a.lowest+(S.upgrades.cascade4?1:0);
+      const targets=S.party.filter(u=>!u.dead).sort((x,y)=>x.hp/x.max-y.hp/y.max).slice(0,n);
+      targets.forEach(u=>healUnit(u,a.heal)); }
+    else if(target){ healUnit(target,a.heal);
+      if(name==="flash" && S.upgrades.afterglow) applyHot(target,{tick:10,every:1.5,dur:3}); }
+  }
+  if(a.hot && target) applyHot(target,a.hot);
+  if(a.absorb && target){ const mult=S.upgrades.bulwark?1.4:1; target.absorb+=Math.round(a.absorb*mult); target.wardLeft=a.dur; }
+  if(name==="dispel" && target){ target.debuff=null; log("You cleanse "+target.name+".","good"); }
+  if(a.cd>0) S.cds[name]=S.time+a.cd;
+  if(!a.offgcd) S.player.gcd=S.time+Math.max(GCD, 0);
+}
+function applyHot(u,def){ u.hots.push({tick:def.tick,every:def.every,acc:0,left:def.dur}); }
+
+// ---------- Tick loop ----------
+let last=0;
+function frame(t){
+  requestAnimationFrame(frame);
+  const now=t/1000; let dt=last?now-last:0; last=now;
+  if(dt>0.1)dt=0.1;
+  if(S.running && !S.over && !S.paused){ update(dt); }
+  render();
+}
+function update(dt){
+  S.time+=dt;
+  S.player.mana=Math.min(MANA_MAX, S.player.mana + MANA_REGEN*S.player.regenMult*dt);
+
+  // player cast progress
+  if(S.player.cast){
+    const c=S.player.cast;
+    if(c.target && c.target.dead){ S.player.cast=null; log("Cast cancelled — target died.","bad"); }
+    else{ c.elapsed+=dt;
+      if(c.elapsed>=c.dur){ resolve(c.name,c.target); S.player.cast=null; } }
+  }
+
+  // hots
+  S.party.forEach(u=>{
+    if(u.dead) return;
+    for(let i=u.hots.length-1;i>=0;i--){ const h=u.hots[i]; h.acc+=dt; h.left-=dt;
+      if(h.acc>=h.every){ h.acc-=h.every; healUnit(u,h.tick); }
+      if(h.left<=0) u.hots.splice(i,1);
+    }
+    if(u.debuff){ const d=u.debuff; d.acc+=dt; d.left-=dt;
+      if(d.acc>=d.every){ d.acc-=d.every; damage(u,d.tick,"debuff"); }
+      if(d.left<=0) u.debuff=null;
+    }
+    if(u.wardLeft>0){ u.wardLeft-=dt; if(u.wardLeft<=0) u.absorb=0; }
+  });
+
+  // boss
+  bossThink(dt);
+  // group damage on boss
+  let rdps=0, bloodCount=0;
+  S.party.forEach(u=>{ if(!u.dead){
+    const f = (S.spec==="brinkwarden") ? brinkDpsFactor(u) : (0.3+0.7*(u.hp/u.max));
+    rdps += u.dps*f;
+    if(bloodied(u)) bloodCount++;
+  }});
+  S._rdps=rdps;
+  S._bloodCount=bloodCount;
+  // Brinkwarden: Nerve builds while allies ride in the red
+  if(S.spec==="brinkwarden" && bloodCount>0){ const rate=NERVE_RATE*((S.upgrades&&S.upgrades.adrenaline)?1.5:1); S.nerve=Math.min(NERVE_MAX, S.nerve + bloodCount*rate*dt); }
+  S.boss.hp=Math.max(0, S.boss.hp - rdps*dt);
+  if(S.boss.hp<=0){
+    if(S.encIndex >= ENCOUNTERS.length-1){
+      endGame(true,"Run cleared as the "+(S.spec==="tidecaller"?"Tidecaller — nothing you cast was wasted; you banked the calm moments and broke the Reservoir over every spike":"Brinkwarden — you rode the whole raid on the knife's edge, turned their wounds into damage, and caught them every time it mattered")+".");
+    } else {
+      S.running=false;
+      log(S.boss.def.name+" falls!","good");
+      openDraft();
+    }
+    return;
+  }
+}
+
+// ---------- Rendering ----------
+function hpColor(f){ if(f>0.5) return "var(--hp)"; if(f>0.25) return "var(--hp-mid)"; return "var(--hp-low)"; }
+function fmt(n){ return Math.round(n).toString(); }
+function render(){
+  // boss
+  const bmax=bossMax();
+  const bf=clamp(S.boss.hp/bmax,0,1);
+  $("#bossname").textContent=S.boss.def.name;
+  $("#bosshpfill").style.width=(bf*100)+"%";
+  $("#bosshptext").textContent=fmt(S.boss.hp)+" / "+bmax;
+  $("#phase").textContent="Fight "+(S.encIndex+1)+"/"+ENCOUNTERS.length+" · Phase "+phaseNum()+(S.enraged?" · ENRAGED":"");
+  // telegraph
+  const tg=$("#telegraph");
+  if(S.tg){ tg.className=S.tg.danger?"danger":"";
+    $("#tgfill").style.width=(S.tg.elapsed/S.tg.dur*100)+"%";
+    $("#tgtag").textContent=S.tg.tag;
+    $("#tgname").textContent=S.tg.name + (S.tg.markName? " → "+S.tg.markName : "");
+    $("#tgcd").textContent=(S.tg.dur-S.tg.elapsed).toFixed(1)+"s";
+  } else if(S.enraged){ tg.className="danger";
+    $("#tgfill").style.width="100%";
+    $("#tgtag").textContent="Enraged"; $("#tgname").textContent="raid damage climbing — kill it now"; $("#tgcd").textContent="";
+  } else { tg.className="idle"; $("#tgfill").style.width="0%";
+    $("#tgtag").textContent="—"; $("#tgname").textContent="reading the group…"; $("#tgcd").textContent=""; }
+
+  // frames
+  const markId = S.tg && S.tg.markId;
+  S.party.forEach(u=>{
+    const el=frameEls[u.id]; if(!el) return;
+    const f=clamp(u.hp/u.max,0,1);
+    el.fill.style.width=(f*100)+"%"; el.fill.style.background=hpColor(f);
+    el.text.textContent=u.dead?"DEAD":fmt(u.hp)+" / "+u.max;
+    // heal-absorb overlay: purple block sitting on the missing-health gap you must heal through
+    const haW=clamp((u.healAbsorb||0)/u.max,0,1-f)*100;
+    el.healabs.style.left=(f*100)+"%"; el.healabs.style.width=haW+"%";
+    // damage-absorb (gold shield) drawn beyond that
+    const abStart=f + (haW/100);
+    const abW=clamp(u.absorb/u.max,0,Math.max(0,1-abStart))*100;
+    el.absorb.style.left=(abStart*100)+"%"; el.absorb.style.width=abW+"%";
+    el.root.classList.toggle("dead",u.dead);
+    el.root.classList.toggle("hover", S.hover===u && !u.dead);
+    el.root.classList.toggle("marked", markId===u.id && !u.dead);
+    el.root.classList.toggle("bloodied", S.spec==="brinkwarden" && bloodied(u));
+    // effects
+    let e="";
+    if(u.absorb>0) e+='<div class="eff ward" title="Shield">◇</div>';
+    if(u.healAbsorb>0) e+='<div class="eff absorbheal" title="Heal absorb — heal through it">⊘</div>';
+    if(u.hots.length) e+='<div class="eff hot" title="Heal over time">♥</div>';
+    if(u.debuff) e+='<div class="eff debuff" title="Curse — dispel">✦</div>';
+    el.effects.innerHTML=e;
+  });
+
+  // mana
+  $("#manafill").style.width=(S.player.mana/MANA_MAX*100)+"%";
+  $("#manatext").textContent=fmt(S.player.mana)+" / "+MANA_MAX+" mana";
+
+  // spec resource bar
+  const sb=$("#specbar");
+  if(S.spec==="tidecaller"){ sb.style.display="block"; sb.className="tide";
+    $("#specfill").style.width=(S.reservoir/resCap()*100)+"%";
+    $("#spectext").textContent="Reservoir "+fmt(S.reservoir)+" / "+resCap();
+  } else if(S.spec==="brinkwarden"){ sb.style.display="block"; sb.className="brink";
+    $("#specfill").style.width=(S.nerve/NERVE_MAX*100)+"%";
+    const bc=S._bloodCount||0;
+    $("#spectext").textContent="Nerve "+fmt(S.nerve)+" / "+NERVE_MAX+(bc?"  · "+bc+" bloodied":"");
+  } else sb.style.display="none";
+
+  // GCD pie — radial swipe that depletes as it becomes ready
+  const gcdLeft = Math.max(0, S.player.gcd - S.time);
+  const gcdFrac = clamp(gcdLeft/GCD, 0, 1);
+  const deg = gcdFrac*360;
+  const wedge=$("#gcdwedge");
+  if(gcdFrac>0){
+    wedge.style.background="conic-gradient(var(--gold) "+deg+"deg, #0a0e16 "+deg+"deg 360deg)";
+    $("#gcdpie").classList.remove("ready");
+  } else {
+    wedge.style.background="transparent";
+    $("#gcdpie").classList.add("ready");
+  }
+
+  // Big cast bar
+  const cb=$("#castbar");
+  if(S.player.cast){ const c=S.player.cast; const a=ABILITIES[c.name];
+    cb.className="active";
+    $("#castfill").style.width=(c.elapsed/c.dur*100)+"%";
+    $("#castname").textContent=a.name;
+    $("#casttarget").textContent = c.target? "▸ "+c.target.name : (a.all?"▸ raid":(a.lowest?"▸ 3 lowest":""));
+    $("#casttime").textContent=(c.dur-c.elapsed).toFixed(1)+"s";
+  } else {
+    cb.className="idle";
+    $("#castfill").style.width="0%";
+    $("#castname").textContent="No cast";
+  }
+
+  // abilities — radial sweep for cooldown/GCD (translucent, text stays readable)
+  ORDER.forEach(name=>{
+    const el=abEls[name]; const a=ABILITIES[name];
+    const cdActive=!ready(name);
+    const gcdBlock=!a.offgcd && S.player.gcd>S.time;
+    let remain=0, total=1, own=false;
+    if(cdActive){ remain=S.cds[name]-S.time; total=a.cd||1; own=true; }
+    else if(gcdBlock){ remain=S.player.gcd-S.time; total=GCD; }
+    const frac=clamp(remain/total,0,1);
+    if(frac>0){
+      const deg=frac*360;
+      el.sweep.style.background="conic-gradient(rgba(6,9,16,.68) "+deg+"deg, transparent "+deg+"deg 360deg)";
+      el.sweep.style.opacity=1;
+    } else el.sweep.style.opacity=0;
+    // corner number only for real cooldowns (not the short GCD)
+    if(own && remain>=1){ el.num.textContent=Math.ceil(remain); el.num.style.opacity=1; }
+    else el.num.style.opacity=0;
+    el.root.classList.toggle("nomana", !canPay(a));
+    el.root.classList.toggle("active", S.player.cast && S.player.cast.name===name);
+  });
+
+  // side stats
+  $("#rdps").textContent=fmt(S._rdps||0);
+  const etk = (S._rdps>0)? (S.boss.hp/S._rdps):Infinity;
+  $("#etk").textContent = isFinite(etk)? etk.toFixed(0)+"s" : "never";
+}
+
+// ---------- FCT + log ----------
+function fct(u,txt,color,small){
+  const el=frameEls[u.id]; if(!el) return;
+  const d=document.createElement("div"); d.className="fct"; d.textContent=txt;
+  d.style.color=color; if(small){d.style.fontSize="12px"; d.style.opacity=".85";}
+  d.style.left=(35+Math.random()*30)+"%";
+  el.root.appendChild(d); setTimeout(()=>d.remove(),1000);
+}
+function log(msg,cls){ const d=document.createElement("div"); if(cls)d.className=cls; d.textContent=msg;
+  const L=$("#log"); L.prepend(d); while(L.children.length>40) L.lastChild.remove(); }
+let hintT;
+function hint(msg){ const h=$("#hint"); h.textContent=msg; h.classList.add("show");
+  clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove("show"),900); }
+
+// ---------- Build DOM ----------
+const frameEls={}, abEls={};
+function buildFrames(){
+  const raid=$("#raid"); raid.innerHTML="";
+  S.party.forEach(u=>{
+    const root=document.createElement("div"); root.className="frame";
+    root.innerHTML=`
+      <div class="marktag">Marked</div>
+      <div class="bloodtag">Bloodied</div>
+      <div class="effects"></div>
+      <div class="top">
+        <span class="who"><span class="dot" style="background:${u.color}"></span>${u.name}</span>
+        <span class="role">${u.role}</span>
+      </div>
+      <div class="hpbar"><div class="hpfill"></div><div class="healabs"></div><div class="absorb"></div><div class="hptext"></div></div>`;
+    raid.appendChild(root);
+    frameEls[u.id]={root, fill:root.querySelector(".hpfill"), absorb:root.querySelector(".absorb"),
+      healabs:root.querySelector(".healabs"), text:root.querySelector(".hptext"), effects:root.querySelector(".effects")};
+    root.addEventListener("mouseenter",()=>S.hover=u);
+    root.addEventListener("mouseleave",()=>{ if(S.hover===u)S.hover=null; });
+    root.addEventListener("click",()=>{ S.focus=u; });
+  });
+}
+function buildAbilities(){
+  const bar=$("#abilities"); bar.innerHTML="";
+  ORDER.forEach(name=>{
+    const a=ABILITIES[name];
+    const el=document.createElement("div"); el.className="ab";
+    el.innerHTML=`<div class="cdsweep"></div><span class="cdnum"></span>
+      <span class="key">${a.key.toUpperCase()}</span>
+      <div class="nm">${a.name}</div>
+      <div class="meta">${a.desc.replace(/(\d+m)/,'<span class="mana">$1</span>')}</div>`;
+    bar.appendChild(el);
+    abEls[name]={root:el, sweep:el.querySelector(".cdsweep"), num:el.querySelector(".cdnum")};
+    el.addEventListener("click",()=>tryCast(name));
+    el.addEventListener("mouseenter",()=>showTip(name,el));
+    el.addEventListener("mouseleave",hideTip);
+  });
+}
+function statsLine(a){
+  const parts=[];
+  if(a.mana>0) parts.push(a.mana+" mana"); else if(a.restore) parts.push("free"); else parts.push("free");
+  parts.push(a.cast>0 ? a.cast+"s cast" : "instant");
+  if(a.cd>0) parts.push(a.cd+"s cooldown");
+  if(a.offgcd) parts.push("off GCD");
+  return parts.join("  ·  ");
+}
+function showTip(name,el){
+  const a=ABILITIES[name]; const tip=$("#tooltip");
+  tip.innerHTML=`<div class="tt-name">${a.name}</div>
+    <div class="tt-stats">${statsLine(a)}</div>
+    <div class="tt-desc">${a.tip}</div>`;
+  const r=el.getBoundingClientRect();
+  tip.style.left=(r.left+r.width/2)+"px";
+  tip.style.top=(r.top-10)+"px";
+  tip.style.display="block";
+}
+function hideTip(){ $("#tooltip").style.display="none"; }
+
+// ---------- Draft ----------
+const UPGRADES=[
+  {id:"afterglow", t:"Afterglow", d:"Flash Heal also applies a short heal-over-time.", apply:()=>S.upgrades.afterglow=true},
+  {id:"bulwark",   t:"Bulwark",   d:"Ward absorbs 40% more.", apply:()=>S.upgrades.bulwark=true},
+  {id:"conserv",   t:"Conservation", d:"Mana regen +60%.", apply:()=>S.player.regenMult=1.6},
+  {id:"cascade4",  t:"Wider Cascade", d:"Cascade heals a 4th ally.", apply:()=>S.upgrades.cascade4=true},
+];
+const TIDE_UP=[
+  {id:"deepwell", t:"Deep Well", d:"Reservoir holds far more, and banks 75% of overheal.", apply:()=>{S.upgrades.deepwell=true;}},
+  {id:"floodgate",t:"Floodgate", d:"Surge shields also heal for 25% of the shield.", apply:()=>S.upgrades.floodgate=true},
+  {id:"overflow", t:"Overflow",  d:"30% of overhealing becomes a shield too.", apply:()=>{S.party.forEach(u=>u.upgOverflow=true);}},
+];
+const BRINK_UP=[
+  {id:"adrenaline",t:"Adrenaline", d:"Nerve builds 50% faster while allies are bloodied.", apply:()=>S.upgrades.adrenaline=true},
+  {id:"bloodpact", t:"Blood Pact", d:"Bloodied allies deal even more damage.", apply:()=>S.upgrades.bloodpact=true},
+  {id:"secondwind",t:"Second Wind",d:"Last Stand also cleanses all debuffs.", apply:()=>S.upgrades.secondwind=true},
+];
+function specUpPool(){ return S.spec==="tidecaller"?TIDE_UP:S.spec==="brinkwarden"?BRINK_UP:[]; }
+function openDraft(){
+  $("#draftSub").textContent = S.boss.def.name+" falls. Take an upgrade before the next fight.";
+  const sp=[...specUpPool()].sort(()=>Math.random()-0.5).slice(0,2);
+  const sh=[...UPGRADES].sort(()=>Math.random()-0.5);
+  const pick=[...sp]; while(pick.length<3 && sh.length) pick.push(sh.shift());
+  const box=$("#choices"); box.innerHTML="";
+  pick.slice(0,3).forEach(u=>{ const c=document.createElement("div"); c.className="choice";
+    c.innerHTML=`<div class="ct">${u.t}</div><div class="cd">${u.d}</div>`;
+    c.addEventListener("click",()=>{ u.apply(); log("Upgrade taken: "+u.t,"good"); $("#draftOv").style.display="none"; startEncounter(S.encIndex+1); });
+    box.appendChild(c);
+  });
+  S.running=false; $("#draftOv").style.display="flex";
+}
+
+// ---------- Flow ----------
+function endGame(win,msg){
+  if(S.over) return; S.over=true; S.running=false;
+  $("#endTitle").textContent = win?"Run cleared":"Wipe";
+  $("#endTitle").className = win?"win":"lose";
+  const t=Math.round(S.time);
+  $("#endBody").textContent = msg + "  (Total time: "+t+"s.)";
+  $("#endOv").style.display="flex";
+}
+function startEncounter(i){
+  S.encIndex=i;
+  const def=ENCOUNTERS[i];
+  initEncounter(def);
+  resetParty();
+  // fresh resources each fight; the draft is what carries between them
+  S.player.mana=MANA_MAX; S.player.gcd=0; S.player.cast=null; S.cds={};
+  S.reservoir=0; S.nerve=0; S.raidDR=null;
+  S.time=0;
+  S.paused=false; $("#pauseOv").style.display="none"; $("#pauseBtn").textContent="Pause";
+  log(def.intro,"hl");
+  S.running=true;
+}
+function startGame(spec){
+  S=newState(); applySpec(spec); buildFrames(); buildAbilities();
+  $("#startOv").style.display="none"; $("#aspectOv").style.display="none"; $("#endOv").style.display="none"; $("#draftOv").style.display="none";
+  $("#pauseOv").style.display="none"; $("#pauseBtn").textContent="Pause";
+  $("#log").innerHTML="";
+  startEncounter(0);
+}
+
+// pause
+function setPause(p){
+  if(!S.running || S.over) return;
+  S.paused=p;
+  $("#pauseOv").style.display = p?"flex":"none";
+  $("#pauseBtn").textContent = p?"Resume":"Pause";
+}
+function togglePause(){ setPause(!S.paused); }
+
+// input
+document.addEventListener("keydown",e=>{
+  if(!S) return;
+  const k=e.key.toLowerCase();
+  if(k==="p" || k==="escape"){ e.preventDefault(); togglePause(); return; }
+  if(!S.running || S.paused) return;
+  const name=ORDER.find(n=>ABILITIES[n].key===k);
+  if(name){ e.preventDefault(); tryCast(name); }
+});
+$("#startBtn").addEventListener("click",()=>{ $("#startOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pickTide").addEventListener("click",()=>startGame("tidecaller"));
+$("#pickBrink").addEventListener("click",()=>startGame("brinkwarden"));
+$("#againBtn").addEventListener("click",()=>{ $("#endOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pauseBtn").addEventListener("click",togglePause);
+$("#resumeBtn").addEventListener("click",()=>setPause(false));
+
+S=newState(); buildFrames(); buildAbilities(); render();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

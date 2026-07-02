@@ -1,0 +1,52 @@
+## Every balance-critical number lives here — NOT as a hard-coded literal in the
+## engine. The sim harness sweeps these to tune the game (see PORT-PLAN.md §M3).
+## This is the whole point of the "tuning-first" architecture: change numbers,
+## re-run thousands of sims, read the win-rate bands.
+class_name TuningConfig
+extends Resource
+
+## Fixed simulation rate. The engine advances in whole ticks of 1/fixed_hz seconds.
+## 30 Hz is ample for these low-frequency combat decisions and cheap for netcode.
+@export var fixed_hz: int = 30
+
+# --- Defensive verb (tank) ---
+@export var defense_active: float = 0.5        ## how long a press stays "active", seconds
+@export var defense_cd: float = 2.2            ## cooldown between presses, seconds
+@export var defense_mitigation: float = 0.7    ## fraction of a defended hit removed (0..1)
+
+# --- Win condition: group damage curve  f(hp%) = f_floor + f_scale * hp_frac ---
+# Healthy allies deal more damage, so the boss dies before your party/resources run out.
+@export var f_floor: float = 0.3
+@export var f_scale: float = 0.7
+
+# --- Enrage ramp ---
+@export var enrage_base: float = 6.0           ## raid dmg/sec added per second past enrage
+
+# --- M7 strike strings + the universal dodge ---
+# Grade windows: seconds BEFORE a beat's impact that a dodge press still answers
+# it (perfect ⊂ good ⊂ graze; outside graze the press is a WHIFF). Sized for the
+# 30 Hz tick — never author a window tighter than ~2 ticks (66ms).
+@export var strike_perfect: float = 0.14
+@export var strike_good: float = 0.34
+@export var strike_graze: float = 0.50
+@export var dodge_recovery: float = 0.35   ## min gap between dodge presses
+@export var dodge_whiff_cd: float = 1.3    ## lockout for a press that answered nothing (or took a feint beat's bait)
+@export var graze_mult: float = 0.5        ## damage fraction still taken on a GRAZE of a DODGEABLE beat
+# BLOCKABLE beats: damage fraction that lands anyway, by grade (partial even when perfect).
+@export var block_perfect: float = 0.25
+@export var block_good: float = 0.5
+@export var block_graze: float = 0.75
+@export var statblock_dodge: float = 0.65  ## stat-block ally chance to auto-dodge an answerable beat
+
+# --- Raid threat (threat_enabled fights only; ignored by all solo content) ---
+@export var threat_tank_mult: float = 4.0    ## tank threat per point of boss damage (dps/healers: 1.0)
+@export var threat_heal_factor: float = 0.5  ## threat per point of EFFECTIVE healing
+@export var taunt_dur: float = 3.0           ## taunt forces the boss onto you this long, seconds
+@export var taunt_threat_bonus: float = 1.1  ## taunt also sets your threat to top × this
+
+func dt() -> float:
+	return 1.0 / float(fixed_hz)
+
+## Deep-ish copy so a sweep can tweak one field without mutating the shared config.
+func clone() -> TuningConfig:
+	return duplicate(true) as TuningConfig

@@ -1,0 +1,31 @@
+; Project Rift — Godot 4 project
+; Uses the GL Compatibility renderer: best for web (WebGL2) export AND most
+; reliable under WSLg. Headless (server/sims) needs no GPU at all.
+
+config_version=5
+
+[application]
+config/name="Project Rift"
+config/description="Co-op roguelike — trinity combat, movement removed. See ../PORT-PLAN.md"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+run/main_scene="res://game/main.tscn"
+boot_splash/bg_color=Color(0.0274510, 0.0274510, 0.0470588, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+UiTheme="*res://game/ui/ui_theme.gd"
+
+[display]
+
+; Design space is 1920x1080. canvas_items stretch scales the whole UI to any window;
+; "expand" grows the design width on wider aspects instead of letterboxing.
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.0274510, 0.0274510, 0.0470588, 1)

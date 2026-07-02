@@ -1,0 +1,14 @@
+# Godot editor/import cache
+.godot/
+
+# Build artifacts & sim outputs
+/dist/
+/godot/out/
+
+# Downloaded binaries (Godot exes, cloudflared)
+/tools/
+
+# Local personal settings
+.claude/settings.local.json
+
+*.tmp

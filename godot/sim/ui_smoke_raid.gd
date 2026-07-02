@@ -1,0 +1,130 @@
+## Headless smoke test for the RAID HUD (R1 v2 — any seat): instantiate the scene,
+## then for EACH of the four playable seats build the combat screen, run ~30s of
+## live raid with scripted human input, and exercise the juice handlers.
+##
+##   godot --headless --path godot --script res://sim/ui_smoke_raid.gd
+extends SceneTree
+
+var hud: Control
+var done := false
+
+func _process(_delta: float) -> bool:
+	if done:
+		return true
+	if hud == null:
+		hud = load("res://game/raid_main.tscn").instantiate()
+		root.add_child(hud)
+		return false
+	done = true
+
+	print("select screen: ok (ui=", hud._ui != null, " ctrl=", hud._ctrl != null, ")")
+
+	for seat_key in ["tank", "blade", "caster", "healer"]:
+		hud._show_aspect_pick(seat_key)
+	print("aspect-pick screens (x4): ok")
+
+	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
+			["blade", "tempo"], ["caster", "disruptor"], ["caster", "silencer"],
+			["healer", "tidecaller"], ["healer", "brinkwarden"]]:
+		hud._launch(combo[0], combo[1])
+		var s: CombatState = hud._ctrl.state
+		var ticks := _drive(s, String(combo[0]))
+		print("%-6s %-11s ok  loadout=%s ticks=%d boss_hp=%d over=%s" % [
+			combo[0], combo[1], str(hud._loadout), ticks, int(s.boss.hp), str(s.over)])
+
+	# juice handlers across every class-specific event, on the healer build
+	var s2: CombatState = hud._ctrl.state
+	for ev in [
+		{"t": "negate", "player": true, "size": 3, "feint": false},
+		{"t": "hurt", "player": true, "seat": s2.seats[3], "amt": 40, "size": 0},
+		{"t": "hurt", "player": false, "seat": s2.seats[0], "amt": 80, "size": 2},
+		{"t": "heal", "seat": s2.seats[1], "amt": 40, "over": 5},
+		{"t": "debuff", "seat": s2.seats[2], "id": "riftrot"},
+		{"t": "boss_hit", "amt": 120, "seat": s2.seats[2]},
+		{"t": "boss_heal", "amt": 300},
+		{"t": "staggered", "was_heal": true},
+		{"t": "interrupt", "player": false, "clean": true, "was_heal": false},
+		{"t": "taunt", "player": false, "seat": s2.seats[0]},
+		{"t": "threat_drop", "player": true, "seat": s2.seats[3]},
+		{"t": "strike_graded", "player": true, "grade": StrikeRes.Grade.PERFECT},
+		{"t": "dodge_whiff", "player": true},
+		{"t": "strike", "player": true, "result": "perfect"},
+		{"t": "perfect", "player": true},
+		{"t": "flow_lost", "player": true},
+		{"t": "rupture", "player": true},
+		{"t": "coup", "player": true},
+		{"t": "kick_whiff", "player": true},
+		{"t": "int_whiff", "player": true},
+		{"t": "overload", "player": true},
+		{"t": "quietus", "player": true},
+		{"t": "silence", "player": true},
+		{"t": "empower", "amt": 0.1},
+		{"t": "pushback", "player": true},
+		{"t": "cast_cancelled", "id": "mend"},
+	]:
+		hud._handle_event(ev)
+	print("juice handlers (all classes): ok")
+
+	hud._show_end(true)
+	hud._show_end(false)
+	print("end screens: ok")
+	hud._show_select("healer")
+	print("reselect: ok")
+
+	# online screens build (R2): connect form + a synthetic lobby, no live server
+	hud._show_online()
+	hud._room = {"code": "TEST", "phase": "lobby", "host": 1, "players": [
+		{"id": 1, "name": "Ava", "seat": "tank", "aspect": "warden", "ready": true},
+		{"id": 2, "name": "Bo", "seat": "", "aspect": "", "ready": false},
+	]}
+	hud._show_lobby()
+	print("online connect + lobby screens: ok")
+
+	print("RAID UI SMOKE: ALL OK")
+	quit()
+	return true
+
+## Scripted human input per seat so every band's input surface gets exercised.
+func _drive(s: CombatState, seat_key: String) -> int:
+	for i in 600:
+		var p: Seat = hud._ctrl.player()
+		if p != null and p.alive() and (i % 8) == 0 and not s.over:
+			var obs := CombatCore.observe(s, p)
+			var tg: Dictionary = obs.get("telegraph", {})
+			match seat_key:
+				"tank":
+					if not bool(obs.get("aggro_me", true)) and s.tick >= int(p.cooldowns.get("challenge", 0)):
+						hud._ctrl.human({"type": "ability", "id": "challenge"})
+					elif not tg.is_empty() and bool(tg.get("defensible", false)) \
+							and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)) \
+							and float(tg.get("remaining", 9.0)) <= 0.3:
+						hud._ctrl.human({"type": "defense"})
+					elif bool(obs.get("gcd_ready", false)):
+						hud._ctrl.human({"type": "ability", "id": ("rampage" if float(obs.get("rage", 0.0)) >= 40.0 else "cleave")})
+				"blade":
+					if not tg.is_empty() and bool(tg.get("defensible", false)) \
+							and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)) \
+							and float(tg.get("remaining", 9.0)) <= 0.4:
+						hud._ctrl.human({"type": "defense"})
+					elif int(obs.get("since_strike", 0)) >= int(obs.get("perfect_lo", 18)):
+						hud._ctrl.human({"type": "ability", "id": "strike"})
+				"caster":
+					if not tg.is_empty() and bool(tg.get("interruptible", false)) \
+							and bool(obs.get("defense_ready", false)):
+						hud._ctrl.human({"type": "defense"})
+					elif (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):
+						hud._ctrl.human({"type": "ability",
+							"id": ("fracture" if float(obs.get("focus", 0.0)) >= 26.0 else "bolt")})
+				"healer":
+					# hover the tank and keep it topped; exercise click-cast gating too
+					hud._hover_seat = s.seats[0]
+					if (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):
+						if (i % 24) == 0:
+							hud._cast_on(s.seats[0], "flash")
+						else:
+							hud._cast("mend")
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+		if s.over:
+			return s.tick
+	return s.tick

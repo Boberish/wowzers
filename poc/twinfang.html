@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift · Twinfang — active-rotation DPS slice</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0e131f; --line:#1e2838;
+    --ink:#e6ecf5; --muted:#8695ac; --dim:#5b6b84;
+    --hp:#49c46a; --hp-mid:#e0b23a; --hp-low:#d9483f;
+    --energy:#e8c84a; --energy2:#9a842a;
+    --cp:#e8933d; --flow:#57c7e0; --poison:#7fd44a;
+    --gold:#e8c86a; --danger:#e0574c; --heal:#6fe0a0; --dodge:#57c7e0; --kick:#b48ee8; --perfect:#7fe0a0;
+    --font:"Segoe UI",system-ui,sans-serif; --mono:"SFMono-Regular",ui-monospace,"Consolas",monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 700px at 50% -10%, #1620320a, #070a11 70%), var(--bg);
+    color:var(--ink); font-family:var(--font); user-select:none; -webkit-user-select:none;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  #app{width:min(1100px,98vw); height:min(770px,98vh); position:relative; display:flex; flex-direction:column; gap:12px; padding:14px;}
+
+  /* boss + telegraph */
+  #boss{background:linear-gradient(180deg,#161d2e,#10151f); border:1px solid var(--line); border-radius:10px; padding:12px 14px; position:relative}
+  #boss .row{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px}
+  #boss .name{font-size:19px; font-weight:700}
+  #boss .phase{font:600 11px var(--mono); color:var(--gold); letter-spacing:1px; text-transform:uppercase}
+  .bossbar{height:16px; background:#0a0e16; border:1px solid #2a2016; border-radius:5px; overflow:hidden; position:relative}
+  .bossbar > i{display:block; height:100%; background:linear-gradient(90deg,#8a2b22,#c9463a); transition:width .12s linear}
+  .bossbar > .psn{position:absolute; top:0; bottom:0; right:0; background:repeating-linear-gradient(45deg,#7fd44a55,#7fd44a55 5px,#5fa83322 5px,#5fa83322 10px); display:none}
+  .bosshp{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:600 11px var(--mono); color:#ffe; text-shadow:0 1px 2px #000}
+  #tele{margin-top:10px; height:40px; background:#0a0e16; border:1px solid var(--line); border-radius:7px; position:relative; overflow:hidden}
+  #tele .fill{position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#5a4a1e,#e8c86a); transition:width .05s linear}
+  #tele.swing .fill{background:linear-gradient(90deg,#6e3a1d,#e09a3d)}
+  #tele.cast .fill{background:linear-gradient(90deg,#3d2a6e,#8a5bd6)}
+  #tele.pulse .fill{background:linear-gradient(90deg,#5a5a1e,#c9c246)}
+  #tele .zone{position:absolute; top:0; bottom:0; right:0; background:repeating-linear-gradient(45deg,#e0574c33,#e0574c33 6px,#e0574c22 6px,#e0574c22 12px); border-left:2px dashed #e0574c; display:none}
+  #tele.armed .zone{display:block}
+  #tele .label{position:absolute; inset:0; display:flex; align-items:center; gap:10px; padding:0 14px; z-index:2}
+  #tele .tag{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; padding:2px 7px; border-radius:4px; background:#00000066}
+  #tele .sname{font:700 14px var(--font); color:#fff; text-shadow:0 1px 2px #000}
+  #tele .cd{margin-left:auto; font:700 13px var(--mono); color:#fff}
+  #tele .prompt{position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:3; font:800 15px var(--mono); letter-spacing:2px; text-shadow:0 0 10px currentColor,0 1px 2px #000}
+  #tele.dodgenow .prompt{display:flex; color:#ff9a90; animation:flash .3s steps(2) infinite}
+  #tele.kicknow .prompt{display:flex; color:#d5aef0; animation:flash .45s steps(2) infinite}
+  @keyframes flash{50%{opacity:.45}}
+  #tele.idle .sname{color:var(--dim)}
+
+  #you{flex:1; display:flex; gap:12px; min-height:0}
+  #self{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:15px 18px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:12px}
+  #self.hurt{animation:hurt .3s} @keyframes hurt{0%{box-shadow:inset 0 0 0 3px #e0574c}100%{}}
+  #self .who{display:flex; align-items:center; justify-content:space-between}
+  #self .who .nm{font-size:20px; font-weight:700}
+  .badge{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; padding:3px 8px; border-radius:5px}
+  .badge.flow{background:var(--flow); color:#0b0f17}
+  .badge.dodge{background:var(--dodge); color:#0b0f17}
+  .barwrap{display:flex; flex-direction:column; gap:4px}
+  .barwrap .lab{display:flex; justify-content:space-between; font:600 11px var(--mono); color:var(--muted)}
+  .bar{height:16px; background:#0a0e16; border:1px solid #10151f; border-radius:5px; position:relative; overflow:hidden}
+  .bar > .fill{position:absolute; left:0; top:0; bottom:0; transition:width .1s linear, background .2s}
+  .bar > .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 10px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:2}
+  #hpfill{background:var(--hp)} #enfill{background:linear-gradient(90deg,var(--energy2),var(--energy))}
+
+  /* combo pips + flow row */
+  .cprow{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .pips{display:flex; gap:6px}
+  .pip{width:20px; height:20px; border-radius:50%; background:#0a0e16; border:1px solid #2a3140; transform:rotate(45deg); border-radius:4px}
+  .pip.on{background:var(--cp); border-color:#f0b070; box-shadow:0 0 8px #e8933d88}
+  .flowbox{display:flex; align-items:center; gap:8px; font:700 13px var(--mono)}
+  .flowbox .fl{color:var(--flow)} .flowbox .mul{color:var(--muted); font-weight:600; font-size:12px}
+
+  /* swing timing bar — the rhythm centerpiece */
+  #swingwrap{position:relative}
+  #swingwrap .lab{display:flex; justify-content:space-between; font:600 11px var(--mono); color:var(--muted); margin-bottom:4px}
+  #swingbar{height:24px; background:#0a0e16; border:1px solid #10151f; border-radius:6px; position:relative; overflow:hidden}
+  #swingbar .green{position:absolute; top:0; bottom:0; right:0; background:linear-gradient(90deg,#2f6a4400,#49c46a44); border-left:2px solid #49c46a88}
+  #swingbar .mark{position:absolute; top:0; bottom:0; width:3px; background:#fff; box-shadow:0 0 8px #fff; left:0}
+  #swingbar .msg{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:800 12px var(--mono); letter-spacing:2px; z-index:2; color:var(--dim)}
+  #swingbar.perfectzone .msg{color:var(--perfect); animation:flash .3s steps(2) infinite}
+  #swingbar.ready .msg{color:#cdd}
+
+  #dodgerow{display:flex; align-items:center; gap:12px}
+  .dpie{width:40px; height:40px; border-radius:50%; background:#0a0e16; border:1px solid var(--line); position:relative; flex:none}
+  .dpie .w{position:absolute; inset:2px; border-radius:50%}
+  .dpie.ready{border-color:var(--dodge); box-shadow:0 0 10px #57c7e055}
+  .dpie.active{border-color:#fff; box-shadow:0 0 16px var(--dodge)}
+  .dhint{font:600 11px var(--mono); color:var(--muted)} .dhint b{color:var(--dodge)}
+
+  .fct{position:absolute; font:800 17px var(--mono); pointer-events:none; z-index:6; animation:fct 1s ease-out forwards; text-shadow:0 1px 3px #000}
+  @keyframes fct{0%{opacity:0; transform:translateY(6px) scale(.8)}15%{opacity:1}100%{opacity:0; transform:translateY(-30px) scale(1.05)}}
+
+  #side{width:200px; display:flex; flex-direction:column; gap:10px}
+  .card{background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:11px}
+  .card h4{margin:0 0 8px; font:600 11px var(--mono); letter-spacing:1px; text-transform:uppercase; color:var(--muted)}
+  .stat{display:flex; justify-content:space-between; align-items:baseline; margin:5px 0; font-size:13px}
+  .stat b{font:700 15px var(--mono)} .kill{color:var(--gold)}
+  #log{flex:1; overflow:hidden; font:12px var(--mono); line-height:1.5; color:var(--muted); display:flex; flex-direction:column-reverse}
+  #log .hl{color:var(--ink)} #log .bad{color:var(--danger)} #log .good{color:var(--heal)} #log .dodge{color:var(--dodge)} #log .kick{color:var(--kick)} #log .crit{color:var(--gold)}
+
+  #bottom{display:flex; flex-direction:column; gap:8px}
+  #abilities{display:flex; gap:8px}
+  .ab{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:8px 6px 7px; position:relative; cursor:pointer; text-align:center; overflow:hidden; transition:border-color .1s}
+  .ab:hover{border-color:#3a5b8c}
+  .ab.dodgebtn{flex:0 0 110px; background:#0d1a22; border-color:#1d3a48}
+  .ab.dodgebtn.ready{border-color:var(--dodge)} .ab.dodgebtn.active{border-color:#fff; box-shadow:0 0 14px var(--dodge)}
+  .ab .key{position:absolute; top:4px; left:6px; font:700 11px var(--mono); color:var(--gold); z-index:2}
+  .ab .nm{font-size:13px; font-weight:600; margin-top:9px; position:relative; z-index:2}
+  .ab .meta{font:600 10px var(--mono); color:var(--muted); margin-top:3px; position:relative; z-index:2}
+  .ab .enc{color:var(--energy)}
+  .ab .cdsweep{position:absolute; inset:0; border-radius:9px; opacity:0; pointer-events:none; z-index:1}
+  .ab .cdnum{position:absolute; bottom:3px; right:6px; font:700 12px var(--mono); color:#eaf; opacity:0; text-shadow:0 1px 3px #000; z-index:2}
+  .ab.noenergy{opacity:.5} .ab.empty{opacity:.3; cursor:default; border-style:dashed}
+
+  #tooltip{position:fixed; display:none; transform:translate(-50%,-100%); z-index:50; pointer-events:none; width:235px; background:#0c1220; border:1px solid #2c3a52; border-radius:10px; padding:11px 13px; box-shadow:0 12px 30px #000a; text-align:left}
+  #tooltip .tt-name{font-weight:700; font-size:15px; color:#fff; margin-bottom:3px}
+  #tooltip .tt-stats{font:600 11px var(--mono); color:var(--gold); margin-bottom:7px}
+  #tooltip .tt-desc{font-size:12.5px; line-height:1.5; color:var(--muted)} #tooltip .tt-desc b{color:var(--ink)}
+
+  .overlay{position:absolute; inset:0; background:#070a11ee; z-index:30; display:flex; align-items:center; justify-content:center; border-radius:12px; backdrop-filter:blur(2px)}
+  .panel{width:min(600px,93%); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:26px 30px; text-align:center}
+  .panel h1{margin:0 0 6px; font-size:26px} .panel h1.win{color:var(--heal)} .panel h1.lose{color:var(--danger)}
+  .panel p{color:var(--muted); font-size:14px; line-height:1.6; margin:8px 0}
+  .panel .keys{font:12px var(--mono); color:var(--dim); background:#0a0e16; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:14px 0; text-align:left; line-height:1.9}
+  .panel .keys b{color:var(--gold)} .panel .keys .d{color:var(--dodge)} .panel .keys .k{color:var(--kick)} .panel .keys .g{color:var(--perfect)}
+  button.big{background:linear-gradient(180deg,#c9a23d,#8a6a1d); color:#111; border:0; padding:11px 26px; border-radius:9px; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px}
+  button.big:hover{filter:brightness(1.08)}
+  .choices{display:flex; gap:12px; margin-top:16px}
+  .choice{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:16px 12px; cursor:pointer; transition:.12s}
+  .choice:hover{border-color:var(--gold); transform:translateY(-3px)}
+  .choice .cty{font:600 9px var(--mono); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px}
+  .choice.spell .cty{color:var(--dodge)} .choice.upgrade .cty{color:var(--gold)} .choice.relic .cty{color:var(--kick)}
+  .choice .ct{font-weight:700; margin-bottom:6px; font-size:14px} .choice .cd{font-size:12px; color:var(--muted); line-height:1.5}
+  .ctrlbtn{background:#1a2436; color:var(--ink); border:1px solid var(--line); border-radius:7px; font:600 12px var(--mono); padding:5px 12px; cursor:pointer} .ctrlbtn:hover{border-color:#3a5b8c}
+  .hint{position:absolute; bottom:130px; left:50%; transform:translateX(-50%); background:#000c; color:#ffd; font:600 12px var(--mono); padding:6px 12px; border-radius:6px; opacity:0; transition:.2s; pointer-events:none; z-index:20}
+  .hint.show{opacity:1}
+
+  /* --- specs --- */
+  .who .spec{font:600 11px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--gold)}
+  .badge.tier{background:var(--perfect); color:#0b0f17} .badge.syn{background:var(--poison); color:#0b0f17}
+  #specrow{min-height:24px; display:flex; align-items:center; gap:10px; font:600 11px var(--mono)}
+  #specrow .rlab{color:var(--muted); min-width:64px}
+  /* tempo tiers */
+  .tiers{display:flex; gap:6px; align-items:center}
+  .tier{padding:3px 9px; border-radius:5px; background:#0a0e16; border:1px solid #26303f; color:var(--dim); font-size:10px; letter-spacing:.5px}
+  .tier.on{color:#0b0f17; background:var(--perfect); border-color:#9ff0c0; box-shadow:0 0 8px #7fe0a077}
+  .tiernote{margin-left:auto; color:var(--perfect)}
+  /* venom types */
+  .ptypes{display:flex; gap:7px}
+  .ptype{display:flex; align-items:center; gap:5px; padding:3px 8px; border-radius:5px; background:#0a0e16; border:1px solid #23301c}
+  .ptype .dot{width:9px; height:9px; border-radius:2px}
+  .ptype.vir .dot{background:#7fd44a} .ptype.fes .dot{background:#c98be0} .ptype.cri .dot{background:#e0b23a}
+  .ptype .n{color:var(--ink); font-size:12px} .ptype.off{opacity:.45}
+  .syn{margin-left:auto; padding:3px 9px; border-radius:5px; background:#0a0e16; border:1px solid #23301c; color:var(--dim)}
+  .syn.on{color:#0b0f17; background:var(--poison); border-color:#a6e878; box-shadow:0 0 10px #7fd44a66}
+  /* aspect cards reuse .choices/.choice; bigger */
+  .aspect{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:18px; cursor:pointer; transition:.14s; text-align:left}
+  .aspect:hover{transform:translateY(-4px)}
+  .aspect.tempo:hover{border-color:var(--perfect); box-shadow:0 10px 30px #7fe0a022}
+  .aspect.venom:hover{border-color:var(--poison); box-shadow:0 10px 30px #7fd44a22}
+  .aspect .an{font-size:18px; font-weight:700; margin-bottom:2px}
+  .aspect.tempo .an{color:var(--perfect)} .aspect.venom .an{color:var(--poison)}
+  .aspect .atl{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:10px}
+  .aspect .ad{font-size:13px; color:var(--muted); line-height:1.55} .aspect .ad b{color:var(--ink)}
+  .ab.maxflow{border-color:var(--perfect); box-shadow:0 0 14px #7fe0a044; background:#0e1c16}
+  .ab.canrupt{border-color:var(--poison); box-shadow:0 0 12px #7fd44a44}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="boss">
+    <div class="row">
+      <div class="name" id="bossname">The Warden</div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="phase" id="phase">Fight 1</div>
+        <button class="ctrlbtn" id="pauseBtn">Pause</button>
+      </div>
+    </div>
+    <div class="bossbar"><i id="bosshpfill"></i><div class="psn" id="bosspsn"></div><div class="bosshp" id="bosshptext"></div></div>
+    <div id="tele" class="idle">
+      <div class="fill" id="telefill"></div>
+      <div class="zone" id="telezone"></div>
+      <div class="label"><span class="tag" id="teletag">—</span><span class="sname" id="telename">circling you</span><span class="cd" id="telecd"></span></div>
+      <div class="prompt" id="teleprompt"></div>
+    </div>
+  </div>
+
+  <div id="you">
+    <div id="self">
+      <div class="who"><span class="nm">The Twinfang <span class="spec" id="specname"></span></span><span class="st" id="selfbadges"></span></div>
+      <div class="barwrap"><div class="lab"><span>Health</span><span></span></div>
+        <div class="bar"><div class="fill" id="hpfill"></div><div class="txt" id="hptxt"></div></div></div>
+      <div class="barwrap"><div class="lab"><span>Energy</span><span></span></div>
+        <div class="bar"><div class="fill" id="enfill"></div><div class="txt" id="entxt"></div></div></div>
+      <div class="cprow">
+        <div class="pips" id="pips"></div>
+        <div class="flowbox"><span class="fl" id="flowval">Flow 0</span><span class="mul" id="flowmul">+0%</span></div>
+      </div>
+      <div id="specrow"></div>
+      <div id="swingwrap">
+        <div class="lab"><span>Strike timing</span><span id="swinghelp">tap <b style="color:var(--perfect)">1</b> in the green</span></div>
+        <div id="swingbar" class="ready"><div class="green" id="swinggreen"></div><div class="mark" id="swingmark"></div><div class="msg" id="swingmsg">READY</div></div>
+      </div>
+      <div id="dodgerow">
+        <div class="dpie" id="dodgepie"><div class="w" id="dodgewedge"></div></div>
+        <div class="dhint">Tap <b>Space</b> to dodge a swing — getting hit resets your Flow</div>
+      </div>
+    </div>
+    <div id="side">
+      <div class="card">
+        <h4>Fight</h4>
+        <div class="stat"><span>Your DPS</span><b id="ydps">0</b></div>
+        <div class="stat"><span>Est. kill in</span><b class="kill" id="etk">—</b></div>
+      </div>
+      <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:0">
+        <h4>Combat log</h4><div id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom"><div id="abilities"></div></div>
+  <div class="hint" id="hint"></div>
+  <div id="tooltip"></div>
+
+  <div class="overlay" id="startOv">
+    <div class="panel">
+      <h1>The Twinfang</h1>
+      <p>You're the damage. Kill the boss before it grinds you out — and your damage is a <b style="color:var(--flow)">rhythm</b>, not a mash.</p>
+      <div class="keys">
+        <b>1</b> Strike — tap it <span class="g">as the bar hits the green zone</span> for a Perfect: harder hit, +2 combo, +Flow, faster swing<br>
+        <b>2</b> Eviscerate — spend combo points for burst (bigger with more points)<br>
+        <span class="k"><b>3</b> Kick</span> — interrupt the boss's heal cast (or it heals and the fight drags)<br>
+        <span class="d"><b>Space</b> Dodge</span> — evade a telegraphed swing. <b>Getting hit wipes your Flow.</b><br>
+        <span style="color:var(--flow)">Flow multiplies all your damage — chaining Perfects is the whole skill ceiling.</span>
+      </div>
+      <button class="big" id="startBtn">Choose your Aspect</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="aspectOv" style="display:none">
+    <div class="panel">
+      <h1 style="color:var(--gold)">Choose your Aspect</h1>
+      <p>Two ways to be the blade. This sets your signature mechanic and weights what you're offered between fights.</p>
+      <div class="choices">
+        <div class="aspect tempo" id="pickTempo">
+          <div class="an">Tempo</div><div class="atl">Flow escalation · rhythm</div>
+          <div class="ad">The rhythm virtuoso. As your <b>Flow</b> climbs, your kit <b>transforms</b> in tiers: Perfect Strikes start <b>double-hitting</b>, then refund energy and pour out extra combo — and at <b>max Flow</b> you unlock <b>Coup de Grâce</b>, a huge finisher that refeeds your combo so you can chain straight into another burst. Hold the solo, and the whole kit sings.</div>
+        </div>
+        <div class="aspect venom" id="pickVenom">
+          <div class="an">Venomancer</div><div class="atl">Status craft · detonate</div>
+          <div class="ad">Poisons come in three <b>types</b>: normal strikes apply <b>Crippling</b>, perfects apply <b>Virulent</b>, and Envenom lays <b>Festering</b> (which grows the longer it sits). Keep <b>all three</b> alive at once and <b>Toxic Synergy</b> ramps up. Then <b>Rupture</b> detonates the whole cocktail for a burst scaled by everything you've stacked. Setup and payoff, not execution — and it wants you to <i>mix</i> normal and perfect hits.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="draftOv" style="display:none">
+    <div class="panel"><h1 style="color:var(--gold)">Sharpen</h1><p id="draftSub">Take one before the next fight.</p><div class="choices" id="choices"></div></div>
+  </div>
+  <div class="overlay" id="endOv" style="display:none">
+    <div class="panel"><h1 id="endTitle"></h1><p id="endBody"></p><button class="big" id="againBtn">Run it back</button></div>
+  </div>
+  <div class="overlay" id="pauseOv" style="display:none">
+    <div class="panel"><h1>Paused</h1><p>Catch your breath.</p><button class="big" id="resumeBtn">Resume</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=n=>Math.round(n).toString();
+
+// ---------- Config ----------
+const HP_MAX=310, EN_MAX=100, EN_REGEN=20;
+const CP_MAX=5, FLOW_MAX=6, FLOW_PER=0.08;     // +8% dmg per flow
+const FLOW_DECAY_EVERY=2.4;                     // lose 1 flow every this many seconds without a perfect
+const SWING_MIN=0.42;                            // earliest you may strike (before = ignored)
+const PERFECT_START=0.60, PERFECT_END=0.95;     // striking in this band = Perfect; between SWING_MIN and here = fast-but-normal
+const DODGE_ACTIVE=0.55, DODGE_ZONE=0.42, DODGE_CD=2.4;
+// spec config
+const VEN_CAP=8;                 // per-type poison cap
+const SYN_CAP=1.8, SYN_RATE=0.14; // Toxic Synergy ramp cap + growth/sec
+
+// ---------- Abilities ----------
+const ABILITIES={
+  strike:{key:"1", name:"Strike", energy:12, dmg:19, cp:1,
+    tip:"Builder. <b>19</b> damage, +1 combo. Tap it in the <b>green window</b> for a <b>Perfect Strike</b>: 1.6× damage, +2 combo, +1 Flow. Strike too early (before the green) and you get a fast plain hit with no Flow — the skill is waiting for the beat, not mashing."},
+  eviscerate:{key:"2", name:"Eviscerate", energy:25, finisher:true, perCp:23,
+    tip:"Finisher. Spends all combo points for <b>23 damage each</b> (115 at 5), scaled by Flow. Your burst payoff."},
+  kick:{key:"3", name:"Kick", energy:10, cd:7, interrupt:true,
+    tip:"Interrupt on a 7s cooldown. Cancels the boss's cast if you hit it mid-cast (its self-heal). Whiffs if there's nothing to interrupt — read the purple bar."},
+  envenom:{key:"4", name:"Envenom", energy:25, finisher:true, poison:true, perCpStacks:1,
+    tip:"Poison finisher. Spends all combo points to apply that many <b>Venom</b> stacks (refreshing the DoT). The poison build's payoff — trade burst for sustained ticking damage."},
+  sliceanddice:{key:"5", name:"Flurry", energy:28, dmg:13, cp:2, hits:3,
+    tip:"Spends 28 energy for a 3-hit flurry: <b>39</b> total damage and <b>+2 combo</b> fast. A quick combo-point injection under pressure."},
+  coupdegrace:{key:"4", name:"Coup de Grâce", energy:30, cd:5, spec:"tempo",
+    tip:"Unlocked only at <b>max Flow</b>. A massive strike scaled by Flow that <b>refunds 3 combo</b> — Coup, then Eviscerate the refunded points, then keep the rhythm going. The capstone of the solo."},
+  rupture:{key:"4", name:"Rupture", energy:22, cd:3.5, spec:"venomancer",
+    tip:"Detonates <b>all</b> poison on the boss for a burst scaled by total stacks × Flow × your Synergy ramp. Layer the three types, let Synergy climb, and blow it at the peak."},
+};
+const START_LOADOUT=["strike","eviscerate","kick"];
+const SPELL_CAP=5;
+
+// ---------- Encounters ----------
+const ENCOUNTERS=[
+  {
+    id:"warden", name:"The Warden", hp:2800,
+    intro:"The Warden tests your rhythm. Dodge the Cleave, Kick its Mending, and keep your Flow alive between hits.",
+    enrage:{at:56},
+    phases:[{at:1,mult:1,speed:1},{at:0.4,mult:1.18,speed:1.15}],
+    actions:[
+      {id:"swipe", kind:"swing", name:"Swipe", tag:"Swing", tel:1.6, dmg:52, cd:4.6, jitter:1, dodgeable:true},
+      {id:"cleave", kind:"swing", name:"Cleave", tag:"Heavy Swing", tel:2.2, dmg:104, cd:8.5, jitter:1.5, dodgeable:true},
+      {id:"mend", kind:"cast", name:"Mending", tag:"Interrupt!", tel:2.3, heal:230, cd:12, jitter:2, interruptible:true},
+      {id:"hex", kind:"pulse", name:"Hex Bolt", tag:"Unavoidable", tel:1.3, dmg:26, cd:11, jitter:2},
+    ],
+  },
+  {
+    id:"executioner", name:"The Executioner", hp:3600,
+    intro:"Faster and it heals more. Your Flow will get wiped if you eat swings — dodge tight, kick every Mending, and burst it down before it enrages.",
+    enrage:{at:66},
+    phases:[{at:1,mult:1,speed:1},{at:0.5,mult:1.15,speed:1.1},{at:0.3,mult:1.3,speed:1.3}],
+    actions:[
+      {id:"swipe", kind:"swing", name:"Rend", tag:"Swing", tel:1.4, dmg:58, cd:4.0, jitter:.8, dodgeable:true},
+      {id:"cleave", kind:"swing", name:"Decapitate", tag:"Heavy Swing", tel:2.0, dmg:120, cd:7.5, jitter:1.3, dodgeable:true},
+      {id:"mend", kind:"cast", name:"Blood Ritual", tag:"Interrupt!", tel:2.0, heal:300, cd:10.5, jitter:1.5, interruptible:true},
+      {id:"hex", kind:"pulse", name:"Wither", tag:"Unavoidable", tel:1.2, dmg:30, cd:10, jitter:2},
+    ],
+  },
+];
+
+// ---------- State ----------
+let S;
+function newState(){
+  return {
+    running:false, paused:false, over:false, time:0, encIndex:0, spec:null,
+    boss:{hp:ENCOUNTERS[0].hp, def:ENCOUNTERS[0], poison:null, venom:null, enraged:false, enrageStacks:0, enrageTimer:0},
+    actionTimers:{}, tg:null,
+    player:{hp:HP_MAX, energy:EN_MAX, cp:0, flow:0, lastStrike:-99, lastPerfect:-99, flowDecay:0,
+      dodgeReadyAt:0, dodgingUntil:0},
+    cds:{}, loadout:[...START_LOADOUT], upgrades:{}, relics:{},
+    _ydps:0,
+  };
+}
+// ---------- Spec setup ----------
+function maxFlow(){ return FLOW_MAX + (S.upgrades.flowCap?2:0); }
+function flowTier(){ const f=S.player.flow, t1=(S.upgrades.encore?2:3); if(f>=maxFlow())return 3; if(f>=5)return 2; if(f>=t1)return 1; return 0; }
+function applySpec(spec){
+  S.spec=spec;
+  if(spec==="tempo"){ S.loadout=["strike","eviscerate","kick","coupdegrace"]; }
+  else { S.loadout=["strike","envenom","kick","rupture"]; }
+}
+function newVenom(){ return {V:0,F:0,C:0,fesElapsed:0,synRamp:1,synActive:false,tickAcc:0,decayAcc:0}; }
+function venomTotal(){ const v=S.boss.venom; return v?(v.V+v.F+v.C):0; }
+
+// ---------- Boss engine ----------
+function bossMax(){ return S.boss.def.hp; }
+function curPhaseIdx(){ const f=S.boss.hp/S.boss.def.hp, ph=S.boss.def.phases; let i=0; for(let k=0;k<ph.length;k++) if(f<=ph[k].at) i=k; return i; }
+function curPhase(){ return S.boss.def.phases[curPhaseIdx()]; }
+function phaseMult(){ return curPhase().mult; }
+function phaseNum(){ return curPhaseIdx()+1; }
+function initEncounter(def){
+  S.boss={hp:def.hp, def, poison:null, venom:(S.spec==="venomancer"?newVenom():null), enraged:false, enrageStacks:0, enrageTimer:0};
+  S.actionTimers={}; def.actions.forEach((a,i)=>{ S.actionTimers[a.id]=2 + i*1.6 + Math.random()*(a.cd*0.3); });
+  S.tg=null;
+}
+function bossThink(dt){
+  const def=S.boss.def, m=phaseMult(), speed=curPhase().speed;
+  // enrage
+  if(def.enrage){
+    if(!S.boss.enraged && S.time>=def.enrage.at){ S.boss.enraged=true; S.boss.enrageTimer=0; log(def.name+" ENRAGES — finish it!","bad"); }
+    if(S.boss.enraged){ S.boss.enrageTimer-=dt; if(S.boss.enrageTimer<=0){ S.boss.enrageTimer=1; S.boss.enrageStacks++; hitPlayer(16+S.boss.enrageStacks*7,false); } }
+  }
+  if(S.tg){ S.tg.elapsed+=dt; if(S.tg.elapsed>=S.tg.dur){ const cb=S.tg.onResolve; S.tg=null; cb(); } return; }
+  let due=null;
+  for(const a of def.actions){ S.actionTimers[a.id]-=dt;
+    if(S.actionTimers[a.id]<=0){ if(!due || (a.kind==="cast" && due.kind!=="cast")) due=a; } }
+  if(due){
+    S.actionTimers[due.id]=due.cd/speed + Math.random()*(due.jitter||0);
+    S.tg={ name:due.name, tag:due.tag, kind:due.kind, dur:due.tel, elapsed:0, dodgeable:!!due.dodgeable, interruptible:!!due.interruptible,
+      onResolve:()=>resolveAction(due, m) };
+  }
+}
+function resolveAction(a, m){
+  if(a.kind==="swing"){
+    if(a.dodgeable && S.time<S.player.dodgingUntil){ fctSelf("DODGE","var(--dodge)"); log("You slip the "+a.name+".","dodge"); if(S.relics.dodgeCp) gainCp(2); }
+    else { hitPlayer(Math.round(a.dmg*m), true); }
+  } else if(a.kind==="cast"){
+    // not interrupted (kick removes S.tg before resolve)
+    const h=Math.round(a.heal*m); S.boss.hp=Math.min(bossMax(), S.boss.hp+h); fctBoss("+"+h,"var(--heal)"); log(S.boss.def.name+" heals for "+h+" — kick it next time.","bad");
+  } else { // pulse
+    hitPlayer(Math.round(a.dmg*m), false);
+  }
+}
+
+// ---------- Player takes damage ----------
+function hitPlayer(dmg, resetsFlow){
+  if(S.spec==="venomancer" && S.relics.debilitate && S.boss.venom && S.boss.venom.C>0){
+    dmg=Math.round(dmg*(1-Math.min(0.30, S.boss.venom.C*0.04)));
+  }
+  S.player.hp-=dmg; fctSelf("−"+dmg,"var(--danger)");
+  const s=document.getElementById("self"); if(s){ s.classList.add("hurt"); setTimeout(()=>{ const x=document.getElementById("self"); if(x)x.classList.remove("hurt"); },300); }
+  if(resetsFlow && S.player.flow>0){ S.player.flow=0; log("Hit — Flow lost.","bad"); }
+  if(S.player.hp<=0){ S.player.hp=0; endGame(false,"You dropped. Either too many swings landed, or "+S.boss.def.name+" out-healed your damage while its cast went un-kicked."); }
+}
+
+// ---------- Player offense ----------
+function flowMult(){ return 1 + S.player.flow*FLOW_PER; }
+function gainCp(n){ S.player.cp=clamp(S.player.cp+n,0,CP_MAX); }
+function gainFlow(){ S.player.flow=clamp(S.player.flow+1,0,FLOW_MAX + (S.upgrades.flowCap?2:0)); S.player.lastPerfect=S.time; S.player.flowDecay=0; }
+function dealBoss(x, crit){
+  let d=x*flowMult();
+  if(S.relics.execute && S.boss.hp/bossMax()<0.35) d*=1.3;
+  if(crit) d*=2;
+  d=Math.round(d);
+  S.boss.hp=Math.max(0,S.boss.hp-d);
+  fctBoss((crit?"✦":"")+"−"+d, crit?"var(--gold)":"var(--gold)");
+  return d;
+}
+function tryStrike(){
+  if(!S.running||S.over||S.paused) return;
+  const a=ABILITIES.strike;
+  const since=S.time-S.player.lastStrike;
+  if(since<SWING_MIN){ return; } // too early — ignored
+  let cost=a.energy;
+  if(S.spec==="tempo" && S.relics.syncopation && S.player.flow>=maxFlow()) cost=0;
+  if(S.player.energy<cost){ hint("Out of energy"); return; }
+  const perfect = since>=PERFECT_START && since<=PERFECT_END; // in the green band
+  S.player.energy-=cost; S.player.lastStrike=S.time;
+  let base=a.dmg, cp=a.cp;
+  if(perfect){
+    base=Math.round(base*1.6); cp=2;
+    let crit=false;
+    if(S.relics.fifthCrit){ S.player.perfectCount=(S.player.perfectCount||0)+1; if(S.player.perfectCount%5===0) crit=true; }
+    dealBoss(base, crit); gainFlow(); fctSelf("PERFECT","var(--perfect)");
+    if(S.spec==="tempo"){ const t=flowTier();
+      if(t>=1) dealBoss(Math.round(a.dmg*0.6),false);        // Tier 1: extra partial hit
+      if(t>=2){ cp+=1; S.player.energy=clamp(S.player.energy+6,0,EN_MAX); } // Tier 2: +combo, refund
+    }
+    if(S.spec==="venomancer"){ applyVenom("V",1); if(S.relics.contagion) applyVenom(Math.random()<0.5?"F":"C",1); }
+    else if(S.relics.venomPerfect) applyPoison(1,4);
+  } else {
+    dealBoss(base,false);
+    if(S.spec==="venomancer") applyVenom("C",1);              // normal strike → Crippling
+  }
+  gainCp(cp);
+  if(S.upgrades.strikeEnergy && perfect) S.player.energy=clamp(S.player.energy+6,0,EN_MAX);
+}
+function tryEviscerate(){
+  if(!S.running||S.over||S.paused) return;
+  const a=ABILITIES.eviscerate; if(!S.loadout.includes("eviscerate")) return;
+  if(S.player.cp<1){ hint("No combo points"); return; }
+  if(S.player.energy<a.energy){ hint("Out of energy"); return; }
+  S.player.energy-=a.energy;
+  const cp=S.player.cp; let per=a.perCp+(S.upgrades.eviPlus?8:0);
+  dealBoss(per*cp,false);
+  log("Eviscerate — "+cp+" points spent.","hl");
+  S.player.cp=0;
+}
+function tryEnvenom(){
+  if(!S.loadout.includes("envenom")) return;
+  if(!S.running||S.over||S.paused) return;
+  const a=ABILITIES.envenom; if(S.player.cp<1){ hint("No combo points"); return; }
+  if(S.player.energy<a.energy){ hint("Out of energy"); return; }
+  S.player.energy-=a.energy; const cp=S.player.cp;
+  if(S.spec==="venomancer"){ applyVenom("F",cp); log("Envenom — "+cp+" Festering.","good"); }
+  else { applyPoison(cp*(a.perCpStacks||1), 8); log("Envenom — "+cp+" venom stacks.","good"); }
+  S.player.cp=0;
+}
+function applyVenom(type,n){ if(!S.boss.venom) S.boss.venom=newVenom(); S.boss.venom[type]=clamp(S.boss.venom[type]+n,0,VEN_CAP); }
+function tryCoup(){
+  if(!S.loadout.includes("coupdegrace")||!S.running||S.over||S.paused) return;
+  const a=ABILITIES.coupdegrace;
+  if((S.cds.coupdegrace||0)>S.time){ hint("Coup recharging"); return; }
+  if(S.player.flow<maxFlow()){ hint("Needs max Flow"); return; }
+  if(S.player.energy<a.energy){ hint("Out of energy"); return; }
+  S.player.energy-=a.energy; S.cds.coupdegrace=S.time+a.cd;
+  dealBoss(120*(S.upgrades.crescendo?1.4:1), false); gainCp(3);
+  log("Coup de Grâce! +3 combo.","hl"); fctSelf("COUP","var(--perfect)");
+}
+function tryRupture(){
+  if(!S.loadout.includes("rupture")||!S.running||S.over||S.paused) return;
+  const a=ABILITIES.rupture; const v=S.boss.venom; const total=venomTotal();
+  if((S.cds.rupture||0)>S.time){ hint("Rupture recharging"); return; }
+  if(total<1){ hint("No poison to detonate"); return; }
+  if(S.player.energy<a.energy){ hint("Out of energy"); return; }
+  S.player.energy-=a.energy; S.cds.rupture=S.time+a.cd;
+  const per=9*(S.relics.rupturing?1.4:1);
+  dealBoss(total*per*v.synRamp, false);
+  log("Rupture! "+total+" stacks ×"+v.synRamp.toFixed(2)+" synergy.","good"); fctBoss("RUPTURE","var(--poison)");
+  v.V=0; v.F=0; v.C=0; v.fesElapsed=0; v.synRamp=1; v.synActive=false;
+}
+function tryFlurry(){
+  if(!S.loadout.includes("sliceanddice")) return;
+  if(!S.running||S.over||S.paused) return;
+  const a=ABILITIES.sliceanddice; if(S.player.energy<a.energy){ hint("Out of energy"); return; }
+  S.player.energy-=a.energy; for(let i=0;i<a.hits;i++) dealBoss(a.dmg,false); gainCp(a.cp);
+}
+function applyPoison(stacks, dur){
+  const cap=8+(S.upgrades.venomCap?4:0);
+  if(!S.boss.poison) S.boss.poison={stacks:0, tick:0, left:0};
+  S.boss.poison.stacks=clamp(S.boss.poison.stacks+stacks,0,cap);
+  S.boss.poison.left=Math.max(S.boss.poison.left,dur);
+}
+// dodge
+function tryDodge(){
+  if(!S.running||S.over||S.paused) return;
+  if(S.player.dodgeReadyAt>S.time){ hint("Dodge recharging"); return; }
+  S.player.dodgingUntil=S.time+DODGE_ACTIVE; S.player.dodgeReadyAt=S.time+DODGE_CD;
+}
+// kick
+function tryKick(){
+  if(!S.running||S.over||S.paused) return;
+  const a=ABILITIES.kick; if(!S.loadout.includes("kick")) return;
+  if((S.cds.kick||0)>S.time){ hint("Kick recharging"); return; }
+  if(S.player.energy<a.energy){ hint("Out of energy"); return; }
+  S.player.energy-=a.energy; S.cds.kick=S.time+a.cd;
+  if(S.tg && S.tg.kind==="cast" && S.tg.interruptible){ const n=S.tg.name; S.tg=null; log("Kicked! Interrupted "+n+".","kick"); fctBoss("INTERRUPT","var(--kick)"); }
+  else { log("Kick finds nothing to interrupt.","dim"); }
+}
+
+// ---------- Loop ----------
+let last=0;
+function frame(t){
+  requestAnimationFrame(frame);
+  const now=t/1000; let dt=last?now-last:0; last=now; if(dt>0.1)dt=0.1;
+  if(S.running && !S.over && !S.paused) update(dt);
+  render();
+}
+function update(dt){
+  S.time+=dt;
+  S.player.energy=clamp(S.player.energy+EN_REGEN*dt,0,EN_MAX);
+  // flow decay
+  if(S.player.flow>0){ S.player.flowDecay+=dt; if(S.player.flowDecay>=FLOW_DECAY_EVERY*(S.relics.virtuoso?1.5:1)){ S.player.flowDecay=0; S.player.flow--; } }
+  // base poison tick (non-venomancer)
+  if(S.boss.poison && S.boss.poison.stacks>0){
+    S.boss.poison.left-=dt; S.boss.poison.tick+=dt;
+    if(S.boss.poison.tick>=1){ S.boss.poison.tick-=1; const pd=Math.round(S.boss.poison.stacks*(S.upgrades.venomHard?7:5)); S.boss.hp=Math.max(0,S.boss.hp-pd); fctBoss("-"+pd,"var(--poison)"); }
+    if(S.boss.poison.left<=0) S.boss.poison.stacks=0;
+  }
+  // venomancer typed poison + Toxic Synergy
+  if(S.spec==="venomancer" && S.boss.venom){
+    const v=S.boss.venom;
+    // stacks bleed off slowly — you must keep the cocktail alive, and they don't sit at cap
+    v.decayAcc+=dt; if(v.decayAcc>=3.0){ v.decayAcc-=3.0; if(v.V>0)v.V--; if(v.F>0)v.F--; if(v.C>0)v.C--; }
+    if(v.F>0) v.fesElapsed+=dt; else v.fesElapsed=0;
+    const three = v.V>0&&v.F>0&&v.C>0;
+    if(three){ v.synActive=true; v.synRamp=Math.min(SYN_CAP, v.synRamp + (S.upgrades.catalyst?SYN_RATE*1.6:SYN_RATE)*dt); }
+    else { v.synActive=false; v.synRamp=1; }
+    v.tickAcc+=dt;
+    if(v.tickAcc>=1){ v.tickAcc-=1; const pot=(S.upgrades.potent?1.3:1);
+      let dmg = v.V*1.8*pot + v.F*1.5*pot*(1+(S.upgrades.fastRot?0.20:0.12)*v.fesElapsed) + v.C*1.1*pot;
+      if(three) dmg += (v.V+v.F+v.C)*0.5*v.synRamp*pot;   // synergy is a chip bonus; Rupture is the payoff
+      dmg=Math.round(dmg); if(dmg>0){ S.boss.hp=Math.max(0,S.boss.hp-dmg); fctBoss("-"+dmg,"var(--poison)"); }
+    }
+  }
+  bossThink(dt);
+  if(S.boss.hp<=0){
+    if(S.encIndex>=ENCOUNTERS.length-1){ endGame(true,"Run cleared. Clean Flow, kicked heals, dodged the heavy swings — you out-paced two bosses that were built to grind you out."); }
+    else { S.running=false; log(S.boss.def.name+" falls!","good"); openDraft(); }
+    return;
+  }
+  tickDps(dt);
+}
+let _lastBossHp=null,_dpsSamples=[];
+function tickDps(dt){
+  if(_lastBossHp==null){ _lastBossHp=S.boss.hp; return; }
+  const dealt=Math.max(0,_lastBossHp-S.boss.hp); _lastBossHp=S.boss.hp;
+  _dpsSamples.push([dealt,dt]); if(_dpsSamples.length>80)_dpsSamples.shift();
+  let d=0,t=0; _dpsSamples.forEach(s=>{d+=s[0];t+=s[1];}); S._ydps=t>0?d/t:0;
+}
+
+// ---------- Render ----------
+function hpColor(f){ return f>0.5?"var(--hp)":f>0.25?"var(--hp-mid)":"var(--hp-low)"; }
+function render(){
+  const bmax=bossMax(), bf=clamp(S.boss.hp/bmax,0,1);
+  $("#bossname").textContent=S.boss.def.name;
+  $("#bosshpfill").style.width=(bf*100)+"%";
+  $("#bosshptext").textContent=fmt(S.boss.hp)+" / "+bmax;
+  const psn=$("#bosspsn"); let pStacks=0;
+  if(S.spec==="venomancer") pStacks=venomTotal(); else if(S.boss.poison) pStacks=S.boss.poison.stacks;
+  if(pStacks>0){ psn.style.display="block"; psn.style.width=Math.min(22,pStacks*1.6)+"%"; }
+  else psn.style.display="none";
+  $("#phase").textContent="Fight "+(S.encIndex+1)+"/"+ENCOUNTERS.length+" · Phase "+phaseNum()+(S.boss.enraged?" · ENRAGED":"");
+
+  // telegraph
+  const te=$("#tele");
+  if(S.tg){
+    const frac=S.tg.elapsed/S.tg.dur;
+    te.className=S.tg.kind;
+    $("#telefill").style.width=(frac*100)+"%";
+    $("#teletag").textContent=S.tg.tag; $("#telename").textContent=S.tg.name; $("#telecd").textContent=(S.tg.dur-S.tg.elapsed).toFixed(1)+"s";
+    if(S.tg.kind==="swing" && S.tg.dodgeable){
+      $("#telezone").style.width=(DODGE_ZONE/S.tg.dur*100)+"%"; te.classList.add("armed");
+      const inZone=(S.tg.dur-S.tg.elapsed)<=DODGE_ZONE;
+      te.classList.toggle("dodgenow", inZone && S.player.dodgeReadyAt<=S.time);
+      $("#teleprompt").textContent="DODGE";
+    } else if(S.tg.kind==="cast"){
+      te.classList.add("kicknow"); $("#teleprompt").textContent="KICK";
+    }
+  } else {
+    te.className="idle"; $("#telefill").style.width="0%"; $("#teletag").textContent="—"; $("#telename").textContent="circling you"; $("#telecd").textContent="";
+  }
+
+  // self bars
+  const hpF=clamp(S.player.hp/HP_MAX,0,1);
+  $("#hpfill").style.width=(hpF*100)+"%"; $("#hpfill").style.background=hpColor(hpF); $("#hptxt").textContent=fmt(S.player.hp)+" / "+HP_MAX;
+  $("#enfill").style.width=(S.player.energy/EN_MAX*100)+"%"; $("#entxt").textContent=fmt(S.player.energy)+" / "+EN_MAX;
+  // combo pips
+  const pips=$("#pips"); if(pips.children.length!==CP_MAX){ pips.innerHTML=""; for(let i=0;i<CP_MAX;i++){ const d=document.createElement("div"); d.className="pip"; pips.appendChild(d);} }
+  for(let i=0;i<CP_MAX;i++) pips.children[i].className="pip"+(i<S.player.cp?" on":"");
+  // flow
+  $("#flowval").textContent="Flow "+S.player.flow;
+  $("#flowmul").textContent="+"+Math.round(S.player.flow*FLOW_PER*100)+"% dmg";
+  // badges
+  let b="";
+  if(S.spec==="tempo"){ const t=flowTier(); if(t>=3) b+='<span class="badge tier">Transcendent</span>'; else if(t>=2) b+='<span class="badge tier">Crescendo</span>'; else if(t>=1) b+='<span class="badge tier">Driving</span>'; }
+  else if(S.player.flow>=4) b+='<span class="badge flow">In Flow</span>';
+  if(S.spec==="venomancer" && S.boss.venom && S.boss.venom.synActive) b+='<span class="badge syn">Synergy ×'+S.boss.venom.synRamp.toFixed(1)+'</span>';
+  if(S.time<S.player.dodgingUntil) b+='<span class="badge dodge">Dodging</span>';
+  $("#selfbadges").innerHTML=b;
+  renderSpecRow();
+
+  // swing timing bar
+  const since=S.time-S.player.lastStrike;
+  const sb=$("#swingbar");
+  // bar fills 0..1 over PERFECT_END; green zone = [SWING_MIN, PERFECT_END]
+  const prog=clamp(since/PERFECT_END,0,1);
+  $("#swingmark").style.left=(prog*100)+"%";
+  const gStart=PERFECT_START/PERFECT_END; $("#swinggreen").style.left=(gStart*100)+"%"; $("#swinggreen").style.width=((1-gStart)*100)+"%";
+  const inGreen = since>=PERFECT_START && since<=PERFECT_END;
+  const rdy = since>PERFECT_END;
+  sb.className = inGreen?"perfectzone":(rdy?"ready":"");
+  $("#swingmsg").textContent = inGreen?"STRIKE!":(rdy?"late":"…");
+
+  // dodge pie
+  const dLeft=Math.max(0,S.player.dodgeReadyAt-S.time), dFrac=clamp(dLeft/DODGE_CD,0,1);
+  const dp=$("#dodgepie"), dw=$("#dodgewedge");
+  if(S.time<S.player.dodgingUntil){ dp.className="dpie active"; dw.style.background="var(--dodge)"; }
+  else if(dFrac>0){ dp.className="dpie"; const deg=dFrac*360; dw.style.background="conic-gradient(#2a3646 "+deg+"deg,#0a0e16 "+deg+"deg 360deg)"; }
+  else { dp.className="dpie ready"; dw.style.background="transparent"; }
+
+  $("#ydps").textContent=fmt(S._ydps); const etk=(S._ydps>0)?(S.boss.hp/S._ydps):Infinity;
+  $("#etk").textContent=isFinite(etk)?etk.toFixed(0)+"s":"—";
+  abRender();
+}
+function renderSpecRow(){
+  const row=$("#specrow"); if(!S.spec){ row.innerHTML=""; return; }
+  if(S.spec==="tempo"){
+    if(row.dataset.spec!=="tempo"){ row.dataset.spec="tempo"; row.innerHTML='<span class="rlab">Flow tiers</span><div class="tiers" id="tiers"><div class="tier">Double-hit</div><div class="tier">Energy + combo</div><div class="tier">Coup ready</div></div><span class="tiernote" id="tiernote"></span>'; }
+    const t=flowTier(), els=$("#tiers").children;
+    for(let i=0;i<3;i++) els[i].className="tier"+(t>=i+1?" on":"");
+    $("#tiernote").textContent = t>=3?"MAX — press 4":"";
+  } else if(S.spec==="venomancer"){
+    if(row.dataset.spec!=="venom"){ row.dataset.spec="venom"; row.innerHTML='<span class="rlab">Poisons</span><div class="ptypes"><div class="ptype vir" id="ptV"><span class="dot"></span><span class="n">V <b id="pV">0</b></span></div><div class="ptype fes" id="ptF"><span class="dot"></span><span class="n">F <b id="pF">0</b></span></div><div class="ptype cri" id="ptC"><span class="dot"></span><span class="n">C <b id="pC">0</b></span></div></div><span class="syn" id="synbox">Synergy —</span>'; }
+    const v=S.boss.venom||newVenom();
+    $("#pV").textContent=v.V; $("#pF").textContent=v.F; $("#pC").textContent=v.C;
+    $("#ptV").classList.toggle("off",v.V===0); $("#ptF").classList.toggle("off",v.F===0); $("#ptC").classList.toggle("off",v.C===0);
+    const sb=$("#synbox"); sb.className="syn"+(v.synActive?" on":""); sb.textContent=v.synActive?("Synergy ×"+v.synRamp.toFixed(1)):"Synergy —";
+  }
+}
+function abRender(){
+  S.loadout.forEach(name=>{
+    const el=abEls[name]; if(!el) return; const a=ABILITIES[name];
+    let remain=0,total=1,show=false;
+    if(a.cd && (S.cds[name]||0)>S.time){ remain=S.cds[name]-S.time; total=a.cd; show=true; }
+    if(show){ const deg=clamp(remain/total,0,1)*360; el.sweep.style.background="conic-gradient(rgba(6,9,16,.66) "+deg+"deg,transparent "+deg+"deg 360deg)"; el.sweep.style.opacity=1; el.num.textContent=Math.ceil(remain); el.num.style.opacity=1; }
+    else { el.sweep.style.opacity=0; el.num.style.opacity=0; }
+    el.root.classList.toggle("noenergy", S.player.energy<a.energy);
+    if(name==="coupdegrace") el.root.classList.toggle("maxflow", S.player.flow>=maxFlow() && (S.cds.coupdegrace||0)<=S.time);
+    if(name==="rupture") el.root.classList.toggle("canrupt", venomTotal()>0 && (S.cds.rupture||0)<=S.time);
+  });
+  const db=abEls.__dodge;
+  if(db){
+    if(S.time<S.player.dodgingUntil) db.root.className="ab dodgebtn active";
+    else if(S.player.dodgeReadyAt<=S.time) db.root.className="ab dodgebtn ready";
+    else db.root.className="ab dodgebtn";
+    const dLeft=Math.max(0,S.player.dodgeReadyAt-S.time), dFrac=clamp(dLeft/DODGE_CD,0,1);
+    if(dFrac>0){ const deg=dFrac*360; db.sweep.style.background="conic-gradient(rgba(6,9,16,.66) "+deg+"deg,transparent "+deg+"deg 360deg)"; db.sweep.style.opacity=1; }
+    else db.sweep.style.opacity=0;
+  }
+}
+
+// ---------- FCT + log ----------
+function fctBoss(txt,color){ spawn($("#boss"),txt,color,30+Math.random()*40,55); }
+function fctSelf(txt,color){ spawn($("#self"),txt,color,30+Math.random()*40,30); }
+function spawn(p,txt,color,l,t){ const d=document.createElement("div"); d.className="fct"; d.textContent=txt; d.style.color=color; d.style.left=l+"%"; d.style.top=t+"%"; p.appendChild(d); setTimeout(()=>d.remove(),1000); }
+function log(msg,cls){ const d=document.createElement("div"); if(cls)d.className=cls; d.textContent=msg; const L=$("#log"); L.prepend(d); while(L.children.length>40) L.lastChild.remove(); }
+let hintT; function hint(m){ const h=$("#hint"); h.textContent=m; h.classList.add("show"); clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove("show"),900); }
+
+// ---------- Build abilities ----------
+const abEls={};
+function buildAbilities(){
+  const bar=$("#abilities"); bar.innerHTML=""; for(const k in abEls) delete abEls[k];
+  const d=document.createElement("div"); d.className="ab dodgebtn";
+  d.innerHTML='<div class="cdsweep"></div><span class="key">Spc</span><div class="nm" style="color:var(--dodge)">Dodge</div><div class="meta">'+DODGE_CD+'s cd</div>';
+  bar.appendChild(d); abEls.__dodge={root:d, sweep:d.querySelector(".cdsweep")};
+  d.addEventListener("click",tryDodge);
+  d.addEventListener("mouseenter",()=>showTipRaw("Dodge","timed · "+DODGE_CD+"s cd","Evade a telegraphed swing. Getting hit by a swing wipes your Flow, so dodging protects your damage as much as your health.",d));
+  d.addEventListener("mouseleave",hideTip);
+  S.loadout.forEach(name=>{
+    const a=ABILITIES[name]; const el=document.createElement("div"); el.className="ab";
+    el.innerHTML='<div class="cdsweep"></div><span class="cdnum"></span><span class="key">'+a.key+'</span><div class="nm">'+a.name+'</div><div class="meta">'+abMeta(a)+'</div>';
+    bar.appendChild(el); abEls[name]={root:el, sweep:el.querySelector(".cdsweep"), num:el.querySelector(".cdnum")};
+    el.addEventListener("click",()=>dispatch(name));
+    el.addEventListener("mouseenter",()=>showTip(name,el)); el.addEventListener("mouseleave",hideTip);
+  });
+  for(let i=S.loadout.length;i<SPELL_CAP;i++){ const el=document.createElement("div"); el.className="ab empty"; el.innerHTML='<div class="nm">—</div><div class="meta">empty</div>'; bar.appendChild(el); }
+}
+function dispatch(name){
+  if(name==="strike") tryStrike(); else if(name==="eviscerate") tryEviscerate();
+  else if(name==="kick") tryKick(); else if(name==="envenom") tryEnvenom(); else if(name==="sliceanddice") tryFlurry();
+  else if(name==="coupdegrace") tryCoup(); else if(name==="rupture") tryRupture();
+}
+function abMeta(a){ const p=[]; if(a.spec==="tempo") p.push("max Flow"); else if(a.spec==="venomancer") p.push("detonate"); else if(a.finisher) p.push("finisher"); else if(a.dmg) p.push(a.dmg*(a.hits||1)+" dmg"); if(a.energy) p.push('<span class="enc">'+a.energy+'e</span>'); return p.join(" · "); }
+function statsLine(a){ const p=[]; p.push(a.energy+" energy"); if(a.cd) p.push(a.cd+"s cd"); if(a.finisher) p.push("spends combo"); return p.join("  ·  "); }
+function showTip(name,el){ const a=ABILITIES[name]; showTipRaw(a.name, statsLine(a), a.tip, el); }
+function showTipRaw(n,s,desc,el){ const tip=$("#tooltip"); tip.innerHTML='<div class="tt-name">'+n+'</div><div class="tt-stats">'+s+'</div><div class="tt-desc">'+desc+'</div>'; const r=el.getBoundingClientRect(); tip.style.left=(r.left+r.width/2)+"px"; tip.style.top=(r.top-10)+"px"; tip.style.display="block"; }
+function hideTip(){ $("#tooltip").style.display="none"; }
+
+// ---------- Draft (Aspect-weighted) ----------
+const SHARED=[
+  {type:"upgrade", id:"flowCap", t:"Momentum", d:"Flow cap +2 — higher ceiling for every Flow bonus.", ok:()=>!S.upgrades.flowCap, apply:()=>S.upgrades.flowCap=true},
+  {type:"upgrade", id:"strikeEnergy", t:"Efficiency", d:"Perfect Strikes refund 6 energy — sustain the rhythm longer.", ok:()=>!S.upgrades.strikeEnergy, apply:()=>S.upgrades.strikeEnergy=true},
+  {type:"relic", id:"dodgeCp", t:"Riposte", d:"Every dodge grants 2 combo points — dodging feeds your rotation.", ok:()=>!S.relics.dodgeCp, apply:()=>S.relics.dodgeCp=true},
+  {type:"relic", id:"execute", t:"Finish It", d:"Below 35% boss HP, your damage is +30%.", ok:()=>!S.relics.execute, apply:()=>S.relics.execute=true},
+  {type:"spell", id:"sliceanddice", t:"Flurry", d:"New spell: 28 energy for a 3-hit, +2 combo burst. Fast points under pressure.", ok:()=>S.loadout.length<SPELL_CAP&&!S.loadout.includes("sliceanddice"), apply:()=>addSpell("sliceanddice")},
+];
+const TEMPO_REWARDS=[
+  {type:"upgrade", id:"encore", t:"Encore", d:"Double-hit (Tier 1) kicks in at Flow 2 instead of 3.", ok:()=>!S.upgrades.encore, apply:()=>S.upgrades.encore=true},
+  {type:"upgrade", id:"crescendo", t:"Crescendo", d:"Coup de Grâce hits 40% harder.", ok:()=>!S.upgrades.crescendo, apply:()=>S.upgrades.crescendo=true},
+  {type:"upgrade", id:"eviPlus", t:"Deep Cuts", d:"Eviscerate deals +8 damage per combo point.", ok:()=>S.loadout.includes("eviscerate")&&!S.upgrades.eviPlus, apply:()=>S.upgrades.eviPlus=true},
+  {type:"relic", id:"syncopation", t:"Syncopation", d:"At max Flow, your Strikes cost no energy — ride the solo forever.", ok:()=>!S.relics.syncopation, apply:()=>S.relics.syncopation=true},
+  {type:"relic", id:"virtuoso", t:"Virtuoso", d:"Flow decays 50% slower between Perfects.", ok:()=>!S.relics.virtuoso, apply:()=>S.relics.virtuoso=true},
+  {type:"relic", id:"fifthCrit", t:"Killer's Eye", d:"Every 5th Perfect Strike is a guaranteed crit.", ok:()=>!S.relics.fifthCrit, apply:()=>S.relics.fifthCrit=true},
+];
+const VENOM_REWARDS=[
+  {type:"upgrade", id:"potent", t:"Potent Toxins", d:"All poison ticks 30% harder.", ok:()=>!S.upgrades.potent, apply:()=>S.upgrades.potent=true},
+  {type:"upgrade", id:"fastRot", t:"Fast Rot", d:"Festering grows faster the longer it sits.", ok:()=>!S.upgrades.fastRot, apply:()=>S.upgrades.fastRot=true},
+  {type:"upgrade", id:"catalyst", t:"Catalyst", d:"Toxic Synergy ramps up 60% faster.", ok:()=>!S.upgrades.catalyst, apply:()=>S.upgrades.catalyst=true},
+  {type:"relic", id:"rupturing", t:"Rupturing Blades", d:"Rupture detonates for 40% more.", ok:()=>!S.relics.rupturing, apply:()=>S.relics.rupturing=true},
+  {type:"relic", id:"contagion", t:"Contagion", d:"Perfect Strikes also apply a random second poison type — easier to keep all three live.", ok:()=>!S.relics.contagion, apply:()=>S.relics.contagion=true},
+  {type:"relic", id:"debilitate", t:"Debilitate", d:"Crippling stacks reduce the boss's damage to you (up to 30%).", ok:()=>!S.relics.debilitate, apply:()=>S.relics.debilitate=true},
+];
+function specPool(){ return S.spec==="tempo"?TEMPO_REWARDS:VENOM_REWARDS; }
+function addSpell(id){ if(!S.loadout.includes(id)&&S.loadout.length<SPELL_CAP){ S.loadout.push(id); buildAbilities(); } }
+function openDraft(){
+  $("#draftSub").textContent=S.boss.def.name+" falls. Take one — your Aspect's picks are weighted in.";
+  const sp=specPool().filter(r=>r.ok()), sh=SHARED.filter(r=>r.ok());
+  const spShuf=[...sp].sort(()=>Math.random()-0.5), shShuf=[...sh].sort(()=>Math.random()-0.5);
+  let pick=[...spShuf.slice(0,2)]; const rest=[...shShuf,...spShuf.slice(2)];
+  while(pick.length<3 && rest.length) pick.push(rest.shift());
+  const box=$("#choices"); box.innerHTML="";
+  pick.slice(0,3).forEach(r=>{ const c=document.createElement("div"); c.className="choice "+r.type;
+    c.innerHTML='<div class="cty">'+r.type+'</div><div class="ct">'+r.t+'</div><div class="cd">'+r.d+'</div>';
+    c.addEventListener("click",()=>{ r.apply(); log("Sharpened: "+r.t,"good"); $("#draftOv").style.display="none"; startEncounter(S.encIndex+1); });
+    box.appendChild(c); });
+  S.running=false; $("#draftOv").style.display="flex";
+}
+
+// ---------- Flow control ----------
+function endGame(win,msg){ if(S.over)return; S.over=true; S.running=false;
+  $("#endTitle").textContent=win?"Run cleared":"Defeated"; $("#endTitle").className=win?"win":"lose";
+  $("#endBody").textContent=msg+"  (Time: "+Math.round(S.time)+"s.)"; $("#endOv").style.display="flex"; }
+function startEncounter(i){
+  S.encIndex=i; const def=ENCOUNTERS[i]; initEncounter(def);
+  S.player.hp=HP_MAX; S.player.energy=EN_MAX; S.player.cp=0; S.player.flow=0; S.player.lastStrike=-99; S.player.lastPerfect=-99; S.player.flowDecay=0; S.player.perfectCount=0;
+  S.player.dodgeReadyAt=0; S.player.dodgingUntil=0; S.cds={}; S.time=0; _lastBossHp=null; _dpsSamples=[]; S._ydps=0;
+  S.paused=false; $("#pauseOv").style.display="none"; $("#pauseBtn").textContent="Pause";
+  buildAbilities(); log(def.intro,"hl"); S.running=true;
+}
+function startGame(spec){
+  S=newState(); applySpec(spec);
+  $("#specname").textContent="· "+(spec==="tempo"?"Tempo":"Venomancer");
+  buildAbilities();
+  $("#startOv").style.display="none"; $("#aspectOv").style.display="none"; $("#endOv").style.display="none"; $("#draftOv").style.display="none"; $("#pauseOv").style.display="none";
+  $("#log").innerHTML=""; $("#pauseBtn").textContent="Pause"; startEncounter(0);
+}
+function setPause(p){ if(!S.running||S.over)return; S.paused=p; $("#pauseOv").style.display=p?"flex":"none"; $("#pauseBtn").textContent=p?"Resume":"Pause"; }
+function togglePause(){ setPause(!S.paused); }
+
+// ---------- Input ----------
+document.addEventListener("keydown",e=>{
+  if(!S) return; const k=e.key.toLowerCase();
+  if(k===" "||e.code==="Space"){ e.preventDefault(); tryDodge(); return; }
+  if(k==="p"||k==="escape"){ e.preventDefault(); togglePause(); return; }
+  if(!S.running||S.paused) return;
+  const name=S.loadout.find(n=>ABILITIES[n].key===k);
+  if(name){ e.preventDefault(); dispatch(name); }
+});
+$("#startBtn").addEventListener("click",()=>{ $("#startOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pickTempo").addEventListener("click",()=>startGame("tempo"));
+$("#pickVenom").addEventListener("click",()=>startGame("venomancer"));
+$("#againBtn").addEventListener("click",()=>{ $("#endOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pauseBtn").addEventListener("click",togglePause);
+$("#resumeBtn").addEventListener("click",()=>setPause(false));
+
+S=newState(); render();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

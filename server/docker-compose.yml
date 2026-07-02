@@ -1,0 +1,24 @@
+# Project Rift — dedicated server (R2).
+#   From the REPO ROOT:   docker compose -f server/docker-compose.yml up -d --build
+# The same file runs unchanged on your desktop, a LAN box, or any VPS (OVH etc.).
+services:
+  rift-server:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    container_name: rift-server
+    restart: unless-stopped
+    ports:
+      - "9077:9077"
+    environment:
+      - PORT=9077
+
+  # Browser (WASM) clients on an https page need wss:// — put a TLS front on the
+  # server. Easiest: a Cloudflare Tunnel (free, no ports to open). Uncomment, set
+  # your token, and point the tunnel at http://rift-server:9077.
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   restart: unless-stopped
+  #   command: tunnel run --token ${CF_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - rift-server

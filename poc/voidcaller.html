@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift · Voidcaller — interrupt-caster DPS, two Aspects</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0e131f; --line:#1e2838;
+    --ink:#e6ecf5; --muted:#8695ac; --dim:#5b6b84;
+    --hp:#49c46a; --hp-mid:#e0b23a; --hp-low:#d9483f;
+    --focus:#4aa6e0; --focus2:#1d4c7a;
+    --gold:#e8c86a; --danger:#e0574c; --heal:#6fe0a0;
+    --int:#b48ee8; --intzone:#c9a6ee; --silence:#7fd6c4; --backlash:#e88ea8; --expose:#e0904a;
+    --cast:#8a5bd6; --font:"Segoe UI",system-ui,sans-serif; --mono:"SFMono-Regular",ui-monospace,"Consolas",monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 700px at 50% -10%, #16203209, #070a11 70%), var(--bg);
+    color:var(--ink); font-family:var(--font); user-select:none; -webkit-user-select:none;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  #app{width:min(1100px,98vw); height:min(784px,98vh); position:relative; display:flex; flex-direction:column; gap:11px; padding:14px;}
+
+  #boss{background:linear-gradient(180deg,#161d2e,#10151f); border:1px solid var(--line); border-radius:10px; padding:12px 14px; position:relative}
+  #boss.exposed{box-shadow:inset 0 0 0 2px #e0904a55, 0 0 24px #e0904a22}
+  #boss .row{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px}
+  #boss .name{font-size:19px; font-weight:700}
+  #boss .exptag{font:700 10px var(--mono); color:var(--expose); text-transform:uppercase; letter-spacing:1px; margin-left:8px}
+  #boss .siltag{font:700 10px var(--mono); color:var(--silence); text-transform:uppercase; letter-spacing:1px; margin-left:8px}
+  #boss .phase{font:600 11px var(--mono); color:var(--gold); letter-spacing:1px; text-transform:uppercase}
+  .bossbar{height:16px; background:#0a0e16; border:1px solid #2a2016; border-radius:5px; overflow:hidden; position:relative}
+  .bossbar > i{display:block; height:100%; background:linear-gradient(90deg,#8a2b22,#c9463a); transition:width .12s linear}
+  .bosshp{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:600 11px var(--mono); color:#ffe; text-shadow:0 1px 2px #000}
+
+  /* boss cast telegraph */
+  #tele{margin-top:10px; height:42px; background:#0a0e16; border:1px solid var(--line); border-radius:7px; position:relative; overflow:hidden}
+  #tele .fill{position:absolute; left:0; top:0; bottom:0; width:0%; transition:width .05s linear; background:linear-gradient(90deg,#3d2a6e,#8a5bd6)}
+  #tele.mend .fill{background:linear-gradient(90deg,#1d5a3a,#3fb87a)}
+  #tele.nova .fill{background:linear-gradient(90deg,#6e241d,#e0574c)}
+  #tele.empower .fill{background:linear-gradient(90deg,#6e4a1d,#e0a83d)}
+  #tele.channel .fill{background:linear-gradient(90deg,#4a2a2a,#a05a5a)}
+  #tele.pulse .fill{background:linear-gradient(90deg,#5a5a1e,#c9c246)}
+  #tele .zone{position:absolute; top:0; bottom:0; right:0; background:repeating-linear-gradient(45deg,#b48ee833,#b48ee833 6px,#b48ee822 6px,#b48ee822 12px); border-left:2px dashed var(--int); display:none}
+  #tele.armed .zone{display:block}
+  #tele .label{position:absolute; inset:0; display:flex; align-items:center; gap:10px; padding:0 14px; z-index:2}
+  #tele .tag{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; padding:2px 7px; border-radius:4px; background:#00000066}
+  #tele .sname{font:700 14px var(--font); color:#fff; text-shadow:0 1px 2px #000}
+  #tele .cd{margin-left:auto; font:700 13px var(--mono); color:#fff}
+  #tele .prompt{position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:3; font:800 15px var(--mono); letter-spacing:3px; text-shadow:0 0 10px var(--int),0 1px 2px #000}
+  #tele.intnow .prompt{display:flex; color:#e6ccff; animation:flash .4s steps(2) infinite}
+  @keyframes flash{50%{opacity:.35}}
+  #tele.idle .label .sname{color:var(--dim)}
+
+  #you{flex:1; display:flex; gap:12px; min-height:0}
+  #self{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:15px 18px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:11px}
+  #self.shield{box-shadow:inset 0 0 0 2px #4aa6e055, 0 0 22px #4aa6e022}
+  #self.hurt{animation:hurt .3s} @keyframes hurt{0%{box-shadow:inset 0 0 0 3px #e0574c}100%{}}
+  #self .who{display:flex; align-items:center; justify-content:space-between}
+  #self .who .nm{font-size:20px; font-weight:700}
+  #self .who .spec{font:600 11px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--gold)}
+  .st{display:flex; gap:6px}
+  .badge{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; padding:3px 8px; border-radius:5px}
+  .badge.shield{background:var(--focus); color:#0b0f17} .badge.instant{background:var(--gold); color:#0b0f17}
+  .barwrap{display:flex; flex-direction:column; gap:4px}
+  .barwrap .lab{display:flex; justify-content:space-between; font:600 11px var(--mono); color:var(--muted)}
+  .bigbar{height:18px; background:#0a0e16; border:1px solid #10151f; border-radius:5px; position:relative; overflow:hidden}
+  .bigbar > .fill{position:absolute; left:0; top:0; bottom:0; transition:width .1s linear, background .2s}
+  .bigbar > .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 10px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:2}
+  #hpfill{background:var(--hp)} #focusfill{background:linear-gradient(90deg,var(--focus2),var(--focus))}
+
+  /* player cast bar */
+  #pcast{height:20px; background:#0a0e16; border:1px solid #241a3a; border-radius:5px; position:relative; overflow:hidden; opacity:.5}
+  #pcast.on{opacity:1; border-color:#4a3a7a}
+  #pcast .pf{position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#3d2a6e,#8a5bd6); transition:width .05s linear}
+  #pcast .pt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 10px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:2}
+  #pcast.push .pf{background:linear-gradient(90deg,#6e3a1d,#e0904a)}
+
+  /* spec resource row */
+  #specrow{min-height:24px; display:flex; align-items:center; gap:10px}
+  #specrow .rlab{font:600 11px var(--mono); color:var(--muted); min-width:66px}
+  .cpips{display:flex; gap:6px}
+  .cpip{width:18px; height:18px; background:#0a0e16; border:1px solid #4a2838; transform:rotate(45deg); border-radius:4px}
+  .cpip.on{background:var(--backlash); border-color:#f0a8bc; box-shadow:0 0 8px #e88ea888}
+  .silmeter{flex:1; height:19px; background:#0a0e16; border:1px solid #1c3a34; border-radius:5px; position:relative; overflow:hidden}
+  .silmeter .sf{position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#1c5a4e,var(--silence)); transition:width .1s linear}
+  .silmeter .stxt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 10px var(--mono); color:#fff; text-shadow:0 1px 2px #000; z-index:2}
+
+  #intState{display:flex; align-items:center; gap:12px}
+  .ipie{width:40px; height:40px; border-radius:50%; background:#0a0e16; border:1px solid var(--line); position:relative; flex:none}
+  .ipie .w{position:absolute; inset:2px; border-radius:50%}
+  .ipie.ready{border-color:var(--int); box-shadow:0 0 10px #b48ee855}
+  .ipie.armed{border-color:#fff; box-shadow:0 0 14px var(--int)}
+  .ihint{font:600 11px var(--mono); color:var(--muted)} .ihint b{color:var(--int)}
+
+  .fct{position:absolute; font:800 17px var(--mono); pointer-events:none; z-index:6; animation:fct 1s ease-out forwards; text-shadow:0 1px 3px #000}
+  @keyframes fct{0%{opacity:0; transform:translateY(6px) scale(.8)}15%{opacity:1}100%{opacity:0; transform:translateY(-30px) scale(1.05)}}
+
+  #side{width:200px; display:flex; flex-direction:column; gap:10px}
+  .card{background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:11px}
+  .card h4{margin:0 0 8px; font:600 11px var(--mono); letter-spacing:1px; text-transform:uppercase; color:var(--muted)}
+  .stat{display:flex; justify-content:space-between; align-items:baseline; margin:5px 0; font-size:13px}
+  .stat b{font:700 15px var(--mono)} .kill{color:var(--gold)}
+  #log{flex:1; overflow:hidden; font:12px var(--mono); line-height:1.5; color:var(--muted); display:flex; flex-direction:column-reverse}
+  #log .hl{color:var(--ink)} #log .bad{color:var(--danger)} #log .good{color:var(--heal)} #log .int{color:var(--int)} #log .sil{color:var(--silence)} #log .dim{color:var(--dim)}
+
+  #bottom{display:flex; flex-direction:column; gap:8px}
+  #abilities{display:flex; gap:8px}
+  .ab{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:8px 6px 7px; position:relative; cursor:pointer; text-align:center; overflow:hidden; transition:border-color .1s}
+  .ab:hover{border-color:#3a5b8c}
+  .ab.intbtn{flex:0 0 118px; background:#160d22; border-color:#3a2a52}
+  .ab.intbtn.ready{border-color:var(--int)} .ab.intbtn.armed{border-color:#fff; box-shadow:0 0 14px var(--int)}
+  .ab .key{position:absolute; top:4px; left:6px; font:700 11px var(--mono); color:var(--gold); z-index:2}
+  .ab .nm{font-size:13px; font-weight:600; margin-top:9px; position:relative; z-index:2}
+  .ab .meta{font:600 10px var(--mono); color:var(--muted); margin-top:3px; position:relative; z-index:2}
+  .ab .meta .fc{color:var(--focus)}
+  .ab .cdsweep{position:absolute; inset:0; border-radius:9px; opacity:0; pointer-events:none; z-index:1}
+  .ab.norsc{opacity:.5} .ab.empty{opacity:.3; cursor:default; border-style:dashed}
+  .ab.casting{border-color:var(--cast); box-shadow:0 0 12px #8a5bd644}
+
+  #tooltip{position:fixed; display:none; transform:translate(-50%,-100%); z-index:50; pointer-events:none; width:238px; background:#0c1220; border:1px solid #2c3a52; border-radius:10px; padding:11px 13px; box-shadow:0 12px 30px #000a; text-align:left}
+  #tooltip .tt-name{font-weight:700; font-size:15px; color:#fff; margin-bottom:3px}
+  #tooltip .tt-stats{font:600 11px var(--mono); color:var(--gold); margin-bottom:7px}
+  #tooltip .tt-desc{font-size:12.5px; line-height:1.5; color:var(--muted)} #tooltip .tt-desc b{color:var(--ink)}
+
+  .overlay{position:absolute; inset:0; background:#070a11ee; z-index:30; display:flex; align-items:center; justify-content:center; border-radius:12px; backdrop-filter:blur(2px)}
+  .panel{width:min(690px,94%); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px 30px; text-align:center}
+  .panel h1{margin:0 0 6px; font-size:25px} .panel h1.win{color:var(--heal)} .panel h1.lose{color:var(--danger)}
+  .panel p{color:var(--muted); font-size:14px; line-height:1.6; margin:8px 0}
+  .panel .keys{font:12px var(--mono); color:var(--dim); background:#0a0e16; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:13px 0; text-align:left; line-height:1.9}
+  .panel .keys b{color:var(--gold)} .panel .keys .i{color:var(--int)}
+  button.big{background:linear-gradient(180deg,#c9a23d,#8a6a1d); color:#111; border:0; padding:11px 26px; border-radius:9px; font-size:15px; font-weight:700; cursor:pointer; margin-top:6px}
+  button.big:hover{filter:brightness(1.08)}
+  .choices{display:flex; gap:14px; margin-top:16px}
+  .choice{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:16px 14px; cursor:pointer; transition:.12s; text-align:left}
+  .choice:hover{border-color:var(--gold); transform:translateY(-3px)}
+  .choice .cty{font:600 9px var(--mono); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px}
+  .choice.spell .cty{color:var(--int)} .choice.upgrade .cty{color:var(--gold)} .choice.relic .cty{color:var(--silence)}
+  .choice .ct{font-weight:700; margin-bottom:6px; font-size:14px} .choice .cd{font-size:12px; color:var(--muted); line-height:1.5}
+  .aspect{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:18px; cursor:pointer; transition:.14s; text-align:left}
+  .aspect:hover{transform:translateY(-4px)}
+  .aspect.dis:hover{border-color:var(--backlash); box-shadow:0 10px 30px #e88ea822}
+  .aspect.sil:hover{border-color:var(--silence); box-shadow:0 10px 30px #7fd6c422}
+  .aspect .an{font-size:18px; font-weight:700; margin-bottom:2px}
+  .aspect.dis .an{color:var(--backlash)} .aspect.sil .an{color:var(--silence)}
+  .aspect .atl{font:600 10px var(--mono); text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:10px}
+  .aspect .ad{font-size:13px; color:var(--muted); line-height:1.55} .aspect .ad b{color:var(--ink)}
+  .ctrlbtn{background:#1a2436; color:var(--ink); border:1px solid var(--line); border-radius:7px; font:600 12px var(--mono); padding:5px 12px; cursor:pointer} .ctrlbtn:hover{border-color:#3a5b8c}
+  .hint{position:absolute; bottom:130px; left:50%; transform:translateX(-50%); background:#000c; color:#ffd; font:600 12px var(--mono); padding:6px 12px; border-radius:6px; opacity:0; transition:.2s; pointer-events:none; z-index:20}
+  .hint.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="boss">
+    <div class="row">
+      <div class="name"><span id="bossname">The Choir-Priest</span><span class="siltag" id="siltag" style="display:none">Silenced</span><span class="exptag" id="exptag" style="display:none">Exposed</span></div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="phase" id="phase">Fight 1</div><button class="ctrlbtn" id="pauseBtn">Pause</button>
+      </div>
+    </div>
+    <div class="bossbar"><i id="bosshpfill"></i><div class="bosshp" id="bosshptext"></div></div>
+    <div id="tele" class="idle">
+      <div class="fill" id="telefill"></div><div class="zone" id="telezone"></div>
+      <div class="label"><span class="tag" id="teletag">—</span><span class="sname" id="telename">channeling the choir</span><span class="cd" id="telecd"></span></div>
+      <div class="prompt" id="teleprompt">INTERRUPT</div>
+    </div>
+  </div>
+
+  <div id="you">
+    <div id="self">
+      <div class="who"><span class="nm">The Voidcaller <span class="spec" id="specname"></span></span><span class="st" id="selfbadges"></span></div>
+      <div class="barwrap"><div class="lab"><span>Health</span><span></span></div>
+        <div class="bigbar"><div class="fill" id="hpfill"></div><div class="txt" id="hptxt"></div></div></div>
+      <div class="barwrap"><div class="lab"><span>Focus</span><span>Bolt builds it · Fracture spends it</span></div>
+        <div class="bigbar"><div class="fill" id="focusfill"></div><div class="txt" id="focustxt"></div></div></div>
+      <div id="pcast"><div class="pf" id="pcastfill"></div><div class="pt" id="pcasttxt"></div></div>
+      <div id="specrow"></div>
+      <div id="intState">
+        <div class="ipie" id="intpie"><div class="w" id="intwedge"></div></div>
+        <div class="ihint" id="inthint">Tap <b>Space</b> to interrupt a boss cast — but it's on a cooldown, so choose</div>
+      </div>
+    </div>
+    <div id="side">
+      <div class="card"><h4>Fight</h4>
+        <div class="stat"><span>Your DPS</span><b id="ydps">0</b></div>
+        <div class="stat"><span>Est. kill in</span><b class="kill" id="etk">—</b></div>
+        <div class="stat"><span>Casts kicked</span><b id="kicks">0</b></div>
+      </div>
+      <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:0"><h4>Combat log</h4><div id="log"></div></div>
+    </div>
+  </div>
+
+  <div id="bottom"><div id="abilities"></div></div>
+  <div class="hint" id="hint"></div>
+  <div id="tooltip"></div>
+
+  <div class="overlay" id="startOv">
+    <div class="panel">
+      <h1>The Voidcaller</h1>
+      <p>A ranged caster — no character to steer, just the duel of casts. The boss <b>casts</b> constantly: heals, buffs, nukes. Your job is to read the purple bar and <b style="color:var(--int)">interrupt</b> the one that matters. But your interrupt is on a cooldown, so when two casts overlap you can only stop one. Pick your Aspect.</p>
+      <button class="big" id="startBtn">Choose your Aspect</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="aspectOv" style="display:none">
+    <div class="panel">
+      <h1 style="color:var(--gold)">Choose your Aspect</h1>
+      <p>Two philosophies of the interrupt. This sets your signature mechanic and biases what you're offered between fights.</p>
+      <div class="choices">
+        <div class="aspect dis" id="pickDis">
+          <div class="an">The Disruptor</div><div class="atl">Backlash · punish the cast</div>
+          <div class="ad">Every interrupt <b>hits back</b> and banks a <b>Backlash</b> — and a <b>clean</b> interrupt (stopping the cast at the last moment) banks more. You <i>want</i> the boss to cast so you can punish it. Dump your stacks with <b>Overload</b> for a nuke that scales with how many casts you've broken.</div>
+        </div>
+        <div class="aspect sil" id="pickSil">
+          <div class="an">The Silencer</div><div class="atl">Silence · suppress casting</div>
+          <div class="ad">Your interrupts don't just stop one cast — they <b>Silence</b> the boss and leave it <b>Exposed</b> (taking more damage) while it can't cast at all. Chain them to hold the lockout, and pour your hardest casts into the window. <b>Quietus</b> is a hard silence that flings the door wide open.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="draftOv" style="display:none">
+    <div class="panel"><h1 style="color:var(--gold)">Attune</h1><p id="draftSub">Take one before the next fight.</p><div class="choices" id="choices"></div></div>
+  </div>
+  <div class="overlay" id="endOv" style="display:none">
+    <div class="panel"><h1 id="endTitle"></h1><p id="endBody"></p><button class="big" id="againBtn">Run it back</button></div>
+  </div>
+  <div class="overlay" id="pauseOv" style="display:none">
+    <div class="panel"><h1>Paused</h1><p>The boss will wait.</p><button class="big" id="resumeBtn">Resume</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=n=>Math.round(n).toString();
+
+// ---------- Config ----------
+const GCD=1.0, HP_MAX=340, FOCUS_MAX=100;
+const FRACTURE_CAST=1.15, PUSHBACK=0.4, PUSH_CAP=1.2;
+let INT_CD=3.5;                 // interrupt cooldown (Space) — can be lowered by draft
+const CLEAN_ZONE=0.62;          // last slice of a cast where an interrupt counts as "clean"
+const INT_HEAL=14;              // interrupting sustains you — skilled play stays healthy
+// Disruptor
+const BACKLASH_MAX=5, BL_DMG=52, BL_DMG_CLEAN=104;
+// Silencer
+let SIL_DUR=3.0; const SIL_DUR_CLEAN=4.6, EXPOSE_AMT=0.30;
+
+// ---------- Abilities ----------
+const ABILITIES={
+  bolt:{key:"1", name:"Bolt", cost:0, gcd:GCD, dmg:34, focus:14, instant:true,
+    tip:"Instant filler. <b>34</b> damage, builds <b>14 Focus</b>. Your between-casts default."},
+  fracture:{key:"2", name:"Fracture", cost:26, gcd:GCD, dmg:118, cast:FRACTURE_CAST,
+    tip:"Your nuke. <b>1.15s cast</b>, spends <b>26 Focus</b> for <b>118</b> damage. Taking a hit while casting <b>pushes it back</b> — protect your cast by interrupting the boss's."},
+  barrier:{key:"3", name:"Barrier", cost:0, gcd:GCD, dr:0.45, drDur:3.0, cd:10, instant:true,
+    tip:"Instant. <b>45% less damage for 3s</b> on a 12s cooldown. For the uninterruptible channels you just have to survive."},
+  overload:{key:"4", name:"Overload", cost:0, gcd:GCD, spec:"disruptor", instant:true,
+    tip:"Spends all <b>Backlash</b> for <b>55 damage each</b> and makes your next Fracture <b>instant</b>. The payoff for breaking casts cleanly."},
+  quietus:{key:"4", name:"Quietus", cost:30, gcd:GCD, spec:"silencer", instant:true, cd:9,
+    tip:"Spends <b>30 Focus</b> to hard-<b>Silence</b> the boss for 5s and leave it <b>Exposed +50%</b>. Open the door, then unload."},
+  silence:{key:"5", name:"Silence", cost:0, gcd:GCD, interrupt:true, cd:11, instant:true, silences:true,
+    tip:"A second interrupt on an 11s cooldown that also <b>Silences</b> the boss for 2.5s no matter your Aspect. Your answer for overlapping casts."},
+  counterspell:{key:"5", name:"Counterspell", cost:0, gcd:GCD, interrupt:true, cd:9, instant:true, reflect:90,
+    tip:"A second interrupt on a 9s cooldown that <b>reflects 90 damage</b> when it lands on a cast. Turns the boss's spell back on it."},
+};
+const SPELL_CAP=5;
+
+// ---------- Encounters ----------
+// kinds: pulse (unavoidable chip), cast (interruptible; castType mend/nova/empower), channel (uninterruptible big hit)
+const ENCOUNTERS=[
+  { id:"priest", name:"The Choir-Priest", hp:1550,
+    intro:"The Choir-Priest never stops casting — reading the purple bar IS the fight. Green Mending heals it, so kick that first; the red Searing Word stings but won't kill you alone. The Purge channel can't be stopped — Barrier through it. Every cast you break heals you a little.",
+    phases:[{at:1,mult:1,speed:1},{at:0.4,mult:1.12,speed:1.15}],
+    acts:[
+      {id:"mend", kind:"cast", castType:"mend", name:"Mending", tag:"Interrupt!", tel:2.2, heal:195, cd:5.5, jitter:0.8},
+      {id:"sear", kind:"cast", castType:"nova", name:"Searing Word", tag:"Interrupt!", tel:1.8, dmg:56, cd:4.5, jitter:0.8},
+      {id:"purge", kind:"channel", name:"Purge", tag:"Can't stop", tel:2.3, dmg:55, cd:15, jitter:2},
+    ],
+  },
+  { id:"cantors", name:"The Twin Cantors", hp:2200,
+    intro:"Two voices, overlapping casts. A heal and a nuke wind up close together and your interrupt is on cooldown — so kick the heal and eat the nuke. It also Empowers itself; let that stack and the nukes start to bite. Below 40% it races.",
+    phases:[{at:1,mult:1,speed:1},{at:0.6,mult:1.1,speed:1.1},{at:0.4,mult:1.25,speed:1.3}],
+    acts:[
+      {id:"mend", kind:"cast", castType:"mend", name:"Antiphon", tag:"Interrupt!", tel:2.0, heal:225, cd:5.0, jitter:0.8},
+      {id:"sear", kind:"cast", castType:"nova", name:"Dirge", tag:"Interrupt!", tel:1.7, dmg:62, cd:4.2, jitter:0.7},
+      {id:"emp", kind:"cast", castType:"empower", name:"Crescendo", tag:"Interrupt!", tel:2.0, buff:0.12, cd:11, jitter:1.5},
+      {id:"smite", kind:"pulse", name:"Dissonance", tag:"Unavoidable", tel:1.0, dmg:20, cd:9.0, jitter:2},
+      {id:"purge", kind:"channel", name:"Requiem", tag:"Can't stop", tel:2.1, dmg:62, cd:15, jitter:2},
+    ],
+  },
+];
+
+// ---------- State ----------
+let S;
+function newState(){
+  return {
+    running:false, paused:false, over:false, time:0, encIndex:0, spec:null,
+    boss:{hp:ENCOUNTERS[0].hp, def:ENCOUNTERS[0], dmgBuff:0, silencedUntil:0, exposedUntil:0, exposeAmt:0},
+    actTimers:{}, tg:null,
+    player:{hp:HP_MAX, focus:0, gcd:0, drUntil:0, dr:0, casting:null, nextInstant:false, backlash:0},
+    cds:{}, loadout:["bolt","fracture","barrier"], upgrades:{}, relics:{}, _ydps:0, kicks:0,
+  };
+}
+
+// ---------- Spec setup ----------
+function applySpec(spec){
+  S.spec=spec; INT_CD=5.0; SIL_DUR=3.0;
+  const add = spec==="disruptor" ? "overload" : "quietus";
+  if(!S.loadout.includes(add)) S.loadout.splice(3,0,add);
+}
+
+// ---------- Boss engine ----------
+function bossMax(){ return S.boss.def.hp; }
+function curPhaseIdx(){ const f=S.boss.hp/S.boss.def.hp, ph=S.boss.def.phases; let i=0; for(let k=0;k<ph.length;k++) if(f<=ph[k].at) i=k; return i; }
+function curPhase(){ return S.boss.def.phases[curPhaseIdx()]; }
+function phaseMult(){ return curPhase().mult; }
+function phaseNum(){ return curPhaseIdx()+1; }
+function initEncounter(def){
+  S.boss={hp:def.hp, def, dmgBuff:0, silencedUntil:0, exposedUntil:0, exposeAmt:0};
+  S.actTimers={}; def.acts.forEach((a,i)=>{ S.actTimers[a.id]=1.5 + i*1.2 + Math.random()*(a.cd*0.3); });
+  S.tg=null;
+}
+function silenced(){ return S.time<S.boss.silencedUntil; }
+function bossThink(dt){
+  const def=S.boss.def, m=phaseMult(), speed=curPhase().speed;
+  if(S.tg){ S.tg.elapsed+=dt; if(S.tg.elapsed>=S.tg.dur){ const cb=S.tg.onResolve; S.tg=null; cb(); } return; }
+  // tick all timers; while silenced, castable acts don't fire (pulses still do)
+  let due=null;
+  for(const a of def.acts){ S.actTimers[a.id]-=dt;
+    if(S.actTimers[a.id]<=0){
+      if(silenced() && a.kind==="cast"){ S.actTimers[a.id]=0.4; continue; } // held during silence
+      if(!due || (a.kind==="cast" && due.kind!=="cast")) due=a;
+    } }
+  if(due){
+    S.actTimers[due.id]=due.cd/speed + Math.random()*(due.jitter||0);
+    S.tg={ name:due.name, tag:due.tag, kind:due.kind, castType:due.castType, dur:due.tel, elapsed:0,
+      act:due, m, onResolve:()=>resolveAct(due,m) };
+  }
+}
+function resolveAct(a,m){
+  if(a.kind==="pulse"){ takeHit(Math.round(a.dmg*m), a); return; }
+  if(a.kind==="channel"){ takeHit(Math.round(a.dmg*m), a); return; }
+  // uninterrupted cast lands
+  if(a.castType==="mend"){ const h=Math.round(a.heal*m); S.boss.hp=Math.min(bossMax(),S.boss.hp+h); fctBoss("+"+h,"var(--heal)"); log(S.boss.def.name+" heals "+h+" — that Mending needed a kick.","bad"); }
+  else if(a.castType==="nova"){ takeHit(Math.round(a.dmg*m), a); }
+  else if(a.castType==="empower"){ S.boss.dmgBuff=Math.min(0.55, S.boss.dmgBuff+a.buff); fctBoss("EMPOWERED","var(--expose)"); log(S.boss.def.name+" empowers itself (+"+Math.round(a.buff*100)+"% damage).","bad"); }
+}
+
+// ---------- Player damage in/out ----------
+function takeHit(dmg, a){
+  let d=dmg*(1+S.boss.dmgBuff);
+  if(S.time<S.player.drUntil) d*=(1-S.player.dr);
+  d=Math.round(d);
+  S.player.hp-=d; fctSelf("−"+d,"var(--danger)");
+  const s=document.getElementById("self"); if(s){ s.classList.add("hurt"); setTimeout(()=>{ const x=document.getElementById("self"); if(x)x.classList.remove("hurt"); },300); }
+  // pushback on your cast
+  if(S.player.casting){ S.player.casting.endsAt=Math.min(S.player.casting.endsAt+PUSHBACK, S.player.casting.startedAt+FRACTURE_CAST+PUSH_CAP); S.player.casting.pushed=true; }
+  if(S.player.hp<=0){ S.player.hp=0; endGame(false,"You dropped. Either a channel caught you without Barrier, or "+S.boss.def.name+" out-healed you while a Mending went un-kicked."); }
+}
+function exposedMult(){ return (S.time<S.boss.exposedUntil) ? (1+S.boss.exposeAmt) : 1; }
+function damageBoss(x){ let d=Math.round(x*exposedMult()); S.boss.hp=Math.max(0,S.boss.hp-d); fctBoss("−"+d,"var(--gold)"); return d; }
+function heal(x){ const b=S.player.hp; S.player.hp=clamp(S.player.hp+x,0,HP_MAX); const e=Math.round(S.player.hp-b); if(e>0) fctSelf("+"+e,"var(--heal)"); }
+function gainFocus(x){ S.player.focus=clamp(S.player.focus+x,0,FOCUS_MAX); }
+
+// ---------- Interrupts ----------
+function ready(name){ return (S.cds[name]||0)<=S.time; }
+function applySilence(dur, expose){ S.boss.silencedUntil=Math.max(S.boss.silencedUntil,S.time+dur); S.boss.exposedUntil=Math.max(S.boss.exposedUntil,S.time+dur); S.boss.exposeAmt=Math.max(S.boss.exposeAmt,expose); }
+function doInterrupt(source){
+  // source: "space" | ability name. Returns true if something was interrupted.
+  if(!(S.tg && S.tg.kind==="cast")){ log(source==="space"?"Interrupt finds nothing to stop.":"Nothing to interrupt.","dim"); return false; }
+  const clean=(S.tg.dur-S.tg.elapsed)<=CLEAN_ZONE;
+  const ct=S.tg.castType, nm=S.tg.name; S.tg=null; S.kicks++;
+  fctBoss("INTERRUPT","var(--int)"); log((clean?"Clean interrupt — ":"Interrupted ")+nm+".", "int");
+  heal(INT_HEAL); // breaking a cast feeds you — active interrupting keeps you alive
+
+  if(source==="space"){
+    if(S.spec==="disruptor"){
+      const dmg = clean?BL_DMG_CLEAN:BL_DMG; damageBoss(dmg*(S.upgrades.punish?1.4:1));
+      const bl = clean?2:1; S.player.backlash=clamp(S.player.backlash+bl,0,BACKLASH_MAX);
+      if(S.upgrades.backdot) S.boss._dot={until:S.time+4, dps:14};
+    } else {
+      const dur=(clean?SIL_DUR_CLEAN:SIL_DUR)*(S.upgrades.longsil?1.4:1);
+      applySilence(dur, EXPOSE_AMT*(S.upgrades.deepexpose?1.5:1));
+      log("Silenced "+Math.round(dur*10)/10+"s — Exposed.","sil");
+      if(S.relics.silheal) heal(30);
+    }
+    if(S.relics.refund && clean) S.cds.interrupt=S.time+INT_CD*0.5; // clean = half cd back
+  } else {
+    // spell interrupts
+    const a=ABILITIES[source];
+    if(a.reflect) damageBoss(a.reflect);
+    if(a.silences) applySilence(2.5,(S.spec==="silencer"?EXPOSE_AMT:0));
+    if(S.spec==="disruptor"){ S.player.backlash=clamp(S.player.backlash+1,0,BACKLASH_MAX); }
+  }
+  return true;
+}
+function tryInterrupt(){ // Space
+  if(!S.running||S.over||S.paused) return;
+  if((S.cds.interrupt||0)>S.time){ hint("Interrupt recharging"); return; }
+  S.cds.interrupt=S.time+INT_CD;
+  doInterrupt("space");
+}
+
+// ---------- Abilities ----------
+function startCast(name){
+  const a=ABILITIES[name];
+  const instant = a.instant || (name==="fracture" && S.player.nextInstant);
+  if(name==="fracture" && S.player.nextInstant){ S.player.nextInstant=false; }
+  if(instant){ resolveCast(name); return; }
+  S.player.casting={name, startedAt:S.time, endsAt:S.time+a.cast, pushed:false};
+  S.player.gcd=S.time+a.cast; // GCD spans the cast
+}
+function resolveCast(name){
+  const a=ABILITIES[name]; let dmg=a.dmg||0;
+  if(name==="fracture"){ dmg+=(S.upgrades.fracplus?30:0); }
+  if(dmg>0) damageBoss(dmg);
+  if(a.focus) gainFocus(a.focus);
+  if(a.dr){ S.player.dr=a.dr; S.player.drUntil=S.time+a.drDur; }
+  if(!S.player.casting){ /* instant path */ S.player.gcd=S.time+(a.gcd||GCD); }
+  S.cds[name]=S.time+(a.cd||0);
+}
+function tryAbility(name){
+  if(!S.running||S.over||S.paused) return;
+  if(!S.loadout.includes(name)) return;
+  const a=ABILITIES[name];
+  if(S.player.casting){ hint("Casting…"); return; }
+  if(S.player.gcd>S.time) return;
+
+  if(name==="overload"){
+    if(S.player.backlash<1){ hint("No Backlash"); return; }
+    const b=S.player.backlash; damageBoss(68*b); S.player.backlash=0; S.player.nextInstant=true;
+    if(S.upgrades.overfocus) gainFocus(20);
+    log("Overload — "+b+" Backlash spent, next Fracture is instant.","hl");
+    S.player.gcd=S.time+GCD; return;
+  }
+  if(name==="quietus"){
+    if((S.cds.quietus||0)>S.time){ hint("Quietus recharging"); return; }
+    if(S.player.focus<a.cost){ hint("Not enough Focus"); return; }
+    S.player.focus-=a.cost; if(S.tg&&S.tg.kind==="cast"){ S.tg=null; }
+    applySilence(5, 0.50); S.cds.quietus=S.time+a.cd; S.player.gcd=S.time+GCD;
+    log("Quietus — hard Silence, boss Exposed +50%.","sil"); return;
+  }
+  if(a.interrupt){ // Silence / Counterspell spells
+    if((S.cds[name]||0)>S.time){ hint(a.name+" recharging"); return; }
+    S.cds[name]=S.time+a.cd; S.player.gcd=S.time+GCD; doInterrupt(name); return;
+  }
+  // bolt / fracture / barrier
+  if(a.cost && S.player.focus<a.cost){ hint("Not enough Focus"); return; }
+  if(a.cd && (S.cds[name]||0)>S.time){ hint(a.name+" recharging"); return; }
+  if(a.cost) S.player.focus-=a.cost;
+  startCast(name);
+}
+
+// ---------- Loop ----------
+let last=0;
+function frame(t){ requestAnimationFrame(frame); const now=t/1000; let dt=last?now-last:0; last=now; if(dt>0.1)dt=0.1; if(S.running&&!S.over&&!S.paused) update(dt); render(); }
+function update(dt){
+  S.time+=dt;
+  // resolve player cast
+  if(S.player.casting && S.time>=S.player.casting.endsAt){ const nm=S.player.casting.name; S.player.casting=null; resolveCast(nm); }
+  // disruptor dot
+  if(S.boss._dot){ if(S.time<S.boss._dot.until){ S.boss.hp=Math.max(0,S.boss.hp-S.boss._dot.dps*dt); } else S.boss._dot=null; }
+  bossThink(dt);
+  if(S.boss.hp<=0){
+    if(S.encIndex>=ENCOUNTERS.length-1) endGame(true,"Run cleared as the "+(S.spec==="disruptor"?"Disruptor — every broken cast fed the next Overload":"Silencer — you held the lockout and burned it down through the Exposed windows")+".");
+    else { S.running=false; log(S.boss.def.name+" falls!","good"); openDraft(); }
+    return;
+  }
+  tickDps(dt);
+}
+let _lastBossHp=null,_dpsSamples=[];
+function tickDps(dt){ if(_lastBossHp==null){_lastBossHp=S.boss.hp;return;} const dealt=Math.max(0,_lastBossHp-S.boss.hp); _lastBossHp=S.boss.hp; _dpsSamples.push([dealt,dt]); if(_dpsSamples.length>60)_dpsSamples.shift(); let d=0,t=0; _dpsSamples.forEach(s=>{d+=s[0];t+=s[1];}); S._ydps=t>0?d/t:0; }
+
+// ---------- Render ----------
+function hpColor(f){ return f>0.5?"var(--hp)":f>0.25?"var(--hp-mid)":"var(--hp-low)"; }
+function render(){
+  const bmax=bossMax(), bf=clamp(S.boss.hp/bmax,0,1);
+  $("#bossname").textContent=S.boss.def.name; $("#bosshpfill").style.width=(bf*100)+"%"; $("#bosshptext").textContent=fmt(S.boss.hp)+" / "+bmax;
+  $("#phase").textContent="Fight "+(S.encIndex+1)+"/"+ENCOUNTERS.length+" · Phase "+phaseNum();
+  const sil=silenced(), exp=S.time<S.boss.exposedUntil;
+  $("#boss").classList.toggle("exposed", exp);
+  $("#siltag").style.display=sil?"inline":"none";
+  $("#exptag").style.display=exp?"inline":"none"; if(exp) $("#exptag").textContent="Exposed +"+Math.round(S.boss.exposeAmt*100)+"%";
+
+  const te=$("#tele");
+  if(S.tg){
+    const frac=S.tg.elapsed/S.tg.dur; te.className=(S.tg.kind==="cast"?S.tg.castType:S.tg.kind);
+    $("#telefill").style.width=(frac*100)+"%"; $("#teletag").textContent=S.tg.tag; $("#telename").textContent=S.tg.name; $("#telecd").textContent=(S.tg.dur-S.tg.elapsed).toFixed(1)+"s";
+    if(S.tg.kind==="cast"){
+      te.classList.add("armed"); $("#telezone").style.width=(CLEAN_ZONE/S.tg.dur*100)+"%";
+      const canInt=(S.cds.interrupt||0)<=S.time; te.classList.toggle("intnow", canInt);
+      $("#teleprompt").textContent="INTERRUPT";
+    }
+  } else { te.className="idle"; $("#telefill").style.width="0%"; $("#teletag").textContent="—"; $("#telename").textContent=sil?"silenced":"channeling the choir"; $("#telecd").textContent=""; }
+
+  const hpF=clamp(S.player.hp/HP_MAX,0,1);
+  $("#hpfill").style.width=(hpF*100)+"%"; $("#hpfill").style.background=hpColor(hpF); $("#hptxt").textContent=fmt(S.player.hp)+" / "+HP_MAX;
+  $("#focusfill").style.width=(S.player.focus/FOCUS_MAX*100)+"%"; $("#focustxt").textContent=fmt(S.player.focus)+" / "+FOCUS_MAX;
+
+  // player cast bar
+  const pc=$("#pcast");
+  if(S.player.casting){ const c=S.player.casting; const total=c.endsAt-c.startedAt; const f=clamp((S.time-c.startedAt)/total,0,1);
+    pc.className="on"+(c.pushed?" push":""); $("#pcastfill").style.width=(f*100)+"%"; $("#pcasttxt").textContent=(c.pushed?"Pushed back — ":"Casting ")+ABILITIES[c.name].name; }
+  else { pc.className=""; $("#pcastfill").style.width="0%"; $("#pcasttxt").textContent=S.player.nextInstant?"Next Fracture: INSTANT":""; }
+
+  const shield=S.time<S.player.drUntil;
+  $("#self").classList.toggle("shield", shield);
+  let b=""; if(shield) b+='<span class="badge shield">Barrier</span>'; if(S.player.nextInstant) b+='<span class="badge instant">Instant</span>';
+  $("#selfbadges").innerHTML=b;
+
+  renderSpecRow();
+
+  const iLeft=Math.max(0,(S.cds.interrupt||0)-S.time), iFrac=clamp(iLeft/INT_CD,0,1);
+  const ip=$("#intpie"), iw=$("#intwedge");
+  const armed=S.tg&&S.tg.kind==="cast"&&iLeft<=0;
+  if(armed){ ip.className="ipie armed"; iw.style.background="var(--int)"; }
+  else if(iFrac>0){ ip.className="ipie"; const deg=iFrac*360; iw.style.background="conic-gradient(#2a2440 "+deg+"deg,#0a0e16 "+deg+"deg 360deg)"; }
+  else { ip.className="ipie ready"; iw.style.background="transparent"; }
+
+  $("#ydps").textContent=fmt(S._ydps); const etk=(S._ydps>0)?(S.boss.hp/S._ydps):Infinity; $("#etk").textContent=isFinite(etk)?etk.toFixed(0)+"s":"—";
+  $("#kicks").textContent=S.kicks;
+  abRender();
+}
+function renderSpecRow(){
+  const row=$("#specrow");
+  if(S.spec==="disruptor"){
+    if(row.dataset.spec!=="dis"){ row.dataset.spec="dis"; row.innerHTML='<span class="rlab">Backlash</span><span class="cpips" id="cpips"></span>'; }
+    const pips=$("#cpips"); if(pips.children.length!==BACKLASH_MAX){ pips.innerHTML=""; for(let i=0;i<BACKLASH_MAX;i++){ const d=document.createElement("div"); d.className="cpip"; pips.appendChild(d);} }
+    for(let i=0;i<BACKLASH_MAX;i++) pips.children[i].className="cpip"+(i<S.player.backlash?" on":"");
+  } else if(S.spec==="silencer"){
+    if(row.dataset.spec!=="sil"){ row.dataset.spec="sil"; row.innerHTML='<span class="rlab">Silence</span><div class="silmeter"><div class="sf" id="silfill"></div><div class="stxt" id="siltxt"></div></div>'; }
+    const left=Math.max(0,S.boss.silencedUntil-S.time); const f=clamp(left/6,0,1);
+    $("#silfill").style.width=(f*100)+"%"; $("#siltxt").textContent = left>0 ? ("Silenced "+left.toFixed(1)+"s · Exposed +"+Math.round(S.boss.exposeAmt*100)+"%") : "boss free to cast";
+  }
+}
+function abRender(){
+  S.loadout.forEach(name=>{
+    const el=abEls[name]; if(!el) return; const a=ABILITIES[name];
+    let remain=0,total=GCD;
+    const casting = S.player.casting && S.player.casting.name===name;
+    if(a.cd && (S.cds[name]||0)>S.time){ remain=S.cds[name]-S.time; total=a.cd; }
+    else if(name==="interrupt"){}
+    else if(S.player.gcd>S.time){ remain=S.player.gcd-S.time; total=GCD; }
+    const frac=clamp(remain/total,0,1);
+    if(frac>0){ const deg=frac*360; el.sweep.style.background="conic-gradient(rgba(6,9,16,.66) "+deg+"deg,transparent "+deg+"deg 360deg)"; el.sweep.style.opacity=1; } else el.sweep.style.opacity=0;
+    let poor=a.cost&&S.player.focus<a.cost;
+    if(name==="overload") poor=S.player.backlash<1;
+    el.root.classList.toggle("norsc", !!poor);
+    el.root.classList.toggle("casting", !!casting);
+  });
+  const ib=abEls.__int;
+  if(ib){
+    const iLeft=Math.max(0,(S.cds.interrupt||0)-S.time), iFrac=clamp(iLeft/INT_CD,0,1);
+    const armed=S.tg&&S.tg.kind==="cast"&&iLeft<=0;
+    ib.root.className="ab intbtn"+(armed?" armed":(iLeft<=0?" ready":""));
+    if(iFrac>0){ const deg=iFrac*360; ib.sweep.style.background="conic-gradient(rgba(6,9,16,.66) "+deg+"deg,transparent "+deg+"deg 360deg)"; ib.sweep.style.opacity=1; } else ib.sweep.style.opacity=0;
+  }
+}
+
+// ---------- FCT + log ----------
+function fctBoss(t,c){ spawn($("#boss"),t,c,30+Math.random()*40,50); }
+function fctSelf(t,c){ spawn($("#self"),t,c,30+Math.random()*40,36); }
+function spawn(p,t,c,l,tp){ const d=document.createElement("div"); d.className="fct"; d.textContent=t; d.style.color=c; d.style.left=l+"%"; d.style.top=tp+"%"; p.appendChild(d); setTimeout(()=>d.remove(),1000); }
+function log(m,cls){ const d=document.createElement("div"); if(cls)d.className=cls; d.textContent=m; const L=$("#log"); L.prepend(d); while(L.children.length>40) L.lastChild.remove(); }
+let hintT; function hint(m){ const h=$("#hint"); h.textContent=m; h.classList.add("show"); clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove("show"),900); }
+
+// ---------- Build abilities ----------
+const abEls={};
+function buildAbilities(){
+  const bar=$("#abilities"); bar.innerHTML=""; for(const k in abEls) delete abEls[k];
+  const d=document.createElement("div"); d.className="ab intbtn";
+  d.innerHTML='<div class="cdsweep"></div><span class="key">Spc</span><div class="nm" style="color:var(--int)">Interrupt</div><div class="meta">'+INT_CD+'s cd</div>';
+  bar.appendChild(d); abEls.__int={root:d, sweep:d.querySelector(".cdsweep")}; d.addEventListener("click",tryInterrupt);
+  d.addEventListener("mouseenter",()=>showTipRaw("Interrupt","instant · "+INT_CD+"s cooldown", S.spec==="disruptor"
+    ? "Stop the boss's cast. A <b>clean</b> interrupt (at the end of the bar) banks 2 Backlash and hits harder. On cooldown — save it for the cast that matters."
+    : "Stop the boss's cast and <b>Silence</b> it, leaving it Exposed. Clean interrupts silence longer. On cooldown, so choose which cast to shut down.", d));
+  d.addEventListener("mouseleave",hideTip);
+  S.loadout.forEach(name=>{
+    const a=ABILITIES[name]; const el=document.createElement("div"); el.className="ab";
+    el.innerHTML='<div class="cdsweep"></div><span class="key">'+a.key+'</span><div class="nm">'+a.name+'</div><div class="meta">'+abMeta(a)+'</div>';
+    bar.appendChild(el); abEls[name]={root:el, sweep:el.querySelector(".cdsweep")};
+    el.addEventListener("click",()=>tryAbility(name)); el.addEventListener("mouseenter",()=>showTip(name,el)); el.addEventListener("mouseleave",hideTip);
+  });
+  for(let i=S.loadout.length;i<SPELL_CAP;i++){ const el=document.createElement("div"); el.className="ab empty"; el.innerHTML='<div class="nm">—</div><div class="meta">empty</div>'; bar.appendChild(el); }
+}
+function abMeta(a){ const p=[]; if(a.spec) p.push(a.spec==="disruptor"?"spend Backlash":"30 Focus"); else if(a.interrupt) p.push("interrupt · "+a.cd+"s"); else { if(a.dmg) p.push(a.dmg+" dmg"); if(a.cast) p.push(a.cast+"s cast"); if(a.dr) p.push(Math.round(a.dr*100)+"% DR"); }
+  if(a.cost>0) p.push('<span class="fc">'+a.cost+'f</span>'); else if(a.focus) p.push('+'+a.focus+'f'); return p.join(" · "); }
+function statsLine(a){ const p=[]; p.push(a.cost>0?a.cost+" Focus":(a.focus?"+"+a.focus+" Focus":"no Focus")); if(a.cast) p.push(a.cast+"s cast"); else p.push("instant"); if(a.cd) p.push(a.cd+"s cd"); return p.join("  ·  "); }
+function showTip(name,el){ const a=ABILITIES[name]; showTipRaw(a.name, statsLine(a), a.tip, el); }
+function showTipRaw(n,s,desc,el){ const tip=$("#tooltip"); tip.innerHTML='<div class="tt-name">'+n+'</div><div class="tt-stats">'+s+'</div><div class="tt-desc">'+desc+'</div>'; const r=el.getBoundingClientRect(); tip.style.left=(r.left+r.width/2)+"px"; tip.style.top=(r.top-10)+"px"; tip.style.display="block"; }
+function hideTip(){ $("#tooltip").style.display="none"; }
+
+// ---------- Draft ----------
+const SHARED=[
+  {type:"spell", id:"silence", t:"Silence", d:"New spell (key 5): a 2nd interrupt on 11s cd that also Silences the boss 2.5s.", ok:()=>S.loadout.length<SPELL_CAP&&!S.loadout.includes("silence")&&!S.loadout.includes("counterspell"), apply:()=>addSpell("silence")},
+  {type:"spell", id:"counterspell", t:"Counterspell", d:"New spell (key 5): a 2nd interrupt on 9s cd that reflects 90 damage.", ok:()=>S.loadout.length<SPELL_CAP&&!S.loadout.includes("counterspell")&&!S.loadout.includes("silence"), apply:()=>addSpell("counterspell")},
+  {type:"upgrade", id:"fracplus", t:"Rupturing Bolt", d:"Fracture deals +30 damage.", ok:()=>!S.upgrades.fracplus, apply:()=>S.upgrades.fracplus=true},
+  {type:"relic", id:"refund", t:"Quick Recovery", d:"A clean interrupt refunds half its cooldown.", ok:()=>!S.relics.refund, apply:()=>S.relics.refund=true},
+];
+const DIS_REWARDS=[
+  {type:"upgrade", id:"punish", t:"Punish", d:"Interrupt damage +40%.", ok:()=>!S.upgrades.punish, apply:()=>S.upgrades.punish=true},
+  {type:"upgrade", id:"overfocus", t:"Feedback", d:"Overload also refunds 20 Focus.", ok:()=>!S.upgrades.overfocus, apply:()=>S.upgrades.overfocus=true},
+  {type:"upgrade", id:"backdot", t:"Backlash Burn", d:"Clean interrupts leave a burn on the boss (14 dps, 4s).", ok:()=>!S.upgrades.backdot, apply:()=>S.upgrades.backdot=true},
+  {type:"relic", id:"quickint", t:"Snap Cast", d:"Interrupt cooldown reduced to 3s.", ok:()=>!S.relics.quickint, apply:()=>{S.relics.quickint=true; INT_CD=3.0;}},
+];
+const SIL_REWARDS=[
+  {type:"upgrade", id:"longsil", t:"Lingering Hush", d:"Your Space silences last 40% longer.", ok:()=>!S.upgrades.longsil, apply:()=>S.upgrades.longsil=true},
+  {type:"upgrade", id:"deepexpose", t:"Laid Bare", d:"Exposed from your interrupts is 50% stronger.", ok:()=>!S.upgrades.deepexpose, apply:()=>S.upgrades.deepexpose=true},
+  {type:"relic", id:"silheal", t:"Reprieve", d:"Each Silence heals you 30.", ok:()=>!S.relics.silheal, apply:()=>S.relics.silheal=true},
+  {type:"relic", id:"quickint", t:"Snap Cast", d:"Interrupt cooldown reduced to 3s.", ok:()=>!S.relics.quickint, apply:()=>{S.relics.quickint=true; INT_CD=3.0;}},
+];
+function specPool(){ return S.spec==="disruptor"?DIS_REWARDS:SIL_REWARDS; }
+function addSpell(id){ if(!S.loadout.includes(id)&&S.loadout.length<SPELL_CAP){ S.loadout.push(id); buildAbilities(); } }
+function openDraft(){
+  $("#draftSub").textContent=S.boss.def.name+" falls. Take one — your Aspect's picks are weighted in.";
+  const sp=specPool().filter(r=>r.ok()), sh=SHARED.filter(r=>r.ok());
+  const spShuf=[...sp].sort(()=>Math.random()-0.5), shShuf=[...sh].sort(()=>Math.random()-0.5);
+  let pick=[...spShuf.slice(0,2)]; const rest=[...shShuf,...spShuf.slice(2)];
+  while(pick.length<3 && rest.length) pick.push(rest.shift());
+  const box=$("#choices"); box.innerHTML="";
+  pick.slice(0,3).forEach(r=>{ const c=document.createElement("div"); c.className="choice "+r.type;
+    c.innerHTML='<div class="cty">'+r.type+'</div><div class="ct">'+r.t+'</div><div class="cd">'+r.d+'</div>';
+    c.addEventListener("click",()=>{ r.apply(); log("Attuned: "+r.t,"good"); $("#draftOv").style.display="none"; startEncounter(S.encIndex+1); });
+    box.appendChild(c); });
+  S.running=false; $("#draftOv").style.display="flex";
+}
+
+// ---------- Flow ----------
+function endGame(win,msg){ if(S.over)return; S.over=true; S.running=false;
+  $("#endTitle").textContent=win?"Run cleared":"Defeated"; $("#endTitle").className=win?"win":"lose";
+  $("#endBody").textContent=msg+"  (Time: "+Math.round(S.time)+"s · "+S.kicks+" casts kicked.)"; $("#endOv").style.display="flex"; }
+function startEncounter(i){
+  S.encIndex=i; const def=ENCOUNTERS[i]; initEncounter(def);
+  S.player.hp=HP_MAX; S.player.focus=0; S.player.gcd=0; S.player.drUntil=0; S.player.casting=null; S.player.nextInstant=false; S.player.backlash=0;
+  S.cds={}; S.time=0; S.kicks=0; _lastBossHp=null; _dpsSamples=[]; S._ydps=0;
+  S.paused=false; $("#pauseOv").style.display="none"; $("#pauseBtn").textContent="Pause";
+  buildAbilities(); log(def.intro,"hl"); S.running=true;
+}
+function startGame(spec){
+  S=newState(); applySpec(spec);
+  $("#specname").textContent="· "+(spec==="disruptor"?"Disruptor":"Silencer");
+  $("#startOv").style.display="none"; $("#aspectOv").style.display="none"; $("#endOv").style.display="none"; $("#draftOv").style.display="none"; $("#pauseOv").style.display="none";
+  $("#log").innerHTML=""; $("#pauseBtn").textContent="Pause";
+  $("#inthint").innerHTML = spec==="disruptor" ? 'Tap <b>Space</b> to interrupt — clean interrupts bank Backlash' : 'Tap <b>Space</b> to interrupt — it Silences and Exposes the boss';
+  startEncounter(0);
+}
+function setPause(p){ if(!S.running||S.over)return; S.paused=p; $("#pauseOv").style.display=p?"flex":"none"; $("#pauseBtn").textContent=p?"Resume":"Pause"; }
+function togglePause(){ setPause(!S.paused); }
+
+// ---------- Input ----------
+document.addEventListener("keydown",e=>{
+  if(!S) return; const k=e.key.toLowerCase();
+  if(k===" "||e.code==="Space"){ e.preventDefault(); tryInterrupt(); return; }
+  if(k==="p"||k==="escape"){ e.preventDefault(); togglePause(); return; }
+  if(!S.running||S.paused) return;
+  const name=S.loadout.find(n=>ABILITIES[n].key===k);
+  if(name){ e.preventDefault(); tryAbility(name); }
+});
+$("#startBtn").addEventListener("click",()=>{ $("#startOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pickDis").addEventListener("click",()=>startGame("disruptor"));
+$("#pickSil").addEventListener("click",()=>startGame("silencer"));
+$("#againBtn").addEventListener("click",()=>{ $("#endOv").style.display="none"; $("#aspectOv").style.display="flex"; });
+$("#pauseBtn").addEventListener("click",togglePause);
+$("#resumeBtn").addEventListener("click",()=>setPause(false));
+
+S=newState(); render();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
