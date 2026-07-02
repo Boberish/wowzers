@@ -38,6 +38,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _rhythm: RhythmBar
+var _judge: StrikeJudge
 var _hp_orb: LiquidOrb
 var _en_orb: LiquidOrb
 var _gauge: TwinfangGauge
@@ -162,9 +163,15 @@ func _build_combat() -> void:
 	_shake_root.add_child(_dial)
 
 	_rhythm = RhythmBar.new()
-	# the metronome channel — wide instrument between the stage and the medallion
-	_place(_rhythm, 0.5, 0, 0.5, 0, -360, 656, 360, 756)
+	# the metronome channel — YOUR instrument, under YOUR side of the stage;
+	# the boss's Judgment Channel answers it under the reticle on the right
+	_place(_rhythm, 0.29, 0, 0.29, 0, -360, 656, 360, 756)
 	_shake_root.add_child(_rhythm)
+
+	_judge = StrikeJudge.new()
+	_judge.verb = VERB
+	_place(_judge, 0.655, 0, 0.655, 0, -290, 656, 290, 760)
+	_shake_root.add_child(_judge)
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -341,6 +348,8 @@ func _process(delta: float) -> void:
 		_dial.tg_strikes = []
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
+	if _judge != null:
+		_judge.feed(s, obs, float(obs.get("def_zone", 0.42)))
 
 	# rhythm bar
 	_rhythm.since = int(obs.get("since_strike", 0))
@@ -425,6 +434,8 @@ func _cd_frac(p: Seat, s: CombatState, id: String, cd_sec: float) -> float:
 func _handle_event(ev: Dictionary) -> void:
 	if _stage2d != null:
 		_stage2d.on_event(ev)      # the puppets act out the same event the HUD juices
+	if _judge != null:
+		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
 	match String(ev.get("t", "")):
 		"strike":
 			# Flash the held verdict on the rhythm bar so every press reads clearly.

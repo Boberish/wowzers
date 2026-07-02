@@ -32,6 +32,7 @@ var _fx: Control
 
 var _bar: BossBar
 var _dial: BossCastDial
+var _judge: StrikeJudge
 var _mana: LiquidOrb
 var _spec: SpecStrip
 var _castbar: CastChannel
@@ -151,6 +152,14 @@ func _build_combat() -> void:
 	# center stage: the boss sigil owns the space above the raid frames
 	_place(_dial, 0.5, 0, 0.5, 0, -140, 112, 140, 480)
 	_ui.add_child(_dial)
+
+	# the Judgment Channel (compact): the barrage-dodge timing instrument, right
+	# under the raid frames where the healer's eyes already live
+	_judge = StrikeJudge.new()
+	_judge.verb = "DODGE"
+	_judge.compact = true
+	_place(_judge, 0.5, 0, 0.5, 0, -280, 634, 280, 714)
+	_ui.add_child(_judge)
 
 	# raid frames — the whole raid, YOU included: aoe strike beats (M7) can hit the
 	# healer now, so your own HP is a frame like everyone else's (and self-castable).
@@ -454,6 +463,8 @@ func _process(_delta: float) -> void:
 		_dial.feed_strikes(tg, dur, bool(obs.get("dodge_ready", true)), s.config.strike_good, s.config.strike_perfect)
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
 	_dial.verb = "DODGE"
+	if _judge != null:
+		_judge.feed(s, obs, 0.0)
 
 	# raid frames
 	for e in _frames:
@@ -631,6 +642,8 @@ func _stats_summary() -> String:
 
 func _handle_event(ev: Dictionary) -> void:
 	var t := String(ev.get("t", ""))
+	if _judge != null:
+		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
 	# M7 strike beats: the healer's own verdicts pop centre-screen — the dodge is
 	# YOUR button now, so its feedback lives where your eyes are, not on a frame.
 	if t == "strike_graded":

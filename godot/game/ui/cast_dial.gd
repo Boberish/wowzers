@@ -145,11 +145,22 @@ func _draw() -> void:
 			var zstart := top + TAU * (1.0 - clampf(zone_frac, 0.0, 1.0))
 			var zcol := Palette.KICK.darkened(0.35) if tg_interruptible else Palette.CRUSH.darkened(0.45)
 			draw_arc(c, r2, zstart, top + TAU, 24, zcol, 7.0, true)
-			if is_string and perfect_frac > 0.0:         # the PERFECT sliver, right at impact
-				var pstart := top + TAU * (1.0 - clampf(perfect_frac, 0.0, 1.0))
+			# the PERFECT sliver, right at impact (strings feed perfect_frac; a
+			# classic swing derives its own so EVERY window has an aim mark)
+			var pfrac := perfect_frac
+			if not is_string and tg_defensible and not tg_feint and tg_frac < 0.999:
+				var dur_est := tg_remaining / maxf(1.0 - tg_frac, 0.001)
+				pfrac = clampf(0.14 / maxf(dur_est, 0.001), 0.0, zone_frac)
+			if pfrac > 0.0:
+				var pstart := top + TAU * (1.0 - clampf(pfrac, 0.0, 1.0))
 				var pscol := Palette.GOLD_BRIGHT
 				pscol.a = 0.85
 				draw_arc(c, r2, pstart, top + TAU, 12, pscol, 7.0, true)
+			# the IMPACT HAIRLINE at 12 o'clock — the narrow "aim here" mark the
+			# sweep races toward
+			var hcol := Palette.GOLD_BRIGHT if in_zone else Palette.GOLD
+			draw_line(c + Vector2(0, -(r2 - 11.0)), c + Vector2(0, -(r2 + 11.0)), Color(0, 0, 0, 0.7), 4.0, true)
+			draw_line(c + Vector2(0, -(r2 - 10.0)), c + Vector2(0, -(r2 + 10.0)), hcol, 2.0, true)
 		var a_end := top + TAU * clampf(tg_frac, 0.0, 1.0)
 		UiKit.gradient_arc(self, c, r2, top, a_end, 7.0, col.darkened(0.45), col, 40)
 		if in_zone:                                      # pulse overlay when actionable

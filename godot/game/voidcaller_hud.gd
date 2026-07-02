@@ -36,6 +36,7 @@ var _book: Control = null
 
 var _bar: BossBar
 var _dial: BossCastDial
+var _judge: StrikeJudge
 var _pcast: PlayerCastBar
 var _hp_orb: LiquidOrb
 var _focus_orb: LiquidOrb
@@ -148,9 +149,16 @@ func _build_combat() -> void:
 	_place(_dial, 0.5, 0, 0.5, 0, -210, 124, 210, 650)
 	_shake_root.add_child(_dial)
 
+	# YOUR cast bar moves to your own column on the left — the center line under
+	# the boss belongs to ITS casts (the Judgment Channel, with the clean-kick band)
 	_pcast = PlayerCastBar.new()
-	_place(_pcast, 0.5, 0, 0.5, 0, -240, 664, 240, 714)
+	_place(_pcast, 0.2, 0, 0.2, 0, -240, 664, 240, 714)
 	_shake_root.add_child(_pcast)
+
+	_judge = StrikeJudge.new()
+	_judge.verb = VERB
+	_place(_judge, 0.5, 0, 0.5, 0, -300, 658, 300, 762)
+	_shake_root.add_child(_judge)
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -326,6 +334,8 @@ func _process(delta: float) -> void:
 		_dial.tg_strikes = []
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
+	if _judge != null:
+		_judge.feed(s, obs, float(obs.get("clean_zone", 0.62)))
 
 	# your cast bar
 	var casting: Dictionary = obs.get("casting", {})
@@ -398,6 +408,8 @@ func _cd_frac(p: Seat, s: CombatState, id: String, cd_sec: float) -> float:
 
 # ============================================================ JUICE
 func _handle_event(ev: Dictionary) -> void:
+	if _judge != null:
+		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
 	match String(ev.get("t", "")):
 		"strike_graded":
 			# M7 combo-beat verdicts (a PERFECT dodge feeds Focus).

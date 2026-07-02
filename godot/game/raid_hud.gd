@@ -79,6 +79,7 @@ var _fx: Control
 # shared combat widgets
 var _bar: BossBar
 var _dial: BossCastDial
+var _judge: StrikeJudge
 var _frames: Array = []            ## [{seat, frame}]
 var _aggro_warn: Label
 var _shake_root: Control
@@ -703,6 +704,14 @@ func _build_combat(s: CombatState) -> void:
 	_place(_dial, 0.72, 0, 0.72, 0, -210, 128, 210, 640)
 	_shake_root.add_child(_dial)
 
+	# the Judgment Channel under the reticle — seat-aware: parry gate for the
+	# tank, dodge gate for the blade, clean-kick band for the caster, barrage
+	# timing for the healer; off-target swings fly dim with their victim's name
+	_judge = StrikeJudge.new()
+	_judge.verb = _verb()
+	_place(_judge, 0.72, 0, 0.72, 0, -260, 648, 260, 752)
+	_shake_root.add_child(_judge)
+
 	# THE RAID — reliquary frames down the left. Gold-lit = the boss's victim;
 	# for the Mender seat the frames are also your click-cast targets.
 	var col := VBoxContainer.new()
@@ -824,7 +833,9 @@ func _build_band_tank() -> void:
 
 func _build_band_blade() -> void:
 	_rhythm = RhythmBar.new()
-	_place(_rhythm, 0.5, 0, 0.5, 0, -360, 646, 360, 746)
+	# YOUR metronome sits in your own column — the boss's Judgment Channel owns
+	# the line under the reticle on the right
+	_place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
 	_shake_root.add_child(_rhythm)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.ENERGY, "ENERGY", true)
@@ -850,7 +861,9 @@ func _build_band_blade() -> void:
 
 func _build_band_caster() -> void:
 	_pcast = PlayerCastBar.new()
-	_place(_pcast, 0.5, 0, 0.5, 0, -240, 654, 240, 704)
+	# YOUR cast bar sits in your own column — the boss's casts (and the clean-kick
+	# band) live on the Judgment Channel under the reticle
+	_place(_pcast, 0.35, 0, 0.35, 0, -240, 654, 240, 704)
 	_shake_root.add_child(_pcast)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.VOID, "FOCUS", true)
@@ -1131,6 +1144,16 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.feed_strikes(tg, dur, bool(obs.get("dodge_ready", true)), s.config.strike_good, s.config.strike_perfect)
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
+	if _judge != null:
+		var jw := 0.0
+		match _seat_key:
+			"caster":
+				jw = float(obs.get("clean_zone", 0.62))
+			"healer":
+				jw = 0.0
+			_:
+				jw = float(obs.get("def_zone", 0.3))
+		_judge.feed(s, obs, jw)
 
 func _render_frames(s: CombatState, obs: Dictionary) -> void:
 	var victim := CombatCore._threat_target(s)
@@ -1419,9 +1442,13 @@ func _render_band_healer(s: CombatState, p: Seat, obs: Dictionary) -> void:
 # ============================================================ JUICE
 func _handle_event(ev: Dictionary) -> void:
 	var mine := bool(ev.get("player", false))
+	if _judge != null:
+		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
 	match String(ev.get("t", "")):
 		"negate":
-			if mine:
+			# seat-less negates are string-impact echoes; strike_graded already
+			# judged that press — don't double-pop over it
+			if mine and ev.has("seat"):
 				_big_text("%s!" % _verb(), Palette.GOLD_BRIGHT, 44)
 				_add_shake(6.0)
 				_dial.react("impact", 40.0)

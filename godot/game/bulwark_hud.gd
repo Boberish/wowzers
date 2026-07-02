@@ -36,6 +36,7 @@ var _book: Control = null
 # combat widgets
 var _bar: BossBar
 var _dial: BossCastDial
+var _judge: StrikeJudge
 var _hp_orb: LiquidOrb
 var _rage_orb: LiquidOrb
 var _spec: SpecGauge
@@ -185,6 +186,13 @@ func _build_combat() -> void:
 	_dial.show_sigil = false
 	_place(_dial, 0.5, 0, 0.5, 0, -230, 128, 230, 660)
 	_shake_root.add_child(_dial)
+
+	# the Judgment Channel: the linear precision instrument under the reticle —
+	# enemy cast bar + impact gate + graded bands + verdict stamps + history rail
+	_judge = StrikeJudge.new()
+	_judge.verb = VERB.get(_run.aspect, "DEFEND")
+	_place(_judge, 0.5, 0, 0.5, 0, -330, 664, 330, 768)
+	_shake_root.add_child(_judge)
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -381,6 +389,8 @@ func _process(delta: float) -> void:
 		_dial.feed_strikes(tg, dur, bool(obs.get("dodge_ready", true)), s.config.strike_good, s.config.strike_perfect)
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
+	if _judge != null:
+		_judge.feed(s, obs, float(obs.get("def_zone", 0.3)))
 
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_rage_orb.set_values(p.resource, p.resource_max)
@@ -413,12 +423,16 @@ func _process(delta: float) -> void:
 func _handle_event(ev: Dictionary) -> void:
 	if _stage3d != null:
 		_stage3d.on_event(ev)      # the 3D actors act out the same event the HUD juices
+	if _judge != null:
+		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
 	match String(ev.get("t", "")):
 		"ability_fired":
 			if bool(ev.get("player", false)):
 				_on_ability_fired(String(ev.get("id", "")))
 		"negate":
-			if bool(ev.get("player", false)):
+			# string dodges emit an echo negate at impact with no seat ref — the
+			# strike_graded pop already judged that press, don't double-pop over it
+			if bool(ev.get("player", false)) and ev.has("seat"):
 				if bool(ev.get("feint", false)):
 					# You guarded a Feint. Baited — read the punish, not a parry.
 					_big_text("BAITED!", Palette.CRIMSON, 46)
