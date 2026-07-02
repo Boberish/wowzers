@@ -61,7 +61,10 @@ func _gain_energy(seat: Seat, x: float) -> void:
 
 ## The single outgoing-damage path: Flow multiplier, Execute relic, crit, then land.
 ## Poison ticks bypass this (they scale with neither Flow nor Execute — see _upkeep).
-func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool) -> float:
+## `kind` tags the SOURCE for the view layer only (auto Strike vs a finisher/signature),
+## so the HUD can colour non-auto-attacks distinctly — it never touches the checksum.
+func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool,
+		kind := "strike") -> float:
 	var d := raw
 	if flow_scaled:
 		d *= _flow_mult(seat)
@@ -72,7 +75,7 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
-		CombatCore.emit_event(s, {"t": "boss_hit", "amt": int(d), "crit": crit})
+		CombatCore.emit_event(s, {"t": "boss_hit", "amt": int(d), "crit": crit, "kind": kind})
 	return d
 
 func _poison_boss(s: CombatState, dmg: float) -> void:
@@ -266,13 +269,13 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 			seat.vars["perfect_count"] = pc
 			if pc % 5 == 0:
 				crit = true
-		_deal(s, seat, base, true, crit)
+		_deal(s, seat, base, true, crit, "perfect")
 		_gain_flow(seat)
 		CombatCore.emit_event(s, {"t": "perfect", "player": seat.is_player})
 		if aspect == "tempo":
 			var t := flow_tier(seat)
 			if t >= 1:
-				_deal(s, seat, roundf(float(a["dmg"]) * 0.6), true, false)   # Tier 1: extra hit
+				_deal(s, seat, roundf(float(a["dmg"]) * 0.6), true, false, "perfect")   # Tier 1: extra hit
 			if t >= 2:
 				cp += 1                                                       # Tier 2: +combo, refund
 				_gain_energy(seat, 6.0)
@@ -301,7 +304,7 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 		return false
 	seat.resource -= float(a["energy"])
 	var per := float(a["per_cp"]) + (8.0 if _b("eviPlus") else 0.0)
-	_deal(s, seat, per * float(cp), true, false)
+	_deal(s, seat, per * float(cp), true, false, "finisher")
 	seat.vars["cp"] = 0
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
 	return true
@@ -335,7 +338,7 @@ func _flurry(s: CombatState, seat: Seat) -> bool:
 		return false
 	seat.resource -= float(a["energy"])
 	for _i in int(a["hits"]):
-		_deal(s, seat, float(a["dmg"]), true, false)
+		_deal(s, seat, float(a["dmg"]), true, false, "flurry")
 	_gain_cp(seat, int(a["cp"]))
 	return true
 
@@ -347,7 +350,7 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 		return false
 	seat.resource -= float(a["energy"])
 	seat.cooldowns["coupdegrace"] = s.tick + _tt(s, float(a["cd"]))
-	_deal(s, seat, float(a["dmg"]) * (1.4 if _b("crescendo") else 1.0), true, false)
+	_deal(s, seat, float(a["dmg"]) * (1.4 if _b("crescendo") else 1.0), true, false, "coup")
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
 	CombatCore.emit_event(s, {"t": "coup", "player": seat.is_player})
 	return true
@@ -363,7 +366,7 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	seat.cooldowns["rupture"] = s.tick + _tt(s, float(a["cd"]))
 	var per := float(a["per"]) * (1.4 if _b("rupturing") else 1.0)
 	var v := _venom(seat)
-	_deal(s, seat, float(total) * per * float(v["syn_ramp"]), true, false)
+	_deal(s, seat, float(total) * per * float(v["syn_ramp"]), true, false, "rupture")
 	v["V"] = 0; v["F"] = 0; v["C"] = 0
 	v["fes_ticks"] = 0; v["syn_ramp"] = 1.0; v["syn_active"] = false
 	CombatCore.emit_event(s, {"t": "rupture", "total": total})
