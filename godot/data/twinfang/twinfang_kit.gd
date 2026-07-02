@@ -196,6 +196,8 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 	match grade:
 		StrikeRes.Grade.PERFECT:
 			_gain_flow(seat)
+			if _b("dancersgrace"):
+				seat.vars["next_perfect"] = true   # Opus: a perfect dodge primes the blades
 		StrikeRes.Grade.GOOD:
 			_gain_energy(seat, cfg.strike_good_energy)
 		StrikeRes.Grade.READ:
@@ -246,6 +248,9 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	if seat.resource < cost:
 		return false                                   # out of energy
 	var perfect := since >= _tt(s, cfg.perfect_start) and since <= _tt(s, cfg.perfect_end)
+	if _b("dancersgrace") and bool(seat.vars.get("next_perfect", false)):
+		perfect = true                                 # Opus: the primed strike IS perfect
+		seat.vars["next_perfect"] = false
 	seat.resource -= cost
 	seat.vars["last_strike_tick"] = s.tick
 

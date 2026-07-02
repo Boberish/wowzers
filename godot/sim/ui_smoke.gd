@@ -33,10 +33,10 @@ func _process(_delta: float) -> bool:
 
 	var steps := 0
 	while not hud._run.is_last() and steps < 8:
-		var picks: Array = BulwarkBoons.roll(hud._run)
+		var picks: Array = Draft.roll_offers(hud._run)
 		print("  draft roll ", hud._run.enc_index, " -> ", picks.map(func(b): return b["id"]))
 		if not picks.is_empty():
-			BulwarkBoons.apply(picks[0], hud._run)
+			Draft.take(hud._run, picks[0])
 		hud._run.enc_index += 1
 		hud._begin_fight()
 		steps += 1

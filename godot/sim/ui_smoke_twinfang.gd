@@ -38,16 +38,16 @@ func _widgets() -> bool:
 
 func _draft() -> bool:
 	var run := RunState.start_twinfang("tempo")
-	var picks := TwinfangBoons.roll(run)
+	var picks := Draft.roll_offers(run)
 	if picks.size() != 3:
 		print("  draft: FAIL — expected 3 picks, got %d" % picks.size()); return false
-	TwinfangBoons.apply(picks[0], run)
+	Draft.take(run, picks[0])
 	# a spell pick should land in the loadout; an upgrade/relic in boons
 	var applied_ok := not run.boons.is_empty() or run.loadout.size() > 4
 	print("  draft: rolled 3, applied '%s' -> %s" % [picks[0]["title"], "ok" if applied_ok else "?"])
 	# venom pool too
 	var vrun := RunState.start_twinfang("venomancer")
-	var vp := TwinfangBoons.roll(vrun)
+	var vp := Draft.roll_offers(vrun)
 	print("  draft: venom rolled %d -> %s" % [vp.size(), "ok" if vp.size() == 3 else "FAIL"])
 	return picks.size() == 3 and vp.size() == 3
 

@@ -163,6 +163,12 @@ func on_overheal(_s: CombatState, caster: Seat, target: Seat, over: float) -> vo
 		target.absorb = minf(target.absorb + roundf(over * 0.3), target.hp_max * 0.5)
 		target.absorb_owner_i = _s.seats.find(caster)
 
+## Opus boon: a Ward fully consumed detonates in light — heal + cleanse its bearer.
+func on_absorb(s: CombatState, healer: Seat, target: Seat, _eaten: float, emptied: bool) -> void:
+	if emptied and _b("sanctifiedward") and target != null and target.alive():
+		CombatCore.heal_unit(s, target, 120.0, healer)
+		target.debuff = {}
+
 func _brink_mana_mult(target: Seat) -> float:
 	return 1.0 - (1.0 - target.hp_frac()) * cfg.brink_mana_disc
 

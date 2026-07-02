@@ -48,10 +48,15 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 	var rem := float(s.telegraph.start_tick + s.telegraph.dur_ticks - s.tick) * s.dt
 	var clean := rem <= cfg.clean_zone
 	var was_heal := s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS
+	var denied_heal := float(s.telegraph.ability.amount) if was_heal else 0.0
 	CombatCore.stagger_boss(s)                        # cancels the cast (emits "staggered")
 	seat.vars["kicks"] = int(seat.vars.get("kicks", 0)) + 1
 	if clean:
 		CombatCore._bump_diag(s, seat, "clean_kick")  # class-signature skill signal (token mint)
+	if _b("nullbrand") and clean:
+		_apply_silence(s, 1.5, 0.0)                   # Opus: clean kicks brand a Silence
+	if _b("voidfeast") and was_heal:
+		_deal(s, seat, roundf(denied_heal * 0.5))     # Opus: the denied heal strikes back
 	_heal(seat, cfg.int_heal)
 
 	if source == "space":
