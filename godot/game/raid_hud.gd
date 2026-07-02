@@ -56,6 +56,7 @@ var _my_ready: bool = false
 var _net_status: Label = null
 var _seat_key: String = "tank"
 var _aspect: String = "warden"
+var _enc_id: String = "riftmaw"    ## the Seal to pull offline (boss-select / autostart)
 var _loadout: Array = []
 var _screen: String = "select"
 
@@ -111,11 +112,12 @@ func _ready() -> void:
 	_show_select()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart=raid"):
-			# --autostart=raid[:seat[:aspect]]  e.g. raid:blade:tempo
+			# --autostart=raid[:seat[:aspect[:boss]]]  e.g. raid:blade:tempo:mythos
 			var spec := a.substr("--autostart=".length()).split(":")
 			var seat := spec[1] if spec.size() > 1 else "tank"
 			var aspect := spec[2] if spec.size() > 2 else ""
-			_launch(seat, aspect)
+			var enc := spec[3] if spec.size() > 3 else ""
+			_launch(seat, aspect, enc)
 
 func _clear() -> void:
 	_hover_seat = null
@@ -143,7 +145,7 @@ func _show_select(seat: String = "tank") -> void:
 	]
 	sel.encounters = RaidContent.run_encounters()
 	sel.current = seat
-	sel.hint = "Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
+	sel.hint = "Pick a Seal: Vorathek is the classic pull; II–IV are the Machine Seals (they escalate). Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
 	sel.extras = [{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online}]
 	sel.chosen.connect(_start_raid)
 	sel.back_pressed.connect(func(): get_tree().change_scene_to_file("res://game/main.tscn"))
@@ -151,8 +153,9 @@ func _show_select(seat: String = "tank") -> void:
 	_ui.add_child(sel)
 
 # ============================================================ ASPECT PICK
-## BossSelect chose a seat — now the ceremony: pick 1 of its 2 Aspects.
-func _start_raid(seat_id: String, _jump_to: String = "") -> void:
+## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
+func _start_raid(seat_id: String, jump_to: String = "") -> void:
+	_enc_id = jump_to if jump_to != "" else "riftmaw"
 	_show_aspect_pick(seat_id if SEAT_IDX.has(seat_id) else "tank")
 
 func _show_aspect_pick(seat_id: String) -> void:
@@ -335,6 +338,34 @@ func _show_lobby() -> void:
 				_net.send({"t": "aspect", "aspect": nxt}))
 			row.add_child(ab)
 
+	# The Seal for the next pull — everyone sees it; the host cycles it.
+	var enc_id := String(_room.get("enc", "riftmaw"))
+	var seals := RaidContent.run_encounters()
+	var seal_name := enc_id
+	var seal_i := 0
+	for i in seals.size():
+		if String((seals[i] as EncounterRes).id) == enc_id:
+			seal_name = (seals[i] as EncounterRes).name
+			seal_i = i
+	var srow := HBoxContainer.new()
+	srow.alignment = BoxContainer.ALIGNMENT_CENTER
+	srow.add_theme_constant_override("separation", 10)
+	box.add_child(srow)
+	var slab := Label.new()
+	slab.text = "SEAL %s  ·  %s" % [["I", "II", "III", "IV"][mini(seal_i, 3)], seal_name]
+	slab.custom_minimum_size = Vector2(430, 32)
+	slab.add_theme_font_size_override("font_size", 15)
+	slab.add_theme_color_override("font_color", Palette.GOLD)
+	srow.add_child(slab)
+	if int(_room.get("host", -1)) == _net.peer_id():
+		var sb := Button.new()
+		sb.text = "SEAL ⇄"
+		sb.custom_minimum_size = Vector2(110, 32)
+		sb.pressed.connect(func():
+			var nxt: EncounterRes = seals[(seal_i + 1) % seals.size()]
+			_net.send({"t": "boss", "enc": String(nxt.id)}))
+		srow.add_child(sb)
+
 	var ctlrow := HBoxContainer.new()
 	ctlrow.alignment = BoxContainer.ALIGNMENT_CENTER
 	ctlrow.add_theme_constant_override("separation", 16)
@@ -402,18 +433,20 @@ func _on_desync() -> void:
 		_set_net_status("desync — see log")
 
 # ============================================================ START / BUILD
-func _launch(seat_id: String, aspect: String = "", _jump_to: String = "") -> void:
+func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void:
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	var pool: Array = ASPECTS[_seat_key]
 	_aspect = String(pool[0]["id"])
 	for a in pool:
 		if String(a["id"]) == aspect:
 			_aspect = aspect
+	if jump_to != "":
+		_enc_id = jump_to
 	_screen = "combat"
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}})
+	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -817,9 +850,15 @@ func _process(delta: float) -> void:
 	var p := _ctrl.player()
 	var obs := CombatCore.observe(s, p)
 
-	_bar.boss_name = s.encounter.name
-	_bar.hp = s.boss.hp
-	_bar.hp_max = s.boss.hp_max
+	var live_add := _active_add(s)
+	if live_add != null:
+		_bar.boss_name = live_add.name
+		_bar.hp = s.boss.add_hp
+		_bar.hp_max = s.boss.add_hp_max
+	else:
+		_bar.boss_name = s.encounter.name
+		_bar.hp = s.boss.hp
+		_bar.hp_max = s.boss.hp_max
 	_bar.phase_num = _phase_num(s)
 	_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
 	_render_dial(s, obs)
@@ -834,13 +873,28 @@ func _process(delta: float) -> void:
 		"healer":
 			_render_band_healer(s, p, obs)
 
+	if _stage2d != null:
+		_stage2d.sync(s)
 	for ev in s.events:
+		if _stage2d != null:
+			_stage2d.on_event(ev)
 		_handle_event(ev)
 	s.events.clear()
 
+## The AddRes currently holding the field, or null (main form).
+func _active_add(s: CombatState) -> AddRes:
+	if s.boss.add_i >= 0 and s.boss.add_i < s.encounter.adds.size():
+		return s.encounter.adds[s.boss.add_i]
+	return null
+
 func _render_dial(s: CombatState, obs: Dictionary) -> void:
-	_dial.boss_name = s.encounter.name
-	_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
+	var live_add := _active_add(s)
+	if live_add != null:
+		_dial.boss_name = live_add.name
+		_dial.boss_hp_frac = s.boss.add_hp / maxf(s.boss.add_hp_max, 1.0)
+	else:
+		_dial.boss_name = s.encounter.name
+		_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
@@ -928,6 +982,15 @@ func _healer_predictions(s: CombatState) -> void:
 				var st: StrikeRes = ab.strikes[i]
 				if st.aoe and not st.feint:
 					fracsum += st.amount_frac
+				elif not st.feint and s.telegraph.beat_targets.has(i):
+					# a random personal bolt — mark ITS victim's frame directly
+					var bv: Seat = s.telegraph.beat_targets[i]
+					if bv != null and bv.alive():
+						var fb := _frame_of(bv)
+						if fb != null:
+							var bd := ab.amount * st.amount_frac * CombatCore.current_phase(s).mult
+							fb.incoming_dmg_frac += bd / bv.hp_max
+							fb.incoming_lethal = fb.incoming_lethal or bd >= bv.hp + bv.absorb
 			amt *= fracsum
 			for e in _frames:
 				if not (e["seat"] as Seat).alive():
@@ -1233,6 +1296,14 @@ func _handle_event(ev: Dictionary) -> void:
 		"dodge_whiff":
 			if mine:
 				_big_text("TOO EARLY!", Palette.CRIMSON.darkened(0.1), 28, 0.6)
+		"add_spawn":
+			_big_text("IT DELEGATES — KILL %s!" % String(ev.get("name", "THE ADD")), Palette.CRIMSON, 36)
+			_add_shake(9.0)
+			if _dial != null:
+				_dial.react("stagger")
+		"add_down":
+			_big_text("%s TERMINATED — THE SEAL RETURNS" % String(ev.get("name", "IT")), Palette.GOLD_BRIGHT, 32)
+			_add_shake(6.0)
 		# ---- class extras (only fire for the class that emits them) ----
 		"strike":
 			if mine and _rhythm != null:
@@ -1336,11 +1407,16 @@ func _show_end(won: bool) -> void:
 	var banner := _title(box, "THE SEAL BREAKS" if won else "THE RAID FALLS", 52,
 		Palette.WIN if won else Palette.LOSE)
 	banner.add_theme_font_override("font", UiKit.title(900))
+	var quips: Dictionary = {}
+	if _ctrl.state != null and _ctrl.state.encounter != null:
+		quips = RaidContent.QUIPS.get(String(_ctrl.state.encounter.id), {})
 	if won:
-		_title(box, "Four seats, one kill. The Rift shudders.", 16, Palette.TEXT)
+		_title(box, String(quips.get("win", "Four seats, one kill. The Rift shudders.")), 16, Palette.TEXT)
 	else:
 		var cause := _ctrl.state.loss_cause if _ctrl.state != null else ""
 		_title(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
+		if quips.has("lose"):
+			_title(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
 	var again := Button.new()
 	again.custom_minimum_size = Vector2(220, 48)
 	again.add_theme_font_size_override("font_size", 18)

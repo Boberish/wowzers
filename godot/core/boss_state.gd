@@ -25,6 +25,14 @@ var dmg_buff: float = 0.0
 var melee_timer: int = 1000000
 var ability_timer: Dictionary = {}     ## StringName ability id -> ticks until due
 
+## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
+## boss damage routes to add_hp, the main body's ability timers freeze, and the
+## main HP can't drop (it CAN still be healed — kick the medic add). Untouched solo.
+var add_i: int = -1                    ## index into encounter.adds, -1 = main form
+var add_hp: float = 0.0
+var add_hp_max: float = 0.0
+var adds_spawned: Dictionary = {}      ## AddRes index -> true (each wave fires once)
+
 ## Raid threat (threat_enabled fights only — see RAID-PLAN.md). Untouched solo.
 ## Keyed/indexed by seats[] position (never Seat refs — cycle/serialization safety).
 var threat: Dictionary = {}            ## seat index (int) -> accumulated threat (float)

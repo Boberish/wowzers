@@ -11,3 +11,8 @@ var target: Seat = null     ## victim chosen at cast START (shown during the win
 # --- multi-strike strings (M7) — unused (and untouched) for classic abilities ---
 var next_strike: int = 0            ## index of the first unresolved beat
 var answers: Dictionary = {}        ## beat idx -> {Seat: StrikeRes.Grade}, recorded at the press
+var beat_targets: Dictionary = {}   ## beat idx -> Seat (rand_target beats, rolled at cast start)
+
+# --- cast chains (raid) — the opener AbilityRes whose chain[] we're walking ---
+var chain_src: AbilityRes = null
+var chain_i: int = 0                ## index of the NEXT link to start

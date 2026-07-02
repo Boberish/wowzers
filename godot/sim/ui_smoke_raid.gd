@@ -32,6 +32,33 @@ func _process(_delta: float) -> bool:
 		print("%-6s %-11s ok  loadout=%s ticks=%d boss_hp=%d over=%s" % [
 			combo[0], combo[1], str(hud._loadout), ticks, int(s.boss.hp), str(s.over)])
 
+	# the Machine Seals (II-IV): launch each, drive live combat, and force-render
+	# an ADD PHASE on the finale (bar/dial swap + banners + stage body swap)
+	for seal in ["mistral", "gemini", "mythos"]:
+		hud._launch("tank", "warden", seal)
+		var ss: CombatState = hud._ctrl.state
+		var ticks2 := _drive(ss, "tank")
+		print("seal %-8s ok  enc=%s ticks=%d boss_hp=%d" % [
+			seal, String(ss.encounter.id), ticks2, int(ss.boss.hp)])
+	hud._launch("tank", "warden", "mythos")     # fresh combat screen for the add pass
+	hud._handle_event({"t": "add_spawn", "id": "opus", "name": "OPUS SUBAGENT"})
+	hud._handle_event({"t": "add_down", "id": "opus", "name": "OPUS SUBAGENT"})
+	print("add banners: ok")
+	var sm: CombatState = hud._ctrl.state       # force the SONNET wave live
+	CombatCore.damage_boss(sm, sm.seats[0], sm.boss.hp - sm.boss.hp_max * 0.60)
+	for i in 240:
+		if sm.over:
+			break
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+		if sm.boss.add_i >= 0:
+			break
+	if sm.boss.add_i >= 0 and not sm.over:
+		hud._process(1.0 / 30.0)                # one render with the add on the plate
+		print("mythos add phase live: add_i=%d bar='%s' ok" % [sm.boss.add_i, hud._bar.boss_name])
+	else:
+		print("mythos add phase: skipped (over=%s) — banners still exercised" % str(sm.over))
+
 	# juice handlers across every class-specific event, on the healer build
 	var s2: CombatState = hud._ctrl.state
 	for ev in [
@@ -65,20 +92,21 @@ func _process(_delta: float) -> bool:
 		hud._handle_event(ev)
 	print("juice handlers (all classes): ok")
 
-	hud._show_end(true)
+	hud._show_end(true)      # mythos state is live -> exercises the QUIPS path
 	hud._show_end(false)
-	print("end screens: ok")
+	print("end screens (with Seal quips): ok")
 	hud._show_select("healer")
 	print("reselect: ok")
 
-	# online screens build (R2): connect form + a synthetic lobby, no live server
+	# online screens build (R2): connect form + a synthetic lobby (with the v2
+	# Seal row — host sees the SEAL ⇄ toggle), no live server
 	hud._show_online()
-	hud._room = {"code": "TEST", "phase": "lobby", "host": 1, "players": [
+	hud._room = {"code": "TEST", "phase": "lobby", "host": 1, "enc": "mythos", "players": [
 		{"id": 1, "name": "Ava", "seat": "tank", "aspect": "warden", "ready": true},
 		{"id": 2, "name": "Bo", "seat": "", "aspect": "", "ready": false},
 	]}
 	hud._show_lobby()
-	print("online connect + lobby screens: ok")
+	print("online connect + lobby screens (Seal row): ok")
 
 	print("RAID UI SMOKE: ALL OK")
 	quit()

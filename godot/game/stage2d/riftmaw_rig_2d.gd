@@ -202,6 +202,35 @@ func set_enrage(on: bool) -> void:
 	part_glow("eye2", Color("d0413a") if on else _eye_col, 1.0 if on else 0.6)
 	part_glow("spines", Color("d0413a"), 0.7 if on else 0.0)
 
+## Reskin per Seal / add id — the placeholder pass for the Machine Seals (tint,
+## eye colour, bulk) until per-boss robot puppets land (see MASTER-PLAN §Graphics).
+## Also the add-wave body swap: the stage calls variant(<add id>) on add_spawn and
+## variant(<encounter id>) on add_down. Preserves the stage's facing flip.
+func variant(id: String) -> void:
+	var tint := Color(1, 1, 1)
+	var eye := Color("b072c9")
+	var bulk := 1.0
+	match id:
+		"mistral":                       # wind-cooled, efficient, single-GPU blue
+			tint = Color(0.80, 0.96, 1.12); eye = Color("7fd4ff"); bulk = 0.86
+		"gemini":                        # twin constellation indigo
+			tint = Color(0.94, 0.88, 1.20); eye = Color("9fb4ff")
+		"mythos":                        # the Final Compute — gilded void
+			tint = Color(1.14, 1.02, 0.82); eye = Color("ffd37a"); bulk = 1.07
+		"bard":                          # deprecated amber, slightly translucent
+			tint = Color(1.06, 0.94, 0.70, 0.92); eye = Color("ffb35c"); bulk = 0.70
+		"sonnet":                        # quick copper subagent
+			tint = Color(1.04, 0.88, 0.76); eye = Color("ff9d5c"); bulk = 0.68
+		"opus":                          # the heavy subagent
+			tint = Color(1.10, 0.84, 0.84); eye = Color("ff6a5c"); bulk = 0.84
+		_:
+			pass                         # riftmaw / unknown = the classic look
+	modulate = tint
+	_eye_col = eye
+	scale = Vector2(signf(scale.x if scale.x != 0.0 else 1.0) * bulk, bulk)
+	part_glow("eye", _eye_col, 0.6)
+	part_glow("eye2", _eye_col, 0.6)
+
 func die() -> void:
 	clear_windup()
 	breath_scale = 0.0
