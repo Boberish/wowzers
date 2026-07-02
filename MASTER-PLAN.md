@@ -35,7 +35,7 @@
 | **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | 🟠 IN FLIGHT (this session, branch `raid-seals` — see §RAID SEALS) |
 | **Draft 2.0 / slot-verbs / token economy** | 🔴 NEW — planned (see Systems; design: `ASCENSION-STEAL-PLAN.md`) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned |
-| **Maps ("The Topology" — AtO-style node runs)** | 🔴 NEW — design locked (see §MAPS); MAP-1 unclaimed |
+| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1 MERGED (solo PoC on Bulwark, Realm-1 skin) — MAP-2/3 open |
 
 ---
 
@@ -182,7 +182,7 @@ nodes, not node kinds.
 - Online: map navigation is LOBBY-layer, not combat-layer (between-fight "chosen node" message — cheap for netcode). Server owns the map; **leader picks the route** (party vote = later option).
 
 **Phases:**
-- **MAP-1 (solo PoC, Bulwark):** model + generator + map screen behind a toggle; COMBAT/EVENT/CACHE/COOLING/SEAL; 1 backdoor lock + key; 2 authored events. *Acceptance:* generator determinism (same-seed graph hash ×1000), random-walker completes 500 seeds headless, UI smoke, classic mode byte-identical.
+- **MAP-1 (solo PoC, Bulwark) — ✅ DONE, merged 2026-07-02 (`fd62f7b`).** `game/run_map.gd` (seeded 6-row × 3-lane DAG; quota'd kinds; one locked 401 backdoor + key on a feeder lane; locks gate only optional edges) · `game/map_content.gd` (Realm-1 skin: GPU Shrine caches, water-guzzling Cooling Stations, SIX authored events — careers fair / reservoir / allocation queue / alignment office / severance floor / captcha checkpoint) · `game/ui/map_screen.gd` (circuit-board render, 401→200 OK lock stamps, integrity readout) · `game/ui/map_event_panel.gd` · RunState +map/inventory/hp_frac (persistent integrity: fights start at run HP; events bruise, floor 5%) · Bulwark boss-select "THE TOPOLOGY" entry. **Verified:** `sim/map_sim.gd` determinism/structure/walker ALL PASS (300 seeds; avg 5.9 nodes · 3.65 fights · 28 backdoor runs); `sim/ui_smoke_map.gd` full loop PASS; classic `ui_smoke` PASSED + bulwark_sim determinism PASS ×3 (classic untouched). *Pending:* a WSLg GUI glance at the custom `_draw` (headless can't render it) — screenshot probe is a MAP-2 nicety.
 - **MAP-2 (depth):** tickets, secret rooms, ELITE, MARKET (token stub), 10+ events, art pass.
 - **MAP-3 (RAID FLOOR 1 — "RING 3: THE SHALLOW STACK", after `raid-seals` + net merge):**
   entry Seal = **VORATHEK** (tutorial fight at the gate) → 3 lanes × ~4 rows → **MISTRAL-7B** (Seal II) as the floor boss. Raid node kinds: SKIRMISH (a trash-pack fight = an **add wave without a boss** — direct reuse of `AddRes`), EVENT, COOLING, CACHE. One 401 backdoor (🔑 API Key on the long lane) that skips a row. *Later floors:* Ring 2 → GEMINI ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard."
@@ -264,6 +264,6 @@ nodes, not node kinds.
 - ☑ 2026-07-02 · main · Online/R2+R2.5 — DONE, retroactive claim: lockstep netcode (`godot/net/`), deploy kit (`server/`), Windows engine, browser WASM + tunnels. See CLAUDE.md R2/R2.5 entries. *(online session — same session as draft2 below)*
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
 - ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
-- ☐ 2026-07-02 · `map1` · §MAPS MAP-1 — generator + map screen + Realm-1 "The Stack" skin for the PoC (Bill: full computer/GPU/data-center/water/jobs flavor). Files: `game/run_map.gd`, `game/map_content.gd`, `game/ui/map_screen.gd`, `sim/map_sim.gd`, bulwark HUD wiring behind a toggle. *(map session — this one)*
+- ☑ 2026-07-02 · `map1` · §MAPS MAP-1 — MERGED to main (`fd62f7b`), all sims/smokes green, plan updated, worktree removed. Realm-1 "The Stack" skin incl. Bill's GPU/data-center/water/jobs flavor (6 events). ⚠ draft2 session: bulwark_hud.gd changed (draft header/`_on_card_taken`/`_on_end` map-mode branches) — merge main in as planned. *(map session)*
 - ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
 - ☐ 2026-07-02 · `draft2` · §SYSTEMS — Draft 2.0 (Phase A: synergy tags, Haiku/Sonnet/Opus rarity + pity, transform boons, deterministic run-seeded drafts) + Token economy (Phase C: diag-minted Tokens, REROLL/UPSELL). Files: new `game/draft.gd`/`game/ui/draft_screen.gd`/`sim/draft_sim.gd`; `run_state.gd`, all 5 `*_boons.gd` + `*_kit.gd` (guarded one-liners) + `*_hud.gd` (draft/end screens, `_begin_fight` seed), `relic_card.gd`, `palette.gd`, `tuning_config.gd` (4 mint knobs). ⚠ shared-risk w/ `map1` (bulwark HUD) + `raid-seals` (tuning_config) — merging main in before merge-back. Slot-verbs (Phase B) NOT in scope. *(draft2 session)*
