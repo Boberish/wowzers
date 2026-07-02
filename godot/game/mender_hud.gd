@@ -827,9 +827,15 @@ func _build_tooltip() -> void:
 func _show_tip(id: String, rune: AbilityRune) -> void:
 	var real := _signature() if (id == "surge" or id == "laststand") else id
 	_tip_title.text = String(_mcfg.spells.get(real, {}).get("name", real))
-	_tip_desc.text = String(SPELL_TIPS.get(real, ""))
-	var w := 260.0
+	var desc := String(SPELL_TIPS.get(real, ""))
 	var h := 96.0
+	if real == "flash" or real == "mend":     # Phase B: YOUR TRIAGE rides the clutch heals
+		var gl := MenderBoons.verb_summary(_run.boons, _run.aspect)
+		if not gl.is_empty():
+			desc += "\n" + "\n".join(gl)
+			h += 17.0 * gl.size()
+	_tip_desc.text = desc
+	var w := 260.0
 	var gp := rune.global_position
 	_tip.position = Vector2(clampf(gp.x + rune.size.x * 0.5 - w * 0.5, 8.0, size.x - w - 8.0), maxf(8.0, gp.y - h - 8.0))
 	_tip.size = Vector2(w, h)

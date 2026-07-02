@@ -375,6 +375,8 @@ func _process(delta: float) -> void:
 	var icd_ticks := maxf(1.0, float(CombatCore.to_ticks(defense_cd_sec(obs), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / icd_ticks, 0.0, 1.0)
+	_guard.charges = int(obs.get("guard_charges", 0))          # Twin Void pips
+	_guard.charges_max = int(obs.get("guard_charges_max", 0))
 
 	for ev in s.events:
 		_handle_event(ev)
@@ -549,16 +551,19 @@ func _show_spec_tip() -> void:
 func _show_guard_tip() -> void:
 	_tip_title.text = "Kick"
 	_tip_stats.text = "Space  ·  own cooldown"
-	_tip_desc.text = "Kick the boss's current cast. A CLEAN kick — in the last slice of the bar — pays more (Backlash / longer Silence). Every kick also heals you. On cooldown, so choose which cast to shut down."
-	_position_tip_above(_guard)
+	var desc := "Kick the boss's current cast. A CLEAN kick — in the last slice of the bar — pays more (Backlash / longer Silence). Every kick also heals you. On cooldown, so choose which cast to shut down."
+	var gl := VoidcallerBoons.verb_summary(_run.boons, _run.aspect)
+	if not gl.is_empty():
+		desc += "\n" + "\n".join(gl)          # Phase B: the assembled YOUR KICK rules
+	_tip_desc.text = desc
+	_position_tip_above(_guard, 124.0 + 17.0 * gl.size())
 
 func _hide_tip() -> void:
 	if _tip != null:
 		_tip.visible = false
 
-func _position_tip_above(node: Control) -> void:
+func _position_tip_above(node: Control, h: float = 124.0) -> void:
 	var w := 250.0
-	var h := 124.0
 	var gp := node.global_position
 	var x := clampf(gp.x + node.size.x * 0.5 - w * 0.5, 8.0, size.x - w - 8.0)
 	var y := maxf(8.0, gp.y - h - 8.0)
@@ -580,9 +585,13 @@ func _toggle_book() -> void:
 		_book.queue_free()
 		_book = null
 		return
+	var ktip := "Cut the boss's cast short. A CLEAN kick (inside the bright window) pays your Aspect; a whiffed press still burns the cooldown."
+	var kgl := VoidcallerBoons.verb_summary(_run.boons, _run.aspect)
+	if not kgl.is_empty():
+		ktip += "\n" + "\n".join(kgl)         # Phase B: the assembled YOUR KICK rules
 	var abilities: Array = [{"icon": "kick", "name": "KICK", "key": "SPC",
 		"stats": "5.0s cd  ·  clean = last slice of the cast",
-		"tip": "Cut the boss's cast short. A CLEAN kick (inside the bright window) pays your Aspect; a whiffed press still burns the cooldown."}]
+		"tip": ktip}]
 	for i in _run.loadout.size():
 		var id: String = _run.loadout[i]
 		var info: Dictionary = ABILITY_TIPS.get(id, {"stats": "", "tip": ""})

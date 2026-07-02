@@ -40,3 +40,14 @@ extends Resource
 func order(aspect: String) -> Array:
 	return ["flash", "mend", "renew", "ward", "cascade", "well", "dispel", "medit",
 		("surge" if aspect == "tidecaller" else "laststand")]
+
+# Phase B slot-verb TRIAGE mods (build-your-Triage; entries with `slot` in MenderBoons).
+# Innate proc = a single-target heal resolving on an ally below mod_clutch_frac.
+@export var mod_clutch_frac: float = 0.5     ## the "clutch" threshold for the innate proc
+@export var mod_shield: float = 25.0         ## mdPayShield absorb on the triaged ally
+@export var mod_mana: float = 12.0           ## mdPayMana per proc
+@export var mod_hot_tick: float = 8.0        ## mdPayHot tick amount (every 1.5s for 3s)
+@export var mod_trig_mana: float = 10.0      ## built-in mana on a drafted trigger fire
+@export var mod_cast_mult: float = 0.88      ## mdPropSwift cast-time multiplier
+@export var mod_bene_every: int = 5          ## mdPropBenediction: every Nth proc...
+@export var mod_bene_heal: float = 30.0      ## ...bathes the whole party for this much

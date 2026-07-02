@@ -115,6 +115,10 @@ func _venom_total(seat: Seat) -> int:
 
 func upkeep(s: CombatState, seat: Seat) -> void:
 	_gain_energy(seat, cfg.energy_regen * s.dt)
+	# Twin Step: the spent spare dodge charge returns after mod_step_recharge seconds.
+	if _b("tfPropTwinStep") and int(seat.vars.get("dodge_spare", 1)) < 1 \
+			and s.tick >= int(seat.vars.get("dodge_recharge_tick", 0)):
+		seat.vars["dodge_spare"] = 1
 
 	# Flow decays toward 0 between Perfects (Virtuoso relic slows it 50%).
 	if _flow(seat) > 0:
@@ -198,6 +202,8 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 			_gain_flow(seat)
 			if _b("dancersgrace"):
 				seat.vars["next_perfect"] = true   # Opus: a perfect dodge primes the blades
+			if _b("tfTrigBeat"):
+				_tf_trigger(_s, seat, "beat")      # Phase B: PERFECT beat = proc moment
 		StrikeRes.Grade.GOOD:
 			_gain_energy(seat, cfg.strike_good_energy)
 		StrikeRes.Grade.READ:
@@ -215,9 +221,19 @@ func defense_active() -> float:
 func defense_cd() -> float:
 	return cfg.dodge_cd
 
-func on_negate(_s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
+## Twin Step (Phase B): the engine just charged the dodge cooldown — a spare charge
+## eats it, so a second step is available back-to-back; upkeep restores the spare.
+func on_defense_press(s: CombatState, seat: Seat) -> void:
+	if _b("tfPropTwinStep") and int(seat.vars.get("dodge_spare", 1)) > 0:
+		seat.vars["dodge_spare"] = int(seat.vars.get("dodge_spare", 1)) - 1
+		seat.defense_ready_tick = s.tick
+		seat.vars["dodge_recharge_tick"] = s.tick + _tt(s, cfg.mod_step_recharge)
+
+func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 	if _b("dodgeCp"):
 		_gain_cp(seat, 2)
+	if _b("tfTrigEvade"):
+		_tf_trigger(s, seat, "evade")      # Phase B: a clean dodge = proc moment
 
 # --------------------------------------------------------------------------
 # Abilities
@@ -248,6 +264,10 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	if seat.resource < cost:
 		return false                                   # out of energy
 	var perfect := since >= _tt(s, cfg.perfect_start) and since <= _tt(s, cfg.perfect_end)
+	if not perfect and _b("tfPropWindow"):
+		var span := _tt(s, cfg.perfect_end) - _tt(s, cfg.perfect_start)
+		var pad := int(ceil(float(span) * cfg.mod_window_pad))
+		perfect = since >= _tt(s, cfg.perfect_start) - pad and since <= _tt(s, cfg.perfect_end) + pad
 	if _b("dancersgrace") and bool(seat.vars.get("next_perfect", false)):
 		perfect = true                                 # Opus: the primed strike IS perfect
 		seat.vars["next_perfect"] = false
@@ -268,6 +288,7 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 				crit = true
 		_deal(s, seat, base, true, crit)
 		_gain_flow(seat)
+		_rhythm_proc(s, seat, "perfect")   # Phase B: the innate proc moment
 		CombatCore.emit_event(s, {"t": "perfect", "player": seat.is_player})
 		if aspect == "tempo":
 			var t := flow_tier(seat)
@@ -303,6 +324,8 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 	var per := float(a["per_cp"]) + (8.0 if _b("eviPlus") else 0.0)
 	_deal(s, seat, per * float(cp), true, false)
 	seat.vars["cp"] = 0
+	if _b("tfTrigSpender") and cp >= cfg.cp_max:
+		_tf_trigger(s, seat, "spender")    # Phase B: a full-point finisher = proc moment
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
 	return true
 
@@ -326,6 +349,8 @@ func _envenom(s: CombatState, seat: Seat) -> bool:
 	seat.resource -= float(a["energy"])
 	_apply_venom(seat, "F", cp)                          # spends combo for Festering stacks
 	seat.vars["cp"] = 0
+	if _b("tfTrigSpender") and cp >= cfg.cp_max:
+		_tf_trigger(s, seat, "spender")    # Phase B: a full-point finisher = proc moment
 	CombatCore.emit_event(s, {"t": "finisher", "id": "envenom", "cp": cp})
 	return true
 
@@ -369,6 +394,32 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	CombatCore.emit_event(s, {"t": "rupture", "total": total})
 	return true
 
+# ---------------------------------------------------------------- slot-verb Rhythm mods
+# Phase B (build-your-Rhythm): the innate proc moment is every PERFECT Strike; TRIGGER
+# pieces add moments, PAYLOAD pieces fire on every proc, PROPERTY pieces reshape the
+# verb. NO LOCKOUTS. All _b()-gated — boonless sims stay byte-identical.
+
+func _has_payloads() -> bool:
+	return _b("tfPayLash") or _b("tfPayEnergy") or _b("tfPayLeech")
+
+## A drafted trigger fired: built-in energy sip + one proc moment.
+func _tf_trigger(s: CombatState, seat: Seat, source: String) -> void:
+	_gain_energy(seat, cfg.mod_trig_energy)
+	_rhythm_proc(s, seat, source)
+
+## One proc moment: fire every drafted payload once (payLash is flat — not Flow-scaled).
+func _rhythm_proc(s: CombatState, seat: Seat, source: String) -> void:
+	if not _has_payloads():
+		return
+	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic
+	if _b("tfPayLash"):
+		_deal(s, seat, cfg.mod_lash, false, false)
+	if _b("tfPayEnergy"):
+		_gain_energy(seat, cfg.mod_energy)
+	if _b("tfPayLeech"):
+		seat.hp = clampf(seat.hp + cfg.mod_leech, 0.0, seat.hp_max)
+	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
+
 # --------------------------------------------------------------------------
 # Observation (policy + HUD). All view/AI fields — never part of the checksum.
 # --------------------------------------------------------------------------
@@ -376,7 +427,7 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var last := int(seat.vars.get("last_strike_tick", -100000))
 	var v: Dictionary = seat.vars.get("venom", {})
-	return {
+	var out := {
 		"tick": s.tick,
 		"aspect": aspect,
 		"energy": seat.resource,
@@ -403,3 +454,8 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 			"syn_ramp": float(v.get("syn_ramp", 1.0)), "syn_active": bool(v.get("syn_active", false))},
 		"venom_total": _venom_total(seat),
 	}
+	if _b("tfPropTwinStep"):   # Twin Step charge pips (Phase B)
+		out["guard_charges"] = int(seat.vars.get("dodge_spare", 1)) \
+			+ (1 if s.tick >= seat.defense_ready_tick else 0)
+		out["guard_charges_max"] = 2
+	return out

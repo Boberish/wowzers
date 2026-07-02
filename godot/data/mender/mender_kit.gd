@@ -64,6 +64,8 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 		_strike: StrikeRes, grade: int) -> void:
 	if grade == StrikeRes.Grade.PERFECT:
 		seat.resource = minf(cfg.mana_max, seat.resource + cfg.strike_perfect_mana)
+		if _b("mdTrigBeat"):
+			_md_trigger(_s, seat, null, "beat")   # Phase B: PERFECT beat = proc moment
 
 # --- cast / instant dispatch ---
 func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) -> bool:
@@ -92,8 +94,11 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 
 	var cast := float(sp.get("cast", 0.0))
 	if cast > 0.0:
+		var ct := _tt(s, cast)
+		if _b("mdPropSwift"):
+			ct = maxi(1, int(ceil(float(ct) * cfg.mod_cast_mult)))   # Phase B: Swift Litany
 		seat.casting = {"id": key, "target": target, "start_tick": s.tick,
-			"dur_ticks": _tt(s, cast)}
+			"dur_ticks": ct}
 		if not offgcd:
 			seat.gcd_until_tick = s.tick + _tt(s, cfg.gcd)   # GCD runs from cast START
 		CombatCore._emit(s, {"t": "cast_started", "id": key, "dur": cast})
@@ -111,10 +116,13 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 
 	match id:
 		"flash", "mend":
+			var clutch: bool = target.hp_frac() < cfg.mod_clutch_frac
 			CombatCore.heal_unit(s, target, float(sp["heal"]), seat)
 			if id == "flash" and _b("afterglow"):
 				target.hots.append({"tick": 10.0, "every": _tt(s, 1.5), "acc": 0, "left": _tt(s, 3.0),
 					"caster_i": s.seats.find(seat)})
+			if clutch:
+				_triage_proc(s, seat, target, "clutch")   # Phase B: the innate proc moment
 		"renew":
 			target.hots.append({"tick": float(sp["hot_tick"]),
 				"every": _tt(s, float(sp["hot_every"])), "acc": 0, "left": _tt(s, float(sp["hot_dur"])),
@@ -132,6 +140,8 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 		"dispel":
 			target.debuff = {}
 			CombatCore._bump_diag(s, seat, "dispel")   # class-signature skill signal (token mint)
+			if _b("mdTrigDispel"):
+				_md_trigger(s, seat, target, "dispel")  # Phase B: a Dispel = proc moment
 		"medit":
 			seat.resource = minf(cfg.mana_max, seat.resource + float(sp["restore"]))
 		"surge":
@@ -168,6 +178,55 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, _eaten: float, emptie
 	if emptied and _b("sanctifiedward") and target != null and target.alive():
 		CombatCore.heal_unit(s, target, 120.0, healer)
 		target.debuff = {}
+	if emptied and _b("mdTrigWard"):
+		_md_trigger(s, healer, target, "ward")   # Phase B: a consumed Ward = proc moment
+
+# ---------------------------------------------------------------- slot-verb Triage mods
+# Phase B (build-your-Triage): the innate proc moment is a CLUTCH HEAL (a single-target
+# heal resolving on an ally below mod_clutch_frac); TRIGGER pieces add moments, PAYLOAD
+# pieces fire on every proc, PROPERTY pieces reshape the verb. NO LOCKOUTS. All
+# _b()-gated — boonless sims stay byte-identical.
+
+func _has_payloads() -> bool:
+	return _b("mdPayShield") or _b("mdPayMana") or _b("mdPayHot") or _b("mdPropBenediction")
+
+## A drafted trigger fired: built-in mana sip + one proc moment.
+func _md_trigger(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
+	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mod_trig_mana)
+	_triage_proc(s, seat, target, source)
+
+## One proc moment: fire every drafted payload once on the triaged ally (fallback:
+## the lowest-HP ally when the moment had no target, e.g. a dodged beat).
+func _triage_proc(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
+	if not _has_payloads():
+		return
+	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic
+	var tgt := target if (target != null and target.alive()) else _lowest_ally(s)
+	if _b("mdPayShield") and tgt != null:
+		tgt.absorb += cfg.mod_shield
+		tgt.absorb_owner_i = s.seats.find(seat)
+	if _b("mdPayMana"):
+		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mod_mana)
+	if _b("mdPayHot") and tgt != null:
+		tgt.hots.append({"tick": cfg.mod_hot_tick, "every": _tt(s, 1.5), "acc": 0,
+			"left": _tt(s, 3.0), "caster_i": s.seats.find(seat)})
+	if _b("mdPropBenediction"):
+		var n := int(seat.vars.get("bene_count", 0)) + 1
+		seat.vars["bene_count"] = n
+		if n % cfg.mod_bene_every == 0:      # Opus: every Nth proc bathes the party
+			for u in s.seats:
+				if u.role != "healer" and u.alive():
+					CombatCore.heal_unit(s, u, cfg.mod_bene_heal, seat)
+			CombatCore.emit_event(s, {"t": "benediction", "player": seat.is_player})
+	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
+
+func _lowest_ally(s: CombatState) -> Seat:
+	var best: Seat = null
+	for u in s.seats:
+		if u.role != "healer" and u.alive():
+			if best == null or u.hp_frac() < best.hp_frac():
+				best = u
+	return best
 
 func _brink_mana_mult(target: Seat) -> float:
 	return 1.0 - (1.0 - target.hp_frac()) * cfg.brink_mana_disc

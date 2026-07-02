@@ -56,3 +56,12 @@ func loadout(aspect: String) -> Array:
 	if aspect == "tempo":
 		return ["strike", "eviscerate", "kick", "coupdegrace"]
 	return ["strike", "envenom", "kick", "rupture"]
+
+# Phase B slot-verb RHYTHM mods (build-your-Rhythm; entries with `slot` in TwinfangBoons).
+# Innate proc = every PERFECT Strike — perfects are frequent, so payloads are small.
+@export var mod_lash: float = 6.0            ## tfPayLash dmg per proc
+@export var mod_energy: float = 3.0          ## tfPayEnergy per proc
+@export var mod_leech: float = 5.0           ## tfPayLeech heal per proc
+@export var mod_trig_energy: float = 6.0     ## built-in energy on a drafted trigger fire
+@export var mod_window_pad: float = 0.20     ## tfPropWindow: widen the Perfect window per side
+@export var mod_step_recharge: float = 6.0   ## tfPropTwinStep spare-dodge recharge, seconds
