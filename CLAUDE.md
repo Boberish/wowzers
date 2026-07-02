@@ -30,10 +30,8 @@ All work is now coordinated through **`MASTER-PLAN.md`**: current status by cate
 ## Status — FROZEN MILESTONE HISTORY
 Everything below is the verified build-up through 2026-07-02 and stays as reference (verify
 commands, debug jump-ins, gotchas, caveats). **Current state, in-flight claims, and what to do
-next live in `MASTER-PLAN.md` — update THAT, not this list.** In-flight right now (see the
-master plan's Coordination Log): Online/R2 follow-ups (another session) · Raid Seals II–IV,
-the AI-Killer online boss ladder with add-wave/cast-chain/random-beat engine additions
-(branch `raid-seals`).
+next live in `MASTER-PLAN.md` — update THAT, not this list.** In-flight claims live in the
+master plan's Coordination Log (don't enumerate them here — they go stale).
 - **M0 (walking skeleton) — DONE & verified.** Pure `CombatCore` reducer, seat/party model, group-damage win line, telegraph + defensive verb, seeded-RNG determinism, headless batch sim → CSV with win-rate bands.
 - **M1 Bulwark — DONE (playable + verified).**
   - Engine: added `ClassKit` hook layer (so classes snap on), active `damage_boss`, full-negate defense, faithful freeze-timers-during-telegraph model.

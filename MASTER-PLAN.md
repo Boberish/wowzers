@@ -32,7 +32,7 @@
 | Co-op raid (R0/R1: any seat, any aspect, AI raiders) | ✅ Playable |
 | Netcode (R2) | 🟠 IN FLIGHT (another session: `godot/net/`, `server/`, web export in `dist/`) |
 | **Realms (raids = themed realms; Realm 1 "The Takeover" = AI irony)** | 🟠 Realm 1 in flight via `raid-seals`; solo reskin DE-SCOPED |
-| **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | 🟠 IN FLIGHT (this session, branch `raid-seals` — see §RAID SEALS) |
+| **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | ✅ DONE, merged `ac1aa25` (adds/chains/rand-beats engine + 3 bosses + lobby Seal pick, protocol v2 — see §RAID SEALS) |
 | **Draft 2.0 / slot-verbs / token economy** | 🔴 NEW — planned (see Systems; design: `ASCENSION-STEAL-PLAN.md`) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned |
 | **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1 MERGED (solo PoC on Bulwark, Realm-1 skin) — MAP-2/3 open |
@@ -95,7 +95,7 @@
 
 ---
 
-## RAID SEALS — the online boss ladder (first AI-Killer content) — IN FLIGHT (branch `raid-seals`)
+## RAID SEALS — the online boss ladder (first AI-Killer content) — ✅ DONE, MERGED (`ac1aa25`, 2026-07-02)
 
 **Bill's brief (2026-07-02, direct):** the online Rift needs a bigger, more DYNAMIC boss —
 random-but-dodgeable raid damage, interrupt chains, varied timings, a ~10s "everyone
@@ -117,8 +117,7 @@ Theme Bible arc: Mistral easy → Gemini mid → Claude-Mythos finale. Combat se
   interruptible **Hotfix Deployment** HEALS the withdrawn boss — kick it or lose progress);
   enrage 120s = USAGE LIMIT REACHED. Phase names Helpful → Harmless → Honest (ramping mult/speed).
 
-**Engine additions (ALL guarded — solo content must stay byte-identical; frozen-baseline gate
-running per the concurrent-sessions rule):**
+**Engine additions (ALL guarded — solo content byte-identical, gate-proven):**
 - **Add waves**: `AddRes` (`data/add_res.gd`) + `EncounterRes.adds`; `BossState.add_i/add_hp`;
   the boss withdraws between swings, damage routes to the add, main timers freeze; `HEAL_BOSS`
   still heals the main body (medic adds). Checksum gains a `+ add_hp` term (0 solo → identical).
@@ -136,9 +135,32 @@ Bill's direct raid brief):** solo reskin rows de-duped: Warcaller → *LE CHAT, 
 Twin Cantors → *LAMDA & PALM, the Deprecated Twins*; Vorathek stays the rift-beast Seal I, and
 the OPUS row's phase ideas (Helpful/Harmless/Honest + subagent adds) are folded into Seal IV.
 
-**Acceptance bar:** six solo sims byte-identical vs frozen baseline; Vorathek raid checksums
-unchanged per seed; `raid_sim` determinism PASS on all four Seals + sane skill bands
-(Mistral ≥ Gemini ≥ Mythos win rates); `ui_smoke_raid` + `net_smoke` green.
+**VERIFIED (all on frozen snapshots per the concurrent-sessions rule):**
+- Regression gate: all six solo sims **byte-identical** (150 seeds, logs + CSVs) vs the
+  pre-change baseline. Vorathek raid: **expert tier 150/150 checksums identical**; good/sloppy
+  diverge ONLY via one intended change — in RAID (`threat_enabled`-guarded) the Mender's own
+  frame joins its triage list, so the AI healer finally self-heals when personally hit
+  (bands hold: sloppy 98.3 vs 98.0, fewer tank deaths). Solo mender untouched.
+- `sim/raid_probe.gd` (17 asserts): add spawn/route/return, hotfix heals the WITHDRAWN main
+  body (+540), kick-skips-verse, silence-kills-chain, rand-beat victims/`mine` integrity.
+- **300-seed bands** (expert/good/sloppy): Vorathek 100/100/98 · Mistral 100/100/100 (easy,
+  loses nothing but time) · Gemini 100/100/**92** (healer+tank deaths) · Mythos 100/**95**/**43**
+  (healer_death-dominant + dps_wipes — ULTRATHINK is the wall). Determinism PASS ×4 Seals.
+- `ui_smoke_raid` (Seal launches, live add-phase render, banners, quips, lobby Seal row),
+  `net_smoke` (host picks Mistral over the wire → both replicas identical checksums →
+  disconnect/AI-takeover still clean), all five solo UI smokes, three live WSLg runs — green.
+- Fixed along the way: fight-end `casting` clear in `update()` (raid self-cast made
+  Seat→casting→Seat refcount cycles — ObjectDB leaks now 0) and `PoseRig2D.set_highlight`'s
+  draw-lambda null-capture (pre-existing; exposed by wiring RaidStage2D sync/events into the
+  raid HUD, which was silently missing).
+**Run/debug:** `godot --headless --path godot --script res://sim/raid_sim.gd -- --seeds=300
+[--boss=mythos]` · `res://sim/raid_probe.gd` · play: `--autostart=raid[:seat[:aspect[:boss]]]`
+(e.g. `raid:healer:tidecaller:mythos`); online: the HOST cycles the SEAL ⇄ row in the lobby.
+⚠ **Protocol v2**: rebuild/redeploy the server (`server/`) together with clients — v1 builds
+are rejected at the handshake by design.
+**NEXT (unclaimed):** per-Seal robot puppets (variant() tint is the placeholder — CAPTCHA-style
+robot rigs per §Graphics); ally banter events; Riftcore drops when the raid economy lands;
+Trial-Ladder versions of the Seals.
 
 ## MAPS — "THE TOPOLOGY" (Across-the-Obelisk-style run maps) — PLANNED (design locked 2026-07-02)
 
@@ -265,5 +287,5 @@ nodes, not node kinds.
 - ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
 - ☑ 2026-07-02 · main · §MAPS — design locked + written (docs only); Raid Floor 1 depends on `raid-seals` merge. *(planning session)*
 - ☑ 2026-07-02 · `map1` · §MAPS MAP-1 — MERGED to main (`fd62f7b`), all sims/smokes green, plan updated, worktree removed. Realm-1 "The Stack" skin incl. Bill's GPU/data-center/water/jobs flavor (6 events). ⚠ draft2 session: bulwark_hud.gd changed (draft header/`_on_card_taken`/`_on_end` map-mode branches) — merge main in as planned. *(map session)*
-- ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
+- ☑ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — MERGED to main (`ac1aa25`), full gate + 300-seed bands + probes + smokes green, plan updated, worktree removed. Net touches were additive (`enc` in spec, lobby `boss` msg, **protocol v2 — rebuild the server with the clients**); no conflict with map1/draft2 (tuning_config untouched). *(raid-seals session)*
 - ☐ 2026-07-02 · `draft2` · §SYSTEMS — Draft 2.0 (Phase A: synergy tags, Haiku/Sonnet/Opus rarity + pity, transform boons, deterministic run-seeded drafts) + Token economy (Phase C: diag-minted Tokens, REROLL/UPSELL). Files: new `game/draft.gd`/`game/ui/draft_screen.gd`/`sim/draft_sim.gd`; `run_state.gd`, all 5 `*_boons.gd` + `*_kit.gd` (guarded one-liners) + `*_hud.gd` (draft/end screens, `_begin_fight` seed), `relic_card.gd`, `palette.gd`, `tuning_config.gd` (4 mint knobs). ⚠ shared-risk w/ `map1` (bulwark HUD) + `raid-seals` (tuning_config) — merging main in before merge-back. Slot-verbs (Phase B) NOT in scope. *(draft2 session)*
