@@ -57,6 +57,12 @@ static func update(s: CombatState) -> void:
 	_apply_group_damage(s, s.dt)           # 5. stat-block allies chip the boss
 	_apply_enrage(s, s.dt)                 # 6. hard-timer ramp
 	_check_end(s)                          # 7. win/lose
+	if s.over:
+		# A fight ending mid-cast can strand seat.casting.target == the seat itself
+		# (raid healer self-cast) — a Seat -> Dictionary -> Seat refcount cycle that
+		# never frees. Nothing reads cast bars after `over`; not in the checksum.
+		for seat in s.seats:
+			seat.casting = {}
 	# add_hp is 0.0 whenever no add holds the field, so the extra term keeps every
 	# pre-add fight's checksum byte-identical while covering add fights against drift.
 	s.checksum = (s.checksum * 1000003 + int(s.boss.hp * 100.0) + int(s.boss.add_hp * 100.0) + s.tick) & 0x7FFFFFFFFFFFFFFF
@@ -749,13 +755,6 @@ static func _check_end(s: CombatState) -> void:
 			s.over = true; s.won = false; s.loss_cause = "player_death"
 		elif not any_alive:
 			s.over = true; s.won = false; s.loss_cause = "wipe"
-	if s.over:
-		# A fight that ends mid-cast could strand seat.casting.target == the seat
-		# itself (raid healer self-cast) — a Seat -> Dictionary -> Seat refcount
-		# cycle that never frees. Drop cast bars at the end; nothing reads them
-		# after `over` and they're not part of the checksum.
-		for seat in s.seats:
-			seat.casting = {}
 
 static func _primary_target(s: CombatState) -> Seat:
 	for seat in s.seats:

@@ -205,7 +205,7 @@ static func make_gemini() -> EncounterRes:
 	e.id = &"gemini"; e.name = "GEMINI ULTRA, the Twin Constellation"; e.hp = 14000
 	e.intro = "Seal III. Two minds, one chassis, several answers. HOLD when it hallucinates a swing, kick the Overview before the twins merge — and when BARD.EXE resurfaces, put it back in the archive."
 	e.melee = {"every": 1.1, "min": 27.0, "max": 37.0}
-	e.enrage_at = 95.0
+	e.enrage_at = 90.0
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
 	var p2 := PhaseRes.new(); p2.at = 0.3; p2.mult = 1.28; p2.speed = 1.18
@@ -220,10 +220,10 @@ static func make_gemini() -> EncounterRes:
 		_tank_string(&"gem_check", "Double-Check", 175.0, 2.5, 16.0, 2.0, [
 			{"at": 1.0, "frac": 0.35, "size": AbilityRes.Size.HEAVY},
 			{"at": 1.7, "frac": 0.0, "size": AbilityRes.Size.HEAVY, "feint": true},   # the hallucinated answer
-			{"at": 2.5, "frac": 0.65, "size": AbilityRes.Size.CRUSH, "guard": StrikeRes.Guard.BLOCKABLE},
+			{"at": 2.5, "frac": 0.72, "size": AbilityRes.Size.CRUSH, "guard": StrikeRes.Guard.BLOCKABLE},
 		]),
 		ov,
-		_rand_barrage(&"gem_abtest", "A/B Test", 200.0, 3.2, 17.0, 2.0, [
+		_rand_barrage(&"gem_abtest", "A/B Test", 280.0, 3.2, 17.0, 2.0, [
 			{"at": 1.1, "frac": 0.25, "size": AbilityRes.Size.LIGHT},
 			{"at": 1.8, "frac": 0.25, "size": AbilityRes.Size.HEAVY},
 			{"at": 2.5, "frac": 0.25, "size": AbilityRes.Size.LIGHT},
@@ -233,7 +233,7 @@ static func make_gemini() -> EncounterRes:
 	e.adds = [
 		_add_wave(0.5, &"bard", "BARD.EXE (deprecated)", 2100,
 			{"every": 0.9, "min": 18.0, "max": 26.0}, [
-				_barrage(&"bard_sonnet", "Farewell Sonnet", 120.0, 2.6, 12.0, 1.5, [
+				_barrage(&"bard_sonnet", "Farewell Sonnet", 140.0, 2.6, 12.0, 1.5, [
 					{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 					{"at": 1.8, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
 					{"at": 2.6, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
