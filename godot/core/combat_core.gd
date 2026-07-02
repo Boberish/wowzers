@@ -57,7 +57,9 @@ static func update(s: CombatState) -> void:
 	_apply_group_damage(s, s.dt)           # 5. stat-block allies chip the boss
 	_apply_enrage(s, s.dt)                 # 6. hard-timer ramp
 	_check_end(s)                          # 7. win/lose
-	s.checksum = (s.checksum * 1000003 + int(s.boss.hp * 100.0) + s.tick) & 0x7FFFFFFFFFFFFFFF
+	# add_hp is 0.0 whenever no add holds the field, so the extra term keeps every
+	# pre-add fight's checksum byte-identical while covering add fights against drift.
+	s.checksum = (s.checksum * 1000003 + int(s.boss.hp * 100.0) + int(s.boss.add_hp * 100.0) + s.tick) & 0x7FFFFFFFFFFFFFFF
 
 # --------------------------------------------------------------------------
 # Player / AI input
@@ -186,14 +188,20 @@ static func current_phase(s: CombatState) -> PhaseRes:
 static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	var enc := s.encounter
 
+	# Add waves (raid): form transitions happen only BETWEEN swings, never mid-telegraph.
+	if s.telegraph == null and not enc.adds.is_empty():
+		_update_form(s)
+
 	# Continuous, untelegraphed melee — keeps ticking even during a telegraph.
-	if not enc.melee.is_empty():
+	# While an add holds the field, its own melee (possibly none) replaces the boss's.
+	var melee: Dictionary = enc.melee if s.boss.add_i < 0 else (enc.adds[s.boss.add_i] as AddRes).melee
+	if not melee.is_empty():
 		s.boss.melee_timer -= 1
 		while s.boss.melee_timer <= 0:
-			var mn := float(enc.melee.get("min", 10.0))
-			var mx := float(enc.melee.get("max", 15.0))
+			var mn := float(melee.get("min", 10.0))
+			var mx := float(melee.get("max", 15.0))
 			_damage(s, _tank_target(s), s.rng.next_range(mn, mx), &"melee")
-			s.boss.melee_timer += to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
+			s.boss.melee_timer += to_ticks(float(melee.get("every", 1.5)), s.config.fixed_hz)
 
 	# A telegraph is winding up: advance it; resolve on completion. Ability timers
 	# are FROZEN meanwhile (faithful to the prototypes — only one swing at a time).
@@ -205,12 +213,16 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 			_resolve_telegraph(s, ph)
 		return
 
-	# Tick every ability timer; pick the most-overdue. `danger` (e.g. a crush) wins ties.
+	# Tick every ACTIVE ability timer (the add's while one holds the field — the
+	# withdrawn boss's own timers freeze, exactly as during a telegraph); pick the
+	# most-overdue. `danger` (e.g. a crush) wins ties.
 	# While the boss is silenced (Voidcaller) it can't START interruptible casts — those
 	# are held (timer nudged) so pulses/channels still fire.
 	var silenced := s.tick < s.boss.silenced_until_tick
+	var abilities: Array = enc.abilities if s.boss.add_i < 0 else (enc.adds[s.boss.add_i] as AddRes).abilities
 	var best: AbilityRes = null
-	for ab in enc.abilities:
+	for ab_v in abilities:
+		var ab: AbilityRes = ab_v
 		s.boss.ability_timer[ab.id] = int(s.boss.ability_timer[ab.id]) - 1
 		if int(s.boss.ability_timer[ab.id]) <= 0:
 			if silenced and ab.response == AbilityRes.Response.INTERRUPTIBLE:
@@ -221,15 +233,76 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	if best != null:
 		var gap := best.cd / maxf(0.01, ph.speed) + s.rng.next_float() * best.jitter
 		s.boss.ability_timer[best.id] = to_ticks(gap, s.config.fixed_hz)
-		var tg := Telegraph.new()
-		tg.ability = best
-		tg.start_tick = s.tick
-		var dur := best.cast
-		for st in best.strikes:             # a string never ends before its last beat
-			dur = maxf(dur, float((st as StrikeRes).at))
-		tg.dur_ticks = to_ticks(dur, s.config.fixed_hz)
-		tg.target = _pick_target(s, best)   # tank for busters, random dps for marks
-		s.telegraph = tg
+		_start_telegraph(s, best)
+
+## Begin a telegraph for `ab` — shared by the scheduler and chain links. Its
+## rand_target beats roll their victims NOW so the wind-up shows who is marked.
+static func _start_telegraph(s: CombatState, ab: AbilityRes) -> void:
+	var tg := Telegraph.new()
+	tg.ability = ab
+	tg.start_tick = s.tick
+	var dur := ab.cast
+	for st in ab.strikes:               # a string never ends before its last beat
+		dur = maxf(dur, float((st as StrikeRes).at))
+	tg.dur_ticks = to_ticks(dur, s.config.fixed_hz)
+	tg.target = _pick_target(s, ab)     # tank for busters, random dps for marks
+	for i in ab.strikes.size():
+		if (ab.strikes[i] as StrikeRes).rand_target:
+			tg.beat_targets[i] = _random_raider(s)
+	if not ab.chain.is_empty():
+		tg.chain_src = ab
+		tg.chain_i = 0
+	s.telegraph = tg
+
+## Add waves (raid). Main form: crossing a wave's HP threshold spawns its add — the
+## boss withdraws (timers frozen, HP untouchable) while the add fights with its own
+## HP pool, melee, and abilities. Add form: the add dying gives the field back.
+static func _update_form(s: CombatState) -> void:
+	var enc := s.encounter
+	if s.boss.add_i >= 0:
+		if s.boss.add_hp <= 0.0:
+			var down: AddRes = enc.adds[s.boss.add_i]
+			s.boss.add_i = -1
+			s.boss.add_hp = 0.0
+			s.boss.add_hp_max = 0.0
+			if not enc.melee.is_empty():
+				s.boss.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
+			_emit(s, {"t": "add_down", "id": down.id, "name": down.name})
+		return
+	var frac := s.boss.hp / s.boss.hp_max
+	for i in enc.adds.size():
+		var ad: AddRes = enc.adds[i]
+		if frac <= ad.at and not s.boss.adds_spawned.has(i):
+			s.boss.adds_spawned[i] = true
+			s.boss.add_i = i
+			s.boss.add_hp = float(ad.hp)
+			s.boss.add_hp_max = float(ad.hp)
+			var j := 0
+			for ab_v in ad.abilities:   # stagger the add's openers like create_state does
+				var ab: AbilityRes = ab_v
+				s.boss.ability_timer[ab.id] = to_ticks(
+					1.0 + float(j) * 1.2 + s.rng.next_float() * (ab.cd * 0.25), s.config.fixed_hz)
+				j += 1
+			if not ad.melee.is_empty():
+				s.boss.melee_timer = to_ticks(float(ad.melee.get("every", 1.5)), s.config.fixed_hz)
+			_emit(s, {"t": "add_spawn", "id": ad.id, "name": ad.name})
+			return
+
+## Cast chains (raid): the next link starts the MOMENT the previous resolved or was
+## kicked — a kick skips ONE verse, it doesn't end the litany. A live silence does
+## (the Silencer's fantasy). Returns true if a new link replaced the telegraph.
+static func _advance_chain(s: CombatState) -> bool:
+	var tg := s.telegraph
+	if tg == null or tg.chain_src == null or tg.chain_i >= tg.chain_src.chain.size():
+		return false
+	if s.tick < s.boss.silenced_until_tick:
+		return false
+	var src := tg.chain_src
+	var next_i := tg.chain_i
+	_start_telegraph(s, src.chain[next_i] as AbilityRes)
+	s.telegraph.chain_src = src
+	s.telegraph.chain_i = next_i + 1
+	return true
 
 static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 	var ab := s.telegraph.ability

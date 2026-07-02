@@ -24,6 +24,11 @@ enum Grade { MISS, GRAZE, GOOD, PERFECT, BAITED, READ }
 @export var feint: bool = false       ## fake beat: pressing = BAITED, holding = READ
 @export var aoe: bool = false         ## every seat answers individually — the HEALER included
 
+## RANDOM PERSONAL BEAT (raid): the beat picks a random LIVING raider (healer
+## included) at telegraph start — only that victim can answer it, and it pierces
+## the healer's untargetability. False = classic (telegraph-target / aoe) beat.
+@export var rand_target: bool = false
+
 ## Grade name for diagnostics / event labels.
 static func grade_name(g: int) -> String:
 	return ["miss", "graze", "good", "perfect", "baited", "read"][clampi(g, 0, 5)]
