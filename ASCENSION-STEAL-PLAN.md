@@ -73,6 +73,9 @@ Ascension Mythic+ / Raid Trials / Manastorm: replayable content at **infinitely 
 - Trial Ladder: solo (Trials) only, or co-op (The Rift) too? Leaderboard scope (seed-verified).
 - Keep the "no lockouts, rebalance the boss instead" rule tractable for the balance sims (`sim/*_sim.gd`).
 
+## Theme addendum (2026-07-02)
+The game is getting an ironic **AI-Killer theme** (see `MASTER-PLAN.md` → Theme Bible). Hooks into this plan: rarity tiers are named **Haiku/Sonnet/Opus** (#5), the skill-minted draft currency is literally **Tokens** (#4), the Trial Ladder is presented as boss **versions** with fake patch notes (#6), and feints are canonically **hallucinations**. Scoping rule for #3 (locked): draft pools stay per-class; mods express through UI the class already has; cross-aspect bleed is rare spice only where the class UI supports it.
+
 ## Non-negotiables (do not break)
 - `CombatCore` stays a **pure, deterministic, Node-free reducer** (fixed 30Hz, integer-tick truth, one seeded PRNG, all tuning in `TuningConfig`). Every new system must be sim-able headless.
 - New systems guarded so existing solo content stays **byte-identical** in the regression sims (the established bar for every engine change).
