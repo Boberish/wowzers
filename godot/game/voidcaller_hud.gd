@@ -37,6 +37,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _pcast: PlayerCastBar
 var _hp_orb: LiquidOrb
 var _focus_orb: LiquidOrb
@@ -162,6 +163,7 @@ func _build_combat() -> void:
 
 	# every fight opens with a ceremony: the boss's name-card burns in and off
 	BossIntro.play(_ui, _run.current_encounter().name)
+	_recap_stats = {}              # a fresh reckoning per fight
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -413,6 +415,7 @@ func _cd_frac(p: Seat, s: CombatState, id: String, cd_sec: float) -> float:
 func _handle_event(ev: Dictionary) -> void:
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"strike_graded":
 			# M7 combo-beat verdicts (a PERFECT dodge feeds Focus).
@@ -661,6 +664,9 @@ func _show_end(won: bool) -> void:
 		_title(box, "%s out-cast you. Attune the void and run it back." % _run.current_encounter().name, 15, Palette.TEXT)
 	_title(box, "TOKENS · %d held%s" % [_run.tokens,
 		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM)
+	# THE RECKONING — the fight's recap plaque (state survives into this screen)
+	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
+		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 	var again := Button.new()
 	again.text = "NEW RUN"
 	again.custom_minimum_size = Vector2(200, 48)

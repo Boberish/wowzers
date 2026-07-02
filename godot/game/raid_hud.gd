@@ -80,6 +80,7 @@ var _fx: Control
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _frames: Array = []            ## [{seat, frame}]
 var _aggro_warn: Label
 var _shake_root: Control
@@ -715,6 +716,7 @@ func _build_combat(s: CombatState) -> void:
 
 	# every fight opens with a ceremony: the boss's name-card burns in and off
 	BossIntro.play(_ui, s.encounter.name)
+	_recap_stats = {}              # a fresh reckoning per fight
 
 	# THE RAID — reliquary frames down the left. Gold-lit = the boss's victim;
 	# for the Mender seat the frames are also your click-cast targets.
@@ -1448,6 +1450,7 @@ func _handle_event(ev: Dictionary) -> void:
 	var mine := bool(ev.get("player", false))
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"negate":
 			# seat-less negates are string-impact echoes; strike_graded already
@@ -1667,6 +1670,9 @@ func _show_end(won: bool) -> void:
 		_title(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
 		if quips.has("lose"):
 			_title(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
+	# THE RECKONING — the fight's recap plaque (state survives into this screen)
+	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
+		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 	var again := Button.new()
 	again.custom_minimum_size = Vector2(220, 48)
 	again.add_theme_font_size_override("font_size", 18)

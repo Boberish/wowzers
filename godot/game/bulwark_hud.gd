@@ -37,6 +37,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _hp_orb: LiquidOrb
 var _rage_orb: LiquidOrb
 var _spec: SpecGauge
@@ -196,6 +197,7 @@ func _build_combat() -> void:
 
 	# every fight opens with a ceremony: the boss's name-card burns in and off
 	BossIntro.play(_ui, _run.current_encounter().name)
+	_recap_stats = {}              # a fresh reckoning per fight
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -428,6 +430,7 @@ func _handle_event(ev: Dictionary) -> void:
 		_stage3d.on_event(ev)      # the 3D actors act out the same event the HUD juices
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"ability_fired":
 			if bool(ev.get("player", false)):
@@ -874,6 +877,9 @@ func _show_end(won: bool) -> void:
 		_title(box, "%s ground you down. Reforge and try again." % _run.current_encounter().name, 16, Palette.TEXT)
 	_title(box, "TOKENS · %d held%s" % [_run.tokens,
 		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM)
+	# THE RECKONING — the fight's recap plaque (state survives into this screen)
+	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
+		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 	var again := Button.new()
 	again.text = "PICK A FIGHT"
 	again.custom_minimum_size = Vector2(220, 48)
