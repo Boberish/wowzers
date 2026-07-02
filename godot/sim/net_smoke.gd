@@ -79,6 +79,7 @@ func _process(delta: float) -> bool:
 		"claim":
 			if _seat_of(ava, "Ava") == "tank" and _seat_of(bo, "Bo") == "healer":
 				bo["net"].send({"t": "aspect", "aspect": "brinkwarden"})
+				_host().send({"t": "boss", "enc": "mistral"})   # v2: host picks Seal II
 				ava["net"].send({"t": "ready", "on": true})
 				bo["net"].send({"t": "ready", "on": true})
 				phase = "ready"
@@ -99,8 +100,10 @@ func _process(delta: float) -> bool:
 					str(ava["won"]), ca.checksum, ca.tick, str(bo["won"]), cb.checksum, cb.tick])
 				if ca.checksum != cb.checksum or ava["won"] != bo["won"]:
 					_fail("replica mismatch after fight 1")
+				elif String(ca.encounter.id) != "mistral" or String(cb.encounter.id) != "mistral":
+					_fail("host Seal pick didn't reach the replicas (got %s/%s)" % [ca.encounter.id, cb.encounter.id])
 				else:
-					print("replicas agree: ok — re-readying for the takeover test")
+					print("replicas agree (Seal: %s): ok — re-readying for the takeover test" % ca.encounter.name)
 					ava["net"].send({"t": "ready", "on": true})
 					bo["net"].send({"t": "ready", "on": true})
 					phase = "ready2"
