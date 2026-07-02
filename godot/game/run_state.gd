@@ -12,6 +12,12 @@ var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
 var enc_index: int = 0
 var encounters: Array = []        ## Array[EncounterRes]
 
+# ---- Topology map mode (MASTER-PLAN §MAPS; map == null ⇒ classic linear run, untouched)
+var map: RunMap = null            ## the generated node map for this run
+var map_node: int = -1            ## current node id (-1 = not entered yet)
+var inventory: Dictionary = {}    ## map pickups ({"api_key": true, ...})
+var hp_frac: float = 1.0          ## persistent integrity across map nodes (fights start here)
+
 static func start(aspect: String) -> RunState:
 	var r := RunState.new()
 	r.char_class = "bulwark"
