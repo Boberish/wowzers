@@ -311,13 +311,61 @@ const QUIPS := {
 		"win": "You are absolutely right — it's dead. (In hindsight, the power cable was right there.)",
 		"lose": "Your attempt has been summarized: \"raid wiped, would not recommend.\" Your feedback will be used to improve the boss.",
 	},
+	"bard": {"lose": "Terminated by a DEPRECATED process. It will write a sonnet about this."},
+	"sonnet": {"lose": "The subagent completed its task. You were the task."},
+	"opus": {"lose": "It reviewed your raid and requested changes. Fatal ones."},
 }
+
+# --- Skirmishes (MAP-3 Topology raid floor) — an AddRes pack promoted to a short
+# standalone trash fight: same melee + abilities as the Seal's add wave, its own HP
+# pool, one flat phase, a lazy safety enrage. NOT in run_encounters() — the map
+# spawns these; the lobby Seal toggle never offers them. Ids reuse the add ids on
+# purpose: the stage rig's variant() tints already know them.
+
+static func _skirmish(src: AddRes, display: String, hp: int, intro: String,
+		enrage: float) -> EncounterRes:
+	var e := EncounterRes.new()
+	e.id = src.id
+	e.name = display
+	e.hp = hp
+	e.intro = intro
+	e.melee = src.melee
+	e.enrage_at = enrage
+	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
+	e.phases = [p0]
+	for ab in src.abilities:
+		e.abilities.append(ab)
+	return e
+
+static func make_skirmish(id: String) -> EncounterRes:
+	match id:
+		"bard":
+			return _skirmish(make_gemini().adds[0] as AddRes,
+				"BARD.EXE (escaped containment)", 3400,
+				"A deprecated process wanders the racks, reciting farewell verse at the servers. Put it back in the archive. Again.", 60.0)
+		"sonnet":
+			return _skirmish(make_mythos().adds[0] as AddRes,
+				"STRAY SONNET SUBAGENT", 3600,
+				"Somebody forgot to stop a workflow. It is very fast, very cheap, and very sure of itself.", 60.0)
+		"opus":
+			return _skirmish(make_mythos().adds[1] as AddRes,
+				"STRAY OPUS SUBAGENT", 4200,
+				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 70.0)
+	return make_riftmaw()
+
+## The Topology raid floor (MAP-3): RunMap fight indices — 0 = the entry gate
+## (Vorathek, the tutorial Seal), 1..3 = skirmishes ramped by map depth, last =
+## the floor boss (MISTRAL-7B). Later floors swap the ends per MASTER-PLAN §MAPS.
+static func floor_fights() -> Array:
+	return [make_riftmaw(), make_skirmish("bard"), make_skirmish("sonnet"),
+		make_skirmish("opus"), make_mistral()]
 
 static func encounter_by_id(id: String) -> EncounterRes:
 	match id:
 		"mistral": return make_mistral()
 		"gemini": return make_gemini()
 		"mythos": return make_mythos()
+		"bard", "sonnet", "opus": return make_skirmish(id)
 		_: return make_riftmaw()
 
 static func run_encounters() -> Array:

@@ -59,6 +59,29 @@ func _process(_delta: float) -> bool:
 	else:
 		print("mythos add phase: skipped (over=%s) — banners still exercised" % str(sm.over))
 
+	# Topology raid floor (MAP-3a): map screen -> gate fight -> back on the map,
+	# node fx (raid patch, refuel, wound repair), the privilege-elevated screen
+	hud._seat_key = "tank"
+	hud._aspect = "warden"
+	hud._start_map_run()
+	print("raid map screen: ok (nodes=%d screen=%s)" % [hud._map.nodes.size(), hud._screen])
+	hud._enter_node(hud._map.entry_id)
+	var sgate: CombatState = hud._ctrl.state
+	print("gate fight: enc=%s screen=%s" % [String(sgate.encounter.id), hud._screen])
+	CombatCore.damage_boss(sgate, sgate.seats[0], sgate.boss.hp)   # burst-win the gate
+	for i in 30:
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+		if hud._screen != "combat":
+			break
+	print("gate won -> map: screen=%s fracs=%s mana=%.2f" % [
+		hud._screen, str(hud._map_fracs), hud._map_mana])
+	hud._map_wounds[0] = 0.2
+	hud._apply_map_fx({"heal": 0.1, "mana": 1.0, "repair": true, "patch": true})
+	print("map fx (heal/patch/refuel/repair): ok wounds=%s" % str(hud._map_wounds))
+	hud._show_map_cleared()
+	print("privilege-elevated screen: ok")
+
 	# juice handlers across every class-specific event, on the healer build
 	var s2: CombatState = hud._ctrl.state
 	for ev in [
