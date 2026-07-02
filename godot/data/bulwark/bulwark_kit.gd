@@ -23,13 +23,13 @@ func _mom_delay() -> float:
 func _mom_decay_step() -> float:
 	return 1.0 if _b("snowball") else cfg.mom_decay_step
 
-# --- defensive params ---
+# --- defensive params (propWide/propSwift are Phase-B Guard property mods) ---
 func _def() -> Dictionary:
 	return cfg.def_warden if aspect == "warden" else cfg.def_jugg
 func defense_active() -> float:
-	return _def()["active"]
+	return _def()["active"] * (cfg.mod_wide_mult if _b("propWide") else 1.0)
 func defense_cd() -> float:
-	return _def()["cd"]
+	return _def()["cd"] * (cfg.mod_swift_mult if _b("propSwift") else 1.0)
 
 func _tt(s: CombatState, seconds: float) -> int:
 	return CombatCore.to_ticks(seconds, s.config.fixed_hz)
@@ -39,6 +39,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	# Duelist reward: correctly holding a Feint leaves the boss briefly Exposed.
 	# Maintain a bool here so outgoing_mult (which has no tick) can read it.
 	seat.vars["exposed"] = s.tick < int(seat.vars.get("exposed_until_tick", 0))
+	# Twin Guard: the spent spare charge returns after mod_charge_recharge seconds.
+	if _b("propCharge") and int(seat.vars.get("guard_spare", 1)) < 1 \
+			and s.tick >= int(seat.vars.get("guard_recharge_tick", 0)):
+		seat.vars["guard_spare"] = 1
 	if aspect != "juggernaut":
 		return
 	var mo := int(seat.vars.get("momentum", 0))
@@ -54,11 +58,18 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		seat.vars["mom_decay_acc"] = acc
 		seat.vars["momentum"] = mo
 
-# --- defensive press: Juggernaut dumps (or halves) Momentum ---
-func on_defense_press(_s: CombatState, seat: Seat) -> void:
+# --- defensive press: Juggernaut dumps (or halves) Momentum. Twin Guard (Phase B):
+#     the engine just charged the base cooldown — a spare charge eats it, so a second
+#     press is available back-to-back; the spare recharges via upkeep. A press that
+#     gets BAITED still burns the spare (Twin Guard doesn't protect misreads). ---
+func on_defense_press(s: CombatState, seat: Seat) -> void:
 	if aspect == "juggernaut":
 		var mo := int(seat.vars.get("momentum", 0))
 		seat.vars["momentum"] = int(mo / 2) if _b("sureFoot") else 0
+	if _b("propCharge") and int(seat.vars.get("guard_spare", 1)) > 0:
+		seat.vars["guard_spare"] = int(seat.vars.get("guard_spare", 1)) - 1
+		seat.defense_ready_tick = s.tick
+		seat.vars["guard_recharge_tick"] = s.tick + _tt(s, cfg.mod_charge_recharge)
 
 # --- a defensible swing was negated. FEINT: the negate was a bait — punish it.
 #     Otherwise: Warden reflects + banks Counter + Riposte. ---
@@ -77,6 +88,14 @@ func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 		seat.vars["riposte_until_tick"] = s.tick + _tt(s, cfg.riposte_dur)
 		if _b("riposteChain"):
 			seat.defense_ready_tick = s.tick + _tt(s, 0.1)   # near-instant re-parry
+	# Phase B: a clean negate is the Guard's INNATE proc moment; Rhythm of Iron
+	# (trigThird) adds an extra proc every 3rd successful guard.
+	if _b("trigThird"):
+		var n := int(seat.vars.get("guard_count", 0)) + 1
+		seat.vars["guard_count"] = n
+		if n % 3 == 0:
+			_trigger_fire(s, seat, "third")
+	_guard_proc(s, seat, "negate")
 
 # --- M7 string beats: grade payoffs. PERFECT = the riposte fantasy (Warden banks
 #     Counter + opens the Riposte window; Jugg banks Momentum). BAITED wipes the
@@ -92,6 +111,8 @@ func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
 				seat.vars["riposte_until_tick"] = s.tick + _tt(s, cfg.riposte_dur)
 			else:
 				_gain_momentum(s, seat, cfg.strike_perfect_momentum)
+			if _b("trigBeat"):
+				_trigger_fire(s, seat, "beat")     # Phase B: PERFECT beat = proc moment
 		StrikeRes.Grade.GOOD:
 			_gain_rage(seat, cfg.strike_good_rage)
 			if aspect == "juggernaut":
@@ -104,6 +125,8 @@ func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
 			_gain_rage(seat, cfg.strike_read_rage)
 			seat.vars["exposed_until_tick"] = maxi(int(seat.vars.get("exposed_until_tick", 0)),
 				s.tick + _tt(s, cfg.strike_read_exposed))
+			if _b("trigRead"):
+				_trigger_fire(s, seat, "read")     # Phase B: a held feint beat = proc moment
 		_:
 			pass
 
@@ -139,6 +162,8 @@ func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName,
 		_gain_rage(seat, cfg.feint_read_rage)
 		seat.vars["exposed_until_tick"] = s.tick + _tt(s, cfg.feint_exposed_dur)
 		CombatCore.emit_event(s, {"t": "read", "player": seat.is_player})
+		if _b("trigRead"):
+			_trigger_fire(s, seat, "read")     # Phase B: a held whole-swing feint = proc moment
 
 # Is this ability id a Feint? Reads the authoritative flag off the encounter data
 # so the kit never has to hardcode which swings are feints.
@@ -216,6 +241,8 @@ func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 		dmg += cfg.riposte_bonus
 		riposted = true
 		seat.vars["riposte_until_tick"] = 0
+		if _b("trigRiposte"):
+			_trigger_fire(s, seat, "riposte")  # Phase B: a landed Riposte = proc moment
 	if dmg > 0.0:
 		CombatCore.damage_boss(s, seat, dmg)
 	if ab.has("lifesteal"):
@@ -272,6 +299,42 @@ func _set_gcd(s: CombatState, seat: Seat, gcd: float, id: String) -> void:
 	seat.gcd_until_tick = until
 	seat.cooldowns[id] = until
 
+# ---------------------------------------------------------------- slot-verb Guard mods
+# Phase B (build-your-Guard): TRIGGER pieces add proc moments, PAYLOAD pieces fire on
+# EVERY proc moment (innate: any clean negate), PROPERTY pieces reshape the verb.
+# NO LOCKOUTS — N triggers × M payloads all live. Everything _b()-gated: with no mods
+# drafted these paths are inert and boonless sims stay byte-identical.
+
+func _has_payloads() -> bool:
+	return _b("payReflect") or _b("payHeal") or _b("payRage") \
+		or _b("payCounter") or _b("payMomentum") or _b("payExpose")
+
+## A drafted trigger fired: built-in rage sip (standalone value) + one proc moment.
+func _trigger_fire(s: CombatState, seat: Seat, source: String) -> void:
+	_gain_rage(seat, cfg.mod_trig_rage)
+	_guard_proc(s, seat, source)
+
+## One proc moment: fire every drafted payload once.
+func _guard_proc(s: CombatState, seat: Seat, source: String) -> void:
+	if not _has_payloads():
+		return
+	seat.vars["guard_procs"] = int(seat.vars.get("guard_procs", 0)) + 1   # probe diagnostic
+	if _b("payReflect"):
+		CombatCore.damage_boss(s, seat, cfg.mod_reflect)
+	if _b("payHeal"):
+		_heal(seat, cfg.mod_heal)
+	if _b("payRage"):
+		_gain_rage(seat, cfg.mod_rage)
+	if _b("payCounter") and aspect == "warden":
+		_gain_counter(seat, 1)
+	if _b("payMomentum") and aspect == "juggernaut":
+		_gain_momentum(s, seat, 2)
+	if _b("payExpose"):
+		var until := s.tick + _tt(s, cfg.mod_expose_dur)
+		s.boss.exposed_until_tick = maxi(s.boss.exposed_until_tick, until)
+		s.boss.expose_amt = maxf(s.boss.expose_amt, cfg.mod_expose_amt)
+	CombatCore.emit_event(s, {"t": "guard_proc", "player": seat.is_player, "src": source})
+
 # --- resource helpers ---
 func _gain_rage(seat: Seat, x: float) -> void:
 	seat.resource = clampf(seat.resource + x, 0.0, seat.resource_max)
@@ -299,4 +362,8 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	}
 	if s.threat_enabled:
 		out["challenge_ready"] = s.tick >= int(seat.cooldowns.get("challenge", 0))
+	if _b("propCharge"):   # Twin Guard: ready charges for the HUD's rune pips
+		out["guard_charges"] = int(seat.vars.get("guard_spare", 1)) \
+			+ (1 if s.tick >= seat.defense_ready_tick else 0)
+		out["guard_charges_max"] = 2
 	return out

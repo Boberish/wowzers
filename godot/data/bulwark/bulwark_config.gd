@@ -60,6 +60,18 @@ extends Resource
 ## Challenge (raid-only taunt): its own cooldown, off-GCD. Unused solo.
 @export var challenge_cd: float = 8.0
 
+# Phase B slot-verb Guard mods (build-your-Guard; entries with `slot` in BulwarkBoons).
+# Payload values fire PER PROC (innate proc = any clean negate; triggers add moments).
+@export var mod_reflect: float = 35.0        ## payReflect dmg per proc
+@export var mod_heal: float = 30.0           ## payHeal per proc
+@export var mod_rage: float = 8.0            ## payRage per proc
+@export var mod_expose_dur: float = 1.2      ## payExpose window, seconds
+@export var mod_expose_amt: float = 0.15     ## payExpose boss damage-taken bonus
+@export var mod_trig_rage: float = 4.0       ## built-in rage on any drafted trigger fire
+@export var mod_swift_mult: float = 0.8      ## propSwift guard cooldown multiplier
+@export var mod_wide_mult: float = 1.3       ## propWide active-window multiplier
+@export var mod_charge_recharge: float = 6.0 ## propCharge spare-charge recharge, seconds
+
 ## Generic abilities (cleave/rampage/fortify + draftable bloodthirst/shockwave).
 ## Vindicate & Avalanche are handled specially in BulwarkKit.
 @export var abilities: Dictionary = {
