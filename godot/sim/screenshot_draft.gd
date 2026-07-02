@@ -38,7 +38,24 @@ func _initialize() -> void:
 			"setup": func(h): h._start_run("warden"); _modded(h); h._toggle_book(), "wait": 20},
 		{"name": "b_charge_pips", "scene": "res://game/bulwark_main.tscn",
 			"setup": func(h): h._start_run("warden"); _modded(h), "wait": 60},
+		# Phase B port: assembled YOUR RHYTHM tooltip + Twin Void pips on the kick socket.
+		{"name": "p_twinfang_tip", "scene": "res://game/twinfang_main.tscn",
+			"setup": func(h): h._start_run("venomancer"); _modded_tf(h); h._show_guard_tip(), "wait": 30},
+		{"name": "p_voidcaller_pips", "scene": "res://game/voidcaller_main.tscn",
+			"setup": func(h): h._start_run("disruptor"); _modded_vc(h), "wait": 60},
 	]
+
+## Modded Rhythm build (Twin Step + triggers/payloads), fight rebuilt with it.
+func _modded_tf(h) -> void:
+	for id in ["tfTrigEvade", "tfTrigSpender", "tfPayLash", "tfPayEnergy", "tfPropTwinStep"]:
+		h._run.boons[id] = true
+	h._begin_fight()
+
+## Modded Kick build (Twin Void + triggers/payloads), fight rebuilt with it.
+func _modded_vc(h) -> void:
+	for id in ["vcTrigClean", "vcTrigDeny", "vcPayVoid", "vcPayFocus", "vcPropTwinVoid"]:
+		h._run.boons[id] = true
+	h._begin_fight()
 
 ## Lock slot 1 on the live DraftScreen (the ◆ HELD banner + LOCKED button state).
 func _lock_one(h) -> void:

@@ -15,6 +15,7 @@ func _initialize() -> void:
 	print("")
 	_prove_determinism()
 	print("")
+	_prove_verb_mods(seeds)
 
 	var rows: Array = []
 	var matchups := [
@@ -79,12 +80,39 @@ func _encounter(name: String) -> EncounterRes:
 		_:
 			return BloomweaverContent.make_ashmaul()
 
-func _run_one(seed: int, enc_name: String, aspect: String, latency: int) -> Dictionary:
+func _run_one(seed: int, enc_name: String, aspect: String, latency: int,
+		boons: Dictionary = {}) -> Dictionary:
 	var cfg := BloomweaverContent.make_config()
 	var bcfg := BloomweaverContent.make_bloom_config()
-	var s := BloomweaverContent.make_state(seed, aspect, cfg, bcfg, _encounter(enc_name))
+	var s := BloomweaverContent.make_state(seed, aspect, cfg, bcfg, _encounter(enc_name), boons)
 	(s.seats[0].policy as BloomweaverPolicy).latency_ticks = latency
-	return _run(s)
+	var r := _run(s)
+	r["verb_procs"] = int(s.seats[0].vars.get("verb_procs", 0))
+	return r
+
+## Phase B probe: the Garden mod pieces change the fight and stay deterministic.
+## Paired seeds on the Hollowking (wildgrove @sloppy) — boonless vs a modded build.
+func _prove_verb_mods(seeds: int) -> void:
+	var n := mini(seeds, 120)
+	var mods := {"bwTrigPerfect": true, "bwTrigPlant": true, "bwPayThorn": true,
+		"bwPaySap": true, "bwPropDeepGarden": true}
+	var bw := 0
+	var mw := 0
+	var procs := 0.0
+	for seed in range(1, n + 1):
+		var a := _run_one(seed, "hollowking", "wildgrove", 18)
+		var b := _run_one(seed, "hollowking", "wildgrove", 18, mods)
+		procs += float(b["verb_procs"])
+		if a["won"]: bw += 1
+		if b["won"]: mw += 1
+	var d1 := _run_one(17, "hollowking", "wildgrove", 18, mods)
+	var d2 := _run_one(17, "hollowking", "wildgrove", 18, mods)
+	var det: bool = d1["checksum"] == d2["checksum"]
+	print("garden-mods probe (Hollowking / wildgrove @sloppy, %d paired seeds):" % n)
+	print("  boonless %.1f%%   modded %.1f%%   procs/run %.1f   det %s  -> %s" % [
+		100.0 * bw / n, 100.0 * mw / n, procs / n, ("PASS" if det else "FAIL"),
+		("PASS" if (mw >= bw and procs > 0.0 and det) else "FAIL")])
+	print("")
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)

@@ -856,7 +856,7 @@ func _show_tip(id: String, rune: AbilityRune) -> void:
 		var gl := BloomweaverBoons.verb_summary(_run.boons, _run.aspect)
 		if not gl.is_empty():
 			desc += "\n" + "\n".join(gl)
-			h += 17.0 * gl.size()
+			h += 24.0 + 44.0 * gl.size()
 	_tip_desc.text = desc
 	var w := 260.0
 	var gp := rune.global_position
