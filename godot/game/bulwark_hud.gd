@@ -61,6 +61,10 @@ const OFFENSIVE := {
 	"avalanche": true, "bloodthirst": true, "shockwave": true,
 }
 
+# topology map mode (MASTER-PLAN §MAPS MAP-1; active when _run.map != null)
+var _draft_to_map := false         ## the next draft returns to the map, not the next fight
+var _draft_header := ""            ## optional custom draft headline (cache salvage etc.)
+
 # tooltip
 var _tip: Control
 var _tip_title: Label
@@ -115,6 +119,8 @@ func _show_boss_select(aspect: String) -> void:
 	sel.encounters = BulwarkContent.run_encounters()
 	sel.current = aspect
 	sel.hint = "SPACE = Parry/Dodge   ·   F = dodge combo beats   ·   1-5 abilities   ·   S = spellbook"
+	sel.extras = [{"label": "THE TOPOLOGY — Ring 3 map run (Realm 1 PoC)",
+		"cb": func(): _start_map_run(sel.current)}]
 	sel.chosen.connect(_start_run)
 	sel.back_pressed.connect(func(): get_tree().change_scene_to_file("res://game/main.tscn"))
 	sel.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -138,6 +144,9 @@ func _begin_fight() -> void:
 	_flash_a = 0.0
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	_ctrl.begin(BulwarkContent.build_fight(_run, run_seed))
+	if _run.map != null:                       # map mode: fights start at run integrity
+		var s0: Seat = _ctrl.state.seats[0]
+		s0.hp = maxf(1.0, s0.hp_max * _run.hp_frac)
 
 func _build_combat() -> void:
 	# the physical fight: knight + boss on a 3D dais, behind every HUD widget,
@@ -699,6 +708,11 @@ func _show_draft() -> void:
 	_clear()
 	var picks := BulwarkBoons.roll(_run)
 	if picks.is_empty():
+		if _draft_to_map:                      # map mode: pool exhausted → back to the map
+			_draft_to_map = false
+			_draft_header = ""
+			_show_map()
+			return
 		_run.enc_index += 1
 		_begin_fight()
 		return
@@ -707,7 +721,9 @@ func _show_draft() -> void:
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
 	_place(head, 0.5, 0, 0.5, 0, -400, 60, 400, 160)
 	_ui.add_child(head)
-	var hl := _title(head, "%s FALLS" % _run.current_encounter().name.to_upper(), 30, Palette.GOLD)
+	var hl_text := _draft_header if _draft_header != "" else "%s FALLS" % _run.current_encounter().name.to_upper()
+	_draft_header = ""
+	var hl := _title(head, hl_text, 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	_title(head, "Reforge — take one. Your Aspect's picks are weighted in.", 15, Palette.TEXT_DIM)
 
@@ -726,12 +742,107 @@ func _make_card(boon: Dictionary) -> Control:
 
 func _on_card_taken(boon: Dictionary) -> void:
 	BulwarkBoons.apply(boon, _run)
+	if _draft_to_map:                          # map mode: drafts hand back to the map
+		_draft_to_map = false
+		_show_map()
+		return
 	_run.enc_index += 1
 	_begin_fight()
+
+# ============================================================ TOPOLOGY MAP (MAP-1)
+## The Across-the-Obelisk-style run: a generated node map (RunMap) replaces the linear
+## chain. Fights start at the run's persistent hp_frac (attrition is the tradeoff the
+## map trades in); events/cooling/cache move hp_frac or grant drafts; the Seal ends it.
+func _start_map_run(aspect: String) -> void:
+	_run = RunState.start(aspect)
+	_run.map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
+		_run.encounters.size(), MapContent.event_ids())
+	_show_map()
+
+func _show_map() -> void:
+	_screen = "map"
+	_clear()
+	var ms := MapScreen.new()
+	ms.map = _run.map
+	ms.current = _run.map_node
+	ms.inventory = _run.inventory
+	ms.hp_frac = _run.hp_frac
+	ms.node_entered.connect(_enter_node)
+	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(ms)
+
+func _enter_node(id: int) -> void:
+	_run.map_node = id
+	var n: Dictionary = _run.map.node(id)
+	var first_visit: bool = not bool(n.get("visited", false))
+	n["visited"] = true
+	if first_visit and bool(n["key"]) and not _run.inventory.get("api_key", false):
+		_run.inventory["api_key"] = true
+		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
+			[{"label": "TAKE IT", "fx": {"key": true,
+				"result": "Authorization acquired. Try not to post it anywhere public."}}],
+			Palette.GOLD_BRIGHT, _resolve_node.bind(n))
+		return
+	_resolve_node(n)
+
+func _resolve_node(n: Dictionary) -> void:
+	match String(n["kind"]):
+		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
+			_run.enc_index = int(n["fight"])
+			_begin_fight()
+		RunMap.KIND_EVENT:
+			var ev := MapContent.event(String(n["event"]))
+			_map_stop(String(ev["title"]), String(ev["body"]), ev["choices"], Palette.VOID, _show_map)
+		RunMap.KIND_COOLING:
+			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
+				[{"label": "THROTTLE  (rest — +%d%% integrity)" % int(MapContent.COOLING_HEAL * 100),
+					"fx": {"heal": MapContent.COOLING_HEAL, "result": MapContent.COOLING_RESULT}}],
+				Palette.FLOW, _show_map)
+		RunMap.KIND_CACHE:
+			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
+				[{"label": "SALVAGE A COMPONENT", "fx": {"draft": true, "result": MapContent.CACHE_RESULT}}],
+				Palette.GOLD, _show_map)
+
+## A stop = one MapEventPanel; applying the chosen fx, then continuing via `done`
+## (or into a salvage draft that returns to the map).
+func _map_stop(title: String, body: String, choices: Array, accent: Color, done: Callable) -> void:
+	_screen = "mapstop"
+	_clear()
+	var p := MapEventPanel.new()
+	p.title_text = title
+	p.body_text = body
+	p.choices = choices
+	p.accent = accent
+	p.finished.connect(func(fx: Dictionary):
+		_apply_map_fx(fx)
+		if bool(fx.get("draft", false)):
+			_draft_to_map = true
+			_draft_header = "SALVAGE — TAKE ONE"
+			_show_draft()
+		else:
+			done.call())
+	p.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(p)
+
+## Events bruise or patch you, but only combat can kill: integrity floors at 5%.
+func _apply_map_fx(fx: Dictionary) -> void:
+	_run.hp_frac = clampf(_run.hp_frac + float(fx.get("heal", 0.0)) - float(fx.get("hurt", 0.0)),
+		0.05, 1.0)
 
 # ============================================================ END
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
+		return
+	if _run.map != null:                       # map mode: persist integrity, route by node
+		var s0: Seat = _ctrl.state.seats[0]
+		_run.hp_frac = clampf(s0.hp / maxf(1.0, s0.hp_max), 0.0, 1.0)
+		if not won:
+			_show_end(false)
+		elif String(_run.map.node(_run.map_node)["kind"]) == RunMap.KIND_SEAL:
+			_show_end(true)
+		else:
+			_draft_to_map = true
+			_show_draft()
 		return
 	if won and not _run.is_last():
 		_show_draft()
