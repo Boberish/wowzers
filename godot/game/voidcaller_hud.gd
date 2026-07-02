@@ -37,6 +37,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _pcast: PlayerCastBar
 var _hp_orb: LiquidOrb
 var _focus_orb: LiquidOrb
@@ -76,6 +77,7 @@ func _ready() -> void:
 				_start_run(spec[0], spec[1] if spec.size() > 1 else "")
 
 func _clear() -> void:
+	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	_book = null
 	for c in _ui.get_children():
 		c.queue_free()
@@ -158,6 +160,10 @@ func _build_combat() -> void:
 	_judge.verb = VERB
 	_place(_judge, 0.5, 0, 0.5, 0, -300, 658, 300, 762)
 	_shake_root.add_child(_judge)
+
+	# every fight opens with a ceremony: the boss's name-card burns in and off
+	BossIntro.play(_ui, _run.current_encounter().name)
+	_recap_stats = {}              # a fresh reckoning per fight
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -409,6 +415,7 @@ func _cd_frac(p: Seat, s: CombatState, id: String, cd_sec: float) -> float:
 func _handle_event(ev: Dictionary) -> void:
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"strike_graded":
 			# M7 combo-beat verdicts (a PERFECT dodge feeds Focus).
@@ -573,24 +580,27 @@ func _toggle_book() -> void:
 		_book.queue_free()
 		_book = null
 		return
-	_book = _panel(Palette.BG1)
-	_book.self_modulate = Color(1, 1, 1, 0.98)
-	_place(_book, 0.5, 0.5, 0.5, 0.5, -280, -220, 280, 220)
+	var abilities: Array = [{"icon": "kick", "name": "KICK", "key": "SPC",
+		"stats": "5.0s cd  ·  clean = last slice of the cast",
+		"tip": "Cut the boss's cast short. A CLEAN kick (inside the bright window) pays your Aspect; a whiffed press still burns the cooldown."}]
+	for i in _run.loadout.size():
+		var id: String = _run.loadout[i]
+		var info: Dictionary = ABILITY_TIPS.get(id, {"stats": "", "tip": ""})
+		abilities.append({"icon": id, "name": ABILITY_NAMES.get(id, id), "key": str(i + 1),
+			"stats": String(info["stats"]), "tip": String(info["tip"])})
+	_book = Grimoire.new("THE VOIDCALLER — %s" % _run.aspect.to_upper(), abilities, _boon_dicts(),
+		Palette.VOID)
+	_book.closed.connect(_toggle_book)
 	_ui.add_child(_book)
-	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 20)
-	v.add_theme_constant_override("separation", 6)
-	_book.add_child(v)
-	_title(v, "SPELLBOOK", 22, Palette.GOLD)
-	_title(v, "Abilities", 14, Palette.VOID)
-	for id in _run.loadout:
-		_title(v, "  %s" % ABILITY_NAMES.get(id, id), 14, Palette.TEXT)
-	_title(v, "Boons", 14, Palette.VOID)
-	if _run.boons.is_empty():
-		_title(v, "  (none yet — win a fight to attune one)", 13, Palette.TEXT_DIM)
+
+func _boon_dicts() -> Array:
+	var out: Array = []
 	for id in _run.boons:
-		_title(v, "  * %s" % _boon_title(id), 13, Palette.TEXT)
-	_title(v, "press S to close", 12, Palette.TEXT_DIM)
+		for pool in [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]:
+			for b in pool:
+				if b["id"] == id:
+					out.append(b)
+	return out
 
 func _boon_title(id: String) -> String:
 	for pool in [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]:
@@ -657,6 +667,9 @@ func _show_end(won: bool) -> void:
 		_title(box, "%s out-cast you. Attune the void and run it back." % _run.current_encounter().name, 15, Palette.TEXT)
 	_title(box, "TOKENS · %d held%s" % [_run.tokens,
 		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM)
+	# THE RECKONING — the fight's recap plaque (state survives into this screen)
+	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
+		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 	var again := Button.new()
 	again.text = "NEW RUN"
 	again.custom_minimum_size = Vector2(200, 48)

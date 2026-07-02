@@ -37,6 +37,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _hp_orb: LiquidOrb
 var _rage_orb: LiquidOrb
 var _spec: SpecGauge
@@ -92,6 +93,7 @@ func _ready() -> void:
 			_start_run(spec[0], spec[1] if spec.size() > 1 else "")
 
 func _clear() -> void:
+	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	_book = null
 	_stage3d = null
 	for c in _ui.get_children():
@@ -192,6 +194,10 @@ func _build_combat() -> void:
 	_judge.verb = VERB.get(_run.aspect, "DEFEND")
 	_place(_judge, 0.5, 0, 0.5, 0, -330, 664, 330, 768)
 	_shake_root.add_child(_judge)
+
+	# every fight opens with a ceremony: the boss's name-card burns in and off
+	BossIntro.play(_ui, _run.current_encounter().name)
+	_recap_stats = {}              # a fresh reckoning per fight
 
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
@@ -426,6 +432,7 @@ func _handle_event(ev: Dictionary) -> void:
 		_stage3d.on_event(ev)      # the 3D actors act out the same event the HUD juices
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"ability_fired":
 			if bool(ev.get("player", false)):
@@ -695,29 +702,33 @@ func _toggle_book() -> void:
 		_book.queue_free()
 		_book = null
 		return
-	_book = _panel(Palette.BG1.darkened(-0.0))
-	_book.self_modulate = Color(1, 1, 1, 0.98)
-	_place(_book, 0.5, 0.5, 0.5, 0.5, -280, -220, 280, 220)
-	_ui.add_child(_book)
-	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 20)
-	v.add_theme_constant_override("separation", 6)
-	_book.add_child(v)
-	_title(v, "SPELLBOOK", 22, Palette.GOLD)
-	_title(v, "Abilities", 14, Palette.STEEL)
-	for id in _run.loadout:
-		_title(v, "  %s" % ABILITY_NAMES.get(id, id), 14, Palette.TEXT)
-	_title(v, "Boons", 14, Palette.STEEL)
-	if _run.boons.is_empty():
-		_title(v, "  (none yet — win a fight to draft one)", 13, Palette.TEXT_DIM)
-	for id in _run.boons:
-		_title(v, "  * %s" % _boon_title(id), 13, Palette.TEXT)
+	var verb: String = VERB.get(_run.aspect, "GUARD")
+	var gtip := "Parry a swing inside its window to negate it, reflect damage, and bank Counter." \
+		if _run.aspect == "warden" else \
+		"Dodge a swing inside its window to negate it — but it dumps your Momentum, so dodge only what you must."
 	var gl := BulwarkBoons.guard_summary(_run.boons, _run.aspect)
 	if not gl.is_empty():
-		_title(v, "Your Guard", 14, Palette.STEEL)
-		for line in gl:
-			_title(v, "  %s" % line, 13, Palette.TEXT)
-	_title(v, "press S to close", 12, Palette.TEXT_DIM)
+		gtip += "\n" + "\n".join(gl)          # Phase B: the assembled YOUR GUARD rules
+	var abilities: Array = [{"icon": "guard", "name": verb, "key": "SPC",
+		"stats": "own cooldown  ·  off the GCD", "tip": gtip}]
+	for i in _run.loadout.size():
+		var id: String = _run.loadout[i]
+		var info: Dictionary = ABILITY_TIPS.get(id, {"stats": "", "tip": ""})
+		abilities.append({"icon": id, "name": ABILITY_NAMES.get(id, id), "key": str(i + 1),
+			"stats": String(info["stats"]), "tip": String(info["tip"])})
+	_book = Grimoire.new("THE BULWARK — %s" % _run.aspect.to_upper(), abilities, _boon_dicts(),
+		Palette.STEEL if _run.aspect == "warden" else Palette.MOMENTUM)
+	_book.closed.connect(_toggle_book)
+	_ui.add_child(_book)
+
+func _boon_dicts() -> Array:
+	var out: Array = []
+	for id in _run.boons:
+		for pool in [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]:
+			for b in pool:
+				if b["id"] == id:
+					out.append(b)
+	return out
 
 func _boon_title(id: String) -> String:
 	for pool in [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]:
@@ -881,6 +892,9 @@ func _show_end(won: bool) -> void:
 		_title(box, "%s ground you down. Reforge and try again." % _run.current_encounter().name, 16, Palette.TEXT)
 	_title(box, "TOKENS · %d held%s" % [_run.tokens,
 		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM)
+	# THE RECKONING — the fight's recap plaque (state survives into this screen)
+	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
+		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 	var again := Button.new()
 	again.text = "PICK A FIGHT"
 	again.custom_minimum_size = Vector2(220, 48)

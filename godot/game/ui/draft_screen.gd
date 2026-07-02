@@ -112,6 +112,11 @@ func _rebuild() -> void:
 			lk.modulate = Color(1, 1, 1, 0.35)
 		col.add_child(lk)
 		_row.add_child(col)
+		# the deal-in: each card arrives a beat after the last (rerolls re-deal too)
+		col.modulate.a = 0.0
+		var tw := col.create_tween()
+		tw.tween_interval(0.10 + 0.09 * float(i))
+		tw.tween_property(col, "modulate:a", 1.0, 0.22)
 	var t: int = _run.tokens
 	_tokens_lbl.text = "TOKENS · %d — spend them responsibly" % t
 	_tokens_lbl.add_theme_color_override("font_color", Palette.GOLD if t > 0 else Palette.TEXT_DIM)

@@ -80,8 +80,14 @@ func _build() -> void:
 	row.offset_top = 330.0
 	row.offset_bottom = 740.0
 	add_child(row)
-	for c in CLASSES:
-		row.add_child(ClassCard.new(c))
+	for i in CLASSES.size():
+		var card := ClassCard.new(CLASSES[i])
+		row.add_child(card)
+		# emblem cards take the stage one at a time
+		card.modulate.a = 0.0
+		var tw := card.create_tween()
+		tw.tween_interval(0.08 + 0.07 * float(i))
+		tw.tween_property(card, "modulate:a", 1.0, 0.26)
 
 	var foot := Label.new()
 	foot.text = "All five roles online — mitigate · keep-alive · anticipate · drive · interrupt — and the Rift is open."

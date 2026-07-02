@@ -33,6 +33,7 @@ var _fx: Control
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _mana: LiquidOrb
 var _spec: SpecStrip
 var _castbar: CastChannel
@@ -83,6 +84,7 @@ func _ready() -> void:
 				_start_run(parts[0], parts[1] if parts.size() > 1 else "")
 
 func _clear() -> void:
+	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	for c in _ui.get_children():
 		c.queue_free()
 
@@ -159,6 +161,10 @@ func _build_combat() -> void:
 	_judge.compact = true
 	_place(_judge, 0.5, 0, 0.5, 0, -280, 634, 280, 714)
 	_ui.add_child(_judge)
+
+	# every fight opens with a ceremony: the boss's name-card burns in and off
+	BossIntro.play(_ui, _run.current_encounter().name)
+	_recap_stats = {}              # a fresh reckoning per fight
 
 	# raid frames — the whole raid, YOU included: aoe strike beats (M7) can hit the
 	# healer now, so your own HP is a frame like everyone else's (and self-castable).
@@ -643,6 +649,7 @@ func _handle_event(ev: Dictionary) -> void:
 	var t := String(ev.get("t", ""))
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	RecapPanel.track(_recap_stats, ev)
 	# M7 strike beats: the healer's own verdicts pop centre-screen — the dodge is
 	# YOUR button now, so its feedback lives where your eyes are, not on a frame.
 	if t == "strike_graded":
@@ -782,6 +789,9 @@ func _show_end(won: bool) -> void:
 	_label(box, _stats_summary(), 14, Palette.STEEL, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(box, "TOKENS · %d held%s" % [_run.tokens,
 		(" · +%d minted this fight" % _minted) if _minted > 0 else ""], 13, Palette.TEXT_DIM, HORIZONTAL_ALIGNMENT_CENTER)
+	# THE RECKONING — the fight's recap plaque (state survives into this screen)
+	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
+		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 	var again := Button.new()
 	again.text = "NEW RUN"
 	again.custom_minimum_size = Vector2(200, 48)
