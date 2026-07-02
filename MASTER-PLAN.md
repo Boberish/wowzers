@@ -32,6 +32,7 @@
 | Co-op raid (R0/R1: any seat, any aspect, AI raiders) | ✅ Playable |
 | Netcode (R2) | 🟠 IN FLIGHT (another session: `godot/net/`, `server/`, web export in `dist/`) |
 | **THEME: AI-Killer rebrand** | 🔴 NEW — not started (see Theme Bible) |
+| **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | 🟠 IN FLIGHT (this session, branch `raid-seals` — see §RAID SEALS) |
 | **Draft 2.0 / slot-verbs / token economy** | 🔴 NEW — planned (see Systems; design: `ASCENSION-STEAL-PLAN.md`) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned |
 
@@ -63,7 +64,7 @@
 | Current boss | Themed identity | The hook |
 |---|---|---|
 | Gatekeeper (parry teacher) | **CAPTCHA-9, the Gatekeeper** | "Prove you are not a robot" — verifies your humanity via parry checks |
-| Warcaller | **MISTRAL, the Draft-Engine** | wind-cooled, fast light swings; lightweight-and-efficient jokes (the easy boss) |
+| Warcaller | **LE CHAT, the Draft-Engine** | wind-cooled, fast light swings; lightweight-and-efficient jokes *(was MISTRAL — canonical name moved to Raid Seal II)* |
 | Colossus (Rockslide) | **BIG IRON** | room-sized legacy mainframe; slow punch-card telegraphs; COBOL jokes |
 | The Duelist (feint boss) | **THE HALLUCINATOR** | a diffusion unit that *renders attacks that don't exist* — the feint boss IS the hallucination boss |
 | The Devourer (chip+heal+enrage) | **THE SCRAPER** | devours data to grow; heal = retraining on what it scraped; enrage = training complete |
@@ -73,17 +74,62 @@
 | TF-Warden | **FIREWALL** | a literal wall that filters your packets (strikes) |
 | The Executioner (Judgment Cuts) | **THE DECOMMISSIONER** | killbot HR: "your role has been made redundant" |
 | Choir-Priest (interruptible chants) | **THE PROMPTER** | chatbot evangelist; its casts are walls of text — kick = Stop generating |
-| Twin Cantors (Duet, silent twin) | **GEMINI, the Twins** | THE twin boss; the silent-twin feint = the mute model; Empower = model merge |
+| Twin Cantors (Duet, silent twin) | **LAMDA & PALM, the Deprecated Twins** | two dead Google models; the silent-twin feint = the mute model; Empower = model merge *(was GEMINI — canonical name moved to Raid Seal III)* |
 | Ashmaul (spike teacher) | **PISTON, the Crash-Loop** | one big hammer, forever |
 | Swarmheart (attrition) | **THE SWARM** | drone cloud (robots! for the boy) |
 | Hollowking (Kingsmark one-shot) | **KERNEL, the Hollow King** | Kingsmark = "selected for deletion"; runs in ring 0 |
-| Vorathek (raid) | **OPUS, the Alignment** | Claude-mythos finale. Three phases: **Helpful / Harmless / Honest** (heals you unwanted → turtles → drops all pretense). Curse = context shift; spawns *subagent* adds (yes, the meta-joke) |
+| Vorathek (raid) | **stays Vorathek** — the rift-beast tutorial Seal | the Claude-mythos capstone is now its own NEW raid boss (Seal IV — see §RAID SEALS); the OPUS ideas (Helpful/Harmless/Honest phases, subagent adds, context-shift curse) live there |
 
 **Art note (genuine win):** robots/computers are much CHEAPER for our procedural `PoseRig` pipeline than organic monsters — boxes, servos, antennae, monitors read instantly. The theme isn't just funny, it accelerates W-Graphics.
 
 **Acceptance bar (theme work):** display names/strings/sigils/dialogue only — sims stay byte-identical (rename via display fields, never ids). UI smokes green.
 
 ---
+
+## RAID SEALS — the online boss ladder (first AI-Killer content) — IN FLIGHT (branch `raid-seals`)
+
+**Bill's brief (2026-07-02, direct):** the online Rift needs a bigger, more DYNAMIC boss —
+random-but-dodgeable raid damage, interrupt chains, varied timings, a ~10s "everyone
+close-to-perfect dodges or dies" spell, and add phases that replace the boss. Themed to the
+Theme Bible arc: Mistral easy → Gemini mid → Claude-Mythos finale. Combat serious, wrapper silly.
+
+**Roster** (Seal I Vorathek stays untouched — the raid's tutorial Seal):
+- **Seal II — MISTRAL-7B, Le Golem Efficace** (easy): "Mixture of Fists" random-personal-beat
+  barrage, a 2-verse kick chain (teaches interrupt chains), light efficient swings. MoE jokes.
+- **Seal III — GEMINI ULTRA, the Twin Constellation** (mid): "Double-Check" tank string with a
+  HALLUCINATION feint mid-combo, "A/B Test" random barrage, 3-verse chain, and the first add
+  wave — **BARD.EXE (deprecated)** resurfaces at 50% and must die before Gemini returns.
+- **Seal IV — CLAUDE MYTHOS, the Final Compute** (finale, the Claude-mythos capstone):
+  **Chain-of-Thought** 3-verse kick chain (each landed verse = raid blast, the Conclusion =
+  EMPOWER — "it scales"); **Agentic Fan-Out** (5 random personal beats, healer included);
+  **ULTRATHINK** (10s wind-up → 3 near-lethal aoe beats — everyone perfect-dodges or dies);
+  **Context Compaction** (threat drop — it summarizes the tank out of its context);
+  **subagent add waves** (SONNET SUBAGENT brawler at ~65%; OPUS SUBAGENT at ~32% whose
+  interruptible **Hotfix Deployment** HEALS the withdrawn boss — kick it or lose progress);
+  enrage 120s = USAGE LIMIT REACHED. Phase names Helpful → Harmless → Honest (ramping mult/speed).
+
+**Engine additions (ALL guarded — solo content must stay byte-identical; frozen-baseline gate
+running per the concurrent-sessions rule):**
+- **Add waves**: `AddRes` (`data/add_res.gd`) + `EncounterRes.adds`; `BossState.add_i/add_hp`;
+  the boss withdraws between swings, damage routes to the add, main timers freeze; `HEAL_BOSS`
+  still heals the main body (medic adds). Checksum gains a `+ add_hp` term (0 solo → identical).
+- **Cast chains**: `AbilityRes.chain` — next verse starts on resolve OR kick (a kick skips one
+  verse); a live silence kills the whole chain (Silencer fantasy). One kicker can't stop a
+  3-verse chain alone (kick cd 5s vs 2s verses) → real co-op kick rotation, attacks the R3
+  "one telegraph source" interrupt problem from the other end.
+- **Random personal beats**: `StrikeRes.rand_target` — victims rolled at cast start, healer
+  included (pierces untargetability); only the victim can answer.
+- **Net (small, additive — ⚠ touches `godot/net/`, see Online section):** fight spec carries
+  `enc`; lobby gets a host SEAL toggle; `NetProtocol.VERSION` 1 → 2.
+
+**Theme-table reconciliation (this session — raid ladder owns the canonical model names, per
+Bill's direct raid brief):** solo reskin rows de-duped: Warcaller → *LE CHAT, the Draft-Engine*;
+Twin Cantors → *LAMDA & PALM, the Deprecated Twins*; Vorathek stays the rift-beast Seal I, and
+the OPUS row's phase ideas (Helpful/Harmless/Honest + subagent adds) are folded into Seal IV.
+
+**Acceptance bar:** six solo sims byte-identical vs frozen baseline; Vorathek raid checksums
+unchanged per seed; `raid_sim` determinism PASS on all four Seals + sane skill bands
+(Mistral ≥ Gemini ≥ Mythos win rates); `ui_smoke_raid` + `net_smoke` green.
 
 ## CLASSES
 
@@ -152,10 +198,11 @@
 - Game title candidates for the theme: *UNPLUGGED*, *Ctrl+Alt+DEFEAT*, *KILLSWITCH*, *RIFT: Do Not Trust Its Outputs*.
 - Rewind verb (deterministic-engine showpiece) — parked, see Classes.
 - Positive run-affixes ("Mythical Boons") — fold into Run modifiers when built.
-- Second raid boss; healer-aggro rules for co-op (R0 caveats list).
+- ~~Second raid boss~~ — claimed: §RAID SEALS (branch `raid-seals`). Healer-aggro rules for co-op still open (R0 caveats list).
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
 - ☐ 2026-07-02 · (unassigned) · Online/R2 — in flight by a concurrent session (pre-dates this log; that session should claim retroactively).
-- ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(this session)*
+- ☑ 2026-07-02 · main · Infra — git init, baseline commit, MASTER-PLAN.md created, CLAUDE.md wired to it. *(infra session)*
+- ☐ 2026-07-02 · `raid-seals` · §RAID SEALS + Bosses + Engine — add waves (`AddRes`), cast chains, random personal beats (all guarded); three AI-themed raid bosses (MISTRAL-7B / GEMINI ULTRA / CLAUDE MYTHOS); lobby Seal pick. ⚠ small additive touches to `godot/net/` (spec `enc` field, lobby `boss` msg, protocol v2) — Online session please coordinate at merge. *(raid-seals session)*
