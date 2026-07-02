@@ -24,18 +24,6 @@ const SPEC_TIP := {
 	"venomancer": {"name": "Poison Cocktail", "tip": "Normal strikes apply Crippling, Perfects apply Virulent, Envenom lays Festering. Keep all THREE alive and Toxic Synergy ramps your ticks. Then Rupture detonates the whole cocktail. Setup and payoff — mix normal and perfect hits."},
 }
 
-## Outgoing-damage numeral styling BY SOURCE (the kit tags every boss_hit with a
-## `kind`). Auto-Strikes read gold and quiet; your finishers/signatures each burst
-## in their own hot colour, bigger and longer-lived — so a non-auto never looks like
-## a Strike. `punch` = scale-pop on spawn. Crits amplify all of it (see _dmg_num).
-static var DMG_STYLE := {
-	"strike":   {"col": Palette.GOLD,        "base": 24, "life": 1.15, "punch": 1.0,  "special": false},
-	"perfect":  {"col": Palette.GOLD_BRIGHT, "base": 29, "life": 1.30, "punch": 1.12, "special": false},
-	"flurry":   {"col": Palette.CP,          "base": 27, "life": 1.30, "punch": 1.12, "special": true},
-	"finisher": {"col": Palette.CP,          "base": 38, "life": 1.60, "punch": 1.28, "special": true},
-	"coup":     {"col": Palette.PERFECT,     "base": 46, "life": 1.85, "punch": 1.40, "special": true},
-	"rupture":  {"col": Palette.POISON,      "base": 46, "life": 1.85, "punch": 1.40, "special": true},
-}
 
 var _ctrl: CombatController
 var _run: RunState
@@ -593,91 +581,15 @@ func _float_num(text: String, pos: Vector2, color: Color, dy: float) -> void:
 	tw.tween_property(l, "modulate:a", 0.0, 0.45).set_delay(0.35)
 	tw.chain().tween_callback(l.queue_free)
 
-## Outgoing boss-damage numerals, styled by SOURCE (see DMG_STYLE). Non-auto attacks
-## get their own hot colour + a bigger, longer-lived, popped numeral so they never
-## read as a plain Strike; crits slam in bold with an outline, a hard scale-punch,
-## a spark ring, and a matching screen flash. Numbers spawn over the boss (right of
-## centre, where the puppet stands) and drift up as they fade.
+## Outgoing boss-damage numerals — the shared DamageNumbers helper does the styling
+## (source colour, size, longer life, scale-punch, crit outline + spark ring, lane
+## fan-out). Solo is always "mine", spawned over the boss puppet (right of centre).
 func _dmg_num(amt: float, kind: String, crit: bool) -> void:
-	var style: Dictionary = DMG_STYLE.get(kind, DMG_STYLE["strike"])
-	var col: Color = style["col"]
-	var fs := int(style["base"])
-	var life := float(style["life"])
-	var punch := float(style["punch"])
-	# heavier hits are physically bigger, on top of the per-kind base
-	if amt >= 200.0: fs += 16
-	elif amt >= 110.0: fs += 10
-	elif amt >= 55.0: fs += 5
-	var text := "-%d" % int(amt)
-	if crit:
-		fs = int(round(float(fs) * 1.55))
-		life += 0.45
-		punch = maxf(punch, 1.35) + 0.25
-		col = col.lightened(0.28)
-		text = "✦ %d ✦" % int(amt)
-
-	# spawn over the boss puppet (stage boss sits right of centre), stepping across
-	# rotating LANES so a burst of hits fans out instead of stacking into one pile —
-	# at these larger sizes plain jitter isn't enough separation.
-	var lane := _dmg_i % 5
+	DamageNumbers.spawn(_fx, amt, kind, crit, true, Vector2(0.62, 0.27), _dmg_i, Palette.GOLD)
 	_dmg_i += 1
-	var lane_x := lerpf(-0.175, 0.175, float(lane) / 4.0)
-	var lane_y := 0.27 + (0.05 if lane % 2 == 1 else 0.0)   # stagger odd lanes down a row
-	var pos := _fx.size * (Vector2(0.62, lane_y) + Vector2(lane_x, 0.0)) \
-		+ Vector2(randf_range(-12.0, 12.0), randf_range(-14.0, 14.0))
-	var box := 320.0
-	var l := Label.new()
-	l.text = text
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.custom_minimum_size = Vector2(box, 0)
-	l.add_theme_font_override("font", UiKit.display(900 if crit else (800 if bool(style["special"]) else 750)))
-	l.add_theme_font_size_override("font_size", fs)
-	l.add_theme_color_override("font_color", col)
-	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
-	l.add_theme_constant_override("shadow_offset_x", 1)
-	l.add_theme_constant_override("shadow_offset_y", 2)
-	if crit or bool(style["special"]):
-		l.add_theme_color_override("font_outline_color", Color(0.06, 0.02, 0.0, 0.92))
-		l.add_theme_constant_override("outline_size", 8 if crit else 5)
-	l.position = pos - Vector2(box * 0.5, float(fs) * 0.5)
-	l.pivot_offset = Vector2(box * 0.5, float(fs) * 0.5)
-	_fx.add_child(l)
-
-	var rise := -40.0 - float(fs)          # bigger numbers throw higher
-	var tw := create_tween()
-	tw.set_parallel(true)
-	if punch > 1.0:
-		l.scale = Vector2(punch, punch)
-		tw.tween_property(l, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(l, "position:y", l.position.y + rise, life) \
-		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-	tw.tween_property(l, "position:x", l.position.x + randf_range(-16.0, 16.0), life)
-	tw.tween_property(l, "modulate:a", 0.0, life * 0.42).set_delay(life * 0.58)
-	tw.chain().tween_callback(l.queue_free)
-
 	if crit:
-		_crit_burst(pos, col)
-		_do_flash(col, 0.16)
-
-## A crit spark: an expanding ring + a few radiating spokes at the numeral, self-freeing.
-func _crit_burst(pos: Vector2, col: Color) -> void:
-	var n := Node2D.new()
-	n.position = pos
-	var st := {"r": 10.0, "a": 0.95}
-	n.draw.connect(func():
-		var c := Color(col, float(st["a"]))
-		n.draw_arc(Vector2.ZERO, float(st["r"]), 0.0, TAU, 40, c, 3.0, true)
-		for k in 8:
-			var ang := TAU * float(k) / 8.0
-			var d := Vector2(cos(ang), sin(ang))
-			n.draw_line(d * (float(st["r"]) * 0.6), d * (float(st["r"]) * 0.95), c, 2.0, true))
-	_fx.add_child(n)
-	var tw := create_tween()
-	tw.set_parallel(true)
-	tw.tween_method(func(r): st["r"] = r; n.queue_redraw(), 10.0, 74.0, 0.42) \
-		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-	tw.tween_method(func(av): st["a"] = av, 0.95, 0.0, 0.42)
-	tw.chain().tween_callback(n.queue_free)
+		var style: Dictionary = DamageNumbers.STYLE.get(kind, DamageNumbers.STYLE["strike"])
+		_do_flash(Color(style["col"]).lightened(0.28), 0.16)
 
 func _show_ability_tip(i: int) -> void:
 	if i < 0 or i >= _run.loadout.size():

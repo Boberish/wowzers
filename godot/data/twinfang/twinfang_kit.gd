@@ -75,15 +75,17 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
-		CombatCore.emit_event(s, {"t": "boss_hit", "amt": int(d), "crit": crit, "kind": kind})
+		# `seat` lets the RAID HUD tell your hits from an ally's (damage_boss already
+		# carries seat); solo ignores it. View-only — never checksummed.
+		CombatCore.emit_event(s, {"t": "boss_hit", "amt": int(d), "crit": crit, "kind": kind, "seat": seat})
 	return d
 
-func _poison_boss(s: CombatState, dmg: float) -> void:
+func _poison_boss(s: CombatState, seat: Seat, dmg: float) -> void:
 	var d := roundf(dmg)
 	if d <= 0.0:
 		return
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
-	CombatCore.emit_event(s, {"t": "poison", "amt": int(d)})
+	CombatCore.emit_event(s, {"t": "poison", "amt": int(d), "seat": seat})
 
 # --------------------------------------------------------------------------
 # Venom (Venomancer): three poison types on the boss, kept in seat.vars.
@@ -172,7 +174,7 @@ func _tick_venom(s: CombatState, seat: Seat) -> void:
 			+ float(v["C"]) * 1.1 * pot
 		if three:
 			dmg += float(int(v["V"]) + int(v["F"]) + int(v["C"])) * 0.5 * float(v["syn_ramp"]) * pot
-		_poison_boss(s, dmg)
+		_poison_boss(s, seat, dmg)
 
 # --------------------------------------------------------------------------
 # Incoming damage: Debilitate (Crippling softens the boss) + Flow reset on a swing.

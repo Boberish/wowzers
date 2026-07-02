@@ -85,6 +85,7 @@ var _frames: Array = []            ## [{seat, frame}]
 var _aggro_warn: Label
 var _shake_root: Control
 var _shake_amt: float = 0.0
+var _dmg_i: int = 0                 # rotating spawn-lane counter for damage numbers
 
 # class-band widgets (only the active seat's set is built)
 var _hp_orb: LiquidOrb
@@ -1473,10 +1474,19 @@ func _handle_event(ev: Dictionary) -> void:
 			_flash_frame(ev.get("seat", null), Palette.CRIMSON)
 		"boss_hit":
 			var a := float(ev.get("amt", 0))
-			_float_num("-%d" % int(a),
-				_fx.size * Vector2(0.5, 0.28) + Vector2(randf_range(-34.0, 34.0), 0.0),
-				Palette.GOLD_BRIGHT, -32.0)
+			var crit := bool(ev.get("crit", false))
+			var mine_hit := _is_my_hit(ev)
+			DamageNumbers.spawn(_fx, a, String(ev.get("kind", "")), crit, mine_hit,
+				Vector2(0.72, 0.28), _dmg_i, _seat_accent())
+			_dmg_i += 1
 			_dial.react("impact", a)
+			if mine_hit and crit:
+				_add_shake(8.0)
+		"poison":
+			# venom ticks (a blade in the comp) — your own read as green, an ally's dim
+			DamageNumbers.spawn(_fx, float(ev.get("amt", 0)), "poison", false,
+				_is_my_hit(ev), Vector2(0.72, 0.34), _dmg_i, Palette.POISON)
+			_dmg_i += 1
 		"boss_heal":
 			var hh := float(ev.get("amt", 0))
 			_float_num("+%d" % int(hh),
@@ -1579,6 +1589,20 @@ func _flash_frame(seat: Seat, col: Color) -> void:
 	var fr := _frame_of(seat)
 	if fr != null:
 		fr.flash(col)
+
+## Did this boss-damage event come from the seat I'm playing? (raid: emphasise mine)
+func _is_my_hit(ev: Dictionary) -> bool:
+	var p: Seat = _ctrl.player() if _ctrl != null else null
+	return p != null and ev.get("seat", null) == p
+
+## The local seat's class colour — the base tint for a generic own-hit number.
+func _seat_accent() -> Color:
+	match _seat_key:
+		"tank": return Palette.STEEL
+		"blade": return Palette.FLOW
+		"caster": return Palette.KICK
+		"healer": return Palette.WIN
+	return Palette.GOLD
 
 func _add_shake(amt: float) -> void:
 	_shake_amt = minf(20.0, maxf(_shake_amt, amt))
