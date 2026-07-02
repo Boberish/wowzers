@@ -12,8 +12,8 @@ const ALLY_LATENCY := 5
 const ALLY_SLACK := 0.06
 
 ## A fight spec (broadcast in the server's `start` message):
-##   {seed:int, enc:"riftmaw", seats:[{key,aspect,ai:bool} x4 in SEAT_KEYS order]}
-static func make_spec(seed: int, seat_cfg: Dictionary) -> Dictionary:
+##   {seed:int, enc:<Seal id>, seats:[{key,aspect,ai:bool} x4 in SEAT_KEYS order]}
+static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw") -> Dictionary:
 	var seats: Array = []
 	for key in SEAT_KEYS:
 		var c: Dictionary = seat_cfg.get(key, {})
@@ -22,7 +22,7 @@ static func make_spec(seed: int, seat_cfg: Dictionary) -> Dictionary:
 			"aspect": String(c.get("aspect", DEFAULT_ASPECT[key])),
 			"ai": bool(c.get("ai", true)),
 		})
-	return {"seed": seed, "enc": "riftmaw", "seats": seats}
+	return {"seed": seed, "enc": enc, "seats": seats}
 
 ## Build the fight state from a spec — identically on every machine.
 ## `my_seat` only sets the view-side is_player flag (diag/event tagging; audited
@@ -31,8 +31,8 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 	var aspects := {}
 	for e in spec.get("seats", []):
 		aspects[String(e["key"])] = String(e["aspect"])
-	var s := RaidContent.make_state(int(spec.get("seed", 1)), RaidContent.make_riftmaw(),
-		aspects, my_seat)
+	var s := RaidContent.make_state(int(spec.get("seed", 1)),
+		RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw"))), aspects, my_seat)
 	var seed_v := int(spec.get("seed", 1))
 	for e in spec.get("seats", []):
 		var key := String(e["key"])

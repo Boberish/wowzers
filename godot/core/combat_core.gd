@@ -144,6 +144,7 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			for i in s.telegraph.ability.strikes.size():
 				var st: StrikeRes = s.telegraph.ability.strikes[i]
 				var a: Dictionary = s.telegraph.answers.get(i, {})
+				var bv := _beat_victim(s.telegraph, i)
 				beats.append({
 					"at": st.at,
 					"remaining": float((s.telegraph.start_tick + to_ticks(st.at, s.config.fixed_hz)) - s.tick) * s.dt,
@@ -151,7 +152,8 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 					"feint": st.feint,
 					"aoe": st.aoe,
 					"guard": st.guard,
-					"mine": st.aoe or s.telegraph.target == seat,
+					"mine": st.aoe or bv == seat,
+					"victim": ("" if st.aoe or bv == null else bv.unit_name),
 					"resolved": i < s.telegraph.next_strike,
 					"answered": a.has(seat),
 					"grade": int(a.get(seat, -1)),
@@ -167,6 +169,10 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	}
 	if s.threat_enabled:
 		base["aggro_me"] = _threat_target(s) == seat   # raid: am I the boss's victim?
+	if s.boss.add_i >= 0:
+		var ad: AddRes = s.encounter.adds[s.boss.add_i]
+		base["add"] = {"name": ad.name,
+			"hp_frac": s.boss.add_hp / maxf(1.0, s.boss.add_hp_max)}
 	if seat.kit != null:
 		base.merge(seat.kit.observe(s, seat), true)
 	return base
@@ -382,15 +388,19 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 				if ti >= 0:
 					s.boss.threat[ti] = 0.0
 					_emit(s, {"t": "threat_drop", "seat": top, "player": top.is_player})
-	s.telegraph = null
+	if not _advance_chain(s):          # a resolved chain verse flows into the next
+		s.telegraph = null
 
 ## Cancel the current telegraph (Shockwave / Avalanche / Vindicate-interrupt).
+## Kicking a CHAIN verse skips that verse only — the litany continues.
 static func stagger_boss(s: CombatState) -> void:
 	if s.telegraph != null:
 		# View juice: denying a heal cast is the payoff moment; flag it so the HUD
 		# can pop "DENIED!" vs a plain "STAGGERED!".
 		_emit(s, {"t": "staggered",
 			"was_heal": s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS})
+		if _advance_chain(s):
+			return
 	s.telegraph = null
 
 # --------------------------------------------------------------------------
@@ -439,13 +449,18 @@ static func _next_answerable(tg: Telegraph, seat: Seat) -> int:
 		var st: StrikeRes = tg.ability.strikes[i]
 		if st.guard == StrikeRes.Guard.UNANSWERABLE:
 			continue
-		if not st.aoe and tg.target != seat:
+		if not st.aoe and _beat_victim(tg, i) != seat:
 			continue
 		var a: Dictionary = tg.answers.get(i, {})
 		if a.has(seat):
 			continue
 		return i
 	return -1
+
+## The victim of a non-aoe beat: its rolled rand_target raider if the beat has one,
+## else the telegraph's target (all pre-raid strings — behavior unchanged).
+static func _beat_victim(tg: Telegraph, i: int) -> Seat:
+	return tg.beat_targets.get(i, tg.target)
 
 ## Progressive resolution: each beat lands at its own impact tick inside the
 ## wind-up; the telegraph clears after the LAST beat. Boss ability timers stay
@@ -460,7 +475,8 @@ static func _advance_string(s: CombatState, ph: PhaseRes) -> void:
 		tg.next_strike += 1
 	if tg.next_strike >= tg.ability.strikes.size() \
 			and s.tick >= tg.start_tick + tg.dur_ticks:
-		s.telegraph = null
+		if not _advance_chain(s):
+			s.telegraph = null
 
 ## One beat lands. `aoe` beats hit EVERY living seat — the healer included (the
 ## only damage in the game that reaches a healer). Stat-block allies can't press,
@@ -477,8 +493,11 @@ static func _resolve_strike(s: CombatState, ph: PhaseRes, idx: int) -> void:
 			if seat.alive():
 				victims.append(seat)
 	else:
-		var t := tg.target
-		if t == null or not t.alive():
+		var t: Seat = _beat_victim(tg, idx)
+		if tg.beat_targets.has(idx):
+			if t == null or not t.alive():
+				t = null                # a personal bolt aimed at the fallen fizzles
+		elif t == null or not t.alive():
 			t = _tank_target(s)
 		if t != null:
 			victims.append(t)
@@ -504,7 +523,8 @@ static func _resolve_strike(s: CombatState, ph: PhaseRes, idx: int) -> void:
 			if seat.kit != null:
 				seat.kit.on_strike_result(s, seat, tg.ability, st, StrikeRes.Grade.MISS)
 		if d > 0.0:
-			_damage(s, seat, d, tg.ability.id, st.size, st.aoe)
+			# rand_target beats pierce like aoe — a personal bolt CAN find the healer
+			_damage(s, seat, d, tg.ability.id, st.size, st.aoe or tg.beat_targets.has(idx))
 		else:
 			_emit(s, {"t": "negate", "player": seat.is_player, "size": st.size, "feint": false})
 	_emit(s, {"t": "strike_landed", "idx": idx})
@@ -546,7 +566,10 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float) -> float:
 	if seat != null and seat.kit != null:
 		mult = seat.kit.outgoing_mult(seat)
 	var d := roundf(raw * mult)
-	s.boss.hp = maxf(0.0, s.boss.hp - d)
+	if s.boss.add_i >= 0:
+		s.boss.add_hp = maxf(0.0, s.boss.add_hp - d)   # an add holds the field — it eats the hit
+	else:
+		s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if s.threat_enabled and seat != null and d > 0.0:
 		_add_threat(s, seat, d * (s.config.threat_tank_mult if seat.role == "tank" else 1.0))
 	if d > 0.0:
@@ -673,9 +696,12 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			total += seat.dps * f
 			if s.threat_enabled:
 				_add_threat(s, seat, seat.dps * f * dt)
-	s.boss.hp -= total * dt
-	if s.boss.hp < 0.0:
-		s.boss.hp = 0.0
+	if s.boss.add_i >= 0:
+		s.boss.add_hp = maxf(0.0, s.boss.add_hp - total * dt)
+	else:
+		s.boss.hp -= total * dt
+		if s.boss.hp < 0.0:
+			s.boss.hp = 0.0
 
 static func _apply_enrage(s: CombatState, dt: float) -> void:
 	var e := s.encounter.enrage_at
@@ -723,6 +749,13 @@ static func _check_end(s: CombatState) -> void:
 			s.over = true; s.won = false; s.loss_cause = "player_death"
 		elif not any_alive:
 			s.over = true; s.won = false; s.loss_cause = "wipe"
+	if s.over:
+		# A fight that ends mid-cast could strand seat.casting.target == the seat
+		# itself (raid healer self-cast) — a Seat -> Dictionary -> Seat refcount
+		# cycle that never frees. Drop cast bars at the end; nothing reads them
+		# after `over` and they're not part of the checksum.
+		for seat in s.seats:
+			seat.casting = {}
 
 static func _primary_target(s: CombatState) -> Seat:
 	for seat in s.seats:
@@ -836,6 +869,18 @@ static func _random_dps(s: CombatState) -> Seat:
 	var pool := _living_dps(s)
 	if pool.is_empty():
 		return _tank_target(s)
+	return pool[s.rng.next_u32() % pool.size()]
+
+## A random LIVING raider, the healer included — rand_target beats are the one
+## mechanic that can find anyone. Deterministic via the state rng (rolled only
+## when a rand_target beat exists, so non-raid rng order is untouched).
+static func _random_raider(s: CombatState) -> Seat:
+	var pool: Array = []
+	for seat in s.seats:
+		if seat.alive():
+			pool.append(seat)
+	if pool.is_empty():
+		return null
 	return pool[s.rng.next_u32() % pool.size()]
 
 static func _healer(s: CombatState) -> Seat:

@@ -3,14 +3,15 @@
 ## lockstep streams INPUTS, not state (see RAID-PLAN.md §R2).
 ##
 ## client -> server:  hello{name,ver} · join{room,name} · claim{seat} · unclaim{}
-##                    aspect{aspect} · ready{on} · start{} · input{action} · leave{}
-## server -> client:  welcome{id,ver} · err{msg} · room{...lobby snapshot...}
+##                    aspect{aspect} · ready{on} · boss{enc} (host) · start{}
+##                    input{action} · leave{}
+## server -> client:  welcome{id,ver} · err{msg} · room{...lobby snapshot incl enc...}
 ##                    start{spec, you} · f{n, in:[[seat_i,action]..], cs?, ai?:[seat_i..]}
 ##                    end{won,n} · bye{msg}
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 1
+const VERSION := 2      # v2: lobby Seal (boss) selection — spec carries `enc`
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 
