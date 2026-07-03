@@ -288,26 +288,12 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 	return {"cleared": false, "fights": fights, "gates": gates, "gate_wins": gate_wins,
 		"integrity": _avg(carry["fracs"]), "loss_at": "walk_stuck", "trace": str(trace)}
 
-## Mirrors the HUD's _apply_map_fx/_raidify: raid-wide heal/hurt (floor 5%),
-## a solo "draft" prize = emergency patch on the most damaged raider, cooling refuels.
+## Routes through the shared MapFx applier (same as the offline HUD + online server),
+## so the attrition walk stays representative of what actually happens in-game. The
+## walker's carry ({fracs,wounds,mana}) is a subset of MapFx's cp-view; absent keys
+## no-op. mana is a scalar in the dict, so MapFx mutates carry["mana"] in place.
 func _apply_fx(fx: Dictionary, carry: Dictionary) -> void:
-	var fracs: Array = carry["fracs"]
-	var heal := float(fx.get("heal", 0.0))
-	var hurt := float(fx.get("hurt", 0.0))
-	for i in fracs.size():
-		fracs[i] = clampf(float(fracs[i]) + heal - hurt, 0.05, 1.0)
-	if bool(fx.get("draft", false)) or bool(fx.get("patch", false)):   # cache draft OR ticket patch
-		var lo := 0
-		for i in fracs.size():
-			if float(fracs[i]) < float(fracs[lo]):
-				lo = i
-		fracs[lo] = clampf(float(fracs[lo]) + 0.25, 0.05, 1.0)
-	if fx.has("mana"):
-		carry["mana"] = clampf(maxf(float(carry["mana"]), float(fx["mana"])), 0.05, 1.0)
-	if bool(fx.get("repair", false)):
-		var w: Array = carry["wounds"]
-		for i in w.size():
-			w[i] = 0.0
+	MapFx.apply(carry, fx)
 
 ## One personal GATE exam (Tier 1): the seat's class solo fight via GateContent,
 ## carried integrity in for THAT raid slot only. A win writes the frac back; a

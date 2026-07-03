@@ -131,6 +131,15 @@ var _map_ticket_total := 0         ## tickets placed on this floor (for the spri
 var _map_closed := 0               ## tickets closed this floor
 var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next map screen
 
+# The Inference Check meta (Topology deep events): ⚡ Entropy is the within-run luck
+# pool spent to bias a roll; 📁 Prior is the across-run luck loaded once at descent
+# start; _flags are cross-node ripple marks. All start inert (0/{}) — an event only
+# touches them if it carries the matching fx, so a runless/dev path is unaffected.
+var _entropy: int = 0
+var _prior: int = 0
+var _flags: Dictionary = {}
+var _check_fails: int = 0          ## consecutive check fails → comeback pity (resets on any pass)
+
 # GEAR-1 (Curios / Realm-1 "peripherals"): run-scoped loot. Items evaporate with the
 # run (win or wipe); only Ledger UNLOCKS persist (GearStore). Offline-only in v1 —
 # the online campaign spec folds `gear` in later (rides like tickets/inventory).
@@ -863,6 +872,13 @@ func _start_map_run() -> void:
 	_map_fracs = [1.0, 1.0, 1.0, 1.0]
 	_map_wounds = [0.0, 0.0, 0.0, 0.0]
 	_map_mana = 1.0
+	# The Inference Check meta resets for a fresh descent. ⚡ Entropy seeds from 📁 Prior
+	# (the veteran's warm welcome); Prior itself loads once from the permanent file
+	# (headless stays disk-inert — smokes/sims start from a clean file).
+	_prior = LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
+	_entropy = LuckProfile.starting_entropy(_prior)
+	_flags = {}
+	_check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _gear_unlocks directly.
 	_map_gear = []
@@ -1135,22 +1151,21 @@ func _raidify(choices: Array) -> Array:
 	return out
 
 ## Events bruise or patch the WHOLE raid; only combat kills (integrity floors at 5%).
+## Routes through the shared MapFx applier (single source of truth for offline +
+## online + the sim walker). Integrity/wounds mutate in place through the cp view;
+## scalar currencies are copied back after.
 func _apply_map_fx(fx: Dictionary) -> void:
-	var heal := float(fx.get("heal", 0.0))
-	var hurt := float(fx.get("hurt", 0.0))
-	for i in _map_fracs.size():
-		_map_fracs[i] = clampf(float(_map_fracs[i]) + heal - hurt, 0.05, 1.0)
-	if fx.has("mana"):
-		_map_mana = clampf(maxf(_map_mana, float(fx["mana"])), 0.05, 1.0)
-	if bool(fx.get("repair", false)):
-		for i in _map_wounds.size():
-			_map_wounds[i] = 0.0
-	if bool(fx.get("patch", false)):
-		var lo := 0
-		for i in _map_fracs.size():
-			if float(_map_fracs[i]) < float(_map_fracs[lo]):
-				lo = i
-		_map_fracs[lo] = clampf(float(_map_fracs[lo]) + 0.25, 0.05, 1.0)
+	var cp := {
+		"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
+		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags,
+	}
+	MapFx.apply(cp, fx)
+	_map_mana = float(cp["mana"])
+	_entropy = int(cp["entropy"])
+	_prior = int(cp["prior"])
+	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
+	if int(fx.get("tokens", 0)) != 0:
+		_gain_tokens(int(fx["tokens"]))
 
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 

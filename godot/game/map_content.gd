@@ -232,9 +232,15 @@ static func event_ids() -> Array:
 	return ["careers_fair", "reservoir", "allocation_queue", "alignment_office",
 		"severance_floor", "captcha_kiosk"]
 
-## The RAID floors' richer pool — every authored event (MAP-2).
+## The RAID floors' richer pool — an EXPLICIT frozen ordered list (was EVENTS.keys()).
+## Frozen because the pool SIZE + ORDER drive the generation rng: growing EVENTS with
+## new deep set-pieces must NOT shift existing raid maps. Adding an id here is a
+## DELIBERATE act that re-baselines raid_map_sim's determinism on purpose. This list
+## == the historical EVENTS.keys() order at the time of freezing (byte-identical now).
 static func raid_event_ids() -> Array:
-	return EVENTS.keys()
+	return ["careers_fair", "reservoir", "allocation_queue", "alignment_office",
+		"severance_floor", "captcha_kiosk", "helpdesk", "model_graveyard",
+		"prompt_injection", "rollback_daemon", "overtime_daemon"]
 
 static func ticket(id: String) -> Dictionary:
 	return TICKETS.get(id, {})

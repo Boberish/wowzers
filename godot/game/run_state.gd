@@ -25,6 +25,12 @@ var map_node: int = -1            ## current node id (-1 = not entered yet)
 var inventory: Dictionary = {}    ## map pickups ({"api_key": true, ...})
 var hp_frac: float = 1.0          ## persistent integrity across map nodes (fights start here)
 
+# ---- The Inference Check meta (Topology deep events; all inert on a linear run) ----
+var entropy: int = 0              ## ⚡ within-run luck pool spent to bias a roll
+var prior: int = 0               ## 📁 across-run luck (loaded once at descent start)
+var flags: Dictionary = {}        ## cross-node ripple marks ({"covered_shift": true, …})
+var check_fails: int = 0          ## consecutive failed checks → comeback pity (resets on a pass)
+
 static func start(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("bulwark", aspect, seed_v)
 	r.loadout = ["cleave", "rampage", "fortify", ("vindicate" if aspect == "warden" else "avalanche")]

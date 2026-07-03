@@ -518,24 +518,11 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 		_:
 			_broadcast_map(room)
 
+## The campaign `cp` is already MapFx's cp-view shape (fracs/wounds/mana/inv/…), so
+## the authoritative server resolves every event effect through the SAME applier the
+## offline HUD and the sim walker use — a new reward key can't diverge across them.
 func _apply_fx_srv(cp: Dictionary, fx: Dictionary) -> void:
-	var fracs: Array = cp["fracs"]
-	var heal := float(fx.get("heal", 0.0))
-	var hurt := float(fx.get("hurt", 0.0))
-	for i in fracs.size():
-		fracs[i] = clampf(float(fracs[i]) + heal - hurt, 0.05, 1.0)
-	if fx.has("mana"):
-		cp["mana"] = clampf(maxf(float(cp["mana"]), float(fx["mana"])), 0.05, 1.0)
-	if bool(fx.get("repair", false)):
-		var w: Array = cp["wounds"]
-		for i in w.size():
-			w[i] = 0.0
-	if bool(fx.get("draft", false)) or bool(fx.get("patch", false)):
-		var lo := 0
-		for i in fracs.size():
-			if float(fracs[i]) < float(fracs[lo]):
-				lo = i
-		fracs[lo] = clampf(float(fracs[lo]) + 0.25, 0.05, 1.0)
+	MapFx.apply(cp, fx)
 
 ## Leader answers an event panel.
 func _pick_choice(id: int, i: int) -> void:
