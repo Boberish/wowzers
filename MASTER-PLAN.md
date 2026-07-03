@@ -462,15 +462,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `armory-ui` · §GRAPHICS GEAR — **CLAIMED (in flight): ARMOR SET pro GUI (Bill:
-  "modal, hover with stats, see current gear while choosing").** (1) Rich HOVER cards on every
-  doll socket (`_make_custom_tooltip` → gilded panel: slot, pieces w/ rarity + effects; trinket
-  name/effect/flavor/charges) replacing plain tooltips. (2) **YOUR SET modal** (`game/ui/
-  armor_modal.gd`): click the doll (map + draft screens) → dim + ornate centered panel — doll,
-  per-slot piece breakdown w/ effects, trinket cards, tokens; Esc/outside closes w/o triggering
-  screen Esc. (3) **Drop ceremony comparison**: the offered curio renders BESIDE your currently
-  equipped trinket cards (EQUIPPED-ribboned, dimmed) — informed REPLACE calls. Owns: armor_doll/
-  armor_modal/raid_hud drop+map+draft wiring; smoke + screenshot_armory extended. *(armory session)*
+- ☑ 2026-07-03 · `armory-ui` · §GRAPHICS GEAR — **ARMOR SET pro GUI — MERGED to main (`7b78912`)
+  (Bill: "modal, hover with stats, see current gear while choosing").** (1) **Rich hover cards**
+  on every doll socket via `_make_custom_tooltip` — slot header + every piece's effect line
+  (rarity-colored); trinkets show effect/flavor/charges/scrap; hover ring lift; and UiKit's theme
+  gained a gilded **TooltipPanel/TooltipLabel** chip, upgrading EVERY tooltip in the game.
+  (2) **YOUR SET modal** (`game/ui/armor_modal.gd`): click any doll socket (map + REFORGE
+  screens) → dim + GlassPanel — the doll (hovers live inside), scrollable per-slot piece
+  breakdown w/ effect lines, equipped trinket RelicCards (`◆ EQUIPPED · ×N ◆` ribbon) or EMPTY
+  SOCKET wells, ⏣ tokens + class crest; Esc/click-outside/✕ close — `raid_hud._input` routes Esc
+  while it lives (mirrors `_pause`; never falls through to quit-to-menu). (3) **Drop-ceremony
+  comparison**: the offered curio (`◆ NEW ◆`) stands beside your equipped trinket cards / FREE
+  SOCKET wells, top-aligned — REPLACE decisions made with current gear in view. `RelicCard`
+  gained `ribbon_text` (static display ribbon). Verified: ui_smoke_raid extended (modal
+  open/Esc-close, comparison cards present) + all 7 smokes green; `screenshot_armory` gained
+  drop_compare/set_modal steps, GUI-eyeballed (fixed a charges-vs-ribbon collision + caption
+  stagger this way). View-only — no engine/sim surface. *(armory session)*
 
 - ☑ 2026-07-03 · `armory` · §SYSTEMS GEAR — **Drop cadence + signature strength + ARMOR SET doll —
   MERGED to main (Bill's direction: "loot only for big kills; make the first signature strong;
