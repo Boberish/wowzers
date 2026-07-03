@@ -72,6 +72,10 @@ var _map_fights: Array = []        ## Array[EncounterRes], indexed by node "figh
 var _map_pending := false          ## TOPOLOGY picked on the select — map starts after aspect pick
 var _floor: int = 0                ## which RaidContent.FLOORS entry (the RING descent, MAP-3c)
 var _gate_live := false            ## a Tier-1 PERSONAL GATE exam is the current fight (§GAME SHAPE)
+var _map_tickets: Dictionary = {}  ## MAP-2: OPEN ticket ids (id -> title) carried this floor
+var _map_ticket_total := 0         ## tickets placed on this floor (for the sprint-retro bonus)
+var _map_closed := 0               ## tickets closed this floor
+var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next map screen
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -525,11 +529,16 @@ func _build_floor() -> void:
 	var fl: Dictionary = RaidContent.FLOORS[_floor]
 	_map_fights = RaidContent.floor_fights(int(fl["ring"]))
 	# every raid floor carries ONE personal GATE exam (Tier 1, §GAME SHAPE); the ROOT
-	# floor also gates its Seal behind credential shards (MAP-3c).
+	# floor also gates its Seal behind credential shards (MAP-3c); TICKETS are the quests (MAP-2).
 	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
-		_map_fights.size(), MapContent.event_ids(), {RunMap.KIND_GATE: 1}, int(fl["shard_req"]))
+		_map_fights.size(), MapContent.raid_event_ids(), {RunMap.KIND_GATE: 1},
+		int(fl["shard_req"]), int(fl.get("tickets", 0)))
 	_map_node = -1
 	_map_inv = {}
+	_map_tickets = {}
+	_map_ticket_total = _map.tickets.size()
+	_map_closed = 0
+	_ticket_toast = ""
 	_show_map()
 
 ## A floor Seal is down → descend one ring (privilege elevation). Past the last
@@ -550,9 +559,20 @@ func _show_map() -> void:
 	ms.inventory = _map_inv
 	ms.hp_frac = _party_integrity()
 	ms.subtitle = String(RaidContent.FLOORS[_floor]["title"])
+	ms.ring = int(RaidContent.FLOORS[_floor]["ring"])
+	ms.open_tickets = _open_ticket_lines()
+	ms.toast = _ticket_toast
+	_ticket_toast = ""                 # one-shot — clears once shown
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
+
+## Short "still open" lines for the map header (title + where to turn it in).
+func _open_ticket_lines() -> Array:
+	var out: Array = []
+	for tid in _map_tickets:
+		out.append(String(_map_tickets[tid]))
+	return out
 
 func _party_integrity() -> float:
 	var t := 0.0
@@ -568,6 +588,8 @@ func _enter_node(id: int) -> void:
 	if first_visit and bool(n.get("shard", false)):
 		# a credential shard, assembled toward root access (MAP-3c ROOT floor)
 		_map_inv["shards"] = int(_map_inv.get("shards", 0)) + 1
+	if first_visit:
+		_ticket_at(n)
 	if first_visit and bool(n["key"]) and not _map_inv.get("api_key", false):
 		_map_inv["api_key"] = true
 		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
@@ -576,6 +598,26 @@ func _enter_node(id: int) -> void:
 			Palette.GOLD_BRIGHT, _resolve_node.bind(n))
 		return
 	_resolve_node(n)
+
+## TICKETS (MAP-2): pick one up here, or close it if we're holding the matching one.
+## Rewards feed the wound-attrition economy; closing the whole floor = a sprint-retro
+## bonus. Toast shows on the next map screen (this node may launch a fight first).
+func _ticket_at(n: Dictionary) -> void:
+	var topen := String(n.get("ticket_open", ""))
+	if topen != "" and not _map_tickets.has(topen):
+		var td := MapContent.ticket(topen)
+		_map_tickets[topen] = String(td.get("title", "TICKET"))
+		_ticket_toast = "📋  %s  —  picked up (turn it in deeper on this lane)" % String(td.get("title", "TICKET"))
+	var tclose := String(n.get("ticket_close", ""))
+	if tclose != "" and _map_tickets.has(tclose):
+		var td2 := MapContent.ticket(tclose)
+		_map_tickets.erase(tclose)
+		_map_closed += 1
+		_apply_map_fx(td2.get("reward", {}))
+		_ticket_toast = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
+		if _map_closed >= _map_ticket_total and _map_ticket_total > 0:
+			_apply_map_fx(MapContent.SPRINT_RETRO_FX)
+			_ticket_toast = "★  SPRINT RETRO — every ticket closed! Sectors repaired, reserves topped."
 
 func _resolve_node(n: Dictionary) -> void:
 	match String(n["kind"]):
