@@ -447,6 +447,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `gear1` · §SYSTEMS GEAR-1 — **GEAR-1 raid-campaign loot PoC (Bill: "go for it" on the catalog).**
+  Implements `GEAR-CATALOG.md` §Rollout GEAR-1 + PROGRESSION-PLAN: `data/gear/` catalog (9 signature
+  items: Riftmaw Tooth / LE CHAT's Bell / Swan Song / Ticket Stub / Cooling Paste + the 4 class gate
+  items), seeded per-run drop stream (own DetRng — combat rng untouched), first-kill unlock → save
+  store (`user://rift_gear.cfg`, HUD-flow only, sims inject), drop ceremony in raid-map mode
+  (relic_card visuals, EQUIP/SCRAP→⏣, 2-slot cap, dupes auto-scrap), SIM items ride the human seat
+  via a gear-gated kit layer (+1 no-op ClassKit hook for heal-denied) — **gearless byte-identical
+  gate on all six sims (frozen A/B)** + new `sim/gear_probe.gd`. Gear noun blessed: **CURIO** global /
+  **PERIPHERAL** Realm-1 display. ⚠ lands right after `online-map` (protocol v3): gear is
+  **OFFLINE-only in v1** — the server campaign spec should fold `run.gear` in later (pure data,
+  rides like tickets/inventory; noted for GEAR-4/online). Shared-file care: `raid_hud`/`run_state`
+  edits stay additive; merge main before merge-back. *(gear-design session)*
 - ☑ 2026-07-03 · `online-map` · §MAPS MAP-3b / §ONLINE — **Online co-op map traversal — MERGED to
   main (`127ab2c`)**, plan updated (§MAPS MAP-3b + Overall Progress netcode row), worktree removed.
   Server owns the campaign + broadcasts it, leader routes, fights `carry` state (protocol **v3**).
