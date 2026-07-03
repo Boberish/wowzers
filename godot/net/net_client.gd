@@ -57,8 +57,13 @@ func send_mapstart() -> void:
 func send_node(id: int) -> void:
 	send({"t": "node", "id": id})
 
-func send_choice(i: int) -> void:
-	send({"t": "choice", "i": i})
+## An event choice. `nudge` = ⚡ Entropy fed to a check (v6); `seat` = the acting seat
+## (the seat whose build drives the check — defaults to the leader server-side).
+func send_choice(i: int, nudge: int = 0, seat: String = "") -> void:
+	var m := {"t": "choice", "i": i, "nudge": nudge}
+	if seat != "":
+		m["seat"] = seat
+	send(m)
 
 func send_pick(id: String) -> void:      ## online boons: this seat's drafted boon ("" = skip)
 	send({"t": "pick", "id": id})

@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 5      # v5: healer seat CLASS choice (Mender / Bloomweaver) + v4 online boons
+const VERSION := 6      # v6: INFERENCE CHECK online — mapstop carries per-choice %/breakdown/gate + ⚡entropy; choice msg carries {i, nudge, seat}
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

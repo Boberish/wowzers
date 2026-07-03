@@ -23,6 +23,9 @@ var choices: Array = []            ## [descriptor]
 var accent: Color = Palette.GOLD
 var resolver: Callable = Callable()   ## check resolver: (orig_index:int, nudge:int) -> Dictionary
 
+var committed_index := -1             ## the orig_index the player pressed (online: sent to server)
+var committed_nudge := 0              ## ⚡ fed on that press (online: sent to server)
+
 var _box: VBoxContainer
 var _nudge := {}                      ## orig_index -> ⚡ points fed (0..min(3,have))
 var _desc := {}                       ## orig_index -> descriptor (for live % recompute)
@@ -145,6 +148,8 @@ func _adjust_nudge(orig: int, delta: int) -> void:
 			l.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
 
 func _on_press(c: Dictionary, orig: int) -> void:
+	committed_index = orig
+	committed_nudge = int(_nudge.get(orig, 0))
 	if String(c.get("kind", "free")) == "check" and resolver.is_valid():
 		var res: Dictionary = resolver.call(orig, int(_nudge.get(orig, 0)))
 		_show_result(res.get("fx", {}), String(res.get("result", "")),

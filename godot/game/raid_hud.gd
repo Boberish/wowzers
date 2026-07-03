@@ -709,6 +709,7 @@ func _on_net_map(msg: Dictionary) -> void:
 	ms.ring = int(msg.get("ring", -1))
 	ms.open_tickets = msg.get("tickets", [])
 	ms.toast = String(msg.get("toast", ""))
+	ms.entropy = int(msg.get("entropy", 0))   # ⚡ the within-run luck pool (server-owned, v6)
 	ms.interactive = _map_is_leader
 	if _map_is_leader:
 		ms.node_entered.connect(func(id: int): _net.send_node(id))
@@ -727,22 +728,55 @@ func _avg_frac(fracs: Array) -> float:
 	return t / float(fracs.size())
 
 ## An event panel: the LEADER picks a choice (sent to the server); others read it.
+## INFERENCE CHECK (v6): the server sends each choice's %/breakdown/gate for the acting
+## seat + ⚡ entropy; the leader renders real dice and shows the ✓/✗ LOCALLY (the pure die
+## keyed off the broadcast map_seed+node matches the server's authoritative resolve), then
+## sends {i, nudge}. Spectators read the prompt and see the outcome in the next map toast.
 func _on_net_mapstop(msg: Dictionary) -> void:
 	_online_map = true
 	_screen = "mapstop"
 	_clear()
 	if _map_is_leader:
+		var eid := String(msg.get("event", ""))
+		var ev := MapContent.event(eid)
+		var raw: Array = ev.get("choices", [])
+		var meta: Array = msg.get("choices", [])
+		var mseed := int(msg.get("map_seed", 0))
+		var node := int(msg.get("node", 0))
+		var ent := int(msg.get("entropy", 0))
+		var descs: Array = []
+		for i in raw.size():
+			var c: Dictionary = raw[i]
+			var sc: Dictionary = meta[i] if i < meta.size() else {}
+			var d := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
+				"orig_index": i, "fx": c.get("fx", {})}
+			if bool(sc.get("gated", false)):
+				d["gated"] = true
+				d["locked_reason"] = String(sc.get("locked_reason", "locked"))
+			elif d["kind"] == "check":
+				d["chance"] = int(sc.get("chance", 0))
+				d["breakdown"] = sc.get("breakdown", [])
+				d["verb"] = String(sc.get("verb", "CHECK"))
+				d["entropy_have"] = ent
+				d["nudge_ladder"] = sc.get("ladder", [])
+			descs.append(d)
 		var p := MapEventPanel.new()
 		p.title_text = String(msg.get("title", ""))
 		p.body_text = String(msg.get("body", ""))
-		var choices: Array = []
-		var i := 0
-		for c in msg.get("choices", []):
-			choices.append({"label": String((c as Dictionary).get("label", "")), "fx": {"_i": i}})
-			i += 1
-		p.choices = choices
+		p.choices = descs
 		p.accent = Palette.VOID
-		p.finished.connect(func(fx: Dictionary): _net.send_choice(int(fx.get("_i", 0))))
+		# Resolve locally for DISPLAY only (the pure die + the server's % → same verdict the
+		# server computes). Never applies fx — the server broadcasts the resulting integrity.
+		p.resolver = func(orig: int, nudge: int) -> Dictionary:
+			var sc: Dictionary = meta[orig] if orig < meta.size() else {}
+			var ladder: Array = sc.get("ladder", [])
+			var pp := int(sc.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
+			var roll := MapCheck.roll(mseed, node, orig, 0)
+			var success := roll < float(pp)
+			var leg: Dictionary = (raw[orig] as Dictionary).get("success" if success else "fail", {})
+			return {"success": success, "roll": roll, "p": pp,
+				"result": String(leg.get("result", "")), "fx": leg.get("fx", {})}
+		p.finished.connect(func(_fx: Dictionary): _net.send_choice(p.committed_index, p.committed_nudge))
 		p.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_ui.add_child(p)
 	else:

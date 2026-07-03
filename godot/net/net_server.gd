@@ -251,7 +251,7 @@ func _handle(id: int, msg: Dictionary) -> void:
 		"node":
 			_pick_node(id, int(msg.get("id", -1)))
 		"choice":
-			_pick_choice(id, int(msg.get("i", -1)))
+			_pick_choice(id, msg)
 		"pick":
 			_pick_boon(id, String(msg.get("id", "")))
 		"input":
@@ -423,6 +423,10 @@ func _start_map(id: int) -> void:
 		"boons": {},                 # online boons: seat_key -> {boon_id: true}, drafted over the descent
 		"draft_pending": [],         # human seats that still owe a pick this draft phase
 		"next_after_draft": "",      # "map" | "advance" — what to do once everyone's picked
+		# THE INFERENCE CHECK meta (v6): ⚡ Entropy is server-owned & broadcast; flags ripple
+		# across nodes; check_fails drives comeback pity. Prior online starts at 0 (the server
+		# can't read a client's user:// file — client-transmitted Prior is a later refinement).
+		"entropy": LuckProfile.starting_entropy(0), "flags": {}, "check_fails": 0,
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"
@@ -500,13 +504,35 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 			room["map_fight"] = {"node": int(n["id"]), "is_seal": String(n["kind"]) == RunMap.KIND_SEAL}
 			_launch_map_fight_srv(room, int(n["fight"]))
 		RunMap.KIND_EVENT:
+			# INFERENCE CHECK (v6): compute each choice's % / breakdown / gate for the
+			# ACTING seat (the leader, MVP) and broadcast the rich metadata so the leader
+			# renders real dice. The pure die (map_seed,node,choice) lets the leader show
+			# the ✓/✗ locally, identical to the server's authoritative resolve.
 			var ev := MapContent.event(String(n["event"]))
 			cp["pending_event"] = String(n["event"])
+			var seat := _leader_seat(room)
+			var ctx := _map_ctx_srv(room, seat)
 			var choices: Array = []
-			for c in ev.get("choices", []):
-				choices.append({"label": String((c as Dictionary).get("label", ""))})
-			_broadcast(room, {"t": "mapstop", "title": String(ev.get("title", "")),
-				"body": String(ev.get("body", "")), "choices": choices, "accent": "void"})
+			var raw: Array = ev.get("choices", [])
+			for i in raw.size():
+				var c: Dictionary = raw[i]
+				var d := {"i": i, "label": String(c.get("label", "")), "kind": String(c.get("kind", "free"))}
+				var gate: Dictionary = c.get("gate", {})
+				if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
+					d["gated"] = true
+					d["locked_reason"] = MapCheck.gate_reason(gate)
+				elif String(c.get("kind", "")) == "check":
+					var info := MapCheck.chance(c.get("check", {}), ctx)
+					d["chance"] = int(info["p"])
+					d["breakdown"] = info["parts"]
+					d["verb"] = String((c.get("check", {}) as Dictionary).get("verb", "CHECK"))
+					d["ladder"] = MapCheck.nudge_ladder(c.get("check", {}), ctx)
+				choices.append(d)
+			_broadcast(room, {"t": "mapstop", "event": String(n["event"]),
+				"node": int(n["id"]), "map_seed": int((cp["map"] as RunMap).seed),
+				"acting_seat": seat, "entropy": int(cp["entropy"]),
+				"title": String(ev.get("title", "")), "body": String(ev.get("body", "")),
+				"choices": choices, "accent": "void"})
 		RunMap.KIND_COOLING:
 			_apply_fx_srv(cp, {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true})
 			cp["toast"] = "COOLING STATION — throttled: integrity up, sectors repaired, reserves topped."
@@ -524,8 +550,12 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 func _apply_fx_srv(cp: Dictionary, fx: Dictionary) -> void:
 	MapFx.apply(cp, fx)
 
-## Leader answers an event panel.
-func _pick_choice(id: int, i: int) -> void:
+## Leader answers an event panel. `msg` = {i, nudge, seat}. A CHECK is resolved
+## authoritatively here: the acting seat's ctx gives the same % the leader saw, and the
+## pure die (map_seed,node,i) gives the same roll — so the leader's local ✓/✗ and this
+## resolve MATCH by construction (no desync). Free choices apply their fx; a gate the
+## acting seat can't meet is rejected (anti-cheat).
+func _pick_choice(id: int, msg: Dictionary) -> void:
 	var room := _room_of(id)
 	if room.is_empty() or room["phase"] != "map" or room["host"] != id:
 		return
@@ -537,16 +567,76 @@ func _pick_choice(id: int, i: int) -> void:
 		return
 	var ev := MapContent.event(eid)
 	var choices: Array = ev.get("choices", [])
+	var i := int(msg.get("i", -1))
 	if i < 0 or i >= choices.size():
 		return
-	var fx: Dictionary = ((choices[i] as Dictionary).get("fx", {}) as Dictionary).duplicate()
-	if bool(fx.get("draft", false)):        # a "draft" prize becomes an emergency patch (raid-shaped)
-		fx.erase("draft")
-		fx["patch"] = true
+	var c: Dictionary = choices[i]
+	var seat := String(msg.get("seat", _leader_seat(room)))
+	var ctx := _map_ctx_srv(room, seat)
+	# the pure decision (gate / roll / toast / ⚡ spend) — shared with the unit probe
+	var r := resolve_event_choice(c, ctx, int((cp["map"] as RunMap).seed), int(cp["node"]),
+		i, int(msg.get("nudge", 0)), int(cp["entropy"]))
+	if not bool(r["accept"]):
+		return                               # can't commit a locked choice
 	cp["pending_event"] = ""
-	_apply_fx_srv(cp, fx)
-	cp["toast"] = String(fx.get("result", ""))
+	if bool(r["is_check"]):
+		cp["check_fails"] = 0 if bool(r["success"]) else int(cp["check_fails"]) + 1
+	cp["entropy"] = int(r["entropy_after"])
+	_apply_fx_srv(cp, r["fx"])                # MapFx handles heal/hurt/wound/draft→patch/⚡/📁/…
+	cp["toast"] = String(r["toast"])
 	_broadcast_map(room)
+
+## PURE, authoritative resolution of an event choice (Node-free, testable). Gate-checks,
+## rolls a CHECK on the deterministic die (identical to the leader's local display), spends
+## ⚡ (always, on commit), and formats the ✓/✗ toast. Returns everything the caller applies.
+## `accept:false` = a locked gate (reject). The die matches the client because both use the
+## same (map_seed, node, i) and the same server-broadcast %.
+static func resolve_event_choice(c: Dictionary, ctx: Dictionary, map_seed: int, node_id: int,
+		i: int, nudge_req: int, entropy_have: int) -> Dictionary:
+	var gate: Dictionary = c.get("gate", {})
+	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
+		return {"accept": false}
+	if String(c.get("kind", "free")) == "check":
+		var nudge := clampi(nudge_req, 0, mini(MapCheck.NUDGE_MAX, entropy_have))
+		var res := MapCheck.resolve(c, ctx, map_seed, node_id, i, 0, {"nudge": nudge})
+		var toast := ("✓ %d%% — " % int(res["p"]) if bool(res["success"]) \
+			else "✗ rolled %d vs %d%% — " % [int(res["roll"]), int(res["p"])]) + String(res["result"])
+		return {"accept": true, "is_check": true, "fx": res["fx"], "toast": toast,
+			"entropy_after": maxi(0, entropy_have - nudge), "success": bool(res["success"]),
+			"p": int(res["p"]), "roll": int(res["roll"]), "nudge": nudge}
+	var fx: Dictionary = (c.get("fx", {}) as Dictionary).duplicate()
+	return {"accept": true, "is_check": false, "fx": fx, "toast": String(fx.get("result", "")),
+		"entropy_after": entropy_have, "success": true}
+
+## The seat that owns the route (the acting seat for checks, MVP).
+func _leader_seat(room: Dictionary) -> String:
+	var host = room.get("host", -1)
+	var pl: Dictionary = (room.get("players", {}) as Dictionary).get(host, {})
+	return String(pl.get("seat", "tank"))
+
+## The build ctx an Inference Check reads for a seat, server-side: its drafted boons
+## (resolved to synergy tags via the class module), aspect, role, party integrity, the
+## server-owned ⚡ Entropy pool, comeback pity, inventory + flags.
+func _map_ctx_srv(room: Dictionary, seat: String) -> Dictionary:
+	var cp: Dictionary = room["campaign"]
+	var cfg: Dictionary = (room.get("seat_cfg", {}) as Dictionary).get(seat, {})
+	var aspect := String(cfg.get("aspect", ""))
+	var cls := String(SEAT_CLASS.get(seat, String(cfg.get("cls", "mender"))))
+	var boons: Dictionary = (cp.get("boons", {}) as Dictionary).get(seat, {})
+	var boon_tags := MapCheck.tags_for_boons(MapCheck.catalog_for(cls), aspect, boons)
+	return MapCheck.build_ctx(boon_tags, [], aspect, seat,
+		_avg_frac_srv(cp["fracs"]), int(cfg.get("prior", 0)), int(cp["entropy"]),
+		int(cp["check_fails"]), cp["inv"], cp["flags"], 0)
+
+const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller"}
+
+func _avg_frac_srv(fracs: Array) -> float:
+	if fracs.is_empty():
+		return 1.0
+	var t := 0.0
+	for f in fracs:
+		t += float(f)
+	return t / float(fracs.size())
 
 ## A fight node: fold the carried campaign state into the spec and PULL, identically
 ## to a single-Seal fight — the lockstep replicas build the same carried opening.
@@ -582,6 +672,7 @@ func _broadcast_map(room: Dictionary) -> void:
 		"map": m.to_dict(), "node": int(cp["node"]), "inv": cp["inv"],
 		"fracs": cp["fracs"], "wounds": cp["wounds"], "mana": float(cp["mana"]),
 		"tickets": titles, "closed": int(cp["closed"]), "total": int(cp["total"]),
+		"entropy": int(cp["entropy"]),              # ⚡ the within-run luck pool (server-owned)
 		"toast": String(cp["toast"])})
 
 # ------------------------------------------------------------ send helpers

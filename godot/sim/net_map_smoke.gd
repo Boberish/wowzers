@@ -25,6 +25,10 @@ var min_open_frac := 1.0
 var nodes_picked := 0
 var drafts_done := 0            # online boons: how many times a client drafted
 var spec_boons_seen := false   # a fight spec carried per-seat boons
+var checks_answered := 0       # v6: online INFERENCE CHECKS the leader resolved
+var check_toast_ok := true     # each check must produce a ✓/✗ dice toast
+var entropy_seen := -1         # last broadcast ⚡ (must never go negative)
+var pending_check := false     # awaiting the map toast after a check
 
 func _run_for(seat: String) -> RunState:
 	match seat:
@@ -63,6 +67,19 @@ func _client(pname: String) -> Dictionary:
 		c["map"] = msg
 		c["mode"] = "map"
 		c["awaiting"] = true
+		# v6: ⚡ Entropy must never go negative; a check's outcome rides in the toast (✓/✗)
+		if c["name"] == "Ava":
+			entropy_seen = int(msg.get("entropy", 0))
+			if entropy_seen < 0:
+				_fail("⚡ entropy went negative (%d)" % entropy_seen)
+			if pending_check:
+				var toast := String(msg.get("toast", ""))
+				if not (toast.begins_with("✓") or toast.begins_with("✗")):
+					check_toast_ok = false
+					print("  CHECK TOAST MISSING VERDICT: '%s'" % toast)
+				else:
+					print("  [check resolved] %s" % toast.left(64))
+				pending_check = false
 		var fl := int(msg.get("floor", 0))
 		if fl > floor_seen:
 			floor_seen = fl
@@ -162,13 +179,49 @@ func _process(delta: float) -> bool:
 				_leader_pick(host)
 			elif host["mode"] == "mapstop" and bool(host["awaiting"]):
 				host["awaiting"] = false
-				print("[leader] answering event panel: %s" % String((host["stop"] as Dictionary).get("title", "")))
-				(host["net"] as NetClient).send_choice(0)
-			# success: a ring advanced (Seal cleared + floor built) or the descent ended
-			if floor_seen >= 1 or ava["campaign_won"] != null or bo["campaign_won"] != null:
+				_answer_event(host)
+			# Finish when the descent ENDS, or once a ring advanced AND we've exercised an
+			# online check end-to-end. Keep descending (deeper floors) to find a check if
+			# the first ring's route missed the 3 enriched events. Always terminates: the
+			# campaign eventually wins or wipes.
+			if (ava["campaign_won"] != null or bo["campaign_won"] != null) and not pending_check:
+				_finish()
+				return true
+			if floor_seen >= 1 and checks_answered >= 1 and not pending_check:
 				_finish()
 				return true
 	return false
+
+## Answer an event: pick the first NON-gated choice (never stall on a locked gate); if
+## it's an Inference CHECK, feed available ⚡ Entropy (nudge) and expect a ✓/✗ toast.
+func _answer_event(host: Dictionary) -> void:
+	var msg: Dictionary = host["stop"]
+	var meta: Array = msg.get("choices", [])
+	var ent := int(msg.get("entropy", 0))
+	# prefer a non-gated CHECK (to exercise the dice); else the first non-gated choice
+	var pick := -1
+	var sc := {}
+	for c in meta:
+		var cc: Dictionary = c
+		if not bool(cc.get("gated", false)) and String(cc.get("kind", "")) == "check":
+			pick = int(cc.get("i", 0)); sc = cc
+			break
+	if pick < 0:
+		for c in meta:
+			if not bool((c as Dictionary).get("gated", false)):
+				pick = int((c as Dictionary).get("i", 0)); sc = c
+				break
+	if pick < 0:
+		pick = 0
+	var nudge := 0
+	var kind := String(sc.get("kind", "free"))
+	if kind == "check":
+		checks_answered += 1
+		nudge = mini((sc.get("ladder", []) as Array).size(), ent)   # feed what we hold
+		pending_check = true
+	print("[leader] answer '%s' choice %d (%s%s)" % [String(msg.get("title", "")), pick, kind,
+		("  ⚡×%d → %d%%" % [nudge, int(sc.get("chance", 0))]) if kind == "check" else ""])
+	(host["net"] as NetClient).send_choice(pick, nudge)
 
 func _leader_pick(host: Dictionary) -> void:
 	var msg: Dictionary = host["map"]
@@ -189,6 +242,13 @@ func _leader_pick(host: Dictionary) -> void:
 	if low:
 		for nid in reach:
 			if String(m.node(int(nid))["kind"]) == RunMap.KIND_COOLING:
+				best = int(nid)
+				break
+	# prefer an EVENT node until we've exercised an online check (v6 coverage) — events
+	# sit on the path, so this still reaches the Seal
+	if best < 0 and checks_answered == 0:
+		for nid in reach:
+			if String(m.node(int(nid))["kind"]) == RunMap.KIND_EVENT:
 				best = int(nid)
 				break
 	# otherwise greedy toward the Seal: the reachable node on the highest row
@@ -225,6 +285,11 @@ func _finish() -> void:
 	print("online boons: drafts=%d (ava=%d bo=%d) · rode a spec=%s" % [
 		drafts_done, int(ava["boons"]), int(bo["boons"]), str(spec_boons_seen)])
 	print("campaign_won: ava=%s bo=%s" % [str(ava["campaign_won"]), str(bo["campaign_won"])])
+	print("online checks answered: %d · every check produced a ✓/✗ toast: %s · ⚡ never negative: %s" % [
+		checks_answered, str(check_toast_ok), str(entropy_seen >= 0)])
+	if not check_toast_ok:
+		_fail("an online check resolved without a ✓/✗ dice toast")
+		return
 	print("desyncs: ava=%s bo=%s" % [str(ava["desync"]), str(bo["desync"])])
 	if min_open_frac >= 0.999:
 		print("NOTE: no fight opened below full integrity — carry present but never bit (fast clears)")

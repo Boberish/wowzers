@@ -43,6 +43,17 @@ static func build_ctx(boon_tags: Array, gear_tags: Array, aspect: String, role: 
 		"check_fails": check_fails, "inv": inv, "flags": flags, "tokens": tokens,
 	}
 
+## The class boon module by class name (the server holds seats, not RunStates, so it
+## can't use Draft.catalog(run)). Mirrors Draft.catalog's mapping.
+static func catalog_for(cls: String) -> Variant:
+	match cls:
+		"bulwark": return BulwarkBoons
+		"twinfang": return TwinfangBoons
+		"voidcaller": return VoidcallerBoons
+		"mender": return MenderBoons
+		"bloomweaver": return BloomweaverBoons
+	return null
+
 ## Resolve a run's owned boon ids into their tag-arrays via the class boon module
 ## (Draft.catalog(run)). `cat` exposes SHARED + spec_pool(aspect). Kept here (duck-typed)
 ## so both the HUD and the online server share one id→tags path.
