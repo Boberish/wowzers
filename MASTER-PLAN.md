@@ -461,6 +461,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `pause-codex` · §GRAPHICS/UX — **In-game PAUSE menu + DEV CLASS CODEX (Bill: "know what's up at a glance for a lot of chars/builds").**
+  A pause button (P / Esc-in-combat) on the ONE game HUD (`raid_hud.gd`) opens an overlay that FREEZES the fight
+  (offline only — `CombatController.paused`; online lockstep never freezes) and shows a **Class Codex**: the current
+  seat's class+aspect fantasy/core-loop, each BAR (what fills/spends/goal), each MOVE (what it encourages), the GOAL
+  ROTATION, and THE BRANCHES (both aspects + boon/gear sub-builds, current build highlighted). New files only:
+  `data/class_codex.gd` (the 4 raid classes), `game/ui/pause_overlay.gd`; +1 field on `CombatController`; combat-only
+  edits to `raid_hud.gd` (`_input`/`_build_combat`). Zero engine/combat-math. ⚠ `raid_hud.gd` shared w/ `menu-refresh`
+  (they touch the MENU screens, I touch COMBAT screen — merge main before merge-back). Gate: ui_smoke_raid green +
+  class sims byte-identical (view-only) + WSLg glance. *(pause-codex session)*
 - ☐ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu full refresh + boot into the game HUD (Bill).**
   The game boots straight into the game HUD (`raid_main.tscn`), skipping the old `main_menu` class
   picker (retired). New clean flow (reuse Gilded Reliquary cards): **HOME** (title + **PLAY** +
