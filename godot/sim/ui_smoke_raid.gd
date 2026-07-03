@@ -114,6 +114,29 @@ func _process(_delta: float) -> bool:
 	print("cooling paste: ok=%s wounds=%s charges=%s" % [
 		str(p3), str(hud._map_wounds), str(hud._map_gear_charges)])
 
+	# ARMORY-UI: the YOUR SET modal opens off the doll, swallows Esc, and closes;
+	# the drop ceremony builds its EQUIPPED-comparison cards alongside the drop
+	hud._taken_boons = [{"id": "propSwift", "title": "Swiftguard", "rarity": "haiku",
+		"tags": ["guard"], "desc": "Guard cooldown -20%."}]
+	hud._show_map()
+	hud._open_armor_modal()
+	var modal_open: bool = hud._armor_modal != null
+	hud._close_armor_modal()
+	var modal_closed: bool = hud._armor_modal == null
+	print("armor modal: open=%s closed=%s" % [str(modal_open), str(modal_closed)])
+	hud._show_drop("swan_song", false, hud._show_map)
+	var have_equipped := false
+	var stack: Array = [hud._ui]
+	while not stack.is_empty():
+		var nd: Node = stack.pop_back()
+		if nd is RelicCard and String(nd.ribbon_text) != "":
+			have_equipped = true
+		for c2 in nd.get_children():
+			stack.append(c2)
+	print("drop comparison: equipped cards present=%s" % str(have_equipped))
+	var pcmp := _press(hud, "SCRAP")
+	print("drop comparison scrapped on: ok=%s" % str(pcmp))
+
 	# GEAR-2: a KEPT oath — resolved on the last fight's final state; the purse and
 	# the fresh row unlock ride THIS kill's roll (sonnet floor -> the new row drops)
 	hud._sworn = {"row": "oath", "item": "grace_period", "sev": 2,

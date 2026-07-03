@@ -100,7 +100,7 @@ static func slot_of(b: Dictionary) -> String:
 static func summarize(taken: Array) -> Dictionary:
 	var out := {}
 	for slot in ORDER:
-		out[slot] = {"count": 0, "best": "", "titles": []}
+		out[slot] = {"count": 0, "best": "", "titles": [], "pieces": []}
 	var rank := {"haiku": 1, "sonnet": 2, "opus": 3}
 	for b in taken:
 		var bd: Dictionary = b
@@ -111,4 +111,7 @@ static func summarize(taken: Array) -> Dictionary:
 		if int(rank.get(r, 0)) > int(rank.get(String(e["best"]), 0)):
 			e["best"] = r
 		(e["titles"] as Array).append("%s  ·  %s" % [String(bd.get("title", "?")), r])
+		# ARMORY-UI: the rich hover/modal want the piece's full stat line
+		(e["pieces"] as Array).append({"title": String(bd.get("title", "?")), "rarity": r,
+			"desc": String(bd.get("desc", ""))})
 	return out

@@ -100,6 +100,7 @@ var _ctrl: CombatController
 var _local_ctrl: CombatController
 var _net_ctrl: NetCombatController
 var _pause: PauseOverlay = null     ## the in-combat pause menu + class codex (null = not paused)
+var _armor_modal: Control = null    ## ARMORY-UI: the YOUR SET inspection modal (null = closed)
 var _net: NetClient = null
 var _online: bool = false
 var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
@@ -233,6 +234,7 @@ func _clear() -> void:
 	_focus_seat = null
 	_stage2d = null
 	_pause = null                   # the overlay is a _ui child — freed below; drop the freeze
+	_armor_modal = null             # ditto — the modal lives under _ui
 	if _ctrl != null:
 		_ctrl.paused = false
 	for c in _ui.get_children():
@@ -943,6 +945,7 @@ func _show_map() -> void:
 		_place(doll, 0.0, 1.0, 0.0, 1.0, 14, -344, 14 + int(ArmorDoll.W), -12)
 		_ui.add_child(doll)
 		doll.set_build(_taken_boons, _map_gear, _map_gear_charges)
+		doll.inspect_requested.connect(_open_armor_modal)
 	# GEAR-1: Cooling Paste — a USE button rides the map while a wound needs it
 	if _map_gear.has("cooling_paste") and int(_map_gear_charges.get("cooling_paste", 0)) > 0 \
 			and _worst_wound() > 0.0:
@@ -1372,13 +1375,56 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 	_title(box, "a TRINKET for your set — socket it, or scrap it for ⏣", 13, Palette.TEXT_DIM)
 	if first:
 		_title(box, "★  FIRST KILL — a new row is inked into the Ledger", 15, Palette.GOLD)
+	# ARMORY-UI: choose WITH your current gear in view — the drop stands beside the
+	# equipped trinket cards (WoW comparison idiom; a free socket shows as room)
+	var cards := HBoxContainer.new()
+	cards.alignment = BoxContainer.ALIGNMENT_CENTER
+	cards.add_theme_constant_override("separation", 30)
+	box.add_child(cards)
+	var dcol := VBoxContainer.new()
+	dcol.alignment = BoxContainer.ALIGNMENT_CENTER
+	dcol.add_theme_constant_override("separation", 7)
+	dcol.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_title(dcol, "· THE DROP ·", 12, Palette.GOLD_BRIGHT)
 	var card := RelicCard.new(String(it["name"]),
 		String(it["desc"]) + "\n\n\"" + String(it.get("flavor", "")) + "\"",
 		"curio", String(it.get("rarity", "haiku")), false, "")
-	card.mouse_filter = Control.MOUSE_FILTER_IGNORE   # display only — buttons decide
-	var cc := CenterContainer.new()
-	cc.add_child(card)
-	box.add_child(cc)
+	card.ribbon_text = "◆ NEW ◆"                      # display only — buttons decide
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dcol.add_child(card)
+	cards.add_child(dcol)
+	for si in Gear.SLOTS:
+		var ecol := VBoxContainer.new()
+		ecol.alignment = BoxContainer.ALIGNMENT_CENTER
+		ecol.add_theme_constant_override("separation", 7)
+		ecol.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		if si < _map_gear.size():
+			var oid := String(_map_gear[si])
+			var oit := GearCatalog.item(oid)
+			_title(ecol, "· EQUIPPED ·", 12, Palette.TEXT_DIM)
+			var ocard := RelicCard.new(String(oit.get("name", oid)),
+				String(oit.get("desc", "")), "curio",
+				String(oit.get("rarity", "haiku")), false, "")
+			ocard.ribbon_text = "◆ EQUIPPED · ×%d ◆" % int(_map_gear_charges[oid]) \
+				if _map_gear_charges.has(oid) else "◆ EQUIPPED ◆"
+			ocard.custom_minimum_size = Vector2(206, 280)
+			ocard.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			ocard.modulate = Color(1, 1, 1, 0.86)
+			ecol.add_child(ocard)
+		else:
+			_title(ecol, "· FREE SOCKET ·", 12, Palette.TEXT_DIM)
+			var ph := GlassPanel.new("WELL", Palette.EDGE)
+			ph.custom_minimum_size = Vector2(206, 268)
+			var pl := Label.new()
+			pl.text = "EMPTY\n\nequipping costs nothing"
+			pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			pl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			pl.add_theme_font_size_override("font_size", 12)
+			pl.add_theme_color_override("font_color", Color(Palette.TEXT_DIM, 0.85))
+			pl.set_anchors_preset(Control.PRESET_FULL_RECT)
+			ph.add_child(pl)
+			ecol.add_child(ph)
+		cards.add_child(ecol)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 12)
@@ -1486,6 +1532,23 @@ func _show_boon_draft(done: Callable) -> void:
 			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
 		_ui.add_child(doll)
 		doll.set_build(_taken_boons, _map_gear, _map_gear_charges)
+		doll.inspect_requested.connect(_open_armor_modal)
+
+## ARMORY-UI: the YOUR SET modal — opened by clicking any doll socket; Esc /
+## click-outside / ✕ close it (raid_hud._input routes Esc while it lives).
+func _open_armor_modal() -> void:
+	if _armor_modal != null or _run == null:
+		return
+	var crest := "%s  ·  %s" % [String(_seat_key).to_upper(), String(_aspect).capitalize()]
+	var m := ArmorModal.new(_taken_boons, _map_gear, _map_gear_charges, _tokens_now(), crest)
+	m.closed.connect(_close_armor_modal)
+	_ui.add_child(m)
+	_armor_modal = m
+
+func _close_armor_modal() -> void:
+	if _armor_modal != null:
+		_armor_modal.queue_free()
+	_armor_modal = null
 
 func _show_floor_cleared() -> void:
 	_screen = "end"
@@ -2080,6 +2143,11 @@ func _input(event: InputEvent) -> void:
 		if _pause != null:
 			if event.keycode == KEY_ESCAPE or event.keycode == KEY_P:
 				_resume_pause()
+			return
+		# ARMORY-UI: the YOUR SET modal swallows keys while open; Esc closes only it
+		if _armor_modal != null:
+			if event.keycode == KEY_ESCAPE:
+				_close_armor_modal()
 			return
 		if event.keycode == KEY_ESCAPE:
 			if _screen == "combat":

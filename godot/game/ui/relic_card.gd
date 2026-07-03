@@ -18,6 +18,8 @@ var rarity: String = "haiku"       # "haiku" / "sonnet" / "opus" — tints the f
 var synergy: bool = false          # slot-0 resonance mark
 var slot: String = ""              # Guard mod piece: "trigger"/"payload"/"property" (caption)
 var locked: bool = false           # LOCK spend: held through rerolls (drawn state)
+var ribbon_text: String = ""       # ARMORY-UI: static foot ribbon ("◆ EQUIPPED ◆") — display
+                                   # cards; replaces the take affordance entirely
 var _accent: Color
 var _rcol: Color
 var _hover := 0.0
@@ -150,10 +152,13 @@ func _draw() -> void:
 	UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(10, 104.0), title,
 		HORIZONTAL_ALIGNMENT_CENTER, w - 20, UiKit.SIZE["HEADER"], Palette.GOLD.lerp(Palette.GOLD_BRIGHT, 0.4))
 
-	# TAKE ribbon at the foot
+	# TAKE ribbon at the foot (or a static display ribbon: EQUIPPED etc.)
 	var ry := h - 30.0
 	var rcol := Palette.GOLD_BRIGHT if _hovered else Palette.TEXT_DIM
 	var ribbon := "◆  TAKE  ◆" if _hovered else "take"
+	if ribbon_text != "":
+		ribbon = ribbon_text
+		rcol = Palette.GOLD_DIM.lightened(0.3)
 	draw_line(Vector2(w * 0.22, ry - 5.0), Vector2(w * 0.78, ry - 5.0),
 		Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.5), 1.0, true)
 	UiKit.text_shadowed(self, UiKit.display(650, 2), Vector2(0, ry + 12.0), ribbon,

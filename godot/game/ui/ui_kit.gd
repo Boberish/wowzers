@@ -270,6 +270,23 @@ static func build_theme() -> Theme:
 	t.set_font("font", "Button", display(600, 1))
 	t.set_font_size("font_size", "Button", SIZE["SUBHEAD"])
 	t.set_color("font_color", "Label", Palette.TEXT)
+	# gilded tooltips (ARMORY-UI): every tooltip_text / custom tooltip rides this chip
+	var tip := StyleBoxFlat.new()
+	tip.bg_color = Color(Palette.BG0.r, Palette.BG0.g, Palette.BG0.b, 0.96)
+	tip.border_color = Palette.GOLD_DIM
+	tip.set_border_width_all(1)
+	tip.set_corner_radius_all(7)
+	tip.content_margin_left = 12.0
+	tip.content_margin_right = 12.0
+	tip.content_margin_top = 9.0
+	tip.content_margin_bottom = 9.0
+	tip.shadow_color = Color(0, 0, 0, 0.55)
+	tip.shadow_size = 8
+	tip.shadow_offset = Vector2(0, 4)
+	t.set_stylebox("panel", "TooltipPanel", tip)
+	t.set_color("font_color", "TooltipLabel", Palette.TEXT)
+	t.set_font("font", "TooltipLabel", body(500))
+	t.set_font_size("font_size", "TooltipLabel", SIZE["BODY"] - 1)
 	return t
 
 static func _btn_sb(bg: Color, border: Color, bw: int) -> StyleBoxFlat:

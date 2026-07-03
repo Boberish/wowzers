@@ -2,10 +2,17 @@
 ## boons stay boons (Draft 2.0 stacking untouched); each drafted boon renders as a
 ## PIECE forged into one of five armor slots (ArmorSlots.slot_of), and the two curio
 ## equip slots render as TRINKET sockets. A slot's frame glows with its family's
-## best rarity and shows its piece count; hover lists the pieces. Feed it with
+## best rarity and shows its piece count. ARMORY-UI: hovering a socket raises a
+## gilded stat card (every piece's effect line); clicking any socket emits
+## `inspect_requested` — the HUD opens the full ArmorModal. Feed it with
 ## set_build() whenever the run's boons/curios change.
 class_name ArmorDoll
 extends Control
+
+signal inspect_requested
+
+## the "click to inspect" caption — the modal's own doll hides it
+var show_hint := true
 
 const W := 236.0
 const H := 332.0
@@ -46,7 +53,8 @@ func _place_socket(sk: _Socket, at: Vector2, r: float) -> void:
 	sk.position = at - Vector2(r + 6, r + 6)
 	sk.custom_minimum_size = Vector2((r + 6) * 2, (r + 6) * 2)
 	sk.size = sk.custom_minimum_size
-	sk.mouse_filter = Control.MOUSE_FILTER_STOP     # hover tooltips
+	sk.mouse_filter = Control.MOUSE_FILTER_STOP     # hover cards + click-to-inspect
+	sk.clicked.connect(func(): inspect_requested.emit())
 	add_child(sk)
 
 ## The one feed: the run's drafted boons + equipped curio ids (+ active charges).
@@ -57,11 +65,9 @@ func set_build(taken_boons: Array, gear_ids: Array, gear_charges: Dictionary = {
 		var sk: _Socket = _sockets[slot]
 		sk.count = int(e["count"])
 		sk.best = String(e["best"])
-		if sk.count == 0:
-			sk.tooltip_text = "%s — empty (the draft forges pieces here)" % ArmorSlots.pretty(slot)
-		else:
-			sk.tooltip_text = "%s — %d piece%s\n%s" % [ArmorSlots.pretty(slot), sk.count,
-				"" if sk.count == 1 else "s", "\n".join(PackedStringArray(e["titles"]))]
+		sk.data = {"kind": "slot", "name": ArmorSlots.pretty(slot), "count": sk.count,
+			"best": sk.best, "pieces": e["pieces"]}
+		sk.tooltip_text = " "   # non-empty → _make_custom_tooltip fires
 		sk.queue_redraw()
 	for i in 2:
 		var tk: _Socket = _trinkets[i]
@@ -70,20 +76,26 @@ func set_build(taken_boons: Array, gear_ids: Array, gear_charges: Dictionary = {
 			var it := GearCatalog.item(id)
 			tk.count = 1
 			tk.best = String(it.get("rarity", "haiku"))
-			var line := "TRINKET — %s" % String(it.get("name", id))
-			if gear_charges.has(id):
-				line += "  ×%d" % int(gear_charges[id])
-			tk.tooltip_text = line + "\n" + String(it.get("desc", ""))
+			tk.data = {"kind": "trinket", "name": String(it.get("name", id)),
+				"rarity": tk.best, "desc": String(it.get("desc", "")),
+				"flavor": String(it.get("flavor", "")),
+				"charges": int(gear_charges.get(id, -1)),
+				"scrap": GearCatalog.scrap_value(id)}
 		else:
 			tk.count = 0
 			tk.best = ""
-			tk.tooltip_text = "TRINKET — empty (boss drops socket here)"
+			tk.data = {"kind": "trinket", "name": "", "rarity": "", "desc": "",
+				"flavor": "", "charges": -1, "scrap": 0}
+		tk.tooltip_text = " "
 		tk.queue_redraw()
 	queue_redraw()
 
 ## Faint body silhouette behind the sockets, so the sockets read as a FIGURE.
 func _draw() -> void:
 	UiKit.engraved_plaque(self, Vector2(W * 0.5, 10), "YOUR SET", true)
+	if show_hint:
+		UiKit.text_shadowed(self, UiKit.display(500, 2), Vector2(0, 27), "· CLICK TO INSPECT ·",
+			HORIZONTAL_ALIGNMENT_CENTER, W, 8, Color(Palette.TEXT_DIM, 0.8))
 	var sil := Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.20)
 	var cx := W * 0.5
 	draw_arc(Vector2(cx, 46), 16.0, 0.0, TAU, 24, sil, 1.5, true)               # head
@@ -96,21 +108,113 @@ func _draw() -> void:
 	draw_line(Vector2(46, 296), Vector2(W - 46, 296), Color(sil, 0.6), 1.0, true)   # belt row
 
 ## One armor/trinket socket: dark well + rarity ring + engraved glyph + count.
+## ARMORY-UI: hover raises a gilded stat card (custom tooltip); click = inspect.
 class _Socket:
 	extends Control
+	signal clicked
 	var kind := "helm"
 	var radius := 27.0
 	var count := 0
 	var best := ""
+	var data := {}          ## structured hover payload (set_build fills it)
+	var _hovered := false
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed \
+				and event.button_index == MOUSE_BUTTON_LEFT:
+			clicked.emit()
+			accept_event()
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_MOUSE_ENTER:
+			_hovered = true
+			queue_redraw()
+		elif what == NOTIFICATION_MOUSE_EXIT:
+			_hovered = false
+			queue_redraw()
+
+	## The rich hover card: slot name + count header, then every piece's title
+	## (rarity-colored) with its effect line; trinkets show effect/flavor/charges.
+	## Rides the theme's gilded TooltipPanel chip (UiKit.build_theme).
+	func _make_custom_tooltip(_for_text: String) -> Object:
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 4)
+		box.custom_minimum_size = Vector2(280, 0)
+		if String(data.get("kind", "")) == "trinket":
+			_tip_trinket(box)
+		else:
+			_tip_slot(box)
+		return box
+
+	func _tip_slot(box: VBoxContainer) -> void:
+		var n := int(data.get("count", 0))
+		_tip_header(box, String(data.get("name", "")),
+			"%d PIECE%s" % [n, "" if n == 1 else "S"] if n > 0 else "EMPTY",
+			Palette.rarity_color(String(data.get("best", ""))) if n > 0 else Palette.TEXT_DIM)
+		if n == 0:
+			_tip_line(box, "The draft forges pieces into this slot.", Palette.TEXT_DIM, true)
+			return
+		for p in data.get("pieces", []):
+			var pd: Dictionary = p
+			_tip_line(box, String(pd["title"]), Palette.rarity_color(String(pd["rarity"])), false)
+			if String(pd.get("desc", "")) != "":
+				_tip_line(box, String(pd["desc"]), Palette.TEXT, true)
+
+	func _tip_trinket(box: VBoxContainer) -> void:
+		if String(data.get("name", "")) == "":
+			_tip_header(box, "TRINKET", "EMPTY SOCKET", Palette.TEXT_DIM)
+			_tip_line(box, "Boss drops socket here — Seals, gates, first kills.",
+				Palette.TEXT_DIM, true)
+			return
+		var rar := String(data.get("rarity", "haiku"))
+		_tip_header(box, String(data["name"]), rar.to_upper() + " · CURIO",
+			Palette.rarity_color(rar))
+		_tip_line(box, String(data.get("desc", "")), Palette.TEXT, true)
+		if String(data.get("flavor", "")) != "":
+			_tip_line(box, "\"%s\"" % String(data["flavor"]), Palette.TEXT_DIM, true)
+		if int(data.get("charges", -1)) >= 0:
+			_tip_line(box, "CHARGES LEFT · %d" % int(data["charges"]), Palette.GOLD, false)
+		_tip_line(box, "scrap value · %d⏣" % int(data.get("scrap", 0)), Palette.GOLD_DIM, false)
+
+	func _tip_header(box: VBoxContainer, title: String, sub: String, col: Color) -> void:
+		var t := Label.new()
+		t.text = title
+		t.add_theme_font_override("font", UiKit.display(700, 1))
+		t.add_theme_font_size_override("font_size", 15)
+		t.add_theme_color_override("font_color", Palette.GOLD.lerp(Palette.GOLD_BRIGHT, 0.4))
+		box.add_child(t)
+		var s := Label.new()
+		s.text = sub
+		s.add_theme_font_override("font", UiKit.display(600, 3))
+		s.add_theme_font_size_override("font_size", 10)
+		s.add_theme_color_override("font_color", col)
+		box.add_child(s)
+		var rule := ColorRect.new()
+		rule.color = Color(Palette.GOLD_DIM, 0.55)
+		rule.custom_minimum_size = Vector2(0, 1)
+		box.add_child(rule)
+
+	func _tip_line(box: VBoxContainer, s: String, col: Color, wrap: bool) -> void:
+		var l := Label.new()
+		l.text = s
+		l.add_theme_color_override("font_color", col)
+		l.add_theme_font_size_override("font_size", 12)
+		if wrap:
+			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			l.custom_minimum_size = Vector2(280, 0)
+		box.add_child(l)
 
 	func _draw() -> void:
 		var c := size * 0.5
 		var lit := count > 0
 		var rar := Palette.rarity_color(best) if lit else Palette.EDGE
-		# recessed well + rarity glow
+		# recessed well + rarity glow (+ hover lift)
 		draw_circle(c, radius, Color(Palette.BG1.r, Palette.BG1.g, Palette.BG1.b, 0.92))
 		if lit:
 			draw_circle(c, radius + 4.0, Color(rar.r, rar.g, rar.b, 0.10))
+		if _hovered:
+			draw_circle(c, radius + 6.0, Color(Palette.GOLD_BRIGHT, 0.07))
+			draw_arc(c, radius + 5.0, 0.0, TAU, 40, Color(Palette.GOLD_BRIGHT, 0.65), 1.4, true)
 		draw_arc(c, radius, 0.0, TAU, 40, rar if lit else Color(rar, 0.8),
 			2.2 if lit else 1.2, true)
 		if lit:
