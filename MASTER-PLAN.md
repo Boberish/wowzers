@@ -36,7 +36,7 @@
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
-| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1/2/3 MERGED (rings, gates, tickets, online). **+ INFERENCE CHECK (deep events) P0–P2+P4+P5 MERGED** — build-read dice + ⚡Entropy/📁Prior luck meta, offline AND online co-op (protocol v6, server resolves; client==server 240/240). Branches (P3) + seat-picker + online-Prior open |
+| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1/2/3 MERGED (rings, gates, tickets, online). **+ INFERENCE CHECK (deep events) P0–P2+P4+P5 + SEAT-PICKER MERGED** — build-read dice + ⚡Entropy/📁Prior luck meta, offline AND online co-op (protocol v7, server resolves, party sends its specialist; client==server 240/240). Branches (P3) + online-Prior open |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
 
 ---
@@ -385,10 +385,18 @@ nodes, not node kinds.
     (map_seed,node,choice) lets the leader show the ✓/✗ LOCALLY, identical to the server's resolve —
     zero lockstep gymnastics. `net_server.resolve_event_choice` (PURE static: gate→roll→toast→⚡-spend)
     is the shared authority; the campaign holds server-owned ⚡Entropy/flags/check_fails; mapstop carries
-    per-choice %/breakdown/gate/ladder; `send_choice(i,nudge,seat)`. **Acting seat = the leader (MVP)** —
-    the protocol carries `seat` so a seat-picker is a UI-only add (the "party picks the seat" fork).
+    per-choice %/breakdown/gate/ladder; `send_choice(i,nudge,seat)`.
     **Online Prior starts at 0** (a dedicated server can't read a client's `user://` file — client-
     transmitted Prior tier is a small follow-up). ⚠ **v6: rebuild+redeploy the server with clients.**
+  - **SEAT-PICKER (the "party picks the seat" fork) — protocol v6→v7.** In co-op the leader chooses
+    WHICH seat steps up to a check — that seat's build drives the %. mapstop carries per-choice
+    `by_seat` ({seat → %/breakdown/ladder/gate}) for every candidate seat + a `suggested` specialist;
+    the panel has a **"WHO STEPS UP"** selector (★ = best fit) that re-renders every check % live; the
+    choice sends `{i, nudge, seat}` and the server resolves with that seat's ctx. The die is
+    seat-INDEPENDENT, so the leader's local ✓/✗ for the chosen seat == the server's. Verified: probe
+    per-seat client==server + die-seat-independent + suggest=caster (by_seat {tank:20 blade:20
+    caster:59 healer:20}); WSLg `screenshot_seatpick` (CASTER 60% → switch TANK → 21%). ⚠ **v7:
+    rebuild+redeploy.**
   - **Gates:** NEW `sim/map_check_sim.gd` ALL PASS (die determinism, uniform p=60→60.0%, monotonicity,
     clamp[5,95], bands off=25/themed+aspect=76/specialist=91, pity cap, nudge, gates). NEW
     `sim/map_event_probe.gd` ALL OK (panel builds + HACK check 59% + nudge 59→67% + gate lock/unlock).
@@ -515,14 +523,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   need deep decisions, side stuff like better luck next time, more than yes/no, an AtO-style dice
   system adapted to us").** Phases P0 (unified MapFx applier, byte-identical) → P1 (MapCheck pure
   resolver + 3 enriched raid events + breakdown panel, offline) → P2 (⚡ nudge stepper) + P4 (📁 Prior
-  persistence) → **P5 ONLINE PARITY (protocol v6 — co-op gets the real dice; server resolves,
-  client==server 240/240)**. Design dossier = the `inference-check` artifact; 5 forks locked (solo shallow ·
-  ENTROPY · soft fails · party-picks-seat · post-fail mulligan). Gates: NEW `map_check_sim`/
-  `map_event_probe`/`map_check_online_probe` ALL PASS; solo `map_sim` byte-identical; `raid_map_sim`
-  re-baselined (walker resolves checks, curve intact); `net_smoke`(v6)/`net_map_smoke`(zero desyncs)/ui
-  smokes green; WSLg `screenshot_event` clean. ⚠ **v6: rebuild+redeploy the server with clients.**
-  **OPEN follow-ups (unclaimed):** P3 branches+flags · P2-rest (mulligan/cushion/wager) · online
-  seat-picker + online Prior · more deep events · P6 marks. See §MAPS · THE INFERENCE CHECK.
+  persistence) → **P5 ONLINE PARITY + SEAT-PICKER (protocol v7 — co-op gets the real dice; server
+  resolves; party sends its specialist; client==server 240/240)**. Design dossier = the `inference-check`
+  artifact; 5 forks locked (solo shallow · ENTROPY · soft fails · party-picks-seat · post-fail mulligan).
+  Gates: NEW `map_check_sim`/`map_event_probe`/`map_check_online_probe`(+seat-picker) ALL PASS; solo
+  `map_sim` byte-identical; `raid_map_sim` re-baselined (walker resolves checks, curve intact);
+  `net_smoke`(v7)/`net_map_smoke`(zero desyncs)/ui smokes green; WSLg `screenshot_event`+`screenshot_seatpick`
+  clean. ⚠ **v7: rebuild+redeploy the server with clients.** **OPEN follow-ups (unclaimed):** P3
+  branches+flags · P2-rest (mulligan/cushion/wager) · online Prior (client transmits its tier) · more
+  deep events · P6 marks. See §MAPS · THE INFERENCE CHECK.
 
 - ☑ 2026-07-03 · `healer-frames` · §GRAPHICS — **RAID-FRAME MEGA UPGRADE — MERGED to main
   (`353626d`) (Bill: bigger/awesome healer frames; shield bigger + clearly visible without
