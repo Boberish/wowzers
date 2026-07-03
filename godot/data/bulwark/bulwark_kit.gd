@@ -83,10 +83,10 @@ func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 		return
 	CombatCore._bump_diag(s, seat, "negate")   # class-signature skill signal (token mint)
 	if _b("retaliation") and _ability != null:
-		CombatCore.damage_boss(s, seat, _ability.amount)   # Opus: hurl the swing back
+		CombatCore.damage_boss(s, seat, _ability.amount, &"retaliation")   # Opus: hurl the swing back
 	if aspect == "warden":
 		var refl := cfg.parry_reflect * (2.0 if _b("perfectReflect") else 1.0)
-		CombatCore.damage_boss(s, seat, refl)
+		CombatCore.damage_boss(s, seat, refl, &"parry")
 		_gain_counter(seat, 2 if _b("deepCounter") else cfg.parry_counter)
 		_gain_rage(seat, cfg.parry_rage)
 		seat.vars["riposte_until_tick"] = s.tick + _tt(s, cfg.riposte_dur)
@@ -250,7 +250,7 @@ func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 		if _b("trigRiposte"):
 			_trigger_fire(s, seat, "riposte")  # Phase B: a landed Riposte = proc moment
 	if dmg > 0.0:
-		CombatCore.damage_boss(s, seat, dmg)
+		CombatCore.damage_boss(s, seat, dmg, StringName(id))
 	if ab.has("lifesteal"):
 		_heal(seat, roundf(dmg * float(ab["lifesteal"])))
 	if ab.has("heal"):
@@ -275,7 +275,7 @@ func _vindicate(s: CombatState, seat: Seat) -> bool:
 	var c := int(seat.vars.get("counter", 0))
 	if c < 1:
 		return false
-	CombatCore.damage_boss(s, seat, cfg.vindicate_dmg_per * float(c))
+	CombatCore.damage_boss(s, seat, cfg.vindicate_dmg_per * float(c), &"vindicate")
 	seat.vars["counter"] = 0
 	seat.dr = cfg.vindicate_dr
 	seat.dr_until_tick = s.tick + _tt(s, cfg.vindicate_dr_dur)
@@ -291,7 +291,7 @@ func _avalanche(s: CombatState, seat: Seat) -> bool:
 	if mo < 1:
 		return false
 	seat.resource -= cfg.avalanche_cost
-	var dealt := CombatCore.damage_boss(s, seat, cfg.avalanche_dmg_per * float(mo))
+	var dealt := CombatCore.damage_boss(s, seat, cfg.avalanche_dmg_per * float(mo), &"avalanche")
 	if _b("landslide"):
 		_heal(seat, roundf(dealt * 0.4))
 	if s.telegraph != null:
@@ -326,7 +326,7 @@ func _guard_proc(s: CombatState, seat: Seat, source: String) -> void:
 		return
 	seat.vars["guard_procs"] = int(seat.vars.get("guard_procs", 0)) + 1   # probe diagnostic
 	if _b("payReflect"):
-		CombatCore.damage_boss(s, seat, cfg.mod_reflect)
+		CombatCore.damage_boss(s, seat, cfg.mod_reflect, &"reflect")
 	if _b("payHeal"):
 		_heal(seat, cfg.mod_heal)
 	if _b("payRage"):

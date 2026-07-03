@@ -80,6 +80,7 @@ var _fx: Control
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _meter: MeterPanel          # the raid DPS/HPS meter (M cycles views)
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _frames: Array = []            ## [{seat, frame}]
 var _aggro_warn: Label
@@ -719,6 +720,13 @@ func _build_combat(s: CombatState) -> void:
 	BossIntro.play(_ui, s.encounter.name)
 	_recap_stats = {}              # a fresh reckoning per fight
 
+	# the raid meter — right rail: all four raiders ranked, engine-truth accounting;
+	# M cycles ranking / your spells / hidden. Works identically offline and online
+	# (it only READS state — the lockstep replica never notices it).
+	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg")
+	_place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
+	_ui.add_child(_meter)
+
 	# THE RAID — reliquary frames down the left. Gold-lit = the boss's victim;
 	# for the Mender seat the frames are also your click-cast targets.
 	var col := VBoxContainer.new()
@@ -951,6 +959,9 @@ func _input(event: InputEvent) -> void:
 			get_tree().change_scene_to_file("res://game/main.tscn")
 			return
 		if _screen != "combat":
+			return
+		if event.keycode == KEY_M and _meter != null:
+			_meter.cycle()
 			return
 		match _seat_key:
 			"healer":
@@ -1682,6 +1693,10 @@ func _show_end(won: bool) -> void:
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
+		# the meter's recap: the raid ranked, click a raider for their spells
+		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+		_place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
+		_ui.add_child(rmeter)
 	var again := Button.new()
 	again.custom_minimum_size = Vector2(220, 48)
 	again.add_theme_font_size_override("font_size", 18)

@@ -117,16 +117,16 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 	match id:
 		"flash", "mend":
 			var clutch: bool = target.hp_frac() < cfg.mod_clutch_frac
-			CombatCore.heal_unit(s, target, float(sp["heal"]), seat)
+			CombatCore.heal_unit(s, target, float(sp["heal"]), seat, StringName(id))
 			if id == "flash" and _b("afterglow"):
 				target.hots.append({"tick": 10.0, "every": _tt(s, 1.5), "acc": 0, "left": _tt(s, 3.0),
-					"caster_i": s.seats.find(seat)})
+					"caster_i": s.seats.find(seat), "src": &"afterglow"})
 			if clutch:
 				_triage_proc(s, seat, target, "clutch")   # Phase B: the innate proc moment
 		"renew":
 			target.hots.append({"tick": float(sp["hot_tick"]),
 				"every": _tt(s, float(sp["hot_every"])), "acc": 0, "left": _tt(s, float(sp["hot_dur"])),
-				"caster_i": s.seats.find(seat)})
+				"caster_i": s.seats.find(seat), "src": &"renew"})
 		"ward":
 			target.absorb += float(sp["shield"]) * (1.4 if _b("wardplus") else 1.0)
 			target.absorb_owner_i = s.seats.find(seat)
@@ -136,7 +136,7 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 		"well":
 			for u in s.seats:
 				if u.role != "healer" and u.alive():
-					CombatCore.heal_unit(s, u, float(sp["heal"]), seat)
+					CombatCore.heal_unit(s, u, float(sp["heal"]), seat, &"well")
 		"dispel":
 			target.debuff = {}
 			CombatCore._bump_diag(s, seat, "dispel")   # class-signature skill signal (token mint)
@@ -181,7 +181,7 @@ func on_overheal(_s: CombatState, caster: Seat, target: Seat, over: float) -> vo
 ## Opus boon: a Ward fully consumed detonates in light — heal + cleanse its bearer.
 func on_absorb(s: CombatState, healer: Seat, target: Seat, _eaten: float, emptied: bool) -> void:
 	if emptied and _b("sanctifiedward") and target != null and target.alive():
-		CombatCore.heal_unit(s, target, 120.0, healer)
+		CombatCore.heal_unit(s, target, 120.0, healer, &"sanctified_ward")
 		target.debuff = {}
 	if emptied and _b("mdTrigWard"):
 		_md_trigger(s, healer, target, "ward")   # Phase B: a consumed Ward = proc moment
@@ -214,14 +214,14 @@ func _triage_proc(s: CombatState, seat: Seat, target: Seat, source: String) -> v
 		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mod_mana)
 	if _b("mdPayHot") and tgt != null:
 		tgt.hots.append({"tick": cfg.mod_hot_tick, "every": _tt(s, 1.5), "acc": 0,
-			"left": _tt(s, 3.0), "caster_i": s.seats.find(seat)})
+			"left": _tt(s, 3.0), "caster_i": s.seats.find(seat), "src": &"lingering_grace"})
 	if _b("mdPropBenediction"):
 		var n := int(seat.vars.get("bene_count", 0)) + 1
 		seat.vars["bene_count"] = n
 		if n % cfg.mod_bene_every == 0:      # Opus: every Nth proc bathes the party
 			for u in s.seats:
 				if u.role != "healer" and u.alive():
-					CombatCore.heal_unit(s, u, cfg.mod_bene_heal, seat)
+					CombatCore.heal_unit(s, u, cfg.mod_bene_heal, seat, &"benediction")
 			CombatCore.emit_event(s, {"t": "benediction", "player": seat.is_player})
 	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
 
@@ -243,7 +243,7 @@ func _heal_lowest(s: CombatState, seat: Seat, n: int, amt: float) -> void:
 			pool.append(u)
 	pool.sort_custom(func(a, b): return a.hp_frac() < b.hp_frac())
 	for i in mini(n, pool.size()):
-		CombatCore.heal_unit(s, pool[i], amt, seat)
+		CombatCore.heal_unit(s, pool[i], amt, seat, &"cascade")
 
 func _surge(s: CombatState, seat: Seat) -> void:
 	var res := float(seat.vars.get("reservoir", 0.0))
@@ -260,7 +260,7 @@ func _surge(s: CombatState, seat: Seat) -> void:
 		u.absorb_owner_i = s.seats.find(seat)
 		u.ward_until_tick = maxi(u.ward_until_tick, until)
 		if _b("floodgate"):
-			CombatCore.heal_unit(s, u, roundf(per * 0.25), seat)
+			CombatCore.heal_unit(s, u, roundf(per * 0.25), seat, &"floodgate")
 	seat.vars["reservoir"] = 0.0
 	CombatCore._emit(s, {"t": "surge"})
 
@@ -268,7 +268,7 @@ func _laststand(s: CombatState, seat: Seat) -> void:
 	var base := roundf(float(seat.vars.get("nerve", 0.0)) * cfg.ls_heal)
 	for u in s.seats:
 		if u.role != "healer" and u.alive():
-			CombatCore.heal_unit(s, u, base, seat)
+			CombatCore.heal_unit(s, u, base, seat, &"laststand")
 			if _b("secondwind"):
 				u.debuff = {}
 	s.raid_dr = {"amt": cfg.ls_dr, "until_tick": s.tick + _tt(s, cfg.ls_dur)}

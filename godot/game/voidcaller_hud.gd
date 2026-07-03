@@ -37,6 +37,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _meter: MeterPanel          # the DPS meter window (M cycles views)
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _pcast: PlayerCastBar
 var _hp_orb: LiquidOrb
@@ -165,6 +166,11 @@ func _build_combat() -> void:
 	BossIntro.play(_ui, _run.current_encounter().name)
 	_recap_stats = {}              # a fresh reckoning per fight
 
+	# the DPS meter — right rail, engine-truth accounting; M cycles views
+	_meter = MeterPanel.new(_ctrl)
+	_place(_meter, 1, 0, 1, 0, -318, 118, -18, 640)
+	_ui.add_child(_meter)
+
 	_hp_orb = LiquidOrb.new()
 	_hp_orb.fill = Palette.BLOOD
 	_hp_orb.caption = "HEALTH"
@@ -281,6 +287,9 @@ func _input(event: InputEvent) -> void:
 		KEY_4: _use_ability(3)
 		KEY_5: _use_ability(4)
 		KEY_S: _toggle_book()
+		KEY_M:
+			if _meter != null:
+				_meter.cycle()
 
 func _use_ability(i: int) -> void:
 	if _screen == "combat" and i >= 0 and i < _run.loadout.size():
@@ -656,6 +665,10 @@ func _show_end(won: bool) -> void:
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
+		# the meter's recap: per-spell breakdown on the right rail (clickable)
+		var rmeter := MeterPanel.new(_ctrl, "dmg", true)
+		_place(rmeter, 1, 0, 1, 0, -318, 118, -18, 640)
+		_ui.add_child(rmeter)
 	var again := Button.new()
 	again.text = "NEW RUN"
 	again.custom_minimum_size = Vector2(200, 48)

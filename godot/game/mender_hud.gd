@@ -33,6 +33,7 @@ var _fx: Control
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _hps_meter: MeterPanel      # the HPS meter window (M cycles views)
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _mana: LiquidOrb
 var _spec: SpecStrip
@@ -167,6 +168,11 @@ func _build_combat() -> void:
 	BossIntro.play(_ui, _run.current_encounter().name)
 	_recap_stats = {}              # a fresh reckoning per fight
 
+	# the HPS meter — right rail, engine-truth accounting; M cycles views
+	_hps_meter = MeterPanel.new(_ctrl, "heal")
+	_place(_hps_meter, 1, 0, 1, 0, -318, 118, -18, 620)
+	_ui.add_child(_hps_meter)
+
 	# raid frames — the whole raid, YOU included: aoe strike beats (M7) can hit the
 	# healer now, so your own HP is a frame like everyone else's (and self-castable).
 	var row := HBoxContainer.new()
@@ -277,6 +283,9 @@ func _input(event: InputEvent) -> void:
 		KEY_Q: _cast("dispel")
 		KEY_E: _cast("medit")
 		KEY_7: _cast(_signature())
+		KEY_M:
+			if _hps_meter != null:
+				_hps_meter.cycle()
 
 func _mouse_chord(e: InputEventMouseButton) -> String:
 	var mods := ""
@@ -793,6 +802,10 @@ func _show_end(won: bool) -> void:
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
+		# the meter's recap: per-spell healing breakdown on the right rail (clickable)
+		var rmeter := MeterPanel.new(_ctrl, "heal", true)
+		_place(rmeter, 1, 0, 1, 0, -318, 118, -18, 620)
+		_ui.add_child(rmeter)
 	var again := Button.new()
 	again.text = "NEW RUN"
 	again.custom_minimum_size = Vector2(200, 48)

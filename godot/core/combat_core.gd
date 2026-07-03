@@ -565,11 +565,82 @@ static func _bump_diag(s: CombatState, seat: Seat, key: String) -> void:
 		s.diag[key] = int(s.diag.get(key, 0)) + 1
 
 # --------------------------------------------------------------------------
+# Meter — Recount-style per-seat per-source accounting (the DPS/HPS window).
+# Diag-family data: deterministic, engine-written, never checksummed. Keyed by
+# seats[] INDEX (RefCounted-cycle + serialization safety, same rule as threat).
+# Kits that damage the boss OUTSIDE damage_boss (Twinfang's direct path) call
+# meter_dmg themselves with their source label.
+# --------------------------------------------------------------------------
+
+static func _meter_row(s: CombatState, seat: Seat) -> Dictionary:
+	var i := s.seats.find(seat)
+	if i < 0:
+		return {}
+	if not s.meter.has(i):
+		s.meter[i] = {"dmg": {}, "heal": {}, "taken": {},
+			"dmg_total": 0.0, "heal_total": 0.0, "over_total": 0.0, "taken_total": 0.0}
+	return s.meter[i]
+
+static func _meter_hit(by: Dictionary, src: StringName, amt: float, discrete: bool) -> void:
+	if not by.has(src):
+		by[src] = {"total": 0.0, "n": 0, "max": 0.0, "crit_n": 0, "over": 0.0}
+	var e: Dictionary = by[src]
+	e["total"] = float(e["total"]) + amt
+	if discrete:                       # continuous chip (statblock autos) skips n/max —
+		e["n"] = int(e["n"]) + 1       # per-tick fractions would make count/avg/max lies
+		e["max"] = maxf(float(e["max"]), amt)
+
+## Damage dealt to the boss (or the add holding the field), by source label.
+static func meter_dmg(s: CombatState, seat: Seat, src: StringName, amt: float,
+		crit := false, discrete := true) -> void:
+	if seat == null or amt <= 0.0:
+		return
+	var row := _meter_row(s, seat)
+	if row.is_empty():
+		return
+	_meter_hit(row["dmg"], src, amt, discrete)
+	if crit:
+		var e: Dictionary = row["dmg"][src]
+		e["crit_n"] = int(e["crit_n"]) + 1
+	row["dmg_total"] = float(row["dmg_total"]) + amt
+
+## Effective healing done by `caster` (overheal tracked beside it, absorbs count
+## as healing with eff and src &"ward" — the Recount convention).
+static func meter_heal(s: CombatState, caster: Seat, src: StringName, eff: float, over: float) -> void:
+	if caster == null or (eff <= 0.0 and over <= 0.0):
+		return
+	var row := _meter_row(s, caster)
+	if row.is_empty():
+		return
+	if eff > 0.0:
+		_meter_hit(row["heal"], src, eff, true)
+	elif not row["heal"].has(src):     # full-overheal casts still register the source
+		row["heal"][src] = {"total": 0.0, "n": 0, "max": 0.0, "crit_n": 0, "over": 0.0}
+	var e: Dictionary = row["heal"][src]
+	e["over"] = float(e["over"]) + over
+	row["heal_total"] = float(row["heal_total"]) + eff
+	row["over_total"] = float(row["over_total"]) + over
+
+## Damage a seat actually took (post-mitigation, post-absorb), by boss source.
+static func meter_taken(s: CombatState, seat: Seat, src: StringName, amt: float,
+		discrete := true) -> void:
+	if seat == null or amt <= 0.0:
+		return
+	var row := _meter_row(s, seat)
+	if row.is_empty():
+		return
+	_meter_hit(row["taken"], src, amt, discrete)
+	row["taken_total"] = float(row["taken_total"]) + amt
+
+# --------------------------------------------------------------------------
 # Damage
 # --------------------------------------------------------------------------
 
 ## Outgoing damage from a seat's ability to the boss. Returns damage dealt.
-static func damage_boss(s: CombatState, seat: Seat, raw: float) -> float:
+## `src` is the meter's source label (ability id); it also rides the boss_hit
+## event as `kind` so HUD damage numbers can colour by source.
+static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName = &"attack",
+		crit := false) -> float:
 	var mult := 1.0
 	if seat != null and seat.kit != null:
 		mult = seat.kit.outgoing_mult(seat)
@@ -581,7 +652,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float) -> float:
 	if s.threat_enabled and seat != null and d > 0.0:
 		_add_threat(s, seat, d * (s.config.threat_tank_mult if seat.role == "tank" else 1.0))
 	if d > 0.0:
-		_emit(s, {"t": "boss_hit", "amt": int(d), "seat": seat})
+		meter_dmg(s, seat, src, d, crit)
+		_emit(s, {"t": "boss_hit", "amt": int(d), "seat": seat, "kind": String(src), "crit": crit})
 	return d
 
 # --------------------------------------------------------------------------
@@ -681,6 +753,7 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 				hseat = s.seats[seat.absorb_owner_i]
 			if hseat == null:
 				hseat = _healer(s)
+			meter_heal(s, hseat, &"ward", eaten, 0.0)   # absorbs count as healing done
 			if hseat != null and hseat.kit != null:
 				hseat.kit.on_absorb(s, hseat, seat, eaten, emptied)
 	seat.hp -= d
@@ -689,6 +762,7 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 	if seat.kit != null and d > 0.0:
 		seat.kit.on_damage_taken(s, seat, d, src, size)
 	if d > 0.0:
+		meter_taken(s, seat, src, d, src != &"enrage")   # enrage is per-tick chip — totals only
 		_emit(s, {"t": "hurt", "seat": seat, "player": seat.is_player, "amt": int(d), "size": size})
 
 ## Win condition (stat-block allies): boss loses Σ (living ally.dps * f(hp%)) * dt.
@@ -702,6 +776,7 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			if f < 0.0:
 				f = f_hp(seat.hp_frac(), s.config)                 # default curve
 			total += seat.dps * f
+			meter_dmg(s, seat, &"attack", seat.dps * f * dt, false, false)
 			if s.threat_enabled:
 				_add_threat(s, seat, seat.dps * f * dt)
 	if s.boss.add_i >= 0:
@@ -774,7 +849,8 @@ static func _primary_target(s: CombatState) -> Seat:
 ## Heal `target` for `amt`, funnelled through the CASTER's aspect (Brinkwarden low-HP
 ## scaling), consuming heal-absorb, applying to HP, and routing overheal (Tidecaller
 ## Reservoir / Overflow shield). Returns effective HP restored.
-static func heal_unit(s: CombatState, target: Seat, amt: float, caster: Seat) -> float:
+static func heal_unit(s: CombatState, target: Seat, amt: float, caster: Seat,
+		src: StringName = &"heal") -> float:
 	if target == null or not target.alive():
 		return 0.0
 	var mult := 1.0
@@ -796,6 +872,7 @@ static func heal_unit(s: CombatState, target: Seat, amt: float, caster: Seat) ->
 	if caster != null and caster.kit != null:
 		caster.kit.on_overheal(s, caster, target, over)
 		caster.kit.on_heal(s, caster, target, eff, over)
+	meter_heal(s, caster, src, eff, over)
 	if eff > 0.0 or over > 0.0:
 		_emit(s, {"t": "heal", "seat": target, "amt": int(eff), "over": int(over)})
 	return eff
@@ -820,7 +897,7 @@ static func _apply_seat_effects(s: CombatState) -> void:
 				while int(h["acc"]) >= int(h["every"]) and int(h["left"]) > 0:
 					h["acc"] = int(h["acc"]) - int(h["every"])
 					h["left"] = int(h["left"]) - int(h["every"])
-					heal_unit(s, seat, float(h["tick"]), hcaster)
+					heal_unit(s, seat, float(h["tick"]), hcaster, StringName(h.get("src", &"hot")))
 				if int(h["left"]) > 0 and seat.alive():
 					keep.append(h)
 			seat.hots = keep
