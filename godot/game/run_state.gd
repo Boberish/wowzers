@@ -6,7 +6,7 @@
 class_name RunState
 extends RefCounted
 
-var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver"
+var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver" | "reckoner"
 var aspect: String = "warden"
 var loadout: Array = []           ## ability ids in key order (1..N)
 var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
@@ -53,6 +53,12 @@ static func start_twinfang(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("twinfang", aspect, seed_v)
 	r.loadout = TwinfangConfig.new().loadout(aspect)
 	r.encounters = TwinfangContent.run_encounters()
+	return r
+
+static func start_reckoner(aspect: String, seed_v: int = -1) -> RunState:
+	var r := _base("reckoner", aspect, seed_v)
+	r.loadout = ReckonerConfig.new().loadout(aspect)
+	r.encounters = ReckonerContent.run_encounters()
 	return r
 
 static func start_voidcaller(aspect: String, seed_v: int = -1) -> RunState:

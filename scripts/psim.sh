@@ -12,9 +12,9 @@
 set -euo pipefail
 SIM="${1:?usage: psim.sh <sim_name> [seeds] [jobs] [-- extra args]}"
 case "$SIM" in
-  bulwark_sim|twinfang_sim|voidcaller_sim|mender_sim|bloomweaver_sim|raid_sim) ;;
+  bulwark_sim|twinfang_sim|voidcaller_sim|mender_sim|bloomweaver_sim|reckoner_sim|raid_sim) ;;
   *) echo "psim.sh supports: bulwark_sim twinfang_sim voidcaller_sim mender_sim"
-     echo "bloomweaver_sim raid_sim (they carry --seed0 + a per-seed CSV).  Got: '$SIM'"
+     echo "bloomweaver_sim reckoner_sim raid_sim (they carry --seed0 + a per-seed CSV).  Got: '$SIM'"
      exit 2 ;;
 esac
 TOTAL="${2:-200}"
