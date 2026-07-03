@@ -537,6 +537,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"swing_min_ticks": _tt(s, _swing_min_sec(seat)),
 		"perfect_lo": _tt(s, _perfect_lo_sec(seat)),
 		"perfect_hi": _tt(s, _perfect_hi_sec(seat)),
+		"rhythm_scale": _tt(s, cfg.perfect_end + 0.15),   # FIXED ruler (flow-0 anchor + margin) so the RhythmBar shows the accelerando
 		"strike_cost": float(cfg.abilities["strike"]["energy"]),
 		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,
 		"def_zone": cfg.dodge_zone,

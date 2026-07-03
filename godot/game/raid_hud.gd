@@ -87,6 +87,7 @@ var _map_gear_charges: Dictionary = {}  ## active-item charges left this run
 var _map_tokens := 0                    ## ⏣ banked from scrap (MARKET spends them, GEAR-3)
 var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
+var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
 
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
 var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
@@ -204,7 +205,7 @@ func _show_select(seat: String = "tank") -> void:
 	sel.current = seat
 	sel.hint = "Pick a Seal: Vorathek is the classic pull; II–IV are the Machine Seals (they escalate). Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
 	sel.extras = [
-		{"label": "THE TOPOLOGY — RING 3 raid floor (map run: Vorathek gate → MISTRAL-7B)",
+		{"label": "THE TOPOLOGY — Realm 1 descent · Ring 3→0 (MISTRAL → GEMINI → MYTHOS)",
 			"cb": func(): _start_map_pick(sel.current)},
 		{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online},
 	]
@@ -658,7 +659,25 @@ func _start_map_run() -> void:
 	if DisplayServer.get_name() != "headless":
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
+	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
+	# its picks ride into every pull (AI raiders stay on the verified boon-less comp).
+	_run = _make_run()
 	_build_floor()
+
+## A minimal RunState for the human seat, just to carry boons + the draft economy
+## (class/aspect/draft_rng/tokens/pity). Its encounter chain is ignored — the raid
+## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
+func _make_run() -> RunState:
+	match _seat_key:
+		"blade": return RunState.start_twinfang(_aspect)
+		"caster": return RunState.start_voidcaller(_aspect)
+		"healer": return RunState.start_mender(_aspect)
+		_: return RunState.start(_aspect)
+
+## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
+func _inject_boons(seat: Seat) -> void:
+	if _run != null and seat != null and seat.kit != null:
+		seat.kit.boons = _run.boons
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -812,6 +831,7 @@ func _launch_map_fight(fi: int) -> void:
 	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, String(enc.id))
 	var s := RaidNet.build(spec, _seat_key)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
+	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
 	for i in s.seats.size():
 		if i < _map_fracs.size():
 			var u: Seat = s.seats[i]
@@ -839,6 +859,7 @@ func _launch_gate_fight() -> void:
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect)
 	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
+	_inject_boons(s.seats[0])   # Draft 2.0: boons on for the exam too
 	if _map != null:
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = s.seats[0]
@@ -1167,6 +1188,31 @@ func _toast_add(msg: String) -> void:
 
 ## A floor Seal is down (but not the last): PRIVILEGE ELEVATION — descend to the
 ## next ring carrying the party's integrity/wounds/mana, or bank out to the Rift.
+## Draft 2.0 REFORGE (the raid's boon draft): mint Tokens from this fight's skill, then
+## offer 1-of-3 (rarity-weighted, synergy slot, build-your-verb pieces). Taking one folds
+## it into `_run.boons` — it rides every future pull. Pool exhausted / no run = skip.
+func _show_boon_draft(done: Callable) -> void:
+	if _run == null:
+		done.call()
+		return
+	if _ctrl != null and _ctrl.state != null:
+		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
+	var picks := Draft.roll_offers(_run)
+	if picks.is_empty():
+		done.call()
+		return
+	_screen = "draft"
+	_clear()
+	var extras: Array = []
+	if _run.tokens > 0:
+		extras.append("%d Tokens banked — REROLL / LOCK a card." % _run.tokens)
+	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
+		"Take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
+	ds.boon_taken.connect(func(boon: Dictionary):
+		Draft.take(_run, boon)
+		done.call())
+	_ui.add_child(ds)
+
 func _show_floor_cleared() -> void:
 	_screen = "end"
 	_clear()
@@ -1260,6 +1306,7 @@ func _build_combat(s: CombatState) -> void:
 			aspects[key] = String(kit.get("aspect")) if kit != null and kit.get("aspect") != null else ""
 		_stage2d.setup(s, aspects)
 	_stage2d.bind_seats(s.seats)
+	_add_dev_tools()
 
 	_shake_root = Control.new()
 	_shake_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1504,6 +1551,29 @@ func _build_band_healer() -> void:
 		_runes.append(rune)
 		_rune_ids.append(id)
 	_hint_line(_healer_hint())
+
+## DEV TOOL: an instant-WIN button to test the post-fight flow (drops, floor advance,
+## ring elevation, campaign clear) without grinding each fight. Debug/source builds
+## only, and OFFLINE only — killing the boss locally in an online lockstep fight would
+## desync every replica. Auto-hidden in headless (sims/smokes) and release exports.
+func _add_dev_tools() -> void:
+	if _online or DisplayServer.get_name() == "headless" or not OS.is_debug_build():
+		return
+	var win := Button.new()
+	win.text = "DEV ▶ WIN"
+	win.add_theme_font_size_override("font_size", 12)
+	win.modulate = Color(1.0, 1.0, 1.0, 0.5)
+	win.pressed.connect(_dev_win)
+	_place(win, 0, 0, 0, 0, 14, 14, 116, 44)     # top-left corner, out of the way
+	_ui.add_child(win)
+
+func _dev_win() -> void:
+	if _ctrl == null or _ctrl.state == null or _ctrl.state.over:
+		return
+	var s: CombatState = _ctrl.state
+	# overkill the boss (and any active add) — the normal update loop then resolves
+	# the win exactly like a real kill, so drops/floor-advance run unchanged.
+	CombatCore.damage_boss(s, s.seats[0], s.boss.hp + s.boss.hp_max + 1.0)
 
 func _healer_hint() -> String:
 	var parts: Array = []
@@ -1905,6 +1975,9 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_rhythm.swing_min = int(obs.get("swing_min_ticks", 13))
 	_rhythm.perfect_lo = int(obs.get("perfect_lo", 18))
 	_rhythm.perfect_hi = int(obs.get("perfect_hi", 29))
+	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando visible
+	_rhythm.flow = int(obs.get("flow", 0)) if String(obs.get("aspect", "")) == "tempo" else 0
+	_rhythm.flow_max = int(obs.get("flow_max", 6))
 	_tf_gauge.combo = int(obs.get("cp", 0))
 	_tf_gauge.combo_max = int(obs.get("cp_max", 5))
 	_tf_gauge.flow = int(obs.get("flow", 0))
@@ -2298,7 +2371,8 @@ func _on_end(won: bool) -> void:
 			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
 			after = _show_campaign_cleared if _floor >= RaidContent.FLOORS.size() - 1 \
 				else _show_floor_cleared
-		_after_drop(String(_ctrl.state.encounter.id), after)
+		# gear drop first, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear)
+		_after_drop(String(_ctrl.state.encounter.id), func(): _show_boon_draft(after))
 		return
 	_show_end(won)
 

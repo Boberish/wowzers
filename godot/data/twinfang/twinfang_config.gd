@@ -32,9 +32,9 @@ extends Resource
 #     Flow-0 values above and these by (flow / max_flow). Venom keeps Flow pinned at 0, so
 #     its window is ALWAYS the base — a steady beat, no accelerando. Window width goes
 #     0.35s → 0.22s (tighter but fair); a Flow crash drops you back to walking pace.
-@export var swing_min_lo: float = 0.32
-@export var perfect_start_lo: float = 0.46
-@export var perfect_end_lo: float = 0.68
+@export var swing_min_lo: float = 0.27
+@export var perfect_start_lo: float = 0.40
+@export var perfect_end_lo: float = 0.60
 @export var coup_flow_seed: int = 2         ## Flow left after Coup CONSUMES it (ride vs spend) —
                                             ## a seed so the spike doesn't crater you to walking pace
 

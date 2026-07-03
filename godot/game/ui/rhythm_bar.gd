@@ -18,6 +18,11 @@ var since: int = 0            ## ticks since last Strike
 var swing_min: int = 13       ## ticks; before this a Strike is ignored
 var perfect_lo: int = 18
 var perfect_hi: int = 29
+var scale_ticks: int = 33     ## FIXED time-scale denominator (constant, NOT perfect_hi) so the
+                              ## accelerando is visible: as the window shrinks it slides LEFT on a
+                              ## fixed ruler instead of the whole bar rescaling with it.
+var flow: int = 0            ## Tempo only: drives the "how fast is the beat" readout
+var flow_max: int = 6
 var _pulse: float = 0.0
 var _result: String = ""      ## "perfect" | "early" | "late"
 var _result_t: float = 0.0    ## fade timer for the verdict flash
@@ -38,7 +43,10 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var w := size.x
-	var hi := maxf(1.0, float(perfect_hi))
+	# Normalize to a FIXED scale, never perfect_hi — otherwise the accelerando is invisible
+	# (the whole bar would rescale with the shrinking window). On a fixed ruler the green
+	# window visibly moves EARLIER and NARROWS as Flow climbs, and the needle reaches it sooner.
+	var hi := maxf(1.0, float(maxi(scale_ticks, perfect_hi + 2)))
 	var early_f := clampf(float(swing_min) / hi, 0.0, 1.0)
 	var green_f := clampf(float(perfect_lo) / hi, 0.0, 1.0)
 	var prog := clampf(float(since) / hi, 0.0, 1.0)
@@ -47,10 +55,27 @@ func _draw() -> void:
 	var flashing := _result_t > 0.0
 	var fa := clampf(_result_t / HOLD, 0.0, 1.0)   # 1 -> 0 fade
 
-	# ---- header: plaque + live cue ----
+	# ---- header: plaque + live cue + TEMPO readout (the accelerando made explicit) ----
 	UiKit.engraved_plaque(self, Vector2(76.0, 10.0), "STRIKE TIMING", in_green)
-	UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), "tap 1 in the green",
-		HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], Palette.PERFECT)
+	if flow > 0:
+		# Flow = BPM: a row of chevrons that light + a "×N" as the beat quickens, hotter at max.
+		var fmax := maxi(flow_max, 1)
+		var hot := float(flow) / float(fmax)
+		var tcol := Palette.PERFECT.lerp(Palette.RAGE, hot)
+		var cx0 := w - 128.0
+		for i in fmax:
+			var lit := i < flow
+			var ca := 0.9 if lit else 0.18
+			var cc := tcol if lit else Palette.TEXT_DIM
+			var chx := cx0 + float(i) * 9.0
+			draw_line(Vector2(chx, 16.0), Vector2(chx + 5.0, 12.0), Color(cc.r, cc.g, cc.b, ca), 2.0, true)
+			draw_line(Vector2(chx, 16.0), Vector2(chx + 5.0, 20.0), Color(cc.r, cc.g, cc.b, ca), 2.0, true)
+		UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, 12.0),
+			"TEMPO ×%.1f — beat's faster!" % (1.0 + hot * 0.6) if flow >= fmax else "TEMPO ×%.1f" % (1.0 + hot * 0.6),
+			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], tcol)
+	else:
+		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), "tap 1 in the green",
+			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], Palette.PERFECT)
 
 	# ---- the recessed glass channel ----
 	var track := Rect2(16.0, 26.0, w - 32.0, 36.0)
