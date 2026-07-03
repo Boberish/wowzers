@@ -32,17 +32,26 @@ combat item below names its hook and its combo so implementation is mechanical.
 
 ## Drop scaling by depth (starting values, knobs on `TuningConfig`)
 
+**ARMORY cadence (2026-07-03): drops are EVENTS.** Rolls fire only at Seal kills, gate
+exams, and any kill whose SIGNATURE is still locked (first-kill shower); repeat skirmish
+kills pay salvage Tokens (1/2/3⏣ by ring), no roll. With ~4–6 rolls per descent the
+weights below are retuned RICHER than the pre-armory table (shipped in `Gear.rarity_weights`).
+
 Rarity is rolled first (pity-bent, persists across bosses), then the item within the tier,
 synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 
 | Surface | Haiku / Sonnet / Opus base weights |
 |---|---|
-| Ring 3 (Seal + gate) | 70 / 25 / 5 |
-| Ring 2 | 55 / 35 / 10 |
-| Ring 0 | 40 / 38 / 22 |
-| Skirmish kills | one tier stingier than their ring (floor 80/18/2) |
+| Ring 3 (Seal + gate + first-kills) | 50 / 35 / 15 |
+| Ring 2 | 38 / 40 / 22 |
+| Ring 0 | 25 / 40 / 35 |
+| Skirmish kills | first kill = the SIGNATURE (guaranteed); repeats = salvage ⏣, no roll |
 | Boss version v2/v3 | shift a further 8pp per version from Haiku upward |
 | Sworn-oath KEPT | purse bend on top (see PROGRESSION-PLAN table) |
+
+**Signature philosophy (ARMORY, supersedes the all-Haiku taste rows):** the SIGNATURE is
+the boss's iconic STRONG piece (printed Sonnet for the combat six) — a first kill must
+change how the next fight feels. Shipped strong versions are inlined per row below.
 
 ---
 
@@ -50,10 +59,11 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 
 ## VORATHEK, THE RIFTMAW (Seal I — the tutorial page; universal basics)
 
-- **RIFTMAW TOOTH** · Haiku · UNIV · [SIM] · **SIGNATURE (first kill)** — whenever a boss
-  self-heal is DENIED (anyone's kick), you gain +15 primary resource. *Combo:* makes the kick
-  game visible to every seat from hour one; feeds Reservoir/Nerve/Flow-economy alike.
-  *Hook:* staggered-heal moment (diag bump beside the `staggered{was_heal}` emit).
+- **RIFTMAW TOOTH** · **Sonnet (ARMORY)** · UNIV · [SIM] · **SIGNATURE (first kill)** — whenever
+  a boss self-heal is DENIED (anyone's kick), **your defensive verb and dodge reset** and you
+  gain +20 primary resource. *Combo:* makes the kick game visible to every seat from hour one —
+  and the denial moment hands you your verbs back (a free guard/dodge/kick window).
+  *Hook:* staggered-heal moment (`GearFx.tooth_grant` resets `defense_ready_tick`/`dodge_ready_tick`).
   *Tags:* [interrupt, mana, rage, focus]. Pop: *"CHECKPOINT CORRUPTED — scavenged."*
 - **STICKY NOTE** · Haiku · bulwark · [SIM] · **OATH sev-I: "answer every Baleful Curse within
   2s"** — taunting back within 2s of a THREAT_DROP refunds +15 rage. *Combo:* teaches the
@@ -75,8 +85,10 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 
 ## MISTRAL-7B, LE GOLEM EFFICACE (Seal II — efficiency)
 
-- **LE CHAT'S BELL** · Haiku · UNIV · [SIM] · **SIGNATURE** — start every fight with +30
-  primary resource, pre-warmed ("lightweight and efficient"). *Tags:* [mana, rage, focus, sap].
+- **LE CHAT'S BELL** · **Sonnet (ARMORY)** · UNIV · [SIM] · **SIGNATURE** — start every fight
+  with +30 primary resource, pre-warmed — and the warm start HUMS: resource flows twice as
+  fast for the first 10s ("lightweight and efficient"). *Hook:* `GearFx.bell_live` at each
+  kit's Scratchpad regen site. *Tags:* [mana, rage, focus, sap].
 - **RELAY BATON** · Sonnet · UNIV · [SIM] · **OATH sev-II: "kick every verse of Recite the
   License"** — when ANOTHER raider lands a kick, your defensive-verb cooldown ticks 2s faster.
   *Combo:* the kick-rotation item — chains (2s verses vs 5s kick cd) become a relay; stacks
@@ -134,13 +146,14 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 
 ## BARD.EXE (deprecated)
 - **SWAN SONG** · Haiku · UNIV · [SIM] · **SIGNATURE** — when you die, you fire a final
-  120 blast and the party heals 15. *"It saved its best poem for last."* *Tags:* [bloodied].
+  **200** blast and the party heals **25** (ARMORY buff — the poem got meatier).
+  *"It saved its best poem for last."* *Tags:* [bloodied].
 - **COUPON CODE** · Haiku · UNIV · [UTIL] · **OATH sev-I: "take zero hits from Farewell
   Sonnet"** — MARKET prices −1⏣.
 
 ## SONNET SUBAGENT (stray)
 - **TICKET STUB** · Haiku · UNIV · [UTIL] · **SIGNATURE** — closing a TICKET also repairs
-  +5% party integrity. (The subagent does the chores.)
+  +10% party integrity and pays +1⏣ (ARMORY buff). (The subagent does the chores.)
 - **SKELETON API KEY** · Sonnet · UNIV · [UTIL] · **OATH sev-II: "kill before its second
   Parallel Tool Calls"** — opens one 401 door per floor without the key.
 
@@ -160,8 +173,9 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 # THE GATE PAGES (class-marked — your exam pays in your class's toys; the natural oath stage)
 
 ## CAPTCHA-9, THE GATEKEEPER (tank gate → Bulwark page)
-- **VERIFICATION STAMP** · Haiku · bulwark · [SIM] · **SIGNATURE** — your first clean negate
-  each fight banks +2 chain links (Warden) / +4 Momentum (Jugg). *"Verified: not a robot."*
+- **VERIFICATION STAMP** · **Sonnet (ARMORY)** · bulwark · [SIM] · **SIGNATURE** — your first
+  clean negate each fight banks +4 chain links (Warden) / +8 Momentum (Jugg) **and resets
+  Guard on the spot** (chain a second read). *"Verified: not a robot."*
   *Tags:* [parry, counter, momentum].
 - **DEBT COLLECTOR** · Sonnet · bulwark[warden] · [SIM] · **OATH sev-II: "clear the gate with
   the chain never broken"** — Vindicate cashed at 5+ links also staggers the boss. *Combo:*
@@ -180,9 +194,9 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
   *Tags:* [guard, parry, momentum]. Pop (raid-wide): *"THE WALL IS DOWN — GO."*
 
 ## FIREWALL (blade gate → Twinfang page)
-- **POWDER VIAL** · Haiku · twinfang · [SIM] · **SIGNATURE** — your Kick also applies 2
-  stacks of the lit wheel lane (Venom) / +1 Flow (Tempo). *Combo:* folds the off-rhythm
-  button into each aspect's engine. *Tags:* [poison, flow].
+- **POWDER VIAL** · **Sonnet (ARMORY)** · twinfang · [SIM] · **SIGNATURE** — your Kick also
+  applies 3 stacks of the lit wheel lane (Venom) / +2 Flow (Tempo). *Combo:* folds the
+  off-rhythm button into each aspect's engine. *Tags:* [poison, flow].
 - **ENCORE BELL** · Sonnet · twinfang[tempo] · [SIM] · **OATH sev-II: "land 8 PERFECT strikes"** — after Coup consumes max Flow, your Perfect window holds at the wide Flow-0
   anchors for the next 3 strikes. *Combo:* the Accelerando cash-out breather — spend the BPM,
   get 3 beats to rebuild it; `dancersgrace`/`crescendo` builds. *Hook:* `coup` moment →
@@ -196,8 +210,9 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
   *Tags:* [poison, combo, rupture].
 
 ## THE PROMPTER (caster gate → Voidcaller page)
-- **SPARK PLUG** · Haiku · voidcaller · [SIM] · **SIGNATURE** — your first kick each fight
-  refunds half its cooldown. *"Kick early, kick often."* *Tags:* [interrupt].
+- **SPARK PLUG** · **Sonnet (ARMORY)** · voidcaller · [SIM] · **SIGNATURE** — your first TWO
+  kicks each fight that answer a cast refund their WHOLE cooldown. *"Kick early, kick often."*
+  *Tags:* [interrupt].
 - **MUTE BUTTON** · Sonnet · voidcaller[silencer] · [SIM] · **OATH sev-II: "land 6 clean
   kicks in the gate"** — active (2/fight): extend a live Silence and Expose by 2s.
   *Combo:* Quietus stretching, `longsil`/`deepexpose` lockout builds; a spend *decision*
@@ -209,8 +224,9 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
   interrupt]. Flavor: *"the same opinion, louder."*
 
 ## POPUP, THE ADHOUND (healer gate → healer page)
-- **SALT VIAL** · Haiku · mender · [SIM] · **SIGNATURE** — your dispel also heals the target
-  25. *Tags:* [mana]. (Dispel is the Mender's mint signature — the item makes it visible.)
+- **SALT VIAL** · **Sonnet (ARMORY)** · mender · [SIM] · **SIGNATURE** — your dispel also heals
+  the target 60 **and refunds its mana**. *Tags:* [mana]. (Dispel is the Mender's mint
+  signature — the item makes it free AND visible.)
 - **OVERFLOW SLUICE** · Sonnet · mender[tidecaller] · [SIM] · **OATH sev-II: "no ally below
   30% for the whole gate"** — overheal banked while the Reservoir is FULL becomes a ward on
   the tank at 0.5×. *Combo:* fixes the capped-flywheel waste; `floodgate`/Surge re-bank

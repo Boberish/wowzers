@@ -116,7 +116,16 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
   otherwise practice becomes the farm and the campaign hollows.
 
 ### Drops — the in-run layer
-- On boss kill, **two-step roll**: (1) rarity first — base weights (e.g. 70/25/5) bent by
+- **Drops are EVENTS (ARMORY amendment, Bill 2026-07-03 — playtest verdict: a drop after
+  every fight killed the moment).** A roll fires only at: **Seal kills**, **gate exams**,
+  and **any kill whose SIGNATURE row is still locked** (preserves the StS first-kill
+  shower). Repeat skirmish kills pay ring-scaled **salvage Tokens** (1⏣/2⏣/3⏣ at Ring
+  3/2/0) with a toast, no ceremony. Scarcity is what makes the ceremony land; weights are
+  retuned richer to match (~4–6 rolls/descent → each pays more; table in GEAR-CATALOG).
+- **Signature philosophy (ARMORY, replaces the all-Haiku "taste rows"):** the first-kill
+  SIGNATURE is the boss's *iconic strong piece* — feel-it-immediately, printed Sonnet for
+  the combat six. Oath/version rows are the refinement and chase. First kills feel awesome.
+- On boss kill, **two-step roll**: (1) rarity first — base weights bent by
   **pity** (per-run Opus counter; dry rolls bump, eventually guarantee) and **depth/version**
   (boss 5 / v3 rolls richer); (2) item among that boss's unlocked rows *of that rarity*,
   weighted by draft2 **synergy tags** toward the current build. If the boss has no unlocked
@@ -139,6 +148,23 @@ Procs tied to verbs ("after a perfect parry, next Guard is instant"), **actives 
 (a new button — huge in a one-verb game; e.g. consume to clear a wound), **set pairs** (the
 one inventory tension 2 slots can hold — keep a weaker piece to complete the pair), and
 map/economy utility (shop prices, 401 doors, cache reveals). Never raw verb %.
+
+### THE ARMOR SET — the presentation layer (ARMORY, Bill 2026-07-03)
+The run-build reads as GEARING UP, not "stacking imaginary things": a paper-doll **YOUR
+SET** panel (`game/ui/armor_doll.gd`) renders every drafted boon as a PIECE forged into
+one of five armor slots — **WEAPON** (your output; heal throughput for healers) ·
+**HELM** (the resource engine) · **CUIRASS** (survival/wards/guard) · **GAUNTLETS** (the
+class mechanic in hand) · **GREAVES** (footwork/beats) — plus the two curio equip slots
+as **TRINKET** sockets. A slot's piece = its family's boon **count** (+N badge) and
+**best-rarity** frame glow; hover lists the pieces. **Presentation ONLY**: the draft
+economy is untouched (Hades stacking, no slot caps — pieces upgrade, never limit), the
+lane law survives as *boons forge armor, drops socket trinkets*. Mapping: explicit
+id→slot table in `data/armor_slots.gd` (+ tag fallback for future boons); DraftScreen
+cards carry a "⚒ SLOT" forge chip; taking a pick toasts "⚒ SLOT REFORGED — piece N".
+Shown on the descent map (bottom-left), beside the REFORGE draft, and grouped in the
+combat build panel. *(Considered and deferred: capped slots w/ replacement (kills Hades
+stacking), Need/Greed shared rolls vs the AI raid at Seals — the "B2/roll" halves of the
+armory design; revisit after this cadence ships feel.)*
 
 ## Standing — make growth visible (and *seen*)
 

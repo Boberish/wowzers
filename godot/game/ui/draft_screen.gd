@@ -82,6 +82,10 @@ func _rebuild() -> void:
 		var col := VBoxContainer.new()
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
 		col.add_theme_constant_override("separation", 8)
+		# ARMORY: every boon is a PIECE — the chip names the armor slot it forges into
+		var forge := _label(col, "⚒  %s" % ArmorSlots.pretty(ArmorSlots.slot_of(b)),
+			11, Palette.GOLD_DIM)
+		forge.add_theme_font_override("font", UiKit.display(600, 2))
 		var card := RelicCard.new(String(b["title"]), String(b["desc"]), String(b["type"]),
 			Draft.rarity(b), i == 0 and Draft.matches(b, _run), String(b.get("slot", "")))
 		card.locked = i in _locked

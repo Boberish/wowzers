@@ -936,6 +936,13 @@ func _show_map() -> void:
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
+	# ARMORY: YOUR SET — the run's boons as armor pieces + curio trinkets, bottom-left
+	# (below the lane band; the doll root ignores the mouse, only sockets hover)
+	if _run != null:
+		var doll := ArmorDoll.new()
+		_place(doll, 0.0, 1.0, 0.0, 1.0, 14, -344, 14 + int(ArmorDoll.W), -12)
+		_ui.add_child(doll)
+		doll.set_build(_taken_boons, _map_gear, _map_gear_charges)
 	# GEAR-1: Cooling Paste — a USE button rides the map while a wound needs it
 	if _map_gear.has("cooling_paste") and int(_map_gear_charges.get("cooling_paste", 0)) > 0 \
 			and _worst_wound() > 0.0:
@@ -1362,6 +1369,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 			Palette.WIN if verdict.contains("KEPT") else Palette.CRIMSON)
 	var banner := _title(box, "PERIPHERAL ACQUIRED", 42, Palette.GOLD_BRIGHT)
 	banner.add_theme_font_override("font", UiKit.title(900))
+	_title(box, "a TRINKET for your set — socket it, or scrap it for ⏣", 13, Palette.TEXT_DIM)
 	if first:
 		_title(box, "★  FIRST KILL — a new row is inked into the Ledger", 15, Palette.GOLD)
 	var card := RelicCard.new(String(it["name"]),
@@ -1460,12 +1468,24 @@ func _show_boon_draft(done: Callable) -> void:
 	if _run.tokens > 0:
 		extras.append("%d Tokens banked — REROLL / LOCK a card." % _run.tokens)
 	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
-		"Take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
+		"Take one — every piece forges into your set.", extras, Palette.GOLD)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_run, boon)
 		_taken_boons.append(boon)      # for the build panel (title + rarity)
+		# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
+		var slot := ArmorSlots.slot_of(boon)
+		var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
+		_toast_add("⚒  %s REFORGED — %s is piece %d" % [
+			ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
 		done.call())
 	_ui.add_child(ds)
+	# ARMORY: the set-so-far stands beside the forge (cards stay centered)
+	if not _taken_boons.is_empty() or not _map_gear.is_empty():
+		var doll := ArmorDoll.new()
+		_place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
+			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
+		_ui.add_child(doll)
+		doll.set_build(_taken_boons, _map_gear, _map_gear_charges)
 
 func _show_floor_cleared() -> void:
 	_screen = "end"
@@ -1941,11 +1961,22 @@ func _add_build_panel() -> void:
 		lbl.custom_minimum_size = Vector2(276, 0)
 		col.add_child(lbl)
 	if not _taken_boons.is_empty():
+		# ARMORY: the build reads as a SET — pieces grouped under their armor slots
 		var cap := Label.new()
-		cap.text = "BOONS  ·  %d" % _taken_boons.size()
+		cap.text = "THE SET  ·  %d PIECES" % _taken_boons.size()
 		cap.add_theme_font_size_override("font_size", 10)
 		cap.add_theme_color_override("font_color", Palette.GOLD_DIM)
 		col.add_child(cap)
+		var summed := ArmorSlots.summarize(_taken_boons)
+		for slot in ArmorSlots.ORDER:
+			var e: Dictionary = summed[slot]
+			if int(e["count"]) == 0:
+				continue
+			var sl := Label.new()
+			sl.text = "%s  +%d" % [ArmorSlots.pretty(slot), int(e["count"])]
+			sl.add_theme_font_size_override("font_size", 11)
+			sl.add_theme_color_override("font_color", Palette.rarity_color(String(e["best"])))
+			col.add_child(sl)
 		for b in _taken_boons:
 			var bd: Dictionary = b
 			var bl := Label.new()
