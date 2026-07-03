@@ -1,9 +1,11 @@
 ## End-to-end NETCODE smoke (R2): ONE headless process runs the real NetServer and
 ## TWO real WebSocket clients over loopback at accelerated time-scale.
-##   Fight 1: human tank (Ava) + human healer (Bo, brinkwarden) + 2 AI — full fight,
-##            assert zero desyncs and both replicas at the server outcome.
-##   Fight 2: Bo hard-disconnects mid-fight — server swaps the seat to AI in-frame;
-##            Ava's replica must run clean to the end.
+##   Fight 1: human tank (Ava) + human healer (Bo, the second healer BLOOMWEAVER/
+##            wildgrove — proves the online CLASS toggle locksteps) + 2 AI — full fight,
+##            assert zero desyncs, both replicas build a BloomweaverKit healer, and both
+##            land on the server outcome.
+##   Fight 2: Bo hard-disconnects mid-fight — server swaps the seat to AI in-frame
+##            (a BloomweaverPolicy, by class); Ava's replica must run clean to the end.
 ##
 ##   godot --headless --path godot --script res://sim/net_smoke.gd
 extends SceneTree
@@ -78,7 +80,8 @@ func _process(delta: float) -> bool:
 				phase = "claim"
 		"claim":
 			if _seat_of(ava, "Ava") == "tank" and _seat_of(bo, "Bo") == "healer":
-				bo["net"].send({"t": "aspect", "aspect": "brinkwarden"})
+				bo["net"].send({"t": "class", "cls": "bloomweaver"})   # v4: the second healer
+				bo["net"].send({"t": "aspect", "aspect": "wildgrove"})
 				_host().send({"t": "boss", "enc": "mistral"})   # v2: host picks Seal II
 				ava["net"].send({"t": "ready", "on": true})
 				bo["net"].send({"t": "ready", "on": true})
@@ -102,6 +105,9 @@ func _process(delta: float) -> bool:
 					_fail("replica mismatch after fight 1")
 				elif String(ca.encounter.id) != "mistral" or String(cb.encounter.id) != "mistral":
 					_fail("host Seal pick didn't reach the replicas (got %s/%s)" % [ca.encounter.id, cb.encounter.id])
+				elif _kit_name(ca.seats[3]) != "BloomweaverKit" or _kit_name(cb.seats[3]) != "BloomweaverKit":
+					_fail("online CLASS toggle didn't build a Bloomweaver healer (got %s/%s)" % [
+						_kit_name(ca.seats[3]), _kit_name(cb.seats[3])])
 				else:
 					print("replicas agree (Seal: %s): ok — re-readying for the takeover test" % ca.encounter.name)
 					ava["net"].send({"t": "ready", "on": true})
@@ -177,5 +183,12 @@ func _drive(c: Dictionary, seat_key: String) -> void:
 			ctrl.human({"type": "ability",
 				"id": ("rampage" if float(obs.get("rage", 0.0)) >= 40.0 else "cleave")})
 	else:
+		# the healer is a Bloomweaver here — keep Growth rolling on the tank
 		if (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):
-			ctrl.human({"type": "ability", "id": "mend", "target": s.seats[0]})
+			ctrl.human({"type": "ability", "id": "growth", "target": s.seats[0]})
+
+func _kit_name(seat: Seat) -> String:
+	if seat == null or seat.kit == null:
+		return "<none>"
+	var scr: Script = seat.kit.get_script()
+	return String(scr.get_global_name()) if scr != null else "<anon>"

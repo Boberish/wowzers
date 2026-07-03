@@ -238,6 +238,8 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_unclaim(id)
 		"aspect":
 			_aspect(id, String(msg.get("aspect", "")))
+		"class":
+			_class(id, String(msg.get("cls", "")))
 		"ready":
 			_ready_flag(id, bool(msg.get("on", false)))
 		"boss":
@@ -265,7 +267,10 @@ func _claim(id: int, seat: String) -> void:
 		if String(room["players"][opid]["seat"]) == seat:
 			return
 	room["players"][id]["seat"] = seat
-	room["players"][id]["aspect"] = String(RaidNet.DEFAULT_ASPECT[seat])
+	# the healer seat has two classes; claim it as the default Mender (toggle in lobby)
+	var cls := "mender" if seat == "healer" else ""
+	room["players"][id]["cls"] = cls
+	room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
 	_broadcast_room(room)
 
 func _unclaim(id: int) -> void:
@@ -274,6 +279,7 @@ func _unclaim(id: int) -> void:
 		return
 	room["players"][id]["seat"] = ""
 	room["players"][id]["aspect"] = ""
+	room["players"][id]["cls"] = ""
 	_broadcast_room(room)
 
 func _aspect(id: int, a: String) -> void:
@@ -281,8 +287,21 @@ func _aspect(id: int, a: String) -> void:
 	if room.is_empty() or room["phase"] != "lobby":
 		return
 	var seat := String(room["players"][id].get("seat", ""))
-	if seat != "" and a in _valid_aspects(seat):
+	var cls := String(room["players"][id].get("cls", ""))
+	if seat != "" and a in _valid_aspects(seat, cls):
 		room["players"][id]["aspect"] = a
+		_broadcast_room(room)
+
+## Toggle the healer seat's CLASS (Mender / Bloomweaver). Resets the aspect to the new
+## class's default so the pair shown in the lobby always matches the class.
+func _class(id: int, cls: String) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "lobby":
+		return
+	var seat := String(room["players"][id].get("seat", ""))
+	if seat == "healer" and (cls == "mender" or cls == "bloomweaver"):
+		room["players"][id]["cls"] = cls
+		room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
 		_broadcast_room(room)
 
 func _ready_flag(id: int, on: bool) -> void:
@@ -303,12 +322,12 @@ func _boss_pick(id: int, enc: String) -> void:
 			_broadcast_room(room)
 			return
 
-func _valid_aspects(seat: String) -> Array:
+func _valid_aspects(seat: String, cls: String = "") -> Array:
 	match seat:
 		"tank": return ["warden", "juggernaut"]
 		"blade": return ["tempo", "venomancer"]
 		"caster": return ["disruptor", "silencer"]
-		_: return ["tidecaller", "brinkwarden"]
+		_: return ["wildgrove", "thornveil"] if cls == "bloomweaver" else ["tidecaller", "brinkwarden"]
 
 func _join(id: int, msg: Dictionary) -> void:
 	if int(msg.get("ver", -1)) != NetProtocol.VERSION:
@@ -331,7 +350,7 @@ func _join(id: int, msg: Dictionary) -> void:
 		_send(id, {"t": "err", "msg": "room is full"})
 		return
 	_peers[id] = {"name": pname, "room": code}
-	room["players"][id] = {"name": pname, "seat": "", "aspect": "", "ready": false}
+	room["players"][id] = {"name": pname, "seat": "", "aspect": "", "cls": "", "ready": false}
 	if room["host"] == 0 or not room["players"].has(room["host"]):
 		room["host"] = id
 	_log("%s joined %s" % [pname, code])
@@ -350,7 +369,7 @@ func _start_fight(id: int) -> void:
 		if not bool(pl["ready"]) and pid != id:
 			_send(id, {"t": "err", "msg": "%s isn't ready" % pl["name"]})
 			return
-		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false}
+		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false, "cls": String(pl.get("cls", ""))}
 	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, seat_cfg, String(room["enc"]))
 	room["spec"] = spec
 	room["state"] = RaidNet.build(spec, "")
@@ -394,7 +413,7 @@ func _start_map(id: int) -> void:
 		if not bool(pl["ready"]) and pid != id:
 			_send(id, {"t": "err", "msg": "%s isn't ready" % pl["name"]})
 			return
-		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false}
+		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false, "cls": String(pl.get("cls", ""))}
 	room["seat_cfg"] = seat_cfg
 	room["campaign"] = {
 		"map_seed": randi() & 0x7FFFFFFF, "floor": 0, "node": -1,
@@ -602,6 +621,6 @@ func _broadcast_room(room: Dictionary) -> void:
 	for pid in room["players"]:
 		var pl: Dictionary = room["players"][pid]
 		players.append({"id": pid, "name": pl["name"], "seat": pl["seat"],
-			"aspect": pl["aspect"], "ready": pl["ready"]})
+			"aspect": pl["aspect"], "cls": pl.get("cls", ""), "ready": pl["ready"]})
 	_broadcast(room, {"t": "room", "code": room["code"], "phase": room["phase"],
 		"host": room["host"], "enc": String(room["enc"]), "players": players})

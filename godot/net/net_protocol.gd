@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 4      # v4: online co-op BOONS (spec carries per-seat boons; draft/pick)
+const VERSION := 5      # v5: healer seat CLASS choice (Mender / Bloomweaver) + v4 online boons
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

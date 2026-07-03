@@ -579,6 +579,42 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   extraction schematics — tokens now have a real faucet); combat-actives socket (G/H) for MUTE
   BUTTON-family items; version-gated rows await the Trial Ladder; fold gear+oaths into the
   ONLINE campaign spec. *(gear-design session)*
+- ☑ 2026-07-03 · `bloom-raid` · §CLASSES/§ONLINE — **Second healer in THE RIFT: Bloomweaver gets a raid seat —
+  MERGED to main.** (Bill: "add the second healer... the last relic that didn't make it from the switch...
+  separate shields from heals".) The last solo class never wired into the raid is now the 5th playable class.
+  - **Class threading:** the healer SEAT is a class CHOICE (Mender ⇄ Bloomweaver), carried as a per-seat `cls`
+    through `RaidNet` spec/build/make_policy/seat_to_ai + `default_aspect`/`cls_of` and `RaidContent._bloomweaver()`
+    / `_healer_seat()`. Default `mender` → **every existing fight byte-identical** (all six solo sims + raid
+    determinism checksum unchanged). `GateContent` is class-aware (a Bloomweaver's personal GATE = its Ashmaul exam).
+  - **HUD (the one game HUD):** 5th class card THE BLOOMWEAVER → full band via `_healer_cls` fork —
+    Sap orb + VerdanceGauge (Blooming Medallion) + benediction CastChannel + Growth/ward rune rail +
+    BloomweaverBinds; input 1-4/Q/E/7 + chords + bloom double-tap + F/SPACE dodge; frames show Growth ripeness +
+    ghost the BLOOM cash-out; 9 new event arms; verb = GARDEN; boon summary/pools. WSLg-verified (class-select,
+    combat band, meter split all render clean).
+  - **Meter split (Bill's ask) — SHIELDS ≠ HEALS:** engine `CombatCore.meter_shield` bucket routes ward absorbs
+    to a new SHIELDING DONE / SPS column, out of HEALING DONE / HPS (real HP restored). `s.meter` only (never
+    checksummed) → six solo sims byte-identical, `meter_probe` ALL OK. A ward-heavy healer no longer inflates HPS.
+  - **AI:** the Bloomweaver policy now self-triages in raids (`observe` includes its own frame when
+    `threat_enabled`) so it survives healer-piercing beats. Bands (100 seeds): riftmaw wild 100/100/98, thorn
+    100/100/100; mythos wild 100/60/14 (the finale bites a proactive healer harder than Mender's reactive heals —
+    flavor-consistent; deeper mythos AI tuning is a noted follow-up).
+  - **Online (protocol v5, co-exists with v4 boons):** lobby healer CLASS toggle (Mender ⇄ Bloomweaver) +
+    class-aware valid aspects; `net_smoke` runs a **Bloomweaver online healer** — both replicas build a
+    BloomweaverKit at identical checksums + a mid-fight disconnect → BloomweaverPolicy AI takeover → clean win.
+  - **Stage:** the 2D raid stage renders a MenderRig2D for the Bloomweaver seat (graceful), now tinted by its
+    aspects (verdance green / thorn amber); a bespoke Bloomweaver rig is a later art follow-up.
+  - **Gate:** all six solo sims byte-identical A/B, raid determinism PASS (default + bloom), all 7 UI smokes +
+    meter_probe + raid_bloom_probe + net_smoke green.
+  - **Reconciled with the healing-rebalance first pass (`raid-tuning`, 405fce8):** the harder raid (melee/nova/DoT
+    ramp) engages the Bloomweaver too — its **Sap floor dips to ~46-55%** (a tighter resource constraint than the
+    Mender's ~88% mana), 100% win on Vorathek, deterministic. High overheal (~48%) is the proactive-HoT signature
+    (plant ahead → some ticks top an already-full ally — exactly why Verdance is earned only on EFFECTIVE healing).
+    Battle-rez (Rekindle) stays **Mender-only by design** — Bloomweaver PREVENTS deaths (wards/HoTs ahead) rather
+    than recovering from them. All 6 solo sims re-verified byte-identical post-reconcile.
+  - **Follow-ups:** bespoke Bloomweaver stage rig; mythos AI finale tuning; a raid Sap-lever + overheal trim if
+    Bill wants Bloomweaver's economy tuned like the Mender's (deferred — raid-healer rebalance pending Bill's
+    steer, see [[raid-healer-under-pressured]]); optional Bloomweaver battle-rez; unpark its GEAR-CATALOG rows
+    (ORCHARD BELL / CROWN OF BRIARS) now that it has a seat. *(bloom-raid session)*
 - ☑ 2026-07-03 · `gear1` · §SYSTEMS GEAR-1 — **GEAR-1 raid-campaign loot PoC — MERGED to main
   (`866592f`)**, worktree removed. The Curio game is LIVE on the raid campaign: `data/gear/`
   (GearCatalog: 9 signature items — Riftmaw Tooth / LE CHAT's Bell / Swan Song / Ticket Stub /

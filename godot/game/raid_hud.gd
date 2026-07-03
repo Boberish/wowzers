@@ -39,6 +39,55 @@ static var ASPECTS := {
 	],
 }
 
+## The SECOND healer's Aspects. The healer SEAT can be a Mender (ASPECTS["healer"]) or a
+## Bloomweaver (below) — `_healer_cls` decides which pair the ceremony/toggles show.
+static var BLOOM_ASPECTS := [
+	{"id": "wildgrove", "name": "WILDGROVE", "accent": Palette.VERDANCE, "icon": "wildbloom",
+		"desc": "RIPEN the garden: tend Growths to the harvest window, BLOOM them for burst, light Flourish across the raid."},
+	{"id": "thornveil", "name": "THORNVEIL", "accent": Palette.THORN, "icon": "briarheart",
+		"desc": "SNAP-STREAK wards: each Perfect Ward ramps the thorns that reflect damage back — heal by hurting the boss."},
+]
+
+## The Aspect pair for a seat, honouring the healer's chosen CLASS.
+func _aspects_for(seat_key: String) -> Array:
+	if seat_key == "healer" and _healer_cls == "bloomweaver":
+		return BLOOM_ASPECTS
+	return ASPECTS[seat_key]
+
+## The Aspect pair for a lobby seat given an explicit class (online — the healer
+## claimant may be a Mender or a Bloomweaver, independent of this client's _healer_cls).
+func _lobby_aspects(seat_key: String, cls: String) -> Array:
+	if seat_key == "healer" and cls == "bloomweaver":
+		return BLOOM_ASPECTS
+	return ASPECTS[seat_key]
+
+## The seat's display name, honouring the healer class (Mender vs Bloomweaver).
+func _seat_display_name(seat_key: String) -> String:
+	if seat_key == "healer" and _healer_cls == "bloomweaver":
+		return "THE BLOOMWEAVER"
+	return String(SEAT_NAMES.get(seat_key, "RAIDER"))
+
+## The class currently filling a seat (only the healer seat is polymorphic).
+func _seat_cls_now() -> String:
+	return _healer_cls if _seat_key == "healer" else String(SEAT_CLASS.get(_seat_key, "bulwark"))
+
+## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
+## right kit + the lobby/sim/net all agree). Non-healer seats keep their native class.
+func _human_seat_cfg() -> Dictionary:
+	_sync_healer_cls()
+	return {_seat_key: {"aspect": _aspect, "ai": false, "cls": _seat_cls_now()}}
+
+## Keep _healer_cls consistent with the chosen aspect (the aspect uniquely identifies
+## the healer class), so any entry path — normal ceremony or a debug autostart — agrees.
+## No-op for non-healer seats; safe to call anytime after _aspect is set.
+func _sync_healer_cls() -> void:
+	if _seat_key != "healer":
+		return
+	if _aspect == "wildgrove" or _aspect == "thornveil":
+		_healer_cls = "bloomweaver"
+	elif _aspect == "tidecaller" or _aspect == "brinkwarden":
+		_healer_cls = "mender"
+
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
 	"strike": "Strike", "eviscerate": "Eviscerate", "kick": "Kick", "envenom": "Envenom",
@@ -129,9 +178,12 @@ var _rhythm: RhythmBar             ## blade
 var _strike_idx: int = -1
 var _vc_gauge: VoidcallerGauge     ## caster
 var _pcast: PlayerCastBar          ## caster
-var _spec_strip: SpecStrip         ## healer
+var _spec_strip: SpecStrip         ## healer (Mender)
 var _castbar: CastChannel          ## healer
-var _mcfg: MenderConfig            ## healer
+var _mcfg: MenderConfig            ## healer (Mender)
+var _bcfg: BloomweaverConfig       ## healer (Bloomweaver)
+var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
+var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver
 var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
@@ -234,22 +286,25 @@ func _show_class_select() -> void:
 	var hl := _title(head, "CHOOSE YOUR CLASS", 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	_title(head, "you play one · AI raiders fill the other three seats", 14, Palette.TEXT_DIM)
+	# [seat, class, name, icon, accent, blurb] — the healer SEAT has two classes
+	# (Mender / Bloomweaver), so five cards map onto the four seats.
 	var cards := [
-		["tank", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
-		["blade", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
-		["caster", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
-		["healer", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — four lives through the storm, click-cast the frames.  (Tidecaller / Brinkwarden)"],
+		["tank", "bulwark", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
+		["blade", "twinfang", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
+		["caster", "voidcaller", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
+		["healer", "mender", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — react to the storm, click-cast big heals + shields.  (Tidecaller / Brinkwarden)"],
+		["healer", "bloomweaver", "THE BLOOMWEAVER", "wildbloom", Palette.VERDANCE, "HEALER · ANTICIPATE — no mana; plant HoTs & wards AHEAD, bloom them on the spike.  (Wildgrove / Thornveil)"],
 	]
-	# AspectCard is a WIDE 680px card — STACK the four vertically (a row of four runs
-	# off-screen). Matches the aspect ceremony's vertical layout.
+	# AspectCard is a WIDE 680px card — STACK them vertically (a row runs off-screen).
+	# Matches the aspect ceremony's vertical layout; five fit the centered column.
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.add_theme_constant_override("separation", 12)
-	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -250, 350, 262)
+	col.add_theme_constant_override("separation", 10)
+	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -320, 350, 320)
 	_ui.add_child(col)
 	for c in cards:
-		var card := AspectCard.new(String(c[1]), String(c[4]), c[3], String(c[2]))
-		card.chosen.connect(_show_aspect_pick.bind(String(c[0])))
+		var card := AspectCard.new(String(c[2]), String(c[5]), c[4], String(c[3]))
+		card.chosen.connect(_pick_class.bind(String(c[0]), String(c[1])))
 		col.add_child(card)
 	var back := Button.new()
 	back.text = "◂ back"
@@ -306,6 +361,13 @@ func _start_map_pick(seat_id: String) -> void:
 	_map_pending = true
 	_show_aspect_pick(seat_id if SEAT_IDX.has(seat_id) else "tank")
 
+## Class-select card chosen. For the healer seat this also records WHICH healer class
+## (mender / bloomweaver) — the rest of the flow reads _healer_cls to pick aspects/band.
+func _pick_class(seat_id: String, cls: String) -> void:
+	if seat_id == "healer":
+		_healer_cls = cls
+	_show_aspect_pick(seat_id)
+
 func _show_aspect_pick(seat_id: String) -> void:
 	_screen = "aspect"
 	_clear()
@@ -313,7 +375,7 @@ func _show_aspect_pick(seat_id: String) -> void:
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
 	_place(head, 0.5, 0, 0.5, 0, -420, 150, 420, 260)
 	_ui.add_child(head)
-	var hl := _title(head, SEAT_NAMES[seat_id], 34, Palette.GOLD)
+	var hl := _title(head, _seat_display_name(seat_id), 34, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	_title(head, "C H O O S E   Y O U R   A S P E C T", 15, Palette.TEXT_DIM)
 
@@ -322,7 +384,7 @@ func _show_aspect_pick(seat_id: String) -> void:
 	box.add_theme_constant_override("separation", 22)
 	_place(box, 0.5, 0.5, 0.5, 0.5, -340, -130, 340, 130)
 	_ui.add_child(box)
-	for a in ASPECTS[seat_id]:
+	for a in _aspects_for(seat_id):
 		var card := AspectCard.new(String(a["name"]), String(a["desc"]), a["accent"], String(a["icon"]))
 		card.chosen.connect(_show_raid_select.bind(seat_id, String(a["id"])))
 		box.add_child(card)
@@ -469,7 +531,10 @@ func _show_lobby() -> void:
 			who += "  ·  " + String(claimant.get("aspect", "")).capitalize()
 			if bool(claimant.get("ready", false)):
 				who += "  ✓"
-		lab.text = "%-14s %s" % [SEAT_NAMES[key], who]
+		var seat_disp := String(SEAT_NAMES[key])
+		if key == "healer":       # the healer seat is Mender OR Bloomweaver
+			seat_disp = "THE BLOOMWEAVER" if String(claimant.get("cls", "")) == "bloomweaver" else "THE MENDER"
+		lab.text = "%-14s %s" % [seat_disp, who]
 		lab.custom_minimum_size = Vector2(430, 34)
 		lab.add_theme_font_size_override("font_size", 16)
 		lab.add_theme_color_override("font_color",
@@ -482,11 +547,19 @@ func _show_lobby() -> void:
 			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key}))
 			row.add_child(cb)
 		elif claimant == me:
+			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
+				var mycls := String(me.get("cls", "mender"))
+				var clsb := Button.new()
+				clsb.text = "◈ " + ("BLOOMWEAVER" if mycls == "bloomweaver" else "MENDER")
+				clsb.custom_minimum_size = Vector2(150, 34)
+				clsb.pressed.connect(func():
+					_net.send({"t": "class", "cls": "mender" if mycls == "bloomweaver" else "bloomweaver"}))
+				row.add_child(clsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 34)
 			ab.pressed.connect(func():
-				var pool: Array = ASPECTS[key]
+				var pool: Array = _lobby_aspects(key, String(me.get("cls", "")))
 				var cur := String(me.get("aspect", ""))
 				var nxt := String(pool[0]["id"]) if cur == String(pool[1]["id"]) else String(pool[1]["id"])
 				_net.send({"t": "aspect", "aspect": nxt}))
@@ -562,6 +635,8 @@ func _launch_online(spec: Dictionary, you: String) -> void:
 	for e in spec.get("seats", []):
 		if String(e["key"]) == you:
 			_aspect = String(e["aspect"])
+			if you == "healer":
+				_healer_cls = String(e.get("cls", "mender"))
 	_loadout = _make_loadout()
 	_screen = "combat"
 	_clear()
@@ -734,8 +809,18 @@ func _on_desync() -> void:
 # ============================================================ START / BUILD
 func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void:
 	_gate_live = false
+	# debug alias: a "bloom"/"bloomweaver" seat token = the healer seat as a Bloomweaver
+	if seat_id == "bloom" or seat_id == "bloomweaver":
+		seat_id = "healer"
+		_healer_cls = "bloomweaver"
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
-	var pool: Array = ASPECTS[_seat_key]
+	# a healer aspect id disambiguates the class (must resolve BEFORE the pool lookup)
+	if _seat_key == "healer":
+		if aspect == "wildgrove" or aspect == "thornveil":
+			_healer_cls = "bloomweaver"
+		elif aspect == "tidecaller" or aspect == "brinkwarden":
+			_healer_cls = "mender"
+	var pool: Array = _aspects_for(_seat_key)
 	_aspect = String(pool[0]["id"])
 	for a in pool:
 		if String(a["id"]) == aspect:
@@ -750,7 +835,7 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, _enc_id)
+	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -794,10 +879,12 @@ func _start_map_run() -> void:
 ## (class/aspect/draft_rng/tokens/pity). Its encounter chain is ignored — the raid
 ## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
 func _make_run() -> RunState:
+	_sync_healer_cls()
 	match _seat_key:
 		"blade": return RunState.start_twinfang(_aspect)
 		"caster": return RunState.start_voidcaller(_aspect)
-		"healer": return RunState.start_mender(_aspect)
+		"healer": return (RunState.start_bloomweaver(_aspect) if _healer_cls == "bloomweaver"
+			else RunState.start_mender(_aspect))
 		_: return RunState.start(_aspect)
 
 ## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
@@ -954,7 +1041,7 @@ func _launch_map_fight(fi: int) -> void:
 	_clear()
 	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, String(enc.id))
+	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), String(enc.id))
 	var s := RaidNet.build(spec, _seat_key)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
@@ -983,7 +1070,7 @@ func _launch_gate_fight() -> void:
 	_screen = "combat"
 	_clear()
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var s := GateContent.make_state(seed, _seat_key, _aspect)
+	var s := GateContent.make_state(seed, _seat_key, _aspect, _seat_cls_now())
 	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
 	_inject_boons(s.seats[0])   # Draft 2.0: boons on for the exam too
 	if _map != null:
@@ -1207,7 +1294,8 @@ func _after_drop(boss_id: String, done: Callable) -> void:
 		else:
 			verdict = "⚖  OATH BROKEN — SLA BREACHED (penalty clauses waived)"
 		_oath_result = {}
-	var d := Gear.roll(boss_id, String(SEAT_CLS[_seat_key]), _gear_unlocks, _drop_rng,
+	# _seat_cls_now(): a Bloomweaver player rolls its OWN class page (parked → no drop)
+	var d := Gear.roll(boss_id, _seat_cls_now(), _gear_unlocks, _drop_rng,
 		int(RaidContent.FLOORS[_floor]["ring"]), _drop_pity, bend)
 	if d.is_empty():
 		if verdict != "":
@@ -1414,12 +1502,16 @@ func _show_campaign_cleared() -> void:
 	box.add_child(again)
 
 func _make_loadout() -> Array:
+	_sync_healer_cls()
 	match _seat_key:
 		"blade":
 			return TwinfangConfig.new().loadout(_aspect)
 		"caster":
 			return VoidcallerConfig.new().loadout(_aspect)
 		"healer":
+			if _healer_cls == "bloomweaver":
+				_bcfg = BloomweaverConfig.new()
+				return _bcfg.order(_aspect)
 			_mcfg = MenderConfig.new()
 			return _mcfg.order(_aspect) + ["revive"]   # RAID adds the battle-rez rune (R)
 		_:
@@ -1688,6 +1780,9 @@ func _build_band_caster() -> void:
 	_hint_line("SPACE — KICK the Devouring Chant (clean = last slice)    ·    F — DODGE beats")
 
 func _build_band_healer() -> void:
+	if _healer_cls == "bloomweaver":
+		_build_band_bloomweaver()
+		return
 	_binds = MenderBinds.load_binds()
 	_hp_orb = _orb(Color("2f5e93"), "MANA", false)     # the healer is untargetable — mana IS the health bar
 	_spec_strip = SpecStrip.new()
@@ -1709,6 +1804,40 @@ func _build_band_healer() -> void:
 		rune.icon_id = id
 		if sp.has("spec"):
 			rune.accent = Palette.STEEL if _aspect == "tidecaller" else Palette.MOMENTUM
+		rune.custom_minimum_size = Vector2(62, 62)
+		rune.pressed.connect(_cast.bind(String(id)))
+		row.add_child(rune)
+		_runes.append(rune)
+		_rune_ids.append(id)
+	_hint_line(_healer_hint())
+
+## The SECOND healer's band: Sap orb + Blooming Medallion (Verdance) + benediction cast
+## channel + the Growth/ward rune rail. No mana, no Reservoir/Nerve strip — the whole
+## class is planted AHEAD and bloomed on the spike (click-cast the frames, same as Mender).
+func _build_band_bloomweaver() -> void:
+	_binds = BloomweaverBinds.load_binds()
+	_hp_orb = _orb(Palette.SAP.darkened(0.2), "SAP", false)   # Sap — Bloomweaver has no mana
+	_verd = VerdanceGauge.new()
+	_verd.aspect = _aspect
+	_verd.verdance_max = _bcfg.verdance_max
+	_verd.min_spend = _bcfg.verd_min_spend
+	_place(_verd, 0.5, 1, 0.5, 1, -300, -298, 300, -168)
+	_shake_root.add_child(_verd)
+	_castbar = CastChannel.new()
+	_castbar.accent = Palette.VERDANCE
+	_place(_castbar, 0.5, 1, 0.5, 1, -240, -358, 240, -298)
+	_shake_root.add_child(_castbar)
+	var row := _rune_row(-320.0, 320.0)
+	_runes = []
+	_rune_ids = []
+	for id in _loadout:
+		var sp: Dictionary = _bcfg.spells.get(id, {})
+		var rune := AbilityRune.new()
+		rune.label = String(sp.get("name", id)).split(" ")[0]
+		rune.key_label = String(sp.get("key", "")).to_upper()
+		rune.icon_id = id
+		if sp.has("spec"):
+			rune.accent = Palette.VERDANCE if _aspect == "wildgrove" else Palette.THORN
 		rune.custom_minimum_size = Vector2(62, 62)
 		rune.pressed.connect(_cast.bind(String(id)))
 		row.add_child(rune)
@@ -1742,13 +1871,19 @@ func _dev_win() -> void:
 ## The player's assembled verb, in the class's own words (build-your-verb boons).
 const VERB_LABEL := {"tank": "GUARD", "blade": "RHYTHM", "caster": "KICK", "healer": "TRIAGE"}
 
+## The verb label shown on the build panel (Bloomweaver's verb is the GARDEN).
+func _verb_label() -> String:
+	if _seat_key == "healer" and _healer_cls == "bloomweaver":
+		return "GARDEN"
+	return String(VERB_LABEL.get(_seat_key, "BUILD"))
+
 func _verb_summary_lines() -> Array:
 	if _run == null:
 		return []
 	match _seat_key:
 		"blade": return TwinfangBoons.verb_summary(_run.boons, _aspect)
 		"caster": return VoidcallerBoons.verb_summary(_run.boons, _aspect)
-		"healer": return MenderBoons.verb_summary(_run.boons, _aspect)
+		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
@@ -1775,7 +1910,7 @@ func _add_build_panel() -> void:
 	col.add_theme_constant_override("separation", 3)
 	frame.add_child(col)
 	var hdr := Label.new()
-	hdr.text = "◆  YOUR %s" % String(VERB_LABEL.get(_seat_key, "BUILD"))
+	hdr.text = "◆  YOUR %s" % _verb_label()
 	hdr.add_theme_font_size_override("font_size", 14)
 	hdr.add_theme_color_override("font_color", Palette.GOLD)
 	col.add_child(hdr)
@@ -1856,7 +1991,7 @@ func _owned_boon_labels() -> Array:
 	match _seat_key:
 		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
 		"caster": pools = [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]
-		"healer": pools = [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK]
+		"healer": pools = ([BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN] if _healer_cls == "bloomweaver" else [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK])
 		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
 	var out: Array = []
 	for pool in pools:
@@ -1867,11 +2002,14 @@ func _owned_boon_labels() -> Array:
 	return out
 
 func _healer_hint() -> String:
+	var bloom := _healer_cls == "bloomweaver"
+	var chords: Array = BloomweaverBinds.CHORDS if bloom else MenderBinds.CHORDS
+	var shorts: Dictionary = BloomweaverBinds.CHORD_SHORT if bloom else MenderBinds.CHORD_SHORT
 	var parts: Array = []
-	for chord in MenderBinds.CHORDS:
+	for chord in chords:
 		var id := String(_binds.get(chord, "none"))
 		if id != "none":
-			parts.append("%s=%s" % [MenderBinds.CHORD_SHORT.get(chord, chord), id.capitalize()])
+			parts.append("%s=%s" % [shorts.get(chord, chord), id.capitalize()])
 	return "Hover a frame + click:  " + "  ·  ".join(parts) + "    ·    SPACE/F — dodge beats"
 
 # ============================================================ INPUT
@@ -1922,7 +2060,7 @@ func _input(event: InputEvent) -> void:
 		var id := String(_binds.get(_mouse_chord(event), "none"))
 		if id == "signature":
 			id = _signature()
-		if id != "none" and _mcfg.spells.has(id):
+		if id != "none" and _hspells().has(id):
 			_focus_seat = _hover_seat
 			_cast_on(_hover_seat, id)
 
@@ -1941,7 +2079,16 @@ func _martial_key(code: int) -> void:
 		KEY_4: _use_ability(3)
 		KEY_5: _use_ability(4)
 
+## The healer's spellbook for the current class (Mender mana spells / Bloomweaver Sap).
+func _hspells() -> Dictionary:
+	if _healer_cls == "bloomweaver":
+		return _bcfg.spells if _bcfg != null else {}
+	return _mcfg.spells if _mcfg != null else {}
+
 func _healer_key(code: int) -> void:
+	if _healer_cls == "bloomweaver":
+		_bloomweaver_key(code)
+		return
 	match code:
 		KEY_SPACE, KEY_F:
 			_ctrl.human({"type": "dodge"})     # cancels your cast — the discipline test
@@ -1956,11 +2103,27 @@ func _healer_key(code: int) -> void:
 		KEY_7: _cast(_signature())
 		KEY_R: _cast("revive")             # battle-rez: hover a FALLEN raider's frame, press R
 
+## Bloomweaver keys: 1-4 Growth/Barkskin/Overgrowth/Thornlash · Q Sap Rot · E Lifesurge
+## · 7 the aspect signature. SPACE/F dodges (cancels an Overgrowth cast — the discipline).
+func _bloomweaver_key(code: int) -> void:
+	match code:
+		KEY_SPACE, KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1: _cast("growth")
+		KEY_2: _cast("bark")
+		KEY_3: _cast("overgrowth")
+		KEY_4: _cast("lash")
+		KEY_Q: _cast("saprot")
+		KEY_E: _cast("lifesurge")
+		KEY_7: _cast(_signature())
+
 func _use_ability(i: int) -> void:
 	if _screen == "combat" and i >= 0 and i < _rune_ids.size():
 		_ctrl.human({"type": "ability", "id": _rune_ids[i]})
 
 func _signature() -> String:
+	if _healer_cls == "bloomweaver":
+		return "wildbloom" if _aspect == "wildgrove" else "briarheart"
 	return "surge" if _aspect == "tidecaller" else "laststand"
 
 func _mouse_chord(e: InputEventMouseButton) -> String:
@@ -1975,9 +2138,9 @@ func _mouse_chord(e: InputEventMouseButton) -> String:
 	return mods + "other"
 
 func _cast(id: String) -> void:
-	if _screen != "combat" or _mcfg == null:
+	if _screen != "combat":
 		return
-	var sp: Dictionary = _mcfg.spells.get(id, {})
+	var sp: Dictionary = _hspells().get(id, {})
 	if sp.is_empty():
 		return
 	var target: Seat = null
@@ -1992,6 +2155,9 @@ func _cast(id: String) -> void:
 
 ## Mirror the engine's gates so a click flashes gold (accepted) or dim (blocked).
 func _cast_on(seat: Seat, id: String) -> void:
+	if _healer_cls == "bloomweaver":
+		_cast_on_bloom(seat, id)
+		return
 	var s := _ctrl.state
 	var p := _ctrl.player()
 	var sp: Dictionary = _mcfg.spells[id]
@@ -2004,6 +2170,28 @@ func _cast_on(seat: Seat, id: String) -> void:
 	if id == "dispel" and seat.debuff.is_empty(): ready = false
 	if id == "surge" and float(p.vars.get("reservoir", 0.0)) <= 1.0: ready = false
 	if id == "laststand" and float(p.vars.get("nerve", 0.0)) <= 1.0: ready = false
+	var fr := _frame_of(seat)
+	if fr != null:
+		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
+	if ready:
+		_ctrl.human({"type": "ability", "id": id, "target": seat if bool(sp.get("target", false)) else null})
+
+## Bloomweaver click-cast: mirror the Sap/Verdance/garden gates for the gold/dim flash.
+func _cast_on_bloom(seat: Seat, id: String) -> void:
+	var s := _ctrl.state
+	var p := _ctrl.player()
+	var sp: Dictionary = _bcfg.spells.get(id, {})
+	if sp.is_empty():
+		return
+	var offgcd := bool(sp.get("offgcd", false))
+	var ready := true
+	if not offgcd and s.tick < p.gcd_until_tick: ready = false
+	if s.tick < int(p.cooldowns.get(id, 0)): ready = false
+	if not offgcd and not p.casting.is_empty(): ready = false
+	if p.resource < float(sp.get("sap", 0.0)): ready = false
+	if id == "saprot" and seat.debuff.is_empty(): ready = false
+	if sp.has("spec") and float(p.vars.get("verdance", 0.0)) < _bcfg.verd_min_spend: ready = false
+	if id == "lifesurge" and int(CombatCore.observe(s, p).get("garden", 0)) <= 0: ready = false
 	var fr := _frame_of(seat)
 	if fr != null:
 		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
@@ -2150,12 +2338,13 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		fr.incoming_frac = 0.0
 		fr.incoming_dmg_frac = 0.0
 		fr.incoming_lethal = false
+		fr.ripe = false                      # Bloomweaver drives this per-frame below
 		if _seat_key == "healer":
 			fr.is_target = (seat == _hover_seat) or (_hover_seat == null and seat == _focus_seat)
 		else:
 			fr.is_target = seat == victim and seat.alive()
 	if _seat_key == "healer":
-		_healer_predictions(s)
+		_healer_predictions(s, obs)
 	# aggro banner (a gate exam has no threat game — you're alone with it)
 	if _gate_live:
 		_aggro_warn.visible = false
@@ -2171,8 +2360,9 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		_:
 			_aggro_warn.visible = false
 
-## Healer-only frame overlays: telegraphed incoming damage + your cast's heal ghost.
-func _healer_predictions(s: CombatState) -> void:
+## Healer-only frame overlays: telegraphed incoming damage + (Mender) the cast's heal
+## ghost / (Bloomweaver) Growth ripeness on every frame + the BLOOM cash-out on hover.
+func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 	if s.telegraph != null:
 		var ab := s.telegraph.ability
 		var amt := ab.amount * CombatCore.current_phase(s).mult
@@ -2212,6 +2402,20 @@ func _healer_predictions(s: CombatState) -> void:
 			if fr != null and amt > 0.0:
 				fr.incoming_dmg_frac = amt / v.hp_max
 				fr.incoming_lethal = amt >= v.hp + v.absorb
+	# Bloomweaver: Growth ripeness on every frame (gold gem) + the BLOOM value a
+	# double-tap would cash right now, ghosted on the hovered frame.
+	if _healer_cls == "bloomweaver":
+		for pe in obs.get("party", []):
+			var u: Seat = pe.get("seat")
+			if u == null:
+				continue
+			var frp := _frame_of(u)
+			if frp == null:
+				continue
+			frp.ripe = bool(pe.get("ripe", false))
+			if u == _hover_seat and u.hp_max > 0.0:
+				frp.incoming_frac = clampf(float(pe.get("growth_heal", 0.0)) / u.hp_max, 0.0, 1.0)
+		return
 	var p := _ctrl.player()
 	if p != null and not p.casting.is_empty():
 		var cid := String(p.casting.get("id", ""))
@@ -2380,6 +2584,9 @@ func _render_band_caster(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / icd, 0.0, 1.0)
 
 func _render_band_healer(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	if _healer_cls == "bloomweaver":
+		_render_band_bloomweaver(s, p, obs)
+		return
 	_hp_orb.set_values(p.resource, _mcfg.mana_max)
 	if _aspect == "tidecaller":
 		_spec_strip.value = float(obs.get("reservoir", 0.0))
@@ -2413,6 +2620,47 @@ func _render_band_healer(s: CombatState, p: Seat, obs: Dictionary) -> void:
 		var afford: bool = p.resource >= float(sp.get("mana", 0.0))
 		if id == "surge": afford = afford and float(obs.get("reservoir", 0.0)) > 1.0
 		if id == "laststand": afford = afford and float(obs.get("nerve", 0.0)) > 1.0
+		var cd_until := int(p.cooldowns.get(id, 0))
+		var gcd_block: bool = (not offgcd) and s.tick < p.gcd_until_tick
+		var cd_block: bool = s.tick < cd_until
+		_runes[i].affordable = afford
+		_runes[i].usable = not gcd_block and not cd_block
+		if cd_block:
+			_runes[i].cd_frac = clampf(float(cd_until - s.tick) / maxf(1.0, float(CombatCore.to_ticks(float(sp.get("cd", 1.0)), s.config.fixed_hz))), 0.0, 1.0)
+		elif gcd_block:
+			_runes[i].cd_frac = clampf(float(p.gcd_until_tick - s.tick) / gcd_ticks, 0.0, 1.0)
+		else:
+			_runes[i].cd_frac = 0.0
+
+func _render_band_bloomweaver(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	_hp_orb.set_values(p.resource, _bcfg.sap_max)
+	_verd.verdance = float(obs.get("verdance", 0.0))
+	_verd.flourish = bool(obs.get("flourish", false))
+	_verd.flourish_ripe = bool(obs.get("flourish_ripe", false))
+	_verd.garden = int(obs.get("garden", 0))
+	_verd.ripe_garden = int(obs.get("ripe_garden", 0))
+	_verd.thorns = int(float(p.vars.get("stat_thorns", 0.0)))
+	_verd.thorn_charge = int(obs.get("thorn_charge", 0))
+	_verd.thorn_charge_max = int(obs.get("thorn_charge_max", 5))
+	_verd.thorns_pct = float(obs.get("thorns_pct", 0.45))
+	var casting: Dictionary = obs.get("casting", {})
+	if casting.is_empty():
+		_castbar.active = false
+	else:
+		_castbar.active = true
+		_castbar.frac = clampf(float(s.tick - int(casting.get("start_tick", 0))) / maxf(float(casting.get("dur_ticks", 1)), 1.0), 0.0, 1.0)
+		var ct: Seat = casting.get("target")
+		_castbar.target = ct.unit_name if ct != null else ""
+		_castbar.spell_id = String(casting.get("id", ""))
+		_castbar.label = String(_bcfg.spells.get(_castbar.spell_id, {}).get("name", _castbar.spell_id))
+	var gcd_ticks := float(CombatCore.to_ticks(_bcfg.gcd, s.config.fixed_hz))
+	for i in _runes.size():
+		var id: String = _rune_ids[i]
+		var sp: Dictionary = _bcfg.spells[id]
+		var offgcd := bool(sp.get("offgcd", false))
+		var afford: bool = p.resource >= float(sp.get("sap", 0.0))
+		if sp.has("spec"):
+			afford = afford and float(obs.get("verdance", 0.0)) >= _bcfg.verd_min_spend
 		var cd_until := int(p.cooldowns.get(id, 0))
 		var gcd_block: bool = (not offgcd) and s.tick < p.gcd_until_tick
 		var cd_block: bool = s.tick < cd_until
@@ -2562,6 +2810,38 @@ func _handle_event(ev: Dictionary) -> void:
 		"pushback":
 			if mine:
 				_big_text("pushed!", Palette.CRIMSON, 20, 0.5)
+		# ---- Bloomweaver (second healer) extras ----
+		"bloom":
+			_flash_frame(ev.get("seat", null), Palette.VERDANCE)
+		"warded":
+			_flash_frame(ev.get("seat", null), Palette.GOLD)
+		"saprot":
+			_flash_frame(ev.get("seat", null), Palette.VERDANCE)
+		"wilt":
+			_flash_frame(ev.get("seat", null), Palette.TEXT_DIM)
+		"perfect_ward":
+			_flash_frame(ev.get("seat", null), Palette.GOLD_BRIGHT)
+			if _seat_key == "healer":
+				_big_text("PERFECT WARD!", Palette.GOLD_BRIGHT, 30, 0.6)
+		"lifesurge":
+			if _seat_key == "healer":
+				_big_text("LIFESURGE — THE GARDEN BLOOMS!", Palette.VERDANCE, 32)
+				_add_shake(5.0)
+		"wildbloom":
+			if _seat_key == "healer":
+				_big_text("WILDBLOOM", Palette.VERDANCE, 36)
+				_add_shake(6.0)
+		"briarheart":
+			if _seat_key == "healer":
+				_big_text("BRIARHEART", Palette.THORN, 36)
+				_add_shake(6.0)
+		"thorn_snap":
+			if bool(ev.get("player", false)):
+				var ch := int(ev.get("charge", 0))
+				_big_text("SNAP x%d" % ch, Palette.THORN, 26 + ch * 2, 0.6)
+		"thorn_break":
+			if bool(ev.get("player", false)):
+				_big_text("streak broken", Palette.TEXT_DIM, 18, 0.5)
 		"cast_cancelled":
 			if _seat_key == "healer":
 				_big_text("cast cancelled", Palette.TEXT_DIM, 16, 0.5)
