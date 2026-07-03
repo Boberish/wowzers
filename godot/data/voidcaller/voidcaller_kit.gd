@@ -63,7 +63,7 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 		_apply_silence(s, 1.5, 0.0)                   # Opus: clean kicks brand a Silence
 	if _b("voidfeast") and was_heal:
 		_deal(s, seat, roundf(denied_heal * 0.5), &"voidfeast")   # Opus: the denied heal strikes back
-	_heal(seat, cfg.int_heal)
+	_heal(s, seat, cfg.int_heal, &"kick_heal")
 
 	if source == "space":
 		if aspect == "disruptor":
@@ -76,7 +76,7 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 			var dur := (cfg.sil_dur_clean if clean else cfg.sil_dur) * (1.4 if _b("longsil") else 1.0)
 			_apply_silence(s, dur, cfg.expose_amt * (1.5 if _b("deepexpose") else 1.0))
 			if _b("silheal"):
-				_heal(seat, 30.0)
+				_heal(s, seat, 30.0, &"reprieve")
 		if _b("refund") and clean:                    # clean kick refunds half its cooldown
 			seat.defense_ready_tick = s.tick + _tt(s, defense_cd() * 0.5)
 	else:
@@ -120,8 +120,13 @@ func _gain_focus(seat: Seat, x: float) -> void:
 func _gain_backlash(seat: Seat, n: int) -> void:
 	seat.vars["backlash"] = clampi(int(seat.vars.get("backlash", 0)) + n, 0, cfg.backlash_max)
 
-func _heal(seat: Seat, x: float) -> void:
+## Kit self-heal: clamp to max AND meter the effective slice, credited to the seat
+## itself (the HEALING column's "self-sustain vs the healer" answer). HP behavior
+## unchanged; the meter is never checksummed.
+func _heal(s: CombatState, seat: Seat, x: float, src: StringName) -> void:
+	var eff := maxf(0.0, minf(seat.hp_max - seat.hp, x))
 	seat.hp = clampf(seat.hp + x, 0.0, seat.hp_max)
+	CombatCore.meter_heal(s, seat, src, eff, x - eff)
 
 ## M7 string beats: clean footwork feeds the cast engine — a PERFECT dodge grants
 ## Focus, a held feint a little too. (A LANDED beat already punishes through
@@ -300,7 +305,7 @@ func _kick_proc(s: CombatState, seat: Seat, source: String) -> void:
 	if _b("vcPayFocus"):
 		_gain_focus(seat, cfg.mod_focus)
 	if _b("vcPayMend"):
-		_heal(seat, cfg.mod_mend)
+		_heal(s, seat, cfg.mod_mend, &"umbral_mending")
 	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
 
 # --------------------------------------------------------------------------
