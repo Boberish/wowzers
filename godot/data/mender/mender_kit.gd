@@ -65,8 +65,8 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if not seat.casting.is_empty():
 		var c := seat.casting
 		var tgt: Seat = c.get("target")
-		if tgt != null and not tgt.alive():
-			seat.casting = {}
+		if tgt != null and not tgt.alive() and String(c["id"]) != "revive":
+			seat.casting = {}                            # revive WANTS a dead target — don't cancel it
 			CombatCore._emit(s, {"t": "cast_cancelled", "id": c["id"]})
 		elif s.tick - int(c["start_tick"]) >= int(c["dur_ticks"]):
 			var id: String = c["id"]
@@ -114,7 +114,10 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 		return false
 	if not offgcd and not seat.casting.is_empty():
 		return false                                     # can't restart while a cast is in progress
-	if bool(sp.get("target", false)):
+	if key == "revive":
+		if target == null or target.alive():             # revive requires a DEAD ally
+			return false
+	elif bool(sp.get("target", false)):
 		if target == null or not target.alive():
 			return false
 		if key == "dispel" and target.debuff.is_empty():
@@ -144,8 +147,8 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 	var sp: Dictionary = cfg.spells[id]
 	# pay mana (Brinkwarden discounts single-target heals by the target's missing HP)
 	var pay := float(sp.get("mana", 0.0))
-	if aspect == "brinkwarden" and bool(sp.get("target", false)) and id != "dispel" and target != null:
-		pay *= _brink_mana_mult(target)
+	if aspect == "brinkwarden" and bool(sp.get("target", false)) and id != "dispel" and id != "revive" and target != null:
+		pay *= _brink_mana_mult(target)                  # revive's dead target (hp 0) must NOT auto-discount
 	seat.resource = maxf(0.0, seat.resource - pay)
 
 	match id:
@@ -190,6 +193,15 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 			_surge(s, seat)
 		"laststand":
 			_laststand(s, seat)
+		"revive":
+			# bring the fallen raider back at revive_frac HP, cleansed. Setting hp > 0
+			# re-enters them (Seat.alive() == hp > 0); role-extinction never fired for a
+			# single dead dps, so the corpse was waiting for exactly this.
+			target.hp = roundf(target.hp_max * float(sp.get("revive_frac", 0.40)))
+			target.debuff = {}
+			target.heal_absorb = 0.0
+			seat.vars["revives"] = int(seat.vars.get("revives", 0)) + 1   # sim diagnostic
+			CombatCore._emit(s, {"t": "revive", "seat": target})
 
 	# instant spells put you on the GCD now; cast-time spells already did at cast start
 	if not bool(sp.get("offgcd", false)) and float(sp.get("cast", 0.0)) <= 0.0:
@@ -393,5 +405,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"foresight_line": cfg.foresight_line,
 		"blood_thresh": cfg.blood_thresh,
 		"casting": seat.casting,
+		# RAID battle-rez signals for the policy/HUD (raid-only, so solo behavior + its
+		# byte-identical checksums are untouched — observe is never checksummed anyway).
+		"raid": s.threat_enabled,
+		"revive_ready": s.tick >= int(seat.cooldowns.get("revive", 0)),
+		"revive_mana": float(cfg.spells.get("revive", {}).get("mana", 340.0)),
 		"party": party,
 	}

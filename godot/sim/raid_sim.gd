@@ -39,12 +39,12 @@ func _initialize() -> void:
 		# healer's decision ticks it had NOTHING worth casting. Low hlOver+low hlIdle+
 		# a mana floor that actually dips = the healer's resource is a real constraint;
 		# hlMana pinned near 100 with high hlIdle = the fight doesn't pressure the healer.
-		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  losses")
+		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  rez  losses")
 		for sk in SKILLS:
 			var wins := 0
 			var ttk_sum := 0.0
 			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
-				"miss": 0.0, "adds": 0.0, "hmana": 0.0, "hover": 0.0, "hidle": 0.0}
+				"miss": 0.0, "adds": 0.0, "hmana": 0.0, "hover": 0.0, "hidle": 0.0, "rez": 0.0}
 			var causes := {}
 			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(String(b), seed, sk, true)
@@ -59,6 +59,7 @@ func _initialize() -> void:
 				agg["hmana"] += float(r["hl_mana_pct"])
 				agg["hover"] += float(r["hl_over_pct"])
 				agg["hidle"] += float(r["hl_idle_pct"])
+				agg["rez"] += float(int(r["revives"]))
 				if r["won"]:
 					wins += 1; ttk_sum += float(r["ttk_sec"])
 				else:
@@ -67,10 +68,10 @@ func _initialize() -> void:
 			var wr := 100.0 * float(wins) / float(seeds)
 			var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
 			var n := float(seeds)
-			print("%-7s  %6.1f%%   %8.1fs    %5.2f  %5.2f  %6.1f  %5.2f    %6.2f  %4.2f  %5.0f%% %5.0f%% %5.0f%%  %s" % [
+			print("%-7s  %6.1f%%   %8.1fs    %5.2f  %5.2f  %6.1f  %5.2f    %6.2f  %4.2f  %5.0f%% %5.0f%% %5.0f%%  %3.2f  %s" % [
 				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
-				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, _fmt(causes)])
+				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, _fmt(causes)])
 		print("")
 	if seed0 == 1 and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
@@ -135,7 +136,9 @@ func _run(s: CombatState) -> Dictionary:
 				var a := seat.policy.act(CombatCore.observe(s, seat))
 				if seat == healer:
 					h_acts += 1
-					if a.is_empty():
+					# TRULY idle = nothing to do AND not mid-cast (a cast bar is work,
+					# not idleness — counting it as idle inflated the number).
+					if a.is_empty() and seat.casting.is_empty():
 						h_idle += 1
 				if not a.is_empty():
 					s.enqueue(s.tick + 1, seat, a)
@@ -171,6 +174,7 @@ func _run(s: CombatState) -> Dictionary:
 		"hl_over_pct": (100.0 * h_over / h_total) if h_total > 0.0 else 0.0,
 		"hl_idle_pct": 100.0 * float(h_idle) / float(maxi(1, h_acts)),
 		"hl_eff": h_eff,
+		"revives": int(healer.vars.get("revives", 0)) if healer != null else 0,
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
 	}

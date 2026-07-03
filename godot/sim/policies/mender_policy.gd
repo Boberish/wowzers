@@ -72,6 +72,15 @@ func _choose(obs: Dictionary) -> Dictionary:
 	if not lowest.is_empty() and float(lowest["frac"]) < 0.35 and mana >= 22.0:
 		return _cast("flash", lowest["seat"])
 
+	# 3.5) RAID battle-rez: a fallen raider is lost until rekindled. Only reach here
+	# when no LIVING ally is critical (step 3 returns first), the long channel is off
+	# cooldown, and we can afford it — so the 6s commitment is a safe save, not a panic.
+	if bool(obs.get("raid", false)) and bool(obs.get("revive_ready", false)) \
+			and mana >= float(obs.get("revive_mana", 340.0)):
+		for p in party:
+			if p["dead"]:
+				return _cast("revive", p["seat"])
+
 	# 4) Group healing when several are hurt
 	if hurt >= 3 and mana >= 30.0:
 		return _cast("well")            # engine no-ops if on cooldown; falls through next tick
