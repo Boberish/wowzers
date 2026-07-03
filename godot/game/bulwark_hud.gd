@@ -13,14 +13,14 @@ const ABILITY_TIPS := {
 	"cleave": {"stats": "Free  ·  42 dmg  ·  +6 rage", "tip": "Filler that builds rage. During a Riposte window it hits far harder — parry, then Cleave into the opening."},
 	"rampage": {"stats": "40 rage  ·  130 dmg", "tip": "Your rage dump and main damage. Spend rage you banked from eating hits."},
 	"fortify": {"stats": "30 rage  ·  heal 130  ·  -30% dmg 3.5s", "tip": "Turn rage into survival — heal and harden right before a dangerous stretch."},
-	"vindicate": {"stats": "Spend Counter  ·  40 dmg each  ·  -25% dmg 3s", "tip": "The Warden payoff: bank Counter by parrying, then unload it all at once."},
-	"avalanche": {"stats": "20 rage  ·  30 dmg/stack  ·  staggers", "tip": "The Juggernaut payoff: cash out all your Momentum, and it staggers the current swing."},
+	"vindicate": {"stats": "Cash the CHAIN  ·  40 dmg/link  ·  -25% dmg 3s", "tip": "The Warden payoff: cash your whole Guard Chain at once. The longer the streak, the bigger the hit."},
+	"avalanche": {"stats": "20 rage  ·  30 dmg/Momentum vented  ·  staggers", "tip": "The Juggernaut VENT: cash SOME Momentum for burst + a stagger, and keep riding the redline. Partial by design — no self-destruct."},
 	"bloodthirst": {"stats": "25 rage  ·  80 dmg  ·  heals 60%", "tip": "Attack to sustain — heals for most of the damage it deals."},
 	"shockwave": {"stats": "50 rage  ·  55 dmg  ·  interrupts", "tip": "Panic button — interrupts the boss's current swing outright."},
 }
 const SPEC_TIP := {
-	"warden": {"name": "Counter & Riposte", "tip": "Parry swings to bank Counter (max 5) and open a brief Riposte window that empowers your next Cleave/Rampage. Spend Counter with Vindicate. Read the swing, punish it."},
-	"juggernaut": {"name": "Momentum", "tip": "Dealing and eating hits builds Momentum: more damage AND more mitigation. But Dodging DUMPS it — so eat what you can, dodge only what you must, and cash out with Avalanche."},
+	"warden": {"name": "Guard Chain", "tip": "Every won read (parry / held feint / PERFECT beat) LINKS your Chain — each link boosts ALL your damage. But EAT a heavy you should've parried and the chain drops to HALF. Cash the whole streak with Vindicate. A combo you protect, not a counter you bank."},
+	"juggernaut": {"name": "Redline", "tip": "Dealing and eating hits builds Momentum (more damage AND mitigation). Below cap, Dodging DUMPS it — greed. At CAP you hit OVERDRIVE: dodging is free. Avalanche VENTS part of it for burst while you keep riding. Live at the redline."},
 }
 
 var _ctrl: CombatController
@@ -115,9 +115,9 @@ func _show_boss_select(aspect: String) -> void:
 	sel.subtitle = "TANK — MITIGATE · PICK A FIGHT"
 	sel.aspects = [
 		{"id": "warden", "label": "WARDEN", "accent": Palette.STEEL,
-			"blurb": "Warden · parry & Counter"},
+			"blurb": "Warden · a GUARD CHAIN you protect — read, link, cash"},
 		{"id": "juggernaut", "label": "JUGGERNAUT", "accent": Palette.MOMENTUM,
-			"blurb": "Juggernaut · Momentum snowball"},
+			"blurb": "Juggernaut · ride the REDLINE, vent to stay hot"},
 	]
 	sel.encounters = BulwarkContent.run_encounters()
 	sel.current = aspect
@@ -402,8 +402,11 @@ func _process(delta: float) -> void:
 	_rage_orb.set_values(p.resource, p.resource_max)
 
 	_spec.counter = int(obs.get("counter", 0))
+	_spec.counter_max = int(obs.get("counter_max", 6))
+	_spec.chain_bonus = float(obs.get("chain_bonus", 0.0))
 	_spec.momentum = int(obs.get("momentum", 0))
 	_spec.momentum_max = int(obs.get("momentum_max", 10))
+	_spec.overdrive = bool(obs.get("overdrive", false))
 	_spec.riposte = bool(obs.get("riposte_active", false))
 
 	var gcd_ticks := float(CombatCore.to_ticks(1.0, s.config.fixed_hz))
@@ -459,6 +462,9 @@ func _handle_event(ev: Dictionary) -> void:
 		"defend":
 			if bool(ev.get("player", false)):
 				_big_text("guard", Palette.STEEL, 22, 0.45)
+		"chain_break":
+			if bool(ev.get("player", false)):
+				_big_text("CHAIN BROKEN", Palette.CRIMSON, 30, 0.6)   # ate a swing you should've parried
 		"hurt":
 			if bool(ev.get("player", false)):
 				var a := float(ev.get("amt", 0))
