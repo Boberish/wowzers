@@ -461,6 +461,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `ledger-desc` · §GRAPHICS/GEAR — **Show item EFFECT on the Ledger page (Bill).** The
+  Ledger (`raid_hud._offer_oath_then`) shows each row's item name + rarity + unlock condition but NOT
+  the item's `desc` (what it does) — "make it clear what I'll get". Add the effect line (rarity-colored,
+  wrapped) per row so the player sees the reward's actual effect. Data already exists (`GearCatalog`
+  item `desc`). View-only, one function. ⚠ `raid_hud.gd` shared w/ `gear2` (owns this screen) +
+  `bloom-raid` — merge main before merge-back. Gate: ui_smoke_raid green + a Ledger screenshot. *(raid-finish session)*
+
 - ☐ 2026-07-03 · `raid-tuning` · §BOSSES + §CLASSES — **RAID rebalance: healing has real work (Bill, direct).**
   Playtest: raid healer idle 93–98%, mana never a factor (see `main` commit `ed6ca6e` — raid_sim now logs
   hlMana/hlOver/hlIdle proving it). Root: tank self-heals (Fortify 130) + tiny raid-wide chip. Doing, all
