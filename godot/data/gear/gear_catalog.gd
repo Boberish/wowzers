@@ -62,8 +62,8 @@ const ITEMS := {
 	# ---- GEAR-2: oath-row items (unlocked by SWORN OATHS, see GEAR-CATALOG.md) ----
 	"grace_period": {
 		"name": "Grace Period", "rarity": "sonnet", "cls": "", "kind": "sim",
-		"desc": "Once per fight, your class streak survives its break: the Chain holds, Flow keeps playing, a Litany pip stays lit, a below-cap dodge keeps Momentum, a whiffed kick comes back.",
-		"flavor": "Your first breach this fight is forgiven.",
+		"desc": "Once per fight, your class streak survives its break — Chain, Flow, Litany pip, Momentum, or a whiffed kick.",
+		"flavor": "Your first breach is forgiven.",
 	},
 	"sticky_note": {
 		"name": "Sticky Note", "rarity": "haiku", "cls": "bulwark", "kind": "sim",
