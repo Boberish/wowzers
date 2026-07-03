@@ -19,6 +19,7 @@ var subtitle: String = ""            ## optional ring/floor label (MAP-3c); "" =
 var ring: int = -1                   ## MAP-2: current ring (drives realm title/sub); -1 = solo
 var open_tickets: Array = []         ## MAP-2: titles of quests still open (header list)
 var toast: String = ""               ## MAP-2: one-shot ticket pickup/close banner
+var gear_line: String = ""           ## GEAR-1: equipped curios + ⏣ (raid map; "" = hidden)
 
 var _hover: int = -1
 var _selectable: Array = []
@@ -84,6 +85,9 @@ func _build_header() -> void:
 	if not open_tickets.is_empty():
 		_label("OPEN TICKETS:   " + "     ·     ".join(open_tickets), 12, Palette.FLOW,
 			Vector2(0, 234), UiKit.display(600, 2))
+	# GEAR-1: the raid's equipped curios (Realm-1: peripherals) + banked Tokens
+	if gear_line != "":
+		_label(gear_line, 13, Palette.GOLD, Vector2(0, 258), UiKit.display(600, 2))
 	_label("choose a connected node  ·  %s routes need credentials  ·  Esc = abandon the run"
 		% MapContent.LOCK_LABEL, 12, Palette.TEXT_DIM, Vector2(0, 880), UiKit.body())
 	# legend

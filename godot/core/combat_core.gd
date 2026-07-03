@@ -407,8 +407,14 @@ static func stagger_boss(s: CombatState) -> void:
 	if s.telegraph != null:
 		# View juice: denying a heal cast is the payoff moment; flag it so the HUD
 		# can pop "DENIED!" vs a plain "STAGGERED!".
-		_emit(s, {"t": "staggered",
-			"was_heal": s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS})
+		var was_heal := s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS
+		_emit(s, {"t": "staggered", "was_heal": was_heal})
+		if was_heal:
+			# GEAR-1: broadcast the denial to every living kitted seat (no-op base
+			# hook — gearless runs execute nothing and stay byte-identical).
+			for seat in s.seats:
+				if seat.kit != null and seat.alive():
+					seat.kit.on_boss_heal_denied(s, seat)
 		if _advance_chain(s):
 			return
 	s.telegraph = null

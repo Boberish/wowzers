@@ -150,6 +150,10 @@ func _venom_total(seat: Seat) -> int:
 # --------------------------------------------------------------------------
 
 func upkeep(s: CombatState, seat: Seat) -> void:
+	# GEAR-1: LE CHAT's Bell — +30 starting energy, exactly once (gear-gated no-op).
+	var bell := GearFx.bell_grant(seat)
+	if bell > 0.0:
+		_gain_energy(seat, bell)
 	_gain_energy(seat, cfg.energy_regen * s.dt)
 	# Twin Step: the spent spare dodge charge returns after mod_step_recharge seconds.
 	if _b("tfPropTwinStep") and int(seat.vars.get("dodge_spare", 1)) < 1 \
@@ -222,10 +226,17 @@ func modify_incoming(_s: CombatState, seat: Seat, dmg: float, _source: StringNam
 ## Eating a swing wipes your Flow — the core tension. Swings carry a Size; the
 ## unavoidable Hex pulse and enrage do not, so only swings reset Flow (faithful).
 func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringName, size: int) -> void:
+	GearFx.damage_taken(s, seat)   # GEAR-1: death procs (Swan Song) — gear-gated no-op
 	if size != AbilityRes.Size.NONE and _flow(seat) > 0:
 		seat.vars["flow"] = 0
 		seat.vars["flow_decay_acc"] = 0
 		CombatCore.emit_event(s, {"t": "flow_lost", "player": seat.is_player})
+
+# --- GEAR-1: a boss self-heal was DENIED somewhere — Riftmaw Tooth pays energy ---
+func on_boss_heal_denied(s: CombatState, seat: Seat) -> void:
+	var g := GearFx.tooth_grant(s, seat)
+	if g > 0.0:
+		_gain_energy(seat, g)
 
 ## M7 string beats join the rhythm: a PERFECT dodge plays like a Perfect Strike
 ## (+1 Flow); a GOOD one pays a little energy; holding a feint keeps the song
@@ -378,6 +389,13 @@ func _kick(s: CombatState, seat: Seat) -> bool:
 		CombatCore.stagger_boss(s)                      # cancels the cast; emits "staggered"/DENIED
 	else:
 		CombatCore.emit_event(s, {"t": "kick_whiff", "player": seat.is_player})
+	# GEAR-1: Powder Vial — the boot carries the toxin (Venom: lit lane; Tempo: Flow).
+	if GearFx.has(seat, &"powder_vial"):
+		if aspect == "venomancer":
+			_apply_venom(seat, WHEEL_KEYS[_wheel(seat)], 2)
+		else:
+			_gain_flow(seat)
+		GearFx.pop(s, seat, &"powder_vial")
 	return true
 
 func _envenom(s: CombatState, seat: Seat) -> bool:

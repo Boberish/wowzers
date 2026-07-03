@@ -21,6 +21,12 @@ func on_defense_press(_s: CombatState, _seat: Seat) -> void:
 func on_negate(_s: CombatState, _seat: Seat, _ability: AbilityRes) -> void:
 	pass
 
+## GEAR-1: a boss self-heal cast was DENIED (kick/stagger cancelled a HEAL_BOSS
+## telegraph). Called for EVERY living kitted seat, whoever landed the denial —
+## gear procs (Riftmaw Tooth) hang here. Default: no reaction (byte-identical).
+func on_boss_heal_denied(_s: CombatState, _seat: Seat) -> void:
+	pass
+
 ## M7: the universal dodge was pressed (accepted past its recovery), before any
 ## beat grading. The Mender cancels its in-flight cast bar here (dodging > casting).
 func on_dodge_press(_s: CombatState, _seat: Seat) -> void:
