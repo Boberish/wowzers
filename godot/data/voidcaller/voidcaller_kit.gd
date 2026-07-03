@@ -62,13 +62,13 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 	if _b("nullbrand") and clean:
 		_apply_silence(s, 1.5, 0.0)                   # Opus: clean kicks brand a Silence
 	if _b("voidfeast") and was_heal:
-		_deal(s, seat, roundf(denied_heal * 0.5))     # Opus: the denied heal strikes back
+		_deal(s, seat, roundf(denied_heal * 0.5), &"voidfeast")   # Opus: the denied heal strikes back
 	_heal(seat, cfg.int_heal)
 
 	if source == "space":
 		if aspect == "disruptor":
 			var dmg := (cfg.bl_dmg_clean if clean else cfg.bl_dmg) * (1.4 if _b("punish") else 1.0)
-			_deal(s, seat, dmg)
+			_deal(s, seat, dmg, &"kick")
 			_gain_backlash(seat, 2 if clean else 1)
 			if _b("backdot"):
 				seat.vars["boss_dot"] = {"until_tick": s.tick + _tt(s, 4.0), "dps": 14.0}
@@ -82,7 +82,7 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 	else:
 		var a: Dictionary = cfg.abilities[source]
 		if a.has("reflect"):
-			_deal(s, seat, float(a["reflect"]))
+			_deal(s, seat, float(a["reflect"]), StringName(source))
 		if bool(a.get("silences", false)):
 			_apply_silence(s, cfg.sil_spell_dur, cfg.expose_amt if aspect == "silencer" else 0.0)
 		if aspect == "disruptor":
@@ -108,11 +108,11 @@ func _apply_silence(s: CombatState, dur_sec: float, expose: float) -> void:
 
 ## Player damage to the boss, scaled by Exposed (Silencer). Routes through the engine's
 ## damage_boss (outgoing_mult stays 1.0 for the caster).
-func _deal(s: CombatState, seat: Seat, raw: float) -> float:
+func _deal(s: CombatState, seat: Seat, raw: float, src: StringName = &"attack") -> float:
 	var m := 1.0
 	if s.boss.exposed_until_tick >= 0 and s.tick < s.boss.exposed_until_tick:
 		m *= (1.0 + s.boss.expose_amt)
-	return CombatCore.damage_boss(s, seat, raw * m)
+	return CombatCore.damage_boss(s, seat, raw * m, src)
 
 func _gain_focus(seat: Seat, x: float) -> void:
 	seat.resource = clampf(seat.resource + x, 0.0, cfg.focus_max)
@@ -157,6 +157,7 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		var d: Dictionary = seat.vars["boss_dot"]
 		if s.tick < int(d["until_tick"]):
 			s.boss.hp = maxf(0.0, s.boss.hp - float(d["dps"]) * s.dt)
+			CombatCore.meter_dmg(s, seat, &"void_dot", float(d["dps"]) * s.dt, false, false)
 		else:
 			seat.vars.erase("boss_dot")
 
@@ -229,7 +230,7 @@ func _resolve_cast(s: CombatState, seat: Seat, id: String, instant: bool) -> voi
 	if id == "fracture" and _b("fracplus"):
 		dmg += 30.0
 	if dmg > 0.0:
-		_deal(s, seat, dmg)
+		_deal(s, seat, dmg, StringName(id))
 	if a.has("focus"):
 		_gain_focus(seat, float(a["focus"]))
 	if a.has("dr"):
@@ -245,7 +246,7 @@ func _overload(s: CombatState, seat: Seat) -> bool:
 	var bl := int(seat.vars.get("backlash", 0))
 	if bl < 1:
 		return false
-	_deal(s, seat, cfg.overload_per_bl * float(bl))
+	_deal(s, seat, cfg.overload_per_bl * float(bl), &"overload")
 	seat.vars["backlash"] = 0
 	seat.vars["next_instant"] = true                  # next Fracture is instant
 	if _b("overfocus"):
@@ -295,7 +296,7 @@ func _kick_proc(s: CombatState, seat: Seat, source: String) -> void:
 		return
 	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic
 	if _b("vcPayVoid"):
-		_deal(s, seat, cfg.mod_void)
+		_deal(s, seat, cfg.mod_void, &"null_lash")
 	if _b("vcPayFocus"):
 		_gain_focus(seat, cfg.mod_focus)
 	if _b("vcPayMend"):

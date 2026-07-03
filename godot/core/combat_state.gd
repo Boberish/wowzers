@@ -48,6 +48,13 @@ var events: Array = []
 ## end. Not part of the checksum, but fully reproducible per seed.
 var diag: Dictionary = {}
 
+## Recount-style combat accounting (the DPS/HPS meter): seats[] index ->
+## {dmg:{src:{total,n,max,crit_n}}, heal:{src:{total,n,max,over}}, taken:{...},
+##  dmg_total, heal_total, over_total, taken_total}. Diag-family data: engine-
+## written at the damage/heal funnels, deterministic per seed, NEVER part of the
+## checksum. The HUD meter window and end-screen recap read it; sims may print it.
+var meter: Dictionary = {}
+
 func time() -> float:
 	return float(tick) * dt
 

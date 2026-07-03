@@ -104,6 +104,7 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
+		CombatCore.meter_dmg(s, seat, StringName(kind), d, crit)
 		# `seat` lets the RAID HUD tell your hits from an ally's (damage_boss already
 		# carries seat); solo ignores it. View-only — never checksummed.
 		CombatCore.emit_event(s, {"t": "boss_hit", "amt": int(d), "crit": crit, "kind": kind, "seat": seat})
@@ -114,6 +115,7 @@ func _poison_boss(s: CombatState, seat: Seat, dmg: float) -> void:
 	if d <= 0.0:
 		return
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
+	CombatCore.meter_dmg(s, seat, &"poison", d)
 	CombatCore.emit_event(s, {"t": "poison", "amt": int(d), "seat": seat})
 
 # --------------------------------------------------------------------------
