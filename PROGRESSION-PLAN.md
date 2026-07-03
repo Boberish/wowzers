@@ -1,7 +1,7 @@
 # PROGRESSION-PLAN — the persistent meta-game (decisions of record)
 
 **Purpose:** locked design from the progression design session with Bill (2026-07-02/03).
-This doc owns everything PERSISTENT (unlocks, loot tables, feats, standing). The in-run draft
+This doc owns everything PERSISTENT (unlocks, loot tables, oaths, standing). The in-run draft
 economy stays owned by `ASCENSION-STEAL-PLAN.md` / MASTER-PLAN §SYSTEMS (draft2 branch).
 **Supersedes** the orphaned economy vocabulary in `RAID-PLAN.md` (essences / reagents /
 Embers / Sigils / Riftcores / the Foundry) — that material economy is **CUT**, see Cut List.
@@ -19,7 +19,7 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
 | **WoW** | the loot *moment* (named drops, rarity colors, trinket procs, set pieces) + attunement-as-access | boss loot tables; Proofs gate Seals/realms; lobby crests |
 | **Slay the Spire** | front-loaded, meaty, FINITE unlocks — then the game is the game | the first-kill shower (falls out of roster size, no extra system) |
 | **Across the Obelisk** | gear bought at in-run shops; gear that grants *actives* (a new button) | MARKET nodes stock gear for Tokens; actives-with-charges |
-| **Expedition 33** | quest-gated gear rows (its graded parry/dodge combat is already our core) | armed feats *(E33's use-based Picto mastery was considered and CUT — passive, no moment)* |
+| **Expedition 33** | deed-gated gear rows (its graded parry/dodge combat is already our core) | sworn oaths *(E33's use-based Picto mastery was considered and CUT — passive, no moment)* |
 | **Hades** | only what's already built (aspects, the boon draft) | **no** cauldron, **no** materials, **no** incantation hub |
 
 ## Laws (non-negotiable)
@@ -47,7 +47,7 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
 1. **WORLD (the campaign spine).** Realm 1 = the Ring descent (3→0); each Seal kill is a
    Privilege Elevation; Proofs (demonstrated execution, seed-verifiable) gate Rings and
    realms — access, never stats. Realms are the expansion cadence and are horizontal by
-   construction: Realm 2 is new bosses/tables/feats, never a higher item level.
+   construction: Realm 2 is new bosses/tables/oaths, never a higher item level.
 2. **POOLS (the gear game, below).** Defeat / Perform / Extract grow per-class boon, gear,
    and event pools. Hour-40 runs are *richer* than hour-5 runs, not easier.
 3. **RANK (the endgame).** Trial Ladder versions per boss + Depth on raids. Your best
@@ -66,18 +66,49 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
   rows greyed), each row = item + **printed rarity** (Haiku/Sonnet/Opus — rarity is a fixed
   property of the item, never itself unlocked) + the deed that opens it.
 - Row kinds: **SIGNATURE** (first kill — guaranteed unlock, and that kill's drop ceremony);
-  **FEAT** rows (armed quests, below); **VERSION** rows (Trial-Ladder kills; version+feat
+  **OATH** rows (sworn deeds, below); **VERSION** rows (Trial-Ladder kills; version+oath
   combos are the chase rows).
-- **Feats are ARMED (Bill's call, locked):** at the boss node / fight start you select one
-  feat to arm → in-fight progress tracker + callout → completes **only when armed**. No
-  accidental unlocks. (Serendipity variant = one gate on the same detector; kept as a
-  playtest knob only.) Feat detectors read `seat.diag`/events — deterministic, per-seat.
-  Deep rows may be arm-only *with a cost* later ("win with Guard sealed") = challenge-run
-  content without a separate mode.
+- **NAMING (2026-07-03, replaces "feats"/"armed quests" — "quest" belongs to the map's
+  TICKETS):** the boss-page deed is an **OATH**. Arming = **SWEARING** it at the boss node;
+  resolution = **OATH KEPT / OATH BROKEN** (one-word verdict pops). Arm-with-cost deep rows
+  = **BLOOD OATHS** (the oath itself imposes the handicap: "win with Guard sealed").
+  Realm-1 display skin (display-fields only, ids stay `oath_*`): oaths render as **SLAs**
+  ("SLA SIGNED" / "SLA MET" / "SLA BREACHED — penalty clauses waived"), Blood Oaths as a
+  **PIP — Performance Improvement Plan**. Rejected: Contracts (that register IS the Realm-1
+  skin, keep it there), Bounties (names the boss, not the deed), Gambits/Wagers (imply a
+  stake only Blood Oaths have).
+- **Oaths are SWORN (Bill's call, locked — was "armed"):** at the boss node / fight start you
+  select one oath to swear → in-fight progress tracker + callout → completes **only when
+  sworn**. No accidental unlocks. (Serendipity variant = one gate on the same detector; kept
+  as a playtest knob only.) Oath detectors read `seat.diag`/events — deterministic, per-seat.
+  One sworn oath per seat per fight (open Q resolved 2026-07-03 — the tracker/callout UI and
+  the payout math assume one).
+- **Oath severity & difficulty scaling (2026-07-03, Bill's ask — "scale with difficulty for
+  reward"):** every oath row carries a printed **severity I / II / III** matched to its row
+  rarity (Haiku / Sonnet / Opus). Three scaling mechanisms, all seeded/deterministic:
+  1. **Severity = deed difficulty.** Sev-I deeds are teaching-tier ("no missed kicks this
+     fight"); Sev-II demand a clean read discipline ("zero BAITED, ≥6 PERFECTs"); Sev-III are
+     version-gated (v2+/v3+) or Blood Oaths — the deed often only *exists* where the added
+     mechanic does ("keep it through v2's added feint verse"). Reward scales because the deed
+     is only performable where the difficulty is.
+  2. **Re-swearing is the endgame loop.** An oath whose row is already unlocked stays
+     swearable forever for an **in-run purse**: OATH KEPT pays Tokens + bends that kill's
+     drop roll (see table). Permanent unlock once; replayable fortune forever.
+  3. **The purse scales with STAKES** = ring depth + boss version:
+     `stakes = (3 − ring) + (version − 1)` (Ring 3 v1 → 0 · Ring 0 v1 → 3 · Ring 0 v3 → 5).
+     | Severity | Tokens on KEPT | Drop-roll bend on that kill |
+     |---|---|---|
+     | I | 1 + stakes/2 (floor) | +2 pity ticks |
+     | II | 2 + stakes | rarity floor = Sonnet |
+     | III / Blood | 3 + stakes | rarity floor = Sonnet; **guaranteed Opus at stakes ≥ 2** |
+     (Starting values — knobs on `TuningConfig`, sims tune.) Purses are strictly additive
+     and only exist at unlock-live surfaces (PROVING GROUNDS stays inert), so the Monotonic
+     Pool Law holds and sandbagging is never correct. OATH BROKEN costs nothing (Blood Oaths
+     excepted — their cost was paid in the handicap, still no post-fight penalty).
 - **Where tables live (raid-only amendment, 2026-07-03):** a boss's table attaches to it
   **wherever it appears** — Seal fight, personal GATE node, owned add, split phase; a gate
-  clear is a kill, and the gate is the natural feat-arming stage (you're alone; it's your
-  exam). **PROVING GROUNDS practice fights are unlock-inert** (no drops/feats/Proofs) —
+  clear is a kill, and the gate is the natural oath-swearing stage (you're alone; it's your
+  exam). **PROVING GROUNDS practice fights are unlock-inert** (no drops/oaths/Proofs) —
   otherwise practice becomes the farm and the campaign hollows.
 
 ### Drops — the in-run layer
@@ -107,7 +138,7 @@ map/economy utility (shop prices, 401 doors, cache reveals). Never raw verb %.
 
 ## Standing — make growth visible (and *seen*)
 
-- **Character sheet per class:** Proof crest, deepest Ring, best boss versions, feats done,
+- **Character sheet per class:** Proof crest, deepest Ring, best boss versions, oaths kept,
   table completion. One gorgeous screen, Gilded Reliquary language.
 - **Raid lobby crests/titles:** claiming a seat shows your standing (Mythos-slayer mark,
   Depth badge, no-bait Duelist title). Cosmetic, social, zero balance surface — the co-op
@@ -119,7 +150,7 @@ map/economy utility (shop prices, 401 doors, cache reveals). Never raw verb %.
 
 First kills across the campaign roster = the StS front-loaded wave — 4 Seals + skirmish
 minibosses + the 15 exam bosses arriving as GATE nodes / owned adds (MASTER-PLAN §GAME SHAPE)
-— every early run ends in guaranteed unlocks, **no separate milestone system needed**. Feats
+— every early run ends in guaranteed unlocks, **no separate milestone system needed**. Oaths
 and versions carry the long tail. Nothing is timed, ever; the core loop must stand alone
 (Bill, locked).
 
@@ -127,7 +158,7 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
 
 - **Material economy + crafting** (essences/reagents/Embers/Riftcores, Foundry/cauldron) —
   CUT. Raid exclusivity is preserved structurally instead: raid bosses own tables that drop
-  nowhere else, and Seal feats/versions gate their deep rows.
+  nowhere else, and Seal oaths/versions gate their deep rows.
 - **Use-based mastery / Inscription** (E33 Pictos) — CUT: passive bookkeeping, no moment.
   Unlocks must be *events* (defeat / perform / extract), not counters.
 - **Pre-run equipped loadouts** and the run-start random sigil offer — CUT.
@@ -143,7 +174,7 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
   tension: faster but leaner draft build-up).
 - Slots exactly 2? Set-pair depth (pairs only, or 3-piece realm sets)? Gear noun (avoid
   "relic" — `relic_card.gd` is the boon card).
-- Arm limit: one feat per fight vs per run. Shard pity for extraction. Serendipity knob.
+- Shard pity for extraction. Serendipity knob. *(Arm limit resolved 2026-07-03: one sworn oath per seat per fight.)*
 - Altar/sacrifice rare map event (trade equipped item now → awakened row forever) — spice.
 - Hub screen for Ledger/character sheet; where standing lives before accounts exist
   (R2 "accounts" line is still future).
@@ -157,10 +188,10 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
    the Ring-3 roster (Vorathek, MISTRAL-7B, the skirmish minibosses; ~8–12 items), kill-unlocks
    only, drop ceremony in raid-map mode (reuse `relic_card.gd` visuals), 2 slots per seat,
    scrap→Tokens, save-file unlock store.
-2. **GEAR-2:** armed feats (detectors off `seat.diag`) + the Ledger page UI.
+2. **GEAR-2:** sworn oaths (detectors off `seat.diag`) + the Ledger page UI + oath purses/severity scaling.
 3. **GEAR-3:** MARKET gear stock + extraction schematics (map layer).
 4. **GEAR-4:** raid personal loot + Seal tables; crests/standing later (needs accounts).
 
 **Acceptance bar (every phase):** all class sims **byte-identical with gear absent**; drop &
-feat determinism PASS; UI smokes green; Monotonic Pool Law spot-check (expected value
+oath determinism PASS; UI smokes green; Monotonic Pool Law spot-check (expected value
 non-decreasing in pool size).
