@@ -461,15 +461,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `pause-codex` · §GRAPHICS/UX — **In-game PAUSE menu + DEV CLASS CODEX (Bill: "know what's up at a glance for a lot of chars/builds").**
-  A pause button (P / Esc-in-combat) on the ONE game HUD (`raid_hud.gd`) opens an overlay that FREEZES the fight
-  (offline only — `CombatController.paused`; online lockstep never freezes) and shows a **Class Codex**: the current
-  seat's class+aspect fantasy/core-loop, each BAR (what fills/spends/goal), each MOVE (what it encourages), the GOAL
-  ROTATION, and THE BRANCHES (both aspects + boon/gear sub-builds, current build highlighted). New files only:
-  `data/class_codex.gd` (the 4 raid classes), `game/ui/pause_overlay.gd`; +1 field on `CombatController`; combat-only
-  edits to `raid_hud.gd` (`_input`/`_build_combat`). Zero engine/combat-math. ⚠ `raid_hud.gd` shared w/ `menu-refresh`
-  (they touch the MENU screens, I touch COMBAT screen — merge main before merge-back). Gate: ui_smoke_raid green +
-  class sims byte-identical (view-only) + WSLg glance. *(pause-codex session)*
+- ☑ 2026-07-03 · `pause-codex` · §GRAPHICS/UX — **In-game PAUSE menu + DEV CLASS CODEX — MERGED to main
+  (`33d44ba`).** A PAUSE button (top-right of combat) + **P / Esc-in-combat** open an overlay on the ONE
+  game HUD: OFFLINE it FREEZES the fight (`CombatController.paused`, guarded — ONLINE lockstep never
+  freezes, the guide just opens over the running fight); it renders a **Class Codex** for the seat you're
+  driving — core-loop, each BAR (fills/spends/goal), each MOVE (+ what it encourages), the GOAL ROTATION
+  for your Aspect, and **THE BRANCHES** (both Aspects + boon/gear sub-builds, current one highlighted +
+  drafted-boon count in the header). New files: `data/class_codex.gd` (authored for the 4 raid classes
+  from live kits/configs/boons + HUD tips — a TEACHING doc; code wins on drift), `game/ui/pause_overlay.gd`,
+  `sim/screenshot_pause.gd` (WSLg probe). Engine: **+1 guarded field on `CombatController`** (the DRIVER,
+  not `CombatCore` — sims never touch it, so class checksums are unaffected by construction). raid_hud:
+  combat-screen only (`_input` Esc/P→pause · `_build_combat` button · `_clear` drops the freeze · SEAT_CLASS
+  + `_owned_boon_labels`). **Verified:** ui_smoke_raid green (opens+freezes+resumes the codex for all 8
+  seat×aspect combos, asserted) · menu_probe green · bulwark determinism PASS · WSLg shots eyeballed
+  (tank/blade/caster/healer render clean + scannable). Merged main (menu-refresh) before merge-back —
+  clean auto-merge (menu vs combat regions). ⚠ **`build-panel`** (open claim) plans an always-visible
+  readout at the SAME top-right combat corner as this PAUSE button — coexist/relocate when it lands
+  (complementary: glance panel vs full pause guide). NEXT: extend the codex to Bloomweaver if it ever
+  becomes a seat; per-branch "you own this" highlighting off `_run.boons`. *(pause-codex session)*
 - ☐ 2026-07-03 · `build-panel` · §GRAPHICS — **Verb/boon summary on the game HUD (Bill).** The combat
   HUD shows no build readout; the solo HUDs had a "YOUR GUARD" verb tooltip. Add an always-visible
   compact panel (top-right of the combat screen) listing the assembled verb rules (per-class
