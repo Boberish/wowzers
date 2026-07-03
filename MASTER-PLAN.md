@@ -447,6 +447,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `gear2` · §SYSTEMS GEAR-2 — **Sworn OATHS + Ledger offer + purses (Bill: "continue" after GEAR-1).**
+  Per PROGRESSION-PLAN + GEAR-CATALOG: swear ONE oath at the boss node (Ledger-lite offer screen)
+  → in-fight tracker banner + live BROKEN pop → resolve at the kill → **permanent row unlock joins
+  the same kill's drop pool** + stakes-scaled purse (Tokens + pity ticks / rarity floors,
+  `stakes = 3 − ring` until versions exist). Detector engine over `seat.diag`/`seat.vars` ONLY
+  (new unconditional diag bumps: curse_dropped/answered, chain_break, kick_whiff, bloodied_dip —
+  never checksummed). `Gear.roll` grows the real rarity-first draw (ring weights 70/25/5 →
+  40/38/22 + run pity). SEVEN new items implemented w/ oath rows: GRACE PERIOD · STICKY NOTE ·
+  SCRATCHPAD · DEBT COLLECTOR · ENCORE BELL · ECHO CHAMBER · OVERFLOW SLUICE (one per raid class
+  page + universals; combat-actives like MUTE BUTTON stay deferred — no G/H socket yet).
+  Gate: frozen A/B byte-identical gearless/unsworn on all sims + gear_probe extension + smokes.
+  ⚠ engine touches: THREAT_DROP/taunt diag + `_damage` dip diag + `BossState.last_curse_tick` —
+  all diag-family/write-only. *(gear-design session)*
 - ☑ 2026-07-03 · `gear1` · §SYSTEMS GEAR-1 — **GEAR-1 raid-campaign loot PoC — MERGED to main
   (`866592f`)**, worktree removed. The Curio game is LIVE on the raid campaign: `data/gear/`
   (GearCatalog: 9 signature items — Riftmaw Tooth / LE CHAT's Bell / Swan Song / Ticket Stub /
