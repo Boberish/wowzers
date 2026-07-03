@@ -15,6 +15,15 @@ extends SceneTree
 var _healer_cls := "mender"
 var _haspect := ""
 
+# --- FAST-ITERATION + LIVE TUNING knobs (for playtest tweaking — see ./tune.sh) ---
+# During tuning you don't need 200 seeds or the correctness gates; you need a fast
+# read you can re-run after each tweak. These make that loop cheap:
+var _probes := true       # --probes=0  : skip determinism + threat-gate probes (they're gates, not tuning signals)
+var _dmg := 1.0           # --dmg=1.3   : scale ALL boss damage (melee/swings/novas/dots/beats) — the difficulty dial
+var _regen := -1.0        # --regen=0.5 : override the raid healer's mana regen_mult (the mana dial)
+var _fortify := -1.0      # --fortify=0.5: override the tank's raid Fortify self-heal mult (the tank-sustain dial)
+var _skills: Array = []   # --skills=good  or  --skills=good,sloppy  (default = all three)
+
 const TICK_CAP_SEC := 300.0
 const SKILLS := [
 	{"label": "expert", "slack": 0.0, "lat": 0, "hlat": 0},
@@ -28,14 +37,25 @@ func _initialize() -> void:
 	var only := _arg("boss", "")
 	_healer_cls = _arg("healer", "mender")
 	_haspect = _arg("haspect", "")
+	_probes = _arg("probes", "1") != "0"
+	_dmg = float(_arg("dmg", "1"))
+	_regen = float(_arg("regen", "-1"))
+	_fortify = float(_arg("fortify", "-1"))
+	_skills = _pick_skills(_arg("skills", ""))
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
 	var healer_desc := ("Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")) \
 		if _healer_cls == "bloomweaver" else ("Mender(%s)" % (_haspect if _haspect != "" else "tidecaller"))
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("party: Bulwark(warden) / Twinfang(venomancer) / Voidcaller(disruptor) / %s" % healer_desc)
+	if _dmg != 1.0 or _regen >= 0.0 or _fortify >= 0.0:
+		print("OVERRIDES:  dmg ×%.2f   regen %s   fortify %s   (live tweaks, not saved to files)" % [
+			_dmg, ("%.2f" % _regen if _regen >= 0.0 else "—"),
+			("%.2f" % _fortify if _fortify >= 0.0 else "—")])
+	if not _probes:
+		print("(quick mode: determinism + threat-gate probes SKIPPED)")
 	print("")
-	if seed0 == 1:                         # shard 0 only (probes are seed-independent diagnostics)
+	if seed0 == 1 and _probes:             # shard 0 only (probes are seed-independent diagnostics)
 		for b in bosses:
 			_prove_determinism(String(b))
 	print("")
@@ -50,7 +70,7 @@ func _initialize() -> void:
 		# a mana floor that actually dips = the healer's resource is a real constraint;
 		# hlMana pinned near 100 with high hlIdle = the fight doesn't pressure the healer.
 		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  rez  losses")
-		for sk in SKILLS:
+		for sk in _skills:
 			var wins := 0
 			var ttk_sum := 0.0
 			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
@@ -83,7 +103,7 @@ func _initialize() -> void:
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
 				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, _fmt(causes)])
 		print("")
-	if seed0 == 1 and (only == "" or only == "riftmaw"):
+	if seed0 == 1 and _probes and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
 
 	_write_csv(_arg("out", "res://out/raid_results.csv"), rows)
@@ -113,12 +133,19 @@ func _prove_threat_gate(seeds: int) -> void:
 	print("  -> the taunt should carry a visible share of the win rate; if ON == OFF, threat isn't biting")
 
 func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> Dictionary:
-	var s := RaidContent.make_state(seed, RaidContent.encounter_by_id(boss),
+	var enc := RaidContent.encounter_by_id(boss)
+	if _dmg != 1.0:
+		_scale_damage(enc)                               # --dmg override (fresh enc per run — no leak)
+	var s := RaidContent.make_state(seed, enc,
 		({"healer": _haspect} if _haspect != "" else {}), "tank", {"healer": _healer_cls})
 	var tank := s.seats[0]
 	var blade := s.seats[1]
 	var caster := s.seats[2]
 	var healer := s.seats[3]
+	if _regen >= 0.0:
+		healer.vars["regen_mult"] = _regen               # --regen override (mana dial)
+	if _fortify >= 0.0 and tank.kit is BulwarkKit:
+		(tank.kit as BulwarkKit).cfg.raid_self_heal_mult = _fortify   # --fortify override (tank-sustain dial)
 	var tp := tank.policy as RaidTankPolicy
 	tp.reaction_slack = float(sk["slack"])
 	tp.rng = DetRng.new(seed * 2749 + 1337)
@@ -194,6 +221,40 @@ func _run(s: CombatState) -> Dictionary:
 		"checksum": s.checksum,
 	}
 
+## --skills filter: "" = all three; "good" or "good,sloppy" = just those tiers (faster).
+func _pick_skills(spec: String) -> Array:
+	if spec == "":
+		return SKILLS
+	var picked: Array = []
+	for sk in SKILLS:
+		if spec.findn(String(sk["label"])) >= 0:
+			picked.append(sk)
+	return picked if not picked.is_empty() else SKILLS
+
+## --dmg override: scale every DAMAGE payload on a FRESH encounter (never the boss's
+## own self-heal or empower — those aren't "damage"). Melee, swings, novas, DoT ticks,
+## and barrage/string beats (beats are amount_frac × ability.amount) all ride this.
+func _scale_damage(enc: EncounterRes) -> void:
+	if not enc.melee.is_empty():
+		enc.melee["min"] = float(enc.melee.get("min", 0.0)) * _dmg
+		enc.melee["max"] = float(enc.melee.get("max", 0.0)) * _dmg
+	for ab in enc.abilities:
+		_scale_ability(ab as AbilityRes)
+	for ad in enc.adds:
+		var a := ad as AddRes
+		if not a.melee.is_empty():
+			a.melee["min"] = float(a.melee.get("min", 0.0)) * _dmg
+			a.melee["max"] = float(a.melee.get("max", 0.0)) * _dmg
+		for ab in a.abilities:
+			_scale_ability(ab as AbilityRes)
+
+func _scale_ability(ab: AbilityRes) -> void:
+	if ab.effect != AbilityRes.Effect.HEAL_BOSS and ab.effect != AbilityRes.Effect.EMPOWER_BOSS:
+		ab.amount = ab.amount * _dmg
+	ab.dot_tick = ab.dot_tick * _dmg
+	for ch in ab.chain:                # chained verses carry their own payloads
+		_scale_ability(ch as AbilityRes)
+
 ## The single healer seat (role == "healer"); null if a comp ever runs without one.
 func _healer_seat(s: CombatState) -> Seat:
 	for seat in s.seats:
@@ -213,6 +274,7 @@ func _prove_determinism(boss: String) -> void:
 		("differ (good)" if a["checksum"] != c["checksum"] else "IDENTICAL (suspect!)")])
 
 func _write_csv(path: String, rows: Array) -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path).get_base_dir())
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		push_error("cannot open %s" % path); return
