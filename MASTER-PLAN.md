@@ -470,16 +470,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   edits to `raid_hud.gd` (`_input`/`_build_combat`). Zero engine/combat-math. ⚠ `raid_hud.gd` shared w/ `menu-refresh`
   (they touch the MENU screens, I touch COMBAT screen — merge main before merge-back). Gate: ui_smoke_raid green +
   class sims byte-identical (view-only) + WSLg glance. *(pause-codex session)*
-- ☐ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu full refresh + boot into the game HUD (Bill).**
-  The game boots straight into the game HUD (`raid_main.tscn`), skipping the old `main_menu` class
-  picker (retired). New clean flow (reuse Gilded Reliquary cards): **HOME** (title + **PLAY** +
-  **PLAY ONLINE** + QUIT) → **CLASS** (the 4 raid seats: Bulwark/Twinfang/Voidcaller/Mender) →
-  **SUB-CLASS** (Aspect ceremony, exists) → **RAID** pick (one card: Realm 1 · The Takeover) →
-  `_start_map_run`. PLAY ONLINE keeps the existing connect/lobby. Replaces the dev BossSelect front
-  door (boss-select stays `--autostart` only). All `_show_select` returns → `_show_home`. Menus+docs
-  scope (no file rename/deletion — per Bill's answer). Game-layer/UI only, zero engine. ⚠ `raid_hud.gd`
-  shared w/ live sessions — merge main before merge-back. Gate: ui_smoke_raid + all class sims
-  byte-identical, WSLg glance if possible. *(raid-finish session)*
+- ☐ 2026-07-03 · `build-panel` · §GRAPHICS — **Verb/boon summary on the game HUD (Bill).** The combat
+  HUD shows no build readout; the solo HUDs had a "YOUR GUARD" verb tooltip. Add an always-visible
+  compact panel (top-right of the combat screen) listing the assembled verb rules (per-class
+  `*_boons.verb_summary/guard_summary(_run.boons, _aspect)`) + the drafted boons (track `_taken_boons`
+  dicts in `_show_boon_draft` for title/rarity, no resolver). Offline map runs only (`_run != null`).
+  Screenshot-verified (WSLg render works here now). Game-layer/UI only, zero engine. Gate: ui_smoke_raid
+  + determinism unchanged + a combat screenshot with boons. *(raid-finish session)*
+
+- ☑ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu refresh + boot into the game HUD — MERGED to
+  main (`d27a84f`)**, worktree removed. The game boots straight into the game HUD (`raid_main.tscn`);
+  `main_menu` + the dev BossSelect front door are retired. Flow: **HOME** (PLAY / PLAY ONLINE / QUIT)
+  → **CLASS** (4 seats) → **SUB-CLASS** (Aspect) → **RAID** (Realm 1 card) → the descent. All
+  fight-end/Esc/leave returns → `_show_home` (`_show_select` is now a thin wrapper). Reuses AspectCard
+  for class + raid cards; boss-select stays `--autostart` dev only. Gate PASS: NEW `sim/menu_probe.gd`
+  (HOME→class→aspect→raid→live descent→HOME); ui_smoke_raid green; bulwark determinism unchanged;
+  boon/gear/floor probes green. **Menus+docs scope** (no file rename). **Pending:** a live WSLg glance
+  at the card/button layout (headless proves it builds, not the pixels). **NEXT:** the verb/boon
+  summary on the game HUD (deferred from the boon work); optional later — rename `raid_hud`→`game_hud`. *(raid-finish session)*
 - ☑ 2026-07-03 · `raid-boons` · §MAPS/§SYSTEMS — **Boon draft in the RAID campaign — MERGED to main
   (`0338a37`)**, worktree removed. Draft 2.0 (1-of-3 / rarities / build-your-verb) now runs in the
   raid descent OFFLINE: the human seat gets a `_run` (RunState via the class starter), a **REFORGE**
