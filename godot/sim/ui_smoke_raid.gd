@@ -74,11 +74,31 @@ func _process(_delta: float) -> bool:
 		hud._process(1.0 / 30.0)
 		if hud._screen != "combat":
 			break
-	print("gate won -> map: screen=%s fracs=%s mana=%.2f" % [
-		hud._screen, str(hud._map_fracs), hud._map_mana])
+	# GEAR-1: the entry kill is a FIRST KILL -> the drop ceremony interposes
+	print("entry fight won -> drop ceremony: screen=%s" % hud._screen)
+	if hud._screen == "drop":
+		var pe := _press(hud, "EQUIP")
+		print("drop EQUIP: ok=%s -> screen=%s gear=%s unlocks=%s" % [
+			str(pe), hud._screen, str(hud._map_gear), str(hud._gear_unlocks)])
+	print("back on map: fracs=%s mana=%.2f" % [str(hud._map_fracs), hud._map_mana])
 	hud._map_wounds[0] = 0.2
 	hud._apply_map_fx({"heal": 0.1, "mana": 1.0, "repair": true, "patch": true})
 	print("map fx (heal/patch/refuel/repair): ok wounds=%s" % str(hud._map_wounds))
+
+	# GEAR-1 (Curios): ceremony paths — EQUIP an active, SCRAP pays ⏣, the paste
+	# button repairs wounds from the map, and curios ride the next pull's seat
+	hud._show_drop("cooling_paste", true, hud._show_map)
+	var p1 := _press(hud, "EQUIP")
+	print("ceremony EQUIP active: ok=%s gear=%s charges=%s" % [
+		str(p1), str(hud._map_gear), str(hud._map_gear_charges)])
+	hud._show_drop("swan_song", false, hud._show_map)
+	var p2 := _press(hud, "SCRAP")
+	print("ceremony SCRAP: ok=%s tokens=%d screen=%s" % [str(p2), hud._map_tokens, hud._screen])
+	hud._map_wounds[0] = 0.2
+	hud._show_map()
+	var p3 := _press(hud, "USE COOLING PASTE")
+	print("cooling paste: ok=%s wounds=%s charges=%s" % [
+		str(p3), str(hud._map_wounds), str(hud._map_gear_charges)])
 
 	# Tier-1 PERSONAL GATE (§GAME SHAPE): intro panel -> exam fight -> result ->
 	# map; a LOST gate = force-reboot (wound) and the run CONTINUES
@@ -94,6 +114,7 @@ func _process(_delta: float) -> bool:
 	var sx: CombatState = hud._ctrl.state
 	print("gate exam fight: enc=%s boss='%s' seats=%d gate_live=%s" % [
 		String(sx.encounter.id), String(sx.encounter.name), sx.seats.size(), str(hud._gate_live)])
+	print("exam seat armed with curios: %s" % str(sx.seats[0].gear))
 	CombatCore.damage_boss(sx, sx.seats[0], sx.boss.hp)      # burst-win the exam
 	for i in 30:
 		hud._ctrl._process(1.0 / 30.0)
@@ -230,3 +251,16 @@ func _drive(s: CombatState, seat_key: String) -> int:
 		if s.over:
 			return s.tick
 	return s.tick
+
+## GEAR-1: find + press the first Button under the HUD whose text starts with
+## `prefix` (drives the drop-ceremony / cooling-paste choices like a click).
+func _press(hud: Node, prefix: String) -> bool:
+	var stack: Array = [hud._ui]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Button and String((n as Button).text).begins_with(prefix):
+			(n as Button).pressed.emit()
+			return true
+		for c in n.get_children():
+			stack.append(c)
+	return false

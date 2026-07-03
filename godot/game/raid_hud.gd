@@ -943,7 +943,7 @@ func _show_drop(id: String, first: bool, done: Callable) -> void:
 		_title(box, "★  FIRST KILL — a new row is inked into the Ledger", 15, Palette.GOLD)
 	var card := RelicCard.new(String(it["name"]),
 		String(it["desc"]) + "\n\n\"" + String(it.get("flavor", "")) + "\"",
-		"relic", String(it.get("rarity", "haiku")), false, "CURIO")
+		"curio", String(it.get("rarity", "haiku")), false, "")
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE   # display only — buttons decide
 	var cc := CenterContainer.new()
 	cc.add_child(card)

@@ -85,7 +85,7 @@ static func type_color(t: String) -> Color:
 	match t:
 		"spell":
 			return SPELL
-		"relic":
+		"relic", "curio":
 			return RELIC
 		_:
 			return UPGRADE
