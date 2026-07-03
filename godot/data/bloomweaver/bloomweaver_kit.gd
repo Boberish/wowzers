@@ -400,7 +400,11 @@ func _lowest_ally(s: CombatState) -> Seat:
 func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var party: Array = []
 	for u in s.seats:
-		if u.role == "healer":
+		# Skip OTHER healers; but in a RAID (threat_enabled) the healer sees its OWN
+		# frame as a triage target — it's hittable by aoe/personal beats and must
+		# self-ward/self-plant to survive them (matches the Mender's raid self-triage).
+		# threat_enabled-guarded → solo Bloomweaver observation is byte-identical.
+		if u.role == "healer" and not (s.threat_enabled and u == seat):
 			continue
 		var gi := _find_growth(u)
 		var ripe := gi >= 0 and aspect == "wildgrove" and _is_ripe(u.hots[gi])

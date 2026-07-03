@@ -9,6 +9,12 @@
 ##   optional: --boss=riftmaw|mistral|gemini|mythos (default: all)
 extends SceneTree
 
+# Which healer CLASS fills the healer seat, and its aspect. Default = the verified
+# Mender comp (--healer=bloomweaver [--haspect=wildgrove|thornveil] runs the second
+# healer). Class-fixed to Mender everywhere else in the pipeline; this is the sim knob.
+var _healer_cls := "mender"
+var _haspect := ""
+
 const TICK_CAP_SEC := 300.0
 const SKILLS := [
 	{"label": "expert", "slack": 0.0, "lat": 0, "hlat": 0},
@@ -20,10 +26,14 @@ func _initialize() -> void:
 	var seeds := int(_arg("seeds", "200"))
 	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	var only := _arg("boss", "")
+	_healer_cls = _arg("healer", "mender")
+	_haspect = _arg("haspect", "")
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
+	var healer_desc := ("Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")) \
+		if _healer_cls == "bloomweaver" else ("Mender(%s)" % (_haspect if _haspect != "" else "tidecaller"))
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
-	print("party: Bulwark(warden) / Twinfang(venomancer) / Voidcaller(disruptor) / Mender(tidecaller)")
+	print("party: Bulwark(warden) / Twinfang(venomancer) / Voidcaller(disruptor) / %s" % healer_desc)
 	print("")
 	if seed0 == 1:                         # shard 0 only (probes are seed-independent diagnostics)
 		for b in bosses:
@@ -93,7 +103,8 @@ func _prove_threat_gate(seeds: int) -> void:
 	print("  -> the taunt should carry a visible share of the win rate; if ON == OFF, threat isn't biting")
 
 func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> Dictionary:
-	var s := RaidContent.make_state(seed, RaidContent.encounter_by_id(boss))
+	var s := RaidContent.make_state(seed, RaidContent.encounter_by_id(boss),
+		({"healer": _haspect} if _haspect != "" else {}), "tank", {"healer": _healer_cls})
 	var tank := s.seats[0]
 	var blade := s.seats[1]
 	var caster := s.seats[2]
@@ -108,7 +119,11 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	var cp := caster.policy as VoidcallerPolicy
 	cp.latency_ticks = int(sk["lat"])
 	cp.rng = DetRng.new(seed * 2749 + 3339)
-	(healer.policy as MenderPolicy).latency_ticks = int(sk["hlat"])
+	# both healer classes expose latency_ticks (extends Policy); pick the real type
+	if healer.policy is BloomweaverPolicy:
+		(healer.policy as BloomweaverPolicy).latency_ticks = int(sk["hlat"])
+	else:
+		(healer.policy as MenderPolicy).latency_ticks = int(sk["hlat"])
 	return _run(s)
 
 func _run(s: CombatState) -> Dictionary:
