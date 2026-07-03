@@ -77,6 +77,47 @@ func fingerprint() -> String:
 			str(n["next"]), str(n["locked_next"])])
 	return "|".join(parts)
 
+# ============================================================ serialization (MAP-3b)
+## The server owns the map and broadcasts it; clients rebuild a RunMap to render +
+## test reachability. JSON turns every number into a float, so from_dict coerces the
+## numeric fields back to int (node ids index arrays — floats would break node()).
+func to_dict() -> Dictionary:
+	return {"seed": seed, "nodes": nodes, "entry_id": entry_id, "seal_id": seal_id,
+		"backdoor": backdoor, "seal_shard_req": seal_shard_req, "tickets": tickets}
+
+static func from_dict(d: Dictionary) -> RunMap:
+	var m := RunMap.new()
+	m.seed = int(d.get("seed", 0))
+	m.entry_id = int(d.get("entry_id", 0))
+	m.seal_id = int(d.get("seal_id", 0))
+	m.seal_shard_req = int(d.get("seal_shard_req", 0))
+	var tk: Array = []
+	for t in d.get("tickets", []):
+		tk.append(String(t))
+	m.tickets = tk
+	m.backdoor = []
+	for v in d.get("backdoor", []):
+		m.backdoor.append(int(v))
+	m.nodes = []
+	for nd in d.get("nodes", []):
+		var n: Dictionary = nd
+		var nn := {
+			"id": int(n.get("id", 0)), "kind": String(n.get("kind", "")),
+			"row": int(n.get("row", 0)), "lane": int(n.get("lane", 0)),
+			"name": String(n.get("name", "")), "fight": int(n.get("fight", -1)),
+			"event": String(n.get("event", "")), "key": bool(n.get("key", false)),
+			"shard": bool(n.get("shard", false)),
+			"ticket_open": String(n.get("ticket_open", "")),
+			"ticket_close": String(n.get("ticket_close", "")),
+			"next": [], "locked_next": [], "visited": bool(n.get("visited", false)),
+		}
+		for x in n.get("next", []):
+			(nn["next"] as Array).append(int(x))
+		for x in n.get("locked_next", []):
+			(nn["locked_next"] as Array).append(int(x))
+		m.nodes.append(nn)
+	return m
+
 # ============================================================ generation
 
 func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {},

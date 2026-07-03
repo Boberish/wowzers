@@ -12,6 +12,9 @@ signal room_update(room: Dictionary)
 signal fight_started(spec: Dictionary, you: String)
 signal fight_ended(won: bool, cause: String)
 signal desynced
+signal map_update(msg: Dictionary)      ## MAP-3b: server campaign snapshot to render
+signal map_stop(msg: Dictionary)        ## MAP-3b: an event panel the leader answers
+signal campaign_ended(won: bool)        ## MAP-3b: the whole descent is over
 
 const CFG_PATH := "user://rift_net.cfg"
 
@@ -45,6 +48,16 @@ func send(msg: Dictionary) -> void:
 
 func send_input(action: Dictionary) -> void:
 	send({"t": "input", "action": action})
+
+# --- MAP-3b: online Topology descent (host starts; leader routes) ---
+func send_mapstart() -> void:
+	send({"t": "mapstart"})
+
+func send_node(id: int) -> void:
+	send({"t": "node", "id": id})
+
+func send_choice(i: int) -> void:
+	send({"t": "choice", "i": i})
 
 func peer_id() -> int:
 	return _peer.get_unique_id()
@@ -93,6 +106,14 @@ func _handle(msg: Dictionary) -> void:
 		"end":
 			_phase = "lobby"
 			fight_ended.emit(bool(msg.get("won", false)), String(msg.get("cause", "")))
+		"map":
+			_phase = "lobby"
+			map_update.emit(msg)
+		"mapstop":
+			map_stop.emit(msg)
+		"campaign":
+			_phase = "lobby"
+			campaign_ended.emit(bool(msg.get("won", false)))
 
 # --- remembered connection settings (server URL / name / room) ---
 static func load_cfg() -> Dictionary:
