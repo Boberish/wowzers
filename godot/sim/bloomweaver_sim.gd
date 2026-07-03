@@ -10,12 +10,13 @@ const TICK_CAP_SEC := 240.0
 
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "200"))
+	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	print("=== Project Rift — Bloomweaver (Healer #2) headless sim ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("")
-	_prove_determinism()
+	if seed0 == 1: _prove_determinism()
 	print("")
-	_prove_verb_mods(seeds)
+	if seed0 == 1: _prove_verb_mods(seeds)
 
 	var rows: Array = []
 	var matchups := [
@@ -43,7 +44,7 @@ func _initialize() -> void:
 			var wilted := 0.0
 			var thorns := 0.0
 			var dsum := {}
-			for seed in range(1, seeds + 1):
+			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(seed, String(m["enc"]), String(m["aspect"]), int(sk["lat"]))
 				r["enc"] = m["enc"]; r["aspect"] = m["aspect"]; r["skill"] = sk["label"]; r["seed"] = seed
 				rows.append(r)
