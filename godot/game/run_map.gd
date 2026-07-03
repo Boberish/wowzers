@@ -32,23 +32,27 @@ var nodes: Array = []          ## Array[Dictionary], id == index
 var entry_id: int = 0
 var seal_id: int = 0
 var backdoor: Array = []       ## [from_id, to_id] — the one locked edge
+var seal_shard_req: int = 0    ## MAP-3c: credential shards needed to unlock the Seal (0 = ungated)
 
 ## `extra_quota` adds node kinds to the mid-grid bag (e.g. {KIND_GATE: 1} on raid
 ## floors). The bag is ALWAYS padded to the same size, so an empty extra_quota
 ## leaves every rng draw — and therefore every existing map — byte-identical.
+## `shard_req` > 0 gates the Seal behind credential shards (MAP-3c ROOT floor).
 static func generate(map_seed: int, n_fights: int, event_ids: Array,
-		extra_quota: Dictionary = {}) -> RunMap:
+		extra_quota: Dictionary = {}, shard_req: int = 0) -> RunMap:
 	var m := RunMap.new()
 	m.seed = map_seed
 	var rng := DetRng.new(map_seed)
-	m._build(rng, n_fights, event_ids, extra_quota)
+	m._build(rng, n_fights, event_ids, extra_quota, shard_req)
 	return m
 
 func node(id: int) -> Dictionary:
 	return nodes[id]
 
 ## Nodes enterable from `from_id` (-1 = outside the map: only the entry).
-## Locked edges are included only when the key is held.
+## Locked edges are included only when the key is held. The Seal is gated until the
+## party holds `seal_shard_req` credential shards (MAP-3c ROOT floor); shards are placed
+## so every path collects enough before the last mid row, so this never dead-ends.
 func reachable(from_id: int, inventory: Dictionary) -> Array:
 	if from_id < 0:
 		return [entry_id]
@@ -56,19 +60,23 @@ func reachable(from_id: int, inventory: Dictionary) -> Array:
 	out.append_array(nodes[from_id]["next"])
 	if inventory.get("api_key", false):
 		out.append_array(nodes[from_id]["locked_next"])
+	if seal_shard_req > 0 and int(inventory.get("shards", 0)) < seal_shard_req:
+		out = out.filter(func(x): return x != seal_id)
 	return out
 
 ## Stable serialization — the determinism check hashes this.
 func fingerprint() -> String:
-	var parts: Array = ["seed=%d" % seed]
+	var parts: Array = ["seed=%d;sreq=%d" % [seed, seal_shard_req]]
 	for n in nodes:
-		parts.append("%d:%s:r%d:l%d:f%d:e%s:k%s:n%s:x%s" % [n["id"], n["kind"], n["row"],
-			n["lane"], n["fight"], n["event"], str(n["key"]), str(n["next"]), str(n["locked_next"])])
+		parts.append("%d:%s:r%d:l%d:f%d:e%s:k%s:s%s:n%s:x%s" % [n["id"], n["kind"], n["row"],
+			n["lane"], n["fight"], n["event"], str(n["key"]), str(n.get("shard", false)),
+			str(n["next"]), str(n["locked_next"])])
 	return "|".join(parts)
 
 # ============================================================ generation
 
-func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {}) -> void:
+func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {},
+		shard_req: int = 0) -> void:
 	nodes.clear()
 	# entry (row 0) and the mid grid (rows 1..ROWS-2), then the Seal (row ROWS-1)
 	entry_id = _add(KIND_COMBAT, 0, 1)
@@ -139,6 +147,26 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 			break
 	nodes[key_id]["key"] = true
 
+	# ---- credential shards (MAP-3c ROOT floor): gate the Seal behind `shard_req`
+	# shards, placed on WHOLE mid rows (all lanes) so every path collects exactly one
+	# per shard row. Skip the row the backdoor jumps over — else a backdoor run could
+	# reach the last row shard-short and dead-end at the gated Seal. With rows chosen
+	# this way the count is guaranteed by construction (no solver, still completable).
+	seal_shard_req = 0
+	if shard_req > 0:
+		var skip_lo: int = nodes[backdoor[0]]["row"] + 1   # node-rows the backdoor skips
+		var skip_hi: int = nodes[backdoor[1]]["row"]       # (exclusive)
+		var shard_rows: Array = []
+		for gi in grid.size():
+			var node_row: int = gi + 1                     # grid[gi] sits at node-row gi+1
+			if node_row < skip_lo or node_row >= skip_hi:
+				shard_rows.append(gi)
+		var want: int = mini(shard_req, shard_rows.size())
+		for k in want:
+			for l in LANES:
+				nodes[grid[shard_rows[k]][l]]["shard"] = true
+		seal_shard_req = want
+
 	# ---- names come from the realm skin (MapContent)
 	for n in nodes:
 		n["name"] = MapContent.name_for(n, rng)
@@ -146,7 +174,7 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 func _add(kind: String, row: int, lane: int) -> int:
 	var id := nodes.size()
 	nodes.append({"id": id, "kind": kind, "row": row, "lane": lane, "name": "",
-		"fight": -1, "event": "", "key": false, "next": [], "locked_next": []})
+		"fight": -1, "event": "", "key": false, "shard": false, "next": [], "locked_next": []})
 	return id
 
 func _link(a: int, b: int) -> void:
