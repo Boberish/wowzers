@@ -26,7 +26,8 @@ func _process(_delta: float) -> bool:
 	# the healer seat's TWO classes: Mender (tidecaller/brinkwarden) + the second
 	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
-			["blade", "tempo"], ["caster", "disruptor"], ["caster", "silencer"],
+			["blade", "tempo"], ["blade", "colossus"], ["blade", "berserker"],
+			["caster", "disruptor"], ["caster", "silencer"],
 			["healer", "tidecaller"], ["healer", "brinkwarden"],
 			["healer", "wildgrove"], ["healer", "thornveil"]]:
 		hud._launch(combo[0], combo[1])
@@ -318,7 +319,10 @@ func _drive(s: CombatState, seat_key: String) -> int:
 					elif bool(obs.get("gcd_ready", false)):
 						hud._ctrl.human({"type": "ability", "id": ("rampage" if float(obs.get("rage", 0.0)) >= 40.0 else "cleave")})
 				"blade":
-					if not tg.is_empty() and bool(tg.get("defensible", false)) \
+					if hud._blade_cls == "reckoner":
+						var rph := int(obs.get("phase", 0))
+						hud._ctrl.human({"type": "ability", "id": ("wind" if (rph == 0 or rph == 3) else "strike")})
+					elif not tg.is_empty() and bool(tg.get("defensible", false)) \
 							and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)) \
 							and float(tg.get("remaining", 9.0)) <= 0.4:
 						hud._ctrl.human({"type": "defense"})

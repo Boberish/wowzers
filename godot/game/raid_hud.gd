@@ -48,10 +48,20 @@ static var BLOOM_ASPECTS := [
 		"desc": "SNAP-STREAK wards: each Perfect Ward ramps the thorns that reflect damage back — heal by hurting the boss."},
 ]
 
-## The Aspect pair for a seat, honouring the healer's chosen CLASS.
+## The blade seat is polymorphic too — Twinfang (rhythm) or Reckoner (the swing).
+static var RECKONER_ASPECTS := [
+	{"id": "colossus", "name": "THE COLOSSUS", "accent": Palette.RAGE, "icon": "rampage",
+		"desc": "COMMIT the perfect swing — read the boss, land the True apex, bank Poise and STAGGER it. Punishing; precision is the whole game."},
+	{"id": "berserker", "name": "THE BERSERKER", "accent": Palette.MOMENTUM, "icon": "avalanche",
+		"desc": "Build MOMENTUM and hyperarmor THROUGH the hits — a Rage snowball that carries a sloppy rhythm. Forgiving; just keep swinging."},
+]
+
+## The Aspect pair for a seat, honouring the seat's chosen CLASS.
 func _aspects_for(seat_key: String) -> Array:
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return BLOOM_ASPECTS
+	if seat_key == "blade" and _blade_cls == "reckoner":
+		return RECKONER_ASPECTS
 	return ASPECTS[seat_key]
 
 ## The Aspect pair for a lobby seat given an explicit class (online — the healer
@@ -59,22 +69,29 @@ func _aspects_for(seat_key: String) -> Array:
 func _lobby_aspects(seat_key: String, cls: String) -> Array:
 	if seat_key == "healer" and cls == "bloomweaver":
 		return BLOOM_ASPECTS
+	if seat_key == "blade" and cls == "reckoner":
+		return RECKONER_ASPECTS
 	return ASPECTS[seat_key]
 
-## The seat's display name, honouring the healer class (Mender vs Bloomweaver).
+## The seat's display name, honouring the seat class.
 func _seat_display_name(seat_key: String) -> String:
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return "THE BLOOMWEAVER"
+	if seat_key == "blade" and _blade_cls == "reckoner":
+		return "THE RECKONER"
 	return String(SEAT_NAMES.get(seat_key, "RAIDER"))
 
-## The class currently filling a seat (only the healer seat is polymorphic).
+## The class currently filling a seat (the healer and blade seats are polymorphic).
 func _seat_cls_now() -> String:
-	return _healer_cls if _seat_key == "healer" else String(SEAT_CLASS.get(_seat_key, "bulwark"))
+	if _seat_key == "healer": return _healer_cls
+	if _seat_key == "blade": return _blade_cls
+	return String(SEAT_CLASS.get(_seat_key, "bulwark"))
 
 ## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
 ## right kit + the lobby/sim/net all agree). Non-healer seats keep their native class.
 func _human_seat_cfg() -> Dictionary:
 	_sync_healer_cls()
+	_sync_blade_cls()
 	return {_seat_key: {"aspect": _aspect, "ai": false, "cls": _seat_cls_now()}}
 
 ## Keep _healer_cls consistent with the chosen aspect (the aspect uniquely identifies
@@ -87,6 +104,16 @@ func _sync_healer_cls() -> void:
 		_healer_cls = "bloomweaver"
 	elif _aspect == "tidecaller" or _aspect == "brinkwarden":
 		_healer_cls = "mender"
+
+## Keep _blade_cls consistent with the chosen aspect (the aspect uniquely identifies
+## the blade class: Reckoner = colossus/berserker · Twinfang = tempo/venomancer).
+func _sync_blade_cls() -> void:
+	if _seat_key != "blade":
+		return
+	if _aspect == "colossus" or _aspect == "berserker":
+		_blade_cls = "reckoner"
+	elif _aspect == "tempo" or _aspect == "venomancer":
+		_blade_cls = "twinfang"
 
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
@@ -198,6 +225,9 @@ var _mcfg: MenderConfig            ## healer (Mender)
 var _bcfg: BloomweaverConfig       ## healer (Bloomweaver)
 var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
 var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver
+var _blade_cls: String = "twinfang" ## which class fills the blade seat: twinfang | reckoner
+var _rcfg: ReckonerConfig             ## the Reckoner's config (set in _make_loadout when the blade is a Reckoner)
+var _rk_gauge: ReckonerGauge          ## the Reckoner's WIND/APEX swing instrument
 var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
@@ -306,6 +336,7 @@ func _show_class_select() -> void:
 	var cards := [
 		["tank", "bulwark", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
 		["blade", "twinfang", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
+		["blade", "reckoner", "THE RECKONER", "rampage", Palette.RAGE, "MELEE · COMMIT — an auto-swing you shape with two timed taps (wind × strike): huge hits, hyperarmor, and STAGGER.  (Colossus / Berserker)"],
 		["caster", "voidcaller", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
 		["healer", "mender", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — react to the storm, click-cast big heals + shields.  (Tidecaller / Brinkwarden)"],
 		["healer", "bloomweaver", "THE BLOOMWEAVER", "wildbloom", Palette.VERDANCE, "HEALER · ANTICIPATE — no mana; plant HoTs & wards AHEAD, bloom them on the spike.  (Wildgrove / Thornveil)"],
@@ -381,6 +412,8 @@ func _start_map_pick(seat_id: String) -> void:
 func _pick_class(seat_id: String, cls: String) -> void:
 	if seat_id == "healer":
 		_healer_cls = cls
+	elif seat_id == "blade":
+		_blade_cls = cls
 	_show_aspect_pick(seat_id)
 
 func _show_aspect_pick(seat_id: String) -> void:
@@ -862,6 +895,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	if seat_id == "bloom" or seat_id == "bloomweaver":
 		seat_id = "healer"
 		_healer_cls = "bloomweaver"
+	if seat_id == "reckoner":              # debug alias: the blade seat as a Reckoner
+		seat_id = "blade"
+		_blade_cls = "reckoner"
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	# a healer aspect id disambiguates the class (must resolve BEFORE the pool lookup)
 	if _seat_key == "healer":
@@ -869,6 +905,11 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 			_healer_cls = "bloomweaver"
 		elif aspect == "tidecaller" or aspect == "brinkwarden":
 			_healer_cls = "mender"
+	if _seat_key == "blade":
+		if aspect == "colossus" or aspect == "berserker":
+			_blade_cls = "reckoner"
+		elif aspect == "tempo" or aspect == "venomancer":
+			_blade_cls = "twinfang"
 	var pool: Array = _aspects_for(_seat_key)
 	_aspect = String(pool[0]["id"])
 	for a in pool:
@@ -936,8 +977,10 @@ func _start_map_run() -> void:
 ## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
 func _make_run() -> RunState:
 	_sync_healer_cls()
+	_sync_blade_cls()
 	match _seat_key:
-		"blade": return RunState.start_twinfang(_aspect)
+		"blade": return (RunState.start_reckoner(_aspect) if _blade_cls == "reckoner"
+			else RunState.start_twinfang(_aspect))
 		"caster": return RunState.start_voidcaller(_aspect)
 		"healer": return (RunState.start_bloomweaver(_aspect) if _healer_cls == "bloomweaver"
 			else RunState.start_mender(_aspect))
@@ -1741,8 +1784,12 @@ func _show_campaign_cleared() -> void:
 
 func _make_loadout() -> Array:
 	_sync_healer_cls()
+	_sync_blade_cls()
 	match _seat_key:
 		"blade":
+			if _blade_cls == "reckoner":
+				_rcfg = ReckonerConfig.new()
+				return _rcfg.loadout(_aspect)
 			return TwinfangConfig.new().loadout(_aspect)
 		"caster":
 			return VoidcallerConfig.new().loadout(_aspect)
@@ -1982,6 +2029,9 @@ func _build_band_tank() -> void:
 		"" if _gate_live else "    ·    T — CHALLENGE (taunt)"])
 
 func _build_band_blade() -> void:
+	if _blade_cls == "reckoner":
+		_build_band_reckoner()
+		return
 	_rhythm = RhythmBar.new()
 	# YOUR metronome sits in your own column — the boss's Judgment Channel owns
 	# the line under the reticle on the right
@@ -2008,6 +2058,32 @@ func _build_band_blade() -> void:
 	_add_runes(row, _loadout)
 	_strike_idx = _rune_ids.find("strike")
 	_hint_line("SPACE — DODGE (protects Flow)    ·    F — DODGE beats    ·    hold aggro low — the boss eats loose blades")
+
+## The Reckoner's band: HP + RAGE orbs, the WIND/APEX swing instrument, and the
+## Overswing/Ultraswing/Onslaught/Signature rune rail. The SWING itself is SPACE
+## (tap to wind, tap again for the apex) — not a rune.
+func _build_band_reckoner() -> void:
+	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
+	_res_orb = _orb(Palette.RAGE, "RAGE", true)
+	_rk_gauge = ReckonerGauge.new()
+	_rk_gauge.aspect = _aspect
+	_place(_rk_gauge, 0.5, 1, 0.5, 1, -320, -320, 320, -168)
+	_shake_root.add_child(_rk_gauge)
+	var row := _rune_row(-360.0, 360.0)
+	_guard = AbilityRune.new()
+	_guard.label = "DODGE"
+	_guard.key_label = "F"
+	_guard.icon_id = "dodge"
+	_guard.accent = Palette.STEEL
+	_guard.tooltip_text = "Dodge the boss's swing (F). The Colossus would rather hyperarmor through — but the dodge is there when you need it."
+	_guard.pressed.connect(func(): _ctrl.human({"type": "dodge"}))
+	row.add_child(_guard)
+	var sep := Control.new()
+	sep.custom_minimum_size = Vector2(14, 0)
+	row.add_child(sep)
+	_add_runes(row, _loadout, Palette.RAGE)
+	_strike_idx = -1
+	_hint_line("SPACE — the SWING: tap to WIND (weight), tap again for the STRIKE apex (power)    ·    1/2/3/4 — Overswing · Ultraswing · Onslaught · Signature    ·    F — DODGE")
 
 func _build_band_caster() -> void:
 	_pcast = PlayerCastBar.new()
@@ -2382,6 +2458,11 @@ func _input(event: InputEvent) -> void:
 		match _seat_key:
 			"healer":
 				_healer_key(event.keycode)
+			"blade":
+				if _blade_cls == "reckoner":
+					_reckoner_key(event.keycode)
+				else:
+					_martial_key(event.keycode)
 			_:
 				_martial_key(event.keycode)
 		return
@@ -2447,6 +2528,22 @@ func _bloomweaver_key(code: int) -> void:
 		KEY_Q: _cast("saprot")
 		KEY_E: _cast("lifesurge")
 		KEY_7: _cast(_signature())
+
+## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
+## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.
+func _reckoner_key(code: int) -> void:
+	match code:
+		KEY_SPACE:
+			var ph := int(_ctrl.player().vars.get("phase", 0))
+			# wind phases (0 WIND, 3 onslaught-wind) send "wind"; strike phases send "strike"
+			var id := "wind" if (ph == 0 or ph == 3) else "strike"
+			_ctrl.human({"type": "ability", "id": id})
+		KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1: _use_ability(0)
+		KEY_2: _use_ability(1)
+		KEY_3: _use_ability(2)
+		KEY_4: _use_ability(3)
 
 func _use_ability(i: int) -> void:
 	if _screen == "combat" and i >= 0 and i < _rune_ids.size():
@@ -2836,6 +2933,9 @@ func _render_band_tank(s: CombatState, p: Seat, obs: Dictionary) -> void:
 		_challenge.cd_frac = clampf(float(ch - s.tick) / float(CombatCore.to_ticks(8.0, s.config.fixed_hz)), 0.0, 1.0)
 
 func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	if _blade_cls == "reckoner":
+		_render_band_reckoner(s, p, obs)
+		return
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_res_orb.set_values(float(obs.get("energy", 0.0)), float(obs.get("energy_max", 100.0)))
 	_rhythm.since = int(obs.get("since_strike", 0))
@@ -2889,6 +2989,38 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
+
+func _render_band_reckoner(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	_hp_orb.set_values(p.hp, p.hp_max)
+	_res_orb.set_values(float(obs.get("rage", 0.0)), float(obs.get("rage_max", 100.0)))
+	var g := _rk_gauge
+	g.phase = int(obs.get("phase", 0))
+	g.since_wind = int(obs.get("seq_since_wind", 0)) if g.phase == 3 else int(obs.get("since_wind", 0))
+	g.wind_len = int(obs.get("wind_len", 27))
+	g.even_lo = int(obs.get("even_lo", 9))
+	g.heavy_lo = int(obs.get("heavy_lo", 18))
+	g.over_lo = int(obs.get("over_lo", 23))
+	g.over_armed = bool(obs.get("over_armed", false))
+	g.to_apex = int(obs.get("to_apex", 999))
+	g.true_half = int(obs.get("true_half", 1))
+	g.apex_total = maxi(1, int(round((_rcfg.apex_delay if _rcfg != null else 0.4) * s.config.fixed_hz)))
+	g.momentum = float(obs.get("momentum", 0.0))
+	g.momentum_max = float(obs.get("momentum_max", 8.0))
+	g.poise = float(obs.get("poise", 0.0))
+	g.poise_max = float(obs.get("poise_max", 100.0))
+	g.stagger = bool(obs.get("stagger", false))
+	for i in _runes.size():
+		var id: String = _rune_ids[i]
+		var usable := true
+		match id:
+			"overswing": usable = bool(obs.get("over_ready", true))
+			"ultraswing": usable = bool(obs.get("ultra_ready", true))
+			"onslaught", "sunder", "berserk": usable = bool(obs.get("ons_ready", true))
+		_runes[i].affordable = usable
+		_runes[i].usable = usable
+		_runes[i].cd_frac = 0.0
+	_guard.usable = s.tick >= int(p.defense_ready_tick)
+	_guard.cd_frac = 0.0
 
 func _render_band_caster(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_hp_orb.set_values(p.hp, p.hp_max)
