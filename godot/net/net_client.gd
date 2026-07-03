@@ -15,6 +15,7 @@ signal desynced
 signal map_update(msg: Dictionary)      ## MAP-3b: server campaign snapshot to render
 signal map_stop(msg: Dictionary)        ## MAP-3b: an event panel the leader answers
 signal campaign_ended(won: bool)        ## MAP-3b: the whole descent is over
+signal draft_prompt                     ## online boons: pick a boon now (all seats draft)
 
 const CFG_PATH := "user://rift_net.cfg"
 
@@ -58,6 +59,9 @@ func send_node(id: int) -> void:
 
 func send_choice(i: int) -> void:
 	send({"t": "choice", "i": i})
+
+func send_pick(id: String) -> void:      ## online boons: this seat's drafted boon ("" = skip)
+	send({"t": "pick", "id": id})
 
 func peer_id() -> int:
 	return _peer.get_unique_id()
@@ -111,6 +115,8 @@ func _handle(msg: Dictionary) -> void:
 			map_update.emit(msg)
 		"mapstop":
 			map_stop.emit(msg)
+		"draft":
+			draft_prompt.emit()
 		"campaign":
 			_phase = "lobby"
 			campaign_ended.emit(bool(msg.get("won", false)))

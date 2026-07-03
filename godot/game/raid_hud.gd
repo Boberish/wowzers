@@ -188,6 +188,7 @@ func _show_home() -> void:
 	_map_pending = false
 	_gate_live = false
 	_online_map = false
+	_run = null                       # no descent = no boon run (fresh one per descent)
 	_clear()
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -345,6 +346,7 @@ func _ensure_net() -> void:
 	_net.map_update.connect(_on_net_map)        # MAP-3b
 	_net.map_stop.connect(_on_net_mapstop)
 	_net.campaign_ended.connect(_on_net_campaign)
+	_net.draft_prompt.connect(_on_net_draft)    # online boons
 
 func _set_net_status(m: String) -> void:
 	if _net_status != null and is_instance_valid(_net_status):
@@ -432,6 +434,7 @@ func _me() -> Dictionary:
 func _show_lobby() -> void:
 	_screen = "lobby"
 	_online_map = false               # MAP-3b: back in the lobby = not descending
+	_run = null                       # online descents rebuild the boon run from the map seed
 	_clear()
 	var me := _me()
 	var box := VBoxContainer.new()
@@ -586,6 +589,17 @@ func _on_net_fight_ended(won: bool, _cause: String) -> void:
 func _on_net_map(msg: Dictionary) -> void:
 	_online_map = true
 	_map_is_leader = int(msg.get("host", -1)) == _net.peer_id()
+	# online boons: on the FIRST map of the descent, start this seat's boon run — seeded
+	# from the descent seed so its draft offers are reproducible (offline uses the same).
+	if _run == null:
+		var me := _me()
+		if not me.is_empty():
+			_seat_key = String(me.get("seat", _seat_key))
+			_aspect = String(me.get("aspect", _aspect))
+		_run = _make_run()
+		_taken_boons = []
+		var sd := int(msg.get("seed", 1))
+		_run.draft_rng = DetRng.new((sd ^ (int(SEAT_IDX.get(_seat_key, 0)) * 2654435761)) & 0x7FFFFFFF)
 	_screen = "map"
 	_clear()
 	var m := RunMap.from_dict(msg.get("map", {}))
@@ -649,9 +663,41 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 		body.custom_minimum_size = Vector2(760, 0)
 		_title(box, "◍  the leader is deciding…", 14, Palette.GOLD_DIM)
 
+## Online boons: the server asks every human seat to draft. Roll THIS seat's offers,
+## take one, send the id, then wait for the raid to finish (the next `map` replaces us).
+func _on_net_draft() -> void:
+	if _run == null:
+		_net.send_pick("")
+		return
+	var picks := Draft.roll_offers(_run)
+	if picks.is_empty():
+		_net.send_pick("")
+		_show_online_wait("Reforge pool exhausted — waiting for the raid…")
+		return
+	_screen = "draft"
+	_clear()
+	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
+		"Take one. Your raid is drafting too.", [], Palette.GOLD)
+	ds.boon_taken.connect(func(boon: Dictionary):
+		Draft.take(_run, boon)
+		_taken_boons.append(boon)
+		_net.send_pick(String(boon.get("id", "")))
+		_show_online_wait("Reforged — waiting for the raid to finish drafting…"))
+	_ui.add_child(ds)
+
+func _show_online_wait(msg: String) -> void:
+	_screen = "netwait"
+	_clear()
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(center)
+	_title(center, msg, 18, Palette.GOLD_DIM)
+
 ## The whole descent is over (ROOT cleared, or a wipe) — a campaign end screen.
 func _on_net_campaign(won: bool) -> void:
 	_online_map = false
+	_run = null                    # the descent's boon run is done
+	_taken_boons = []
 	_screen = "end"
 	_clear()
 	var center := CenterContainer.new()
@@ -1539,7 +1585,7 @@ func _verb_summary_lines() -> Array:
 ## so you can always see the run you've drafted. Offline descent only (_run present;
 ## online boons ride the spec later). Rebuilt each fight, so it reflects new picks.
 func _add_build_panel() -> void:
-	if _run == null or _online:
+	if _run == null:               # online + offline descents both carry a boon run now
 		return
 	var lines := _verb_summary_lines()
 	if _taken_boons.is_empty() and lines.is_empty():
