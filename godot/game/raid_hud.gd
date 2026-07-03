@@ -54,6 +54,13 @@ func _aspects_for(seat_key: String) -> Array:
 		return BLOOM_ASPECTS
 	return ASPECTS[seat_key]
 
+## The Aspect pair for a lobby seat given an explicit class (online — the healer
+## claimant may be a Mender or a Bloomweaver, independent of this client's _healer_cls).
+func _lobby_aspects(seat_key: String, cls: String) -> Array:
+	if seat_key == "healer" and cls == "bloomweaver":
+		return BLOOM_ASPECTS
+	return ASPECTS[seat_key]
+
 ## The seat's display name, honouring the healer class (Mender vs Bloomweaver).
 func _seat_display_name(seat_key: String) -> String:
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
@@ -514,7 +521,10 @@ func _show_lobby() -> void:
 			who += "  ·  " + String(claimant.get("aspect", "")).capitalize()
 			if bool(claimant.get("ready", false)):
 				who += "  ✓"
-		lab.text = "%-14s %s" % [SEAT_NAMES[key], who]
+		var seat_disp := String(SEAT_NAMES[key])
+		if key == "healer":       # the healer seat is Mender OR Bloomweaver
+			seat_disp = "THE BLOOMWEAVER" if String(claimant.get("cls", "")) == "bloomweaver" else "THE MENDER"
+		lab.text = "%-14s %s" % [seat_disp, who]
 		lab.custom_minimum_size = Vector2(430, 34)
 		lab.add_theme_font_size_override("font_size", 16)
 		lab.add_theme_color_override("font_color",
@@ -527,11 +537,19 @@ func _show_lobby() -> void:
 			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key}))
 			row.add_child(cb)
 		elif claimant == me:
+			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
+				var mycls := String(me.get("cls", "mender"))
+				var clsb := Button.new()
+				clsb.text = "◈ " + ("BLOOMWEAVER" if mycls == "bloomweaver" else "MENDER")
+				clsb.custom_minimum_size = Vector2(150, 34)
+				clsb.pressed.connect(func():
+					_net.send({"t": "class", "cls": "mender" if mycls == "bloomweaver" else "bloomweaver"}))
+				row.add_child(clsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 34)
 			ab.pressed.connect(func():
-				var pool: Array = ASPECTS[key]
+				var pool: Array = _lobby_aspects(key, String(me.get("cls", "")))
 				var cur := String(me.get("aspect", ""))
 				var nxt := String(pool[0]["id"]) if cur == String(pool[1]["id"]) else String(pool[1]["id"])
 				_net.send({"t": "aspect", "aspect": nxt}))
@@ -607,6 +625,8 @@ func _launch_online(spec: Dictionary, you: String) -> void:
 	for e in spec.get("seats", []):
 		if String(e["key"]) == you:
 			_aspect = String(e["aspect"])
+			if you == "healer":
+				_healer_cls = String(e.get("cls", "mender"))
 	_loadout = _make_loadout()
 	_screen = "combat"
 	_clear()

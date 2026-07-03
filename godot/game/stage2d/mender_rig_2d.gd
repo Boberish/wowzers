@@ -8,7 +8,13 @@ extends PoseRig2D
 var accent := Color("83c98d")
 
 func _init(aspect: String = "tidecaller") -> void:
-	accent = Color("e0862f") if aspect == "brinkwarden" else Color("8fb8e0")
+	# doubles as the placeholder puppet for the SECOND healer (Bloomweaver) until it
+	# gets a bespoke rig — tint by that class's aspects too (green grove / bark thorn).
+	match aspect:
+		"brinkwarden": accent = Color("e0862f")
+		"wildgrove": accent = Color("5fd6a3")     # Palette.VERDANCE
+		"thornveil": accent = Color("c98a5a")     # Palette.THORN
+		_: accent = Color("8fb8e0")
 
 func _build() -> void:
 	var robe := Color(0.27, 0.29, 0.30)

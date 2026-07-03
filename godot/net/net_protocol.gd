@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 3      # v3: online map traversal (mapstart/node/choice · map/mapstop/campaign)
+const VERSION := 4      # v4: healer seat CLASS choice (Mender / Bloomweaver) rides the spec
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 
