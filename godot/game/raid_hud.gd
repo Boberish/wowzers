@@ -84,7 +84,7 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 # the online campaign spec folds `gear` in later (rides like tickets/inventory).
 var _map_gear: Array = []               ## equipped curio ids (≤ Gear.SLOTS)
 var _map_gear_charges: Dictionary = {}  ## active-item charges left this run
-var _map_tokens := 0                    ## ⏣ banked from scrap (MARKET spends them, GEAR-3)
+var _map_tokens := 0                    ## ⏣ fallback bank when no _run exists (see _gain_tokens)
 var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
@@ -935,6 +935,18 @@ func _arm_gear(u: Seat) -> void:
 	u.gear = _map_gear.duplicate()
 	u.gear_vars = {}
 
+## Tokens are ONE currency: scrap + oath purses feed the same purse the REFORGE
+## boon draft spends (raid-boons' `_run.tokens`). `_map_tokens` stays only as the
+## fallback bank for runless dev paths.
+func _gain_tokens(n: int) -> void:
+	if _run != null:
+		_run.tokens += n
+	else:
+		_map_tokens += n
+
+func _tokens_now() -> int:
+	return _run.tokens if _run != null else _map_tokens
+
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 
 ## Gate exams key their Ledger pages by the exam's canonical encounter id.
@@ -1052,7 +1064,7 @@ func _after_drop(boss_id: String, done: Callable) -> void:
 				_gear_unlocks[boss_id] = got0
 				if DisplayServer.get_name() != "headless":
 					GearStore.save_unlocks(_gear_unlocks)
-			_map_tokens += int(p["tokens"])
+			_gain_tokens(int(p["tokens"]))
 			_drop_pity += int(p["pity"])
 			bend = p
 			verdict = "⚖  OATH KEPT — SLA MET: +%d⏣%s" % [int(p["tokens"]),
@@ -1084,7 +1096,7 @@ func _after_drop(boss_id: String, done: Callable) -> void:
 		# a dupe of an equipped curio auto-scraps — Tokens without ceremony
 		if verdict != "":
 			_toast_add(verdict)
-		_map_tokens += GearCatalog.scrap_value(id)
+		_gain_tokens(GearCatalog.scrap_value(id))
 		_toast_add("⚙  %s — duplicate recycled responsibly (+%d⏣)" % [
 			String(GearCatalog.item(id)["name"]), GearCatalog.scrap_value(id)])
 		done.call()
@@ -1146,7 +1158,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 	sb.text = "SCRAP  (+%d⏣)" % GearCatalog.scrap_value(id)
 	sb.custom_minimum_size = Vector2(200, 44)
 	sb.pressed.connect(func():
-		_map_tokens += GearCatalog.scrap_value(id)
+		_gain_tokens(GearCatalog.scrap_value(id))
 		done.call())
 	row.add_child(sb)
 
@@ -1154,7 +1166,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 func _gear_equip(id: String, replace_i: int) -> void:
 	if replace_i >= 0 and replace_i < _map_gear.size():
 		var old := String(_map_gear[replace_i])
-		_map_tokens += GearCatalog.scrap_value(old)
+		_gain_tokens(GearCatalog.scrap_value(old))
 		_map_gear_charges.erase(old)
 		_map_gear[replace_i] = id
 	else:
@@ -1165,7 +1177,7 @@ func _gear_equip(id: String, replace_i: int) -> void:
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
-	if _map_gear.is_empty() and _map_tokens == 0:
+	if _map_gear.is_empty() and _tokens_now() == 0:
 		return ""
 	var names: Array = []
 	for g in _map_gear:
@@ -1174,7 +1186,7 @@ func _gear_line() -> String:
 			nm += " ×%d" % int(_map_gear_charges[g])
 		names.append(nm)
 	var line := "PERIPHERALS:  " + ("  ·  ".join(PackedStringArray(names)) if not names.is_empty() else "—")
-	return line + "      ⏣ %d" % _map_tokens
+	return line + "      ⏣ %d" % _tokens_now()
 
 func _worst_wound() -> float:
 	var w := 0.0

@@ -98,7 +98,7 @@ func _process(_delta: float) -> bool:
 		str(p1), str(hud._map_gear), str(hud._map_gear_charges)])
 	hud._show_drop("swan_song", false, hud._show_map)
 	var p2 := _press(hud, "SCRAP")
-	print("ceremony SCRAP: ok=%s tokens=%d screen=%s" % [str(p2), hud._map_tokens, hud._screen])
+	print("ceremony SCRAP: ok=%s tokens=%d screen=%s" % [str(p2), hud._tokens_now(), hud._screen])
 	hud._map_wounds[0] = 0.2
 	hud._show_map()
 	var p3 := _press(hud, "USE COOLING PASTE")
@@ -110,13 +110,13 @@ func _process(_delta: float) -> bool:
 	hud._sworn = {"row": "oath", "item": "grace_period", "sev": 2,
 		"deed": {"kind": "zero_deaths"}, "deed_text": "zero raider deaths", "boss": "riftmaw"}
 	hud._resolve_oath(hud._ctrl.state, hud._ctrl.player(), true)
-	var tok0: int = hud._map_tokens
+	var tok0: int = hud._tokens_now()
 	hud._after_drop("riftmaw", hud._show_map)
-	print("oath KEPT: tokens %d->%d row_unlocked=%s screen=%s" % [tok0, hud._map_tokens,
+	print("oath KEPT: tokens %d->%d row_unlocked=%s screen=%s" % [tok0, hud._tokens_now(),
 		str((hud._gear_unlocks.get("riftmaw", []) as Array).has("grace_period")), hud._screen])
 	if hud._screen == "drop":
 		var pk := _press(hud, "SCRAP")
-		print("kept-oath drop scrapped: ok=%s tokens=%d" % [str(pk), hud._map_tokens])
+		print("kept-oath drop scrapped: ok=%s tokens=%d" % [str(pk), hud._tokens_now()])
 
 	# Tier-1 PERSONAL GATE (§GAME SHAPE): intro panel -> exam fight -> result ->
 	# map; a LOST gate = force-reboot (wound) and the run CONTINUES
