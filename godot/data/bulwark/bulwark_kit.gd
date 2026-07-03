@@ -39,6 +39,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	# Duelist reward: correctly holding a Feint leaves the boss briefly Exposed.
 	# Maintain a bool here so outgoing_mult (which has no tick) can read it.
 	seat.vars["exposed"] = s.tick < int(seat.vars.get("exposed_until_tick", 0))
+	# Sunder Guard (payExpose): its own per-seat Exposed window, same bool trick.
+	# Guarded, so a run without the boon never writes the key → byte-identical.
+	if _b("payExpose"):
+		seat.vars["pay_exposed"] = s.tick < int(seat.vars.get("pay_expose_until", 0))
 	# Twin Guard: the spent spare charge returns after mod_charge_recharge seconds.
 	if _b("propCharge") and int(seat.vars.get("guard_spare", 1)) < 1 \
 			and s.tick >= int(seat.vars.get("guard_recharge_tick", 0)):
@@ -178,6 +182,8 @@ func outgoing_mult(seat: Seat) -> float:
 	var m := 1.0
 	if bool(seat.vars.get("exposed", false)):
 		m *= cfg.feint_exposed_mult
+	if bool(seat.vars.get("pay_exposed", false)):     # Sunder Guard: +15% while Exposed
+		m *= 1.0 + cfg.mod_expose_amt
 	if aspect == "juggernaut":
 		m *= 1.0 + float(int(seat.vars.get("momentum", 0))) * cfg.mom_dmg
 	if _b("execute") and seat.hp_max > 0.0 and seat.hp / seat.hp_max < 0.35:
@@ -330,9 +336,12 @@ func _guard_proc(s: CombatState, seat: Seat, source: String) -> void:
 	if _b("payMomentum") and aspect == "juggernaut":
 		_gain_momentum(s, seat, 2)
 	if _b("payExpose"):
-		var until := s.tick + _tt(s, cfg.mod_expose_dur)
-		s.boss.exposed_until_tick = maxi(s.boss.exposed_until_tick, until)
-		s.boss.expose_amt = maxf(s.boss.expose_amt, cfg.mod_expose_amt)
+		# PER-SEAT expose window (upkeep maintains the `pay_exposed` flag; outgoing_mult
+		# applies +mod_expose_amt). NOT boss-level: those fields are the Voidcaller's
+		# (its _deal reads them) — writing them here did nothing for a solo tank AND
+		# would leak Expose to a co-op Voidcaller. This is the tank's own bonus.
+		seat.vars["pay_expose_until"] = maxi(int(seat.vars.get("pay_expose_until", 0)),
+			s.tick + _tt(s, cfg.mod_expose_dur))
 	CombatCore.emit_event(s, {"t": "guard_proc", "player": seat.is_player, "src": source})
 
 # --- resource helpers ---
