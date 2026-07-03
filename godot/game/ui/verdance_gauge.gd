@@ -12,8 +12,13 @@ var verdance: float = 0.0
 var verdance_max: float = 100.0
 var min_spend: float = 20.0
 var flourish: bool = false          ## Wildgrove: garden bonus is live
+var flourish_ripe: bool = false     ## …and the field is RIPE (upgraded bonus)
 var garden: int = 0                 ## allies carrying a Growth
+var ripe_garden: int = 0            ## …of which are RIPE (harvest window)
 var thorns: int = 0                 ## Thornveil: total reflected damage
+var thorn_charge: int = 0           ## Thornveil: snap-streak (0..max)
+var thorn_charge_max: int = 5
+var thorns_pct: float = 0.45        ## current reflect fraction (ramps with charge)
 var _pulse: float = 0.0
 var _bloom_t: float = 0.0           ## petal pop when a new petal completes
 var _last_lit: int = 0
@@ -39,7 +44,7 @@ func _draw() -> void:
 	UiKit.wing_flourish(self, c, -1.0, 205.0, Palette.VERDANCE, spendable)
 	UiKit.wing_flourish(self, c, 1.0, 205.0,
 		Palette.VERDANCE if aspect == "wildgrove" else Palette.THORN,
-		flourish if aspect == "wildgrove" else thorns > 0)
+		flourish if aspect == "wildgrove" else thorn_charge > 0)
 
 	# ---- the jade core ----
 	if spendable or _bloom_t > 0.0:
@@ -96,27 +101,41 @@ func _draw() -> void:
 		for i in 4:
 			var gp := Vector2(gx0 - spacing * float(i), c.y)
 			var on := i < garden
-			if on and flourish:
-				var gh := Palette.VERDANCE
+			var is_ripe := i < ripe_garden            # RIPE growths glow gold (harvest window)
+			if on and (flourish or is_ripe):
+				var gh := Palette.GOLD_BRIGHT if is_ripe else Palette.VERDANCE
 				gh.a = 0.20 + 0.14 * sin(_pulse * 2.2 + float(i))
 				draw_circle(gp, 14.0, gh)
-			UiKit.gilded_pip(self, gp, 8.0, on, Palette.VERDANCE)
-		UiKit.engraved_plaque(self, Vector2(gx0 - spacing * 1.5, h - 11.0), "GARDEN", garden >= 3)
+			UiKit.gilded_pip(self, gp, 8.0, on, Palette.GOLD_BRIGHT if is_ripe else Palette.VERDANCE)
+		UiKit.engraved_plaque(self, Vector2(gx0 - spacing * 1.5, h - 11.0),
+			"%d RIPE" % ripe_garden if ripe_garden > 0 else "GARDEN", ripe_garden >= 3)
 
 	# ---- the payoff line ----
 	if aspect == "wildgrove":
-		if flourish:
+		if flourish_ripe:
 			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(c.x + 40.0, h - 7.0),
-				"◆ FLOURISH — GARDEN +25% ◆", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
-				Palette.VERDANCE.lerp(Palette.GOLD_BRIGHT, 0.5 + 0.5 * sin(_pulse * 2.0)))
+				"◆ FLOURISH — RIPE FIELD +42% ◆", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
+				Palette.GOLD_BRIGHT.lerp(Palette.VERDANCE, 0.5 + 0.5 * sin(_pulse * 2.0)))
+		elif flourish:
+			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(c.x + 40.0, h - 7.0),
+				"FLOURISH +25% — RIPEN FOR MORE", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
+				Palette.VERDANCE.lerp(Palette.GOLD_BRIGHT, 0.4))
 		else:
 			UiKit.engraved_plaque(self, Vector2(c.x + 168.0, h - 13.0),
 				"3 GROWTHS LIGHT FLOURISH", false)
 	else:
-		if thorns > 0:
-			UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(c.x + 40.0, h - 7.0),
-				"THORNS %d REFLECTED" % thorns, HORIZONTAL_ALIGNMENT_CENTER, 260.0,
-				UiKit.SIZE["CAPTION"], Palette.THORN.lightened(0.15))
-		else:
-			UiKit.engraved_plaque(self, Vector2(c.x + 168.0, h - 13.0),
-				"WARDS REFLECT — TIME THEM", false)
+		# THORN CHARGE — the snap-streak: pips light per consecutive Perfect Ward, reflect ramps.
+		var tx0 := c.x + 78.0
+		var tsp := 26.0
+		for i in thorn_charge_max:
+			var tp := Vector2(tx0 + tsp * float(i), c.y + 30.0)
+			var lit := i < thorn_charge
+			if lit and i == thorn_charge - 1:
+				var th := Palette.THORN
+				th.a = 0.25 + 0.2 * sin(_pulse * 2.4)
+				draw_circle(tp, 11.0, th)
+			UiKit.gilded_pip(self, tp, 6.5, lit, Palette.THORN)
+		UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(c.x + 40.0, h - 8.0),
+			"SNAP ×%d  ·  reflect %d%%" % [thorn_charge, int(round(thorns_pct * 100.0))],
+			HORIZONTAL_ALIGNMENT_CENTER, 280.0, UiKit.SIZE["CAPTION"],
+			Palette.THORN.lightened(0.2) if thorn_charge > 0 else Palette.TEXT_DIM)

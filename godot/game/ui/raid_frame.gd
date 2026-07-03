@@ -25,6 +25,7 @@ var dead: bool = false
 var bloodied: bool = false
 var is_target: bool = false
 var read_mode: String = ""       ## Mender aspect read overlay: "" | "tide" | "brink"
+var ripe: bool = false           ## Bloomweaver: this ally's Growth is in the harvest window
 var read_a: float = 0.60         ## Tidecaller waterline (keep bars above it)
 var read_b: float = 0.40         ## Brinkwarden band top (catch bars inside 0.15..read_b)
 
@@ -189,11 +190,16 @@ func _draw() -> void:
 		fl.set_corner_radius_all(9)
 		draw_style_box(fl, Rect2(0, 0, w, h))
 
-	# HoT gems (gilded, glowing green)
+	# HoT gems (gilded, glowing green) — Bloomweaver: a RIPE growth glows GOLD (harvest now!)
 	for i in mini(hot_count, 3):
 		var px := w - 14.0 - float(i) * 13.0
-		draw_circle(Vector2(px, 13.0), 6.5, Color(Palette.WIN.r, Palette.WIN.g, Palette.WIN.b, 0.20))
-		UiKit.gilded_pip(self, Vector2(px, 13.0), 4.0, true, Palette.WIN)
+		var gcol := Palette.GOLD_BRIGHT if (ripe and i == 0) else Palette.WIN
+		if ripe and i == 0:
+			var rh := Palette.GOLD_BRIGHT
+			rh.a = 0.28 + 0.22 * sin(_pulse * 2.2)
+			draw_circle(Vector2(px, 13.0), 10.0, rh)     # "◆ RIPE" glow
+		draw_circle(Vector2(px, 13.0), 6.5, Color(gcol.r, gcol.g, gcol.b, 0.20))
+		UiKit.gilded_pip(self, Vector2(px, 13.0), 4.0, true, gcol)
 
 	# dispellable debuff: a pulsing crimson wax seal
 	if has_debuff and not dead:

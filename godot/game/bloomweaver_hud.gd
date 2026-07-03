@@ -8,14 +8,14 @@ extends Control
 const SPELL_KEYS := {"1": "growth", "2": "bark", "3": "overgrowth", "4": "lash",
 	"q": "saprot", "e": "lifesurge", "7": "signature"}
 const SPELL_TIPS := {
-	"growth": "Plant a heal-over-time. RECAST on a Growth'd ally to BLOOM it — cash the remaining ticks instantly. Plant early, bloom the spike.",
-	"bark": "Instant ward. If damage FULLY consumes it: PERFECT WARD — Sap refund + bonus Verdance. If it expires unused, it wilts (wasted).",
+	"growth": "Plant a heal-over-time that RIPENS. RECAST on a Growth'd ally to BLOOM it — cash the remaining ticks. WILDGROVE: harvest in the RIPE window (gold gem) for a bonus, and 3 ripe growths upgrade Flourish. Plant early, harvest at peak.",
+	"bark": "Instant ward. If damage FULLY consumes it: PERFECT WARD — Sap refund + bonus Verdance. THORNVEIL: each Perfect Ward is a SNAP that ramps your thorn reflect; let one wilt and the streak breaks.",
 	"overgrowth": "2s cast: plant Growth on the whole party. The blanket that starts the garden.",
 	"lash": "Flick a thorn at the boss (18). The greed button for calm windows.",
 	"saprot": "Cleanse a debuff and leave a Growth where it was — rot becomes flowers. Off-GCD.",
 	"lifesurge": "BLOOM every Growth at 125%, at once. The panic button is the garden you already planted. Off-GCD, 30s.",
-	"wildbloom": "WILDGROVE: spend all Verdance — heal every Growth'd ally for that much and restart their Growths.",
-	"briarheart": "THORNVEIL: spend all Verdance — thorned wards on the whole party. They reflect, and full absorbs refund.",
+	"wildbloom": "WILDGROVE: spend all Verdance — heal every Growth'd ally for that much and restart their Growths. Refunds Sap per ally (the garden re-funds itself).",
+	"briarheart": "THORNVEIL: spend all Verdance — thorned wards on the whole party, biting harder at high snap-streak. Refunds Sap per ward placed.",
 }
 
 var _ctrl: CombatController
@@ -100,9 +100,9 @@ func _show_select() -> void:
 	sel.subtitle = "HEALER — ANTICIPATE · PICK A FIGHT"
 	sel.aspects = [
 		{"id": "wildgrove", "label": "WILDGROVE", "accent": Palette.VERDANCE,
-			"blurb": "Wildgrove · 3+ Growths light Flourish — sprawl and ramp the garden"},
+			"blurb": "Wildgrove · tend the field to RIPE, harvest at peak — the gardener's timing game"},
 		{"id": "thornveil", "label": "THORNVEIL", "accent": Palette.THORN,
-			"blurb": "Thornveil · wards reflect; a PERFECT ward refunds — answer the swing"},
+			"blurb": "Thornveil · SNAP wards on the hit, ramp the thorn streak — a combo meter on a healer"},
 	]
 	sel.encounters = BloomweaverContent.run_encounters()
 	sel.extras = [{"label": "Mouse Bindings", "cb": _show_binds}]
@@ -487,6 +487,11 @@ func _process(_delta: float) -> void:
 		fr.absorb_frac = (seat.absorb / seat.hp_max) if seat.hp_max > 0.0 else 0.0
 		fr.has_debuff = not seat.debuff.is_empty()
 		fr.hot_count = seat.hots.size()
+		fr.ripe = false                          # Wildgrove: gold HoT gem when the Growth is ripe
+		for pe in obs.get("party", []):
+			if pe.get("seat") == seat:
+				fr.ripe = bool(pe.get("ripe", false))
+				break
 		fr.dead = not seat.alive()
 		fr.bloodied = seat.alive() and seat.hp_frac() <= 0.35
 		fr.is_target = (seat == _hover_seat) or (_hover_seat == null and seat == _focus_seat)
@@ -519,8 +524,13 @@ func _process(_delta: float) -> void:
 	# Verdance petal ring
 	_verd.verdance = float(obs.get("verdance", 0.0))
 	_verd.flourish = bool(obs.get("flourish", false))
+	_verd.flourish_ripe = bool(obs.get("flourish_ripe", false))
 	_verd.garden = int(obs.get("garden", 0))
+	_verd.ripe_garden = int(obs.get("ripe_garden", 0))
 	_verd.thorns = int(float(p.vars.get("stat_thorns", 0.0)))
+	_verd.thorn_charge = int(obs.get("thorn_charge", 0))
+	_verd.thorn_charge_max = int(obs.get("thorn_charge_max", 5))
+	_verd.thorns_pct = float(obs.get("thorns_pct", 0.45))
 
 	# cast bar (Overgrowth)
 	var casting: Dictionary = p.casting
@@ -638,6 +648,14 @@ func _handle_event(ev: Dictionary) -> void:
 		return
 	if t == "cast_cancelled":
 		_center_pop("cast cancelled", Palette.TEXT_DIM, 16)
+		return
+	# Thornveil snap-streak feedback: the combo climbs (louder each snap), breaks on a wilt.
+	if t == "thorn_snap":
+		var ch := int(ev.get("charge", 1))
+		_center_pop("SNAP ×%d" % ch, Palette.THORN.lightened(0.1 + 0.04 * float(ch)), 20 + 2 * ch)
+		return
+	if t == "thorn_break":
+		_center_pop("streak broken", Palette.TEXT_DIM, 18)
 		return
 	if t == "heal":
 		_stat_eff += float(ev.get("amt", 0))
