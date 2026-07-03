@@ -479,13 +479,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   readout at the SAME top-right combat corner as this PAUSE button — coexist/relocate when it lands
   (complementary: glance panel vs full pause guide). NEXT: extend the codex to Bloomweaver if it ever
   becomes a seat; per-branch "you own this" highlighting off `_run.boons`. *(pause-codex session)*
-- ☐ 2026-07-03 · `build-panel` · §GRAPHICS — **Verb/boon summary on the game HUD (Bill).** The combat
-  HUD shows no build readout; the solo HUDs had a "YOUR GUARD" verb tooltip. Add an always-visible
-  compact panel (top-right of the combat screen) listing the assembled verb rules (per-class
-  `*_boons.verb_summary/guard_summary(_run.boons, _aspect)`) + the drafted boons (track `_taken_boons`
-  dicts in `_show_boon_draft` for title/rarity, no resolver). Offline map runs only (`_run != null`).
-  Screenshot-verified (WSLg render works here now). Game-layer/UI only, zero engine. Gate: ui_smoke_raid
-  + determinism unchanged + a combat screenshot with boons. *(raid-finish session)*
+- ☑ 2026-07-03 · `build-panel` · §GRAPHICS — **Verb/boon summary on the game HUD — MERGED to main
+  (`fbfc74b`)**, worktree removed. An always-visible **TOP-LEFT** panel during offline descent fights:
+  "◆ YOUR GUARD/RHYTHM/KICK/TRIAGE" + the assembled verb rules (per-class `*_boons` verb summary) +
+  the drafted boons (title, rarity-colored). Tracks `_taken_boons` dicts in `_show_boon_draft` (reset
+  per descent). Placed top-left (not top-right — the DPS meter owns that; caught via screenshot).
+  Reconciled with `pause-codex` (kept both; its `_pause_quit` now returns to `_show_home`, not the
+  retired `main.tscn`). Gate PASS: screenshot-eyeballed (renders clean, no collision); menu/boon
+  probes + ui_smoke_raid green; bulwark determinism unchanged. **View-only, zero engine.** NEW WSLg
+  probes `sim/screenshot_menu.gd` + `sim/screenshot_build.gd` (render works here — no longer
+  layout-blind). NEXT: online boons (build panel + draft ride the spec). *(raid-finish session)*
 
 - ☑ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu refresh + boot into the game HUD — MERGED to
   main (`d27a84f`)**, worktree removed. The game boots straight into the game HUD (`raid_main.tscn`);
