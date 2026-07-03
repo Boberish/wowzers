@@ -428,6 +428,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `raid-richness` · §MAPS MAP-2 — **Make the raid map RICH & FUN (Bill, direct).**
+  The quest/objective + flavor layer on the Realm-1 floors: **TICKETS** (pickup at one node →
+  turn-in at a later one → reward paid in the wound-attrition economy: repair a corrupted sector /
+  integrity / refuel; close ALL on a floor = sprint-retro bonus), **per-ring identity** (Ring 3
+  user-space → Ring 2 middleware → Ring 0 root, ring-aware `MapContent.realm_title/sub` + node
+  flavor), and an **expanded event pool** (more Realm-1 events so floors don't repeat). Game-layer
+  only (`run_map`/`map_content`/`raid_hud`/`map_screen`/`raid_map_sim`); ZERO engine. Guarded:
+  `n_tickets=0`/ring-default = byte-identical map gen (solo map untouched). ⚠ no active session on
+  the map files now (gate-nodes/dps-meter merged; `sunder` is class-layer). Gate: map determinism,
+  raid+solo sims byte-identical with tickets off, raid_map_sim + smokes green. *(raid-finish session)*
 - ☑ 2026-07-03 · `realm1-floors` · §MAPS MAP-3c — **Finish Realm 1's raid — MERGED to main (`fafaf1a`)**,
   plan updated (§MAPS MAP-3c has the full record), worktree removed. GEMINI (Ring 2) + CLAUDE MYTHOS
   (Ring 0, credential-shard gated) are now playable floor Seals in a 3-floor RING descent;
