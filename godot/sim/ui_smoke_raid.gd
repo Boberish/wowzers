@@ -31,6 +31,12 @@ func _process(_delta: float) -> bool:
 		var ticks := _drive(s, String(combo[0]))
 		print("%-6s %-11s ok  loadout=%s ticks=%d boss_hp=%d over=%s" % [
 			combo[0], combo[1], str(hud._loadout), ticks, int(s.boss.hp), str(s.over)])
+		# pause menu + class codex: opens (freezes the fight), builds, resumes clean
+		hud._toggle_pause()
+		var codex_ok: bool = hud._pause != null and hud._pause.get_child_count() > 0 and hud._ctrl.paused
+		hud._resume_pause()
+		assert(codex_ok and hud._pause == null and not hud._ctrl.paused, "pause+codex round-trip failed")
+		print("   pause+codex: built+frozen+resumed ok")
 
 	# the Machine Seals (II-IV): launch each, drive live combat, and force-render
 	# an ADD PHASE on the finale (bar/dial swap + banners + stage body swap)

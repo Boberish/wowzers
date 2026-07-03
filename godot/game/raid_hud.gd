@@ -7,6 +7,7 @@
 extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
+const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller", "healer": "mender"}
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE VOIDCALLER", "healer": "THE MENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -49,6 +50,7 @@ const ABILITY_NAMES := {
 var _ctrl: CombatController
 var _local_ctrl: CombatController
 var _net_ctrl: NetCombatController
+var _pause: PauseOverlay = null     ## the in-combat pause menu + class codex (null = not paused)
 var _net: NetClient = null
 var _online: bool = false
 var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
@@ -171,6 +173,9 @@ func _clear() -> void:
 	_hover_seat = null
 	_focus_seat = null
 	_stage2d = null
+	_pause = null                   # the overlay is a _ui child — freed below; drop the freeze
+	if _ctrl != null:
+		_ctrl.paused = false
 	for c in _ui.get_children():
 		c.queue_free()
 
@@ -1317,6 +1322,21 @@ func _build_combat(s: CombatState) -> void:
 	_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(_fx)
+	_add_pause_button()
+
+## The PAUSE button (top-right). Always available in real play (offline freezes the
+## fight, online just opens the guide); hidden only in headless (sims/smokes drive
+## _toggle_pause directly). It's the entry to the Class Codex — the playtest cheat-sheet.
+func _add_pause_button() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var pb := Button.new()
+	pb.text = "PAUSE  (P)"
+	pb.add_theme_font_size_override("font_size", 12)
+	pb.modulate = Color(1.0, 1.0, 1.0, 0.72)
+	pb.pressed.connect(_toggle_pause)
+	_place(pb, 1, 0, 1, 0, -150, 14, -18, 46)
+	_ui.add_child(pb)
 
 func _orb(fill: Color, caption: String, right: bool) -> LiquidOrb:
 	var o := LiquidOrb.new()
@@ -1578,6 +1598,58 @@ func _add_build_panel() -> void:
 	frame.offset_top = 56
 	frame.offset_bottom = 56
 
+# ============================================================ PAUSE + CLASS CODEX
+## Open/close the pause menu. OFFLINE freezes the fight (`CombatController.paused`);
+## ONLINE never freezes a lockstep replica — the guide just opens over the running fight.
+func _toggle_pause() -> void:
+	if _screen != "combat":
+		return
+	if _pause != null:
+		_resume_pause()
+		return
+	if not _online and _ctrl != null:
+		_ctrl.paused = true
+	_pause = PauseOverlay.new(SEAT_CLASS.get(_seat_key, "bulwark"), _aspect,
+		_owned_boon_labels(), not _online)
+	_pause.resumed.connect(_resume_pause)
+	_pause.quit_to_menu.connect(_pause_quit)
+	_ui.add_child(_pause)
+
+func _resume_pause() -> void:
+	if _ctrl != null:
+		_ctrl.paused = false
+	if _pause != null and is_instance_valid(_pause):
+		_pause.queue_free()
+	_pause = null
+
+func _pause_quit() -> void:
+	# one HUD: "quit to menu" returns to the HOME screen (the retired main.tscn is gone)
+	_resume_pause()
+	if _net != null:
+		_net.close()
+	_online = false
+	_show_home()
+
+## The boons the human seat has drafted, resolved to {title,rarity,type} for the codex
+## header. Only the map/campaign run carries a boon pool (`_run`); a bare Seal pull has
+## none → []. Scans the current class's boon pools by id.
+func _owned_boon_labels() -> Array:
+	if _run == null or _run.boons.is_empty():
+		return []
+	var pools: Array = []
+	match _seat_key:
+		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
+		"caster": pools = [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]
+		"healer": pools = [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK]
+		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
+	var out: Array = []
+	for pool in pools:
+		for b in pool:
+			if _run.boons.get(String(b.get("id", "")), false):
+				out.append({"title": b.get("title", b.get("id", "?")),
+					"rarity": b.get("rarity", "haiku"), "type": b.get("type", "")})
+	return out
+
 func _healer_hint() -> String:
 	var parts: Array = []
 	for chord in MenderBinds.CHORDS:
@@ -1601,12 +1673,23 @@ func _on_frame_unhover(fr) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		# pause menu open: Esc / P resume, everything else is swallowed (fight frozen)
+		if _pause != null:
+			if event.keycode == KEY_ESCAPE or event.keycode == KEY_P:
+				_resume_pause()
+			return
 		if event.keycode == KEY_ESCAPE:
+			if _screen == "combat":
+				_toggle_pause()      # Esc in a fight = PAUSE (Quit-to-menu lives inside it)
+				return
 			if _net != null:
 				_net.close()
 			get_tree().change_scene_to_file("res://game/main.tscn")
 			return
 		if _screen != "combat":
+			return
+		if event.keycode == KEY_P:
+			_toggle_pause()
 			return
 		if event.keycode == KEY_M and _meter != null:
 			_meter.cycle()
@@ -1618,7 +1701,7 @@ func _input(event: InputEvent) -> void:
 				_martial_key(event.keycode)
 		return
 	# Mender click-cast: hover a frame, click a chord
-	if _seat_key == "healer" and _screen == "combat" \
+	if _pause == null and _seat_key == "healer" and _screen == "combat" \
 			and event is InputEventMouseButton and event.pressed and _hover_seat != null:
 		var id := String(_binds.get(_mouse_chord(event), "none"))
 		if id == "signature":
