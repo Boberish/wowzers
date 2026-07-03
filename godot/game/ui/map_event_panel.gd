@@ -16,6 +16,11 @@ class_name MapEventPanel
 extends Control
 
 signal finished(fx: Dictionary)
+## Multi-stage branch (OFFLINE only): a chosen leg leads to a follow-up stage. The HUD
+## applies `fx` and renders `page`; the panel is rebuilt per stage. Online stages are
+## server-driven (each stage is a fresh mapstop), so `client_stages` stays false there.
+signal staged(fx: Dictionary, page: String)
+var client_stages := false
 
 var title_text := "NODE"
 var body_text := ""
@@ -222,12 +227,15 @@ func _on_press(c: Dictionary, orig: int) -> void:
 	if String(c.get("kind", "free")) == "check" and resolver.is_valid():
 		var res: Dictionary = resolver.call(orig, int(_nudge.get(orig, 0)))
 		_show_result(res.get("fx", {}), String(res.get("result", "")),
-			bool(res.get("success", false)), int(res.get("roll", -1)), int(res.get("p", 0)), true)
+			bool(res.get("success", false)), int(res.get("roll", -1)), int(res.get("p", 0)), true,
+			String(res.get("goto", "")))
 	else:
 		var fx: Dictionary = c.get("fx", {})
-		_show_result(fx, String(fx.get("result", "It is done.")), true, -1, 0, false)
+		_show_result(fx, String(fx.get("result", "It is done.")), true, -1, 0, false,
+			String(c.get("next_page", "")))
 
-func _show_result(fx: Dictionary, text: String, success: bool, roll: int, p: int, was_check: bool) -> void:
+func _show_result(fx: Dictionary, text: String, success: bool, roll: int, p: int, was_check: bool,
+		next_page := "") -> void:
 	_clear()
 	_title(title_text)
 	if was_check:
@@ -240,10 +248,16 @@ func _show_result(fx: Dictionary, text: String, success: bool, roll: int, p: int
 		_label(outcome, 14, accent)
 	_box.add_child(_gap(6))
 	var b := Button.new()
-	b.text = "CONTINUE"
+	# OFFLINE multi-stage: if this leg leads to a follow-up stage, advance instead of ending
+	var stages := client_stages and next_page != ""
+	b.text = "PROCEED  →" if stages else "CONTINUE"
 	b.custom_minimum_size = Vector2(240, 46)
 	b.add_theme_font_size_override("font_size", 16)
-	b.pressed.connect(func(): finished.emit(fx))
+	b.pressed.connect(func():
+		if stages:
+			staged.emit(fx, next_page)
+		else:
+			finished.emit(fx))
 	_box.add_child(b)
 
 ## The reward/penalty preview line — themed for the whole Inference-Check vocab.

@@ -207,6 +207,19 @@ static func gate_reason(gate: Dictionary) -> String:
 	return ""
 
 # ---------------------------------------------------------------- the die
+## A distinct die SLOT per (stage page, choice) so a multi-stage branch's sub-page checks
+## never share the root page's die. The ROOT page ("") returns the choice index unchanged,
+## so single-stage events (every existing one) keep byte-identical dice. Server + both
+## clients compute this identically → no desync across stages.
+static func choice_slot(page_id: String, orig: int) -> int:
+	if page_id == "":
+		return orig
+	var h := 2166136261
+	for i in page_id.length():
+		h = (h ^ page_id.unicode_at(i)) & 0xFFFFFFFF
+		h = (h * 16777619) & 0xFFFFFFFF
+	return orig + (h % 8000) + 1000        # page-specific offset, clear of small root indices
+
 static func roll_seed(map_seed: int, node_id: int, choice_i: int, attempt: int) -> int:
 	var h := map_seed & 0x7FFFFFFF
 	h = (h * 1000003 + (node_id + 1) * 6763) & 0x7FFFFFFF

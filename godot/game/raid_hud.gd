@@ -739,8 +739,10 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 	_clear()
 	if _map_is_leader:
 		var eid := String(msg.get("event", ""))
+		var page := String(msg.get("page", ""))   # P3: the current branch stage
 		var ev := MapContent.event(eid)
-		var raw: Array = ev.get("choices", [])
+		var raw: Array = ev.get("choices", []) if page == "" \
+			else ((ev.get("pages", {}) as Dictionary).get(page, {}) as Dictionary).get("choices", [])
 		var meta: Array = msg.get("choices", [])
 		var mseed := int(msg.get("map_seed", 0))
 		var node := int(msg.get("node", 0))
@@ -767,7 +769,7 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 			var bs: Dictionary = (sc.get("by_seat", {}) as Dictionary).get(p.committed_seat, {})
 			var ladder: Array = bs.get("ladder", [])
 			var pp := int(bs.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
-			var roll := MapCheck.roll(mseed, node, orig, 0)
+			var roll := MapCheck.roll(mseed, node, MapCheck.choice_slot(page, orig), 0)
 			var success := roll < float(pp)
 			var leg: Dictionary = (raw[orig] as Dictionary).get("success" if success else "fail", {})
 			return {"success": success, "roll": roll, "p": pp,
@@ -1102,22 +1104,32 @@ func _resolve_node(n: Dictionary) -> void:
 ## resolves exactly like before. Kind-less legacy choices route the free path too.
 func _event_stop(n: Dictionary) -> void:
 	var ev := MapContent.event(String(n["event"]))
+	_render_event_page(n, "", String(ev.get("title", "")), String(ev.get("body", "")),
+		ev.get("choices", []))
+
+## Render ONE stage of an event (the root page, or a branch/goto sub-page). Multi-stage
+## events chain client-side offline: a chosen leg with a `branch`/`goto` emits `staged`,
+## which applies its fx and renders the target page. The die is keyed per (page, choice)
+## via choice_slot, so a sub-page's checks get their own rolls; the root ("") is unchanged.
+func _render_event_page(n: Dictionary, page_id: String, title: String, body: String,
+		raw: Array) -> void:
 	var ctx := _map_ctx()
 	var map_seed := _map.seed if _map != null else 0
 	var node_id := int(n["id"])
-	var raw: Array = ev.get("choices", [])
 	var descs: Array = []
 	for i in raw.size():
 		descs.append(_prep_choice(raw[i], i, ctx))
 	_screen = "mapstop"
 	_clear()
 	var p := MapEventPanel.new()
-	p.title_text = String(ev.get("title", ""))
-	p.body_text = String(ev.get("body", ""))
+	p.title_text = title
+	p.body_text = body
 	p.choices = descs
 	p.accent = Palette.VOID
+	p.client_stages = true
 	p.resolver = func(orig: int, nudge: int) -> Dictionary:
-		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id, orig, 0, {"nudge": nudge})
+		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id,
+			MapCheck.choice_slot(page_id, orig), 0, {"nudge": nudge})
 		if bool(res["success"]):
 			_check_fails = 0
 		else:
@@ -1125,6 +1137,12 @@ func _event_stop(n: Dictionary) -> void:
 		if nudge > 0:                          # ⚡ fed to the sampler is spent on commit
 			_entropy = maxi(0, _entropy - nudge)
 		return res
+	p.staged.connect(func(fx: Dictionary, page: String):
+		_apply_map_fx(fx)
+		var ev := MapContent.event(String(n["event"]))
+		var pg: Dictionary = (ev.get("pages", {}) as Dictionary).get(page, {})
+		_render_event_page(n, page, String(pg.get("title", title)),
+			String(pg.get("body", "")), pg.get("choices", [])))
 	p.finished.connect(func(fx: Dictionary):
 		_apply_map_fx(fx)
 		_show_map())
@@ -1132,10 +1150,11 @@ func _event_stop(n: Dictionary) -> void:
 	_ui.add_child(p)
 
 ## Present a single choice: gate first (greyed if unmet), then a check gets its % +
-## itemized breakdown; a free choice carries its fx straight through.
+## itemized breakdown; a free/branch choice carries its fx + the page it opens (next_page).
 func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 	var kind := String(c.get("kind", "free"))
-	var d := {"label": String(c["label"]), "kind": kind, "orig_index": i, "fx": c.get("fx", {})}
+	var d := {"label": String(c["label"]), "kind": kind, "orig_index": i, "fx": c.get("fx", {}),
+		"next_page": String(c.get("branch", String(c.get("goto", ""))))}   # branch/goto target
 	var gate: Dictionary = c.get("gate", {})
 	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
 		d["gated"] = true

@@ -419,7 +419,7 @@ func _start_map(id: int) -> void:
 		"map_seed": randi() & 0x7FFFFFFF, "floor": 0, "node": -1,
 		"inv": {}, "fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
 		"tickets": {}, "total": 0, "closed": 0, "map": null, "fights": [],
-		"toast": "", "pending_event": "",
+		"toast": "", "pending_event": "", "pending_page": "",   # P3: current branch stage
 		"boons": {},                 # online boons: seat_key -> {boon_id: true}, drafted over the descent
 		"draft_pending": [],         # human seats that still owe a pick this draft phase
 		"next_after_draft": "",      # "map" | "advance" — what to do once everyone's picked
@@ -509,26 +509,9 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 			# their SPECIALIST to the terminal (the seat's build drives the check). The pure
 			# die (map_seed,node,choice) is seat-independent, so the leader shows the ✓/✗
 			# locally for the chosen seat, identical to the server's authoritative resolve.
-			var ev := MapContent.event(String(n["event"]))
 			cp["pending_event"] = String(n["event"])
-			var seats := _candidate_seats(room)
-			var raw: Array = ev.get("choices", [])
-			var choices: Array = []
-			for i in raw.size():
-				var c: Dictionary = raw[i]
-				var d := {"i": i, "label": String(c.get("label", "")),
-					"kind": String(c.get("kind", "free")),
-					"verb": String((c.get("check", {}) as Dictionary).get("verb", "CHECK")),
-					"by_seat": {}}
-				for st in seats:
-					d["by_seat"][st] = _choice_meta_for(c, _map_ctx_srv(room, st))
-				choices.append(d)
-			var suggested := _suggest_seat(seats, choices)
-			_broadcast(room, {"t": "mapstop", "event": String(n["event"]),
-				"node": int(n["id"]), "map_seed": int((cp["map"] as RunMap).seed),
-				"seats": seats, "suggested": suggested, "entropy": int(cp["entropy"]),
-				"title": String(ev.get("title", "")), "body": String(ev.get("body", "")),
-				"choices": choices, "accent": "void"})
+			cp["pending_page"] = ""
+			_broadcast_mapstop(room, String(n["event"]), "")
 		RunMap.KIND_COOLING:
 			_apply_fx_srv(cp, {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true})
 			cp["toast"] = "COOLING STATION — throttled: integrity up, sectors repaired, reserves topped."
@@ -562,7 +545,8 @@ func _pick_choice(id: int, msg: Dictionary) -> void:
 	if eid == "":
 		return
 	var ev := MapContent.event(eid)
-	var choices: Array = ev.get("choices", [])
+	var page := String(cp.get("pending_page", ""))
+	var choices: Array = _page_choices(ev, page)
 	var i := int(msg.get("i", -1))
 	if i < 0 or i >= choices.size():
 		return
@@ -572,18 +556,57 @@ func _pick_choice(id: int, msg: Dictionary) -> void:
 	if not (room.get("seat_cfg", {}) as Dictionary).has(seat):
 		seat = _leader_seat(room)
 	var ctx := _map_ctx_srv(room, seat)
-	# the pure decision (gate / roll / toast / ⚡ spend) — shared with the unit probe
+	# the pure decision (gate / roll / toast / ⚡ spend). The die slot is per (page, choice)
+	# so a branch sub-page has its own roll — identical to the leader's local resolve.
 	var r := resolve_event_choice(c, ctx, int((cp["map"] as RunMap).seed), int(cp["node"]),
-		i, int(msg.get("nudge", 0)), int(cp["entropy"]))
+		MapCheck.choice_slot(page, i), int(msg.get("nudge", 0)), int(cp["entropy"]))
 	if not bool(r["accept"]):
 		return                               # can't commit a locked choice
-	cp["pending_event"] = ""
 	if bool(r["is_check"]):
 		cp["check_fails"] = 0 if bool(r["success"]) else int(cp["check_fails"]) + 1
 	cp["entropy"] = int(r["entropy_after"])
 	_apply_fx_srv(cp, r["fx"])                # MapFx handles heal/hurt/wound/draft→patch/⚡/📁/…
 	cp["toast"] = String(r["toast"])
-	_broadcast_map(room)
+	# P3 STAGING: a branch/goto leg advances to a sub-page (a fresh mapstop); else the
+	# event ends and we broadcast the map.
+	var nxt := String(r.get("goto", ""))
+	if nxt != "" and (ev.get("pages", {}) as Dictionary).has(nxt):
+		cp["pending_page"] = nxt
+		_broadcast_mapstop(room, eid, nxt)
+	else:
+		cp["pending_event"] = ""
+		cp["pending_page"] = ""
+		_broadcast_map(room)
+
+## The choices for the current stage: the event's root, or a branch sub-page.
+func _page_choices(ev: Dictionary, page: String) -> Array:
+	if page == "":
+		return ev.get("choices", [])
+	return ((ev.get("pages", {}) as Dictionary).get(page, {}) as Dictionary).get("choices", [])
+
+## Broadcast a mapstop for one STAGE (root page = "", or a branch sub-page): per-seat
+## metadata for the stage's choices + the suggested specialist. The client looks the
+## stage's choice bodies up locally from MapContent by (event, page).
+func _broadcast_mapstop(room: Dictionary, event_id: String, page: String) -> void:
+	var cp: Dictionary = room["campaign"]
+	var ev := MapContent.event(event_id)
+	var raw: Array = _page_choices(ev, page)
+	var src: Dictionary = ev if page == "" else (ev.get("pages", {}) as Dictionary).get(page, {})
+	var seats := _candidate_seats(room)
+	var choices: Array = []
+	for i in raw.size():
+		var c: Dictionary = raw[i]
+		var d := {"i": i, "label": String(c.get("label", "")),
+			"kind": String(c.get("kind", "free")),
+			"verb": String((c.get("check", {}) as Dictionary).get("verb", "CHECK")), "by_seat": {}}
+		for st in seats:
+			d["by_seat"][st] = _choice_meta_for(c, _map_ctx_srv(room, st))
+		choices.append(d)
+	_broadcast(room, {"t": "mapstop", "event": event_id, "page": page,
+		"node": int(cp["node"]), "map_seed": int((cp["map"] as RunMap).seed),
+		"seats": seats, "suggested": _suggest_seat(seats, choices), "entropy": int(cp["entropy"]),
+		"title": String(src.get("title", ev.get("title", ""))),
+		"body": String(src.get("body", "")), "choices": choices, "accent": "void"})
 
 ## PURE, authoritative resolution of an event choice (Node-free, testable). Gate-checks,
 ## rolls a CHECK on the deterministic die (identical to the leader's local display), spends
@@ -602,10 +625,13 @@ static func resolve_event_choice(c: Dictionary, ctx: Dictionary, map_seed: int, 
 			else "✗ rolled %d vs %d%% — " % [int(res["roll"]), int(res["p"])]) + String(res["result"])
 		return {"accept": true, "is_check": true, "fx": res["fx"], "toast": toast,
 			"entropy_after": maxi(0, entropy_have - nudge), "success": bool(res["success"]),
-			"p": int(res["p"]), "roll": int(res["roll"]), "nudge": nudge}
+			"p": int(res["p"]), "roll": int(res["roll"]), "nudge": nudge,
+			"goto": String(res.get("goto", ""))}          # a check leg may fail-forward
 	var fx: Dictionary = (c.get("fx", {}) as Dictionary).duplicate()
+	# a free/branch choice's next stage: `branch` (kind branch) or `goto` (free)
 	return {"accept": true, "is_check": false, "fx": fx, "toast": String(fx.get("result", "")),
-		"entropy_after": entropy_have, "success": true}
+		"entropy_after": entropy_have, "success": true,
+		"goto": String(c.get("branch", String(c.get("goto", ""))))}
 
 ## Candidate seats a check can be attempted by — every seat in the descent, in the
 ## canonical tank→blade→caster→healer order (stable across machines).

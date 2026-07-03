@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 7      # v7: SEAT-PICKER — mapstop carries per-choice by_seat{%/breakdown/gate/ladder} + suggested; party sends its specialist in {i, nudge, seat}
+const VERSION := 8      # v8: MULTI-STAGE BRANCHES — mapstop carries `page`; the server traverses stages (branch/goto), broadcasting a fresh mapstop per stage
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 
