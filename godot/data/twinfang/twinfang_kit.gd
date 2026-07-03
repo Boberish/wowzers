@@ -65,6 +65,10 @@ func _gain_energy(seat: Seat, x: float) -> void:
 #     source of truth for _strike AND observe() so the RhythmBar/policy read exactly what
 #     the kit judges a press against.
 func _tempo_t(seat: Seat) -> float:
+	# GEAR-2: Encore Bell — after a finisher the window holds at the wide Flow-0
+	# anchors for 3 strikes (encore_left is only ever written by the gear branch).
+	if int(seat.vars.get("encore_left", 0)) > 0:
+		return 0.0
 	return clampf(float(_flow(seat)) / float(max_flow()), 0.0, 1.0)
 func _swing_min_sec(seat: Seat) -> float:
 	return lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat))
@@ -155,6 +159,11 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if bell > 0.0:
 		_gain_energy(seat, bell)
 	_gain_energy(seat, cfg.energy_regen * s.dt)
+	# GEAR-2: Scratchpad — regen trebles while a long wind-up thinks.
+	if GearFx.scratchpad_live(s, seat):
+		_gain_energy(seat, cfg.energy_regen * s.dt * 2.0)
+		if GearFx.flag_once(seat, &"scratchpad_pop"):
+			GearFx.pop(s, seat, &"scratchpad")
 	# Twin Step: the spent spare dodge charge returns after mod_step_recharge seconds.
 	if _b("tfPropTwinStep") and int(seat.vars.get("dodge_spare", 1)) < 1 \
 			and s.tick >= int(seat.vars.get("dodge_recharge_tick", 0)):
@@ -228,9 +237,12 @@ func modify_incoming(_s: CombatState, seat: Seat, dmg: float, _source: StringNam
 func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringName, size: int) -> void:
 	GearFx.damage_taken(s, seat)   # GEAR-1: death procs (Swan Song) — gear-gated no-op
 	if size != AbilityRes.Size.NONE and _flow(seat) > 0:
-		seat.vars["flow"] = 0
-		seat.vars["flow_decay_acc"] = 0
-		CombatCore.emit_event(s, {"t": "flow_lost", "player": seat.is_player})
+		if GearFx.once(seat, &"grace_period"):
+			GearFx.pop(s, seat, &"grace_period")   # GEAR-2: the song survives one landed swing
+		else:
+			seat.vars["flow"] = 0
+			seat.vars["flow_decay_acc"] = 0
+			CombatCore.emit_event(s, {"t": "flow_lost", "player": seat.is_player})
 
 # --- GEAR-1: a boss self-heal was DENIED somewhere — Riftmaw Tooth pays energy ---
 func on_boss_heal_denied(s: CombatState, seat: Seat) -> void:
@@ -311,6 +323,8 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	var cost := float(a["energy"])
 	if aspect == "tempo" and _b("syncopation") and _flow(seat) >= max_flow():
 		cost = 0.0
+	if aspect == "venomancer" and int(seat.vars.get("encore_left", 0)) > 0:
+		cost = maxf(0.0, cost - 6.0)                   # GEAR-2: Encore Bell (Venom side)
 	if seat.resource < cost:
 		return false                                   # out of energy
 	# ACCELERANDO: the window bounds ride current Flow (Venom's Flow is pinned 0 → base).
@@ -324,6 +338,8 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 		perfect = true                                 # Opus: the primed strike IS perfect
 		seat.vars["next_perfect"] = false
 	seat.resource -= cost
+	if int(seat.vars.get("encore_left", 0)) > 0:       # the encore spends a beat per Strike
+		seat.vars["encore_left"] = int(seat.vars["encore_left"]) - 1
 	seat.vars["last_strike_tick"] = s.tick
 
 	var base := float(a["dmg"])
@@ -436,6 +452,9 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 	seat.vars["flow_decay_acc"] = 0
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
 	CombatCore.emit_event(s, {"t": "coup", "player": seat.is_player})
+	if GearFx.has(seat, &"encore_bell"):                 # GEAR-2: the bell rings after the finisher
+		seat.vars["encore_left"] = 3
+		GearFx.pop(s, seat, &"encore_bell")
 	return true
 
 func _rupture(s: CombatState, seat: Seat) -> bool:
@@ -447,6 +466,9 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 		return false
 	seat.resource -= float(a["energy"])
 	seat.cooldowns["rupture"] = s.tick + _tt(s, float(a["cd"]))
+	if GearFx.has(seat, &"encore_bell"):                 # GEAR-2: the bell rings after the finisher
+		seat.vars["encore_left"] = 3
+		GearFx.pop(s, seat, &"encore_bell")
 	var per := float(a["per"]) * (1.4 if _b("rupturing") else 1.0)
 	var v := _venom(seat)
 	# Lingering Venom (boon): a SIP — a smaller detonation that keeps HALF the cocktail +

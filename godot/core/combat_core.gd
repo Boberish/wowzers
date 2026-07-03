@@ -397,6 +397,9 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 				var ti := s.seats.find(top)
 				if ti >= 0:
 					s.boss.threat[ti] = 0.0
+					# GEAR-2: stamp the curse + deed counter (diag-family, never checksummed)
+					s.boss.last_curse_tick = s.tick
+					_bump_diag(s, top, "curse_dropped")
 					_emit(s, {"t": "threat_drop", "seat": top, "player": top.is_player})
 	if not _advance_chain(s):          # a resolved chain verse flows into the next
 		s.telegraph = null
@@ -689,6 +692,11 @@ static func taunt(s: CombatState, seat: Seat, dur: float = -1.0) -> void:
 		dur = s.config.taunt_dur
 	s.boss.taunt_seat_i = i
 	s.boss.taunt_until_tick = s.tick + to_ticks(dur, s.config.fixed_hz)
+	# GEAR-2: a taunt within 2s of a THREAT_DROP answers the curse (deed detector).
+	# Capped at one answer per drop so re-taunts can't outpace curse_dropped.
+	if s.tick - s.boss.last_curse_tick <= to_ticks(2.0, s.config.fixed_hz) \
+			and int(seat.diag.get("curse_answered", 0)) < int(seat.diag.get("curse_dropped", 0)):
+		_bump_diag(s, seat, "curse_answered")
 	var top := 0.0
 	for t in s.boss.threat.values():
 		top = maxf(top, float(t))
@@ -766,9 +774,12 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 			meter_heal(s, hseat, &"ward", eaten, 0.0)   # absorbs count as healing done
 			if hseat != null and hseat.kit != null:
 				hseat.kit.on_absorb(s, hseat, seat, eaten, emptied)
+	var pre_frac := seat.hp / maxf(1.0, seat.hp_max)   # GEAR-2: dip detector reads the crossing
 	seat.hp -= d
 	if seat.hp < 0.0:
 		seat.hp = 0.0
+	if pre_frac >= 0.3 and seat.hp / maxf(1.0, seat.hp_max) < 0.3:
+		_bump_diag(s, seat, "bloodied_dip")            # deed detector (diag-only, never checksummed)
 	if seat.kit != null and d > 0.0:
 		seat.kit.on_damage_taken(s, seat, d, src, size)
 	if d > 0.0:
