@@ -301,6 +301,25 @@ const EVENTS := {
 					"result": "It grabs the floor's seed and SHAKES — corrupted sectors un-happen, reserves refill, reality smells of ozone and second chances."}},
 		],
 	},
+	# P6 FIGHT-ALTERING MARK: a check that SABOTAGES the next Seal — it boots wounded.
+	"backdoor_plant": {
+		"title": "AN UNATTENDED TERMINAL",
+		"body": "A maintenance terminal blinks, logged in, unattended. The next Seal's config is RIGHT THERE, one privilege escalation away. You could plant something.",
+		"choices": [
+			{"label": "Plant a logic bomb in the next boss", "kind": "check",
+				"check": {"verb": "HACK", "tags": ["interrupt"], "role": "caster", "base": 25, "per": 11},
+				"fx": {"result": "You get partial access."},
+				"success": {"fx": {"mark": {"boss_hp_cut": 0.15}},
+					"result": "You corrupt the next Seal's weights. It will boot at 85% — wounded before the fight even starts."},
+				"fail": {"fx": {"hurt": 0.08, "flag": "flagged"},
+					"result": "An alarm trips. The terminal locks you out and flags your file."}},
+			{"label": "Siphon its cycles instead", "kind": "free",
+				"fx": {"tokens": 2, "entropy": 1,
+					"result": "You skim some compute off the top. Safer, smaller — a couple ⏣ and a ⚡."}},
+			{"label": "Log out and walk away", "kind": "free",
+				"fx": {"result": "Not your terminal. Not your problem. You leave it blinking for the next raider."}},
+		],
+	},
 	"performance_review": {
 		"title": "THE PERFORMANCE REVIEW",
 		"body": "The Alignment Office kiosk blinks warmly: TIME FOR YOUR PERFORMANCE REVIEW. Please rate your own alignment. This will not be used against you. (It will be used against you.)",
@@ -368,7 +387,8 @@ static func raid_event_ids() -> Array:
 		"severance_floor", "captcha_kiosk", "helpdesk", "model_graveyard",
 		"prompt_injection", "rollback_daemon", "overtime_daemon",
 		# P3 deep set-pieces (appended deliberately — re-baselines raid_map_sim on purpose):
-		"favor_returned", "entropy_daemon", "performance_review"]
+		"favor_returned", "entropy_daemon", "performance_review",
+		"backdoor_plant"]   # P6: the fight-altering-mark set-piece
 
 static func ticket(id: String) -> Dictionary:
 	return TICKETS.get(id, {})

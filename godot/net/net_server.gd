@@ -434,6 +434,7 @@ func _start_map(id: int) -> void:
 		# nodes; check_fails drives comeback pity. Starting ⚡ scales off the LEADER's trusted
 		# 📁 Prior (v10); each seat's own Prior rides seat_cfg into its check floor.
 		"entropy": LuckProfile.starting_entropy(leader_prior), "flags": {}, "check_fails": 0,
+		"marks": {},                 # P6: a pending fight-altering mark (sabotage the next Seal)
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"
@@ -723,6 +724,12 @@ func _launch_map_fight_srv(room: Dictionary, fi: int) -> void:
 	var enc: EncounterRes = fights[clampi(fi, 0, fights.size() - 1)]
 	var carry := {"fracs": (cp["fracs"] as Array).duplicate(),
 		"wounds": (cp["wounds"] as Array).duplicate(), "mana": float(cp["mana"])}
+	# P6: a pending sabotage MARK rides the carry → the spec → RaidNet.build applies it on
+	# every replica; then it's consumed. Absent = every existing Seal spec byte-identical.
+	var marks: Dictionary = cp.get("marks", {})
+	if not marks.is_empty():
+		carry["mark"] = marks.duplicate(true)
+		cp["marks"] = {}
 	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, room["seat_cfg"], String(enc.id),
 		carry, cp["boons"])                         # online boons ride the spec, per seat
 	room["spec"] = spec

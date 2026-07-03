@@ -100,6 +100,12 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 				u.hp = maxf(1.0, roundf(u.hp_max * float(fracs[i])))
 			if u.role == "healer":
 				u.resource = roundf(u.resource_max * mana)
+	# P6 FIGHT-ALTERING MARK: an event may sabotage the next Seal (it boots WOUNDED).
+	# Rides the carry → the spec, so both replicas apply it identically. Absent = no-op.
+	var mark: Dictionary = carry.get("mark", {})
+	var cut := float(mark.get("boss_hp_cut", 0.0))
+	if cut > 0.0 and s.boss != null:
+		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - cut)))
 	return s
 
 ## The standard AI raider for a seat — MUST be constructed identically everywhere

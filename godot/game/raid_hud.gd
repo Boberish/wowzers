@@ -138,6 +138,7 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 var _entropy: int = 0
 var _prior: int = 0
 var _flags: Dictionary = {}
+var _map_marks: Dictionary = {}    ## P6: a pending fight-altering mark (sabotage the next Seal)
 var _check_fails: int = 0          ## consecutive check fails → comeback pity (resets on any pass)
 
 # GEAR-1 (Curios / Realm-1 "peripherals"): run-scoped loot. Items evaporate with the
@@ -927,6 +928,7 @@ func _start_map_run() -> void:
 	_prior = _my_prior()
 	_entropy = LuckProfile.starting_entropy(_prior)
 	_flags = {}
+	_map_marks = {}
 	_check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _gear_unlocks directly.
@@ -1255,6 +1257,7 @@ func _launch_map_fight(fi: int) -> void:
 			u.hp = maxf(1.0, roundf(u.hp_max * float(_map_fracs[i])))
 			if u.role == "healer":    # the fuel gauge: mana carries between nodes
 				u.resource = roundf(u.resource_max * _map_mana)
+	_apply_next_fight_mark(s)   # P6: a pending sabotage mark weakens THIS boss, then clears
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1262,6 +1265,15 @@ func _launch_map_fight(fi: int) -> void:
 	_ctrl = _local_ctrl
 	_ctrl.begin(s, SEAT_IDX[_seat_key])
 	_spawn_oath_banner()   # GEAR-2: the sworn deed rides the HUD
+
+## P6: apply a pending fight-altering MARK (an event's sabotage) to this fight's boss,
+## then clear it. Absent (no mark) = the fight is byte-identical. Mirrors RaidNet.build's
+## online carry-mark so offline + online sabotage land the same boss HP.
+func _apply_next_fight_mark(s: CombatState) -> void:
+	var cut := float(_map_marks.get("boss_hp_cut", 0.0))
+	if cut > 0.0 and s.boss != null:
+		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - cut)))
+	_map_marks = {}
 
 ## A Tier-1 PERSONAL GATE exam (§GAME SHAPE): YOUR seat's class exam, fought alone —
 ## the class's solo fight, recast to its Realm-1 identity. Carry-in applies only to
@@ -1327,7 +1339,7 @@ func _raidify(choices: Array) -> Array:
 func _apply_map_fx(fx: Dictionary) -> void:
 	var cp := {
 		"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
-		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags,
+		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags, "marks": _map_marks,
 	}
 	MapFx.apply(cp, fx)
 	_map_mana = float(cp["mana"])
