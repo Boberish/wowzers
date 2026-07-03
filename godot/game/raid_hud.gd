@@ -161,6 +161,10 @@ var _judge: StrikeJudge
 var _meter: MeterPanel          # the raid DPS/HPS meter (M cycles views)
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _frames: Array = []            ## [{seat, frame}]
+var _raid_col: VBoxContainer = null   # the movable raid-frame panel (drag its header)
+var _raid_col_xl: bool = false        # which layout the panel was built with
+var _raid_drag: bool = false
+var _raid_drag_off := Vector2.ZERO
 var _aggro_warn: Label
 var _shake_root: Control
 var _shake_amt: float = 0.0
@@ -1685,29 +1689,48 @@ func _build_combat(s: CombatState) -> void:
 	_place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(_meter)
 
-	# THE RAID — reliquary frames down the left. Gold-lit = the boss's victim;
-	# for the Mender seat the frames are also your click-cast targets.
+	# THE RAID — reliquary TRIAGE CARDS down the left (XL for the healer seat: the
+	# frames ARE its combat surface — shield crest, HoT countdown chips, debuff
+	# timers). Gold-lit = the boss's victim; for the Mender seat the frames are also
+	# your click-cast targets. Drag the ≡ header to move the panel (persists);
+	# double-click the header to snap it back.
+	# XL cards for the healer's 4-seat raid; the 5-frame gate SANDBOX party falls
+	# back to the compact cards so the column clears the mana orb.
+	var xl_frames := _seat_key == "healer" and s.seats.size() <= 4
+	_raid_col_xl = xl_frames
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 10)
-	_place(col, 0, 0.5, 0, 0.5, 26, -220, 210, 220)
+	col.add_theme_constant_override("separation", 12 if xl_frames else 10)
+	if xl_frames:
+		_place(col, 0, 0.5, 0, 0.5, 22, -276, 334, 276)
+	else:
+		_place(col, 0, 0.5, 0, 0.5, 26, -238, 266, 238)
 	_ui.add_child(col)              # NOT under shake — the healer aims clicks at these
+	_raid_col = col
 	var head := Label.new()
-	head.text = "THE RAID   ·   ◆ = its gaze" if _seat_key != "healer" else "THE RAID   ·   hover + click-cast"
+	head.text = "≡  THE RAID   ·   ◆ = its gaze" if _seat_key != "healer" else "≡  THE RAID   ·   hover + click-cast"
 	if _gate_live:
-		head.text = "THE EXAM   ·   the raid watches" if _seat_key != "healer" \
-			else "THE SANDBOX   ·   hover + click-cast"
+		head.text = "≡  THE EXAM   ·   the raid watches" if _seat_key != "healer" \
+			else "≡  THE SANDBOX   ·   hover + click-cast"
 	head.add_theme_font_size_override("font_size", 12)
 	head.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	head.mouse_filter = Control.MOUSE_FILTER_STOP
+	head.mouse_default_cursor_shape = Control.CURSOR_MOVE
+	head.tooltip_text = "Drag to move the raid panel — double-click to reset"
+	head.gui_input.connect(_raid_col_input)
 	col.add_child(head)
 	_frames = []
 	for seat in s.seats:
 		var fr := RaidFrame.new()
-		fr.unit_name = seat.unit_name + (" (YOU)" if seat.is_player else "")
+		fr.variant = "xl" if xl_frames else "raid"
+		# XL has header room for the explicit tag; the compact card gilds your name
+		fr.unit_name = seat.unit_name + (" (YOU)" if seat.is_player and xl_frames else "")
+		fr.is_you = seat.is_player
 		fr.role = seat.role
 		fr.hovered.connect(_on_frame_hover)
 		fr.unhovered.connect(_on_frame_unhover)
 		col.add_child(fr)
 		_frames.append({"seat": seat, "frame": fr})
+	_restore_raid_col()
 
 	_aggro_warn = Label.new()
 	_aggro_warn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2125,6 +2148,64 @@ func _healer_hint() -> String:
 	return "Hover a frame + click:  " + "  ·  ".join(parts) + "    ·    SPACE/F — dodge beats"
 
 # ============================================================ INPUT
+## The raid panel is MOVABLE: drag its ≡ header anywhere (clamped on-screen, saved
+## per layout size to user://rift_ui.cfg); double-click the header to snap back.
+const UI_CFG := "user://rift_ui.cfg"
+
+func _raid_col_input(ev: InputEvent) -> void:
+	if _raid_col == null:
+		return
+	if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT:
+		if ev.double_click:
+			_raid_drag = false
+			_reset_raid_col()
+		elif ev.pressed:
+			_raid_drag = true
+			_raid_drag_off = _raid_col.global_position - ev.global_position
+		else:
+			_raid_drag = false
+			_save_raid_col()
+	elif ev is InputEventMouseMotion and _raid_drag:
+		var vp := _raid_col.get_viewport_rect().size
+		var p: Vector2 = ev.global_position + _raid_drag_off
+		p.x = clampf(p.x, 0.0, maxf(0.0, vp.x - _raid_col.size.x))
+		p.y = clampf(p.y, 0.0, maxf(0.0, vp.y - _raid_col.size.y))
+		_raid_col.global_position = p
+
+func _raid_col_key() -> String:
+	return "col_xl" if _raid_col_xl else "col_std"
+
+func _save_raid_col() -> void:
+	var cf := ConfigFile.new()
+	cf.load(UI_CFG)                    # keep whatever else lives in the file
+	cf.set_value("raid_frames", _raid_col_key(),
+		Vector2(_raid_col.offset_left, _raid_col.offset_top))
+	cf.save(UI_CFG)
+
+func _restore_raid_col() -> void:
+	var cf := ConfigFile.new()
+	if cf.load(UI_CFG) != OK:
+		return
+	var v = cf.get_value("raid_frames", _raid_col_key(), null)
+	if v is Vector2:
+		# saved as offsets off the panel's own anchors — size preserved
+		var wdt := _raid_col.offset_right - _raid_col.offset_left
+		var hgt := _raid_col.offset_bottom - _raid_col.offset_top
+		_raid_col.offset_left = v.x
+		_raid_col.offset_right = v.x + wdt
+		_raid_col.offset_top = v.y
+		_raid_col.offset_bottom = v.y + hgt
+
+func _reset_raid_col() -> void:
+	if _raid_col_xl:
+		_place(_raid_col, 0, 0.5, 0, 0.5, 22, -276, 334, 276)
+	else:
+		_place(_raid_col, 0, 0.5, 0, 0.5, 26, -238, 266, 238)
+	var cf := ConfigFile.new()
+	if cf.load(UI_CFG) == OK and cf.has_section_key("raid_frames", _raid_col_key()):
+		cf.erase_section_key("raid_frames", _raid_col_key())
+		cf.save(UI_CFG)
+
 func _on_frame_hover(fr) -> void:
 	for e in _frames:
 		if e["frame"] == fr:
@@ -2441,6 +2522,7 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 
 func _render_frames(s: CombatState, obs: Dictionary) -> void:
 	var victim := CombatCore._threat_target(s)
+	var hzf := float(s.config.fixed_hz)
 	for e in _frames:
 		var seat: Seat = e["seat"]
 		var fr: RaidFrame = e["frame"]
@@ -2448,8 +2530,14 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		fr.hp = int(round(seat.hp))
 		fr.maxhp = int(round(seat.hp_max))
 		fr.absorb_frac = (seat.absorb / seat.hp_max) if seat.hp_max > 0.0 else 0.0
+		fr.absorb_val = seat.absorb if seat.alive() else 0.0
+		fr.ward_remain = (float(seat.ward_until_tick - s.tick) / hzf) \
+			if (seat.alive() and seat.absorb > 0.0 and seat.ward_until_tick >= 0) else -1.0
 		fr.hot_count = seat.hots.size()
+		fr.hots_rich = _rich_hots(seat, hzf) if seat.alive() else []
 		fr.has_debuff = not seat.debuff.is_empty()
+		fr.debuff_remain = (float(int(seat.debuff["left"]) - int(seat.debuff["acc"])) / hzf) \
+			if not seat.debuff.is_empty() else -1.0
 		fr.dead = not seat.alive()
 		fr.bloodied = seat.alive() and seat.hp_frac() <= 0.4
 		fr.incoming_frac = 0.0
@@ -2476,6 +2564,25 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 			_aggro_warn.visible = aggro_me and not s.over
 		_:
 			_aggro_warn.visible = false
+
+## HoT source → [rune icon id, full duration s] — feeds the frame's countdown chips.
+## Durations mirror the kits (renew hot_dur 9 · afterglow/lingering_grace/laststand 3
+## · growth 9); a refresh past the listed max just clamps the sweep full.
+const HOT_META := {
+	"renew": ["renew", 9.0], "afterglow": ["flash", 3.0],
+	"lingering_grace": ["mend", 3.0], "laststand": ["laststand", 3.0],
+	"growth": ["growth", 9.0], "hot": ["renew", 6.0],
+}
+
+func _rich_hots(seat: Seat, hzf: float) -> Array:
+	var out: Array = []
+	for h in seat.hots:
+		var src := String(h.get("src", "hot"))
+		var meta: Array = HOT_META.get(src, HOT_META["hot"])
+		out.append({"icon": String(meta[0]), "src": src,
+			"remain": maxf(float(int(h["left"]) - int(h["acc"])) / hzf, 0.0),
+			"total": float(meta[1])})
+	return out
 
 ## Healer-only frame overlays: telegraphed incoming damage + (Mender) the cast's heal
 ## ghost / (Bloomweaver) Growth ripeness on every frame + the BLOOM cash-out on hover.

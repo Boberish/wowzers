@@ -248,6 +248,38 @@ func _process(_delta: float) -> bool:
 	print("juice handlers (all classes): ok")
 
 	hud._launch("tank", "warden", "mythos")   # a Seal state -> exercises the QUIPS path
+
+	# the raid panel is movable: drag its header +60,+40 -> panel moves + position
+	# persists to user://rift_ui.cfg; double-click resets and erases the save
+	var col: VBoxContainer = hud._raid_col
+	assert(col != null)
+	var before := Vector2(col.offset_left, col.offset_top)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.global_position = col.global_position + Vector2(30, 8)
+	hud._raid_col_input(press)
+	var move := InputEventMouseMotion.new()
+	move.global_position = press.global_position + Vector2(60, 40)
+	hud._raid_col_input(move)
+	var rel := InputEventMouseButton.new()
+	rel.button_index = MOUSE_BUTTON_LEFT
+	rel.pressed = false
+	rel.global_position = move.global_position
+	hud._raid_col_input(rel)
+	var after := Vector2(col.offset_left, col.offset_top)
+	assert(after.distance_to(before + Vector2(60, 40)) < 2.0)
+	var cfg_chk := ConfigFile.new()
+	assert(cfg_chk.load("user://rift_ui.cfg") == OK
+		and cfg_chk.has_section_key("raid_frames", "col_std"))
+	var dbl := InputEventMouseButton.new()
+	dbl.button_index = MOUSE_BUTTON_LEFT
+	dbl.pressed = true
+	dbl.double_click = true
+	hud._raid_col_input(dbl)
+	assert(Vector2(col.offset_left, col.offset_top).distance_to(before) < 2.0)
+	print("raid panel drag + persist + reset: ok")
+
 	hud._show_end(true)
 	hud._show_end(false)
 	print("end screens (with Seal quips): ok")
