@@ -461,6 +461,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `raid-tuning` · §BOSSES + §CLASSES — **RAID rebalance: healing has real work (Bill, direct).**
+  Playtest: raid healer idle 93–98%, mana never a factor (see `main` commit `ed6ca6e` — raid_sim now logs
+  hlMana/hlOver/hlIdle proving it). Root: tank self-heals (Fortify 130) + tiny raid-wide chip. Doing, all
+  **raid-gated** (frozen solo sims stay byte-identical): (1) Fortify heal drops hard when `threat_enabled`
+  (keeps mitigation); (2) raid mana regen via the raid seat's `regen_mult` var (no config change);
+  (3) Vorathek damage ramp — bigger unavoidable Cataclysm baseline + painful Void Volley (miss 1 = big,
+  miss 2 ≈ death); (4) **battle rez** Mender spell (long cast / big mana / big CD, revives a dead DPS —
+  loss model untouched). "Start nice, then a missed dodge hurts." Retune bands; then the Seals inherit.
 - ☑ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons — MERGED to main
   (`24dd28a`)**, worktree removed. The Draft 2.0 boon draft now works in online co-op: each human
   seat drafts its OWN boons after each won fight, and the picks ride the fight SPEC per seat
