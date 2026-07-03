@@ -30,7 +30,7 @@
 | UI (Gilded Reliquary overhaul) | ✅ Done |
 | 3D stage | 🟡 Bulwark vertical slice only |
 | Co-op raid (R0/R1: any seat, any aspect, AI raiders) | ✅ Playable |
-| Netcode (R2/R2.5: lockstep WS server, Docker/tunnel deploy kit, Windows + browser clients) | ✅ DONE & verified (cross-OS identical checksums; see CLAUDE.md R2/R2.5) |
+| Netcode (R2/R2.5: lockstep WS server, Docker/tunnel deploy kit, Windows + browser clients) | ✅ DONE & verified (cross-OS identical checksums; see CLAUDE.md R2/R2.5). **+ MAP-3b: online co-op map traversal (protocol v3, `127ab2c`)** — server owns the campaign, leader routes, fights carry state |
 | **Realms (raids = themed realms; Realm 1 "The Takeover" = AI irony)** | 🟢 Realm 1 PLAYABLE end-to-end: 3-floor RING descent (MISTRAL→GEMINI→MYTHOS) w/ GATE exams + shard gate (MAP-3c `fafaf1a`). Online nav (3b) + Realm 2 open |
 | **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | ✅ DONE, merged `ac1aa25` (adds/chains/rand-beats engine + 3 bosses + lobby Seal pick, protocol v2 — see §RAID SEALS) |
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
@@ -283,10 +283,29 @@ nodes, not node kinds.
   gentle intro floor by design: bands 100/100/98 (sloppy losses at the gate + a skirmish,
   avg 3.6 fights/run). Verified: map+run determinism PASS, all four Seal checksums
   byte-identical (game-layer only), net/ui/map smokes green, live WSLg run clean.
-  **3b (online nav — leader picks the node in the lobby, fracs+wounds ride the spec) is NEXT,
-  unclaimed**; the map dict is wire-serializable by design. Later floors: Ring 2 → GEMINI
+  **3b (online co-op traversal) — ✅ DONE (`127ab2c`, see below).** Later floors: Ring 2 → GEMINI
   ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard" —
   those floors should lean hard on wounds (their fights actually kill raiders).
+- **MAP-3b (ONLINE co-op map traversal) — ✅ DONE, merged 2026-07-03 (`127ab2c`).** The Topology
+  descent goes LIVE co-op. The **server owns the campaign** (map + per-seat integrity/wounds + healer
+  mana + inventory/tickets + floor) and broadcasts it; the **leader (host) routes the party**; only
+  FIGHTS stay lockstep. Fights **carry** the campaign state (`RaidNet.make_spec/build` gains an
+  optional `carry` folded into opening HP/mana — rides the spec so every replica builds identically;
+  absent = a fresh pull, every existing Seal fight byte-identical). Protocol **v2→v3** (`mapstart`/
+  `node`/`choice` up · `map`/`mapstop`/`campaign` down). Server campaign engine mirrors the offline
+  `raid_hud` logic (node resolve, tickets/key/shard, event choices, cooling/cache fx, fight writeback,
+  Seal→ring elevation / ROOT→win / wipe→end); disconnect marks the seat AI + re-broadcasts so a
+  migrated leader keeps routing. `RunMap.to_dict/from_dict` serialize the map (JSON int coercion).
+  Client: host lobby **DESCEND** button, online `MapScreen` (leader clickable, others spectate
+  read-only), event panels, campaign end; `_on_end` guarded so descent fights don't pop a single-fight
+  end screen. **v1 scope:** no GATE nodes online (personal-exam-online deferred); leader-only route/
+  choice (party vote later). **Verified:** NEW `sim/net_map_smoke.gd` — real server + 2 WS clients run
+  a full descent (leader routes → cooling → carried-state fights [opening integrity 0.83–0.96] →
+  MISTRAL Seal → **"ring advanced to RING 2"**, or a clean wipe→campaign-end), carry applied, **zero
+  desyncs** both replicas; `net_smoke` (single-Seal) ALL OK on v3; offline byte-identical (map_sim
+  5.90/20/6, raid_map_sim tickets/shard/gate, bulwark determinism); ui_smoke_raid green. ⚠ **Protocol
+  v3: rebuild + redeploy the server with clients** (v2 rejected at handshake). **NEXT:** live 2-window
+  WSLg playtest; online GATE spectate; event-choice UX polish; party-vote routing.
 - **MAP-3c (REALM 1 COMPLETION — the first FULL raid) — ✅ DONE, merged 2026-07-03 (`fafaf1a`).**
   Realm 1 is now a complete RING descent: **Ring 3 (MISTRAL) → Ring 2 "THE MIDDLEWARE" (GEMINI) →
   Ring 0 "ROOT" (CLAUDE MYTHOS, credential-shard gated)**. `RaidContent.FLOORS[]` drives the
@@ -302,10 +321,10 @@ nodes, not node kinds.
   wounds bite deep (Ring 0 corrupted party 0% vs 38% full). Verified: raid_map_sim all-floors
   determinism/structure/one-gate/gate-exams/shard-gate PASS; raid_sim + bulwark_sim checksums
   byte-identical (dps-meter engine confirmed neutral); ui_smoke_raid + ui_smoke_map + map_sim green.
-  Debug: `--autostart=raidmap[:seat[:aspect]]`. **NEXT (unclaimed):** online nav (3b — leader picks
-  the node, fracs/wounds/ring ride the spec); per-ring `map_content` skin polish (Ring 2/0 flavor +
-  new events); harder GATE exam picks on deeper rings; a cumulative full-descent sim (carry across
-  all three floors, not per-floor-from-full).
+  Debug: `--autostart=raidmap[:seat[:aspect]]`. **NEXT (unclaimed):** ~~online nav (3b)~~ ✅ DONE
+  (`127ab2c`, MAP-3b above); per-ring `map_content` skin polish (Ring 2/0 flavor + new events);
+  harder GATE exam picks on deeper rings; a cumulative full-descent sim (carry across all three
+  floors, not per-floor-from-full).
   <details><summary>original plan</summary>
   The gap: only Ring 3 exists as a playable floor; GEMINI + MYTHOS are fully built
   (`make_gemini`/`make_mythos`, tuned bands) but reachable ONLY via `--autostart`/boss-select — no
@@ -428,19 +447,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `online-map` · §MAPS MAP-3b / §ONLINE — **Online co-op map traversal (Bill, direct).**
-  The Topology descent goes live co-op: the SERVER owns the campaign (map + per-seat integrity/
-  wounds + mana + inventory/tickets + floor), broadcasts it, the **leader picks the route**; only
-  FIGHTS stay lockstep. Fight specs gain a `carry` (fracs/wounds/mana) so online fights start at
-  carried state deterministically (`RaidNet.make_spec/build`). New protocol msgs (`mapstart`/`node`/
-  `choice` up · `map`/`mapstop`/`campaign` down, **VERSION 2→3**). Server campaign engine mirrors the
-  offline `raid_hud` map logic (node resolve, fx, floor advance, Seal→elevate/clear). Client renders
-  the server map (leader clickable) + event panels; fights unchanged. **v1 scope:** no GATE nodes
-  online (personal-exam-online deferred — `extra_quota={}`); leader-only route/choice (party vote
-  later). ⚠ touches `godot/net/*` + `raid_hud.gd` (shared w/ `self-heal-meter` — merge main before
-  merge-back; **rebuild the server with clients, protocol bump**). Gate: `net_smoke` extended to a
-  full 2-client map run (leader routes a floor, carried-state fights, floor advance, replicas agree,
-  zero desync); offline raid_map_sim + solo sims byte-identical; smokes green. *(raid-finish session)*
+- ☑ 2026-07-03 · `online-map` · §MAPS MAP-3b / §ONLINE — **Online co-op map traversal — MERGED to
+  main (`127ab2c`)**, plan updated (§MAPS MAP-3b + Overall Progress netcode row), worktree removed.
+  Server owns the campaign + broadcasts it, leader routes, fights `carry` state (protocol **v3**).
+  New `sim/net_map_smoke.gd` proves a full 2-client descent (routes → carried-state fights [0.83–0.96
+  opening] → MISTRAL Seal → ring advance to Ring 2, or clean wipe→campaign-end, **zero desyncs**);
+  `net_smoke` ALL OK on v3; offline byte-identical (map_sim/raid_map_sim/bulwark determinism);
+  ui_smoke_raid green. Merged main (self-heal-meter/gear-catalog docs) cleanly. ⚠ **protocol v3 —
+  rebuild+redeploy the server with clients.** NEXT: live WSLg 2-window playtest; online GATE spectate;
+  event-choice UX; party-vote routing. *(raid-finish session)*
 - ☑ 2026-07-03 · main (docs only) · §SYSTEMS/PROGRESSION — **Gear catalog + boss-deed naming + difficulty scaling (Bill, direct) — DONE.** (1) **Feats/quests → OATHS** (sworn / OATH KEPT / OATH BROKEN; arm-with-cost = **Blood Oaths**; Realm-1 skin = SLA, Blood Oath = PIP) — PROGRESSION-PLAN amended, incl. one-oath-per-seat-per-fight (open Q resolved). (2) **Oath↔difficulty scaling:** severity I–III printed per row (= row rarity) + **re-swear purses** scaling with `stakes = (3−ring)+(version−1)` (Tokens + drop-roll bends; table in PROGRESSION-PLAN — unlock once, replayable fortune forever). (3) **`GEAR-CATALOG.md` NEW** — ~35 items across 11 Ledger pages (4 Seals · 3 skirmishes · 4 class-marked GATE pages), every combat item names its hook/tags/combo vs the class-fun kits (grounded via code extraction): Opus build-arounds = **KEYSTONE OF THE BROKEN WALL** (Sunder-max resets the raid's defensive verbs), **SECOND OPINION** (PERFECT/READ beat payoffs ×2), **FIFTH PSALM** (Benediction fires triage payloads party-wide), **ROULETTE FANG** (wheel-revolution micro-sip), **ECHO CHAMBER**, **THE CONCLUSION** (execute-window payload ×2), ORCHARD BELL / CROWN OF BRIARS (parked until a Bloomweaver seat is live); **THE UNPLUGGING** set pair (the power-cable gag as the 2-slot meme build); Haiku rows all single visible proc moments; ring/version drop-weight table; GEAR-1..4 rollout mapping + `gear_probe` acceptance bar. **NEXT:** Bill blesses the gear noun (CURIO / Realm-1 PERIPHERAL proposed) → GEAR-1 claimable against the catalog. *(gear-design session)*
 - ☑ 2026-07-03 · `self-heal-meter` · §SYSTEMS — **Meter follow-up (Bill, direct): SELF-heals now count — MERGED to main (`c616fe7`).** The HEALING column answers "how much do I keep myself alive vs the healer": kit `_heal` helpers meter their EFFECTIVE slice (overheal beside it, HP behavior unchanged — same clamp) credited to the seat itself, srcs named after the cards — Bulwark `lifesteal`(Bloodthirst)/`fortify`/Vengeful Guard/Landslide/Warding Light · Voidcaller Kick Recovery(int_heal)/Reprieve/Umbral Mending · Twinfang Red Harvest. Raid HEALING ranking shows it live (probe shot: Mender 524 · 19.8 HPS vs tank Fortify 130 · 4.9). Gate: bulwark/twinfang/voidcaller (120 seeds) + raid (60) logs AND CSVs **byte-identical** vs main; `meter_probe` +2 self-heal checks (voidcaller fight row exists; Bloodthirst lifesteal == exactly 48) ALL OK ×2 (pre + post the raid-richness main sync); 4 smokes green; `screenshot_meter` gained a HEALING-mode raid step. *(meter session)*
 - ☑ 2026-07-03 · `raid-richness` · §MAPS MAP-2 — **Raid map RICH & FUN — MERGED to main (`d2e51ea`)**,
