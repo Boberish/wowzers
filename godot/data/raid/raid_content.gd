@@ -444,19 +444,46 @@ static func _mender(aspect: String) -> Seat:
 	u.vars = {"reservoir": 0.0, "nerve": 0.0, "regen_mult": 1.0}
 	return u
 
+## The SECOND healer class in the raid: Bloomweaver (anticipate — HoTs + wards, no
+## mana; Sap resource + earned Verdance). Same healer SEAT, different CLASS — chosen
+## via make_state's `classes` dict / the fight spec's per-seat `cls`. Mirrors the
+## solo factory (data/bloomweaver/bloomweaver_content.gd:_make_healer), minus is_player.
+static func _bloomweaver(aspect: String) -> Seat:
+	var bcfg := BloomweaverConfig.new()
+	var u := Seat.new()
+	u.role = "healer"; u.unit_name = "The Bloomweaver"; u.fidelity = "full"
+	u.hp_max = 200.0; u.hp = 200.0; u.dps = 0.0
+	u.resource = bcfg.sap_max; u.resource_max = bcfg.sap_max
+	u.kit = BloomweaverKit.new(aspect, bcfg)
+	u.policy = BloomweaverPolicy.new()
+	u.vars = {"verdance": 0.0}
+	return u
+
+## Build the healer seat for whichever healer CLASS the seat carries (default Mender).
+## Aspect defaults per class: Mender→tidecaller, Bloomweaver→wildgrove.
+static func _healer_seat(cls: String, aspect: String) -> Seat:
+	if cls == "bloomweaver":
+		return _bloomweaver(aspect if aspect != "" else "wildgrove")
+	return _mender(aspect if aspect != "" else "tidecaller")
+
 ## Build a raid fight. `aspects` may override any seat's Aspect; `player` names the
 ## human seat ("tank"/"blade"/"caster"/"healer") for diag mirroring — every seat is
 ## policy-driven until a driver swaps a human adapter in (R1).
 ## Seat order puts the tank first among targetable seats, so the boss opens on it
 ## before anyone has threat (the pull).
+## `classes` overrides a seat's CLASS (only the healer seat is polymorphic today:
+## "mender" (default) or "bloomweaver"); `aspects` overrides its Aspect. Both default
+## to the verified comp — an empty `classes` builds the exact original 4-seat state,
+## byte-identical.
 static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
-		player: String = "tank") -> CombatState:
+		player: String = "tank", classes: Dictionary = {}) -> CombatState:
 	var s := CombatCore.create_state(enc, make_config(), seed)
 	var seats := {
 		"tank": _tank(String(aspects.get("tank", "warden"))),
 		"blade": _blade(String(aspects.get("blade", "venomancer"))),
 		"caster": _caster(String(aspects.get("caster", "disruptor"))),
-		"healer": _mender(String(aspects.get("healer", "tidecaller"))),
+		"healer": _healer_seat(String(classes.get("healer", "mender")),
+			String(aspects.get("healer", ""))),
 	}
 	if seats.has(player):
 		(seats[player] as Seat).is_player = true

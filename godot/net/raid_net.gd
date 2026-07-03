@@ -8,8 +8,27 @@ extends RefCounted
 
 const SEAT_KEYS := ["tank", "blade", "caster", "healer"]
 const DEFAULT_ASPECT := {"tank": "warden", "blade": "venomancer", "caster": "disruptor", "healer": "tidecaller"}
+## Each seat's native CLASS. Only the healer seat is polymorphic today — it may be
+## "mender" (default, verified comp) or "bloomweaver" (the second healer). `cls` rides
+## the fight spec per seat; absent/default → the original state builds byte-identical.
+const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller", "healer": "mender"}
 const ALLY_LATENCY := 5
 const ALLY_SLACK := 0.06
+
+## The default Aspect for a seat given its class (Bloomweaver-healer defaults Wildgrove,
+## every other seat/class keeps DEFAULT_ASPECT).
+static func default_aspect(key: String, cls: String) -> String:
+	if key == "healer" and cls == "bloomweaver":
+		return "wildgrove"
+	return String(DEFAULT_ASPECT.get(key, ""))
+
+## Which healer class a seat is running (read off its kit) — so a disconnect takeover
+## re-attaches the RIGHT AI policy. Returns "bloomweaver" only for a Bloomweaver seat.
+static func cls_of(seat: Seat) -> String:
+	if seat == null or seat.kit == null:
+		return ""
+	var scr: Script = seat.kit.get_script()
+	return "bloomweaver" if (scr != null and String(scr.get_global_name()) == "BloomweaverKit") else ""
 
 ## A fight spec (broadcast in the server's `start` message):
 ##   {seed:int, enc:<Seal id>, seats:[{key,aspect,ai:bool} x4 in SEAT_KEYS order],
@@ -23,9 +42,11 @@ static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
 	var seats: Array = []
 	for key in SEAT_KEYS:
 		var c: Dictionary = seat_cfg.get(key, {})
+		var cls := String(c.get("cls", SEAT_CLASS[key]))
 		seats.append({
 			"key": key,
-			"aspect": String(c.get("aspect", DEFAULT_ASPECT[key])),
+			"cls": cls,
+			"aspect": String(c.get("aspect", default_aspect(key, cls))),
 			"ai": bool(c.get("ai", true)),
 		})
 	var spec := {"seed": seed, "enc": enc, "seats": seats}
@@ -38,16 +59,19 @@ static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
 ## sim-neutral in raid mode) — pass "" on the server.
 static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 	var aspects := {}
+	var classes := {}
 	for e in spec.get("seats", []):
-		aspects[String(e["key"])] = String(e["aspect"])
+		var k := String(e["key"])
+		aspects[k] = String(e["aspect"])
+		classes[k] = String(e.get("cls", SEAT_CLASS.get(k, "")))
 	var s := RaidContent.make_state(int(spec.get("seed", 1)),
-		RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw"))), aspects, my_seat)
+		RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw"))), aspects, my_seat, classes)
 	var seed_v := int(spec.get("seed", 1))
 	for e in spec.get("seats", []):
 		var key := String(e["key"])
 		var seat: Seat = s.seats[SEAT_KEYS.find(key)]
 		if bool(e.get("ai", true)):
-			seat.policy = make_policy(key, seed_v)
+			seat.policy = make_policy(key, seed_v, String(e.get("cls", SEAT_CLASS.get(key, ""))))
 		else:
 			seat.policy = null            # a human drives this seat via input frames
 	# MAP-3b: fold the carried campaign state in (wounds cut max HP, then integrity of
@@ -69,7 +93,7 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 
 ## The standard AI raider for a seat — MUST be constructed identically everywhere
 ## (disconnect takeover swaps this in at an agreed tick on every replica).
-static func make_policy(key: String, seed_v: int) -> Policy:
+static func make_policy(key: String, seed_v: int, cls: String = "") -> Policy:
 	match key:
 		"tank":
 			var tp := RaidTankPolicy.new()
@@ -87,6 +111,11 @@ static func make_policy(key: String, seed_v: int) -> Policy:
 			cp.rng = DetRng.new(seed_v * 2749 + 3339)
 			return cp
 		_:
+			# healer — the second healer (Bloomweaver) or the default Mender
+			if cls == "bloomweaver":
+				var wp := BloomweaverPolicy.new()
+				wp.latency_ticks = ALLY_LATENCY
+				return wp
 			var mp := MenderPolicy.new()
 			mp.latency_ticks = ALLY_LATENCY
 			return mp
@@ -120,4 +149,4 @@ static func step(s: CombatState, inputs: Array) -> void:
 ## at the same frame so the lockstep stays aligned.
 static func seat_to_ai(s: CombatState, seat_i: int, seed_v: int) -> void:
 	if seat_i >= 0 and seat_i < s.seats.size():
-		s.seats[seat_i].policy = make_policy(SEAT_KEYS[seat_i], seed_v)
+		s.seats[seat_i].policy = make_policy(SEAT_KEYS[seat_i], seed_v, cls_of(s.seats[seat_i]))
