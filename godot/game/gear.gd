@@ -7,12 +7,14 @@ extends RefCounted
 const SLOTS := 2
 
 ## GEAR-2: rarity-first weights by ring depth (PROGRESSION/GEAR-CATALOG table).
+## ARMORY retune: drops are scarce EVENTS now (Seal/gate/first-kill only), so each
+## roll pays richer — a full descent should all but guarantee one opus moment.
 static func rarity_weights(ring: int) -> Dictionary:
 	if ring <= 0:
-		return {"haiku": 0.40, "sonnet": 0.38, "opus": 0.22}
+		return {"haiku": 0.25, "sonnet": 0.40, "opus": 0.35}
 	if ring <= 2:
-		return {"haiku": 0.55, "sonnet": 0.35, "opus": 0.10}
-	return {"haiku": 0.70, "sonnet": 0.25, "opus": 0.05}
+		return {"haiku": 0.38, "sonnet": 0.40, "opus": 0.22}
+	return {"haiku": 0.50, "sonnet": 0.35, "opus": 0.15}
 
 ## Clamp order when the rolled tier has nothing unlocked (nearest non-empty).
 const _TIER_ORDER := {
@@ -63,6 +65,17 @@ static func roll(boss_id: String, seat_cls: String, unlocks: Dictionary, rng: De
 		if not pool.is_empty():
 			return {"item": String(pool[rng.next_u32() % pool.size()]), "first": false}
 	return {}
+
+## Does this boss still hold a LOCKED signature row this class could take? The
+## first-kill shower: a locked signature keeps a skirmish kill ceremony-worthy;
+## once it's inked, repeat kills stop rolling (drops stay EVENTS — ARMORY cadence).
+static func first_locked(boss_id: String, seat_cls: String, unlocks: Dictionary) -> bool:
+	var got: Array = unlocks.get(boss_id, [])
+	for r in GearCatalog.table(boss_id):
+		var id := String(r["item"])
+		if String(r["row"]) == "signature" and not got.has(id) and _fits(id, seat_cls):
+			return true
+	return false
 
 ## Class-marked rows only drop for their class ("" = universal).
 static func _fits(id: String, seat_cls: String) -> bool:

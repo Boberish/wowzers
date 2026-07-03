@@ -40,6 +40,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	var bell := GearFx.bell_grant(seat)
 	if bell > 0.0:
 		_gain_rage(seat, bell)
+	# ARMORY (strong bell): the warm start hums — rage trickles for the first 10s.
+	if GearFx.bell_live(s, seat):
+		_gain_rage(seat, 3.0 * s.dt)
 	# GEAR-2: Scratchpad — rage trickles in while a long wind-up thinks.
 	if GearFx.scratchpad_live(s, seat):
 		_gain_rage(seat, 4.0 * s.dt)
@@ -121,12 +124,14 @@ func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 		if n % 3 == 0:
 			_trigger_fire(s, seat, "third")
 	_guard_proc(s, seat, "negate")
-	# GEAR-1: Verification Stamp — the first clean guard each fight banks gauge.
+	# GEAR-1 (ARMORY strong): Verification Stamp — the first clean guard each fight
+	# banks a fat gauge chunk AND hands Guard straight back (chain a second read).
 	if GearFx.once(seat, &"verify_stamp"):
 		if aspect == "warden":
-			_gain_counter(seat, 2)
+			_gain_counter(seat, 4)
 		else:
-			_gain_momentum(s, seat, 4)
+			_gain_momentum(s, seat, 8)
+		seat.defense_ready_tick = s.tick
 		GearFx.pop(s, seat, &"verify_stamp")
 
 # --- GEAR-1: a boss self-heal was DENIED somewhere — Riftmaw Tooth pays rage ---

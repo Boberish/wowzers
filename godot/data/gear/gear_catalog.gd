@@ -14,23 +14,23 @@ extends RefCounted
 ## per-run charges. Rarity strings match Draft.RARITIES.
 const ITEMS := {
 	"riftmaw_tooth": {
-		"name": "Riftmaw Tooth", "rarity": "haiku", "cls": "", "kind": "sim",
-		"desc": "Whenever a boss self-heal is DENIED — anyone's kick — you gain 15 resource.",
+		"name": "Riftmaw Tooth", "rarity": "sonnet", "cls": "", "kind": "sim",
+		"desc": "Whenever a boss self-heal is DENIED — anyone's kick — your defensive verb and dodge reset, and you gain 20 resource.",
 		"flavor": "Checkpoint corrupted. Scavenge the parts.",
 	},
 	"lechat_bell": {
-		"name": "LE CHAT's Bell", "rarity": "haiku", "cls": "", "kind": "sim",
-		"desc": "Begin every fight with +30 resource, pre-warmed.",
+		"name": "LE CHAT's Bell", "rarity": "sonnet", "cls": "", "kind": "sim",
+		"desc": "Begin every fight with +30 resource, pre-warmed — and for the first 10 seconds your resource flows twice as fast.",
 		"flavor": "Lightweight. Efficient. Rings exactly once.",
 	},
 	"swan_song": {
 		"name": "Swan Song", "rarity": "haiku", "cls": "", "kind": "sim",
-		"desc": "When you die: a 120 farewell blast, and 15 healing to each living ally.",
+		"desc": "When you die: a 200 farewell blast, and 25 healing to each living ally.",
 		"flavor": "It saved its best poem for last.",
 	},
 	"ticket_stub": {
 		"name": "Ticket Stub", "rarity": "haiku", "cls": "", "kind": "util",
-		"desc": "Closing a TICKET also repairs +5% party integrity.",
+		"desc": "Closing a TICKET also repairs +10% party integrity and pays +1⏣.",
 		"flavor": "The subagent does the chores.",
 	},
 	"cooling_paste": {
@@ -40,23 +40,23 @@ const ITEMS := {
 		"flavor": "Thermal throttling recommended.",
 	},
 	"verify_stamp": {
-		"name": "Verification Stamp", "rarity": "haiku", "cls": "bulwark", "kind": "sim",
-		"desc": "Your first clean guard each fight banks +2 Chain links (Warden) / +4 Momentum (Juggernaut).",
+		"name": "Verification Stamp", "rarity": "sonnet", "cls": "bulwark", "kind": "sim",
+		"desc": "Your first clean guard each fight banks +4 Chain links (Warden) / +8 Momentum (Juggernaut) and resets Guard on the spot.",
 		"flavor": "You are not a robot: verified.",
 	},
 	"powder_vial": {
-		"name": "Powder Vial", "rarity": "haiku", "cls": "twinfang", "kind": "sim",
-		"desc": "Your Kick also applies 2 stacks of the lit poison lane (Venomancer) / +1 Flow (Tempo).",
+		"name": "Powder Vial", "rarity": "sonnet", "cls": "twinfang", "kind": "sim",
+		"desc": "Your Kick also applies 3 stacks of the lit poison lane (Venomancer) / +2 Flow (Tempo).",
 		"flavor": "The boot carries the toxin.",
 	},
 	"spark_plug": {
-		"name": "Spark Plug", "rarity": "haiku", "cls": "voidcaller", "kind": "sim",
-		"desc": "Your first kick each fight refunds half its cooldown.",
+		"name": "Spark Plug", "rarity": "sonnet", "cls": "voidcaller", "kind": "sim",
+		"desc": "Your first TWO kicks each fight that answer a cast refund their whole cooldown.",
 		"flavor": "Kick early, kick often.",
 	},
 	"salt_vial": {
-		"name": "Salt Vial", "rarity": "haiku", "cls": "mender", "kind": "sim",
-		"desc": "Your Dispel also heals its target for 25.",
+		"name": "Salt Vial", "rarity": "sonnet", "cls": "mender", "kind": "sim",
+		"desc": "Your Dispel also heals its target for 60 and refunds its mana.",
 		"flavor": "Rub it in.",
 	},
 	# ---- GEAR-2: oath-row items (unlocked by SWORN OATHS, see GEAR-CATALOG.md) ----

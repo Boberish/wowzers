@@ -998,8 +998,9 @@ func _ticket_at(n: Dictionary) -> void:
 		_map_tickets.erase(tclose)
 		_map_closed += 1
 		_apply_map_fx(td2.get("reward", {}))
-		if _map_gear.has("ticket_stub"):   # GEAR-1: the stub pays +5% party integrity
-			_apply_map_fx({"heal": 0.05})
+		if _map_gear.has("ticket_stub"):   # GEAR-1 (ARMORY strong): +10% integrity +1⏣
+			_apply_map_fx({"heal": 0.10})
+			_gain_tokens(1)
 		_ticket_toast = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
 		if _map_closed >= _map_ticket_total and _map_ticket_total > 0:
 			_apply_map_fx(MapContent.SPRINT_RETRO_FX)
@@ -1265,9 +1266,15 @@ func _resolve_oath(s: CombatState, seat: Seat, won: bool) -> void:
 		"boss": String(_sworn.get("boss", "")), "text": String(_sworn.get("deed_text", ""))}
 	_sworn = {}
 
+## ARMORY cadence: what a repeat skirmish kill pays instead of a drop roll, by ring.
+const SALVAGE_TOKENS := {3: 1, 2: 2, 0: 3}
+
 ## Roll the kill's drop (map mode only), run the ceremony, then continue the run.
 ## Rolls draw from _drop_rng only — the combat stream never notices loot.
-func _after_drop(boss_id: String, done: Callable) -> void:
+## ARMORY cadence: drops are EVENTS — `event` is true for Seal/gate kills; a plain
+## skirmish only rolls while its SIGNATURE row is still locked (the first-kill
+## shower). Repeat skirmish kills pay salvage Tokens so the ceremony stays scarce.
+func _after_drop(boss_id: String, done: Callable, event: bool = true) -> void:
 	if _map == null or _drop_rng == null:
 		done.call()
 		return
@@ -1294,6 +1301,17 @@ func _after_drop(boss_id: String, done: Callable) -> void:
 		else:
 			verdict = "⚖  OATH BROKEN — SLA BREACHED (penalty clauses waived)"
 		_oath_result = {}
+	if not event and not Gear.first_locked(boss_id, _seat_cls_now(), _gear_unlocks):
+		# no ceremony for a farmed skirmish — pay parts + any oath verdict and move on
+		# (a KEPT oath's purse Tokens/pity were already banked above; only the one-kill
+		# roll bend evaporates, and no shipped skirmish carries an oath row today)
+		if verdict != "":
+			_toast_add(verdict)
+		var pay := int(SALVAGE_TOKENS.get(int(RaidContent.FLOORS[_floor]["ring"]), 1))
+		_gain_tokens(pay)
+		_toast_add("⚙  SALVAGE — subagent parts stripped (+%d⏣)" % pay)
+		done.call()
+		return
 	# _seat_cls_now(): a Bloomweaver player rolls its OWN class page (parked → no drop)
 	var d := Gear.roll(boss_id, _seat_cls_now(), _gear_unlocks, _drop_rng,
 		int(RaidContent.FLOORS[_floor]["ring"]), _drop_pity, bend)
@@ -2958,7 +2976,10 @@ func _on_end(won: bool) -> void:
 			after = _show_campaign_cleared if _floor >= RaidContent.FLOORS.size() - 1 \
 				else _show_floor_cleared
 		# gear drop first, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear)
-		_after_drop(String(_ctrl.state.encounter.id), func(): _show_boon_draft(after))
+		# ARMORY: only a Seal kill is a drop EVENT here — skirmish repeats pay salvage
+		var seal_kill: bool = String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL
+		_after_drop(String(_ctrl.state.encounter.id),
+			func(): _show_boon_draft(after), seal_kill)
 		return
 	_show_end(won)
 

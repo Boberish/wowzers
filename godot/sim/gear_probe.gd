@@ -37,9 +37,15 @@ func _initialize() -> void:
 	s.seats = [seat]
 	seat.gear = ["lechat_bell"]
 	kit.upkeep(s, seat)
-	oks.append(["bell: first upkeep grants +30 rage", is_equal_approx(seat.resource, 30.0)])
+	oks.append(["bell: first upkeep grants +30 rage (+ the 10s hum trickle)",
+		is_equal_approx(seat.resource, 30.0 + 3.0 * s.dt)])
 	kit.upkeep(s, seat)
-	oks.append(["bell: rings exactly once", is_equal_approx(seat.resource, 30.0)])
+	oks.append(["bell: rings exactly once (only the hum keeps trickling)",
+		is_equal_approx(seat.resource, 30.0 + 6.0 * s.dt)])
+	s.tick = 400                                       # past the 10s hum window
+	kit.upkeep(s, seat)
+	oks.append(["bell: the hum stops after 10s", is_equal_approx(seat.resource, 30.0 + 6.0 * s.dt)])
+	s.tick = 100
 	var seat0 := _tank_seat(BulwarkKit.new("warden", bcfg))
 	var s0 := _mini_state(tune)
 	s0.seats = [seat0]
@@ -50,6 +56,8 @@ func _initialize() -> void:
 	var s2 := _mini_state(tune)
 	var tank2 := _tank_seat(BulwarkKit.new("warden", bcfg))
 	tank2.gear = ["riftmaw_tooth"]
+	tank2.defense_ready_tick = 500                     # mid-cooldown when the denial lands
+	tank2.dodge_ready_tick = 500
 	var tcfg := TwinfangConfig.new()
 	var blade2 := Seat.new()
 	blade2.role = "dps"
@@ -65,7 +73,9 @@ func _initialize() -> void:
 	tg.dur_ticks = 30
 	s2.telegraph = tg
 	CombatCore.stagger_boss(s2)
-	oks.append(["tooth: denied heal pays the holder +15 rage", is_equal_approx(tank2.resource, 15.0)])
+	oks.append(["tooth: denied heal pays the holder +20 rage", is_equal_approx(tank2.resource, 20.0)])
+	oks.append(["tooth: the denial hands the verbs back (defense + dodge reset)",
+		tank2.defense_ready_tick == s2.tick and tank2.dodge_ready_tick == s2.tick])
 	oks.append(["tooth: a gearless seat gets nothing", is_equal_approx(blade2.resource, 0.0)])
 
 	# ------------------------------------------------- SWAN SONG (death procs once)
@@ -79,12 +89,12 @@ func _initialize() -> void:
 	s3.seats = [dying, ally]
 	dying.hp = 0.0
 	dying.kit.on_damage_taken(s3, dying, 10.0, &"melee", 0)
-	var swan_dmg := is_equal_approx(s3.boss.hp, 1000.0 - 120.0)
-	var swan_heal := is_equal_approx(ally.hp, 65.0)
+	var swan_dmg := is_equal_approx(s3.boss.hp, 1000.0 - 200.0)
+	var swan_heal := is_equal_approx(ally.hp, 75.0)
 	dying.kit.on_damage_taken(s3, dying, 10.0, &"melee", 0)
-	oks.append(["swan: death fires a 120 farewell blast", swan_dmg])
-	oks.append(["swan: allies each catch 15 healing", swan_heal])
-	oks.append(["swan: sings exactly once", is_equal_approx(s3.boss.hp, 880.0)])
+	oks.append(["swan: death fires a 200 farewell blast", swan_dmg])
+	oks.append(["swan: allies each catch 25 healing", swan_heal])
+	oks.append(["swan: sings exactly once", is_equal_approx(s3.boss.hp, 800.0)])
 
 	# ------------------------------------ VERIFICATION STAMP (first negate = gauge)
 	var s4 := _mini_state(tune)
@@ -92,9 +102,11 @@ func _initialize() -> void:
 	w4.gear = ["verify_stamp"]
 	s4.seats = [w4]
 	var swing := AbilityRes.new()
+	w4.defense_ready_tick = 900                        # guard just spent — the stamp hands it back
 	w4.kit.on_negate(s4, w4, swing)
 	var c1 := int(w4.vars.get("counter", 0))
-	oks.append(["stamp: first clean guard banks +2 extra links (warden 1+2)", c1 == bcfg.parry_counter + 2])
+	oks.append(["stamp: first clean guard banks +4 extra links (warden 1+4)", c1 == bcfg.parry_counter + 4])
+	oks.append(["stamp: the first guard resets Guard on the spot", w4.defense_ready_tick == s4.tick])
 	w4.kit.on_negate(s4, w4, swing)
 	oks.append(["stamp: only the FIRST guard (next adds the normal 1)",
 		int(w4.vars.get("counter", 0)) == c1 + bcfg.parry_counter])
@@ -103,7 +115,7 @@ func _initialize() -> void:
 	j4.gear = ["verify_stamp"]
 	s4j.seats = [j4]
 	j4.kit.on_negate(s4j, j4, swing)
-	oks.append(["stamp: juggernaut side banks +4 momentum", int(j4.vars.get("momentum", 0)) == 4])
+	oks.append(["stamp: juggernaut side banks +8 momentum", int(j4.vars.get("momentum", 0)) == 8])
 
 	# ----------------------------------------------- POWDER VIAL (kick carries it)
 	var s5 := _mini_state(tune)
@@ -119,7 +131,7 @@ func _initialize() -> void:
 	s5.tick = 100
 	v5.kit._kick(s5, v5)
 	var ven: Dictionary = v5.vars.get("venom", {})
-	oks.append(["vial: venom kick stacks the lit lane +2", int(ven.get("V", 0)) == 2])
+	oks.append(["vial: venom kick stacks the lit lane +3", int(ven.get("V", 0)) == 3])
 	var s5t := _mini_state(tune)
 	var t5 := Seat.new()
 	t5.role = "dps"
@@ -131,7 +143,7 @@ func _initialize() -> void:
 	s5t.seats = [t5]
 	s5t.tick = 100
 	t5.kit._kick(s5t, t5)
-	oks.append(["vial: tempo kick pays +1 Flow", int(t5.vars.get("flow", 0)) == 1])
+	oks.append(["vial: tempo kick pays +2 Flow", int(t5.vars.get("flow", 0)) == 2])
 
 	# ------------------------------------------- SPARK PLUG (first kick, half cd)
 	var s6 := _mini_state(tune)
@@ -152,8 +164,25 @@ func _initialize() -> void:
 	tg6.dur_ticks = 30
 	s6.telegraph = tg6
 	c6.kit._do_interrupt(s6, c6, "space")
-	var half := s6.tick + CombatCore.to_ticks(c6.kit.defense_cd() * 0.5, tune.fixed_hz)
-	oks.append(["plug: first kick refunds half its cooldown", c6.defense_ready_tick == half])
+	oks.append(["plug: the first answered kick refunds its whole cooldown",
+		c6.defense_ready_tick == s6.tick])
+	s6.tick = 200
+	var tg6b := Telegraph.new()
+	tg6b.ability = kick_ab
+	tg6b.start_tick = 200
+	tg6b.dur_ticks = 30
+	s6.telegraph = tg6b
+	c6.kit._do_interrupt(s6, c6, "space")
+	oks.append(["plug: and the second", c6.defense_ready_tick == s6.tick])
+	s6.tick = 300
+	var tg6c := Telegraph.new()
+	tg6c.ability = kick_ab
+	tg6c.start_tick = 300
+	tg6c.dur_ticks = 30
+	s6.telegraph = tg6c
+	c6.kit._do_interrupt(s6, c6, "space")
+	oks.append(["plug: the third kick pays full price (2 sparks per fight)",
+		c6.defense_ready_tick == 200 and int(c6.gear_vars.get("spark_n", 0)) == 2])
 
 	# ------------------------------------------------- SALT VIAL (dispel heals 25)
 	var s7 := _mini_state(tune)
@@ -168,11 +197,13 @@ func _initialize() -> void:
 	var sick := Seat.new()
 	sick.role = "dps"
 	sick.hp_max = 100.0
-	sick.hp = 50.0
+	sick.hp = 30.0
 	sick.debuff = {"id": "rot"}
 	s7.seats = [h7, sick]
 	h7.kit._resolve_spell(s7, h7, "dispel", sick)
-	oks.append(["salt: the cleanse also heals its target 25", is_equal_approx(sick.hp, 75.0)])
+	oks.append(["salt: the cleanse also heals its target 60", is_equal_approx(sick.hp, 90.0)])
+	oks.append(["salt: the dispel's mana comes back (net unchanged)",
+		is_equal_approx(h7.resource, 500.0)])
 	oks.append(["salt: the debuff is gone (dispel unchanged)", sick.debuff.is_empty()])
 
 	# ================================================================ GEAR-2: OATHS
@@ -241,7 +272,8 @@ func _initialize() -> void:
 	var all_sonnet := true
 	for i in 12:
 		var dr := Gear.roll("riftmaw", "bulwark", un_r, rf, 3, 0, {"floor": "sonnet"})
-		if String(dr.get("item", "")) != "grace_period":
+		var drar := String(GearCatalog.item(String(dr.get("item", ""))).get("rarity", ""))
+		if drar == "haiku":
 			all_sonnet = false
 	oks.append(["roll: sonnet floor lifts every draw out of haiku", all_sonnet])
 	var un_p := {"priest": ["spark_plug", "echo_chamber"]}

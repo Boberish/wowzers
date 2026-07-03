@@ -92,8 +92,11 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 				_heal(s, seat, 30.0, &"reprieve")
 		if _b("refund") and clean:                    # clean kick refunds half its cooldown
 			seat.defense_ready_tick = s.tick + _tt(s, defense_cd() * 0.5)
-		if GearFx.once(seat, &"spark_plug"):          # GEAR-1: first kick refunds half its cd
-			seat.defense_ready_tick = s.tick + _tt(s, defense_cd() * 0.5)
+		# GEAR-1 (ARMORY strong): Spark Plug — the first TWO answered kicks each
+		# fight hand the whole cooldown back ("kick early, kick often").
+		if GearFx.has(seat, &"spark_plug") and int(seat.gear_vars.get("spark_n", 0)) < 2:
+			seat.gear_vars["spark_n"] = int(seat.gear_vars.get("spark_n", 0)) + 1
+			seat.defense_ready_tick = s.tick
 			GearFx.pop(s, seat, &"spark_plug")
 	else:
 		var a: Dictionary = cfg.abilities[source]
@@ -168,6 +171,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	var bell := GearFx.bell_grant(seat)
 	if bell > 0.0:
 		_gain_focus(seat, bell)
+	# ARMORY (strong bell): the warm start hums — focus trickles for the first 10s.
+	if GearFx.bell_live(s, seat):
+		_gain_focus(seat, 3.0 * s.dt)
 	# GEAR-2: Scratchpad — focus trickles in while a long wind-up thinks.
 	if GearFx.scratchpad_live(s, seat):
 		_gain_focus(seat, 4.0 * s.dt)

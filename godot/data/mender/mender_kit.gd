@@ -32,6 +32,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		seat.resource = minf(cfg.mana_max, seat.resource + bell)
 	var rm := float(seat.vars.get("regen_mult", 1.0))
 	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt)
+	# ARMORY (strong bell): the warm start hums — mana regen doubles for the first 10s.
+	if GearFx.bell_live(s, seat):
+		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt)
 	# GEAR-2: Scratchpad — regen trebles while a long wind-up thinks.
 	if GearFx.scratchpad_live(s, seat):
 		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt * 2.0)
@@ -184,9 +187,10 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 			CombatCore._bump_diag(s, seat, "dispel")   # class-signature skill signal (token mint)
 			if _b("mdTrigDispel"):
 				_md_trigger(s, seat, target, "dispel")  # Phase B: a Dispel = proc moment
-			if GearFx.has(seat, &"salt_vial"):          # GEAR-1: the cleanse also soothes
-				CombatCore.heal_unit(s, target, 25.0, seat, &"salt_vial")
-				GearFx.pop(s, seat, &"salt_vial")
+			if GearFx.has(seat, &"salt_vial"):          # GEAR-1 (ARMORY strong): the cleanse
+				CombatCore.heal_unit(s, target, 60.0, seat, &"salt_vial")   # also soothes…
+				seat.resource = minf(cfg.mana_max, seat.resource + float(sp.get("mana", 0.0)))
+				GearFx.pop(s, seat, &"salt_vial")       # …and refunds the dispel's mana
 		"medit":
 			seat.resource = minf(cfg.mana_max, seat.resource + float(sp["restore"]))
 		"surge":

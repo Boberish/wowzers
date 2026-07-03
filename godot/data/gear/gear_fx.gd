@@ -25,25 +25,35 @@ static func once(seat: Seat, id: StringName) -> bool:
 static func bell_grant(seat: Seat) -> float:
 	return 30.0 if once(seat, &"lechat_bell") else 0.0
 
-## RIFTMAW TOOTH — +15 resource when a boss self-heal is DENIED (whoever kicked).
-## Kits call from on_boss_heal_denied and apply the grant themselves.
+## LE CHAT'S BELL (ARMORY strong half) — the warm start keeps humming: true for the
+## fight's first 10s. Kits double their regen (or trickle a dead resource) while it
+## rings, at the same site as the Scratchpad check.
+static func bell_live(s: CombatState, seat: Seat) -> bool:
+	return has(seat, &"lechat_bell") and s.tick < CombatCore.to_ticks(10.0, s.config.fixed_hz)
+
+## RIFTMAW TOOTH (ARMORY strong) — a DENIED boss self-heal hands your verbs back
+## (defensive verb + universal dodge reset — mini() so it never delays one already
+## ready) and pays +20 resource. Kits call from on_boss_heal_denied and apply the
+## grant via their own clamped gain helper.
 static func tooth_grant(s: CombatState, seat: Seat) -> float:
 	if not has(seat, &"riftmaw_tooth"):
 		return 0.0
+	seat.defense_ready_tick = mini(seat.defense_ready_tick, s.tick)
+	seat.dodge_ready_tick = mini(seat.dodge_ready_tick, s.tick)
 	pop(s, seat, &"riftmaw_tooth")
-	return 15.0
+	return 20.0
 
-## SWAN SONG — on this seat's death: a 120 farewell blast + 15 to each living ally.
+## SWAN SONG — on this seat's death: a 200 farewell blast + 25 to each living ally.
 ## Kits call at the END of on_damage_taken (hp is already applied and clamped there,
 ## so death is visible; _check_end hasn't run yet, so the blast lands this tick).
 static func damage_taken(s: CombatState, seat: Seat) -> void:
 	if seat.gear.is_empty():
 		return
 	if seat.hp <= 0.0 and once(seat, &"swan_song"):
-		CombatCore.damage_boss(s, seat, 120.0, &"swan_song")
+		CombatCore.damage_boss(s, seat, 200.0, &"swan_song")
 		for u in s.seats:
 			if u != seat and u.alive():
-				CombatCore.heal_unit(s, u, 15.0, seat, &"swan_song")
+				CombatCore.heal_unit(s, u, 25.0, seat, &"swan_song")
 		pop(s, seat, &"swan_song")
 
 ## One-shot per fight keyed on gear_vars ONLY (no gear check) — pop throttles etc.

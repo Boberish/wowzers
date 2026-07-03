@@ -159,6 +159,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if bell > 0.0:
 		_gain_energy(seat, bell)
 	_gain_energy(seat, cfg.energy_regen * s.dt)
+	# ARMORY (strong bell): the warm start hums — regen doubles for the first 10s.
+	if GearFx.bell_live(s, seat):
+		_gain_energy(seat, cfg.energy_regen * s.dt)
 	# GEAR-2: Scratchpad — regen trebles while a long wind-up thinks.
 	if GearFx.scratchpad_live(s, seat):
 		_gain_energy(seat, cfg.energy_regen * s.dt * 2.0)
@@ -405,11 +408,13 @@ func _kick(s: CombatState, seat: Seat) -> bool:
 		CombatCore.stagger_boss(s)                      # cancels the cast; emits "staggered"/DENIED
 	else:
 		CombatCore.emit_event(s, {"t": "kick_whiff", "player": seat.is_player})
-	# GEAR-1: Powder Vial — the boot carries the toxin (Venom: lit lane; Tempo: Flow).
+	# GEAR-1 (ARMORY strong): Powder Vial — the boot carries the toxin
+	# (Venom: 3 stacks on the lit lane; Tempo: +2 Flow).
 	if GearFx.has(seat, &"powder_vial"):
 		if aspect == "venomancer":
-			_apply_venom(seat, WHEEL_KEYS[_wheel(seat)], 2)
+			_apply_venom(seat, WHEEL_KEYS[_wheel(seat)], 3)
 		else:
+			_gain_flow(seat)
 			_gain_flow(seat)
 		GearFx.pop(s, seat, &"powder_vial")
 	return true
