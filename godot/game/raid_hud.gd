@@ -514,7 +514,7 @@ func _build_floor() -> void:
 	var fl: Dictionary = RaidContent.FLOORS[_floor]
 	_map_fights = RaidContent.floor_fights(int(fl["ring"]))
 	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
-		_map_fights.size(), MapContent.event_ids())
+		_map_fights.size(), MapContent.event_ids(), int(fl["shard_req"]))
 	_map_node = -1
 	_map_inv = {}
 	_show_map()
@@ -552,6 +552,9 @@ func _enter_node(id: int) -> void:
 	var n: Dictionary = _map.node(id)
 	var first_visit: bool = not bool(n.get("visited", false))
 	n["visited"] = true
+	if first_visit and bool(n.get("shard", false)):
+		# a credential shard, assembled toward root access (MAP-3c ROOT floor)
+		_map_inv["shards"] = int(_map_inv.get("shards", 0)) + 1
 	if first_visit and bool(n["key"]) and not _map_inv.get("api_key", false):
 		_map_inv["api_key"] = true
 		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,

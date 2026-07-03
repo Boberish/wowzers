@@ -58,6 +58,9 @@ func _build_header() -> void:
 	if subtitle != "":
 		_label(subtitle, 16, Palette.GOLD_BRIGHT, Vector2(0, 166), UiKit.title(700))
 	var status := "INTEGRITY %d%%" % int(round(hp_frac * 100.0))
+	if map.seal_shard_req > 0:
+		status += "      [CREDENTIAL SHARDS: %d / %d]" % [
+			int(inventory.get("shards", 0)), map.seal_shard_req]
 	if inventory.get("api_key", false):
 		status += "      [KEY: %s]" % MapContent.KEY_NAME
 	_label(status, 15, Palette.TEXT, Vector2(0, 186), UiKit.display(600, 2))
