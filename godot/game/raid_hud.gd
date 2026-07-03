@@ -60,7 +60,7 @@ var _seat_key: String = "tank"
 var _aspect: String = "warden"
 var _enc_id: String = "riftmaw"    ## the Seal to pull offline (boss-select / autostart)
 var _loadout: Array = []
-var _screen: String = "select"
+var _screen: String = "home"
 
 # Topology raid floor (MAP-3a, offline): map-run state lives HERE, not in RunState —
 # the raid never uses the solo run machinery (and draft2 owns run_state.gd right now).
@@ -142,7 +142,7 @@ func _ready() -> void:
 	add_child(_net_ctrl)
 	_net_ctrl.encounter_ended.connect(_on_end_moment)
 	_ctrl = _local_ctrl
-	_show_select()
+	_show_home()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart=gate"):
 			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
@@ -174,38 +174,109 @@ func _clear() -> void:
 		c.queue_free()
 
 # ============================================================ SELECT
-func _show_select(seat: String = "tank") -> void:
-	_screen = "select"
-	_map = null                       # leaving for the select abandons any map run
+## The one game front door (ONE GAME · ONE HUD, see MASTER-PLAN §GAME SHAPE): PLAY the
+## raid campaign (solo-with-AI) or PLAY ONLINE (co-op). No mode select, no solo split.
+func _show_home() -> void:
+	_screen = "home"
+	_map = null
 	_map_pending = false
 	_gate_live = false
-	_online_map = false               # MAP-3b: abandon any online descent
+	_online_map = false
 	_clear()
-	var sel := BossSelect.new()
-	sel.title = "THE RIFT"
-	sel.subtitle = "RAID — FOUR SEATS, ONE SEAL · PICK YOURS, AI FILLS THE REST"
-	sel.aspects = [
-		{"id": "tank", "label": "THE BULWARK", "accent": Palette.STEEL,
-			"blurb": "Tank · Warden or Juggernaut — hold its gaze, CHALLENGE it back"},
-		{"id": "blade", "label": "THE TWINFANG", "accent": Palette.FLOW,
-			"blurb": "Melee · Tempo or Venomancer — don't out-threat the tank"},
-		{"id": "caster", "label": "THE VOIDCALLER", "accent": Palette.KICK,
-			"blurb": "Caster · Disruptor or Silencer — kick the Devouring Chant"},
-		{"id": "healer", "label": "THE MENDER", "accent": Palette.WIN,
-			"blurb": "Healer · Tidecaller or Brinkwarden — four lives through the storm"},
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 14)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -260, -230, 260, 250)
+	_ui.add_child(box)
+	var t := _title(box, "THE RIFT", 76, Palette.GOLD)
+	t.add_theme_font_override("font", UiKit.title(900))
+	_title(box, "REALM 1 · THE TAKEOVER", 15, Palette.TEXT_DIM)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 30)
+	box.add_child(gap)
+	box.add_child(_menu_button("▶    PLAY", Palette.GOLD_BRIGHT, _show_class_select))
+	box.add_child(_menu_button("🌐    PLAY ONLINE", Palette.FLOW, _show_online))
+	box.add_child(_menu_button("QUIT", Palette.TEXT_DIM, func(): get_tree().quit()))
+
+func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(330, 56)
+	b.add_theme_font_size_override("font_size", 22)
+	b.add_theme_color_override("font_color", accent)
+	b.pressed.connect(cb)
+	return b
+
+## PLAY → pick your CLASS (the four raid seats; you play one, AI fills the rest).
+func _show_class_select() -> void:
+	_screen = "class"
+	_map = null
+	_map_pending = false
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 205)
+	_ui.add_child(head)
+	var hl := _title(head, "CHOOSE YOUR CLASS", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "you play one · AI raiders fill the other three seats", 14, Palette.TEXT_DIM)
+	var cards := [
+		["tank", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
+		["blade", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
+		["caster", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
+		["healer", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — four lives through the storm, click-cast the frames.  (Tidecaller / Brinkwarden)"],
 	]
-	sel.encounters = RaidContent.run_encounters()
-	sel.current = seat
-	sel.hint = "Pick a Seal: Vorathek is the classic pull; II–IV are the Machine Seals (they escalate). Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
-	sel.extras = [
-		{"label": "THE TOPOLOGY — Realm 1 descent · Ring 3→0 (MISTRAL → GEMINI → MYTHOS)",
-			"cb": func(): _start_map_pick(sel.current)},
-		{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online},
-	]
-	sel.chosen.connect(_start_raid)
-	sel.back_pressed.connect(func(): get_tree().change_scene_to_file("res://game/main.tscn"))
-	sel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_ui.add_child(sel)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 20)
+	_place(row, 0.5, 0.5, 0.5, 0.5, -580, -150, 580, 170)
+	_ui.add_child(row)
+	for c in cards:
+		var card := AspectCard.new(String(c[1]), String(c[4]), c[3], String(c[2]))
+		card.chosen.connect(_show_aspect_pick.bind(String(c[0])))
+		row.add_child(card)
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	_place(back, 0.5, 1, 0.5, 1, -80, -78, 80, -44)
+	back.pressed.connect(_show_home)
+	_ui.add_child(back)
+
+## SUB-CLASS chosen → pick your RAID (one for now: Realm 1). Future realms add cards here.
+func _show_raid_select(seat_id: String, aspect: String) -> void:
+	_screen = "raidpick"
+	_seat_key = seat_id
+	_aspect = aspect
+	_map_pending = false
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 210)
+	_ui.add_child(head)
+	var hl := _title(head, "CHOOSE YOUR RAID", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "%s · %s" % [SEAT_NAMES.get(seat_id, "RAIDER"), aspect.capitalize()], 14, Palette.TEXT_DIM)
+	var mid := CenterContainer.new()
+	_place(mid, 0.5, 0.5, 0.5, 0.5, -360, -150, 360, 150)
+	_ui.add_child(mid)
+	var card := AspectCard.new("REALM 1 · THE TAKEOVER",
+		"The ironic AI takeover. Descend the Topology, Ring 3 → 0 — MISTRAL → GEMINI → CLAUDE MYTHOS. Route the node map, carry your wounds, draft your build. (More realms to come.)",
+		Palette.CRIMSON, "")
+	card.chosen.connect(func(): _start_map_run())
+	mid.add_child(card)
+	var back := Button.new()
+	back.text = "◂ back to aspect"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	_place(back, 0.5, 1, 0.5, 1, -110, -78, 110, -44)
+	back.pressed.connect(func(): _show_aspect_pick(seat_id))
+	_ui.add_child(back)
+
+## Legacy entry point — every fight-end / Esc / "leave" call routes here. Now it just
+## returns to the one HOME menu (the old dev BossSelect front door is retired).
+func _show_select(_seat: String = "tank") -> void:
+	_show_home()
 
 # ============================================================ ASPECT PICK
 ## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
@@ -237,15 +308,15 @@ func _show_aspect_pick(seat_id: String) -> void:
 	_ui.add_child(box)
 	for a in ASPECTS[seat_id]:
 		var card := AspectCard.new(String(a["name"]), String(a["desc"]), a["accent"], String(a["icon"]))
-		card.chosen.connect(_launch.bind(seat_id, String(a["id"])))
+		card.chosen.connect(_show_raid_select.bind(seat_id, String(a["id"])))
 		box.add_child(card)
 
 	var back := Button.new()
-	back.text = "◂ back to seats"
+	back.text = "◂ back to classes"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
 	_place(back, 0.5, 1, 0.5, 1, -110, -90, 110, -56)
-	back.pressed.connect(func(): _show_select(seat_id))
+	back.pressed.connect(_show_class_select)
 	_ui.add_child(back)
 
 # ============================================================ ONLINE (R2)
