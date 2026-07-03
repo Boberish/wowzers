@@ -12,21 +12,28 @@ extends Resource
 @export var def_warden: Dictionary = {"active": 0.34, "zone": 0.30, "cd": 2.0}
 @export var def_jugg: Dictionary = {"active": 0.55, "zone": 0.42, "cd": 2.2}
 
-# Warden
+# Warden — the GUARD CHAIN: Counter is now a STREAK you protect. Every won read (parry /
+# PERFECT beat / held feint) links it; EATING a heavy/crush you should have parried DROPS
+# it to half; each link passively boosts your outgoing (Riposte-as-passive); Vindicate
+# cashes the whole chain. A combo you keep alive, not just a counter you bank.
 @export var parry_reflect: float = 50.0
 @export var parry_rage: float = 14.0
 @export var parry_counter: int = 1
 @export var riposte_dur: float = 2.6
 @export var riposte_bonus: float = 95.0
-@export var counter_max: int = 5
+@export var counter_max: int = 6           ## chain length ceiling (was 5)
+@export var chain_dmg_per: float = 0.06    ## each link boosts ALL your outgoing by this (the chain's teeth)
 
-# Juggernaut
+# Juggernaut — the REDLINE: Momentum is a gauge you RIDE and VENT. At cap you enter
+# OVERDRIVE (dodging no longer dumps — the reward for redlining); Avalanche is a PARTIAL
+# vent (spend some for burst, keep riding) instead of a full self-destructing dump.
 @export var mom_dmg: float = 0.06
 @export var mom_dr: float = 0.025
 @export var mom_max: int = 10
 @export var mom_delay: float = 2.5
 @export var mom_decay_step: float = 0.5
 @export var mom_dr_cap: float = 0.85
+@export var avalanche_vent: int = 6        ## Avalanche vents this many Momentum (partial), keeps the rest
 
 # shared
 @export var rage_from_dmg: float = 0.42

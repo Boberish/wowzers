@@ -69,7 +69,11 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 func on_defense_press(s: CombatState, seat: Seat) -> void:
 	if aspect == "juggernaut":
 		var mo := int(seat.vars.get("momentum", 0))
-		seat.vars["momentum"] = int(mo / 2) if _b("sureFoot") else 0
+		# OVERDRIVE: at cap the snowball is HOT — dodging no longer dumps it (the reward for
+		# living at the redline, and the fix for "my own dodge kills my Momentum"). Below
+		# cap, the greed tension stands: a dodge still costs the snowball (halved w/ sureFoot).
+		if mo < _mom_max():
+			seat.vars["momentum"] = int(mo / 2) if _b("sureFoot") else 0
 	if _b("propCharge") and int(seat.vars.get("guard_spare", 1)) > 0:
 		seat.vars["guard_spare"] = int(seat.vars.get("guard_spare", 1)) - 1
 		seat.defense_ready_tick = s.tick
@@ -151,6 +155,14 @@ func modify_incoming(s: CombatState, seat: Seat, dmg: float, _source: StringName
 func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName, size: int) -> void:
 	var fury := 1.3 if _b("furyGain") else 1.0
 	_gain_rage(seat, roundf(dmg * cfg.rage_from_dmg * fury))
+	# GUARD CHAIN: eating a heavy/crush you should have PARRIED drops the chain to HALF —
+	# the streak you protect survives a mistake but punishes it. (A landed FEINT is a
+	# correct HOLD, rewarded below, and never breaks the chain.)
+	if aspect == "warden" and size >= AbilityRes.Size.HEAVY and not _is_feint(s, source):
+		var c := int(seat.vars.get("counter", 0))
+		if c > 0:
+			seat.vars["counter"] = c / 2
+			CombatCore.emit_event(s, {"t": "chain_break", "player": seat.is_player})
 	if aspect == "juggernaut":
 		var mg := 3 if (_b("bulldoze") and size >= AbilityRes.Size.HEAVY) else 1
 		_gain_momentum(s, seat, mg)
@@ -164,6 +176,8 @@ func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName,
 	# revisit via a resolution-time hook if/when tanks can carry absorbs.
 	if _is_feint(s, source):
 		_gain_rage(seat, cfg.feint_read_rage)
+		if aspect == "warden":
+			_gain_counter(seat, 1)   # a held feint is a WON READ → links the chain
 		seat.vars["exposed_until_tick"] = s.tick + _tt(s, cfg.feint_exposed_dur)
 		CombatCore.emit_event(s, {"t": "read", "player": seat.is_player})
 		if _b("trigRead"):
@@ -184,6 +198,8 @@ func outgoing_mult(seat: Seat) -> float:
 		m *= cfg.feint_exposed_mult
 	if bool(seat.vars.get("pay_exposed", false)):     # Sunder Guard: +15% while Exposed
 		m *= 1.0 + cfg.mod_expose_amt
+	if aspect == "warden":
+		m *= 1.0 + float(int(seat.vars.get("counter", 0))) * cfg.chain_dmg_per   # the CHAIN's teeth
 	if aspect == "juggernaut":
 		m *= 1.0 + float(int(seat.vars.get("momentum", 0))) * cfg.mom_dmg
 	if _b("execute") and seat.hp_max > 0.0 and seat.hp / seat.hp_max < 0.35:
@@ -291,12 +307,14 @@ func _avalanche(s: CombatState, seat: Seat) -> bool:
 	if mo < 1:
 		return false
 	seat.resource -= cfg.avalanche_cost
-	var dealt := CombatCore.damage_boss(s, seat, cfg.avalanche_dmg_per * float(mo))
+	var vent := mini(mo, cfg.avalanche_vent)   # PARTIAL vent — cash some for burst, keep riding
+	var dealt := CombatCore.damage_boss(s, seat, cfg.avalanche_dmg_per * float(vent))
 	if _b("landslide"):
 		_heal(seat, roundf(dealt * 0.4))
 	if s.telegraph != null:
 		CombatCore.stagger_boss(s)
-	seat.vars["momentum"] = 0
+	seat.vars["momentum"] = mo - vent
+	seat.vars["last_aggro_tick"] = s.tick       # venting keeps the snowball hot (no instant decay)
 	_set_gcd(s, seat, cfg.gcd, "avalanche")
 	return true
 
@@ -362,8 +380,11 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"rage": seat.resource,
 		"rage_max": seat.resource_max,
 		"counter": int(seat.vars.get("counter", 0)),
+		"counter_max": cfg.counter_max,
+		"chain_bonus": float(int(seat.vars.get("counter", 0))) * cfg.chain_dmg_per if aspect == "warden" else 0.0,
 		"momentum": int(seat.vars.get("momentum", 0)),
 		"momentum_max": _mom_max(),
+		"overdrive": aspect == "juggernaut" and int(seat.vars.get("momentum", 0)) >= _mom_max(),
 		"riposte_active": s.tick < int(seat.vars.get("riposte_until_tick", 0)),
 		"aspect": aspect,
 		"def_zone": _def()["zone"],
