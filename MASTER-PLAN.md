@@ -69,13 +69,27 @@ solo-only features · the solo draft-run mode (drafts live in the Topology, wher
 **Frozen:** the five solo class HUDs (no further polish; personal gates run through `raid_hud`'s
 existing per-seat class bands). **Kept:** all 15 boss content files (the casting pool, §REALMS
 table) · the six class sims (regression spine — infra, not product) · boss-select as practice/debug.
-**Front door:** class menu shrinks to **THE RIFT** (the game) + one **PROVING GROUNDS** practice
-card reusing the existing boss-select (zero work now; retire later if unused). Practice fights
-are **unlock-inert** (no drops/feats/Proofs — otherwise practice becomes the farm).
+**Front door (the ONLY player flow — reaffirmed with Bill 2026-07-03):** ONE **PLAY** button
+(Play *is* the raid — it's the only mode) → **pick your CLASS** (which seat you take) → **pick your
+SUB-CLASS** (Aspect) → **pick the RAID** (one for now: Realm 1 · The Takeover) → play. No mode
+select, no "solo vs co-op" fork (AI fills empty seats; PLAY ONLINE is a lobby toggle *inside* the
+raid, not a separate mode). The old `main_menu` / per-class `*_main.tscn` solo entries + the
+PROVING GROUNDS card are being REMOVED (see the menu-refresh claim in the Coordination Log).
 
-**⚖ RAID-FIRST LAW (every session, every feature):** player-facing features land on the raid
-HUD/sim FIRST; practice surfaces inherit only what shared components give for free. There is
-no "solo side" to default to anymore.
+**⚖ ONE GAME · ONE HUD LAW (non-negotiable — reaffirmed 2026-07-03. This is the norm; do NOT
+re-introduce a solo/raid split. Read this before building any player-facing system.):**
+- There is exactly ONE game (the raid) and exactly ONE combat HUD — today `raid_hud.gd`. It is
+  **THE game HUD**; the "raid HUD" name is legacy shorthand, not a mode. EVERY player-facing
+  feature lands there. Full stop. (Don't say "add it to the raid HUD" — there's only one HUD.)
+- The five solo class HUDs (`bulwark_hud`/`mender_hud`/`twinfang_hud`/`voidcaller_hud`/
+  `bloomweaver_hud`), `main_menu.gd`, and the `*_main.tscn` solo scenes are **DEAD** — do not add
+  features to them, do not wire menus to them, and never "port from solo to raid." If a system
+  only lives in a solo HUD, it is MISSING from the game and must be (re)built on the one HUD.
+- **Canonical failure to never repeat:** the Draft 2.0 BOON draft shipped only in the solo HUDs,
+  so it was silently absent from the actual game until 2026-07-03 (`0338a37`). That split-induced
+  gap is exactly what this law exists to prevent. Build every system on the game HUD, once.
+- Kept: the class sims (regression infra, NOT product) and boss-select **only** as a `--autostart`
+  dev jump-in behind a flag — never a player-facing front door. Practice/PROVING-GROUNDS surface: cut.
 
 ---
 
