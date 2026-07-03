@@ -461,7 +461,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `ledger-desc` · §GRAPHICS/GEAR — **Show item EFFECT on the Ledger page (Bill).** The
+- ☑ 2026-07-03 · `ledger-desc` · §GRAPHICS/GEAR — **Show item EFFECT on the Ledger page — MERGED (`e9e76ef`).** The
   Ledger (`raid_hud._offer_oath_then`) shows each row's item name + rarity + unlock condition but NOT
   the item's `desc` (what it does) — "make it clear what I'll get". Add the effect line (rarity-colored,
   wrapped) per row so the player sees the reward's actual effect. Data already exists (`GearCatalog`
