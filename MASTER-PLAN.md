@@ -524,6 +524,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   Gate: frozen A/B byte-identical gearless/unsworn on all sims + gear_probe extension + smokes.
   ⚠ engine touches: THREAT_DROP/taunt diag + `_damage` dip diag + `BossState.last_curse_tick` —
   all diag-family/write-only. *(gear-design session)*
+- ☐ 2026-07-03 · `bloom-raid` · §CLASSES/§ONLINE — **Second healer in THE RIFT: Bloomweaver gets a raid seat
+  (Bill: "add the second healer... the last relic that didn't make it from the switch... separate shields
+  from heals").** The healer seat becomes a CLASS choice (Mender ⇄ Bloomweaver), threaded as a per-seat `cls`
+  through `RaidNet` spec/build/make_policy (default `mender` → every existing fight byte-identical) +
+  `RaidContent._bloomweaver()` factory. New 5th class card on the game HUD → full Bloomweaver band
+  (Sap orb + VerdanceGauge + CastChannel + BloomweaverBinds, 1-4/Q/E/7 + chords, bloom double-tap, ripe/bloom
+  frame ghosts, 9 event arms). **Meter split (Bill's ask):** engine `meter_shield` bucket separates ward
+  absorbs (SHIELDING DONE / SPS) from real HP restored (HEALING DONE / HPS) — `s.meter` only, never checksummed,
+  six solo sims byte-identical + meter_probe ALL OK. Online lobby healer-class toggle + stage actor. *(bloom-raid session)*
 - ☑ 2026-07-03 · `gear1` · §SYSTEMS GEAR-1 — **GEAR-1 raid-campaign loot PoC — MERGED to main
   (`866592f`)**, worktree removed. The Curio game is LIVE on the raid campaign: `data/gear/`
   (GearCatalog: 9 signature items — Riftmaw Tooth / LE CHAT's Bell / Swan Song / Ticket Stub /

@@ -17,9 +17,10 @@ const ROW_C := 24.0            # compact row
 const ROW_D := 31.0            # detail row (name line + dim stat line)
 const FOOT := 18.0
 
-const MODES: Array = ["dmg", "heal", "taken"]
-const MODE_NAMES := {"dmg": "DAMAGE DONE", "heal": "HEALING DONE", "taken": "DAMAGE TAKEN"}
-const MODE_RATE := {"dmg": "DPS", "heal": "HPS", "taken": "DTPS"}
+const MODES: Array = ["dmg", "heal", "shield", "taken"]
+const MODE_NAMES := {"dmg": "DAMAGE DONE", "heal": "HEALING DONE",
+	"shield": "SHIELDING DONE", "taken": "DAMAGE TAKEN"}
+const MODE_RATE := {"dmg": "DPS", "heal": "HPS", "shield": "SPS", "taken": "DTPS"}
 
 ## source label -> display name, where String.capitalize() isn't enough
 static var PRETTY := {
@@ -29,7 +30,8 @@ static var PRETTY := {
 	"poison": "Poison", "kick": "Kick", "medit": "Meditation", "flash": "Flash Heal",
 	"mend": "Mend", "well": "Welling Tide", "laststand": "Last Stand",
 	"perfect_burst": "Perfect Ward", "void_dot": "Void Rot", "lash": "Thornlash",
-	"kick_heal": "Kick Recovery",
+	"kick_heal": "Kick Recovery", "growth": "Growth", "bloom": "Bloom",
+	"wildbloom": "Wildbloom", "renew": "Renew",
 }
 
 var mode: String = "dmg"

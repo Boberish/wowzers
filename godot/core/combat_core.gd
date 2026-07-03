@@ -585,8 +585,9 @@ static func _meter_row(s: CombatState, seat: Seat) -> Dictionary:
 	if i < 0:
 		return {}
 	if not s.meter.has(i):
-		s.meter[i] = {"dmg": {}, "heal": {}, "taken": {},
-			"dmg_total": 0.0, "heal_total": 0.0, "over_total": 0.0, "taken_total": 0.0}
+		s.meter[i] = {"dmg": {}, "heal": {}, "shield": {}, "taken": {},
+			"dmg_total": 0.0, "heal_total": 0.0, "over_total": 0.0,
+			"shield_total": 0.0, "taken_total": 0.0}
 	return s.meter[i]
 
 static func _meter_hit(by: Dictionary, src: StringName, amt: float, discrete: bool) -> void:
@@ -628,6 +629,19 @@ static func meter_heal(s: CombatState, caster: Seat, src: StringName, eff: float
 	e["over"] = float(e["over"]) + over
 	row["heal_total"] = float(row["heal_total"]) + eff
 	row["over_total"] = float(row["over_total"]) + over
+
+## Shielding done by `caster` — damage absorbed by a ward it granted. Tracked in a
+## bucket SEPARATE from heal (a ward mitigates a hit; it never restores lost HP), so
+## the meter can show HEALING and SHIELDING as distinct output — the honest split a
+## ward-heavy healer (Bloomweaver) needs (no more "Wards" inflating the HPS number).
+static func meter_shield(s: CombatState, caster: Seat, src: StringName, amt: float) -> void:
+	if caster == null or amt <= 0.0:
+		return
+	var row := _meter_row(s, caster)
+	if row.is_empty():
+		return
+	_meter_hit(row["shield"], src, amt, true)
+	row["shield_total"] = float(row["shield_total"]) + amt
 
 ## Damage a seat actually took (post-mitigation, post-absorb), by boss source.
 static func meter_taken(s: CombatState, seat: Seat, src: StringName, amt: float,
@@ -763,7 +777,7 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 				hseat = s.seats[seat.absorb_owner_i]
 			if hseat == null:
 				hseat = _healer(s)
-			meter_heal(s, hseat, &"ward", eaten, 0.0)   # absorbs count as healing done
+			meter_shield(s, hseat, &"ward", eaten)      # mitigation, tracked apart from heals
 			if hseat != null and hseat.kit != null:
 				hseat.kit.on_absorb(s, hseat, seat, eaten, emptied)
 	seat.hp -= d
