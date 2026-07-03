@@ -8,10 +8,14 @@ your raid seat), and the pure-reducer architecture rule existed precisely so tha
 
 **Product shape (locked):**
 - **Solo Trials** — the current game, unchanged. Per-class gauntlets, map/meta layer, earns
-  base resources (essences, reagents, Embers, Sigils).
+  base resources (essences, reagents, Embers, Sigils). *(Economy vocabulary SUPERSEDED
+  2026-07-03 — no material economy; see `PROGRESSION-PLAN.md`: trials unlock loot-table
+  rows via kills/armed feats instead.)*
 - **The Rift (raid mode)** — live 4-seat fights vs raid-only bosses. Humans + AI backfill for
   empty seats (solo-playable, as always dreamed). Your solo-built loadout carries in. Drops
   raid-exclusive top-tier materials (**Riftcores**) required for Sigil T3 / capstone crafts.
+  *(SUPERSEDED 2026-07-03 — raid exclusivity is now structural: raid bosses own loot tables
+  that drop nowhere else, deep rows gated by Seal feats/versions; see `PROGRESSION-PLAN.md`.)*
 
 ## Engine readiness audit (2026-07-02)
 
@@ -221,9 +225,13 @@ Still open for later R3:
 - Ensemble bosses that REQUIRE the trinity: tank-swap taunt mechanics (needs 2-tank comps),
   healer dispels mid-telegraph, feints aimed at a random non-tank, marks that must be
   bloomed/warded pre-emptively.
-- **Riftcores**: raid-only material, deterministic drop per raid boss kill; required for
-  Sigil T3 and the sealed Ledger page. Solo trials farm essences; raids prove loadouts.
-- Difficulty tiers = Depth applied to raids; higher Depth → more Riftcores.
+- ~~**Riftcores**: raid-only material, deterministic drop per raid boss kill; required for
+  Sigil T3 and the sealed Ledger page. Solo trials farm essences; raids prove loadouts.~~
+  *(SUPERSEDED 2026-07-03 by `PROGRESSION-PLAN.md` — materials CUT; raids own exclusive
+  loot tables + Seal-gated feat rows instead. "The sealed Ledger page" survives as the raid
+  capstone collectible in the Ledger.)*
+- Difficulty tiers = Depth applied to raids; higher Depth → richer drop-rarity weights and
+  Depth-gated table rows (per `PROGRESSION-PLAN.md` RANK track), not materials.
 
 ## Known future work (tracked, not R0)
 
