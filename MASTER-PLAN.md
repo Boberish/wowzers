@@ -447,17 +447,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `raid-boons` · §MAPS/§SYSTEMS — **Boon draft in the RAID campaign (Bill, direct).**
-  The raid Topology has GEAR but no BOON draft (`raid_hud.gd:856` "the raid has no boon draft") —
-  Draft 2.0 (1-of-3 / rarities / build-your-verb) never got ported from the solo runs. Add it
-  OFFLINE first (what Bill plays): give the human seat a `RunState` (`_run` via the class starter),
-  offer a `DraftScreen` after each won fight (chained AFTER the gear drop), `Draft.take` the pick,
-  inject `_run.boons` into the human seat's kit at every map-fight build (kits already read `boons`
-  via `_b()`), persist across the descent, mint Tokens from fight skill. AI raiders stay boon-less.
-  Online boons (ride the spec) = follow-up. Touches `raid_hud.gd` (game-layer, zero engine).
-  ⚠ shared w/ `gear2` (both in the raid post-fight flow) — merge main before merge-back. Gate:
-  raid/solo sims byte-identical, new boon probe (draft appears → take → next fight's human kit has
-  it), ui_smoke_raid green. *(raid-finish session)*
+- ☑ 2026-07-03 · `raid-boons` · §MAPS/§SYSTEMS — **Boon draft in the RAID campaign — MERGED to main
+  (`0338a37`)**, worktree removed. Draft 2.0 (1-of-3 / rarities / build-your-verb) now runs in the
+  raid descent OFFLINE: the human seat gets a `_run` (RunState via the class starter), a **REFORGE**
+  `DraftScreen` fires after each won fight (chained AFTER the gear drop), `Draft.take` folds the pick
+  into `_run.boons`, `_inject_boons` rides it into the human kit at every map/gate-fight build
+  (`_show_boon_draft` mints Tokens too). AI raiders stay boon-less; boons persist across the descent.
+  Gate PASS: NEW `sim/raid_boon_probe.gd` (1-of-3 offered, taken boon injects into the kit, reaches
+  REFORGE after the drop); `map_advance_probe` all 4 seats gear→draft→DESCEND→floor 1; ui_smoke_raid
+  green; bulwark determinism unchanged. Merged `twinfang-accel` cleanly. **NEXT:** ONLINE boons (the
+  human's `run_seed`/picks ride the fight spec so replicas build identically — netcode follow-up);
+  a verb/boon summary on the raid combat HUD (solo shows one; raid doesn't yet); gate-fight post-draft. *(raid-finish session)*
 - ☐ 2026-07-03 · `gear2` · §SYSTEMS GEAR-2 — **Sworn OATHS + Ledger offer + purses (Bill: "continue" after GEAR-1).**
   Per PROGRESSION-PLAN + GEAR-CATALOG: swear ONE oath at the boss node (Ledger-lite offer screen)
   → in-fight tracker banner + live BROKEN pop → resolve at the kill → **permanent row unlock joins
