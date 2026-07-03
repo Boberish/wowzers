@@ -27,6 +27,23 @@ func _press(prefix: String) -> bool:
 			return true
 	return false
 
+func _find_draft(node: Node):
+	if node is DraftScreen:
+		return node
+	for c in node.get_children():
+		var r = _find_draft(c)
+		if r != null:
+			return r
+	return null
+
+## take the first boon offer to advance past the REFORGE draft
+func _take_draft() -> bool:
+	var ds = _find_draft(hud._ui)
+	if ds != null and not (ds._offers as Array).is_empty():
+		ds.emit_signal("boon_taken", ds._offers[0])
+		return true
+	return false
+
 func _process(_delta: float) -> bool:
 	if hud == null:
 		hud = load("res://game/raid_main.tscn").instantiate()
@@ -59,14 +76,17 @@ func _process(_delta: float) -> bool:
 			if not (_press("EQUIP") or _press("SCRAP") or _press("REPLACE")):
 				print("[%s] FAIL: drop card had no continue button" % seat)
 				fails += 1
+		var drafted := false
+		if String(hud._screen) == "draft":         # REFORGE boon draft — take one to continue
+			drafted = _take_draft()
 		var after_scr := String(hud._screen)
 		var has_descend := _press("DESCEND")       # press it if present (advances the floor)
 		var floor_after := int(hud._floor)
 		var ok := has_descend and floor_after == 1 and String(hud._screen) == "map"
 		if not ok:
 			fails += 1
-		print("[%-6s] seal WON -> drop=%s screen_after_drop=%s DESCEND_shown=%s -> floor=%d screen=%s  %s" % [
-			seat, str(dropped), after_scr, str(has_descend), floor_after, hud._screen,
+		print("[%-6s] seal WON -> drop=%s draft=%s (%s) DESCEND=%s -> floor=%d screen=%s  %s" % [
+			seat, str(dropped), str(drafted), after_scr, str(has_descend), floor_after, hud._screen,
 			("OK" if ok else "FAIL <<<")])
 		si += 1
 		step = 0

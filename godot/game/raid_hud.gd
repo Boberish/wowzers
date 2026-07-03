@@ -87,6 +87,7 @@ var _map_gear_charges: Dictionary = {}  ## active-item charges left this run
 var _map_tokens := 0                    ## ⏣ banked from scrap (MARKET spends them, GEAR-3)
 var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
+var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -647,7 +648,25 @@ func _start_map_run() -> void:
 	if DisplayServer.get_name() != "headless":
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
+	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
+	# its picks ride into every pull (AI raiders stay on the verified boon-less comp).
+	_run = _make_run()
 	_build_floor()
+
+## A minimal RunState for the human seat, just to carry boons + the draft economy
+## (class/aspect/draft_rng/tokens/pity). Its encounter chain is ignored — the raid
+## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
+func _make_run() -> RunState:
+	match _seat_key:
+		"blade": return RunState.start_twinfang(_aspect)
+		"caster": return RunState.start_voidcaller(_aspect)
+		"healer": return RunState.start_mender(_aspect)
+		_: return RunState.start(_aspect)
+
+## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
+func _inject_boons(seat: Seat) -> void:
+	if _run != null and seat != null and seat.kit != null:
+		seat.kit.boons = _run.boons
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -797,6 +816,7 @@ func _launch_map_fight(fi: int) -> void:
 	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, String(enc.id))
 	var s := RaidNet.build(spec, _seat_key)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
+	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
 	for i in s.seats.size():
 		if i < _map_fracs.size():
 			var u: Seat = s.seats[i]
@@ -823,6 +843,7 @@ func _launch_gate_fight() -> void:
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect)
 	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
+	_inject_boons(s.seats[0])   # Draft 2.0: boons on for the exam too
 	if _map != null:
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = s.seats[0]
@@ -1018,6 +1039,31 @@ func _toast_add(msg: String) -> void:
 
 ## A floor Seal is down (but not the last): PRIVILEGE ELEVATION — descend to the
 ## next ring carrying the party's integrity/wounds/mana, or bank out to the Rift.
+## Draft 2.0 REFORGE (the raid's boon draft): mint Tokens from this fight's skill, then
+## offer 1-of-3 (rarity-weighted, synergy slot, build-your-verb pieces). Taking one folds
+## it into `_run.boons` — it rides every future pull. Pool exhausted / no run = skip.
+func _show_boon_draft(done: Callable) -> void:
+	if _run == null:
+		done.call()
+		return
+	if _ctrl != null and _ctrl.state != null:
+		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
+	var picks := Draft.roll_offers(_run)
+	if picks.is_empty():
+		done.call()
+		return
+	_screen = "draft"
+	_clear()
+	var extras: Array = []
+	if _run.tokens > 0:
+		extras.append("%d Tokens banked — REROLL / LOCK a card." % _run.tokens)
+	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
+		"Take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
+	ds.boon_taken.connect(func(boon: Dictionary):
+		Draft.take(_run, boon)
+		done.call())
+	_ui.add_child(ds)
+
 func _show_floor_cleared() -> void:
 	_screen = "end"
 	_clear()
@@ -2158,7 +2204,8 @@ func _on_end(won: bool) -> void:
 			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
 			after = _show_campaign_cleared if _floor >= RaidContent.FLOORS.size() - 1 \
 				else _show_floor_cleared
-		_after_drop(String(_ctrl.state.encounter.id), after)
+		# gear drop first, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear)
+		_after_drop(String(_ctrl.state.encounter.id), func(): _show_boon_draft(after))
 		return
 	_show_end(won)
 
