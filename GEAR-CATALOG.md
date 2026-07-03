@@ -245,9 +245,10 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 
 ## Rollout mapping (matches PROGRESSION-PLAN phases)
 
-- **GEAR-1 (Ring-3 roster, kill-unlocks only):** SIGNATURE rows of Vorathek + MISTRAL-7B +
-  the three skirmish pages (Riftmaw Tooth, LE CHAT's Bell, Swan Song, Ticket Stub, Cooling
-  Paste) + drop/scrap/2-slot/MARKET plumbing. ~8 items, sims small.
+- **GEAR-1 — ✅ SHIPPED 2026-07-03 (`866592f`):** all NINE signature rows live (the five
+  above + the four gate items — the gates were free since their tables key by canonical
+  encounter id), drop/scrap/2-slot plumbing, unlock store, ceremony, `gear_probe`. Scrap
+  Tokens bank until MARKET (GEAR-3); offline raid-map only (online spec fold-in later).
 - **GEAR-2 (oaths + Ledger UI):** every OATH row above + the `seat.diag` detector bumps +
   severity purses. Gates become the oath stage.
 - **GEAR-3 (MARKET/extraction):** [UTIL] items stock MARKETs; schematics lane.

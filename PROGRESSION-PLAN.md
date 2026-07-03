@@ -176,9 +176,8 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
 
 - Checkpoint attunements (once Ring 3 is proven, may start at Ring 2 — Spelunky-shortcut
   tension: faster but leaner draft build-up).
-- Slots exactly 2? Set-pair depth (pairs only, or 3-piece realm sets)? Gear noun (avoid
-  "relic" — `relic_card.gd` is the boon card; catalog proposes **CURIO** global /
-  **PERIPHERAL** Realm-1 skin — unlocked, Bill to bless).
+- Slots exactly 2? Set-pair depth (pairs only, or 3-piece realm sets)?
+  *(Gear noun resolved 2026-07-03 with GEAR-1: **CURIO** global / **PERIPHERAL** Realm-1 skin.)*
 - Shard pity for extraction. Serendipity knob. *(Arm limit resolved 2026-07-03: one sworn oath per seat per fight.)*
 - Altar/sacrifice rare map event (trade equipped item now → awakened row forever) — spice.
 - Hub screen for Ledger/character sheet; where standing lives before accounts exist
@@ -189,10 +188,12 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
 0. **The substrate is already merged** (Draft 2.0 + slot-verbs + Tokens, 2026-07-02 — rarity/
    pity/synergy tags/Token mint+spends live in `game/draft.gd`) — gear REUSES that machinery,
    never forks it. GEAR-1 is claimable immediately.
-1. **GEAR-1 (raid-campaign PoC — retargeted 2026-07-03 per the raid-only lock):** tables for
-   the Ring-3 roster (Vorathek, MISTRAL-7B, the skirmish minibosses; ~8–12 items), kill-unlocks
-   only, drop ceremony in raid-map mode (reuse `relic_card.gd` visuals), 2 slots per seat,
-   scrap→Tokens, save-file unlock store. **Item designs: `GEAR-CATALOG.md` §Rollout GEAR-1.**
+1. **GEAR-1 — ✅ DONE, merged 2026-07-03 (`866592f`; record in MASTER-PLAN Coordination Log):**
+   9 signature items live on the raid campaign (Ring-3 roster + gate exams), first-kill unlock →
+   `user://rift_gear.cfg`, drop ceremony (EQUIP/REPLACE/SCRAP→⏣, 2-slot cap, dupes auto-scrap),
+   curios armed on the human seat, `sim/gear_probe.gd` + byte-identical gearless gate.
+   v1 caveats: OFFLINE raid-map only (fold `gear` into the online campaign spec later);
+   scrap Tokens BANK only until MARKET (GEAR-3). **Item designs: `GEAR-CATALOG.md` §Rollout GEAR-1.**
 2. **GEAR-2:** sworn oaths (detectors off `seat.diag`) + the Ledger page UI + oath purses/severity scaling. **Oath rows + detector notes: `GEAR-CATALOG.md`.**
 3. **GEAR-3:** MARKET gear stock + extraction schematics (map layer).
 4. **GEAR-4:** raid personal loot + Seal tables; crests/standing later (needs accounts).
