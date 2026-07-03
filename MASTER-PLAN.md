@@ -461,6 +461,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `armory` · §SYSTEMS GEAR — **CLAIMED (in flight): drop-cadence rework + signature
+  strength pass + ARMOR SET doll (Bill's direction, this session).** Playtest verdict: drops every
+  fight + weak items = no WoW moment. (1) **Drops become EVENTS** — roll only at Seal kills, gate
+  exams, and any kill whose SIGNATURE row is still locked (preserves the first-kill shower);
+  skirmish repeat kills pay ⏣ toasts instead. (2) **Richer ring weights + pity** (fewer rolls →
+  each pays more). (3) **Signature strength pass** — the 9 live signatures redesigned STRONG
+  (iconic, feel-it-now; combat six promoted to printed Sonnet), per Bill: "the 1st signature for
+  a boss should be a strong one". (4) **ARMOR SET rebrand (presentation-only)** — boons render as
+  armor PIECES on a paper-doll SET panel: slots WEAPON/HELM/CUIRASS/GAUNTLETS/GREAVES + the 2 curio
+  TRINKET sockets; every boon gains an inert `slot` tag; Hades stacking/draft economy untouched
+  (slot piece = family count + best-rarity glow; curios stay the special drop lane). Owns:
+  `raid_hud.gd` drop/draft flow, `game/gear.gd` weights, `gear_catalog/gear_fx` + kit gear sites,
+  new `game/ui/armor_doll.gd`, DraftScreen slot line, boon-pool `slot` data pass, PROGRESSION-PLAN
+  + GEAR-CATALOG amendments. Gate: gear_probe ALL OK; gearless sims byte-identical; smokes green;
+  doll screenshot. *(armory session)*
+
 - ☑ 2026-07-03 · `ledger-desc` · §GRAPHICS/GEAR — **Show item EFFECT on the Ledger page — MERGED (`e9e76ef`).** The
   Ledger (`raid_hud._offer_oath_then`) shows each row's item name + rarity + unlock condition but NOT
   the item's `desc` (what it does) — "make it clear what I'll get". Add the effect line (rarity-colored,
