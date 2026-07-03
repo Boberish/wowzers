@@ -99,3 +99,10 @@ extends Resource
 	"bloodthirst":{"cost": 25.0, "dmg": 80.0,  "lifesteal": 0.6, "gcd": 1.0},
 	"shockwave":  {"cost": 50.0, "dmg": 55.0,  "stagger": true, "gcd": 1.0},
 }
+
+## RAID re-balance (threat_enabled fights only — solo/practice stays byte-identical).
+## The Bulwark was tuned to SOLO its own survival; in a raid the HEALER tops the tank,
+## so its default self-top (Fortify's flat heal) is cut to a token amount — Fortify
+## becomes a MITIGATION button (its DR carries), not a self-heal. Drafted sustain
+## (bloodthirst lifesteal, riposteHeal, landslide) is untouched — that's chosen agency.
+@export var raid_self_heal_mult: float = 0.52   ## Fortify's 130 heal → ~68 in a raid (mitigation button, healer covers the rest)

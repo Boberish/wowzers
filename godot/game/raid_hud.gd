@@ -1412,7 +1412,7 @@ func _make_loadout() -> Array:
 			return VoidcallerConfig.new().loadout(_aspect)
 		"healer":
 			_mcfg = MenderConfig.new()
-			return _mcfg.order(_aspect)
+			return _mcfg.order(_aspect) + ["revive"]   # RAID adds the battle-rez rune (R)
 		_:
 			return ["cleave", "rampage", "fortify", ("vindicate" if _aspect == "warden" else "avalanche")]
 
@@ -1945,6 +1945,7 @@ func _healer_key(code: int) -> void:
 		KEY_Q: _cast("dispel")
 		KEY_E: _cast("medit")
 		KEY_7: _cast(_signature())
+		KEY_R: _cast("revive")             # battle-rez: hover a FALLEN raider's frame, press R
 
 func _use_ability(i: int) -> void:
 	if _screen == "combat" and i >= 0 and i < _rune_ids.size():
@@ -1973,7 +1974,10 @@ func _cast(id: String) -> void:
 	var target: Seat = null
 	if bool(sp.get("target", false)):
 		target = _hover_seat if _hover_seat != null else _focus_seat
-		if target == null or not target.alive():
+		if id == "revive":
+			if target == null or target.alive():   # battle-rez needs a DEAD hovered ally
+				return
+		elif target == null or not target.alive():
 			return
 	_ctrl.human({"type": "ability", "id": id, "target": target})
 

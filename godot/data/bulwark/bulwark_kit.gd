@@ -314,7 +314,12 @@ func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 	if ab.has("lifesteal"):
 		_heal(s, seat, roundf(dmg * float(ab["lifesteal"])), &"lifesteal")
 	if ab.has("heal"):
-		_heal(s, seat, float(ab["heal"]), StringName(id))
+		# RAID: the healer tops the tank — cut the flat self-heal so Fortify is a
+		# mitigation button (its DR still carries). Solo/practice byte-identical.
+		var heal_amt := float(ab["heal"])
+		if s.threat_enabled:
+			heal_amt *= cfg.raid_self_heal_mult
+		_heal(s, seat, heal_amt, StringName(id))
 	if ab.has("dr"):
 		seat.dr = float(ab["dr"])
 		seat.dr_until_tick = s.tick + _tt(s, float(ab["drDur"]))

@@ -88,7 +88,12 @@ static func make_riftmaw() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"riftmaw"; e.name = "Vorathek, the Riftmaw"; e.hp = 13500
 	e.intro = "The first raid Seal. Hold its gaze, kick the Chant, dodge the Volley, out-heal the rest — and when the Curse makes it forget you, take its eyes back."
-	e.melee = {"every": 1.1, "min": 30.0, "max": 42.0}
+	# Melee is the ONE unavoidable, un-freezable pressure (telegraphed abilities freeze
+	# each other's timers). With the tank's self-heal cut, this steady chip on the tank
+	# IS the healer's core job + the honest mana tax. Tuned up from the solo-era 30-42,
+	# but GENTLY — Vorathek is the teaching Seal (Ring 3, the Shallow Stack). The later
+	# Seals (Gemini/Mythos) are where the melee + dodge punishment ramps hard.
+	e.melee = {"every": 1.05, "min": 34.0, "max": 44.0}
 	e.enrage_at = 75.0
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
@@ -98,10 +103,17 @@ static func make_riftmaw() -> EncounterRes:
 		_swing(&"crush", "Riftmaw Crush", AbilityRes.Size.CRUSH, 160.0, 2.5, 12.0, 2.0, true),
 		_swing(&"rend", "Rending Talon", AbilityRes.Size.HEAVY, 80.0, 1.8, 9.0, 2.0, false),
 		_chant(&"chant", "Devouring Chant", 450.0, 2.0, 9.0, 2.0),
-		_nova(&"cataclysm", "Rift Cataclysm", 30.0, 2.0, 11.0, 2.0),
+		# UNAVOIDABLE raid-wide chip — the healer's baseline work even vs a group that
+		# dodges everything. Ramps hard by phase (×1.15 / ×1.3), so healing gets heavier
+		# as the fight goes. This is what keeps mana honest.
+		_nova(&"cataclysm", "Rift Cataclysm", 42.0, 2.0, 10.0, 2.0),
 		_curse(&"curse", "Baleful Curse", 1.5, 18.0, 3.0),
-		_dot(&"riftrot", "Riftrot", 9.0, 9.0, 2, 1.6, 13.0, 2.0),
-		_barrage(&"volley", "Void Volley", 60.0, 2.4, 14.0, 2.0, [
+		# Sustained unavoidable DoT on up to 3 raiders — steady triage pressure.
+		_dot(&"riftrot", "Riftrot", 10.0, 9.0, 3, 1.6, 12.0, 2.0),
+		# DODGE-CHECK (GENTLE on the teacher): a missed beat stings (~20 on a dps) and
+		# makes the healer spend, but won't cascade a fresh player into a wipe. This is
+		# the knob that gets CRANKED in the later Seals — Vorathek just teaches the motion.
+		_barrage(&"volley", "Void Volley", 60.0, 2.4, 13.0, 2.0, [
 			{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 			{"at": 1.7, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
 			{"at": 2.4, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
@@ -180,7 +192,7 @@ static func make_mistral() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"mistral"; e.name = "MISTRAL-7B, Le Golem Efficace"; e.hp = 11500
 	e.intro = "Seal II. A small, efficient murder machine — open weights, open fists. Kick its license recital, dodge the Mixture of Fists, and remember: it runs on one GPU and unlimited confidence."
-	e.melee = {"every": 1.15, "min": 26.0, "max": 36.0}
+	e.melee = {"every": 1.1, "min": 34.0, "max": 44.0}   # was 26-36; a pushover at 100/100/100 needed a floor of pressure
 	e.enrage_at = 80.0                            # FREE TIER EXCEEDED
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.55; p1.mult = 1.12; p1.speed = 1.08
@@ -441,7 +453,9 @@ static func _mender(aspect: String) -> Seat:
 	u.resource = mcfg.mana_max; u.resource_max = mcfg.mana_max
 	u.kit = MenderKit.new(aspect, mcfg)
 	u.policy = MenderPolicy.new()
-	u.vars = {"reservoir": 0.0, "nerve": 0.0, "regen_mult": 1.0}
+	# RAID: dial mana regen DOWN here (not in the shared MenderConfig) so active
+	# healing actually taxes mana — solo/practice Mender stays byte-identical.
+	u.vars = {"reservoir": 0.0, "nerve": 0.0, "regen_mult": 0.5}
 	return u
 
 ## Build a raid fight. `aspects` may override any seat's Aspect; `player` names the
