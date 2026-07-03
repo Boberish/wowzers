@@ -462,6 +462,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `armory-ui` · §GRAPHICS GEAR — **CLAIMED (in flight): ARMOR SET pro GUI (Bill:
+  "modal, hover with stats, see current gear while choosing").** (1) Rich HOVER cards on every
+  doll socket (`_make_custom_tooltip` → gilded panel: slot, pieces w/ rarity + effects; trinket
+  name/effect/flavor/charges) replacing plain tooltips. (2) **YOUR SET modal** (`game/ui/
+  armor_modal.gd`): click the doll (map + draft screens) → dim + ornate centered panel — doll,
+  per-slot piece breakdown w/ effects, trinket cards, tokens; Esc/outside closes w/o triggering
+  screen Esc. (3) **Drop ceremony comparison**: the offered curio renders BESIDE your currently
+  equipped trinket cards (EQUIPPED-ribboned, dimmed) — informed REPLACE calls. Owns: armor_doll/
+  armor_modal/raid_hud drop+map+draft wiring; smoke + screenshot_armory extended. *(armory session)*
+
 - ☑ 2026-07-03 · `armory` · §SYSTEMS GEAR — **Drop cadence + signature strength + ARMOR SET doll —
   MERGED to main (Bill's direction: "loot only for big kills; make the first signature strong;
   rebrand boons as armor — gear up your run").** Playtest verdict fixed: drops-every-fight + weak
