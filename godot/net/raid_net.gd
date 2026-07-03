@@ -12,8 +12,14 @@ const ALLY_LATENCY := 5
 const ALLY_SLACK := 0.06
 
 ## A fight spec (broadcast in the server's `start` message):
-##   {seed:int, enc:<Seal id>, seats:[{key,aspect,ai:bool} x4 in SEAT_KEYS order]}
-static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw") -> Dictionary:
+##   {seed:int, enc:<Seal id>, seats:[{key,aspect,ai:bool} x4 in SEAT_KEYS order],
+##    carry?:{fracs:[4], wounds:[4], mana:float}}
+## `carry` (MAP-3b) folds the map campaign's persistent state into the fight so an
+## online fight starts exactly where traversal left it — and because it rides the
+## spec, every replica builds the identical opening state (lockstep-safe). Absent
+## carry = a fresh full-HP pull (every existing Seal fight is byte-identical).
+static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
+		carry: Dictionary = {}) -> Dictionary:
 	var seats: Array = []
 	for key in SEAT_KEYS:
 		var c: Dictionary = seat_cfg.get(key, {})
@@ -22,7 +28,10 @@ static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw") 
 			"aspect": String(c.get("aspect", DEFAULT_ASPECT[key])),
 			"ai": bool(c.get("ai", true)),
 		})
-	return {"seed": seed, "enc": enc, "seats": seats}
+	var spec := {"seed": seed, "enc": enc, "seats": seats}
+	if not carry.is_empty():
+		spec["carry"] = carry
+	return spec
 
 ## Build the fight state from a spec — identically on every machine.
 ## `my_seat` only sets the view-side is_player flag (diag/event tagging; audited
@@ -41,6 +50,21 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 			seat.policy = make_policy(key, seed_v)
 		else:
 			seat.policy = null            # a human drives this seat via input frames
+	# MAP-3b: fold the carried campaign state in (wounds cut max HP, then integrity of
+	# what's left; the healer's mana carries too). Mirrors the offline _launch_map_fight.
+	var carry: Dictionary = spec.get("carry", {})
+	if not carry.is_empty():
+		var fracs: Array = carry.get("fracs", [])
+		var wounds: Array = carry.get("wounds", [])
+		var mana := float(carry.get("mana", 1.0))
+		for i in s.seats.size():
+			var u: Seat = s.seats[i]
+			if i < wounds.size():
+				u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(wounds[i]))))
+			if i < fracs.size():
+				u.hp = maxf(1.0, roundf(u.hp_max * float(fracs[i])))
+			if u.role == "healer":
+				u.resource = roundf(u.resource_max * mana)
 	return s
 
 ## The standard AI raider for a seat — MUST be constructed identically everywhere

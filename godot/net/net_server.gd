@@ -43,6 +43,9 @@ func _make_room(code: String) -> Dictionary:
 		"accum": 0.0,
 		"pending": {},                 # seat_i -> [actions] gathered for the next tick
 		"pending_ai": [],              # seat_i list: disconnect takeovers for the next tick
+		"campaign": null,              # MAP-3b: the online Topology descent (see _start_map)
+		"seat_cfg": {},                # seat -> {aspect, ai} fixed at descent start
+		"map_fight": {},               # which node/kind the current fight came from
 	}
 
 # ------------------------------------------------------------ connection events
@@ -70,7 +73,13 @@ func _on_peer_disconnected(id: int) -> void:
 	if room["phase"] == "fight" and seat != "":
 		room["pending_ai"].append(RaidNet.SEAT_KEYS.find(seat))
 		_log("seat %s -> AI takeover" % seat)
-	_broadcast_room(room)
+	# MAP-3b: a dropped raider's seat runs AI for the rest of the descent's fights
+	if room.get("campaign", null) != null and seat != "" and (room["seat_cfg"] as Dictionary).has(seat):
+		room["seat_cfg"][seat]["ai"] = true
+	if room["phase"] == "map" and room.get("campaign", null) != null:
+		_broadcast_map(room)          # the (possibly new) leader keeps picking the route
+	else:
+		_broadcast_room(room)
 
 # ------------------------------------------------------------ main loop
 func _process(delta: float) -> void:
@@ -118,6 +127,50 @@ func _tick_room(room: Dictionary, delta: float) -> void:
 			return
 
 func _end_fight(room: Dictionary) -> void:
+	# MAP-3b: a map-run fight writes its result back into the campaign and returns to
+	# the map (or advances a ring / ends the descent). A plain single-Seal pull just
+	# returns to the lobby (unchanged).
+	var cp = room.get("campaign", null)
+	if cp != null and room.get("state") != null:
+		var s: CombatState = room["state"]
+		var fracs: Array = cp["fracs"]
+		for i in s.seats.size():
+			if i < fracs.size():
+				var u: Seat = s.seats[i]
+				if u.alive():
+					fracs[i] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
+				else:
+					fracs[i] = 0.35            # reboot
+					cp["wounds"][i] = minf(0.4, float(cp["wounds"][i]) + 0.2)  # + a corrupted sector
+				if u.role == "healer":
+					cp["mana"] = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		var won := s.won
+		room["state"] = null
+		room["pending"] = {}
+		room["pending_ai"] = []
+		if not won:
+			_broadcast(room, {"t": "campaign", "won": false})   # wipe ends the descent
+			room["campaign"] = null
+			_reset_lobby(room)
+			return
+		if bool((room.get("map_fight", {}) as Dictionary).get("is_seal", false)):
+			cp["floor"] = int(cp["floor"]) + 1
+			if int(cp["floor"]) >= RaidContent.FLOORS.size():
+				_broadcast(room, {"t": "campaign", "won": true})   # ROOT cleared — realm won
+				room["campaign"] = null
+				_reset_lobby(room)
+				return
+			cp["toast"] = "PRIVILEGE ELEVATED — descending to the next ring."
+			_build_floor_srv(room)
+			room["phase"] = "map"
+			_broadcast_map(room)
+			return
+		room["phase"] = "map"                # a skirmish fell — back to the node picker
+		_broadcast_map(room)
+		return
+	_reset_lobby(room)
+
+func _reset_lobby(room: Dictionary) -> void:
 	room["phase"] = "lobby"
 	room["state"] = null
 	room["pending"] = {}
@@ -143,6 +196,12 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_boss_pick(id, String(msg.get("enc", "")))
 		"start":
 			_start_fight(id)
+		"mapstart":
+			_start_map(id)
+		"node":
+			_pick_node(id, int(msg.get("id", -1)))
+		"choice":
+			_pick_choice(id, int(msg.get("i", -1)))
 		"input":
 			_on_input_msg(id, msg)
 		"leave":
@@ -268,6 +327,200 @@ func _on_input_msg(id: int, msg: Dictionary) -> void:
 		room["pending"][seat_i] = []
 	if (room["pending"][seat_i] as Array).size() < MAX_INPUTS_PER_TICK:
 		room["pending"][seat_i].append(action)
+
+# ------------------------------------------------------------ MAP-3b campaign
+## Host begins the Topology descent (instead of a single-Seal PULL). Same
+## seat/ready validation; then the server generates floor 0 and enters "map" phase.
+func _start_map(id: int) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "lobby" or room["host"] != id:
+		return
+	var seat_cfg := {}
+	for pid in room["players"]:
+		var pl: Dictionary = room["players"][pid]
+		if String(pl["seat"]) == "":
+			_send(id, {"t": "err", "msg": "%s hasn't claimed a seat" % pl["name"]})
+			return
+		if not bool(pl["ready"]) and pid != id:
+			_send(id, {"t": "err", "msg": "%s isn't ready" % pl["name"]})
+			return
+		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false}
+	room["seat_cfg"] = seat_cfg
+	room["campaign"] = {
+		"map_seed": randi() & 0x7FFFFFFF, "floor": 0, "node": -1,
+		"inv": {}, "fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
+		"tickets": {}, "total": 0, "closed": 0, "map": null, "fights": [],
+		"toast": "", "pending_event": "",
+	}
+	_build_floor_srv(room)
+	room["phase"] = "map"
+	_log("room %s DESCENT started (seed %d)" % [room["code"], int(room["campaign"]["map_seed"])])
+	_broadcast_map(room)
+
+## Generate the current ring's map. Online v1 carries NO personal GATE nodes
+## (extra_quota {}); the ROOT floor keeps its credential-shard gate + tickets.
+func _build_floor_srv(room: Dictionary) -> void:
+	var cp: Dictionary = room["campaign"]
+	var fl: Dictionary = RaidContent.FLOORS[int(cp["floor"])]
+	cp["fights"] = RaidContent.floor_fights(int(fl["ring"]))
+	cp["map"] = RunMap.generate(int(cp["map_seed"]) + int(cp["floor"]) * 101,
+		(cp["fights"] as Array).size(), MapContent.raid_event_ids(), {},
+		int(fl["shard_req"]), int(fl.get("tickets", 0)))
+	cp["node"] = -1
+	cp["inv"] = {}
+	cp["tickets"] = {}
+	cp["total"] = (cp["map"] as RunMap).tickets.size()
+	cp["closed"] = 0
+	cp["pending_event"] = ""
+
+## The leader picks the next node. Validated against reachability (key/shard gates).
+func _pick_node(id: int, node_id: int) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "map" or room["host"] != id:
+		return
+	var cp = room.get("campaign", null)
+	if cp == null or String(cp.get("pending_event", "")) != "":
+		return
+	var m: RunMap = cp["map"]
+	if not (m.reachable(int(cp["node"]), cp["inv"]) as Array).has(node_id):
+		return
+	cp["node"] = node_id
+	cp["toast"] = ""
+	_enter_node_srv(room, node_id)
+
+func _enter_node_srv(room: Dictionary, node_id: int) -> void:
+	var cp: Dictionary = room["campaign"]
+	var m: RunMap = cp["map"]
+	var n: Dictionary = m.node(node_id)
+	var first := not bool(n.get("visited", false))
+	n["visited"] = true
+	if first and bool(n.get("shard", false)):
+		cp["inv"]["shards"] = int(cp["inv"].get("shards", 0)) + 1
+	if first:
+		_ticket_srv(cp, n)
+	if first and bool(n["key"]) and not cp["inv"].get("api_key", false):
+		cp["inv"]["api_key"] = true
+		cp["toast"] = "API KEY acquired — 401 doors are yours."
+	_resolve_node_srv(room, n)
+
+## Mirror of raid_hud._ticket_at, server-side.
+func _ticket_srv(cp: Dictionary, n: Dictionary) -> void:
+	var topen := String(n.get("ticket_open", ""))
+	if topen != "" and not cp["tickets"].has(topen):
+		var td := MapContent.ticket(topen)
+		cp["tickets"][topen] = String(td.get("title", "TICKET"))
+		cp["toast"] = "📋  %s  —  picked up (turn it in deeper on this lane)" % String(td.get("title", "TICKET"))
+	var tclose := String(n.get("ticket_close", ""))
+	if tclose != "" and cp["tickets"].has(tclose):
+		var td2 := MapContent.ticket(tclose)
+		cp["tickets"].erase(tclose)
+		cp["closed"] = int(cp["closed"]) + 1
+		_apply_fx_srv(cp, td2.get("reward", {}))
+		cp["toast"] = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
+		if int(cp["closed"]) >= int(cp["total"]) and int(cp["total"]) > 0:
+			_apply_fx_srv(cp, MapContent.SPRINT_RETRO_FX)
+			cp["toast"] = "★  SPRINT RETRO — every ticket closed! Sectors repaired, reserves topped."
+
+func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
+	var cp: Dictionary = room["campaign"]
+	match String(n["kind"]):
+		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
+			room["map_fight"] = {"node": int(n["id"]), "is_seal": String(n["kind"]) == RunMap.KIND_SEAL}
+			_launch_map_fight_srv(room, int(n["fight"]))
+		RunMap.KIND_EVENT:
+			var ev := MapContent.event(String(n["event"]))
+			cp["pending_event"] = String(n["event"])
+			var choices: Array = []
+			for c in ev.get("choices", []):
+				choices.append({"label": String((c as Dictionary).get("label", ""))})
+			_broadcast(room, {"t": "mapstop", "title": String(ev.get("title", "")),
+				"body": String(ev.get("body", "")), "choices": choices, "accent": "void"})
+		RunMap.KIND_COOLING:
+			_apply_fx_srv(cp, {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true})
+			cp["toast"] = "COOLING STATION — throttled: integrity up, sectors repaired, reserves topped."
+			_broadcast_map(room)
+		RunMap.KIND_CACHE:
+			_apply_fx_srv(cp, {"patch": true})
+			cp["toast"] = "CACHE HIT — salvage routed to your most battered raider (+25%)."
+			_broadcast_map(room)
+		_:
+			_broadcast_map(room)
+
+func _apply_fx_srv(cp: Dictionary, fx: Dictionary) -> void:
+	var fracs: Array = cp["fracs"]
+	var heal := float(fx.get("heal", 0.0))
+	var hurt := float(fx.get("hurt", 0.0))
+	for i in fracs.size():
+		fracs[i] = clampf(float(fracs[i]) + heal - hurt, 0.05, 1.0)
+	if fx.has("mana"):
+		cp["mana"] = clampf(maxf(float(cp["mana"]), float(fx["mana"])), 0.05, 1.0)
+	if bool(fx.get("repair", false)):
+		var w: Array = cp["wounds"]
+		for i in w.size():
+			w[i] = 0.0
+	if bool(fx.get("draft", false)) or bool(fx.get("patch", false)):
+		var lo := 0
+		for i in fracs.size():
+			if float(fracs[i]) < float(fracs[lo]):
+				lo = i
+		fracs[lo] = clampf(float(fracs[lo]) + 0.25, 0.05, 1.0)
+
+## Leader answers an event panel.
+func _pick_choice(id: int, i: int) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "map" or room["host"] != id:
+		return
+	var cp = room.get("campaign", null)
+	if cp == null:
+		return
+	var eid := String(cp.get("pending_event", ""))
+	if eid == "":
+		return
+	var ev := MapContent.event(eid)
+	var choices: Array = ev.get("choices", [])
+	if i < 0 or i >= choices.size():
+		return
+	var fx: Dictionary = ((choices[i] as Dictionary).get("fx", {}) as Dictionary).duplicate()
+	if bool(fx.get("draft", false)):        # a "draft" prize becomes an emergency patch (raid-shaped)
+		fx.erase("draft")
+		fx["patch"] = true
+	cp["pending_event"] = ""
+	_apply_fx_srv(cp, fx)
+	cp["toast"] = String(fx.get("result", ""))
+	_broadcast_map(room)
+
+## A fight node: fold the carried campaign state into the spec and PULL, identically
+## to a single-Seal fight — the lockstep replicas build the same carried opening.
+func _launch_map_fight_srv(room: Dictionary, fi: int) -> void:
+	var cp: Dictionary = room["campaign"]
+	var fights: Array = cp["fights"]
+	var enc: EncounterRes = fights[clampi(fi, 0, fights.size() - 1)]
+	var carry := {"fracs": (cp["fracs"] as Array).duplicate(),
+		"wounds": (cp["wounds"] as Array).duplicate(), "mana": float(cp["mana"])}
+	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, room["seat_cfg"], String(enc.id), carry)
+	room["spec"] = spec
+	room["state"] = RaidNet.build(spec, "")
+	room["phase"] = "fight"
+	room["accum"] = 0.0
+	room["pending"] = {}
+	room["pending_ai"] = []
+	for pid in room["players"]:
+		_send(pid, {"t": "start", "spec": spec, "you": String(room["players"][pid]["seat"])})
+	_log("room %s map-fight PULL: %s (seed %d)" % [room["code"], enc.id, int(spec["seed"])])
+
+func _broadcast_map(room: Dictionary) -> void:
+	var cp: Dictionary = room["campaign"]
+	var m: RunMap = cp["map"]
+	var fl: Dictionary = RaidContent.FLOORS[int(cp["floor"])]
+	var titles: Array = []
+	for tid in cp["tickets"]:
+		titles.append(String(cp["tickets"][tid]))
+	_broadcast(room, {"t": "map", "code": room["code"], "host": room["host"],
+		"floor": int(cp["floor"]), "ring": int(fl["ring"]), "title": String(fl["title"]),
+		"map": m.to_dict(), "node": int(cp["node"]), "inv": cp["inv"],
+		"fracs": cp["fracs"], "wounds": cp["wounds"], "mana": float(cp["mana"]),
+		"tickets": titles, "closed": int(cp["closed"]), "total": int(cp["total"]),
+		"toast": String(cp["toast"])})
 
 # ------------------------------------------------------------ send helpers
 func _room_of(id: int) -> Dictionary:

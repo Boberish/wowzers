@@ -46,10 +46,15 @@ const KIND_TAG := {
 	RunMap.KIND_GATE: "GATE — one steps through alone",
 }
 
+## MAP-3b: online spectators (non-leaders) see the map read-only — the reachable
+## nodes still glow, but there are no click buttons (only the leader routes).
+var interactive: bool = true
+
 func _ready() -> void:
 	_selectable = map.reachable(current, inventory)
 	_build_header()
-	_build_buttons()
+	if interactive:
+		_build_buttons()
 	queue_redraw()
 
 func _pos(n: Dictionary) -> Vector2:

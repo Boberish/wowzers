@@ -51,6 +51,8 @@ var _local_ctrl: CombatController
 var _net_ctrl: NetCombatController
 var _net: NetClient = null
 var _online: bool = false
+var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
+var _map_is_leader: bool = false   ## MAP-3b: am I the route-picker (server host)?
 var _room: Dictionary = {}
 var _my_ready: bool = false
 var _net_status: Label = null
@@ -167,6 +169,7 @@ func _show_select(seat: String = "tank") -> void:
 	_map = null                       # leaving for the select abandons any map run
 	_map_pending = false
 	_gate_live = false
+	_online_map = false               # MAP-3b: abandon any online descent
 	_clear()
 	var sel := BossSelect.new()
 	sel.title = "THE RIFT"
@@ -250,6 +253,9 @@ func _ensure_net() -> void:
 	_net.fight_started.connect(_launch_online)
 	_net.fight_ended.connect(_on_net_fight_ended)
 	_net.desynced.connect(_on_desync)
+	_net.map_update.connect(_on_net_map)        # MAP-3b
+	_net.map_stop.connect(_on_net_mapstop)
+	_net.campaign_ended.connect(_on_net_campaign)
 
 func _set_net_status(m: String) -> void:
 	if _net_status != null and is_instance_valid(_net_status):
@@ -336,6 +342,7 @@ func _me() -> Dictionary:
 
 func _show_lobby() -> void:
 	_screen = "lobby"
+	_online_map = false               # MAP-3b: back in the lobby = not descending
 	_clear()
 	var me := _me()
 	var box := VBoxContainer.new()
@@ -431,7 +438,13 @@ func _show_lobby() -> void:
 		pull.add_theme_font_size_override("font_size", 17)
 		pull.pressed.connect(func(): _net.send({"t": "start"}))
 		ctlrow.add_child(pull)
-	_net_status = _title(box, "empty seats fight as AI raiders", 12, Palette.TEXT_DIM)
+		var descend := Button.new()
+		descend.text = "🌐  DESCEND"
+		descend.custom_minimum_size = Vector2(170, 44)
+		descend.add_theme_font_size_override("font_size", 17)
+		descend.pressed.connect(func(): _net.send_mapstart())    # MAP-3b: the Topology descent
+		ctlrow.add_child(descend)
+	_net_status = _title(box, "PULL = one Seal · DESCEND = the Topology campaign (leader routes) · empty seats fight as AI", 12, Palette.TEXT_DIM)
 	var back := Button.new()
 	back.text = "◂ leave room"
 	back.flat = true
@@ -470,10 +483,106 @@ func _on_net_dropped(reason: String) -> void:
 		_set_net_status("✗ " + reason)
 
 func _on_net_fight_ended(won: bool, _cause: String) -> void:
-	# normally encounter_ended already showed the end screen off the replica;
-	# this catches server-side aborts the replica never reached
+	# In a DESCENT the server drives what comes next (a `map`/`campaign` message is
+	# already inbound) — don't pop a single-fight end screen. A plain single-Seal pull
+	# still shows its end. (Server-side aborts the replica never reached also caught.)
+	if _online_map:
+		return
 	if _screen == "combat" and (_ctrl.state == null or not _ctrl.state.over):
 		_show_end(won)
+
+# ============================================================ ONLINE MAP (MAP-3b)
+## The server owns the campaign and broadcasts it; we render its snapshot. Only the
+## LEADER (server host) gets clickable nodes — everyone else watches the route.
+func _on_net_map(msg: Dictionary) -> void:
+	_online_map = true
+	_map_is_leader = int(msg.get("host", -1)) == _net.peer_id()
+	_screen = "map"
+	_clear()
+	var m := RunMap.from_dict(msg.get("map", {}))
+	var ms := MapScreen.new()
+	ms.map = m
+	ms.current = int(msg.get("node", -1))
+	ms.inventory = msg.get("inv", {})
+	ms.hp_frac = _avg_frac(msg.get("fracs", []))
+	ms.subtitle = String(msg.get("title", ""))
+	ms.ring = int(msg.get("ring", -1))
+	ms.open_tickets = msg.get("tickets", [])
+	ms.toast = String(msg.get("toast", ""))
+	ms.interactive = _map_is_leader
+	if _map_is_leader:
+		ms.node_entered.connect(func(id: int): _net.send_node(id))
+	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(ms)
+	if not _map_is_leader:
+		var wait := _title(_ui, "◍  the leader is choosing the route…", 15, Palette.GOLD_DIM)
+		_place(wait, 0.5, 0, 0.5, 0, -260, 946, 260, 976)
+
+func _avg_frac(fracs: Array) -> float:
+	if fracs.is_empty():
+		return 1.0
+	var t := 0.0
+	for f in fracs:
+		t += float(f)
+	return t / float(fracs.size())
+
+## An event panel: the LEADER picks a choice (sent to the server); others read it.
+func _on_net_mapstop(msg: Dictionary) -> void:
+	_online_map = true
+	_screen = "mapstop"
+	_clear()
+	if _map_is_leader:
+		var p := MapEventPanel.new()
+		p.title_text = String(msg.get("title", ""))
+		p.body_text = String(msg.get("body", ""))
+		var choices: Array = []
+		var i := 0
+		for c in msg.get("choices", []):
+			choices.append({"label": String((c as Dictionary).get("label", "")), "fx": {"_i": i}})
+			i += 1
+		p.choices = choices
+		p.accent = Palette.VOID
+		p.finished.connect(func(fx: Dictionary): _net.send_choice(int(fx.get("_i", 0))))
+		p.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_ui.add_child(p)
+	else:
+		# spectator: read-only title + body, no choices
+		var center := CenterContainer.new()
+		center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_ui.add_child(center)
+		var box := VBoxContainer.new()
+		box.alignment = BoxContainer.ALIGNMENT_CENTER
+		box.add_theme_constant_override("separation", 16)
+		center.add_child(box)
+		_title(box, String(msg.get("title", "")), 30, Palette.GOLD)
+		var body := _title(box, String(msg.get("body", "")), 15, Palette.TEXT)
+		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		body.custom_minimum_size = Vector2(760, 0)
+		_title(box, "◍  the leader is deciding…", 14, Palette.GOLD_DIM)
+
+## The whole descent is over (ROOT cleared, or a wipe) — a campaign end screen.
+func _on_net_campaign(won: bool) -> void:
+	_online_map = false
+	_screen = "end"
+	_clear()
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	center.add_child(box)
+	var banner := _title(box, "ROOT ACCESS GRANTED" if won else "THE DESCENT FALLS", 52,
+		Palette.WIN if won else Palette.LOSE)
+	banner.add_theme_font_override("font", UiKit.title(900))
+	_title(box, ("Realm 1 cleared — CLAUDE MYTHOS is unplugged, together." if won
+		else "The raid wiped. Reboot, re-ready, and descend again."), 16, Palette.TEXT)
+	var again := Button.new()
+	again.text = "BACK TO LOBBY"
+	again.custom_minimum_size = Vector2(260, 48)
+	again.add_theme_font_size_override("font_size", 18)
+	again.pressed.connect(func(): _show_lobby())
+	box.add_child(again)
 
 func _on_desync() -> void:
 	if _screen == "combat":
@@ -1796,6 +1905,10 @@ func _float_num(text: String, pos: Vector2, color: Color, dy: float) -> void:
 # ============================================================ END
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
+		return
+	if _online_map:
+		# a DESCENT fight ended — the server is already sending the next map/campaign;
+		# don't run the offline floor logic or pop a single-fight end screen.
 		return
 	if _gate_live and not _online:
 		# Tier-1 GATE exam resolves: only YOUR raid slot carries in or out —
