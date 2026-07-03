@@ -375,6 +375,9 @@ func _process(delta: float) -> void:
 	_rhythm.swing_min = int(obs.get("swing_min_ticks", 13))
 	_rhythm.perfect_lo = int(obs.get("perfect_lo", 18))
 	_rhythm.perfect_hi = int(obs.get("perfect_hi", 29))
+	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando is visible
+	_rhythm.flow = int(obs.get("flow", 0)) if _run.aspect == "tempo" else 0
+	_rhythm.flow_max = int(obs.get("flow_max", 6))
 	var in_green := _rhythm.since >= _rhythm.perfect_lo and _rhythm.since <= _rhythm.perfect_hi
 
 	_hp_orb.set_values(p.hp, p.hp_max)

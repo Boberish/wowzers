@@ -1772,6 +1772,9 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_rhythm.swing_min = int(obs.get("swing_min_ticks", 13))
 	_rhythm.perfect_lo = int(obs.get("perfect_lo", 18))
 	_rhythm.perfect_hi = int(obs.get("perfect_hi", 29))
+	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando visible
+	_rhythm.flow = int(obs.get("flow", 0)) if String(obs.get("aspect", "")) == "tempo" else 0
+	_rhythm.flow_max = int(obs.get("flow_max", 6))
 	_tf_gauge.combo = int(obs.get("cp", 0))
 	_tf_gauge.combo_max = int(obs.get("cp_max", 5))
 	_tf_gauge.flow = int(obs.get("flow", 0))
