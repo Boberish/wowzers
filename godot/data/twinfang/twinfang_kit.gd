@@ -59,6 +59,35 @@ func _gain_cp(seat: Seat, n: int) -> void:
 func _gain_energy(seat: Seat, x: float) -> void:
 	seat.resource = clampf(seat.resource + x, 0.0, cfg.energy_max)
 
+# --- Tempo ACCELERANDO: the live rhythm window as a function of current Flow. Flow 0 =
+#     the base anchors; max Flow = the *_lo anchors; lerp between (Flow = BPM). Venom pins
+#     Flow at 0, so it always sees the base window (a steady beat, no accelerando). ONE
+#     source of truth for _strike AND observe() so the RhythmBar/policy read exactly what
+#     the kit judges a press against.
+func _tempo_t(seat: Seat) -> float:
+	return clampf(float(_flow(seat)) / float(max_flow()), 0.0, 1.0)
+func _swing_min_sec(seat: Seat) -> float:
+	return lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat))
+func _perfect_lo_sec(seat: Seat) -> float:
+	return lerpf(cfg.perfect_start, cfg.perfect_start_lo, _tempo_t(seat))
+func _perfect_hi_sec(seat: Seat) -> float:
+	return lerpf(cfg.perfect_end, cfg.perfect_end_lo, _tempo_t(seat))
+
+# --- Venomancer POISON WHEEL: the lit lane (0=V, 1=F, 2=C) — the lane the NEXT Strike
+#     feeds. A Strike stacks it then ADVANCES the wheel (riding V→F→C tops all three →
+#     Toxic Synergy); Envenom stacks it WITHOUT advancing (fixate = over-stack a lane).
+const WHEEL_KEYS := ["V", "F", "C"]
+func _wheel(seat: Seat) -> int:
+	return int(seat.vars.get("wheel", 0))
+func _wheel_strike(s: CombatState, seat: Seat, perfect: bool) -> void:
+	var lane := _wheel(seat)
+	_apply_venom(seat, WHEEL_KEYS[lane], cfg.wheel_perfect_apply if perfect else cfg.wheel_strike_apply)
+	if perfect and _b("contagion"):
+		# Contagion: a Perfect also seeds a random OTHER lane — easier to keep all three live.
+		var other := (lane + 1 + (1 if s.rng.next_float() < 0.5 else 0)) % 3
+		_apply_venom(seat, WHEEL_KEYS[other], 1)
+	seat.vars["wheel"] = (lane + 1) % 3
+
 ## The single outgoing-damage path: Flow multiplier, Execute relic, crit, then land.
 ## Poison ticks bypass this (they scale with neither Flow nor Execute — see _upkeep).
 ## `kind` tags the SOURCE for the view layer only (auto Strike vs a finisher/signature),
@@ -204,7 +233,10 @@ func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
 		_strike: StrikeRes, grade: int) -> void:
 	match grade:
 		StrikeRes.Grade.PERFECT:
-			_gain_flow(seat)
+			if aspect == "tempo":
+				_gain_flow(seat)                   # a perfect dodge keeps the accelerando alive
+			else:
+				_gain_energy(seat, cfg.strike_good_energy)   # Venom has no Flow — footwork pays energy
 			if _b("dancersgrace"):
 				seat.vars["next_perfect"] = true   # Opus: a perfect dodge primes the blades
 			if _b("tfTrigBeat"):
@@ -261,18 +293,20 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	var a: Dictionary = cfg.abilities["strike"]
 	var last := int(seat.vars.get("last_strike_tick", -100000))
 	var since := s.tick - last
-	if since < _tt(s, cfg.swing_min):
+	if since < _tt(s, _swing_min_sec(seat)):
 		return false                                   # too early — the press is dropped
 	var cost := float(a["energy"])
 	if aspect == "tempo" and _b("syncopation") and _flow(seat) >= max_flow():
 		cost = 0.0
 	if seat.resource < cost:
 		return false                                   # out of energy
-	var perfect := since >= _tt(s, cfg.perfect_start) and since <= _tt(s, cfg.perfect_end)
+	# ACCELERANDO: the window bounds ride current Flow (Venom's Flow is pinned 0 → base).
+	var lo := _tt(s, _perfect_lo_sec(seat))
+	var hi := _tt(s, _perfect_hi_sec(seat))
+	var perfect := since >= lo and since <= hi
 	if not perfect and _b("tfPropWindow"):
-		var span := _tt(s, cfg.perfect_end) - _tt(s, cfg.perfect_start)
-		var pad := int(ceil(float(span) * cfg.mod_window_pad))
-		perfect = since >= _tt(s, cfg.perfect_start) - pad and since <= _tt(s, cfg.perfect_end) + pad
+		var pad := int(ceil(float(hi - lo) * cfg.mod_window_pad))
+		perfect = since >= lo - pad and since <= hi + pad
 	if _b("dancersgrace") and bool(seat.vars.get("next_perfect", false)):
 		perfect = true                                 # Opus: the primed strike IS perfect
 		seat.vars["next_perfect"] = false
@@ -292,31 +326,29 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 			if pc % 5 == 0:
 				crit = true
 		_deal(s, seat, base, true, crit, "perfect")
-		_gain_flow(seat)
 		_rhythm_proc(s, seat, "perfect")   # Phase B: the innate proc moment
 		CombatCore.emit_event(s, {"t": "perfect", "player": seat.is_player})
 		if aspect == "tempo":
+			_gain_flow(seat)                                                  # Flow = BPM (Tempo only)
 			var t := flow_tier(seat)
 			if t >= 1:
 				_deal(s, seat, roundf(float(a["dmg"]) * 0.6), true, false, "perfect")   # Tier 1: extra hit
 			if t >= 2:
 				cp += 1                                                       # Tier 2: +combo, refund
 				_gain_energy(seat, 6.0)
-		elif aspect == "venomancer":
-			_apply_venom(seat, "V", 1)                                       # Perfect → Virulent
-			if _b("contagion"):
-				_apply_venom(seat, ("F" if s.rng.next_float() < 0.5 else "C"), 1)
+		else:
+			_wheel_strike(s, seat, true)                                     # ride the wheel (Perfect)
 	else:
 		_deal(s, seat, base, true, false)
 		if aspect == "venomancer":
-			_apply_venom(seat, "C", 1)                                       # normal → Crippling
+			_wheel_strike(s, seat, false)                                    # ride the wheel (normal)
 	_gain_cp(seat, cp)
 	if _b("strikeEnergy") and perfect:
 		_gain_energy(seat, 6.0)
 	# Tell the view HOW this strike landed so the rhythm bar can flash a clear, held
 	# verdict — otherwise the bar instantly resets and reads "too early" on your next
 	# cycle, which looks like it's judging the click you just nailed.
-	var result := "perfect" if perfect else ("early" if since < _tt(s, cfg.perfect_start) else "late")
+	var result := "perfect" if perfect else ("early" if since < lo else "late")
 	CombatCore.emit_event(s, {"t": "strike", "player": seat.is_player, "result": result})
 	return true
 
@@ -352,7 +384,8 @@ func _envenom(s: CombatState, seat: Seat) -> bool:
 	if cp < 1 or seat.resource < float(a["energy"]):
 		return false
 	seat.resource -= float(a["energy"])
-	_apply_venom(seat, "F", cp)                          # spends combo for Festering stacks
+	# FIXATE: over-stack the lit lane WITHOUT advancing the wheel (the "double-down" tool).
+	_apply_venom(seat, WHEEL_KEYS[_wheel(seat)], cp)
 	seat.vars["cp"] = 0
 	if _b("tfTrigSpender") and cp >= cfg.cp_max:
 		_tf_trigger(s, seat, "spender")    # Phase B: a full-point finisher = proc moment
@@ -377,7 +410,10 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 		return false
 	seat.resource -= float(a["energy"])
 	seat.cooldowns["coupdegrace"] = s.tick + _tt(s, float(a["cd"]))
+	# Damage rides the Flow you spend (via _deal's flow_mult) — then Coup CONSUMES it.
 	_deal(s, seat, float(a["dmg"]) * (1.4 if _b("crescendo") else 1.0), true, false, "coup")
+	seat.vars["flow"] = clampi(cfg.coup_flow_seed, 0, max_flow())   # ride vs spend: the spike costs your BPM
+	seat.vars["flow_decay_acc"] = 0
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
 	CombatCore.emit_event(s, {"t": "coup", "player": seat.is_player})
 	return true
@@ -444,10 +480,13 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"flow_mult": _flow_mult(seat),
 		"tier": flow_tier(seat),
 		"since_strike": s.tick - last,
-		"swing_min_ticks": _tt(s, cfg.swing_min),
-		"perfect_lo": _tt(s, cfg.perfect_start),
-		"perfect_hi": _tt(s, cfg.perfect_end),
+		# ACCELERANDO: the window the kit will judge THIS press against — flow-adjusted, so
+		# the RhythmBar visibly compresses and the policy re-aims as Flow climbs (Venom = base).
+		"swing_min_ticks": _tt(s, _swing_min_sec(seat)),
+		"perfect_lo": _tt(s, _perfect_lo_sec(seat)),
+		"perfect_hi": _tt(s, _perfect_hi_sec(seat)),
 		"strike_cost": float(cfg.abilities["strike"]["energy"]),
+		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,
 		"def_zone": cfg.dodge_zone,
 		"def_cd": cfg.dodge_cd,
 		"kick_ready": s.tick >= int(seat.cooldowns.get("kick", 0)),
@@ -455,6 +494,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 			and s.tick >= int(seat.cooldowns.get("coupdegrace", 0)),
 		"rupture_ready": aspect == "venomancer" and _venom_total(seat) >= 1 \
 			and s.tick >= int(seat.cooldowns.get("rupture", 0)),
+		"wheel": _wheel(seat),   # Venom poison wheel: 0=V 1=F 2=C, the lit (on-deck) lane
 		"venom": {"V": int(v.get("V", 0)), "F": int(v.get("F", 0)), "C": int(v.get("C", 0)),
 			"syn_ramp": float(v.get("syn_ramp", 1.0)), "syn_active": bool(v.get("syn_active", false))},
 		"venom_total": _venom_total(seat),

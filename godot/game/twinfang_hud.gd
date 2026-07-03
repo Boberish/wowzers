@@ -11,17 +11,17 @@ const ABILITY_NAMES := {
 	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry",
 }
 const ABILITY_TIPS := {
-	"strike": {"stats": "12 energy  ·  19 dmg  ·  +1 combo", "tip": "Your builder AND your metronome. Tap it in the GREEN window (wait ~0.6s after your last) for a Perfect: 1.6x damage, +2 combo, +1 Flow. Too early and the press is ignored — patience, not mashing."},
+	"strike": {"stats": "12 energy  ·  19 dmg  ·  +1 combo", "tip": "Your builder AND your metronome. Tap it in the GREEN window for a Perfect: 1.6x damage, +2 combo. TEMPO: each Perfect QUICKENS the beat (Flow = BPM) — the window shifts earlier and tightens as you climb. VENOM: a steady beat that turns the poison wheel. Too early and the press is ignored — patience, not mashing."},
 	"eviscerate": {"stats": "25 energy  ·  23 dmg / combo", "tip": "Finisher. Spends ALL combo for 23 damage each (115 at 5), scaled by Flow. Your burst payoff."},
 	"kick": {"stats": "10 energy  ·  7s cd  ·  interrupt", "tip": "Kick the boss mid-cast to cancel its self-heal — read the violet bar. Whiffs (still costs) if there's nothing to interrupt."},
-	"envenom": {"stats": "25 energy  ·  combo -> Festering", "tip": "Poison finisher. Spends all combo to lay that many Festering stacks — completing the trio is what powers Toxic Synergy."},
-	"coupdegrace": {"stats": "30 energy  ·  5s cd  ·  max Flow", "tip": "Unlocked at MAX Flow. A massive strike that refunds 3 combo — Coup, Eviscerate the refund, and keep the solo going. The capstone."},
-	"rupture": {"stats": "22 energy  ·  3.5s cd  ·  detonate", "tip": "Detonates ALL poison for a burst scaled by total stacks x Synergy x Flow. Layer the three types, ramp Synergy, blow it at the peak."},
+	"envenom": {"stats": "25 energy  ·  fixate the lane", "tip": "Poison spender. FIXATES the wheel's lit lane — dumps all combo as extra stacks of the on-deck poison WITHOUT turning the wheel. Over-stack the exact lane you want."},
+	"coupdegrace": {"stats": "30 energy  ·  5s cd  ·  max Flow", "tip": "Unlocked at MAX Flow. A massive strike that scales with the Flow you've banked — then CONSUMES it (keep a seed, rebuild). RIDE the fast cadence, or SPEND for a spike — best cashed at execute. Refunds 3 combo."},
+	"rupture": {"stats": "22 energy  ·  3.5s cd  ·  detonate", "tip": "Detonates ALL poison for a burst scaled by total stacks x Toxic Synergy. Ride the wheel to keep all three alive, ramp Synergy, blow it at the peak."},
 	"flurry": {"stats": "28 energy  ·  3 hits  ·  +2 combo", "tip": "A fast 3-hit (39 dmg), +2 combo burst. Quick points under pressure."},
 }
 const SPEC_TIP := {
-	"tempo": {"name": "Flow & Tiers", "tip": "Chain Perfect Strikes to build Flow — a damage multiplier. As it climbs your kit transforms: Perfects double-hit, then refund energy + combo, and at MAX Flow you unlock Coup de Grace. Hold the solo and the whole kit sings."},
-	"venomancer": {"name": "Poison Cocktail", "tip": "Normal strikes apply Crippling, Perfects apply Virulent, Envenom lays Festering. Keep all THREE alive and Toxic Synergy ramps your ticks. Then Rupture detonates the whole cocktail. Setup and payoff — mix normal and perfect hits."},
+	"tempo": {"name": "Accelerando", "tip": "Flow IS your tempo. Each Perfect Strike quickens the beat AND hits harder — the green window shifts earlier and tightens as you climb, so a hot solo plays fast and lethal. Eat a swing and Flow crashes back to walking pace. At max Flow: double-hits, energy/combo refunds, and Coup de Grace."},
+	"venomancer": {"name": "Poison Wheel", "tip": "One lit lane at a time — V -> F -> C. A Strike feeds the on-deck poison and turns the wheel, so riding the beat tops all three and Toxic Synergy ramps on its own. Envenom FIXATES a lane to over-stack it; Rupture detonates the cocktail. No Flow — a steady drummer, forgiving of a sloppy beat."},
 }
 
 
@@ -239,7 +239,8 @@ func _build_combat() -> void:
 		_runes.append(rune)
 
 	var hint := Label.new()
-	hint.text = "SPACE — Dodge   (eating a swing wipes your Flow)"
+	hint.text = "SPACE — Dodge   (eating a swing wipes your Flow)" if _run.aspect == "tempo" \
+		else "SPACE — Dodge   (F on the beats — keep the poison flowing)"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.add_theme_color_override("font_color", Palette.GOLD_DIM)
@@ -377,6 +378,7 @@ func _process(delta: float) -> void:
 	_gauge.flow_mult = float(obs.get("flow_mult", 1.0))
 	_gauge.tier = int(obs.get("tier", 0))
 	_gauge.venom = obs.get("venom", {})
+	_gauge.wheel = int(obs.get("wheel", 0))
 
 	# ability runes
 	for i in _runes.size():

@@ -17,6 +17,7 @@ var flow_max: int = 6
 var flow_mult: float = 1.0
 var tier: int = 0
 var venom: Dictionary = {"V": 0, "F": 0, "C": 0, "syn_ramp": 1.0, "syn_active": false}
+var wheel: int = 0             ## Venom poison wheel: the lit (on-deck) lane a Strike feeds — 0=V 1=F 2=C
 var _pulse: float = 0.0
 var _flash: float = 0.0        # facet pop on a Flow gain
 var _last_flow: int = 0
@@ -138,9 +139,10 @@ func _venom_wing(c: Vector2, h: float) -> void:
 		["C", int(venom.get("C", 0)), Palette.GOLD],
 	]
 	var syn_active: bool = bool(venom.get("syn_active", false))
+	var lane_x := func(i: int) -> float: return c.x + 96.0 + float(i) * 66.0
 	for i in 3:
 		var t = types[i]
-		var gp := Vector2(c.x + 96.0 + float(i) * 66.0, c.y)
+		var gp := Vector2(lane_x.call(i), c.y)
 		var lit: bool = int(t[1]) > 0
 		if lit and syn_active:
 			var halo := t[2] as Color
@@ -150,6 +152,19 @@ func _venom_wing(c: Vector2, h: float) -> void:
 		UiKit.text_shadowed(self, UiKit.display(650), Vector2(gp.x - 24.0, c.y + 26.0),
 			"%s %d" % [t[0], int(t[1])], HORIZONTAL_ALIGNMENT_CENTER, 48.0, UiKit.SIZE["CAPTION"],
 			Palette.TEXT if lit else Palette.TEXT_DIM)
+	# ON-DECK marker: the wheel's lit lane — the poison your NEXT Strike feeds. A pulsing
+	# gold ring + chevron, so "ride vs Envenom-fixate" is a glance, not memory.
+	var wl := clampi(wheel, 0, 2)
+	var wp := Vector2(lane_x.call(wl), c.y)
+	var pull := 0.5 + 0.5 * sin(_pulse * 2.4)
+	var mk := Palette.GOLD_BRIGHT
+	mk.a = 0.55 + 0.35 * pull
+	UiKit.gilded_ring(self, wp, 15.0 + 1.5 * pull, 1.6, 22)
+	var ct := wp + Vector2(0.0, -21.0 - 3.0 * pull)         # chevron pointing down at the lane
+	draw_line(ct + Vector2(-6.0, -5.0), ct, mk, 2.2, true)
+	draw_line(ct + Vector2(6.0, -5.0), ct, mk, 2.2, true)
+	UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(wp.x - 34.0, c.y - 40.0), "NEXT",
+		HORIZONTAL_ALIGNMENT_CENTER, 68.0, UiKit.SIZE["MICRO"], mk)
 	# Synergy ramp beneath the cocktail
 	var ramp := float(venom.get("syn_ramp", 1.0))
 	var bar := Rect2(c.x + 82.0, h - 18.0, 150.0, 9.0)

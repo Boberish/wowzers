@@ -165,16 +165,23 @@ func _fmt_diag(d: Dictionary, seeds: int) -> String:
 func _prove_determinism() -> void:
 	var a := _run_one(1, "warden", "tempo", 0)
 	var b := _run_one(1, "warden", "tempo", 0)
-	var c := _run_one(2, "warden", "tempo", 0)
 	var repro: bool = (a["checksum"] == b["checksum"]) and (a["ttk_sec"] == b["ttk_sec"])
-	print("determinism check (Warden / Tempo):")
-	print("  seed 1 == seed 1  -> %s   (checksum %d, TTK %.3fs, result %s)" % [
+	print("determinism check:")
+	print("  Warden/Tempo  seed 1 == seed 1  -> %s   (checksum %d, TTK %.3fs, result %s)" % [
 		("PASS" if repro else "FAIL"), a["checksum"], a["ttk_sec"], ("win" if a["won"] else a["loss_cause"])])
-	print("  seed 1 vs seed 2  -> %s" % ("differ (good)" if a["checksum"] != c["checksum"] else "IDENTICAL (suspect!)"))
-	# venomancer path exercises contagion RNG + poison ticks — check it too
+	# Cross-seed divergence uses VENOMANCER: its contagion RNG threads the seed, so runs
+	# genuinely diverge. (An expert Tempo/Warden clear is now FLAWLESS — the boss never
+	# heals and no hit lands — so its boss-HP checksum is legitimately seed-independent,
+	# making it a poor divergence probe. Same-seed reproducibility still holds everywhere,
+	# and sloppy Tempo / all Venom cells vary across seeds — the seed IS threaded.)
+	var c := _run_one(1, "executioner", "venomancer", 6)
+	var c2 := _run_one(2, "executioner", "venomancer", 6)
+	print("  Venom         seed 1 vs seed 2  -> %s" % (
+		"differ (good)" if c["checksum"] != c2["checksum"] else "IDENTICAL (suspect!)"))
+	# venomancer path exercises contagion RNG + poison ticks — reproducibility check
 	var d := _run_one(3, "executioner", "venomancer", 0)
 	var e := _run_one(3, "executioner", "venomancer", 0)
-	print("  venomancer seed 3 == seed 3 -> %s   (checksum %d, %s)" % [
+	print("  Venom         seed 3 == seed 3  -> %s   (checksum %d, %s)" % [
 		("PASS" if d["checksum"] == e["checksum"] else "FAIL"), d["checksum"],
 		("win" if d["won"] else d["loss_cause"])])
 

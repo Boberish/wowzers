@@ -71,9 +71,12 @@ func act(obs: Dictionary) -> Dictionary:
 		return _tempo(obs, energy)
 	return _venom(obs, energy)
 
-# --- Tempo: chain Perfects for Flow, dump combo with Eviscerate, cash Coup at max Flow.
+# --- Tempo: chain Perfects to ride the accelerando (Flow = BPM); RIDE max Flow for the
+#     fast+hard cadence, then SPEND it — Coup consumes Flow, so cash it as a finisher spike
+#     in the execute window (boss < 40%) rather than dumping the BPM mid-fight.
 func _tempo(obs: Dictionary, energy: float) -> Dictionary:
-	if bool(obs.get("coup_ready", false)) and energy >= 42.0:
+	if bool(obs.get("coup_ready", false)) and energy >= 42.0 \
+			and float(obs.get("boss_frac", 1.0)) < 0.50:
 		return _ab("coupdegrace")
 	if int(obs.get("cp", 0)) >= int(obs.get("cp_max", 5)) and energy >= 37.0:
 		return _ab("eviscerate")
@@ -82,14 +85,13 @@ func _tempo(obs: Dictionary, energy: float) -> Dictionary:
 		return _ab("strike")
 	return {}
 
-# --- Venomancer: keep all three poisons alive so Toxic Synergy ramps (the ticking
-#     cocktail is the bulk of the damage), keep Flow up with Perfects, and detonate only
-#     a FAT, synergised cocktail with Rupture — spamming it at low stacks resets the ramp.
+# --- Venomancer: PLAY THE WHEEL. Striking in the green rides V→F→C, topping all three
+#     so Toxic Synergy ramps on its own (the ticking cocktail is the bulk of the damage);
+#     Envenom FIXATES the lit lane to dump banked combo into extra poison; detonate only a
+#     FAT, synergised cocktail with Rupture. No Flow — a sloppy tempo just leaks a little
+#     poison uptime, so Venom stays the forgiving aspect.
 func _venom(obs: Dictionary, energy: float) -> Dictionary:
 	var venom: Dictionary = obs.get("venom", {})
-	var v := int(venom.get("V", 0))
-	var f := int(venom.get("F", 0))
-	var c := int(venom.get("C", 0))
 	var cp := int(obs.get("cp", 0))
 	var since := int(obs.get("since_strike", 0))
 
@@ -98,15 +100,12 @@ func _venom(obs: Dictionary, energy: float) -> Dictionary:
 			and bool(venom.get("syn_active", false)):
 		return _ab("rupture")
 
-	# Keep Festering topped (spends combo) — completing the trio is what powers Synergy.
-	if f <= 2 and cp >= 2 and energy >= 27.0:
+	# Fixate: spend banked combo into the lit lane (extra poison) once it's stocked up.
+	if cp >= 4 and energy >= 27.0:
 		return _ab("envenom")
 
-	# Strike: aim green for a Perfect (Virulent + Flow + combo); if Virulent is stocked
-	# but Crippling is running low, take a cheap LATE normal hit to reapply Crippling.
+	# Strike in the green: rides the wheel (tops all three → synergy) + builds combo.
 	var target := int(obs.get("perfect_lo", 18)) + latency_ticks
-	if v > 2 and c <= 1:
-		target = int(obs.get("perfect_hi", 29)) + 3 + latency_ticks
 	if since >= target and energy >= float(obs.get("strike_cost", 12.0)):
 		return _ab("strike")
 	return {}

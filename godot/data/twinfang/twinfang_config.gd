@@ -21,10 +21,28 @@ extends Resource
 @export var strike_good_energy: float = 6.0
 @export var strike_read_energy: float = 10.0
 
-# --- the rhythm: seconds since your last Strike ---
+# --- the rhythm: seconds since your last Strike. These are the Flow-0 anchors.
 @export var swing_min: float = 0.42         ## earliest you may Strike (before = ignored, no cost)
 @export var perfect_start: float = 0.60     ## [perfect_start, perfect_end] = the green window (Perfect)
 @export var perfect_end: float = 0.95
+
+# --- Tempo ACCELERANDO: Flow IS tempo. As Flow climbs the whole cycle shifts EARLIER and
+#     the green window tightens (Flow = BPM) — DPS rises from faster cadence AND from
+#     flow_per's bigger hits. These are the MAX-Flow anchors; the kit lerps between the
+#     Flow-0 values above and these by (flow / max_flow). Venom keeps Flow pinned at 0, so
+#     its window is ALWAYS the base — a steady beat, no accelerando. Window width goes
+#     0.35s → 0.22s (tighter but fair); a Flow crash drops you back to walking pace.
+@export var swing_min_lo: float = 0.32
+@export var perfect_start_lo: float = 0.46
+@export var perfect_end_lo: float = 0.68
+@export var coup_flow_seed: int = 2         ## Flow left after Coup CONSUMES it (ride vs spend) —
+                                            ## a seed so the spike doesn't crater you to walking pace
+
+# --- Venomancer POISON WHEEL: one lit lane (V→F→C). A Strike feeds the lit lane and
+#     ADVANCES the wheel (riding tops all three → Toxic Synergy comes naturally); Envenom
+#     FIXATES it (over-stacks the lit lane, no advance). Flow never touches Venom.
+@export var wheel_perfect_apply: int = 3    ## a Perfect Strike stacks the lit poison this much
+@export var wheel_strike_apply: int = 2     ## a non-Perfect Strike stacks the lit poison this much
 
 # --- dodge (the defensive verb) ---
 @export var dodge_active: float = 0.55      ## how long a dodge stays "active"
@@ -35,7 +53,7 @@ extends Resource
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap
 @export var syn_rate: float = 0.14          ## Synergy growth per second while all three live
-@export var venom_decay_every: float = 3.0  ## every this long, each poison type bleeds 1 stack
+@export var venom_decay_every: float = 4.0  ## every this long, each poison type bleeds 1 stack
 @export var venom_tick_every: float = 1.0   ## poison damage cadence
 
 ## The ability book. `effect` is inferred from the fields/id in TwinfangKit.
