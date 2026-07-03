@@ -226,15 +226,17 @@ func _show_class_select() -> void:
 		["caster", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
 		["healer", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — four lives through the storm, click-cast the frames.  (Tidecaller / Brinkwarden)"],
 	]
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 20)
-	_place(row, 0.5, 0.5, 0.5, 0.5, -580, -150, 580, 170)
-	_ui.add_child(row)
+	# AspectCard is a WIDE 680px card — STACK the four vertically (a row of four runs
+	# off-screen). Matches the aspect ceremony's vertical layout.
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 12)
+	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -250, 350, 262)
+	_ui.add_child(col)
 	for c in cards:
 		var card := AspectCard.new(String(c[1]), String(c[4]), c[3], String(c[2]))
 		card.chosen.connect(_show_aspect_pick.bind(String(c[0])))
-		row.add_child(card)
+		col.add_child(card)
 	var back := Button.new()
 	back.text = "◂ back"
 	back.flat = true
