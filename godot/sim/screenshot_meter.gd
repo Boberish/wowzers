@@ -30,6 +30,12 @@ func _initialize() -> void:
 			"setup": func(h): h._launch("tank"),
 			"policy": func(): return RaidTankPolicy.new(),
 			"ticks": 780, "pre": func(_h): MeterPanel.view_state = 1},
+		{"name": "meter_raid_healing", "scene": "res://game/raid_main.tscn",
+			"setup": func(h): h._launch("tank"),
+			"policy": func(): return RaidTankPolicy.new(),
+			"ticks": 780, "pre": func(h):
+				MeterPanel.view_state = 0
+				h._meter.mode = "heal"},
 		{"name": "meter_raid_end", "scene": "res://game/raid_main.tscn",
 			"setup": func(h): h._launch("tank"),
 			"policy": func(): return RaidTankPolicy.new(),
