@@ -1103,18 +1103,27 @@ func _offer_oath_then(boss_id: String, launch: Callable) -> void:
 	var banner := _title(box, "THE LEDGER", 40, Palette.GOLD_BRIGHT)
 	banner.add_theme_font_override("font", UiKit.title(900))
 	_title(box, "an oath may be sworn before this pull — SLAs are strictly optional", 14, Palette.TEXT_DIM)
-	# the page: every row, lock state + printed rarity
+	# the page: every row — item name + rarity + WHAT IT DOES + how to unlock it
 	var got: Array = _gear_unlocks.get(boss_id, [])
 	for r in GearCatalog.table(boss_id):
 		var it := GearCatalog.item(String(r["item"]))
 		var unlocked: bool = got.has(String(r["item"]))
-		var line := "%s  %s · %s" % ["◆" if unlocked else "◇",
-			String(it["name"]).to_upper(), String(it.get("rarity", "haiku")).to_upper()]
+		var how: String
 		if String(r["row"]) == "oath":
-			line += "  —  deed: %s" % String(r.get("deed_text", ""))
-		elif not unlocked:
-			line += "  —  first kill"
-		_title(box, line, 13, Palette.GOLD if unlocked else Palette.TEXT_DIM)
+			how = "swear its oath below"
+		elif unlocked:
+			how = "unlocked ✓"
+		else:
+			how = "first-kill reward"
+		# header: name · rarity · how to get it
+		_title(box, "%s  %s  ·  %s  ·  %s" % ["◆" if unlocked else "◇",
+			String(it["name"]).to_upper(), String(it.get("rarity", "haiku")).to_upper(), how],
+			14, Palette.GOLD if unlocked else Palette.TEXT)
+		# the EFFECT — so you know exactly what you're chasing (rarity-tinted)
+		var eff := _title(box, String(it.get("desc", "")), 12,
+			Palette.rarity_color(String(it.get("rarity", "haiku"))))
+		eff.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		eff.custom_minimum_size = Vector2(740, 0)
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 10)
 	box.add_child(gap)
