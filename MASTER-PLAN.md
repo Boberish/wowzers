@@ -510,6 +510,8 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `reckoner` · §CLASSES — **The Reckoner (Warrior, 6th class) — IN PROGRESS.** The blade/melee-DPS seat becomes a class choice (Twinfang ⇄ Reckoner), mirroring the `bloom-raid` `cls`-threading (default `twinfang` → byte-identical). New verb COMMIT: an auto-advancing swing shaped by two tick-stamped presses — WIND (weight) × STRIKE (apex power) — a 3×3 grid, degrade-never-whiff; abilities Overswing/Ultraswing/Onslaught; resources Rage/Momentum/Poise-Break; aspects Colossus (punishing) / Berserker (forgiving, hyperarmor). Ported from a tuned browser greybox (True band ±1t). Stage 1 (this branch): kit/config/content/policy/sim + cls-wiring in raid_net/raid_content/run_state + raid_reckoner_probe. Stage 2 (later): raid-HUD class band + gauge + gate_content + net_server lobby. Gate: reckoner_sim determinism+bands, raid_reckoner_probe, byte-identical default comp (twinfang_sim + raid_sim).
+
 - ☑ 2026-07-03 · `topology-checks` · §MAPS — **THE INFERENCE CHECK — deep events + build-read dice +
   ⚡Entropy/📁Prior luck meta — MERGED to main (Bill: "the map is a joke, just +integrity jokes; we
   need deep decisions, side stuff like better luck next time, more than yes/no, an AtO-style dice
