@@ -40,6 +40,11 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	var bell := GearFx.bell_grant(seat)
 	if bell > 0.0:
 		_gain_rage(seat, bell)
+	# GEAR-2: Scratchpad — rage trickles in while a long wind-up thinks.
+	if GearFx.scratchpad_live(s, seat):
+		_gain_rage(seat, 4.0 * s.dt)
+		if GearFx.flag_once(seat, &"scratchpad_pop"):
+			GearFx.pop(s, seat, &"scratchpad")
 	# Duelist reward: correctly holding a Feint leaves the boss briefly Exposed.
 	# Maintain a bool here so outgoing_mult (which has no tick) can read it.
 	seat.vars["exposed"] = s.tick < int(seat.vars.get("exposed_until_tick", 0))
@@ -81,7 +86,10 @@ func on_defense_press(s: CombatState, seat: Seat) -> void:
 		# living at the redline, and the fix for "my own dodge kills my Momentum"). Below
 		# cap, the greed tension stands: a dodge still costs the snowball (halved w/ sureFoot).
 		if mo < _mom_max():
-			seat.vars["momentum"] = int(mo / 2) if _b("sureFoot") else 0
+			if mo > 0 and GearFx.once(seat, &"grace_period"):
+				GearFx.pop(s, seat, &"grace_period")   # GEAR-2: the snowball survives once
+			else:
+				seat.vars["momentum"] = int(mo / 2) if _b("sureFoot") else 0
 	if _b("propCharge") and int(seat.vars.get("guard_spare", 1)) > 0:
 		seat.vars["guard_spare"] = int(seat.vars.get("guard_spare", 1)) - 1
 		seat.defense_ready_tick = s.tick
@@ -186,8 +194,14 @@ func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName,
 	if aspect == "warden" and size >= AbilityRes.Size.HEAVY and not _is_feint(s, source):
 		var c := int(seat.vars.get("counter", 0))
 		if c > 0:
-			seat.vars["counter"] = c / 2
-			CombatCore.emit_event(s, {"t": "chain_break", "player": seat.is_player})
+			# GEAR-2: the MISTAKE counts for oath deeds whether or not gear saves the
+			# chain (diag-only); Grace Period holds the streak once per fight.
+			CombatCore._bump_diag(s, seat, "chain_break")
+			if GearFx.once(seat, &"grace_period"):
+				GearFx.pop(s, seat, &"grace_period")
+			else:
+				seat.vars["counter"] = c / 2
+				CombatCore.emit_event(s, {"t": "chain_break", "player": seat.is_player})
 	if aspect == "juggernaut":
 		var mg := 3 if (_b("bulldoze") and size >= AbilityRes.Size.HEAVY) else 1
 		_gain_momentum(s, seat, mg)
@@ -270,6 +284,10 @@ func _challenge(s: CombatState, seat: Seat) -> bool:
 	CombatCore.taunt(s, seat)
 	seat.cooldowns["challenge"] = s.tick + _tt(s, cfg.challenge_cd)
 	seat.vars["taunts"] = int(seat.vars.get("taunts", 0)) + 1   # raid-sim diagnostic
+	# GEAR-2: Sticky Note — answering the curse fast refunds the taunt's rage.
+	if GearFx.has(seat, &"sticky_note") and s.tick - s.boss.last_curse_tick <= _tt(s, 2.0):
+		_gain_rage(seat, 15.0)
+		GearFx.pop(s, seat, &"sticky_note")
 	return true
 
 func _generic(s: CombatState, seat: Seat, id: String) -> bool:
@@ -296,7 +314,12 @@ func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 	if ab.has("lifesteal"):
 		_heal(s, seat, roundf(dmg * float(ab["lifesteal"])), &"lifesteal")
 	if ab.has("heal"):
-		_heal(s, seat, float(ab["heal"]), StringName(id))
+		# RAID: the healer tops the tank — cut the flat self-heal so Fortify is a
+		# mitigation button (its DR still carries). Solo/practice byte-identical.
+		var heal_amt := float(ab["heal"])
+		if s.threat_enabled:
+			heal_amt *= cfg.raid_self_heal_mult
+		_heal(s, seat, heal_amt, StringName(id))
 	if ab.has("dr"):
 		seat.dr = float(ab["dr"])
 		seat.dr_until_tick = s.tick + _tt(s, float(ab["drDur"]))
@@ -323,6 +346,11 @@ func _vindicate(s: CombatState, seat: Seat) -> bool:
 	seat.dr_until_tick = s.tick + _tt(s, cfg.vindicate_dr_dur)
 	if _b("vindInterrupt") and s.telegraph != null:
 		CombatCore.stagger_boss(s)
+	# GEAR-2: Debt Collector — a 5+-link cash-out also staggers the boss.
+	if GearFx.has(seat, &"debt_collector") and c >= 5:
+		if s.telegraph != null:
+			CombatCore.stagger_boss(s)
+		GearFx.pop(s, seat, &"debt_collector")
 	_set_gcd(s, seat, cfg.gcd, "vindicate")
 	return true
 

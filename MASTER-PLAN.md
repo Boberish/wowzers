@@ -461,6 +461,36 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-03 · `ledger-desc` · §GRAPHICS/GEAR — **Show item EFFECT on the Ledger page — MERGED (`e9e76ef`).** The
+  Ledger (`raid_hud._offer_oath_then`) shows each row's item name + rarity + unlock condition but NOT
+  the item's `desc` (what it does) — "make it clear what I'll get". Add the effect line (rarity-colored,
+  wrapped) per row so the player sees the reward's actual effect. Data already exists (`GearCatalog`
+  item `desc`). View-only, one function. ⚠ `raid_hud.gd` shared w/ `gear2` (owns this screen) +
+  `bloom-raid` — merge main before merge-back. Gate: ui_smoke_raid green + a Ledger screenshot. *(raid-finish session)*
+
+- ☑ 2026-07-03 · `raid-tuning` · §BOSSES + §CLASSES — **RAID healing rebalance — FIRST PASS MERGED to main
+  (`4a9f33e`), all raid-gated (solo sims byte-identical, verified).** The raid healer was idle 93–98% w/
+  mana never a factor (proved by the `ed6ca6e` logs on main). Fixed: (1) **tank self-heal cut** — Fortify's
+  flat 130 → ~68 when `threat_enabled` (`bulwark_config.raid_self_heal_mult 0.52`; DR still carries, so it's
+  a mitigation button and the HEALER tops the tank); (2) **raid mana regen** dialed via the raid Mender seat's
+  `regen_mult` var (0.5, no MenderConfig change → solo byte-identical); (3) **Vorathek ramp** (the TEACHING
+  Seal, kept GENTLE): melee 30-42→34-44 (the only un-freezable pressure = the healer's core job), Cataclysm
+  30→42 unavoidable baseline, Riftrot 3 targets, Void Volley a gentle dodge-check; (4) **battle rez 'Rekindle'**
+  (Mender: 6s channel / 340 mana / 120s cd, revives a fallen ally at 40%; raid HUD rune + **R** key, hover the
+  fallen frame; loss model untouched — a single dead dps was always survivable). Engine-clean; `raid_sim` now
+  also prints `rez` + a fixed `hlIdle` (excludes mid-cast).
+  **Result (150 seeds):** healer GCD-idle **93%→8-54%** (finally engaged). Skill bands: Vorathek 100/100/**47**
+  (teacher gradient ✓) · Gemini 100/100/**69** ✓ · Mythos 100/97/**20** (finale, rez fires ~0.07/run) ✓ ·
+  **Mistral 100/100/100** (still a pushover — melee bumped so the healer works, but it has no lethal dodge-check;
+  needs its own gradient pass). Mana floor DIPS more up the ladder (Vorathek ~85% → Gemini/Mythos ~79-84%) — the
+  ramp works. Determinism PASS (riftmaw/mistral/gemini); solo bulwark+mender PASS bands-match; ui_smoke_raid +
+  ui_smoke_mender green.
+  **NEXT (unclaimed, wants Bill's playtest feel):** (a) the "painful ramp" — crank the LATER Seals' dodge-checks
+  so a missed dodge really bites (Mistral needs a real dodge gradient; Gemini/Mythos punish harder); (b) MANA AS
+  A HARD WALL is still open — regen barely moves the floor because the Mender's kit is very efficient (cheap
+  HoTs/wards + Meditate's 280 battery); a true OOM wall needs trimming those efficiency tools (a Mender design
+  call) or much more sustained damage. (c) rez feel: it rarely fires in AI sims (AI dies in cascades, not
+  isolation) — it's mostly a human/co-op save; watch it in co-op.
 - ☑ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons — MERGED to main
   (`24dd28a`)**, worktree removed. The Draft 2.0 boon draft now works in online co-op: each human
   seat drafts its OWN boons after each won fight, and the picks ride the fight SPEC per seat
@@ -524,19 +554,31 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   green; bulwark determinism unchanged. Merged `twinfang-accel` cleanly. **NEXT:** ONLINE boons (the
   human's `run_seed`/picks ride the fight spec so replicas build identically — netcode follow-up);
   a verb/boon summary on the raid combat HUD (solo shows one; raid doesn't yet); gate-fight post-draft. *(raid-finish session)*
-- ☐ 2026-07-03 · `gear2` · §SYSTEMS GEAR-2 — **Sworn OATHS + Ledger offer + purses (Bill: "continue" after GEAR-1).**
-  Per PROGRESSION-PLAN + GEAR-CATALOG: swear ONE oath at the boss node (Ledger-lite offer screen)
-  → in-fight tracker banner + live BROKEN pop → resolve at the kill → **permanent row unlock joins
-  the same kill's drop pool** + stakes-scaled purse (Tokens + pity ticks / rarity floors,
-  `stakes = 3 − ring` until versions exist). Detector engine over `seat.diag`/`seat.vars` ONLY
-  (new unconditional diag bumps: curse_dropped/answered, chain_break, kick_whiff, bloodied_dip —
-  never checksummed). `Gear.roll` grows the real rarity-first draw (ring weights 70/25/5 →
-  40/38/22 + run pity). SEVEN new items implemented w/ oath rows: GRACE PERIOD · STICKY NOTE ·
-  SCRATCHPAD · DEBT COLLECTOR · ENCORE BELL · ECHO CHAMBER · OVERFLOW SLUICE (one per raid class
-  page + universals; combat-actives like MUTE BUTTON stay deferred — no G/H socket yet).
-  Gate: frozen A/B byte-identical gearless/unsworn on all sims + gear_probe extension + smokes.
-  ⚠ engine touches: THREAT_DROP/taunt diag + `_damage` dip diag + `BossState.last_curse_tick` —
-  all diag-family/write-only. *(gear-design session)*
+- ☑ 2026-07-03 · `gear2` · §SYSTEMS GEAR-2 — **Sworn OATHS + Ledger offer + purses — MERGED to main
+  (`8d18685`)**, worktree removed. The oath loop is LIVE on the raid campaign: swear ONE oath on
+  the boss's **Ledger offer screen** (page rows w/ lock gems + SWEAR / RE-SWEAR / FIGHT UNSWORN)
+  → in-fight ⚖ tracker banner (turns crimson + "OATH BROKEN" pop the moment a monotone deed dies)
+  → resolves at the kill: **OATH KEPT = the row unlocks INTO the same kill's drop pool** + a
+  stakes-scaled purse (`Oaths.purse`: Tokens + pity ticks / sonnet floor / opus guarantee,
+  `stakes = 3 − ring`); Realm-1 verdicts = SLA MET / SLA BREACHED. `game/oaths.gd` detector
+  engine reads `seat.diag`/`seat.vars` ONLY (new unconditional diag: curse_dropped/answered
+  [engine THREAT_DROP+taunt], chain_break, kick_whiff [kit mistake-counters — gear saves don't
+  hide deeds], bloodied_dip [`_damage` crossing]; + `BossState.last_curse_tick`). `Gear.roll` is
+  now the real **rarity-first draw** (ring weights 70/25/5 → 55/35/10 → 40/38/22, +5pp opus per
+  pity tick, purse bends, nearest-tier clamp). SEVEN new curios w/ oath rows: **GRACE PERIOD**
+  (one streak-break forgiven — 5 class meanings) · STICKY NOTE · SCRATCHPAD (regen ×3 in ≥6s
+  winds) · DEBT COLLECTOR · ENCORE BELL · **ECHO CHAMBER** (opus) · OVERFLOW SLUICE — every raid
+  class's gate page has a deed to chase. **Tokens unified**: scrap + purses feed raid-boons'
+  REFORGE purse (`_run.tokens` — one ⏣ currency). **Gate PASS:** fresh frozen-main A/B — all 6
+  sims CSVs byte-identical unsworn/gearless · map sims identical · `gear_probe` 51 checks ALL OK
+  (detectors, purse table, floor/pity/ring rolls, all 7 items + controls, geared determinism) ·
+  raid smoke drives swear→break→KEPT→purse→re-swear live · all 8 smokes + net_smoke green ·
+  raid-boons' probes green (their `raid_boon_probe` needed one press-through for the new Ledger
+  screen — the composed chain is win → verdict → drop card → REFORGE draft → DESCEND) · Ledger/
+  verdict screens eyeballed (`screenshot_drop`). **NEXT (unclaimed):** GEAR-3 (MARKET stock +
+  extraction schematics — tokens now have a real faucet); combat-actives socket (G/H) for MUTE
+  BUTTON-family items; version-gated rows await the Trial Ladder; fold gear+oaths into the
+  ONLINE campaign spec. *(gear-design session)*
 - ☑ 2026-07-03 · `bloom-raid` · §CLASSES/§ONLINE — **Second healer in THE RIFT: Bloomweaver gets a raid seat —
   MERGED to main.** (Bill: "add the second healer... the last relic that didn't make it from the switch...
   separate shields from heals".) The last solo class never wired into the raid is now the 5th playable class.

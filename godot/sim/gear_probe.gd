@@ -175,6 +175,262 @@ func _initialize() -> void:
 	oks.append(["salt: the cleanse also heals its target 25", is_equal_approx(sick.hp, 75.0)])
 	oks.append(["salt: the debuff is gone (dispel unchanged)", sick.debuff.is_empty()])
 
+	# ================================================================ GEAR-2: OATHS
+	# ---- detectors (pure functions over diag/vars) ----
+	var so := _mini_state(tune)
+	var sw := _tank_seat(BulwarkKit.new("warden", bcfg))
+	var al2 := Seat.new()
+	al2.role = "dps"
+	al2.hp_max = 100.0
+	al2.hp = 100.0
+	so.seats = [sw, al2]
+	oks.append(["oath: zero_deaths kept while all stand",
+		Oaths.kept({"kind": "zero_deaths"}, so, sw)])
+	al2.hp = 0.0
+	oks.append(["oath: zero_deaths breaks on a death (live too)",
+		not Oaths.kept({"kind": "zero_deaths"}, so, sw)
+		and Oaths.broken_live({"kind": "zero_deaths"}, so, sw)])
+	al2.hp = 100.0
+	sw.diag = {"curse_dropped": 2, "curse_answered": 2}
+	oks.append(["oath: curses kept when every drop is answered",
+		Oaths.kept({"kind": "curses"}, so, sw)])
+	sw.diag = {"curse_dropped": 2, "curse_answered": 1}
+	so.boss.last_curse_tick = so.tick - 100      # window long lapsed
+	oks.append(["oath: a lapsed unanswered curse breaks live",
+		not Oaths.kept({"kind": "curses"}, so, sw)
+		and Oaths.broken_live({"kind": "curses"}, so, sw)])
+	sw.diag = {"negate": 5, "chain_break": 0}
+	oks.append(["oath: chain_intact wants 5 guards + no breaks",
+		Oaths.kept({"kind": "chain_intact", "n": 5}, so, sw)
+		and not Oaths.kept({"kind": "chain_intact", "n": 6}, so, sw)])
+	sw.diag = {"negate": 9, "chain_break": 1}
+	oks.append(["oath: one chain break voids it",
+		not Oaths.kept({"kind": "chain_intact", "n": 5}, so, sw)
+		and Oaths.broken_live({"kind": "chain_intact", "n": 5}, so, sw)])
+	sw.diag = {"perfect": 8}
+	oks.append(["oath: perfects_n counts up (never breaks live)",
+		Oaths.kept({"kind": "perfects_n", "n": 8}, so, sw)
+		and not Oaths.broken_live({"kind": "perfects_n", "n": 8}, so, sw)])
+	sw.diag = {"kick_whiff": 0}
+	sw.vars["kicks"] = 6
+	oks.append(["oath: kicks_clean kept at 6 kicks / 0 whiffs",
+		Oaths.kept({"kind": "kicks_clean", "n": 6}, so, sw)])
+	sw.diag = {"kick_whiff": 1}
+	oks.append(["oath: one whiff voids kicks_clean (live)",
+		not Oaths.kept({"kind": "kicks_clean", "n": 6}, so, sw)
+		and Oaths.broken_live({"kind": "kicks_clean", "n": 6}, so, sw)])
+	al2.diag = {"bloodied_dip": 1}
+	oks.append(["oath: an ally's dip voids no_dips",
+		not Oaths.kept({"kind": "no_dips"}, so, sw)
+		and Oaths.broken_live({"kind": "no_dips"}, so, sw)])
+
+	# ---- purses (PROGRESSION table) ----
+	var p1o := Oaths.purse(1, 0)
+	var p2o := Oaths.purse(2, 3)
+	var p3o := Oaths.purse(3, 2)
+	oks.append(["oath: sev-I purse = 1⏣ + 2 pity ticks",
+		int(p1o["tokens"]) == 1 and int(p1o["pity"]) == 2 and String(p1o["floor"]) == ""])
+	oks.append(["oath: sev-II @stakes 3 = 5⏣ + sonnet floor",
+		int(p2o["tokens"]) == 5 and String(p2o["floor"]) == "sonnet"])
+	oks.append(["oath: sev-III @stakes 2 = 5⏣ + guaranteed opus",
+		int(p3o["tokens"]) == 5 and bool(p3o["opus"])])
+
+	# ---- rarity-first roll: floors, forced opus, pity, ring depth ----
+	var un_r := {"riftmaw": ["riftmaw_tooth", "sticky_note", "grace_period"]}
+	var rf := DetRng.new(5)
+	var all_sonnet := true
+	for i in 12:
+		var dr := Gear.roll("riftmaw", "bulwark", un_r, rf, 3, 0, {"floor": "sonnet"})
+		if String(dr.get("item", "")) != "grace_period":
+			all_sonnet = false
+	oks.append(["roll: sonnet floor lifts every draw out of haiku", all_sonnet])
+	var un_p := {"priest": ["spark_plug", "echo_chamber"]}
+	var rp := DetRng.new(6)
+	var dopus := Gear.roll("priest", "voidcaller", un_p, rp, 3, 0, {"opus": true})
+	oks.append(["roll: a guaranteed-opus bend forces the opus row",
+		String(dopus.get("item", "")) == "echo_chamber"])
+	var rpity := DetRng.new(7)
+	var dpity := Gear.roll("priest", "voidcaller", un_p, rpity, 3, 20, {})
+	oks.append(["roll: deep pity (+5pp/tick) reaches opus on its own",
+		String(dpity.get("item", "")) == "echo_chamber"])
+	var n_r0 := 0
+	var n_r3 := 0
+	var r0rng := DetRng.new(8)
+	var r3rng := DetRng.new(8)
+	for i in 200:
+		if String(Gear.roll("priest", "voidcaller", un_p, r0rng, 0, 0, {}).get("item", "")) == "echo_chamber":
+			n_r0 += 1
+		if String(Gear.roll("priest", "voidcaller", un_p, r3rng, 3, 0, {}).get("item", "")) == "echo_chamber":
+			n_r3 += 1
+	oks.append(["roll: Ring 0 rolls opus more than Ring 3 (%d vs %d /200)" % [n_r0, n_r3],
+		n_r0 > n_r3])
+
+	# ---- GEAR-2 item effects ----
+	# GRACE PERIOD: the warden chain survives its first break (the mistake still counts)
+	var sg := _mini_state(tune)
+	var wg := _tank_seat(BulwarkKit.new("warden", bcfg))
+	wg.gear = ["grace_period"]
+	wg.vars["counter"] = 4
+	sg.seats = [wg]
+	wg.kit.on_damage_taken(sg, wg, 50.0, &"crush", AbilityRes.Size.CRUSH)
+	var g_hold: bool = int(wg.vars["counter"]) == 4 and int(wg.diag.get("chain_break", 0)) == 1
+	wg.kit.on_damage_taken(sg, wg, 50.0, &"crush", AbilityRes.Size.CRUSH)
+	oks.append(["grace: the chain holds once (mistake still counted)", g_hold])
+	oks.append(["grace: the second break lands (4 -> 2)",
+		int(wg.vars["counter"]) == 2 and int(wg.diag.get("chain_break", 0)) == 2])
+	# GRACE: twinfang Flow survives one landed swing
+	var sgf := _mini_state(tune)
+	var tf := Seat.new()
+	tf.role = "dps"
+	tf.hp_max = 100.0
+	tf.hp = 100.0
+	tf.kit = TwinfangKit.new("tempo", TwinfangConfig.new())
+	tf.gear = ["grace_period"]
+	tf.vars["flow"] = 3
+	sgf.seats = [tf]
+	tf.kit.on_damage_taken(sgf, tf, 30.0, &"heavy", AbilityRes.Size.HEAVY)
+	var f_hold: bool = int(tf.vars["flow"]) == 3
+	tf.kit.on_damage_taken(sgf, tf, 30.0, &"heavy", AbilityRes.Size.HEAVY)
+	oks.append(["grace: Flow survives one landed swing, then wipes",
+		f_hold and int(tf.vars["flow"]) == 0])
+	# GRACE: a voidcaller whiff hands the press back (whiff still counted)
+	var sgv := _mini_state(tune)
+	var vg := Seat.new()
+	vg.role = "dps"
+	vg.hp_max = 100.0
+	vg.hp = 100.0
+	vg.kit = VoidcallerKit.new("disruptor", VoidcallerConfig.new())
+	vg.gear = ["grace_period"]
+	vg.defense_ready_tick = 260
+	sgv.seats = [vg]
+	vg.kit._do_interrupt(sgv, vg, "space")     # telegraph null -> whiff
+	oks.append(["grace: the whiffed kick comes back (whiff still counted)",
+		vg.defense_ready_tick == sgv.tick and int(vg.diag.get("kick_whiff", 0)) == 1])
+	# GRACE: one Litany pip stays lit through a decay
+	var sgm := _mini_state(tune)
+	var mg := Seat.new()
+	mg.role = "healer"
+	mg.hp_max = 100.0
+	mg.hp = 100.0
+	mg.kit = MenderKit.new("tidecaller", MenderConfig.new())
+	mg.gear = ["grace_period"]
+	mg.vars["litany"] = 3
+	mg.vars["litany_idle"] = 89                # one tick from the 3.0s decay
+	sgm.seats = [mg]
+	mg.kit.upkeep(sgm, mg)
+	var l_hold: bool = int(mg.vars["litany"]) == 3
+	mg.vars["litany_idle"] = 89
+	mg.kit.upkeep(sgm, mg)
+	oks.append(["grace: a Litany pip stays lit once, then decays",
+		l_hold and int(mg.vars["litany"]) == 2])
+	# STICKY NOTE: answering the curse fast refunds rage (+ the deed counter ticks)
+	var ss := _mini_state(tune)
+	ss.threat_enabled = true
+	var st := _tank_seat(BulwarkKit.new("warden", bcfg))
+	st.gear = ["sticky_note"]
+	st.diag = {"curse_dropped": 1}
+	ss.seats = [st]
+	ss.boss.last_curse_tick = ss.tick - 10
+	st.kit.on_action(ss, st, &"challenge")
+	oks.append(["sticky: a fast answer refunds 15 rage + counts the deed",
+		is_equal_approx(st.resource, 15.0) and int(st.diag.get("curse_answered", 0)) == 1])
+	# DEBT COLLECTOR: a 5-link Vindicate staggers the wind-up
+	var sd := _mini_state(tune)
+	var wd := _tank_seat(BulwarkKit.new("warden", bcfg))
+	wd.gear = ["debt_collector"]
+	wd.vars["counter"] = 5
+	sd.seats = [wd]
+	var tgd := Telegraph.new()
+	tgd.ability = AbilityRes.new()
+	tgd.start_tick = sd.tick
+	tgd.dur_ticks = 60
+	sd.telegraph = tgd
+	wd.kit.on_action(sd, wd, &"vindicate")
+	oks.append(["debt: a 5-link cash-out staggers the boss", sd.telegraph == null])
+	# ENCORE BELL: Coup rings it — the window holds at the wide anchors for 3 strikes
+	var se := _mini_state(tune)
+	var te := Seat.new()
+	te.role = "dps"
+	te.hp_max = 100.0
+	te.hp = 100.0
+	te.resource = 100.0
+	var tek := TwinfangKit.new("tempo", TwinfangConfig.new())
+	te.kit = tek
+	te.gear = ["encore_bell"]
+	te.vars["flow"] = 6
+	se.seats = [te]
+	tek._coup(se, te)
+	oks.append(["encore: the bell rings after Coup (3 wide-window strikes)",
+		int(te.vars.get("encore_left", 0)) == 3
+		and is_equal_approx(tek._perfect_lo_sec(te), tek.cfg.perfect_start)])
+	# ENCORE (Venom side): strikes cost 6 less while it rings
+	var sev := _mini_state(tune)
+	var tv := Seat.new()
+	tv.role = "dps"
+	tv.hp_max = 100.0
+	tv.hp = 100.0
+	tv.resource = 10.0                          # strike costs 12 — only rings with the bell
+	var tvk := TwinfangKit.new("venomancer", TwinfangConfig.new())
+	tv.kit = tvk
+	tv.gear = ["encore_bell"]
+	tv.vars["encore_left"] = 2
+	tv.vars["last_strike_tick"] = sev.tick - 21
+	sev.seats = [tv]
+	var struck: bool = tvk._strike(sev, tv)
+	oks.append(["encore: Venom strikes cost 6 less while it rings",
+		struck and is_equal_approx(tv.resource, 4.0) and int(tv.vars["encore_left"]) == 1])
+	# ECHO CHAMBER: a clean kick at full Backlash echoes a free 0.6x Overload
+	var sec := _mini_state(tune)
+	var ve := Seat.new()
+	ve.role = "dps"
+	ve.hp_max = 100.0
+	ve.hp = 100.0
+	var vek := VoidcallerKit.new("disruptor", VoidcallerConfig.new())
+	ve.kit = vek
+	ve.gear = ["echo_chamber"]
+	ve.vars["backlash"] = 5
+	sec.seats = [ve]
+	var tge := Telegraph.new()
+	tge.ability = AbilityRes.new()
+	tge.ability.response = AbilityRes.Response.INTERRUPTIBLE
+	tge.start_tick = sec.tick
+	tge.dur_ticks = 15                          # rem 0.5s <= clean zone
+	sec.telegraph = tge
+	vek._do_interrupt(sec, ve, "space")
+	oks.append(["echo: full-bank clean kick echoes the Overload (stacks kept)",
+		sec.boss.hp <= 1000.0 - 204.0 - 100.0 and int(ve.vars["backlash"]) == 5])
+	# OVERFLOW SLUICE: spill past a full Reservoir wards the tank at 0.5x
+	var ssl := _mini_state(tune)
+	var hm := Seat.new()
+	hm.role = "healer"
+	hm.hp_max = 100.0
+	hm.hp = 100.0
+	var hmk := MenderKit.new("tidecaller", MenderConfig.new())
+	hm.kit = hmk
+	hm.gear = ["overflow_sluice"]
+	hm.vars["reservoir"] = hmk._res_max()
+	var tk2 := _tank_seat(BulwarkKit.new("warden", bcfg))
+	ssl.seats = [tk2, hm]
+	hmk.on_overheal(ssl, hm, tk2, 100.0)
+	oks.append(["sluice: the spill wards the tank (0.5x of 55 conv = 28)",
+		is_equal_approx(tk2.absorb, 28.0) and tk2.absorb_owner_i == 1])
+	# SCRATCHPAD: rage trickles while a long wind-up thinks
+	var ssc := _mini_state(tune)
+	var wsc := _tank_seat(BulwarkKit.new("warden", bcfg))
+	wsc.gear = ["scratchpad"]
+	ssc.seats = [wsc]
+	var tgs := Telegraph.new()
+	tgs.ability = AbilityRes.new()
+	tgs.start_tick = ssc.tick
+	tgs.dur_ticks = 200                         # a 6.7s ULTRATHINK-sized wind
+	ssc.telegraph = tgs
+	wsc.kit.upkeep(ssc, wsc)
+	var trickled: float = wsc.resource
+	ssc.telegraph = null
+	wsc.kit.upkeep(ssc, wsc)
+	oks.append(["scratchpad: trickles only while the boss thinks",
+		trickled > 0.0 and is_equal_approx(wsc.resource, trickled)])
+
 	# ------------------------- full fight: deterministic WITH gear, and gear is LIVE
 	var ga := _riftmaw_run(11, ["lechat_bell", "riftmaw_tooth"])
 	var gb := _riftmaw_run(11, ["lechat_bell", "riftmaw_tooth"])

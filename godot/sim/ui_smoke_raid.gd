@@ -75,6 +75,11 @@ func _process(_delta: float) -> bool:
 	hud._start_map_run()
 	print("raid map screen: ok (nodes=%d screen=%s)" % [hud._map.nodes.size(), hud._screen])
 	hud._enter_node(hud._map.entry_id)
+	# GEAR-2: the boss's Ledger page interposes — swear the first oath, then pull
+	print("ledger offer: screen=%s" % hud._screen)
+	var psw := _press(hud, "SWEAR")
+	print("oath sworn: ok=%s -> screen=%s sworn=%s" % [
+		str(psw), hud._screen, str(not hud._sworn.is_empty())])
 	var sgate: CombatState = hud._ctrl.state
 	print("gate fight: enc=%s screen=%s" % [String(sgate.encounter.id), hud._screen])
 	CombatCore.damage_boss(sgate, sgate.seats[0], sgate.boss.hp)   # burst-win the gate
@@ -102,12 +107,25 @@ func _process(_delta: float) -> bool:
 		str(p1), str(hud._map_gear), str(hud._map_gear_charges)])
 	hud._show_drop("swan_song", false, hud._show_map)
 	var p2 := _press(hud, "SCRAP")
-	print("ceremony SCRAP: ok=%s tokens=%d screen=%s" % [str(p2), hud._map_tokens, hud._screen])
+	print("ceremony SCRAP: ok=%s tokens=%d screen=%s" % [str(p2), hud._tokens_now(), hud._screen])
 	hud._map_wounds[0] = 0.2
 	hud._show_map()
 	var p3 := _press(hud, "USE COOLING PASTE")
 	print("cooling paste: ok=%s wounds=%s charges=%s" % [
 		str(p3), str(hud._map_wounds), str(hud._map_gear_charges)])
+
+	# GEAR-2: a KEPT oath — resolved on the last fight's final state; the purse and
+	# the fresh row unlock ride THIS kill's roll (sonnet floor -> the new row drops)
+	hud._sworn = {"row": "oath", "item": "grace_period", "sev": 2,
+		"deed": {"kind": "zero_deaths"}, "deed_text": "zero raider deaths", "boss": "riftmaw"}
+	hud._resolve_oath(hud._ctrl.state, hud._ctrl.player(), true)
+	var tok0: int = hud._tokens_now()
+	hud._after_drop("riftmaw", hud._show_map)
+	print("oath KEPT: tokens %d->%d row_unlocked=%s screen=%s" % [tok0, hud._tokens_now(),
+		str((hud._gear_unlocks.get("riftmaw", []) as Array).has("grace_period")), hud._screen])
+	if hud._screen == "drop":
+		var pk := _press(hud, "SCRAP")
+		print("kept-oath drop scrapped: ok=%s tokens=%d" % [str(pk), hud._tokens_now()])
 
 	# Tier-1 PERSONAL GATE (§GAME SHAPE): intro panel -> exam fight -> result ->
 	# map; a LOST gate = force-reboot (wound) and the run CONTINUES

@@ -44,12 +44,17 @@ func _initialize() -> void:
 	for b in bosses:
 		var enc := RaidContent.encounter_by_id(String(b))
 		print("--- %s  (%d HP, enrage %.0fs) ---" % [enc.name, enc.hp, enc.enrage_at])
-		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  losses")
+		# healer-engagement cols: hlMana = healer's MIN mana over the fight (% of pool),
+		# hlOver = share of its healing that was OVERHEAL (wasted), hlIdle = % of the
+		# healer's decision ticks it had NOTHING worth casting. Low hlOver+low hlIdle+
+		# a mana floor that actually dips = the healer's resource is a real constraint;
+		# hlMana pinned near 100 with high hlIdle = the fight doesn't pressure the healer.
+		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  rez  losses")
 		for sk in SKILLS:
 			var wins := 0
 			var ttk_sum := 0.0
 			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
-				"miss": 0.0, "adds": 0.0}
+				"miss": 0.0, "adds": 0.0, "hmana": 0.0, "hover": 0.0, "hidle": 0.0, "rez": 0.0}
 			var causes := {}
 			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(String(b), seed, sk, true)
@@ -61,6 +66,10 @@ func _initialize() -> void:
 				agg["buff"] += float(r["dmg_buff"])
 				agg["miss"] += float(int(r["beat_miss"]))
 				agg["adds"] += float(int(r["adds_killed"]))
+				agg["hmana"] += float(r["hl_mana_pct"])
+				agg["hover"] += float(r["hl_over_pct"])
+				agg["hidle"] += float(r["hl_idle_pct"])
+				agg["rez"] += float(int(r["revives"]))
 				if r["won"]:
 					wins += 1; ttk_sum += float(r["ttk_sec"])
 				else:
@@ -69,9 +78,10 @@ func _initialize() -> void:
 			var wr := 100.0 * float(wins) / float(seeds)
 			var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
 			var n := float(seeds)
-			print("%-7s  %6.1f%%   %8.1fs    %5.2f  %5.2f  %6.1f  %5.2f    %6.2f  %4.2f  %s" % [
+			print("%-7s  %6.1f%%   %8.1fs    %5.2f  %5.2f  %6.1f  %5.2f    %6.2f  %4.2f  %5.0f%% %5.0f%% %5.0f%%  %3.2f  %s" % [
 				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
-				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n, _fmt(causes)])
+				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
+				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, _fmt(causes)])
 		print("")
 	if seed0 == 1 and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
@@ -128,13 +138,28 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)
+	# healer-engagement sampling (read-only — does not touch the sim, so checksums
+	# stay byte-identical): min mana over the fight + how often the healer idled.
+	var healer := _healer_seat(s)
+	var mana_max := (healer.resource_max if healer != null else 900.0)
+	var mana_min := (healer.resource if healer != null else 0.0)
+	var h_idle := 0
+	var h_acts := 0
 	while not s.over and s.tick < cap:
 		for seat in s.seats:
 			if seat.policy != null and seat.alive():
 				var a := seat.policy.act(CombatCore.observe(s, seat))
+				if seat == healer:
+					h_acts += 1
+					# TRULY idle = nothing to do AND not mid-cast (a cast bar is work,
+					# not idleness — counting it as idle inflated the number).
+					if a.is_empty() and seat.casting.is_empty():
+						h_idle += 1
 				if not a.is_empty():
 					s.enqueue(s.tick + 1, seat, a)
 		CombatCore.update(s)
+		if healer != null:
+			mana_min = minf(mana_min, healer.resource)
 	if not s.over:
 		s.loss_cause = "timeout"
 	var dps_deaths := 0
@@ -144,6 +169,11 @@ func _run(s: CombatState) -> Dictionary:
 			dps_deaths += 1
 		beat_miss += int(seat.diag.get("miss", 0))
 	var adds_killed := s.boss.adds_spawned.size() - (1 if s.boss.add_i >= 0 else 0)
+	# healer output from the meter (eff vs overheal) → % wasted; mana floor as % of pool.
+	var hrow: Dictionary = s.meter.get(s.seats.find(healer), {})
+	var h_eff := float(hrow.get("heal_total", 0.0))
+	var h_over := float(hrow.get("over_total", 0.0))
+	var h_total := h_eff + h_over
 	return {
 		"won": s.won,
 		"ttk_sec": s.time(),
@@ -155,9 +185,21 @@ func _run(s: CombatState) -> Dictionary:
 		"beat_miss": beat_miss,                # missed string beats, all four seats
 		"adds_killed": adds_killed,
 		"dps_deaths": dps_deaths,
+		"hl_mana_pct": 100.0 * mana_min / maxf(1.0, mana_max),
+		"hl_over_pct": (100.0 * h_over / h_total) if h_total > 0.0 else 0.0,
+		"hl_idle_pct": 100.0 * float(h_idle) / float(maxi(1, h_acts)),
+		"hl_eff": h_eff,
+		"revives": int(healer.vars.get("revives", 0)) if healer != null else 0,
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
 	}
+
+## The single healer seat (role == "healer"); null if a comp ever runs without one.
+func _healer_seat(s: CombatState) -> Seat:
+	for seat in s.seats:
+		if seat.role == "healer":
+			return seat
+	return null
 
 func _prove_determinism(boss: String) -> void:
 	var sk: Dictionary = SKILLS[0]
@@ -174,12 +216,14 @@ func _write_csv(path: String, rows: Array) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		push_error("cannot open %s" % path); return
-	f.store_line("boss,skill,seed,probe,won,ttk_sec,boss_hp_left,boss_healed,dmg_buff,taunts,kicks,beat_miss,adds_killed,dps_deaths,loss_cause,checksum")
+	f.store_line("boss,skill,seed,probe,won,ttk_sec,boss_hp_left,boss_healed,dmg_buff,taunts,kicks,beat_miss,adds_killed,dps_deaths,hl_mana_pct,hl_over_pct,hl_idle_pct,hl_eff,loss_cause,checksum")
 	for r in rows:
-		f.store_line("%s,%s,%d,%s,%d,%.3f,%.1f,%.1f,%.2f,%d,%d,%d,%d,%d,%s,%d" % [
+		f.store_line("%s,%s,%d,%s,%d,%.3f,%.1f,%.1f,%.2f,%d,%d,%d,%d,%d,%.1f,%.1f,%.1f,%.1f,%s,%d" % [
 			r["boss"], r["skill"], r["seed"], r["probe"], (1 if r["won"] else 0), r["ttk_sec"],
 			r["boss_hp_left"], r["boss_healed"], r["dmg_buff"], r["taunts"], r["kicks"],
-			r["beat_miss"], r["adds_killed"], r["dps_deaths"], r["loss_cause"], r["checksum"]])
+			r["beat_miss"], r["adds_killed"], r["dps_deaths"],
+			r["hl_mana_pct"], r["hl_over_pct"], r["hl_idle_pct"], r["hl_eff"],
+			r["loss_cause"], r["checksum"]])
 	f.close()
 
 func _fmt(causes: Dictionary) -> String:

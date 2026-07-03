@@ -46,6 +46,20 @@ static func damage_taken(s: CombatState, seat: Seat) -> void:
 				CombatCore.heal_unit(s, u, 15.0, seat, &"swan_song")
 		pop(s, seat, &"swan_song")
 
+## One-shot per fight keyed on gear_vars ONLY (no gear check) — pop throttles etc.
+static func flag_once(seat: Seat, key: StringName) -> bool:
+	if bool(seat.gear_vars.get(key, false)):
+		return false
+	seat.gear_vars[key] = true
+	return true
+
+## SCRATCHPAD — "use the thinking time": true while a boss wind-up ≥ 6s is live.
+## Kits treble their regen (or trickle a dead resource) while this holds.
+static func scratchpad_live(s: CombatState, seat: Seat) -> bool:
+	if not has(seat, &"scratchpad") or s.telegraph == null:
+		return false
+	return s.telegraph.dur_ticks >= CombatCore.to_ticks(6.0, s.config.fixed_hz)
+
 ## View-only proc flash (the HUD pops the curio's name) — cosmetic, never gameplay.
 static func pop(s: CombatState, seat: Seat, id: StringName) -> void:
 	CombatCore.emit_event(s, {"t": "curio", "player": seat.is_player, "seat": seat, "id": String(id)})

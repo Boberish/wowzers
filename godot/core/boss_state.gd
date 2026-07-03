@@ -25,6 +25,10 @@ var dmg_buff: float = 0.0
 ## (the co-op "break the wall" payoff). Decays aggressively toward 0 each tick.
 var sunder: float = 0.0
 
+## GEAR-2: tick of the last THREAT_DROP resolve — curse-answer timers/deeds read it
+## (Sticky Note, "answer every curse" oaths). Write-only otherwise; never checksummed.
+var last_curse_tick: int = -999999
+
 ## Countdown timers in TICKS (faithful to the prototypes: ability timers freeze
 ## while a telegraph is winding up; melee keeps ticking).
 var melee_timer: int = 1000000

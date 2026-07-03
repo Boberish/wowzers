@@ -50,6 +50,10 @@ extends Resource
 	"medit":     {"name": "Meditate",   "key": "e", "mana": 0.0,  "cast": 0.0, "cd": 45.0, "target": false, "offgcd": true, "restore": 280.0},
 	"surge":     {"name": "Surge",      "key": "7", "mana": 15.0, "cast": 0.0, "cd": 0.0,  "target": false, "spec": "tidecaller"},
 	"laststand": {"name": "Last Stand", "key": "7", "mana": 20.0, "cast": 0.0, "cd": 0.0,  "target": false, "spec": "brinkwarden"},
+	# BATTLE REZ (raid only — targets a DEAD ally). A big commitment: a long channel that
+	# locks you out of triage, ~38% of your pool, and a long cooldown. Bringing a fallen
+	# raider back is meant to feel like a save, not a routine button.
+	"revive":    {"name": "Rekindle",   "key": "r", "mana": 340.0, "cast": 6.0, "cd": 120.0, "target": true, "revive": true, "revive_frac": 0.40},
 }
 
 ## Ability bar order (the signature is appended per aspect).

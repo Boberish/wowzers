@@ -109,8 +109,7 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 - **COMPLIMENTARY APOLOGY** · Haiku · UNIV · [SIM] · **SIGNATURE** — whenever the boss
   EMPOWERs or self-heals, you gain +10 resource. *"We apologize for the inconvenience."*
   *Tags:* [interrupt, mana]. (Even the finale page has a taste row.)
-- **SCRATCHPAD** · Sonnet · UNIV · [SIM] · **OATH sev-II: "all four alive through
-  ULTRATHINK"** — during any boss wind-up ≥6s, your resource regen triples. *Combo:* the
+- **SCRATCHPAD** · Sonnet · UNIV · [SIM] · **OATH sev-II: "bring all four out alive"** — during any boss wind-up ≥6s, your resource regen triples. *Combo:* the
   ULTRATHINK/parked-comet answer — Reservoir banking, garden pre-planting, Focus pooling
   while it "thinks". *Hook:* `upkeep` reads the live telegraph length. *Tags:* [mana, sap,
   focus, reservoir]. Flavor: *"use the thinking time."*
@@ -184,8 +183,7 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
 - **POWDER VIAL** · Haiku · twinfang · [SIM] · **SIGNATURE** — your Kick also applies 2
   stacks of the lit wheel lane (Venom) / +1 Flow (Tempo). *Combo:* folds the off-rhythm
   button into each aspect's engine. *Tags:* [poison, flow].
-- **ENCORE BELL** · Sonnet · twinfang[tempo] · [SIM] · **OATH sev-II: "land 3 Coups in the
-  gate"** — after Coup consumes max Flow, your Perfect window holds at the wide Flow-0
+- **ENCORE BELL** · Sonnet · twinfang[tempo] · [SIM] · **OATH sev-II: "land 8 PERFECT strikes"** — after Coup consumes max Flow, your Perfect window holds at the wide Flow-0
   anchors for the next 3 strikes. *Combo:* the Accelerando cash-out breather — spend the BPM,
   get 3 beats to rebuild it; `dancersgrace`/`crescendo` builds. *Hook:* `coup` moment →
   window-anchor override counter. *Tags:* [flow, perfect, combo].
@@ -204,8 +202,7 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
   kicks in the gate"** — active (2/fight): extend a live Silence and Expose by 2s.
   *Combo:* Quietus stretching, `longsil`/`deepexpose` lockout builds; a spend *decision*
   (which cast deserves the longer gag?). *Tags:* [silence, interrupt].
-- **ECHO CHAMBER** · Opus · voidcaller[disruptor] · [SIM] · **OATH sev-III: "win with zero
-  whiffed kicks and ≥8 kicks"** — a CLEAN kick at full Backlash echoes a free Overload at
+- **ECHO CHAMBER** · Opus · voidcaller[disruptor] · [SIM] · **OATH sev-III: "6+ kicks, none whiffed"** — a CLEAN kick at full Backlash echoes a free Overload at
   0.6× without spending the stacks. *Combo:* the full-bank rider — hold 5 stacks and keep
   kicking clean instead of dumping; `vcTrigClean` fires payloads on the same moment;
   `punish`/`overfocus`. *Hook:* `_do_interrupt` clean + backlash==max. *Tags:* [backlash,
@@ -249,8 +246,15 @@ synergy-weighted (`draft.gd` tag matching — every item below lists its tags).
   above + the four gate items — the gates were free since their tables key by canonical
   encounter id), drop/scrap/2-slot plumbing, unlock store, ceremony, `gear_probe`. Scrap
   Tokens bank until MARKET (GEAR-3); offline raid-map only (online spec fold-in later).
-- **GEAR-2 (oaths + Ledger UI):** every OATH row above + the `seat.diag` detector bumps +
-  severity purses. Gates become the oath stage.
+- **GEAR-2 — ✅ SHIPPED 2026-07-03 (`8d18685`):** the oath system (Ledger offer screen /
+  tracker banner / KEPT-unlocks-into-this-roll / stakes purses), the rarity-first roll
+  (ring weights + pity + purse bends), detector diag, and SEVEN oath-row curios: Grace
+  Period, Sticky Note, Scratchpad, Debt Collector, Encore Bell, Echo Chamber, Overflow
+  Sluice. v1 deed adjustments (detectability): Mythos Scratchpad = "bring all four out
+  alive"; Encore Bell = "land 8 PERFECT strikes" (Coup-count needs a diag); Echo Chamber
+  = "6+ kicks, none whiffed". Still paper: RELAY BATON / FREE TIER / SECOND OPINION /
+  the pair / KEYSTONE / ROULETTE FANG / FIFTH PSALM / THE CONCLUSION / MUTE BUTTON
+  (actives need the G/H socket) + all VERSION rows (Trial Ladder).
 - **GEAR-3 (MARKET/extraction):** [UTIL] items stock MARKETs; schematics lane.
 - **GEAR-4 (Seal tables/personal loot):** GEMINI + MYTHOS pages, the pair, VERSION rows
   (behind Trial Ladder).

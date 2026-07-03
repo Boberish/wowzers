@@ -32,6 +32,11 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		seat.resource = minf(cfg.mana_max, seat.resource + bell)
 	var rm := float(seat.vars.get("regen_mult", 1.0))
 	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt)
+	# GEAR-2: Scratchpad — regen trebles while a long wind-up thinks.
+	if GearFx.scratchpad_live(s, seat):
+		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt * 2.0)
+		if GearFx.flag_once(seat, &"scratchpad_pop"):
+			GearFx.pop(s, seat, &"scratchpad")
 
 	# LITANY decays a pip after litany_decay seconds without an in-condition beat — the
 	# chain is a live thing you must keep feeding, not a bank.
@@ -39,7 +44,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		var idle := int(seat.vars.get("litany_idle", 0)) + 1
 		if idle >= _tt(s, cfg.litany_decay):
 			idle = 0
-			seat.vars["litany"] = _litany(seat) - 1
+			if GearFx.once(seat, &"grace_period"):
+				GearFx.pop(s, seat, &"grace_period")   # GEAR-2: one pip stays lit
+			else:
+				seat.vars["litany"] = _litany(seat) - 1
 		seat.vars["litany_idle"] = idle
 
 	if aspect == "brinkwarden":
@@ -57,8 +65,8 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if not seat.casting.is_empty():
 		var c := seat.casting
 		var tgt: Seat = c.get("target")
-		if tgt != null and not tgt.alive():
-			seat.casting = {}
+		if tgt != null and not tgt.alive() and String(c["id"]) != "revive":
+			seat.casting = {}                            # revive WANTS a dead target — don't cancel it
 			CombatCore._emit(s, {"t": "cast_cancelled", "id": c["id"]})
 		elif s.tick - int(c["start_tick"]) >= int(c["dur_ticks"]):
 			var id: String = c["id"]
@@ -106,7 +114,10 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 		return false
 	if not offgcd and not seat.casting.is_empty():
 		return false                                     # can't restart while a cast is in progress
-	if bool(sp.get("target", false)):
+	if key == "revive":
+		if target == null or target.alive():             # revive requires a DEAD ally
+			return false
+	elif bool(sp.get("target", false)):
 		if target == null or not target.alive():
 			return false
 		if key == "dispel" and target.debuff.is_empty():
@@ -136,8 +147,8 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 	var sp: Dictionary = cfg.spells[id]
 	# pay mana (Brinkwarden discounts single-target heals by the target's missing HP)
 	var pay := float(sp.get("mana", 0.0))
-	if aspect == "brinkwarden" and bool(sp.get("target", false)) and id != "dispel" and target != null:
-		pay *= _brink_mana_mult(target)
+	if aspect == "brinkwarden" and bool(sp.get("target", false)) and id != "dispel" and id != "revive" and target != null:
+		pay *= _brink_mana_mult(target)                  # revive's dead target (hp 0) must NOT auto-discount
 	seat.resource = maxf(0.0, seat.resource - pay)
 
 	match id:
@@ -182,6 +193,15 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 			_surge(s, seat)
 		"laststand":
 			_laststand(s, seat)
+		"revive":
+			# bring the fallen raider back at revive_frac HP, cleansed. Setting hp > 0
+			# re-enters them (Seat.alive() == hp > 0); role-extinction never fired for a
+			# single dead dps, so the corpse was waiting for exactly this.
+			target.hp = roundf(target.hp_max * float(sp.get("revive_frac", 0.40)))
+			target.debuff = {}
+			target.heal_absorb = 0.0
+			seat.vars["revives"] = int(seat.vars.get("revives", 0)) + 1   # sim diagnostic
+			CombatCore._emit(s, {"t": "revive", "seat": target})
 
 	# instant spells put you on the GCD now; cast-time spells already did at cast start
 	if not bool(sp.get("offgcd", false)) and float(sp.get("cast", 0.0)) <= 0.0:
@@ -203,6 +223,16 @@ func on_overheal(_s: CombatState, caster: Seat, target: Seat, over: float) -> vo
 	if aspect == "tidecaller":
 		var r := float(caster.vars.get("reservoir", 0.0)) + over * _conv()
 		caster.vars["reservoir"] = minf(_res_max(), r)
+		# GEAR-2: Overflow Sluice — spill past a FULL Reservoir wards the tank at 0.5x.
+		if GearFx.has(caster, &"overflow_sluice") and r > _res_max():
+			var tk := CombatCore._tank_target(_s)
+			if tk != null and tk.alive():
+				tk.absorb += roundf((r - _res_max()) * 0.5)
+				tk.absorb_owner_i = _s.seats.find(caster)
+				tk.ward_until_tick = maxi(tk.ward_until_tick,
+					_s.tick + CombatCore.to_ticks(8.0, _s.config.fixed_hz))
+				if GearFx.flag_once(caster, &"sluice_pop"):
+					GearFx.pop(_s, caster, &"overflow_sluice")
 	if _b("overflow") and target != null:                  # Overflow: shield the target with the spill
 		# Top up toward Overflow's cap (hp_max*0.5) but ONLY GROW — never let the minf
 		# collapse an already-larger ward (Surge caps at hp_max, Ward is uncapped) down
@@ -375,5 +405,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"foresight_line": cfg.foresight_line,
 		"blood_thresh": cfg.blood_thresh,
 		"casting": seat.casting,
+		# RAID battle-rez signals for the policy/HUD (raid-only, so solo behavior + its
+		# byte-identical checksums are untouched — observe is never checksummed anyway).
+		"raid": s.threat_enabled,
+		"revive_ready": s.tick >= int(seat.cooldowns.get("revive", 0)),
+		"revive_mana": float(cfg.spells.get("revive", {}).get("mana", 340.0)),
 		"party": party,
 	}
