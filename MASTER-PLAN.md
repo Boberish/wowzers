@@ -461,14 +461,29 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `raid-tuning` · §BOSSES + §CLASSES — **RAID rebalance: healing has real work (Bill, direct).**
-  Playtest: raid healer idle 93–98%, mana never a factor (see `main` commit `ed6ca6e` — raid_sim now logs
-  hlMana/hlOver/hlIdle proving it). Root: tank self-heals (Fortify 130) + tiny raid-wide chip. Doing, all
-  **raid-gated** (frozen solo sims stay byte-identical): (1) Fortify heal drops hard when `threat_enabled`
-  (keeps mitigation); (2) raid mana regen via the raid seat's `regen_mult` var (no config change);
-  (3) Vorathek damage ramp — bigger unavoidable Cataclysm baseline + painful Void Volley (miss 1 = big,
-  miss 2 ≈ death); (4) **battle rez** Mender spell (long cast / big mana / big CD, revives a dead DPS —
-  loss model untouched). "Start nice, then a missed dodge hurts." Retune bands; then the Seals inherit.
+- ☑ 2026-07-03 · `raid-tuning` · §BOSSES + §CLASSES — **RAID healing rebalance — FIRST PASS MERGED to main
+  (`4a9f33e`), all raid-gated (solo sims byte-identical, verified).** The raid healer was idle 93–98% w/
+  mana never a factor (proved by the `ed6ca6e` logs on main). Fixed: (1) **tank self-heal cut** — Fortify's
+  flat 130 → ~68 when `threat_enabled` (`bulwark_config.raid_self_heal_mult 0.52`; DR still carries, so it's
+  a mitigation button and the HEALER tops the tank); (2) **raid mana regen** dialed via the raid Mender seat's
+  `regen_mult` var (0.5, no MenderConfig change → solo byte-identical); (3) **Vorathek ramp** (the TEACHING
+  Seal, kept GENTLE): melee 30-42→34-44 (the only un-freezable pressure = the healer's core job), Cataclysm
+  30→42 unavoidable baseline, Riftrot 3 targets, Void Volley a gentle dodge-check; (4) **battle rez 'Rekindle'**
+  (Mender: 6s channel / 340 mana / 120s cd, revives a fallen ally at 40%; raid HUD rune + **R** key, hover the
+  fallen frame; loss model untouched — a single dead dps was always survivable). Engine-clean; `raid_sim` now
+  also prints `rez` + a fixed `hlIdle` (excludes mid-cast).
+  **Result (150 seeds):** healer GCD-idle **93%→8-54%** (finally engaged). Skill bands: Vorathek 100/100/**47**
+  (teacher gradient ✓) · Gemini 100/100/**69** ✓ · Mythos 100/97/**20** (finale, rez fires ~0.07/run) ✓ ·
+  **Mistral 100/100/100** (still a pushover — melee bumped so the healer works, but it has no lethal dodge-check;
+  needs its own gradient pass). Mana floor DIPS more up the ladder (Vorathek ~85% → Gemini/Mythos ~79-84%) — the
+  ramp works. Determinism PASS (riftmaw/mistral/gemini); solo bulwark+mender PASS bands-match; ui_smoke_raid +
+  ui_smoke_mender green.
+  **NEXT (unclaimed, wants Bill's playtest feel):** (a) the "painful ramp" — crank the LATER Seals' dodge-checks
+  so a missed dodge really bites (Mistral needs a real dodge gradient; Gemini/Mythos punish harder); (b) MANA AS
+  A HARD WALL is still open — regen barely moves the floor because the Mender's kit is very efficient (cheap
+  HoTs/wards + Meditate's 280 battery); a true OOM wall needs trimming those efficiency tools (a Mender design
+  call) or much more sustained damage. (c) rez feel: it rarely fires in AI sims (AI dies in cascades, not
+  isolation) — it's mostly a human/co-op save; watch it in co-op.
 - ☑ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons — MERGED to main
   (`24dd28a`)**, worktree removed. The Draft 2.0 boon draft now works in online co-op: each human
   seat drafts its OWN boons after each won fight, and the picks ride the fight SPEC per seat
