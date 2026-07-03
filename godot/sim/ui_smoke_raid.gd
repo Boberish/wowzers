@@ -79,8 +79,11 @@ func _process(_delta: float) -> bool:
 	hud._map_wounds[0] = 0.2
 	hud._apply_map_fx({"heal": 0.1, "mana": 1.0, "repair": true, "patch": true})
 	print("map fx (heal/patch/refuel/repair): ok wounds=%s" % str(hud._map_wounds))
-	hud._show_map_cleared()
-	print("privilege-elevated screen: ok")
+	hud._floor = 0
+	hud._show_floor_cleared()          # inter-floor elevation (Ring 3 -> descend to Ring 2)
+	print("floor-cleared (privilege-elevated) screen: ok")
+	hud._show_campaign_cleared()       # last Seal down -> Realm 1 cleared
+	print("campaign-cleared (root access) screen: ok")
 
 	# juice handlers across every class-specific event, on the healer build
 	var s2: CombatState = hud._ctrl.state

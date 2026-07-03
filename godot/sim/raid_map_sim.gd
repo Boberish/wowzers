@@ -20,32 +20,36 @@ var _fights: Array = []
 
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "60"))
-	_fights = RaidContent.floor_fights()
-	print("=== Project Rift — raid map sim (Ring 3: The Shallow Stack) ===")
-	print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
-	print("")
-	_prove_determinism()
-	print("")
-	print("skill    clear%%   avg fights  avg integrity(end)  losses at")
-	print("------------------------------------------------------------------")
-	for sk in SKILLS:
-		var cleared := 0
-		var fight_sum := 0
-		var integ_sum := 0.0
-		var losses := {}
-		for seed in range(1, seeds + 1):
-			var r := _walk(seed, sk)
-			if r["cleared"]:
-				cleared += 1
-				integ_sum += float(r["integrity"])
-			else:
-				var k := String(r["loss_at"])
-				losses[k] = int(losses.get(k, 0)) + 1
-			fight_sum += int(r["fights"])
-		var n := float(seeds)
-		print("%-7s  %5.1f%%      %5.2f            %5.2f         %s" % [
-			sk["label"], 100.0 * cleared / n, fight_sum / n,
-			(integ_sum / maxf(1.0, float(cleared))), _fmt(losses)])
+	print("=== Project Rift — raid map sim (Realm 1: the RING descent, MAP-3c) ===")
+	# Walk EACH floor of the campaign (Ring 3 MISTRAL → Ring 2 GEMINI → Ring 0 MYTHOS):
+	# the Seal escalates per ring, so clear% should fall as we descend.
+	for fl in RaidContent.FLOORS:
+		_fights = RaidContent.floor_fights(int(fl["ring"]))
+		var seal_name := String((_fights[_fights.size() - 1] as EncounterRes).name)
+		print("")
+		print("######## %s  →  Seal: %s ########" % [String(fl["title"]), seal_name])
+		print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
+		_prove_determinism()
+		print("skill    clear%%   avg fights  avg integrity(end)  losses at")
+		print("------------------------------------------------------------------")
+		for sk in SKILLS:
+			var cleared := 0
+			var fight_sum := 0
+			var integ_sum := 0.0
+			var losses := {}
+			for seed in range(1, seeds + 1):
+				var r := _walk(seed, sk)
+				if r["cleared"]:
+					cleared += 1
+					integ_sum += float(r["integrity"])
+				else:
+					var k := String(r["loss_at"])
+					losses[k] = int(losses.get(k, 0)) + 1
+				fight_sum += int(r["fights"])
+			var n := float(seeds)
+			print("%-7s  %5.1f%%      %5.2f            %5.2f         %s" % [
+				sk["label"], 100.0 * cleared / n, fight_sum / n,
+				(integ_sum / maxf(1.0, float(cleared))), _fmt(losses)])
 	quit()
 
 ## Same seed twice ⇒ identical map fingerprint AND identical full-run trace
@@ -89,11 +93,12 @@ func _prove_carry(seeds: int) -> void:
 	for seed in range(1, seeds + 1):
 		var full := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0}
 		var wounded := {"fracs": [0.55, 1.0, 1.0, 0.55], "wounds": [0.4, 0.0, 0.0, 0.4], "mana": 0.25}
-		if bool(_fight(seed * 977 + 3, 0, full, sk)["won"]):
+		var seal_i := _fights.size() - 1
+		if bool(_fight(seed * 977 + 3, seal_i, full, sk)["won"]):
 			wins_full += 1
-		if bool(_fight(seed * 977 + 3, 0, wounded, sk)["won"]):
+		if bool(_fight(seed * 977 + 3, seal_i, wounded, sk)["won"]):
 			wins_wounded += 1
-	print("carry probe (gate fight, sloppy, %d seeds): full %.1f%%  vs  corrupted tank+healer (-40%% max HP, 25%% mana) %.1f%%" % [
+	print("carry probe (Seal fight, sloppy, %d seeds): full %.1f%%  vs  corrupted tank+healer (-40%% max HP, 25%% mana) %.1f%%" % [
 		seeds, 100.0 * wins_full / seeds, 100.0 * wins_wounded / seeds])
 	print("  -> the wound must cost a visible chunk of win rate, or the map carries nothing")
 

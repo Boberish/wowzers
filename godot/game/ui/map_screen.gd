@@ -15,6 +15,7 @@ var map: RunMap
 var current: int = -1
 var inventory: Dictionary = {}
 var hp_frac: float = 1.0
+var subtitle: String = ""            ## optional ring/floor label (MAP-3c); "" = hide
 
 var _hover: int = -1
 var _selectable: Array = []
@@ -54,6 +55,8 @@ func _pos(n: Dictionary) -> Vector2:
 func _build_header() -> void:
 	_label(MapContent.REALM_TITLE, 36, Palette.GOLD, Vector2(0, 96), UiKit.title(900))
 	_label(MapContent.REALM_SUB, 13, Palette.TEXT_DIM, Vector2(0, 148), UiKit.display(500, 3))
+	if subtitle != "":
+		_label(subtitle, 16, Palette.GOLD_BRIGHT, Vector2(0, 166), UiKit.title(700))
 	var status := "INTEGRITY %d%%" % int(round(hp_frac * 100.0))
 	if inventory.get("api_key", false):
 		status += "      [KEY: %s]" % MapContent.KEY_NAME
