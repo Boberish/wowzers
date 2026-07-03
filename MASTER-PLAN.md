@@ -265,6 +265,24 @@ nodes, not node kinds.
   unclaimed**; the map dict is wire-serializable by design. Later floors: Ring 2 → GEMINI
   ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard" —
   those floors should lean hard on wounds (their fights actually kill raiders).
+- **MAP-3c (REALM 1 COMPLETION — the first FULL raid) — 🟠 CLAIMED 2026-07-03 (`realm1-floors`).**
+  The gap: only Ring 3 exists as a playable floor; GEMINI + MYTHOS are fully built
+  (`make_gemini`/`make_mythos`, tuned bands) but reachable ONLY via `--autostart`/boss-select — no
+  floor houses them. This phase makes Realm 1 a complete 4-floor descent (Ring 3 → 2 → 1 → 0):
+  - **Floors**: generalize `floor_fights()` → `floor_fights(ring)`. Ring 3 → MISTRAL (unchanged),
+    Ring 2 "THE MIDDLEWARE" → GEMINI (+ BARD.EXE skirmishes), Rings 1→0 "ROOT" → CLAUDE MYTHOS
+    behind a **credential-shard gate** (collect N shards across the floor's nodes before the SEAL
+    unlocks — reuses the key/401-lock idiom, gating the SEAL edge). Deeper floors lean HARD on
+    CORRUPTED-SECTOR wounds (Ring 3 is deliberately the gentle intro).
+  - **Sequencing**: `RunState` tracks `ring` (3→0); clearing a floor Seal = PRIVILEGE ELEVATION →
+    next ring, integrity + wounds + mana + drafted boons/tokens CARRY. Campaign clears when Mythos falls.
+  - **Skins**: `map_content` per-ring flavor (Ring 2 middleware, Ring 0 kernel) + a few new events.
+  - **Sim**: extend `raid_map_sim` to walk all four rings (reachable + beatable + wounds bite deeper).
+  - **Online nav (3b)** stays a SEPARATE later claim (netcode + gate-nodes overlap): leader picks
+    the node in the lobby; fracs/wounds/ring ride the spec.
+  ⚠ **Shared-file coordination**: `run_map.gd`/`map_content.gd`/`run_state.gd`/`raid_hud.gd` overlap
+  the `gate-nodes` + `dps-meter` sessions — merge main often; keep floor logic separable from the
+  GATE node kind / meter panel. Boss content (`raid_content.gd`, the low-collision core) moves first.
 - **Acceptance (all phases):** map-gen determinism; solo sims + raid checksums byte-identical with maps off; smokes green.
 
 ## CLASSES
@@ -368,6 +386,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `realm1-floors` · §MAPS MAP-3c — **Finish Realm 1's raid (Bill, direct).** Build
+  the remaining floors so the already-built GEMINI (Ring 2) + CLAUDE MYTHOS (Ring 1→0, credential-
+  shard gate) become playable in the campaign; floor sequencing in `RunState` (ring 3→0, integrity/
+  wounds/mana/boons carry); per-ring `map_content` skins; extend `raid_map_sim` to all four rings.
+  Online nav (3b) is a separate later claim. ⚠ shared-risk `run_map.gd`/`map_content.gd`/
+  `run_state.gd`/`raid_hud.gd` with `gate-nodes` (NOT touching its GATE node kind) + `dps-meter` —
+  merge main before merge-back. Gate: map/raid determinism, raid sims byte-identical for existing
+  floors, `raid_map_sim` extended (all rings beatable), smokes green. *(raid-finish session)*
 - ☐ 2026-07-03 · `gate-nodes` · §MAPS/§GAME SHAPE — **Tier-1 PERSONAL GATE nodes (Bill, direct)**: new GATE node kind on the Ring-3 raid map — ONE seat (the human, v1) fights their class's exam solo (CAPTCHA-9/FIREWALL/THE PROMPTER/POPUP from the casting table); banner+result for the others; integrity/wounds carry both ways. Game-layer only (`run_map.gd`/`map_content.gd` or raid map builder/`raid_hud.gd`/`run_state.gd` expected); zero engine files. ⚠ shared-risk: `raid_hud.gd` w/ dps-meter session — merging main in before merge-back. Gate: map determinism, raid+solo sims byte-identical with gates absent, raid_map_sim extended, smokes green. *(progression design session)*
 - ☑ 2026-07-03 · main · §GAME SHAPE — **RAID-ONLY locked with Bill (docs only)**: one game (raid campaign + PROVING GROUNDS practice card, unlock-inert); solo campaign/maps/HUD-polish retired-frozen; 15 solo bosses → personal-content pipeline (Tier-1 GATE nodes claimable / Tier-2 owned adds / Tier-3 split phase); **raid-first law**. PROGRESSION-PLAN Breadth/GEAR-1 retargeted; RAID-PLAN product shape amended. *(progression design session)*
 - ☑ 2026-07-03 · main · §SYSTEMS — **`PROGRESSION-PLAN.md` written (docs only, design locked with Bill)**: persistent meta-game = boss loot tables + armed feats + extraction schematics + World/Pools/Rank/Breadth tracks + standing; Monotonic Pool Law; material economy CUT (supersede notes added to RAID-PLAN). No code touched. GEAR-1 (Bulwark PoC) is claimable. *(progression design session)*
