@@ -276,9 +276,9 @@ func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 	if dmg > 0.0:
 		CombatCore.damage_boss(s, seat, dmg, StringName(id))
 	if ab.has("lifesteal"):
-		_heal(seat, roundf(dmg * float(ab["lifesteal"])))
+		_heal(s, seat, roundf(dmg * float(ab["lifesteal"])), &"lifesteal")
 	if ab.has("heal"):
-		_heal(seat, float(ab["heal"]))
+		_heal(s, seat, float(ab["heal"]), StringName(id))
 	if ab.has("dr"):
 		seat.dr = float(ab["dr"])
 		seat.dr_until_tick = s.tick + _tt(s, float(ab["drDur"]))
@@ -289,7 +289,7 @@ func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 	if id == "cleave":
 		_gain_rage(seat, float(ab.get("rage", 0.0)))
 	if riposted and _b("riposteHeal"):
-		_heal(seat, 60.0)
+		_heal(s, seat, 60.0, &"vengeful_guard")
 	if aspect == "juggernaut" and dmg > 0.0:
 		_gain_momentum(s, seat, 1)
 	_set_gcd(s, seat, float(ab.get("gcd", cfg.gcd)), id)
@@ -318,7 +318,7 @@ func _avalanche(s: CombatState, seat: Seat) -> bool:
 	var vent := mini(mo, cfg.avalanche_vent)   # PARTIAL vent — cash some for burst, keep riding
 	var dealt := CombatCore.damage_boss(s, seat, cfg.avalanche_dmg_per * float(vent), &"avalanche")
 	if _b("landslide"):
-		_heal(seat, roundf(dealt * 0.4))
+		_heal(s, seat, roundf(dealt * 0.4), &"landslide")
 	if s.telegraph != null:
 		CombatCore.stagger_boss(s)
 	seat.vars["momentum"] = mo - vent
@@ -354,7 +354,7 @@ func _guard_proc(s: CombatState, seat: Seat, source: String) -> void:
 	if _b("payReflect"):
 		CombatCore.damage_boss(s, seat, cfg.mod_reflect, &"reflect")
 	if _b("payHeal"):
-		_heal(seat, cfg.mod_heal)
+		_heal(s, seat, cfg.mod_heal, &"warding_light")
 	if _b("payRage"):
 		_gain_rage(seat, cfg.mod_rage)
 	if _b("payCounter") and aspect == "warden":
@@ -379,8 +379,13 @@ func _gain_momentum(s: CombatState, seat: Seat, x: int) -> void:
 	seat.vars["momentum"] = clampi(int(seat.vars.get("momentum", 0)) + x, 0, _mom_max())
 	seat.vars["last_aggro_tick"] = s.tick
 	seat.vars["mom_decay_acc"] = 0.0
-func _heal(seat: Seat, x: float) -> void:
+## Kit self-heal: clamp to max AND meter the effective slice, credited to the seat
+## itself — the HEALING column's "self-sustain vs the healer" answer. HP behavior
+## unchanged; the meter is never checksummed.
+func _heal(s: CombatState, seat: Seat, x: float, src: StringName) -> void:
+	var eff := maxf(0.0, minf(seat.hp_max - seat.hp, x))
 	seat.hp = clampf(seat.hp + x, 0.0, seat.hp_max)
+	CombatCore.meter_heal(s, seat, src, eff, x - eff)
 
 ## SUNDER: crack the boss's wall. Every won read feeds it; while it's up the boss takes
 ## more from the whole team (co-op break-the-wall). Capped; decays fast in the engine.

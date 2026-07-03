@@ -29,6 +29,7 @@ static var PRETTY := {
 	"poison": "Poison", "kick": "Kick", "medit": "Meditation", "flash": "Flash Heal",
 	"mend": "Mend", "well": "Welling Tide", "laststand": "Last Stand",
 	"perfect_burst": "Perfect Ward", "void_dot": "Void Rot", "lash": "Thornlash",
+	"kick_heal": "Kick Recovery",
 }
 
 var mode: String = "dmg"

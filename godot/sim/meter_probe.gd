@@ -142,7 +142,31 @@ func _initialize() -> void:
 		"(srcs: %s)" % [s5.meter.get(1, {}).get("dmg", {}).keys()])
 	_reconcile_dmg("raid/riftmaw seed 17", s5)
 
-	# ---- [6] determinism: same seed → byte-identical meter ----
+	# ---- [6] SELF-heals are metered (the "self-sustain vs the healer" answer) ----
+	# Voidcaller: every landed kick self-heals int_heal — a full fight must show it.
+	var s6 := VoidcallerContent.make_state(9, "disruptor", VoidcallerContent.make_config(),
+		VoidcallerContent.make_voidcaller_config(), VoidcallerContent.make_priest(), {})
+	var vp := s6.seats[0].policy as VoidcallerPolicy
+	vp.latency_ticks = 4
+	vp.rng = DetRng.new(9 * 2749 + 1337)
+	_run(s6)
+	var vrow: Dictionary = s6.meter.get(0, {})
+	_check("voidcaller kick self-heal metered",
+		(vrow.get("heal", {}) as Dictionary).has(&"kick_heal"),
+		"(heal srcs: %s, total %.0f)" % [vrow.get("heal", {}).keys(), vrow.get("heal_total", 0.0)])
+	# Bulwark: a Bloodthirst press on a hurt tank meters its lifesteal exactly.
+	var s8 := _bulwark_state(3, BulwarkContent.make_gatekeeper())
+	var bseat: Seat = s8.seats[0]
+	bseat.hp = bseat.hp_max * 0.4
+	bseat.resource = 100.0
+	bseat.kit.on_action(s8, bseat, &"bloodthirst")
+	var brow: Dictionary = s8.meter.get(0, {})
+	var bls: Dictionary = (brow.get("heal", {}) as Dictionary).get(&"lifesteal", {})
+	_check("bulwark lifesteal metered (eff 48 = 80 dmg x 0.6)",
+		float(bls.get("total", 0.0)) == 48.0,
+		"(heal srcs: %s)" % [brow.get("heal", {}).keys()])
+
+	# ---- [7] determinism: same seed → byte-identical meter ----
 	var a := _raid_state(29)
 	_run(a)
 	var b := _raid_state(29)

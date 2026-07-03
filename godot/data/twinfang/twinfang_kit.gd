@@ -467,7 +467,10 @@ func _rhythm_proc(s: CombatState, seat: Seat, source: String) -> void:
 	if _b("tfPayEnergy"):
 		_gain_energy(seat, cfg.mod_energy)
 	if _b("tfPayLeech"):
+		# meter the effective slice as self-healing (HP behavior unchanged)
+		var leech_eff := maxf(0.0, minf(seat.hp_max - seat.hp, cfg.mod_leech))
 		seat.hp = clampf(seat.hp + cfg.mod_leech, 0.0, seat.hp_max)
+		CombatCore.meter_heal(s, seat, &"red_harvest", leech_eff, cfg.mod_leech - leech_eff)
 	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
 
 # --------------------------------------------------------------------------
