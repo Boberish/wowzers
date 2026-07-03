@@ -109,6 +109,10 @@ static func name_for(n: Dictionary, rng: DetRng) -> String:
 			return pool[rng.next_u32() % pool.size()]
 		RunMap.KIND_CACHE:
 			return "GPU SHRINE"
+		RunMap.KIND_GATE:
+			var pool := ["SECURITY CHECKPOINT", "AUTH GATE %d" % (2 + rng.next_u32() % 7),
+				"THE TURNSTILE"]
+			return pool[rng.next_u32() % pool.size()]
 		RunMap.KIND_EVENT:
 			var ev: Dictionary = EVENTS.get(String(n["event"]), {})
 			return String(ev.get("title", "UNINDEXED SECTOR"))

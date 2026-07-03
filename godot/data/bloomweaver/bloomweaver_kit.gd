@@ -181,7 +181,7 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target) -> void:
 					else:
 						_plant(s, seat, u)
 		"lash":
-			CombatCore.damage_boss(s, seat, float(sp["dmg"]))
+			CombatCore.damage_boss(s, seat, float(sp["dmg"]), &"lash")
 		"saprot":
 			target.debuff = {}
 			if _find_growth(target) >= 0:
@@ -229,7 +229,7 @@ func _plant(s: CombatState, seat: Seat, u: Seat) -> void:
 	u.hots.append({"gid": "growth", "tick": cfg.growth_tick,
 		"every": ev, "acc": 0, "left": _tt(s, _growth_dur()),
 		"dur": _tt(s, _growth_dur()),   # total lifetime → ripeness = 1 - left/dur
-		"caster_i": s.seats.find(seat)})
+		"caster_i": s.seats.find(seat), "src": &"growth"})
 	seat.vars["stat_planted"] = int(seat.vars.get("stat_planted", 0)) + 1
 	if _b("bwTrigPlant"):
 		var n := int(seat.vars.get("plant_count", 0)) + 1
@@ -260,7 +260,7 @@ func _bloom(s: CombatState, seat: Seat, u: Seat, mult: float = -1.0) -> void:
 		m *= (1.0 + cfg.ripe_bonus)
 	var amt := roundf(_remaining(u.hots[i]) * m)
 	u.hots.remove_at(i)
-	var eff := CombatCore.heal_unit(s, u, amt, seat)
+	var eff := CombatCore.heal_unit(s, u, amt, seat, &"bloom")
 	seat.vars["stat_blooms"] = int(seat.vars.get("stat_blooms", 0)) + 1
 	if ripe:
 		seat.vars["stat_ripe_blooms"] = int(seat.vars.get("stat_ripe_blooms", 0)) + 1
@@ -282,7 +282,7 @@ func _wildbloom(s: CombatState, seat: Seat) -> void:
 		if u.role == "healer" or not u.alive():
 			continue
 		if _find_growth(u) >= 0:
-			CombatCore.heal_unit(s, u, per, seat)
+			CombatCore.heal_unit(s, u, per, seat, &"wildbloom")
 			_refresh_growth(s, u)                       # the garden restarts
 			n += 1
 		elif _b("verdantsurge"):
@@ -331,7 +331,7 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied
 	if aspect == "thornveil":
 		var reflect := roundf(eaten * _thorns(healer))   # reflect RAMPS with the snap-streak
 		if reflect > 0.0:
-			CombatCore.damage_boss(s, healer, reflect)
+			CombatCore.damage_boss(s, healer, reflect, &"thorns")
 			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + reflect
 	if emptied:
 		# A Perfect Ward is a SNAP — Sap/Verdance refund, and (Thornveil) it ramps the streak.
@@ -342,7 +342,7 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied
 			var ch := mini(_thorn_charge(healer) + 1, cfg.thorn_charge_max)
 			healer.vars["thorn_charge"] = ch
 			var burst := roundf(cfg.perfect_burst * (1.0 + 0.15 * float(ch)))   # burst scales w/ streak
-			CombatCore.damage_boss(s, healer, burst)
+			CombatCore.damage_boss(s, healer, burst, &"perfect_burst")
 			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + burst
 			CombatCore.emit_event(s, {"t": "thorn_snap", "player": healer.is_player, "charge": ch})
 		healer.vars["stat_perfect"] = int(healer.vars.get("stat_perfect", 0)) + 1
@@ -378,14 +378,14 @@ func _garden_proc(s: CombatState, seat: Seat, target: Seat, source: String) -> v
 	var times := 2 if (_b("bwPropDeepGarden") and _garden_count(s) >= cfg.mod_garden_need) else 1
 	for _i in times:
 		if _b("bwPayThorn"):
-			CombatCore.damage_boss(s, seat, cfg.mod_thorn)
+			CombatCore.damage_boss(s, seat, cfg.mod_thorn, &"bramble")
 		if _b("bwPaySap"):
 			seat.resource = minf(cfg.sap_max, seat.resource + cfg.mod_sap)
 		if _b("bwPayMend"):
 			var tgt := target if (target != null and target.alive() and target.role != "healer") \
 				else _lowest_ally(s)
 			if tgt != null:
-				CombatCore.heal_unit(s, tgt, cfg.mod_mend, seat)
+				CombatCore.heal_unit(s, tgt, cfg.mod_mend, seat, &"petalfall")
 	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
 
 func _lowest_ally(s: CombatState) -> Seat:

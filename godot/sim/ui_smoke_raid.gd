@@ -79,6 +79,53 @@ func _process(_delta: float) -> bool:
 	hud._map_wounds[0] = 0.2
 	hud._apply_map_fx({"heal": 0.1, "mana": 1.0, "repair": true, "patch": true})
 	print("map fx (heal/patch/refuel/repair): ok wounds=%s" % str(hud._map_wounds))
+
+	# Tier-1 PERSONAL GATE (§GAME SHAPE): intro panel -> exam fight -> result ->
+	# map; a LOST gate = force-reboot (wound) and the run CONTINUES
+	var gid := -1
+	for nd in hud._map.nodes:
+		if String(nd["kind"]) == RunMap.KIND_GATE:
+			gid = int(nd["id"])
+	print("gate node present: %s (id=%d)" % [str(gid >= 0), gid])
+	hud._enter_node(gid)
+	var intro_ok: bool = hud._screen == "mapstop"
+	print("gate intro panel: ok=%s screen=%s" % [str(intro_ok), hud._screen])
+	hud._launch_gate_fight()                       # what STEP THROUGH ALONE does
+	var sx: CombatState = hud._ctrl.state
+	print("gate exam fight: enc=%s boss='%s' seats=%d gate_live=%s" % [
+		String(sx.encounter.id), String(sx.encounter.name), sx.seats.size(), str(hud._gate_live)])
+	CombatCore.damage_boss(sx, sx.seats[0], sx.boss.hp)      # burst-win the exam
+	for i in 30:
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+		if hud._screen != "combat":
+			break
+	print("gate won -> result panel: screen=%s frac[tank]=%.2f" % [
+		hud._screen, hud._map_fracs[0]])
+	hud._launch_gate_fight()                       # loss path: the exam kills you
+	var sl: CombatState = hud._ctrl.state
+	sl.seats[0].hp = 0.0
+	for i in 30:
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+		if hud._screen != "combat":
+			break
+	print("gate LOST -> rebooted through: screen=%s frac=%.2f wound=%.2f map_alive=%s" % [
+		hud._screen, hud._map_fracs[0], hud._map_wounds[0], str(hud._map != null)])
+	# every other seat's exam builds its band + fights live for a moment
+	for gseat in ["blade", "caster", "healer"]:
+		hud._seat_key = gseat
+		hud._aspect = String((hud.ASPECTS[gseat][0] as Dictionary)["id"])
+		hud._launch_gate_fight()
+		var gs: CombatState = hud._ctrl.state
+		for i in 60:
+			hud._ctrl._process(1.0 / 30.0)
+			hud._process(1.0 / 30.0)
+		print("gate exam %-6s ok  enc=%s boss='%s' seats=%d" % [
+			gseat, String(gs.encounter.id), String(gs.encounter.name), gs.seats.size()])
+	hud._seat_key = "tank"
+	hud._aspect = "warden"
+	# MAP-3c floor progression screens (replaces the old single _show_map_cleared):
 	hud._floor = 0
 	hud._show_floor_cleared()          # inter-floor elevation (Ring 3 -> descend to Ring 2)
 	print("floor-cleared (privilege-elevated) screen: ok")
@@ -118,7 +165,8 @@ func _process(_delta: float) -> bool:
 		hud._handle_event(ev)
 	print("juice handlers (all classes): ok")
 
-	hud._show_end(true)      # mythos state is live -> exercises the QUIPS path
+	hud._launch("tank", "warden", "mythos")   # a Seal state -> exercises the QUIPS path
+	hud._show_end(true)
 	hud._show_end(false)
 	print("end screens (with Seal quips): ok")
 	hud._show_select("healer")
