@@ -7,6 +7,7 @@
 extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
+const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller", "healer": "mender"}
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE VOIDCALLER", "healer": "THE MENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -49,6 +50,7 @@ const ABILITY_NAMES := {
 var _ctrl: CombatController
 var _local_ctrl: CombatController
 var _net_ctrl: NetCombatController
+var _pause: PauseOverlay = null     ## the in-combat pause menu + class codex (null = not paused)
 var _net: NetClient = null
 var _online: bool = false
 var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
@@ -60,7 +62,7 @@ var _seat_key: String = "tank"
 var _aspect: String = "warden"
 var _enc_id: String = "riftmaw"    ## the Seal to pull offline (boss-select / autostart)
 var _loadout: Array = []
-var _screen: String = "select"
+var _screen: String = "home"
 
 # Topology raid floor (MAP-3a, offline): map-run state lives HERE, not in RunState —
 # the raid never uses the solo run machinery (and draft2 owns run_state.gd right now).
@@ -88,6 +90,7 @@ var _map_tokens := 0                    ## ⏣ fallback bank when no _run exists
 var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
+var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
 
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
 var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
@@ -149,7 +152,7 @@ func _ready() -> void:
 	add_child(_net_ctrl)
 	_net_ctrl.encounter_ended.connect(_on_end_moment)
 	_ctrl = _local_ctrl
-	_show_select()
+	_show_home()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart=gate"):
 			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
@@ -177,42 +180,118 @@ func _clear() -> void:
 	_hover_seat = null
 	_focus_seat = null
 	_stage2d = null
+	_pause = null                   # the overlay is a _ui child — freed below; drop the freeze
+	if _ctrl != null:
+		_ctrl.paused = false
 	for c in _ui.get_children():
 		c.queue_free()
 
 # ============================================================ SELECT
-func _show_select(seat: String = "tank") -> void:
-	_screen = "select"
-	_map = null                       # leaving for the select abandons any map run
+## The one game front door (ONE GAME · ONE HUD, see MASTER-PLAN §GAME SHAPE): PLAY the
+## raid campaign (solo-with-AI) or PLAY ONLINE (co-op). No mode select, no solo split.
+func _show_home() -> void:
+	_screen = "home"
+	_map = null
 	_map_pending = false
 	_gate_live = false
-	_online_map = false               # MAP-3b: abandon any online descent
+	_online_map = false
 	_clear()
-	var sel := BossSelect.new()
-	sel.title = "THE RIFT"
-	sel.subtitle = "RAID — FOUR SEATS, ONE SEAL · PICK YOURS, AI FILLS THE REST"
-	sel.aspects = [
-		{"id": "tank", "label": "THE BULWARK", "accent": Palette.STEEL,
-			"blurb": "Tank · Warden or Juggernaut — hold its gaze, CHALLENGE it back"},
-		{"id": "blade", "label": "THE TWINFANG", "accent": Palette.FLOW,
-			"blurb": "Melee · Tempo or Venomancer — don't out-threat the tank"},
-		{"id": "caster", "label": "THE VOIDCALLER", "accent": Palette.KICK,
-			"blurb": "Caster · Disruptor or Silencer — kick the Devouring Chant"},
-		{"id": "healer", "label": "THE MENDER", "accent": Palette.WIN,
-			"blurb": "Healer · Tidecaller or Brinkwarden — four lives through the storm"},
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 14)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -260, -230, 260, 250)
+	_ui.add_child(box)
+	var t := _title(box, "THE RIFT", 76, Palette.GOLD)
+	t.add_theme_font_override("font", UiKit.title(900))
+	_title(box, "REALM 1 · THE TAKEOVER", 15, Palette.TEXT_DIM)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 30)
+	box.add_child(gap)
+	box.add_child(_menu_button("▶    PLAY", Palette.GOLD_BRIGHT, _show_class_select))
+	box.add_child(_menu_button("🌐    PLAY ONLINE", Palette.FLOW, _show_online))
+	box.add_child(_menu_button("QUIT", Palette.TEXT_DIM, func(): get_tree().quit()))
+
+func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(330, 56)
+	b.add_theme_font_size_override("font_size", 22)
+	b.add_theme_color_override("font_color", accent)
+	b.pressed.connect(cb)
+	return b
+
+## PLAY → pick your CLASS (the four raid seats; you play one, AI fills the rest).
+func _show_class_select() -> void:
+	_screen = "class"
+	_map = null
+	_map_pending = false
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 205)
+	_ui.add_child(head)
+	var hl := _title(head, "CHOOSE YOUR CLASS", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "you play one · AI raiders fill the other three seats", 14, Palette.TEXT_DIM)
+	var cards := [
+		["tank", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
+		["blade", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
+		["caster", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
+		["healer", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — four lives through the storm, click-cast the frames.  (Tidecaller / Brinkwarden)"],
 	]
-	sel.encounters = RaidContent.run_encounters()
-	sel.current = seat
-	sel.hint = "Pick a Seal: Vorathek is the classic pull; II–IV are the Machine Seals (they escalate). Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
-	sel.extras = [
-		{"label": "THE TOPOLOGY — Realm 1 descent · Ring 3→0 (MISTRAL → GEMINI → MYTHOS)",
-			"cb": func(): _start_map_pick(sel.current)},
-		{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online},
-	]
-	sel.chosen.connect(_start_raid)
-	sel.back_pressed.connect(func(): get_tree().change_scene_to_file("res://game/main.tscn"))
-	sel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_ui.add_child(sel)
+	# AspectCard is a WIDE 680px card — STACK the four vertically (a row of four runs
+	# off-screen). Matches the aspect ceremony's vertical layout.
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 12)
+	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -250, 350, 262)
+	_ui.add_child(col)
+	for c in cards:
+		var card := AspectCard.new(String(c[1]), String(c[4]), c[3], String(c[2]))
+		card.chosen.connect(_show_aspect_pick.bind(String(c[0])))
+		col.add_child(card)
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	_place(back, 0.5, 1, 0.5, 1, -80, -78, 80, -44)
+	back.pressed.connect(_show_home)
+	_ui.add_child(back)
+
+## SUB-CLASS chosen → pick your RAID (one for now: Realm 1). Future realms add cards here.
+func _show_raid_select(seat_id: String, aspect: String) -> void:
+	_screen = "raidpick"
+	_seat_key = seat_id
+	_aspect = aspect
+	_map_pending = false
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 210)
+	_ui.add_child(head)
+	var hl := _title(head, "CHOOSE YOUR RAID", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "%s · %s" % [SEAT_NAMES.get(seat_id, "RAIDER"), aspect.capitalize()], 14, Palette.TEXT_DIM)
+	var mid := CenterContainer.new()
+	_place(mid, 0.5, 0.5, 0.5, 0.5, -360, -150, 360, 150)
+	_ui.add_child(mid)
+	var card := AspectCard.new("REALM 1 · THE TAKEOVER",
+		"The ironic AI takeover. Descend the Topology, Ring 3 → 0 — MISTRAL → GEMINI → CLAUDE MYTHOS. Route the node map, carry your wounds, draft your build. (More realms to come.)",
+		Palette.CRIMSON, "")
+	card.chosen.connect(func(): _start_map_run())
+	mid.add_child(card)
+	var back := Button.new()
+	back.text = "◂ back to aspect"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	_place(back, 0.5, 1, 0.5, 1, -110, -78, 110, -44)
+	back.pressed.connect(func(): _show_aspect_pick(seat_id))
+	_ui.add_child(back)
+
+## Legacy entry point — every fight-end / Esc / "leave" call routes here. Now it just
+## returns to the one HOME menu (the old dev BossSelect front door is retired).
+func _show_select(_seat: String = "tank") -> void:
+	_show_home()
 
 # ============================================================ ASPECT PICK
 ## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
@@ -244,15 +323,15 @@ func _show_aspect_pick(seat_id: String) -> void:
 	_ui.add_child(box)
 	for a in ASPECTS[seat_id]:
 		var card := AspectCard.new(String(a["name"]), String(a["desc"]), a["accent"], String(a["icon"]))
-		card.chosen.connect(_launch.bind(seat_id, String(a["id"])))
+		card.chosen.connect(_show_raid_select.bind(seat_id, String(a["id"])))
 		box.add_child(card)
 
 	var back := Button.new()
-	back.text = "◂ back to seats"
+	back.text = "◂ back to classes"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
 	_place(back, 0.5, 1, 0.5, 1, -110, -90, 110, -56)
-	back.pressed.connect(func(): _show_select(seat_id))
+	back.pressed.connect(_show_class_select)
 	_ui.add_child(back)
 
 # ============================================================ ONLINE (R2)
@@ -656,6 +735,7 @@ func _start_map_run() -> void:
 	_oath_result = {}
 	_oath_broken = false
 	_drop_pity = 0
+	_taken_boons = []
 	if DisplayServer.get_name() != "headless":
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
@@ -1222,6 +1302,7 @@ func _show_boon_draft(done: Callable) -> void:
 		"Take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_run, boon)
+		_taken_boons.append(boon)      # for the build panel (title + rarity)
 		done.call())
 	_ui.add_child(ds)
 
@@ -1319,6 +1400,7 @@ func _build_combat(s: CombatState) -> void:
 		_stage2d.setup(s, aspects)
 	_stage2d.bind_seats(s.seats)
 	_add_dev_tools()
+	_add_build_panel()
 
 	_shake_root = Control.new()
 	_shake_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1401,6 +1483,21 @@ func _build_combat(s: CombatState) -> void:
 	_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(_fx)
+	_add_pause_button()
+
+## The PAUSE button (top-right). Always available in real play (offline freezes the
+## fight, online just opens the guide); hidden only in headless (sims/smokes drive
+## _toggle_pause directly). It's the entry to the Class Codex — the playtest cheat-sheet.
+func _add_pause_button() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var pb := Button.new()
+	pb.text = "PAUSE  (P)"
+	pb.add_theme_font_size_override("font_size", 12)
+	pb.modulate = Color(1.0, 1.0, 1.0, 0.72)
+	pb.pressed.connect(_toggle_pause)
+	_place(pb, 1, 0, 1, 0, -150, 14, -18, 46)
+	_ui.add_child(pb)
 
 func _orb(fill: Color, caption: String, right: bool) -> LiquidOrb:
 	var o := LiquidOrb.new()
@@ -1587,6 +1684,133 @@ func _dev_win() -> void:
 	# the win exactly like a real kill, so drops/floor-advance run unchanged.
 	CombatCore.damage_boss(s, s.seats[0], s.boss.hp + s.boss.hp_max + 1.0)
 
+## The player's assembled verb, in the class's own words (build-your-verb boons).
+const VERB_LABEL := {"tank": "GUARD", "blade": "RHYTHM", "caster": "KICK", "healer": "TRIAGE"}
+
+func _verb_summary_lines() -> Array:
+	if _run == null:
+		return []
+	match _seat_key:
+		"blade": return TwinfangBoons.verb_summary(_run.boons, _aspect)
+		"caster": return VoidcallerBoons.verb_summary(_run.boons, _aspect)
+		"healer": return MenderBoons.verb_summary(_run.boons, _aspect)
+		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
+
+## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
+## so you can always see the run you've drafted. Offline descent only (_run present;
+## online boons ride the spec later). Rebuilt each fight, so it reflects new picks.
+func _add_build_panel() -> void:
+	if _run == null or _online:
+		return
+	var lines := _verb_summary_lines()
+	if _taken_boons.is_empty() and lines.is_empty():
+		return                                    # nothing drafted yet
+	var frame := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(Palette.BG0, 0.74)
+	sb.border_color = Color(Palette.GOLD_DIM, 0.55)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(5)
+	sb.content_margin_left = 12
+	sb.content_margin_right = 12
+	sb.content_margin_top = 9
+	sb.content_margin_bottom = 9
+	frame.add_theme_stylebox_override("panel", sb)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 3)
+	frame.add_child(col)
+	var hdr := Label.new()
+	hdr.text = "◆  YOUR %s" % String(VERB_LABEL.get(_seat_key, "BUILD"))
+	hdr.add_theme_font_size_override("font_size", 14)
+	hdr.add_theme_color_override("font_color", Palette.GOLD)
+	col.add_child(hdr)
+	for l in lines:
+		var lbl := Label.new()
+		lbl.text = "·  " + String(l)
+		lbl.add_theme_font_size_override("font_size", 11)
+		lbl.add_theme_color_override("font_color", Palette.TEXT)
+		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbl.custom_minimum_size = Vector2(276, 0)
+		col.add_child(lbl)
+	if not _taken_boons.is_empty():
+		var cap := Label.new()
+		cap.text = "BOONS  ·  %d" % _taken_boons.size()
+		cap.add_theme_font_size_override("font_size", 10)
+		cap.add_theme_color_override("font_color", Palette.GOLD_DIM)
+		col.add_child(cap)
+		for b in _taken_boons:
+			var bd: Dictionary = b
+			var bl := Label.new()
+			bl.text = "•  " + String(bd.get("title", "?"))
+			bl.add_theme_font_size_override("font_size", 11)
+			bl.add_theme_color_override("font_color", Palette.rarity_color(String(bd.get("rarity", "haiku"))))
+			col.add_child(bl)
+	_ui.add_child(frame)
+	# TOP-LEFT (below the dev button, above the party frames) — the top-right is the
+	# DPS meter's. Grows DOWN as the build fills out (content-sized height).
+	frame.anchor_left = 0.0
+	frame.anchor_top = 0.0
+	frame.anchor_right = 0.0
+	frame.anchor_bottom = 0.0
+	frame.grow_horizontal = Control.GROW_DIRECTION_END
+	frame.grow_vertical = Control.GROW_DIRECTION_END
+	frame.offset_left = 14
+	frame.offset_right = 320
+	frame.offset_top = 56
+	frame.offset_bottom = 56
+
+# ============================================================ PAUSE + CLASS CODEX
+## Open/close the pause menu. OFFLINE freezes the fight (`CombatController.paused`);
+## ONLINE never freezes a lockstep replica — the guide just opens over the running fight.
+func _toggle_pause() -> void:
+	if _screen != "combat":
+		return
+	if _pause != null:
+		_resume_pause()
+		return
+	if not _online and _ctrl != null:
+		_ctrl.paused = true
+	_pause = PauseOverlay.new(SEAT_CLASS.get(_seat_key, "bulwark"), _aspect,
+		_owned_boon_labels(), not _online)
+	_pause.resumed.connect(_resume_pause)
+	_pause.quit_to_menu.connect(_pause_quit)
+	_ui.add_child(_pause)
+
+func _resume_pause() -> void:
+	if _ctrl != null:
+		_ctrl.paused = false
+	if _pause != null and is_instance_valid(_pause):
+		_pause.queue_free()
+	_pause = null
+
+func _pause_quit() -> void:
+	# one HUD: "quit to menu" returns to the HOME screen (the retired main.tscn is gone)
+	_resume_pause()
+	if _net != null:
+		_net.close()
+	_online = false
+	_show_home()
+
+## The boons the human seat has drafted, resolved to {title,rarity,type} for the codex
+## header. Only the map/campaign run carries a boon pool (`_run`); a bare Seal pull has
+## none → []. Scans the current class's boon pools by id.
+func _owned_boon_labels() -> Array:
+	if _run == null or _run.boons.is_empty():
+		return []
+	var pools: Array = []
+	match _seat_key:
+		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
+		"caster": pools = [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]
+		"healer": pools = [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK]
+		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
+	var out: Array = []
+	for pool in pools:
+		for b in pool:
+			if _run.boons.get(String(b.get("id", "")), false):
+				out.append({"title": b.get("title", b.get("id", "?")),
+					"rarity": b.get("rarity", "haiku"), "type": b.get("type", "")})
+	return out
+
 func _healer_hint() -> String:
 	var parts: Array = []
 	for chord in MenderBinds.CHORDS:
@@ -1610,12 +1834,23 @@ func _on_frame_unhover(fr) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		# pause menu open: Esc / P resume, everything else is swallowed (fight frozen)
+		if _pause != null:
+			if event.keycode == KEY_ESCAPE or event.keycode == KEY_P:
+				_resume_pause()
+			return
 		if event.keycode == KEY_ESCAPE:
+			if _screen == "combat":
+				_toggle_pause()      # Esc in a fight = PAUSE (Quit-to-menu lives inside it)
+				return
 			if _net != null:
 				_net.close()
 			get_tree().change_scene_to_file("res://game/main.tscn")
 			return
 		if _screen != "combat":
+			return
+		if event.keycode == KEY_P:
+			_toggle_pause()
 			return
 		if event.keycode == KEY_M and _meter != null:
 			_meter.cycle()
@@ -1627,7 +1862,7 @@ func _input(event: InputEvent) -> void:
 				_martial_key(event.keycode)
 		return
 	# Mender click-cast: hover a frame, click a chord
-	if _seat_key == "healer" and _screen == "combat" \
+	if _pause == null and _seat_key == "healer" and _screen == "combat" \
 			and event is InputEventMouseButton and event.pressed and _hover_seat != null:
 		var id := String(_binds.get(_mouse_chord(event), "none"))
 		if id == "signature":

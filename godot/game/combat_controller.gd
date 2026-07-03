@@ -10,6 +10,8 @@ signal encounter_ended(won: bool)
 
 var state: CombatState
 var running: bool = false
+var paused: bool = false            ## view-layer freeze (pause menu). OFFLINE only —
+                                    ## an online lockstep fight must never freeze locally.
 var human_seat_index: int = 0      ## which seat the human drives (raid: any seat)
 var _accum: float = 0.0
 
@@ -23,8 +25,8 @@ func begin(state_in: CombatState, human_index: int = 0) -> void:
 	running = true
 
 func _process(delta: float) -> void:
-	if not running or state == null or state.over:
-		return
+	if not running or paused or state == null or state.over:
+		return   # paused: don't accumulate — resume picks up where the fight froze
 	_accum += minf(0.25, delta)
 	var dt := state.dt
 	while _accum >= dt and not state.over:

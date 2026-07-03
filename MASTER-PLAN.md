@@ -69,13 +69,27 @@ solo-only features · the solo draft-run mode (drafts live in the Topology, wher
 **Frozen:** the five solo class HUDs (no further polish; personal gates run through `raid_hud`'s
 existing per-seat class bands). **Kept:** all 15 boss content files (the casting pool, §REALMS
 table) · the six class sims (regression spine — infra, not product) · boss-select as practice/debug.
-**Front door:** class menu shrinks to **THE RIFT** (the game) + one **PROVING GROUNDS** practice
-card reusing the existing boss-select (zero work now; retire later if unused). Practice fights
-are **unlock-inert** (no drops/feats/Proofs — otherwise practice becomes the farm).
+**Front door (the ONLY player flow — reaffirmed with Bill 2026-07-03):** ONE **PLAY** button
+(Play *is* the raid — it's the only mode) → **pick your CLASS** (which seat you take) → **pick your
+SUB-CLASS** (Aspect) → **pick the RAID** (one for now: Realm 1 · The Takeover) → play. No mode
+select, no "solo vs co-op" fork (AI fills empty seats; PLAY ONLINE is a lobby toggle *inside* the
+raid, not a separate mode). The old `main_menu` / per-class `*_main.tscn` solo entries + the
+PROVING GROUNDS card are being REMOVED (see the menu-refresh claim in the Coordination Log).
 
-**⚖ RAID-FIRST LAW (every session, every feature):** player-facing features land on the raid
-HUD/sim FIRST; practice surfaces inherit only what shared components give for free. There is
-no "solo side" to default to anymore.
+**⚖ ONE GAME · ONE HUD LAW (non-negotiable — reaffirmed 2026-07-03. This is the norm; do NOT
+re-introduce a solo/raid split. Read this before building any player-facing system.):**
+- There is exactly ONE game (the raid) and exactly ONE combat HUD — today `raid_hud.gd`. It is
+  **THE game HUD**; the "raid HUD" name is legacy shorthand, not a mode. EVERY player-facing
+  feature lands there. Full stop. (Don't say "add it to the raid HUD" — there's only one HUD.)
+- The five solo class HUDs (`bulwark_hud`/`mender_hud`/`twinfang_hud`/`voidcaller_hud`/
+  `bloomweaver_hud`), `main_menu.gd`, and the `*_main.tscn` solo scenes are **DEAD** — do not add
+  features to them, do not wire menus to them, and never "port from solo to raid." If a system
+  only lives in a solo HUD, it is MISSING from the game and must be (re)built on the one HUD.
+- **Canonical failure to never repeat:** the Draft 2.0 BOON draft shipped only in the solo HUDs,
+  so it was silently absent from the actual game until 2026-07-03 (`0338a37`). That split-induced
+  gap is exactly what this law exists to prevent. Build every system on the game HUD, once.
+- Kept: the class sims (regression infra, NOT product) and boss-select **only** as a `--autostart`
+  dev jump-in behind a flag — never a player-facing front door. Practice/PROVING-GROUNDS surface: cut.
 
 ---
 
@@ -447,6 +461,45 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-03 · `pause-codex` · §GRAPHICS/UX — **In-game PAUSE menu + DEV CLASS CODEX — MERGED to main
+  (`33d44ba`).** A PAUSE button (top-right of combat) + **P / Esc-in-combat** open an overlay on the ONE
+  game HUD: OFFLINE it FREEZES the fight (`CombatController.paused`, guarded — ONLINE lockstep never
+  freezes, the guide just opens over the running fight); it renders a **Class Codex** for the seat you're
+  driving — core-loop, each BAR (fills/spends/goal), each MOVE (+ what it encourages), the GOAL ROTATION
+  for your Aspect, and **THE BRANCHES** (both Aspects + boon/gear sub-builds, current one highlighted +
+  drafted-boon count in the header). New files: `data/class_codex.gd` (authored for the 4 raid classes
+  from live kits/configs/boons + HUD tips — a TEACHING doc; code wins on drift), `game/ui/pause_overlay.gd`,
+  `sim/screenshot_pause.gd` (WSLg probe). Engine: **+1 guarded field on `CombatController`** (the DRIVER,
+  not `CombatCore` — sims never touch it, so class checksums are unaffected by construction). raid_hud:
+  combat-screen only (`_input` Esc/P→pause · `_build_combat` button · `_clear` drops the freeze · SEAT_CLASS
+  + `_owned_boon_labels`). **Verified:** ui_smoke_raid green (opens+freezes+resumes the codex for all 8
+  seat×aspect combos, asserted) · menu_probe green · bulwark determinism PASS · WSLg shots eyeballed
+  (tank/blade/caster/healer render clean + scannable). Merged main (menu-refresh) before merge-back —
+  clean auto-merge (menu vs combat regions). ⚠ **`build-panel`** (open claim) plans an always-visible
+  readout at the SAME top-right combat corner as this PAUSE button — coexist/relocate when it lands
+  (complementary: glance panel vs full pause guide). NEXT: extend the codex to Bloomweaver if it ever
+  becomes a seat; per-branch "you own this" highlighting off `_run.boons`. *(pause-codex session)*
+- ☑ 2026-07-03 · `build-panel` · §GRAPHICS — **Verb/boon summary on the game HUD — MERGED to main
+  (`fbfc74b`)**, worktree removed. An always-visible **TOP-LEFT** panel during offline descent fights:
+  "◆ YOUR GUARD/RHYTHM/KICK/TRIAGE" + the assembled verb rules (per-class `*_boons` verb summary) +
+  the drafted boons (title, rarity-colored). Tracks `_taken_boons` dicts in `_show_boon_draft` (reset
+  per descent). Placed top-left (not top-right — the DPS meter owns that; caught via screenshot).
+  Reconciled with `pause-codex` (kept both; its `_pause_quit` now returns to `_show_home`, not the
+  retired `main.tscn`). Gate PASS: screenshot-eyeballed (renders clean, no collision); menu/boon
+  probes + ui_smoke_raid green; bulwark determinism unchanged. **View-only, zero engine.** NEW WSLg
+  probes `sim/screenshot_menu.gd` + `sim/screenshot_build.gd` (render works here — no longer
+  layout-blind). NEXT: online boons (build panel + draft ride the spec). *(raid-finish session)*
+
+- ☑ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu refresh + boot into the game HUD — MERGED to
+  main (`d27a84f`)**, worktree removed. The game boots straight into the game HUD (`raid_main.tscn`);
+  `main_menu` + the dev BossSelect front door are retired. Flow: **HOME** (PLAY / PLAY ONLINE / QUIT)
+  → **CLASS** (4 seats) → **SUB-CLASS** (Aspect) → **RAID** (Realm 1 card) → the descent. All
+  fight-end/Esc/leave returns → `_show_home` (`_show_select` is now a thin wrapper). Reuses AspectCard
+  for class + raid cards; boss-select stays `--autostart` dev only. Gate PASS: NEW `sim/menu_probe.gd`
+  (HOME→class→aspect→raid→live descent→HOME); ui_smoke_raid green; bulwark determinism unchanged;
+  boon/gear/floor probes green. **Menus+docs scope** (no file rename). **Pending:** a live WSLg glance
+  at the card/button layout (headless proves it builds, not the pixels). **NEXT:** the verb/boon
+  summary on the game HUD (deferred from the boon work); optional later — rename `raid_hud`→`game_hud`. *(raid-finish session)*
 - ☑ 2026-07-03 · `raid-boons` · §MAPS/§SYSTEMS — **Boon draft in the RAID campaign — MERGED to main
   (`0338a37`)**, worktree removed. Draft 2.0 (1-of-3 / rarities / build-your-verb) now runs in the
   raid descent OFFLINE: the human seat gets a `_run` (RunState via the class starter), a **REFORGE**
