@@ -462,21 +462,32 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `armory` · §SYSTEMS GEAR — **CLAIMED (in flight): drop-cadence rework + signature
-  strength pass + ARMOR SET doll (Bill's direction, this session).** Playtest verdict: drops every
-  fight + weak items = no WoW moment. (1) **Drops become EVENTS** — roll only at Seal kills, gate
-  exams, and any kill whose SIGNATURE row is still locked (preserves the first-kill shower);
-  skirmish repeat kills pay ⏣ toasts instead. (2) **Richer ring weights + pity** (fewer rolls →
-  each pays more). (3) **Signature strength pass** — the 9 live signatures redesigned STRONG
-  (iconic, feel-it-now; combat six promoted to printed Sonnet), per Bill: "the 1st signature for
-  a boss should be a strong one". (4) **ARMOR SET rebrand (presentation-only)** — boons render as
-  armor PIECES on a paper-doll SET panel: slots WEAPON/HELM/CUIRASS/GAUNTLETS/GREAVES + the 2 curio
-  TRINKET sockets; every boon gains an inert `slot` tag; Hades stacking/draft economy untouched
-  (slot piece = family count + best-rarity glow; curios stay the special drop lane). Owns:
-  `raid_hud.gd` drop/draft flow, `game/gear.gd` weights, `gear_catalog/gear_fx` + kit gear sites,
-  new `game/ui/armor_doll.gd`, DraftScreen slot line, boon-pool `slot` data pass, PROGRESSION-PLAN
-  + GEAR-CATALOG amendments. Gate: gear_probe ALL OK; gearless sims byte-identical; smokes green;
-  doll screenshot. *(armory session)*
+- ☑ 2026-07-03 · `armory` · §SYSTEMS GEAR — **Drop cadence + signature strength + ARMOR SET doll —
+  MERGED to main (Bill's direction: "loot only for big kills; make the first signature strong;
+  rebrand boons as armor — gear up your run").** Playtest verdict fixed: drops-every-fight + weak
+  items = no WoW moment. (1) **Drops are EVENTS** — roll only at Seal kills, gate exams, and any
+  kill whose SIGNATURE is still locked (first-kill shower intact); repeat skirmish kills pay
+  ring-scaled salvage ⏣ (1/2/3) via toast (`raid_hud._after_drop(event)`, `Gear.first_locked`).
+  (2) **Weights retuned richer** (50/35/15 · 38/40/22 · 25/40/35 by ring — ~4-6 rolls/descent).
+  (3) **Signature strength pass** — all 9 live signatures redesigned STRONG, combat six promoted
+  to printed Sonnet: Tooth (denied heal resets defense+dodge +20), Bell (+30 & 10s double-regen
+  hum via `GearFx.bell_live`), Stamp (+4 links/+8 Momentum + Guard reset), Powder (3 stacks/+2
+  Flow), Spark (first 2 answered kicks refund whole cd), Salt (heal 60 + mana refund), Swan
+  (200/25), Stub (+10% +1⏣). (4) **ARMOR SET (presentation-only)** — `data/armor_slots.gd` maps
+  all ~120 boons → WEAPON/HELM/CUIRASS/GAUNTLETS/GREAVES (healer WEAPON = heal output; explicit
+  id map + tag fallback — note: the `slot` boon key was TAKEN by verb-mods, armor uses its own
+  table); `game/ui/armor_doll.gd` YOUR SET paper doll (count badges + best-rarity rings + hover
+  piece lists + 2 curio TRINKET sockets) on the descent map, beside the REFORGE draft (shared
+  DraftScreen gains a "⚒ SLOT" forge chip per card + REFORGED toast), build panel grouped by
+  slot, drop ceremony framed "a TRINKET for your set". Draft economy UNTOUCHED (Hades stacking,
+  no caps). **Gate PASS:** gear_probe 57 checks ALL OK · frozen-snapshot A/B — all 5 gearless
+  sims byte-identical (100 seeds; only the CSV-path echo differs) · all 7 UI smokes green ·
+  `sim/screenshot_armory.gd` GUI tour (map doll / forge chips / trinket drop) eyeballed clean ·
+  post-merge-with-main (tune.sh) probe+smoke+raid_sim re-run green. **Docs:** PROGRESSION-PLAN
+  (drops-are-EVENTS + signature philosophy + THE ARMOR SET section), GEAR-CATALOG (weights table
+  + strong rows). **Deferred (Bill's B-halves, revisit after feel-testing):** capped slots w/
+  replacement (kills Hades stacking), Need/Greed shared rolls vs the AI raid at Seal kills (needs
+  AI seats wearing gear + raid_sim gate). *(armory session)*
 
 - ☑ 2026-07-03 · `ledger-desc` · §GRAPHICS/GEAR — **Show item EFFECT on the Ledger page — MERGED (`e9e76ef`).** The
   Ledger (`raid_hud._offer_oath_then`) shows each row's item name + rarity + unlock condition but NOT
