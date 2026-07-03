@@ -34,6 +34,7 @@ var _perfect_next := 0.0
 var _melee_gap := 0.0
 var _over_done := false
 var _seat_keys: Array = []
+var _cast: Array = []             # explicit actor specs (gate exams); [] = raid roster
 var _enc_id := "riftmaw"          # to restore the boss body after an add wave
 
 func _init() -> void:
@@ -41,21 +42,37 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 ## Build actors from the fight state (RaidNet seat order: tank blade caster healer).
-func setup(s: CombatState, aspects: Dictionary) -> void:
+## `cast` (optional, seat-ordered) overrides the roster for non-raid parties —
+## personal GATE exams pass their own specs ({id, key, aspect?, at?}); the boss can
+## be recast too (`boss_id`/`boss_var`). Defaults keep every raid pull unchanged.
+func setup(s: CombatState, aspects: Dictionary, cast: Array = [],
+		boss_id: String = "", boss_var: String = "") -> void:
 	_world = Node2D.new()
 	add_child(_world)
-	boss_actor = Actor2D.make("riftmaw")
+	boss_actor = Actor2D.make(boss_id if boss_id != "" else "riftmaw")
 	boss_actor.scale = Vector2(-1, 1)
 	_world.add_child(boss_actor)
 	_enc_id = String(s.encounter.id)
-	boss_actor.variant(_enc_id)
-	_seat_keys = RaidNet.SEAT_KEYS.duplicate()
+	boss_actor.variant(boss_var if boss_var != "" else _enc_id)
+	_cast = cast
+	_seat_keys = []
 	actors = []
 	for i in s.seats.size():
-		var key: String = _seat_keys[i] if i < _seat_keys.size() else "tank"
-		var id: String = {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller",
-			"healer": "mender"}.get(key, "bulwark")
-		var a := Actor2D.make(id, String(aspects.get(key, "")))
+		var key: String
+		var id: String
+		var aspect: String
+		if i < cast.size():
+			var spec: Dictionary = cast[i]
+			key = String(spec.get("key", "tank"))
+			id = String(spec.get("id", "bulwark"))
+			aspect = String(spec.get("aspect", ""))
+		else:
+			key = RaidNet.SEAT_KEYS[i] if i < RaidNet.SEAT_KEYS.size() else "tank"
+			id = {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller",
+				"healer": "mender"}.get(key, "bulwark")
+			aspect = String(aspects.get(key, ""))
+		_seat_keys.append(key)
+		var a := Actor2D.make(id, aspect)
 		_world.add_child(a)
 		actors.append(a)
 	_fxl = Node2D.new()
@@ -70,7 +87,10 @@ func _layout() -> void:
 	for i in actors.size():
 		var slot: Dictionary = SLOTS.get(_seat_keys[i], SLOTS["tank"])
 		var a: Actor2D = actors[i]
-		a.position = size * (slot["at"] as Vector2)
+		var at: Vector2 = slot["at"]
+		if i < _cast.size() and (_cast[i] as Dictionary).has("at"):
+			at = (_cast[i] as Dictionary)["at"]
+		a.position = size * at
 		a.scale = Vector2.ONE * float(slot["scale"])
 		var d := float(slot["dim"])
 		a.modulate = Color(d, d, d)

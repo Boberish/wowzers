@@ -31,6 +31,7 @@ static var KIND_COL := {
 	RunMap.KIND_CACHE: Palette.GOLD,
 	RunMap.KIND_COOLING: Palette.FLOW,
 	RunMap.KIND_SEAL: Palette.CRUSH,
+	RunMap.KIND_GATE: Palette.GOLD_BRIGHT,
 }
 const KIND_TAG := {
 	RunMap.KIND_COMBAT: "FIGHT",
@@ -38,6 +39,7 @@ const KIND_TAG := {
 	RunMap.KIND_CACHE: "CACHE",
 	RunMap.KIND_COOLING: "COOLING",
 	RunMap.KIND_SEAL: "SEAL",
+	RunMap.KIND_GATE: "GATE — one steps through alone",
 }
 
 func _ready() -> void:
@@ -61,7 +63,7 @@ func _build_header() -> void:
 	_label("choose a connected node  ·  %s routes need credentials  ·  Esc = abandon the run"
 		% MapContent.LOCK_LABEL, 12, Palette.TEXT_DIM, Vector2(0, 880), UiKit.body())
 	# legend
-	var lg := "X FIGHT   ·   ? EVENT   ·   + CACHE   ·   ~ COOLING   ·   ! SEAL"
+	var lg := "X FIGHT   ·   ? EVENT   ·   + CACHE   ·   ~ COOLING   ·   1 GATE   ·   ! SEAL"
 	_label(lg, 11, Palette.GOLD_DIM, Vector2(0, 912), UiKit.display(500, 2))
 
 func _label(text: String, fs: int, col: Color, at: Vector2, font: Font) -> void:
@@ -137,7 +139,7 @@ func _draw() -> void:
 			var glow := Palette.GOLD if _hover != id else Palette.GOLD_BRIGHT
 			draw_arc(p, r + 8.0, 0, TAU, 40, Color(glow, 0.9), 2.0)
 		# kind glyph (plain ASCII — the bundled faces don't cover dingbats)
-		var glyph: String = {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!"}[kind]
+		var glyph: String = {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!", "gate": "1"}[kind]
 		draw_string(fnt, p + Vector2(-20, 7), glyph, HORIZONTAL_ALIGNMENT_CENTER, 40, 20,
 			Color(Palette.BG0, 0.95) if sel or is_cur else Color(Palette.BG0, 0.7))
 		# key badge — visible until picked up

@@ -9,7 +9,9 @@
 ##
 ## Node = plain Dictionary (serializable for the net layer later):
 ##   {id, kind, row, lane, name, fight, event, key, next: [ids], locked_next: [ids]}
-## kind: "combat" | "event" | "cache" | "cooling" | "seal"
+## kind: "combat" | "event" | "cache" | "cooling" | "seal" | "gate"
+## ("gate" = a Tier-1 PERSONAL GATE exam, MASTER-PLAN §GAME SHAPE — raid floors
+## request it via `extra_quota`; the solo map never does, so its maps are untouched.)
 class_name RunMap
 extends RefCounted
 
@@ -20,6 +22,7 @@ const KIND_EVENT := "event"
 const KIND_CACHE := "cache"
 const KIND_COOLING := "cooling"
 const KIND_SEAL := "seal"
+const KIND_GATE := "gate"      ## one seat's personal exam (payload resolved at arrival)
 
 ## mid-grid kind quota (LANES * 4 mid slots = 12): the rest fill with combat
 const QUOTA := {KIND_COOLING: 2, KIND_CACHE: 1, KIND_EVENT: 4}
@@ -30,11 +33,15 @@ var entry_id: int = 0
 var seal_id: int = 0
 var backdoor: Array = []       ## [from_id, to_id] — the one locked edge
 
-static func generate(map_seed: int, n_fights: int, event_ids: Array) -> RunMap:
+## `extra_quota` adds node kinds to the mid-grid bag (e.g. {KIND_GATE: 1} on raid
+## floors). The bag is ALWAYS padded to the same size, so an empty extra_quota
+## leaves every rng draw — and therefore every existing map — byte-identical.
+static func generate(map_seed: int, n_fights: int, event_ids: Array,
+		extra_quota: Dictionary = {}) -> RunMap:
 	var m := RunMap.new()
 	m.seed = map_seed
 	var rng := DetRng.new(map_seed)
-	m._build(rng, n_fights, event_ids)
+	m._build(rng, n_fights, event_ids, extra_quota)
 	return m
 
 func node(id: int) -> Dictionary:
@@ -61,7 +68,7 @@ func fingerprint() -> String:
 
 # ============================================================ generation
 
-func _build(rng: DetRng, n_fights: int, event_ids: Array) -> void:
+func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {}) -> void:
 	nodes.clear()
 	# entry (row 0) and the mid grid (rows 1..ROWS-2), then the Seal (row ROWS-1)
 	entry_id = _add(KIND_COMBAT, 0, 1)
@@ -95,6 +102,9 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array) -> void:
 	var bag: Array = []
 	for kind in QUOTA:
 		for i in QUOTA[kind]:
+			bag.append(kind)
+	for kind in extra_quota:           # raid-floor extras (gates); {} = identical bag
+		for i in extra_quota[kind]:
 			bag.append(kind)
 	while bag.size() < grid.size() * LANES:
 		bag.append(KIND_COMBAT)

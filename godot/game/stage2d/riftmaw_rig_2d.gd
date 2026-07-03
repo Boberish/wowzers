@@ -223,6 +223,13 @@ func variant(id: String) -> void:
 			tint = Color(1.04, 0.88, 0.76); eye = Color("ff9d5c"); bulk = 0.68
 		"opus":                          # the heavy subagent
 			tint = Color(1.10, 0.84, 0.84); eye = Color("ff6a5c"); bulk = 0.84
+		# --- personal GATE exams (Tier 1) — stand-in bodies until per-boss puppets ---
+		"gatekeeper":                    # CAPTCHA-9 — cold checkpoint stone
+			tint = Color(0.86, 0.90, 0.98); eye = Color("9fd8ff"); bulk = 0.90
+		"priest":                        # THE PROMPTER — parchment-screen glow
+			tint = Color(1.04, 1.00, 0.82); eye = Color("d6ff7a"); bulk = 0.78
+		"rendmaw":                       # POPUP, the Adhound — garish ad magenta
+			tint = Color(1.10, 0.82, 1.02); eye = Color("ff7ad9"); bulk = 0.80
 		_:
 			pass                         # riftmaw / unknown = the classic look
 	modulate = tint

@@ -70,6 +70,7 @@ var _map_wounds: Array = [0.0, 0.0, 0.0, 0.0]  ## CORRUPTED SECTORS: max-HP cut 
 var _map_mana: float = 1.0         ## the healer's mana ALSO carries — the raid's fuel gauge
 var _map_fights: Array = []        ## Array[EncounterRes], indexed by node "fight"
 var _map_pending := false          ## TOPOLOGY picked on the select — map starts after aspect pick
+var _gate_live := false            ## a Tier-1 PERSONAL GATE exam is the current fight (§GAME SHAPE)
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -125,7 +126,14 @@ func _ready() -> void:
 	_ctrl = _local_ctrl
 	_show_select()
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--autostart=raidmap"):
+		if a.begins_with("--autostart=gate"):
+			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
+			# (no map context: the end screen closes it — a dev/verify entry)
+			var gspec := a.substr("--autostart=".length()).split(":")
+			_seat_key = gspec[1] if gspec.size() > 1 and SEAT_IDX.has(gspec[1]) else "tank"
+			_aspect = gspec[2] if gspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
+			_launch_gate_fight()
+		elif a.begins_with("--autostart=raidmap"):
 			# --autostart=raidmap[:seat[:aspect]]  → straight onto the Topology floor
 			var mspec := a.substr("--autostart=".length()).split(":")
 			_seat_key = mspec[1] if mspec.size() > 1 and SEAT_IDX.has(mspec[1]) else "tank"
@@ -152,6 +160,7 @@ func _show_select(seat: String = "tank") -> void:
 	_screen = "select"
 	_map = null                       # leaving for the select abandons any map run
 	_map_pending = false
+	_gate_live = false
 	_clear()
 	var sel := BossSelect.new()
 	sel.title = "THE RIFT"
@@ -467,6 +476,7 @@ func _on_desync() -> void:
 
 # ============================================================ START / BUILD
 func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void:
+	_gate_live = false
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	var pool: Array = ASPECTS[_seat_key]
 	_aspect = String(pool[0]["id"])
@@ -500,8 +510,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 ## combat kills. A raider dead at a won fight REBOOTS at 35%.
 func _start_map_run() -> void:
 	_map_fights = RaidContent.floor_fights()
+	# raid floors carry ONE personal GATE exam (Tier 1, §GAME SHAPE)
 	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
-		_map_fights.size(), MapContent.event_ids())
+		_map_fights.size(), MapContent.event_ids(), {RunMap.KIND_GATE: 1})
 	_map_node = -1
 	_map_inv = {}
 	_map_fracs = [1.0, 1.0, 1.0, 1.0]
@@ -545,6 +556,12 @@ func _resolve_node(n: Dictionary) -> void:
 	match String(n["kind"]):
 		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 			_launch_map_fight(int(n["fight"]))
+		RunMap.KIND_GATE:
+			# Tier-1 PERSONAL GATE (§GAME SHAPE): YOUR seat steps through alone
+			var ex: Dictionary = GateContent.exam(_seat_key)
+			_map_stop(String(n["name"]), String(ex["body"]),
+				[{"label": "STEP THROUGH ALONE", "fx": {"result": String(ex["challenge"])}}],
+				Palette.GOLD_BRIGHT, _launch_gate_fight)
 		RunMap.KIND_EVENT:
 			var ev := MapContent.event(String(n["event"]))
 			_map_stop(String(ev["title"]), String(ev["body"]), ev["choices"], Palette.VOID, _show_map)
@@ -562,6 +579,7 @@ func _resolve_node(n: Dictionary) -> void:
 ## A map fight: the node's encounter through the SAME shared factory as every raid
 ## pull, then each seat starts at its carried integrity.
 func _launch_map_fight(fi: int) -> void:
+	_gate_live = false
 	_screen = "combat"
 	_clear()
 	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
@@ -583,6 +601,30 @@ func _launch_map_fight(fi: int) -> void:
 	_online = false
 	_ctrl = _local_ctrl
 	_ctrl.begin(s, SEAT_IDX[_seat_key])
+
+## A Tier-1 PERSONAL GATE exam (§GAME SHAPE): YOUR seat's class exam, fought alone —
+## the class's solo fight, recast to its Realm-1 identity. Carry-in applies only to
+## YOUR raid slot (the healer's sandbox allies are phantoms — they carry nothing).
+## Losing does NOT end the run: the checkpoint force-reboots you through, WOUNDED.
+func _launch_gate_fight() -> void:
+	_screen = "combat"
+	_clear()
+	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var s := GateContent.make_state(seed, _seat_key, _aspect)
+	if _map != null:
+		var ri: int = SEAT_IDX[_seat_key]
+		var u: Seat = s.seats[0]
+		u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_map_wounds[ri]))))
+		u.hp = maxf(1.0, roundf(u.hp_max * float(_map_fracs[ri])))
+		if u.role == "healer":
+			u.resource = roundf(u.resource_max * _map_mana)
+	_gate_live = true
+	_loadout = _make_loadout()
+	_build_combat(s)
+	_shake_amt = 0.0
+	_online = false
+	_ctrl = _local_ctrl
+	_ctrl.begin(s, 0)
 
 ## One node stop = one MapEventPanel; apply the chosen fx, then continue.
 func _map_stop(title: String, body: String, choices: Array, accent: Color, done: Callable) -> void:
@@ -683,12 +725,18 @@ func _build_combat(s: CombatState) -> void:
 	# replace any placeholder (see godot/ART-PIPELINE.md).
 	_stage2d = RaidStage2D.new()
 	_ui.add_child(_stage2d)
-	var aspects := {}
-	for i in s.seats.size():
-		var key: String = RaidNet.SEAT_KEYS[i] if i < RaidNet.SEAT_KEYS.size() else "tank"
-		var kit = s.seats[i].kit
-		aspects[key] = String(kit.get("aspect")) if kit != null and kit.get("aspect") != null else ""
-	_stage2d.setup(s, aspects)
+	if _gate_live:
+		# the exam: your puppet (plus any sandboxed phantoms) vs the recast checkpoint
+		var ex: Dictionary = GateContent.exam(_seat_key)
+		_stage2d.setup(s, {}, GateContent.stage_cast(_seat_key, _aspect),
+			String(ex.get("actor", "")), String(ex.get("variant", "")))
+	else:
+		var aspects := {}
+		for i in s.seats.size():
+			var key: String = RaidNet.SEAT_KEYS[i] if i < RaidNet.SEAT_KEYS.size() else "tank"
+			var kit = s.seats[i].kit
+			aspects[key] = String(kit.get("aspect")) if kit != null and kit.get("aspect") != null else ""
+		_stage2d.setup(s, aspects)
 	_stage2d.bind_seats(s.seats)
 
 	_shake_root = Control.new()
@@ -727,6 +775,9 @@ func _build_combat(s: CombatState) -> void:
 	_ui.add_child(col)              # NOT under shake — the healer aims clicks at these
 	var head := Label.new()
 	head.text = "THE RAID   ·   ◆ = its gaze" if _seat_key != "healer" else "THE RAID   ·   hover + click-cast"
+	if _gate_live:
+		head.text = "THE EXAM   ·   the raid watches" if _seat_key != "healer" \
+			else "THE SANDBOX   ·   hover + click-cast"
 	head.add_theme_font_size_override("font_size", 12)
 	head.add_theme_color_override("font_color", Palette.TEXT_DIM)
 	col.add_child(head)
@@ -824,19 +875,22 @@ func _build_band_tank() -> void:
 	_guard.tooltip_text = "Your defensive verb — own cooldown, off-GCD."
 	_guard.pressed.connect(func(): _ctrl.human({"type": "defense"}))
 	row.add_child(_guard)
-	_challenge = AbilityRune.new()
-	_challenge.label = "Challenge"
-	_challenge.key_label = "T"
-	_challenge.icon_id = "shockwave"
-	_challenge.accent = Palette.CRIMSON
-	_challenge.tooltip_text = "Taunt — force the boss onto you and seize top threat. 8s cd, off-GCD."
-	_challenge.pressed.connect(func(): _ctrl.human({"type": "ability", "id": "challenge"}))
-	row.add_child(_challenge)
+	_challenge = null
+	if not _gate_live:                 # Challenge is a raid verb — no one to taunt off at a gate
+		_challenge = AbilityRune.new()
+		_challenge.label = "Challenge"
+		_challenge.key_label = "T"
+		_challenge.icon_id = "shockwave"
+		_challenge.accent = Palette.CRIMSON
+		_challenge.tooltip_text = "Taunt — force the boss onto you and seize top threat. 8s cd, off-GCD."
+		_challenge.pressed.connect(func(): _ctrl.human({"type": "ability", "id": "challenge"}))
+		row.add_child(_challenge)
 	var sep := Control.new()
 	sep.custom_minimum_size = Vector2(14, 0)
 	row.add_child(sep)
 	_add_runes(row, _loadout)
-	_hint_line("SPACE — %s    ·    F — DODGE beats    ·    T — CHALLENGE (taunt)" % _verb())
+	_hint_line("SPACE — %s    ·    F — DODGE beats%s" % [_verb(),
+		"" if _gate_live else "    ·    T — CHALLENGE (taunt)"])
 
 func _build_band_blade() -> void:
 	_rhythm = RhythmBar.new()
@@ -975,7 +1029,7 @@ func _martial_key(code: int) -> void:
 		KEY_F:
 			_ctrl.human({"type": "dodge"})
 		KEY_T:
-			if _seat_key == "tank":
+			if _seat_key == "tank" and not _gate_live:
 				_ctrl.human({"type": "ability", "id": "challenge"})
 		KEY_1: _use_ability(0)
 		KEY_2: _use_ability(1)
@@ -1186,7 +1240,10 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 			fr.is_target = seat == victim and seat.alive()
 	if _seat_key == "healer":
 		_healer_predictions(s)
-	# aggro banner
+	# aggro banner (a gate exam has no threat game — you're alone with it)
+	if _gate_live:
+		_aggro_warn.visible = false
+		return
 	var aggro_me := bool(obs.get("aggro_me", false))
 	match _seat_key:
 		"tank":
@@ -1296,9 +1353,10 @@ func _render_band_tank(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.2)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
-	var ch := int(p.cooldowns.get("challenge", 0))
-	_challenge.usable = s.tick >= ch
-	_challenge.cd_frac = clampf(float(ch - s.tick) / float(CombatCore.to_ticks(8.0, s.config.fixed_hz)), 0.0, 1.0)
+	if _challenge != null:             # absent at a GATE exam (raid verb)
+		var ch := int(p.cooldowns.get("challenge", 0))
+		_challenge.usable = s.tick >= ch
+		_challenge.cd_frac = clampf(float(ch - s.tick) / float(CombatCore.to_ticks(8.0, s.config.fixed_hz)), 0.0, 1.0)
 
 func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_hp_orb.set_values(p.hp, p.hp_max)
@@ -1630,6 +1688,28 @@ func _float_num(text: String, pos: Vector2, color: Color, dy: float) -> void:
 # ============================================================ END
 func _on_end(won: bool) -> void:
 	if _screen != "combat":
+		return
+	if _gate_live and not _online:
+		# Tier-1 GATE exam resolves: only YOUR raid slot carries in or out —
+		# and a lost gate does NOT end the run (force-rebooted through, WOUNDED).
+		_gate_live = false
+		if _map == null:               # --autostart=gate dev entry: plain end screen
+			_show_end(won)
+			return
+		var ri: int = SEAT_IDX[_seat_key]
+		var u: Seat = _ctrl.state.seats[0]
+		if won:
+			_map_fracs[ri] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
+		else:
+			_map_fracs[ri] = 0.35
+			_map_wounds[ri] = minf(0.4, float(_map_wounds[ri]) + 0.2)
+		if u.role == "healer":
+			_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		var ex: Dictionary = GateContent.exam(_seat_key)
+		_map_stop(String(_ctrl.state.encounter.name),
+			String(ex["win"] if won else ex["lose"]),
+			[{"label": "REJOIN THE RAID", "fx": {"result": String(GateContent.CAPPER[won])}}],
+			Palette.WIN if won else Palette.CRIMSON, _show_map)
 		return
 	if _map != null and not _online:
 		# Topology floor: persist per-seat integrity + the healer's remaining mana.
