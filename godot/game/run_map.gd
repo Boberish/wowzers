@@ -33,17 +33,20 @@ var entry_id: int = 0
 var seal_id: int = 0
 var backdoor: Array = []       ## [from_id, to_id] — the one locked edge
 var seal_shard_req: int = 0    ## MAP-3c: credential shards needed to unlock the Seal (0 = ungated)
+var tickets: Array = []        ## MAP-2: ticket ids placed on this map (pickup→turn-in quests)
 
 ## `extra_quota` adds node kinds to the mid-grid bag (e.g. {KIND_GATE: 1} on raid
 ## floors). The bag is ALWAYS padded to the same size, so an empty extra_quota
 ## leaves every rng draw — and therefore every existing map — byte-identical.
 ## `shard_req` > 0 gates the Seal behind credential shards (MAP-3c ROOT floor).
+## `n_tickets` > 0 seeds pickup→turn-in TICKET quests (MAP-2). All three default to
+## off, so the solo map and every classic call stay byte-identical.
 static func generate(map_seed: int, n_fights: int, event_ids: Array,
-		extra_quota: Dictionary = {}, shard_req: int = 0) -> RunMap:
+		extra_quota: Dictionary = {}, shard_req: int = 0, n_tickets: int = 0) -> RunMap:
 	var m := RunMap.new()
 	m.seed = map_seed
 	var rng := DetRng.new(map_seed)
-	m._build(rng, n_fights, event_ids, extra_quota, shard_req)
+	m._build(rng, n_fights, event_ids, extra_quota, shard_req, n_tickets)
 	return m
 
 func node(id: int) -> Dictionary:
@@ -68,15 +71,16 @@ func reachable(from_id: int, inventory: Dictionary) -> Array:
 func fingerprint() -> String:
 	var parts: Array = ["seed=%d;sreq=%d" % [seed, seal_shard_req]]
 	for n in nodes:
-		parts.append("%d:%s:r%d:l%d:f%d:e%s:k%s:s%s:n%s:x%s" % [n["id"], n["kind"], n["row"],
+		parts.append("%d:%s:r%d:l%d:f%d:e%s:k%s:s%s:to%s:tc%s:n%s:x%s" % [n["id"], n["kind"], n["row"],
 			n["lane"], n["fight"], n["event"], str(n["key"]), str(n.get("shard", false)),
+			String(n.get("ticket_open", "")), String(n.get("ticket_close", "")),
 			str(n["next"]), str(n["locked_next"])])
 	return "|".join(parts)
 
 # ============================================================ generation
 
 func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {},
-		shard_req: int = 0) -> void:
+		shard_req: int = 0, n_tickets: int = 0) -> void:
 	nodes.clear()
 	# entry (row 0) and the mid grid (rows 1..ROWS-2), then the Seal (row ROWS-1)
 	entry_id = _add(KIND_COMBAT, 0, 1)
@@ -167,6 +171,27 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 				nodes[grid[shard_rows[k]][l]]["shard"] = true
 		seal_shard_req = want
 
+	# ---- TICKETS (quests, MAP-2): each = a pickup on an early node → a turn-in on a
+	# LATER same-lane node. The always-present same-lane edge guarantees a closeable
+	# route; detour to another lane and you forfeit the reward (the routing decision).
+	# Tickets gate NOTHING mandatory, so completability is untouched. One ticket per
+	# lane (≤ LANES). n_tickets == 0 skips every draw → byte-identical map.
+	tickets = []
+	if n_tickets > 0:
+		var tpool := MapContent.ticket_ids()
+		_shuffle(tpool, rng)
+		var want_t: int = mini(n_tickets, mini(tpool.size(), LANES))
+		for t in want_t:
+			var la: int = t % LANES
+			var ra: int = int(rng.next_u32() % 2)          # pickup on grid row 0 or 1 (early)
+			var rb: int = grid.size() - 1                  # turn-in on the last mid row, same lane
+			if rb <= ra:
+				continue
+			var tid: String = String(tpool[t])
+			nodes[grid[ra][la]]["ticket_open"] = tid
+			nodes[grid[rb][la]]["ticket_close"] = tid
+			tickets.append(tid)
+
 	# ---- names come from the realm skin (MapContent)
 	for n in nodes:
 		n["name"] = MapContent.name_for(n, rng)
@@ -174,7 +199,8 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 func _add(kind: String, row: int, lane: int) -> int:
 	var id := nodes.size()
 	nodes.append({"id": id, "kind": kind, "row": row, "lane": lane, "name": "",
-		"fight": -1, "event": "", "key": false, "shard": false, "next": [], "locked_next": []})
+		"fight": -1, "event": "", "key": false, "shard": false,
+		"ticket_open": "", "ticket_close": "", "next": [], "locked_next": []})
 	return id
 
 func _link(a: int, b: int) -> void:

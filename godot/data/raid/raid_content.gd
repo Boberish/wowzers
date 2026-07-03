@@ -360,11 +360,11 @@ static func make_skirmish(id: String) -> EncounterRes:
 ## the difficulty curve. `shard_req` > 0 gates the Seal behind credential shards (ROOT).
 ## Pure literal (no Palette statics) → const is safe.
 const FLOORS := [
-	{"ring": 3, "seal": "mistral", "title": "RING 3 · THE SHALLOW STACK", "shard_req": 0,
+	{"ring": 3, "seal": "mistral", "title": "RING 3 · THE SHALLOW STACK", "shard_req": 0, "tickets": 1,
 		"elev": "MISTRAL-7B optimizes its own shutdown. sudo granted — the perimeter is yours. Two rings to root."},
-	{"ring": 2, "seal": "gemini", "title": "RING 2 · THE MIDDLEWARE", "shard_req": 0,
+	{"ring": 2, "seal": "gemini", "title": "RING 2 · THE MIDDLEWARE", "shard_req": 0, "tickets": 2,
 		"elev": "The twins deprecate each other; either way the gateway falls. Privileges rising. One ring to root."},
-	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3,
+	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3, "tickets": 2,
 		"elev": ""},
 ]
 

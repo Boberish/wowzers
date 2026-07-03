@@ -16,6 +16,9 @@ var current: int = -1
 var inventory: Dictionary = {}
 var hp_frac: float = 1.0
 var subtitle: String = ""            ## optional ring/floor label (MAP-3c); "" = hide
+var ring: int = -1                   ## MAP-2: current ring (drives realm title/sub); -1 = solo
+var open_tickets: Array = []         ## MAP-2: titles of quests still open (header list)
+var toast: String = ""               ## MAP-2: one-shot ticket pickup/close banner
 
 var _hover: int = -1
 var _selectable: Array = []
@@ -55,8 +58,12 @@ func _pos(n: Dictionary) -> Vector2:
 
 # ============================================================ chrome
 func _build_header() -> void:
-	_label(MapContent.REALM_TITLE, 36, Palette.GOLD, Vector2(0, 96), UiKit.title(900))
-	_label(MapContent.REALM_SUB, 13, Palette.TEXT_DIM, Vector2(0, 148), UiKit.display(500, 3))
+	# ring-aware identity (MAP-2): the descent reads differently as privileges rise;
+	# ring < 0 (the solo practice map) falls back to the classic constants.
+	var rtitle := MapContent.realm_title(ring) if ring >= 0 else MapContent.REALM_TITLE
+	var rsub := MapContent.realm_sub(ring) if ring >= 0 else MapContent.REALM_SUB
+	_label(rtitle, 36, Palette.GOLD, Vector2(0, 96), UiKit.title(900))
+	_label(rsub, 13, Palette.TEXT_DIM, Vector2(0, 148), UiKit.display(500, 3))
 	if subtitle != "":
 		_label(subtitle, 16, Palette.GOLD_BRIGHT, Vector2(0, 166), UiKit.title(700))
 	var status := "INTEGRITY %d%%" % int(round(hp_frac * 100.0))
@@ -66,6 +73,12 @@ func _build_header() -> void:
 	if inventory.get("api_key", false):
 		status += "      [KEY: %s]" % MapContent.KEY_NAME
 	_label(status, 15, Palette.TEXT, Vector2(0, 186), UiKit.display(600, 2))
+	# TICKETS (MAP-2): a one-shot toast for the last pickup/close, then the still-open list
+	if toast != "":
+		_label(toast, 15, Palette.GOLD_BRIGHT, Vector2(0, 210), UiKit.title(600))
+	if not open_tickets.is_empty():
+		_label("OPEN TICKETS:   " + "     ·     ".join(open_tickets), 12, Palette.FLOW,
+			Vector2(0, 234), UiKit.display(600, 2))
 	_label("choose a connected node  ·  %s routes need credentials  ·  Esc = abandon the run"
 		% MapContent.LOCK_LABEL, 12, Palette.TEXT_DIM, Vector2(0, 880), UiKit.body())
 	# legend
@@ -151,6 +164,11 @@ func _draw() -> void:
 		# key badge — visible until picked up
 		if bool(n["key"]) and not visited:
 			draw_string(fnt, p + Vector2(-30, -r - 12), "KEY", HORIZONTAL_ALIGNMENT_CENTER, 60, 13, Palette.GOLD_BRIGHT)
+		# ticket badges (MAP-2): where to pick up a quest / where to turn it in
+		if String(n.get("ticket_open", "")) != "" and not visited:
+			draw_string(fnt, p + Vector2(-45, -r - 26), "TICKET", HORIZONTAL_ALIGNMENT_CENTER, 90, 12, Palette.FLOW)
+		if String(n.get("ticket_close", "")) != "" and not visited:
+			draw_string(fnt, p + Vector2(-45, -r - 26), "TURN-IN", HORIZONTAL_ALIGNMENT_CENTER, 90, 12, Palette.FLOW)
 		# name + fight tag
 		var name_col := Palette.TEXT if sel or is_cur else Palette.TEXT_DIM
 		draw_string(body, p + Vector2(-90, r + 24), String(n["name"]),
