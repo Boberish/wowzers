@@ -462,6 +462,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `healer-frames` · §GRAPHICS — **RAID-FRAME MEGA UPGRADE (Bill: bigger/awesome
+  healer frames; shield bigger + clearly on the RIGHT so incoming/dodge reads stay visible, or
+  movable; HoT countdown timers; real icons; sleek).** RaidFrame v2: XL healer variant, dedicated
+  gold SHIELD CREST (value + ward-expiry sweep) on the frame's right gutter + woven absorb
+  extension on the bar, HoT icon chips (RuneIcons) with countdown arcs + seconds, debuff wax seal
+  w/ countdown, hazard-striped incoming-damage slice, draggable raid panel (persisted). View-only
+  (raid_frame.gd + raid_hud.gd feed). Gate: ui smokes green + WSLg shots. *(healer-frames session)*
+
 - ☑ 2026-07-03 · `armory-ui` · §GRAPHICS GEAR — **ARMOR SET pro GUI — MERGED to main (`7b78912`)
   (Bill: "modal, hover with stats, see current gear while choosing").** (1) **Rich hover cards**
   on every doll socket via `_make_custom_tooltip` — slot header + every piece's effect line
