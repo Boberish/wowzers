@@ -61,6 +61,10 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
 
 ## The gear game (full spec)
 
+> **Content:** the concrete Realm-1 item + oath designs (per-boss Ledger pages, hooks, tags,
+> combos, drop-weight scaling table) live in **`GEAR-CATALOG.md`** (authored 2026-07-03
+> against the class-fun reworks). This section stays the system spec.
+
 ### Ledger pages — the permanent layer
 - Every boss owns a page: a **4–6 row loot table**, all rows visible from the start (locked
   rows greyed), each row = item + **printed rarity** (Haiku/Sonnet/Opus — rarity is a fixed
@@ -173,7 +177,8 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
 - Checkpoint attunements (once Ring 3 is proven, may start at Ring 2 — Spelunky-shortcut
   tension: faster but leaner draft build-up).
 - Slots exactly 2? Set-pair depth (pairs only, or 3-piece realm sets)? Gear noun (avoid
-  "relic" — `relic_card.gd` is the boon card).
+  "relic" — `relic_card.gd` is the boon card; catalog proposes **CURIO** global /
+  **PERIPHERAL** Realm-1 skin — unlocked, Bill to bless).
 - Shard pity for extraction. Serendipity knob. *(Arm limit resolved 2026-07-03: one sworn oath per seat per fight.)*
 - Altar/sacrifice rare map event (trade equipped item now → awakened row forever) — spice.
 - Hub screen for Ledger/character sheet; where standing lives before accounts exist
@@ -187,8 +192,8 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
 1. **GEAR-1 (raid-campaign PoC — retargeted 2026-07-03 per the raid-only lock):** tables for
    the Ring-3 roster (Vorathek, MISTRAL-7B, the skirmish minibosses; ~8–12 items), kill-unlocks
    only, drop ceremony in raid-map mode (reuse `relic_card.gd` visuals), 2 slots per seat,
-   scrap→Tokens, save-file unlock store.
-2. **GEAR-2:** sworn oaths (detectors off `seat.diag`) + the Ledger page UI + oath purses/severity scaling.
+   scrap→Tokens, save-file unlock store. **Item designs: `GEAR-CATALOG.md` §Rollout GEAR-1.**
+2. **GEAR-2:** sworn oaths (detectors off `seat.diag`) + the Ledger page UI + oath purses/severity scaling. **Oath rows + detector notes: `GEAR-CATALOG.md`.**
 3. **GEAR-3:** MARKET gear stock + extraction schematics (map layer).
 4. **GEAR-4:** raid personal loot + Seal tables; crests/standing later (needs accounts).
 
