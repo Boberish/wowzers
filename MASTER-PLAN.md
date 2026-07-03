@@ -37,6 +37,45 @@
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
 | **Persistent progression (loot tables / armed feats / Ledger / standing)** | 🔴 design LOCKED 2026-07-03 (`PROGRESSION-PLAN.md`) — GEAR-1 claimable now (draft2 substrate merged) |
 | **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1 MERGED (solo PoC on Bulwark, Realm-1 skin) — MAP-2/3 open |
+| **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
+
+---
+
+## GAME SHAPE — RAID-ONLY (locked with Bill, 2026-07-03)
+
+**The decision:** there is ONE game — the raid campaign (the Topology Rings, solo-playable via
+AI raiders, co-op online). The parallel solo campaign is **retired as a product surface** — the
+split was an accident of porting the per-class POC teaching rigs, and it was costing double
+features/maps/defaults. The 15 solo bosses are NOT wasted: they were built as one-verb exams,
+and they become the raid's **personal-responsibility content** (Bill's frame: "the boss runs
+away and these solo bosses come — each player has to finish theirs") via three tiers:
+
+- **Tier 1 — PERSONAL GATE nodes (cheap, claimable now):** a Topology node that is a 1v1 duel
+  for ONE designated seat — existing solo encounter nearly verbatim; the Realm-1 casting-pool
+  fiction is pre-written (FIREWALL: "one process may pass"). Others see banner+result in v1
+  (live spectate = later nicety — lockstep makes it data-free, it's HUD work). Integrity/wounds
+  carry, so a sloppy gate bleeds into the Seal fight.
+- **Tier 2 — OWNED ADDS (moderate):** mid-Seal minibosses locked to one seat (`add_owner_i`
+  on the AddRes system, guarded; swings aim only at the owner, `rand_target` idiom). The main
+  boss keeps melee-chip pressure only while the add owns the telegraph (one-telegraph law) —
+  reads as "the boss watches while its subagent works."
+- **Tier 3 — THE SPLIT PHASE (showpiece — Ring 0 / Realm-2 capstone only):** the Seal withdraws
+  and EVERY seat's personal boss manifests simultaneously; everyone finishes theirs or the raid
+  dies. Needs parallel personal telegraph streams (real engine work; Mythos's Agentic Fan-Out
+  is the primitive). Gets its own design doc when claimed — do not buy casually.
+
+**Killed:** solo campaign surface · solo maps ×5 (cancelled unspent) · new solo bosses ·
+solo-only features · the solo draft-run mode (drafts live in the Topology, where they already run).
+**Frozen:** the five solo class HUDs (no further polish; personal gates run through `raid_hud`'s
+existing per-seat class bands). **Kept:** all 15 boss content files (the casting pool, §REALMS
+table) · the six class sims (regression spine — infra, not product) · boss-select as practice/debug.
+**Front door:** class menu shrinks to **THE RIFT** (the game) + one **PROVING GROUNDS** practice
+card reusing the existing boss-select (zero work now; retire later if unused). Practice fights
+are **unlock-inert** (no drops/feats/Proofs — otherwise practice becomes the farm).
+
+**⚖ RAID-FIRST LAW (every session, every feature):** player-facing features land on the raid
+HUD/sim FIRST; practice surfaces inherit only what shared components give for free. There is
+no "solo side" to default to anymore.
 
 ---
 
@@ -206,7 +245,8 @@ nodes, not node kinds.
 
 **Phases:**
 - **MAP-1 (solo PoC, Bulwark) — ✅ DONE, merged 2026-07-02 (`fd62f7b`).** `game/run_map.gd` (seeded 6-row × 3-lane DAG; quota'd kinds; one locked 401 backdoor + key on a feeder lane; locks gate only optional edges) · `game/map_content.gd` (Realm-1 skin: GPU Shrine caches, water-guzzling Cooling Stations, SIX authored events — careers fair / reservoir / allocation queue / alignment office / severance floor / captcha checkpoint) · `game/ui/map_screen.gd` (circuit-board render, 401→200 OK lock stamps, integrity readout) · `game/ui/map_event_panel.gd` · RunState +map/inventory/hp_frac (persistent integrity: fights start at run HP; events bruise, floor 5%) · Bulwark boss-select "THE TOPOLOGY" entry. **Verified:** `sim/map_sim.gd` determinism/structure/walker ALL PASS (300 seeds; avg 5.9 nodes · 3.65 fights · 28 backdoor runs); `sim/ui_smoke_map.gd` full loop PASS; classic `ui_smoke` PASSED + bulwark_sim determinism PASS ×3 (classic untouched). *Pending:* a WSLg GUI glance at the custom `_draw` (headless can't render it) — screenshot probe is a MAP-2 nicety.
-- **MAP-2 (depth):** tickets, secret rooms, ELITE, MARKET (token stub), 10+ events, art pass.
+- **MAP-2 (depth) — RESCOPED 2026-07-03 (§GAME SHAPE):** all map depth lands on the RAID floors (the Bulwark solo map stays as-is, a practice fossil): tickets, secret rooms, ELITE, MARKET (gear stock per `PROGRESSION-PLAN.md`), 10+ events, art pass.
+- **GATE nodes (Tier 1 personal exams, §GAME SHAPE — claimable):** a node kind that runs ONE seat's 1v1 duel (existing solo encounters ~verbatim, Realm-1 identities from the casting table); banner+result for the others in v1; integrity/wounds carry through.
 - **MAP-3a (RAID FLOOR 1 — "RING 3: THE SHALLOW STACK", offline) — ✅ DONE, merged 2026-07-02 (`5d4ff47`).**
   The Seals meet the Topology: **VORATHEK** guards the perimeter login (entry fight) →
   generated lanes of SKIRMISHES (`RaidContent.make_skirmish` promotes the Seal AddRes packs —
@@ -230,6 +270,7 @@ nodes, not node kinds.
 ## CLASSES
 
 **Now:** 5 classes done & verified (2 tanks-of-verbs pattern: mitigate/keep-alive/rhythm/interrupt/anticipate). Aspect pairs everywhere. Raid seats for all 4 roles.
+**Game-shape note (2026-07-03):** the per-class solo gauntlets are PRACTICE surfaces now (§GAME SHAPE) — class work targets the raid seats first; kit changes still gate on the class sims as always.
 **Next up (any agent can claim):**
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
@@ -242,7 +283,8 @@ nodes, not node kinds.
 
 ## BOSSES & ENCOUNTERS
 
-**Now:** 15 solo bosses + Vorathek raid, all with M7.2 strings, tuned skill bands.
+**Now:** 15 solo bosses + Vorathek raid + Seals II–IV, all with M7.2 strings, tuned skill bands.
+**Game-shape note (2026-07-03):** the 15 solo bosses are the **personal-content casting pool** — promote on demand as Tier-1 GATE duels / Tier-2 owned adds / Tier-3 split-phase exams (§GAME SHAPE + the §REALMS identity table). No new solo-only bosses.
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
 - **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — design against `RAID-PLAN.md` R3.
@@ -257,7 +299,7 @@ nodes, not node kinds.
 - **B. Slot-verbs — ✅ DONE, ALL FIVE VERBS (Bulwark PoC merged `7860efa`, port to the other four merged 2026-07-02 branch `slot-verbs-port`).** The port (same cross-product/no-lockouts pattern, ~8 pieces/class, kit-side proc engines, all `_b()`-gated): **Twinfang build-your-RHYTHM** (innate proc = PERFECT Strike; Ghost Step/Killing Tempo/Beat Dancer · Razor Echo/Quickblood/Red Harvest · Wide Tempo + opus **Twin Step** 2nd dodge charge) · **Voidcaller build-your-KICK** (innate = landed interrupt; Resonant Break/Starve the Choir/Void Step · Null Lash/Mind Siphon/Umbral Mending · Perfect Pitch + opus **Twin Void** 2nd kick charge) · **Mender build-your-TRIAGE** (innate = clutch heal on a sub-50% ally; Cleansing Rite/Aegis Echo/Graceful Step · Lightward/Deep Well/Lingering Grace · Swift Litany + opus **Benediction** every-5th-proc party bathe) · **Bloomweaver build-your-GARDEN** (innate = cashed Bloom; Barkward Echo/Seedsower/Rootstep · Bramble Burst/Sapwell/Petalfall · Quickening + opus **Deep Garden** payloads ×2 at 3+ Growths). `verb_summary()` renders the assembled verb in each class's verb tooltip (+ Grimoire tomes); Twin Step/Void pips ride the dodge/kick rune-sockets. **Port probes (`_prove_verb_mods`, 120 paired seeds @sloppy): rhythm 54.2→92.5 · kick 80.8→100 · triage 71.7→90.8 · garden 78.3→84.2, all deterministic.** Port gates: 6 sims byte-identical boonless · draft_sim ALL OK · 5 smokes · WSLg (tooltip + pips). ⚠ Port lesson (memory'd): `RunState` couples every class's content into every sim's compile graph — never edit ANY kit while ANY sim runs. The Bulwark PoC details: Build-your-Guard as **cross-product pieces, NO LOCKOUTS** (Bill-locked): **TRIGGER** cards add proc moments (`trigRead` feint READ · `trigThird` every 3rd guard · `trigBeat` PERFECT beat · `trigRiposte` landed Riposte, Warden pool; each carries a +4-rage built-in), **PAYLOAD** cards fire on EVERY proc moment — innate proc = any clean negate — (`payReflect` 35 · `payHeal` 30 · `payRage` 8 · `payExpose` 1.2s/+15% · `payCounter` Warden · `payMomentum` Jugg), **PROPERTY** cards reshape the verb (`propSwift` cd ×0.8 · `propWide` window ×1.3 · **opus `propCharge` "Twin Guard"** 2nd charge via post-press `defense_ready_tick` rewrite + `upkeep` recharge — riposteChain precedent). Kit-side proc engine (`BulwarkKit._guard_proc`/`_trigger_fire`), all `_b()`-gated; knobs = `BulwarkConfig.mod_*`; catalog entries carry `slot:`, guard-adjacent classics labeled `slot:"property"`. **LOCK · 1⏣ = hold-through-reroll** (Bill-locked): `Draft.lock` + `Draft.reroll_kept(run, offers, locked)` redraws only unlocked slots (locked ids excluded from redraw; empty locks ≡ classic reroll stream). UI within existing surfaces: slot captions on RelicCard ("OPUS · GUARD PROPERTY"), ◆ HELD banner + LOCK/RELEASE buttons on DraftScreen, YOUR GUARD assembled rules in the guard tooltip + the Grimoire tome's guard entry, Twin Guard charge pips on the rune-socket. **Proof (`_prove_guard_mods`, Duelist@loose, 120 paired seeds): boonless 74.2% → modded 92.5% win-rate, TTK 57.9s → 38.5s, 7.7 procs/run, modded determinism PASS** — two runs of the same class now build tangibly different verbs. Gates: 6 sims byte-identical boonless vs frozen baselines · draft_sim ALL OK (incl. 5-class LOCK matrix) · 5 smokes · WSLg shots. **Scoping rule for the port (still locked):** pools stay per-class; mods express through UI the class already has; cross-aspect bleed = rare spice only.
 - **C. Token economy — ✅ DONE (merged with A)**: kits bump class-signature skill signals into `seat.diag`/`state.diag` (`negate` / `perfect_strike` / `clean_kick` / `dispel` / `perfect_ward` — diag is never checksummed, so byte-identical sims held); `Draft.mint(state, class)` at fight end = footwork (PERFECT+READ per `mint_per_grades` 3) + signature (per `mint_per_signature` 4) + flawless bonus (no miss/bait/whiff), cap 3/fight (knobs on TuningConfig). Spends: REROLL 1⏣ / UPSELL 2⏣ ("lock a slot" waits for B). Refused spends consume no rng (test-proven).
 - **D. Feeds the Trial Ladder** (below).
-- **E. Persistent progression — design LOCKED 2026-07-03, decisions of record in `PROGRESSION-PLAN.md`.** The meta-game: in-run boss loot (2 slots, rarity-first pity rolls reusing Draft 2.0 machinery, scrap→Tokens, MARKET buys) + permanent unlocks by *event* only — first-kill signature rows, **armed feats** (select the quest on the boss's Ledger page → do the deed → the row joins your drop pool forever), Trial-version rows, carried-out map schematics. Four persistent tracks (World/Pools/Rank/Breadth), **Monotonic Pool Law** (an unlock may never make a run worse — rarity-first rolls + synergy weighting + auto-scrap token floor), lane rule (boons = verb/agency · gear = fortune/new-buttons). **CUT (superseded):** RAID-PLAN's material economy (essences/Embers/Sigils/Riftcores/crafting), use-based mastery, pre-run loadouts, daily/weekly content. Phases GEAR-1…4 in the doc; GEAR-1 (Bulwark PoC) is claimable now.
+- **E. Persistent progression — design LOCKED 2026-07-03, decisions of record in `PROGRESSION-PLAN.md`.** The meta-game: in-run boss loot (2 slots, rarity-first pity rolls reusing Draft 2.0 machinery, scrap→Tokens, MARKET buys) + permanent unlocks by *event* only — first-kill signature rows, **armed feats** (select the quest on the boss's Ledger page → do the deed → the row joins your drop pool forever), Trial-version rows, carried-out map schematics. Four persistent tracks (World/Pools/Rank/Breadth), **Monotonic Pool Law** (an unlock may never make a run worse — rarity-first rolls + synergy weighting + auto-scrap token floor), lane rule (boons = verb/agency · gear = fortune/new-buttons). **CUT (superseded):** RAID-PLAN's material economy (essences/Embers/Sigils/Riftcores/crafting), use-based mastery, pre-run loadouts, daily/weekly content. Phases GEAR-1…4 in the doc; GEAR-1 (raid-campaign PoC, Ring-3 roster — retargeted per §GAME SHAPE) is claimable now.
 **Acceptance (met + how to re-run):** `sim/draft_sim.gd` (determinism transcripts incl. spends, synergy guarantee, pity bound, spend legality, mint table + seeded-fight integration) ALL OK · all 5 class sims + raid sim **byte-identical stdout+CSV** vs pre-change baselines (diag-only kit touches; 300 seeds) · 5 UI smokes green · WSLg visual probe `sim/screenshot_draft.gd` (5 draft screens + end screen, pity-forced opus) rendered clean.
 
 ## MODES & ENDGAME
@@ -326,6 +368,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-03 · main · §GAME SHAPE — **RAID-ONLY locked with Bill (docs only)**: one game (raid campaign + PROVING GROUNDS practice card, unlock-inert); solo campaign/maps/HUD-polish retired-frozen; 15 solo bosses → personal-content pipeline (Tier-1 GATE nodes claimable / Tier-2 owned adds / Tier-3 split phase); **raid-first law**. PROGRESSION-PLAN Breadth/GEAR-1 retargeted; RAID-PLAN product shape amended. *(progression design session)*
 - ☑ 2026-07-03 · main · §SYSTEMS — **`PROGRESSION-PLAN.md` written (docs only, design locked with Bill)**: persistent meta-game = boss loot tables + armed feats + extraction schematics + World/Pools/Rank/Breadth tracks + standing; Monotonic Pool Law; material economy CUT (supersede notes added to RAID-PLAN). No code touched. GEAR-1 (Bulwark PoC) is claimable. *(progression design session)*
 - ☐ 2026-07-03 · `dps-meter` · §SYSTEMS/§GRAPHICS — **DPS/HPS meter (Recount-style), Bill's direct ask.** Engine-side per-seat per-source combat accounting (`state.meter` — diag-style, never checksummed; `damage_boss`/`heal_unit` gain optional `src`, kits label their call sites, Twinfang's direct-deal path calls the same `CombatCore.meter_*` API) + `game/ui/meter_panel.gd` live window (per-seat DPS/HPS bars, per-spell breakdown w/ count·avg·max·crits, M toggle, all 6 HUDs) + expanded breakdown on end screens beside THE RECKONING. Gate: all 6 solo sims + raid byte-identical (A/B frozen snapshots), new `sim/meter_probe.gd` reconciliation, smokes green, WSLg screenshots. *(meter session)*
 - ☑ 2026-07-02 · `raid-dmg-juice` · §GRAPHICS — MERGED to main (`eb79f5a`), synced to the Windows play copy. Damage-number juice now lives in the RAID HUD (where the user actually plays). Shared `game/ui/damage_numbers.gd` (`DamageNumbers.spawn` — one source of truth for the STYLE table + rendering; solo Twinfang refactored onto it, ~85 inline lines deleted). Twinfang kit stamps `seat` on its boss_hit + poison events (damage_boss already had it) so the raid attributes hits; `raid_hud` → YOUR hits full treatment (source colour, big, longer, punch, crit outline+spark-ring+shake), an ALLY's hit small/dim ambient (own-vs-ally via `ev.seat == _ctrl.player()`; generic own-hits tint by seat class accent). Gates: twinfang_sim + raid_sim **byte-identical** vs main (Riftmaw seed-1 cs 1472825847869132157 unchanged), both UI smokes, raid dmg-path probe, WSLg raid screenshot. **Note:** only Twinfang tags a damage `kind`, so in the raid the blade seat gets the rich source palette; other seats (tank/caster/healer) get bigger accent-tinted numbers + crit-capable but no per-ability colour until their kits tag sources too — an easy follow-up. *(this session)*
