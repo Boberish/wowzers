@@ -52,8 +52,11 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
    and event pools. Hour-40 runs are *richer* than hour-5 runs, not easier.
 3. **RANK (the endgame).** Trial Ladder versions per boss + Depth on raids. Your best
    version/Depth record IS your gear score — earnable only with reads, verifiable by seed.
-4. **BREADTH (the roster).** Five classes × two aspects. Beating a class's solo gauntlet =
-   its **Proof → its raid seat** (RAID-PLAN's "trials are the exam" made ceremonial).
+4. **BREADTH (the roster).** Five classes × two aspects. **Proof = clearing your class's
+   personal exams in the campaign** (Tier-1 GATE duels / designated exam encounters — amended
+   2026-07-03 per MASTER-PLAN §GAME SHAPE; was "solo gauntlet" pre-raid-only lock). The Proof
+   is **standing, never an entry gate** — a friend joining a lobby is never sent away to solo
+   first (AI-assist makes any seat playable; the crest shows who's proven).
    A fresh class re-runs the first-kill unlock shower.
 
 ## The gear game (full spec)
@@ -71,6 +74,11 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
   playtest knob only.) Feat detectors read `seat.diag`/events — deterministic, per-seat.
   Deep rows may be arm-only *with a cost* later ("win with Guard sealed") = challenge-run
   content without a separate mode.
+- **Where tables live (raid-only amendment, 2026-07-03):** a boss's table attaches to it
+  **wherever it appears** — Seal fight, personal GATE node, owned add, split phase; a gate
+  clear is a kill, and the gate is the natural feat-arming stage (you're alone; it's your
+  exam). **PROVING GROUNDS practice fights are unlock-inert** (no drops/feats/Proofs) —
+  otherwise practice becomes the farm and the campaign hollows.
 
 ### Drops — the in-run layer
 - On boss kill, **two-step roll**: (1) rarity first — base weights (e.g. 70/25/5) bent by
@@ -109,9 +117,11 @@ map/economy utility (shop prices, 401 doors, cache reveals). Never raw verb %.
 
 ## Pacing / early game
 
-First kills across 15 solo bosses + 4 Seals = the StS front-loaded wave — every early run
-ends in guaranteed unlocks, **no separate milestone system needed**. Feats and versions carry
-the long tail. Nothing is timed, ever; the core loop must stand alone (Bill, locked).
+First kills across the campaign roster = the StS front-loaded wave — 4 Seals + skirmish
+minibosses + the 15 exam bosses arriving as GATE nodes / owned adds (MASTER-PLAN §GAME SHAPE)
+— every early run ends in guaranteed unlocks, **no separate milestone system needed**. Feats
+and versions carry the long tail. Nothing is timed, ever; the core loop must stand alone
+(Bill, locked).
 
 ## Cut list (decided — do not resurrect casually)
 
@@ -143,8 +153,10 @@ the long tail. Nothing is timed, ever; the core loop must stand alone (Bill, loc
 0. **The substrate is already merged** (Draft 2.0 + slot-verbs + Tokens, 2026-07-02 — rarity/
    pity/synergy tags/Token mint+spends live in `game/draft.gd`) — gear REUSES that machinery,
    never forks it. GEAR-1 is claimable immediately.
-1. **GEAR-1 (Bulwark PoC):** tables for its 5 bosses (~8–12 items), kill-unlocks only, drop
-   ceremony (reuse `relic_card.gd` visuals), 2 slots, scrap→Tokens, save-file unlock store.
+1. **GEAR-1 (raid-campaign PoC — retargeted 2026-07-03 per the raid-only lock):** tables for
+   the Ring-3 roster (Vorathek, MISTRAL-7B, the skirmish minibosses; ~8–12 items), kill-unlocks
+   only, drop ceremony in raid-map mode (reuse `relic_card.gd` visuals), 2 slots per seat,
+   scrap→Tokens, save-file unlock store.
 2. **GEAR-2:** armed feats (detectors off `seat.diag`) + the Ledger page UI.
 3. **GEAR-3:** MARKET gear stock + extraction schematics (map layer).
 4. **GEAR-4:** raid personal loot + Seal tables; crests/standing later (needs accounts).

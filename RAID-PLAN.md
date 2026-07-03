@@ -6,7 +6,10 @@ built is not a detour: it is the **Trials** (each class's boss gauntlet = the ex
 your raid seat), and the pure-reducer architecture rule existed precisely so that one shared
 `CombatCore.update()` could run on an authoritative server with four humans connected.
 
-**Product shape (locked):**
+**Product shape (locked)** *(AMENDED 2026-07-03 — RAID-ONLY lock, see MASTER-PLAN §GAME SHAPE:
+the parallel solo campaign is retired as a product surface; "Solo Trials" survives only as an
+unlock-inert PROVING GROUNDS practice card, and the 15 exam bosses redeploy INSIDE the raid as
+personal GATE nodes / owned adds / split phases)*:
 - **Solo Trials** — the current game, unchanged. Per-class gauntlets, map/meta layer, earns
   base resources (essences, reagents, Embers, Sigils). *(Economy vocabulary SUPERSEDED
   2026-07-03 — no material economy; see `PROGRESSION-PLAN.md`: trials unlock loot-table
