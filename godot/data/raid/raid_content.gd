@@ -354,12 +354,34 @@ static func make_skirmish(id: String) -> EncounterRes:
 				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 70.0)
 	return make_riftmaw()
 
-## The Topology raid floor (MAP-3): RunMap fight indices — 0 = the entry gate
-## (Vorathek, the tutorial Seal), 1..3 = skirmishes ramped by map depth, last =
-## the floor boss (MISTRAL-7B). Later floors swap the ends per MASTER-PLAN §MAPS.
-static func floor_fights() -> Array:
-	return [make_riftmaw(), make_skirmish("bard"), make_skirmish("sonnet"),
-		make_skirmish("opus"), make_mistral()]
+## Realm 1's RING descent (MAP-3c): the campaign is a stack of floors, each = one
+## RunMap. Clearing a floor's Seal ELEVATES you to the next ring, carrying wounds.
+## The Seal escalates per ring (MISTRAL easy → GEMINI mid → MYTHOS finale) — that IS
+## the difficulty curve. `shard_req` > 0 gates the Seal behind credential shards (ROOT).
+## Pure literal (no Palette statics) → const is safe.
+const FLOORS := [
+	{"ring": 3, "seal": "mistral", "title": "RING 3 · THE SHALLOW STACK", "shard_req": 0,
+		"elev": "MISTRAL-7B optimizes its own shutdown. sudo granted — the perimeter is yours. Two rings to root."},
+	{"ring": 2, "seal": "gemini", "title": "RING 2 · THE MIDDLEWARE", "shard_req": 0,
+		"elev": "The twins deprecate each other; either way the gateway falls. Privileges rising. One ring to root."},
+	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3,
+		"elev": ""},
+]
+
+## Per-ring floor fight list (MAP-3c): RunMap fight indices — 0 = the entry gate,
+## last = the floor Seal, mids = skirmishes ramped by map depth. ring 3 (default)
+## is BYTE-IDENTICAL to the old single-floor call (the Ring-3 Shallow Stack).
+static func floor_fights(ring: int = 3) -> Array:
+	match ring:
+		2:  # THE MIDDLEWARE — GEMINI ULTRA behind a skirmish gauntlet
+			return [make_skirmish("sonnet"), make_skirmish("bard"),
+				make_skirmish("opus"), make_gemini()]
+		0, 1:  # ROOT — CLAUDE MYTHOS (credential-shard gated)
+			return [make_skirmish("opus"), make_skirmish("sonnet"),
+				make_skirmish("bard"), make_mythos()]
+		_:  # RING 3 — THE SHALLOW STACK — MISTRAL-7B (Vorathek gate, unchanged)
+			return [make_riftmaw(), make_skirmish("bard"), make_skirmish("sonnet"),
+				make_skirmish("opus"), make_mistral()]
 
 static func encounter_by_id(id: String) -> EncounterRes:
 	match id:

@@ -21,6 +21,7 @@ const SKILLS := [
 ]
 
 var _fights: Array = []
+var _shard_req: int = 0       ## credential-shard gate for the current floor (MAP-3c ROOT)
 var _gate_seat := "tank"
 
 func _initialize() -> void:
@@ -28,45 +29,51 @@ func _initialize() -> void:
 	_gate_seat = _arg("gateseat", "tank")
 	if not RaidNet.SEAT_KEYS.has(_gate_seat):
 		_gate_seat = "tank"
-	_fights = RaidContent.floor_fights()
-	print("=== Project Rift — raid map sim (Ring 3: The Shallow Stack) ===")
-	print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
+	print("=== Project Rift — raid map sim (Realm 1: the RING descent, MAP-3c) ===")
 	print("gate exam seat: %s (%s)" % [_gate_seat, String(GateContent.exam(_gate_seat)["boss"])])
-	print("")
-	_prove_determinism()
-	print("")
-	print("skill    clear%%   avg fights  avg integrity(end)  gates(won/fought)  losses at")
-	print("---------------------------------------------------------------------------------")
-	for sk in SKILLS:
-		var cleared := 0
-		var fight_sum := 0
-		var integ_sum := 0.0
-		var losses := {}
-		var gates := 0
-		var gate_wins := 0
-		for seed in range(1, seeds + 1):
-			var r := _walk(seed, sk)
-			if r["cleared"]:
-				cleared += 1
-				integ_sum += float(r["integrity"])
-			else:
-				var k := String(r["loss_at"])
-				losses[k] = int(losses.get(k, 0)) + 1
-			fight_sum += int(r["fights"])
-			gates += int(r["gates"])
-			gate_wins += int(r["gate_wins"])
-		var n := float(seeds)
-		print("%-7s  %5.1f%%      %5.2f            %5.2f            %d/%d          %s" % [
-			sk["label"], 100.0 * cleared / n, fight_sum / n,
-			(integ_sum / maxf(1.0, float(cleared))), gate_wins, gates, _fmt(losses)])
+	# Walk EACH floor of the campaign (Ring 3 MISTRAL → Ring 2 GEMINI → Ring 0 MYTHOS):
+	# the Seal escalates per ring, so clear% should fall as we descend. Every floor
+	# also carries one personal GATE exam (Tier 1) and the ROOT floor a shard gate.
+	for fl in RaidContent.FLOORS:
+		_fights = RaidContent.floor_fights(int(fl["ring"]))
+		_shard_req = int(fl["shard_req"])
+		var seal_name := String((_fights[_fights.size() - 1] as EncounterRes).name)
+		print("")
+		print("######## %s  →  Seal: %s ########" % [String(fl["title"]), seal_name])
+		print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
+		_prove_determinism()
+		print("skill    clear%%   avg fights  avg integrity(end)  gates(won/fought)  losses at")
+		print("---------------------------------------------------------------------------------")
+		for sk in SKILLS:
+			var cleared := 0
+			var fight_sum := 0
+			var integ_sum := 0.0
+			var losses := {}
+			var gates := 0
+			var gate_wins := 0
+			for seed in range(1, seeds + 1):
+				var r := _walk(seed, sk)
+				if r["cleared"]:
+					cleared += 1
+					integ_sum += float(r["integrity"])
+				else:
+					var k := String(r["loss_at"])
+					losses[k] = int(losses.get(k, 0)) + 1
+				fight_sum += int(r["fights"])
+				gates += int(r["gates"])
+				gate_wins += int(r["gate_wins"])
+			var n := float(seeds)
+			print("%-7s  %5.1f%%      %5.2f            %5.2f            %d/%d          %s" % [
+				sk["label"], 100.0 * cleared / n, fight_sum / n,
+				(integ_sum / maxf(1.0, float(cleared))), gate_wins, gates, _fmt(losses)])
 	quit()
 
 ## Same seed twice ⇒ identical map fingerprint AND identical full-run trace
 ## (visited nodes + every fight checksum) — the co-op/daily-seed guarantee.
 func _prove_determinism() -> void:
-	var fp1 := RunMap.generate(1, _fights.size(), MapContent.event_ids(), GATE_QUOTA).fingerprint()
-	var fp2 := RunMap.generate(1, _fights.size(), MapContent.event_ids(), GATE_QUOTA).fingerprint()
-	var fp3 := RunMap.generate(2, _fights.size(), MapContent.event_ids(), GATE_QUOTA).fingerprint()
+	var fp1 := RunMap.generate(1, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req).fingerprint()
+	var fp2 := RunMap.generate(1, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req).fingerprint()
+	var fp3 := RunMap.generate(2, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req).fingerprint()
 	print("map determinism: seed1==seed1 -> %s · seed1 vs seed2 -> %s" % [
 		("PASS" if fp1 == fp2 else "FAIL"),
 		("differ (good)" if fp1 != fp3 else "IDENTICAL (suspect!)")])
@@ -81,7 +88,7 @@ func _prove_determinism() -> void:
 	var ok := true
 	var gates_ok := true
 	for seed in range(1, 40):
-		var m := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA)
+		var m := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req)
 		var n_gates := 0
 		for nd in m.nodes:
 			var fi := int(nd["fight"])
@@ -99,6 +106,7 @@ func _prove_determinism() -> void:
 		("PASS" if ok else "FAIL"), String((_fights[_fights.size() - 1] as EncounterRes).name),
 		("PASS" if gates_ok else "FAIL")])
 	_prove_gates()
+	_prove_shard_gate(60)
 	_prove_carry(50)
 
 ## Every seat's personal exam builds and replays deterministically (same seed ⇒
@@ -117,6 +125,38 @@ func _prove_gates() -> void:
 	print("gate exams (4 seats, det ×2): %s  (%s)" % [
 		("PASS" if all_ok else "FAIL"), " ".join(parts)])
 
+## Completability under the credential-shard gate (MAP-3c ROOT): BFS over
+## (from_node, shards_collected) states via reachable(); the Seal must be reachable
+## on EVERY seed and EVERY route — a gate that could strand you shard-short is a bug.
+func _prove_shard_gate(seeds: int) -> void:
+	if _shard_req <= 0:
+		return
+	var ok := true
+	for seed in range(1, seeds + 1):
+		var m := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req)
+		var seen := {}
+		var stack: Array = [[-1, 0]]                 # [from_id, shards] — start outside the map
+		var reached_seal := false
+		var dead_end := false
+		while not stack.is_empty():
+			var st: Array = stack.pop_back()
+			var reach: Array = m.reachable(int(st[0]), {"shards": int(st[1]), "api_key": true})
+			if reach.is_empty() and int(st[0]) != m.seal_id:
+				dead_end = true                      # a route with no way forward (not at the Seal)
+			for nid in reach:
+				if nid == m.seal_id:
+					reached_seal = true
+					continue
+				var s2: int = int(st[1]) + (1 if bool(m.node(nid).get("shard", false)) else 0)
+				var k := "%d:%d" % [nid, s2]
+				if not seen.has(k):
+					seen[k] = true
+					stack.append([nid, s2])
+		if not reached_seal or dead_end:
+			ok = false
+	print("shard gate (%d maps, req %d): %s — Seal reachable, no shard-short dead-ends" % [
+		seeds, _shard_req, ("PASS" if ok else "FAIL")])
+
 ## The attrition mechanism must be REAL even where Ring 3 is too shallow to show
 ## it. HP/mana deficits alone are healed away (measured: no effect) — the carry
 ## that BITES is the CORRUPTED SECTOR wound (a max-HP cut no heal can fix,
@@ -129,11 +169,12 @@ func _prove_carry(seeds: int) -> void:
 	for seed in range(1, seeds + 1):
 		var full := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0}
 		var wounded := {"fracs": [0.55, 1.0, 1.0, 0.55], "wounds": [0.4, 0.0, 0.0, 0.4], "mana": 0.25}
-		if bool(_fight(seed * 977 + 3, 0, full, sk)["won"]):
+		var seal_i := _fights.size() - 1
+		if bool(_fight(seed * 977 + 3, seal_i, full, sk)["won"]):
 			wins_full += 1
-		if bool(_fight(seed * 977 + 3, 0, wounded, sk)["won"]):
+		if bool(_fight(seed * 977 + 3, seal_i, wounded, sk)["won"]):
 			wins_wounded += 1
-	print("carry probe (gate fight, sloppy, %d seeds): full %.1f%%  vs  corrupted tank+healer (-40%% max HP, 25%% mana) %.1f%%" % [
+	print("carry probe (Seal fight, sloppy, %d seeds): full %.1f%%  vs  corrupted tank+healer (-40%% max HP, 25%% mana) %.1f%%" % [
 		seeds, 100.0 * wins_full / seeds, 100.0 * wins_wounded / seeds])
 	print("  -> the wound must cost a visible chunk of win rate, or the map carries nothing")
 
@@ -141,7 +182,7 @@ func _prove_carry(seeds: int) -> void:
 ## `carry` = {fracs: per-seat integrity, mana: the healer's fuel gauge} — mirrors
 ## the HUD's persistence exactly.
 func _walk(seed: int, sk: Dictionary) -> Dictionary:
-	var map := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA)
+	var map := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req)
 	var route := DetRng.new(seed * 7919 + 17)
 	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0}
 	var inv := {}
@@ -159,6 +200,8 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 		var n: Dictionary = map.node(pos)
 		if bool(n["key"]):
 			inv["api_key"] = true
+		if bool(n.get("shard", false)):
+			inv["shards"] = int(inv.get("shards", 0)) + 1
 		match String(n["kind"]):
 			RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 				fights += 1

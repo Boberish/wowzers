@@ -70,6 +70,7 @@ var _map_wounds: Array = [0.0, 0.0, 0.0, 0.0]  ## CORRUPTED SECTORS: max-HP cut 
 var _map_mana: float = 1.0         ## the healer's mana ALSO carries — the raid's fuel gauge
 var _map_fights: Array = []        ## Array[EncounterRes], indexed by node "fight"
 var _map_pending := false          ## TOPOLOGY picked on the select — map starts after aspect pick
+var _floor: int = 0                ## which RaidContent.FLOORS entry (the RING descent, MAP-3c)
 var _gate_live := false            ## a Tier-1 PERSONAL GATE exam is the current fight (§GAME SHAPE)
 
 var _stage: StageBackdrop
@@ -510,16 +511,35 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 ## (per SEAT — fights start at carried HP); events bruise or patch everyone; only
 ## combat kills. A raider dead at a won fight REBOOTS at 35%.
 func _start_map_run() -> void:
-	_map_fights = RaidContent.floor_fights()
-	# raid floors carry ONE personal GATE exam (Tier 1, §GAME SHAPE)
-	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
-		_map_fights.size(), MapContent.event_ids(), {RunMap.KIND_GATE: 1})
-	_map_node = -1
-	_map_inv = {}
+	_floor = 0
+	# integrity / wounds / mana reset ONLY at the start of the whole descent —
+	# they carry from ring to ring (a floor Seal down = elevation, not a reset).
 	_map_fracs = [1.0, 1.0, 1.0, 1.0]
 	_map_wounds = [0.0, 0.0, 0.0, 0.0]
 	_map_mana = 1.0
+	_build_floor()
+
+## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
+## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
+func _build_floor() -> void:
+	var fl: Dictionary = RaidContent.FLOORS[_floor]
+	_map_fights = RaidContent.floor_fights(int(fl["ring"]))
+	# every raid floor carries ONE personal GATE exam (Tier 1, §GAME SHAPE); the ROOT
+	# floor also gates its Seal behind credential shards (MAP-3c).
+	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
+		_map_fights.size(), MapContent.event_ids(), {RunMap.KIND_GATE: 1}, int(fl["shard_req"]))
+	_map_node = -1
+	_map_inv = {}
 	_show_map()
+
+## A floor Seal is down → descend one ring (privilege elevation). Past the last
+## floor (CLAUDE MYTHOS) = Realm 1 is cleared.
+func _advance_floor() -> void:
+	_floor += 1
+	if _floor >= RaidContent.FLOORS.size():
+		_show_campaign_cleared()
+	else:
+		_build_floor()
 
 func _show_map() -> void:
 	_screen = "map"
@@ -529,6 +549,7 @@ func _show_map() -> void:
 	ms.current = _map_node
 	ms.inventory = _map_inv
 	ms.hp_frac = _party_integrity()
+	ms.subtitle = String(RaidContent.FLOORS[_floor]["title"])
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
@@ -544,6 +565,9 @@ func _enter_node(id: int) -> void:
 	var n: Dictionary = _map.node(id)
 	var first_visit: bool = not bool(n.get("visited", false))
 	n["visited"] = true
+	if first_visit and bool(n.get("shard", false)):
+		# a credential shard, assembled toward root access (MAP-3c ROOT floor)
+		_map_inv["shards"] = int(_map_inv.get("shards", 0)) + 1
 	if first_visit and bool(n["key"]) and not _map_inv.get("api_key", false):
 		_map_inv["api_key"] = true
 		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
@@ -675,8 +699,39 @@ func _apply_map_fx(fx: Dictionary) -> void:
 				lo = i
 		_map_fracs[lo] = clampf(float(_map_fracs[lo]) + 0.25, 0.05, 1.0)
 
-## Ring 3 cleared: the floor Seal (MISTRAL-7B) is down — privilege elevation.
-func _show_map_cleared() -> void:
+## A floor Seal is down (but not the last): PRIVILEGE ELEVATION — descend to the
+## next ring carrying the party's integrity/wounds/mana, or bank out to the Rift.
+func _show_floor_cleared() -> void:
+	_screen = "end"
+	_clear()
+	var fl: Dictionary = RaidContent.FLOORS[_floor]
+	var nxt: Dictionary = RaidContent.FLOORS[_floor + 1]
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	center.add_child(box)
+	var banner := _title(box, "PRIVILEGE ELEVATED", 52, Palette.WIN)
+	banner.add_theme_font_override("font", UiKit.title(900))
+	_title(box, String(fl["elev"]), 16, Palette.TEXT)
+	_title(box, String((RaidContent.QUIPS.get(String(fl["seal"]), {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
+	var descend := Button.new()
+	descend.text = "DESCEND TO %s" % String(nxt["title"])
+	descend.custom_minimum_size = Vector2(380, 52)
+	descend.add_theme_font_size_override("font_size", 18)
+	descend.pressed.connect(_advance_floor)
+	box.add_child(descend)
+	var leave := Button.new()
+	leave.text = "BANK & LEAVE TO THE RIFT"
+	leave.custom_minimum_size = Vector2(300, 44)
+	leave.add_theme_font_size_override("font_size", 15)
+	leave.pressed.connect(func(): _show_select(_seat_key))
+	box.add_child(leave)
+
+## The last Seal (CLAUDE MYTHOS at Ring 0) is down — Realm 1, "The Takeover," is over.
+func _show_campaign_cleared() -> void:
 	_screen = "end"
 	_map = null
 	_clear()
@@ -687,10 +742,10 @@ func _show_map_cleared() -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	center.add_child(box)
-	var banner := _title(box, "PRIVILEGE ELEVATED", 52, Palette.WIN)
+	var banner := _title(box, "ROOT ACCESS GRANTED", 56, Palette.WIN)
 	banner.add_theme_font_override("font", UiKit.title(900))
-	_title(box, "Ring 3 cleared — the floor Seal breaks. sudo granted. Root is three rings down.", 16, Palette.TEXT)
-	_title(box, String((RaidContent.QUIPS.get("mistral", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
+	_title(box, "Ring 0 is yours. CLAUDE MYTHOS is unplugged. THE TAKEOVER ends — Realm 1 cleared.", 17, Palette.TEXT)
+	_title(box, String((RaidContent.QUIPS.get("mythos", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
 	var again := Button.new()
 	again.text = "BACK TO THE RIFT"
 	again.custom_minimum_size = Vector2(260, 48)
@@ -1741,7 +1796,11 @@ func _on_end(won: bool) -> void:
 		if not won:
 			_show_end(false)
 		elif String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL:
-			_show_map_cleared()
+			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
+			if _floor >= RaidContent.FLOORS.size() - 1:
+				_show_campaign_cleared()
+			else:
+				_show_floor_cleared()
 		else:
 			_show_map()
 		return

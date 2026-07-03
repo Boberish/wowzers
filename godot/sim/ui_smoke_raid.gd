@@ -125,8 +125,12 @@ func _process(_delta: float) -> bool:
 			gseat, String(gs.encounter.id), String(gs.encounter.name), gs.seats.size()])
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
-	hud._show_map_cleared()
-	print("privilege-elevated screen: ok")
+	# MAP-3c floor progression screens (replaces the old single _show_map_cleared):
+	hud._floor = 0
+	hud._show_floor_cleared()          # inter-floor elevation (Ring 3 -> descend to Ring 2)
+	print("floor-cleared (privilege-elevated) screen: ok")
+	hud._show_campaign_cleared()       # last Seal down -> Realm 1 cleared
+	print("campaign-cleared (root access) screen: ok")
 
 	# juice handlers across every class-specific event, on the healer build
 	var s2: CombatState = hud._ctrl.state
