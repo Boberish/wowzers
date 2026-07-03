@@ -76,6 +76,13 @@ func _on_peer_disconnected(id: int) -> void:
 	# MAP-3b: a dropped raider's seat runs AI for the rest of the descent's fights
 	if room.get("campaign", null) != null and seat != "" and (room["seat_cfg"] as Dictionary).has(seat):
 		room["seat_cfg"][seat]["ai"] = true
+	# a drop mid-DRAFT no longer owes a pick; if that was the last one, continue
+	if room["phase"] == "draft" and room.get("campaign", null) != null and seat != "":
+		var dp: Array = room["campaign"]["draft_pending"]
+		dp.erase(seat)
+		if dp.is_empty():
+			_finish_draft(room)
+			return
 	if room["phase"] == "map" and room.get("campaign", null) != null:
 		_broadcast_map(room)          # the (possibly new) leader keeps picking the route
 	else:
@@ -153,22 +160,63 @@ func _end_fight(room: Dictionary) -> void:
 			room["campaign"] = null
 			_reset_lobby(room)
 			return
-		if bool((room.get("map_fight", {}) as Dictionary).get("is_seal", false)):
-			cp["floor"] = int(cp["floor"]) + 1
-			if int(cp["floor"]) >= RaidContent.FLOORS.size():
-				_broadcast(room, {"t": "campaign", "won": true})   # ROOT cleared — realm won
-				room["campaign"] = null
-				_reset_lobby(room)
-				return
-			cp["toast"] = "PRIVILEGE ELEVATED — descending to the next ring."
-			_build_floor_srv(room)
-			room["phase"] = "map"
-			_broadcast_map(room)
+		var seal := bool((room.get("map_fight", {}) as Dictionary).get("is_seal", false))
+		if seal and int(cp["floor"]) + 1 >= RaidContent.FLOORS.size():
+			_broadcast(room, {"t": "campaign", "won": true})   # the last Seal (ROOT) — realm won
+			room["campaign"] = null
+			_reset_lobby(room)
 			return
-		room["phase"] = "map"                # a skirmish fell — back to the node picker
-		_broadcast_map(room)
+		# the descent continues → a boon DRAFT, then map (skirmish) or ring-advance (Seal)
+		_begin_draft(room, "advance" if seal else "map")
 		return
 	_reset_lobby(room)
+
+## Post-fight DRAFT phase: every human seat picks a boon before the run continues.
+## Each client rolls its OWN offers (from its local run) and sends back only the picked
+## id; the server records it per seat so it rides every future fight spec.
+func _begin_draft(room: Dictionary, next_action: String) -> void:
+	var cp: Dictionary = room["campaign"]
+	cp["next_after_draft"] = next_action
+	var humans: Array = []
+	for pid in room["players"]:
+		var seat := String(room["players"][pid]["seat"])
+		if seat != "":
+			humans.append(seat)
+	cp["draft_pending"] = humans
+	if humans.is_empty():
+		_finish_draft(room)
+		return
+	room["phase"] = "draft"
+	_broadcast(room, {"t": "draft"})
+	_log("room %s DRAFT: %d seats picking" % [room["code"], humans.size()])
+
+func _pick_boon(id: int, boon_id: String) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "draft":
+		return
+	var cp = room.get("campaign", null)
+	if cp == null:
+		return
+	var seat := String(room["players"][id].get("seat", ""))
+	if seat == "" or not (cp["draft_pending"] as Array).has(seat):
+		return
+	if boon_id != "":                       # "" = skipped (pool exhausted); still counts
+		if not cp["boons"].has(seat):
+			cp["boons"][seat] = {}
+		cp["boons"][seat][boon_id] = true
+	(cp["draft_pending"] as Array).erase(seat)
+	if (cp["draft_pending"] as Array).is_empty():
+		_finish_draft(room)
+
+func _finish_draft(room: Dictionary) -> void:
+	var cp: Dictionary = room["campaign"]
+	if String(cp["next_after_draft"]) == "advance":
+		cp["floor"] = int(cp["floor"]) + 1
+		cp["toast"] = "PRIVILEGE ELEVATED — descending to the next ring."
+		_build_floor_srv(room)
+	cp["next_after_draft"] = ""
+	room["phase"] = "map"
+	_broadcast_map(room)
 
 func _reset_lobby(room: Dictionary) -> void:
 	room["phase"] = "lobby"
@@ -204,6 +252,8 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_pick_node(id, int(msg.get("id", -1)))
 		"choice":
 			_pick_choice(id, int(msg.get("i", -1)))
+		"pick":
+			_pick_boon(id, String(msg.get("id", "")))
 		"input":
 			_on_input_msg(id, msg)
 		"leave":
@@ -370,6 +420,9 @@ func _start_map(id: int) -> void:
 		"inv": {}, "fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
 		"tickets": {}, "total": 0, "closed": 0, "map": null, "fights": [],
 		"toast": "", "pending_event": "",
+		"boons": {},                 # online boons: seat_key -> {boon_id: true}, drafted over the descent
+		"draft_pending": [],         # human seats that still owe a pick this draft phase
+		"next_after_draft": "",      # "map" | "advance" — what to do once everyone's picked
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"
@@ -516,7 +569,9 @@ func _launch_map_fight_srv(room: Dictionary, fi: int) -> void:
 	var enc: EncounterRes = fights[clampi(fi, 0, fights.size() - 1)]
 	var carry := {"fracs": (cp["fracs"] as Array).duplicate(),
 		"wounds": (cp["wounds"] as Array).duplicate(), "mana": float(cp["mana"])}
-	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, room["seat_cfg"], String(enc.id), carry)
+	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, room["seat_cfg"], String(enc.id),
+		carry, cp["boons"])                         # online boons ride the spec, per seat
+	room["spec"] = spec
 	room["spec"] = spec
 	room["state"] = RaidNet.build(spec, "")
 	room["phase"] = "fight"
@@ -535,6 +590,7 @@ func _broadcast_map(room: Dictionary) -> void:
 	for tid in cp["tickets"]:
 		titles.append(String(cp["tickets"][tid]))
 	_broadcast(room, {"t": "map", "code": room["code"], "host": room["host"],
+		"seed": int(cp["map_seed"]),                # lets clients seed their boon-draft run
 		"floor": int(cp["floor"]), "ring": int(fl["ring"]), "title": String(fl["title"]),
 		"map": m.to_dict(), "node": int(cp["node"]), "inv": cp["inv"],
 		"fracs": cp["fracs"], "wounds": cp["wounds"], "mana": float(cp["mana"]),

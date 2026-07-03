@@ -5,16 +5,16 @@
 ## client -> server:  hello{name,ver} · join{room,name} · claim{seat} · unclaim{}
 ##                    aspect{aspect} · ready{on} · boss{enc} (host) · start{}
 ##                    mapstart{} (host — MAP-3b) · node{id} (leader) · choice{i} (leader)
-##                    input{action} · leave{}
+##                    pick{id} (online boons: this seat's drafted boon) · input{action} · leave{}
 ## server -> client:  welcome{id,ver} · err{msg} · room{...lobby snapshot incl enc...}
 ##                    start{spec, you} · f{n, in:[[seat_i,action]..], cs?, ai?:[seat_i..]}
 ##                    end{won,n} · bye{msg}
-##                    map{...campaign snapshot...} · mapstop{title,body,choices,accent}
-##                    campaign{won} (MAP-3b: online Topology descent)
+##                    map{...campaign snapshot incl seed...} · mapstop{title,body,choices,accent}
+##                    draft{} (online boons: pick a boon now) · campaign{won}
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 4      # v4: healer seat CLASS choice (Mender / Bloomweaver) rides the spec
+const VERSION := 5      # v5: healer seat CLASS choice (Mender / Bloomweaver) + v4 online boons
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

@@ -461,17 +461,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons (Bill).** The boon
-  draft is offline-only; wire it into the online lockstep. Each human seat drafts its OWN boons after
-  each fight; the picks ride the fight SPEC per seat (`RaidNet.make_spec` gains `seat_boons`; `build`
-  applies each seat's `boons` to its kit → all replicas build the identical fight). Server tracks
-  per-seat boon sets in the campaign + a post-fight DRAFT phase: broadcasts `draft` (per-seat seeded
-  offers), each client shows the DraftScreen + sends `pick{id}`, server records + rides it forward;
-  proceeds to `map` once all human seats have picked. Client draft UI reuses `DraftScreen`; the build
-  panel already works per-seat. Protocol bump (**v3→v4**). ⚠ touches `godot/net/*` + `raid_hud.gd`
-  (shared) — merge main before merge-back; rebuild server+clients. Gate: `net_map_smoke` extended
-  (2 clients draft boons online → picks in future specs → zero desync), offline byte-identical
-  (empty seat_boons = identical spec), smokes green. *(raid-finish session)*
+- ☑ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons — MERGED to main
+  (`24dd28a`)**, worktree removed. The Draft 2.0 boon draft now works in online co-op: each human
+  seat drafts its OWN boons after each won fight, and the picks ride the fight SPEC per seat
+  (`RaidNet.make_spec` `seat_boons`; `build` applies each seat's `boons`) so every replica builds the
+  identical fight — lockstep-safe. Server tracks per-seat boon sets + a post-fight DRAFT phase
+  (`draft`→`pick`, proceeds once all seats picked; disconnect drops the owed pick); map broadcast
+  carries the descent `seed` so clients seed their run. Client rolls its own offers → `DraftScreen`
+  → `send_pick` → waits; build panel un-gated for online. Protocol **v3→v4**. Gate PASS:
+  `net_map_smoke` extended (2 clients draft 6 boons, boons rode a spec, ring advanced, **zero
+  desync**); `net_smoke` ALL OK on v4; offline byte-identical (empty `seat_boons`); ui_smoke_raid +
+  raid_boon_probe + bulwark determinism green. ⚠ **protocol v4 — rebuild+redeploy server with
+  clients.** **This closes the offline/online boon gap — boons + gear now work both ways.** *(raid-finish session)*
 
 - ☑ 2026-07-03 · `pause-codex` · §GRAPHICS/UX — **In-game PAUSE menu + DEV CLASS CODEX — MERGED to main
   (`33d44ba`).** A PAUSE button (top-right of combat) + **P / Esc-in-combat** open an overlay on the ONE

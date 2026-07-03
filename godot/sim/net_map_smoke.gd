@@ -23,6 +23,15 @@ var fights_done := 0
 var carry_seen := false
 var min_open_frac := 1.0
 var nodes_picked := 0
+var drafts_done := 0            # online boons: how many times a client drafted
+var spec_boons_seen := false   # a fight spec carried per-seat boons
+
+func _run_for(seat: String) -> RunState:
+	match seat:
+		"blade": return RunState.start_twinfang("venomancer")
+		"caster": return RunState.start_voidcaller("disruptor")
+		"healer": return RunState.start_mender("brinkwarden")
+		_: return RunState.start("warden")
 
 func _initialize() -> void:
 	server = NetServer.new()
@@ -39,7 +48,7 @@ func _client(pname: String) -> Dictionary:
 	var c := {"name": pname, "net": NetClient.new(), "ctrl": NetCombatController.new(),
 		"connected": false, "room": {}, "you": "", "mode": "lobby", "map": {},
 		"stop": {}, "awaiting": false, "desync": false, "last_in": 0,
-		"campaign_won": null, "errs": []}
+		"campaign_won": null, "errs": [], "run": null, "boons": 0}
 	var net: NetClient = c["net"]
 	var ctrl: NetCombatController = c["ctrl"]
 	root.add_child(net)
@@ -66,12 +75,28 @@ func _client(pname: String) -> Dictionary:
 		c["mode"] = "done"
 		c["campaign_won"] = won
 		print("[%s] campaign ended: won=%s" % [pname, str(won)]))
+	net.draft_prompt.connect(func():                # online boons: draft this seat's boon
+		c["mode"] = "draft"
+		if c["run"] == null:
+			c["run"] = _run_for(_seat_of(c, pname))
+		var picks: Array = Draft.roll_offers(c["run"])
+		if picks.is_empty():
+			net.send_pick("")
+		else:
+			Draft.take(c["run"], picks[0])
+			c["boons"] = int(c["boons"]) + 1
+			net.send_pick(String((picks[0] as Dictionary).get("id", "")))
+		drafts_done += 1
+		print("[%s] drafted a boon (%d total)" % [pname, int(c["boons"])]))
 	net.fight_started.connect(func(spec, you):
 		c["you"] = you
 		c["mode"] = "fight"
 		c["last_in"] = 0
 		if spec.has("carry"):
 			carry_seen = true
+		for e in spec.get("seats", []):            # online boons: did the spec carry them?
+			if (e as Dictionary).has("boons") and not (e["boons"] as Dictionary).is_empty():
+				spec_boons_seen = true
 		var st := RaidNet.build(spec, you)
 		ctrl.set_spec_seed(int(spec.get("seed", 1)))
 		ctrl.begin_net(st, RaidNet.SEAT_KEYS.find(you))
@@ -185,9 +210,20 @@ func _finish() -> void:
 	if not carry_seen:
 		_fail("no fight carried campaign state (spec.carry never present)")
 		return
+	# a draft happens after each WON fight; boons ride the NEXT fight's spec. So with 2+
+	# fights, we must have drafted and seen boons in a spec. An early wipe (fights < 2)
+	# legitimately drafts nothing — don't fail that.
+	if fights_done >= 2 and drafts_done == 0:
+		_fail("online boons: 2+ fights but no draft was ever prompted")
+		return
+	if fights_done >= 2 and not spec_boons_seen:
+		_fail("online boons: 2+ fights but a drafted boon never rode a spec")
+		return
 	print("---- MAP DESCENT RESULT ----")
 	print("floors advanced: %d · fights: %d · nodes picked: %d" % [floor_seen, fights_done, nodes_picked])
 	print("carry applied: %s (min opening tank integrity = %.2f)" % [str(carry_seen), min_open_frac])
+	print("online boons: drafts=%d (ava=%d bo=%d) · rode a spec=%s" % [
+		drafts_done, int(ava["boons"]), int(bo["boons"]), str(spec_boons_seen)])
 	print("campaign_won: ava=%s bo=%s" % [str(ava["campaign_won"]), str(bo["campaign_won"])])
 	print("desyncs: ava=%s bo=%s" % [str(ava["desync"]), str(bo["desync"])])
 	if min_open_frac >= 0.999:

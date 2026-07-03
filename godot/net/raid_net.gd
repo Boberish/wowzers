@@ -37,18 +37,25 @@ static func cls_of(seat: Seat) -> String:
 ## online fight starts exactly where traversal left it — and because it rides the
 ## spec, every replica builds the identical opening state (lockstep-safe). Absent
 ## carry = a fresh full-HP pull (every existing Seal fight is byte-identical).
+## `seat_boons` (online boons): seat_key -> {boon_id: true}. Ridden per seat so every
+## replica builds the identical fight with each player's drafted boons applied. Absent /
+## empty = a boon-less seat (AI raiders, or a seat that hasn't drafted) — byte-identical.
 static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
-		carry: Dictionary = {}) -> Dictionary:
+		carry: Dictionary = {}, seat_boons: Dictionary = {}) -> Dictionary:
 	var seats: Array = []
 	for key in SEAT_KEYS:
 		var c: Dictionary = seat_cfg.get(key, {})
 		var cls := String(c.get("cls", SEAT_CLASS[key]))
-		seats.append({
+		var entry := {
 			"key": key,
 			"cls": cls,
 			"aspect": String(c.get("aspect", default_aspect(key, cls))),
 			"ai": bool(c.get("ai", true)),
-		})
+		}
+		var b: Dictionary = seat_boons.get(key, {})
+		if not b.is_empty():
+			entry["boons"] = b
+		seats.append(entry)
 	var spec := {"seed": seed, "enc": enc, "seats": seats}
 	if not carry.is_empty():
 		spec["carry"] = carry
@@ -74,6 +81,10 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 			seat.policy = make_policy(key, seed_v, String(e.get("cls", SEAT_CLASS.get(key, ""))))
 		else:
 			seat.policy = null            # a human drives this seat via input frames
+		# online boons: apply this seat's drafted boons to its kit (kits read `boons`)
+		var sb: Dictionary = e.get("boons", {})
+		if not sb.is_empty() and seat.kit != null:
+			seat.kit.boons = sb
 	# MAP-3b: fold the carried campaign state in (wounds cut max HP, then integrity of
 	# what's left; the healer's mana carries too). Mirrors the offline _launch_map_fight.
 	var carry: Dictionary = spec.get("carry", {})
