@@ -14,7 +14,7 @@ func _initialize() -> void:
 		if a.begins_with("--out="):
 			out_dir = a.substr("--out=".length())
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	steps = ["drop_first", "drop_full_slots", "map_curios"]
+	steps = ["drop_first", "drop_full_slots", "map_curios", "ledger_offer", "drop_verdict"]
 
 func _process(_d: float) -> bool:
 	if frames > 0:
@@ -47,5 +47,12 @@ func _process(_d: float) -> bool:
 		"map_curios":
 			hud._map_wounds[0] = 0.2
 			hud._show_map()
+		"ledger_offer":   # GEAR-2: the pre-pull Ledger page (rows + swearable oaths)
+			hud._gear_unlocks = {"riftmaw": ["riftmaw_tooth", "sticky_note"]}
+			hud._offer_oath_then("riftmaw", hud._show_map)
+		"drop_verdict":   # GEAR-2: a KEPT oath crowns the ceremony
+			hud._map_gear = []
+			hud._show_drop("grace_period", true, hud._show_map,
+				"⚖  OATH KEPT — SLA MET: +2⏣  ·  a new row is inked into the Ledger")
 	frames = 14
 	return false

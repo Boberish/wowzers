@@ -86,11 +86,18 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 # the online campaign spec folds `gear` in later (rides like tickets/inventory).
 var _map_gear: Array = []               ## equipped curio ids (≤ Gear.SLOTS)
 var _map_gear_charges: Dictionary = {}  ## active-item charges left this run
-var _map_tokens := 0                    ## ⏣ banked from scrap (MARKET spends them, GEAR-3)
+var _map_tokens := 0                    ## ⏣ fallback bank when no _run exists (see _gain_tokens)
 var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
 var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
+
+# GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
+var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
+var _oath_result: Dictionary = {}       ## resolved at fight end, consumed by the drop flow
+var _oath_broken := false               ## live tracker latch (view-only)
+var _oath_lbl: Label = null
+var _drop_pity := 0                     ## opus dry-streak counter (purses add ticks)
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -770,6 +777,10 @@ func _start_map_run() -> void:
 	_map_gear = []
 	_map_gear_charges = {}
 	_map_tokens = 0
+	_sworn = {}
+	_oath_result = {}
+	_oath_broken = false
+	_drop_pity = 0
 	_taken_boons = []
 	if DisplayServer.get_name() != "headless":
 		_gear_unlocks = GearStore.load_unlocks()
@@ -910,13 +921,17 @@ func _ticket_at(n: Dictionary) -> void:
 func _resolve_node(n: Dictionary) -> void:
 	match String(n["kind"]):
 		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
-			_launch_map_fight(int(n["fight"]))
+			# GEAR-2: the boss's Ledger page offers its oaths before the pull
+			var fi := int(n["fight"])
+			var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
+			_offer_oath_then(String(enc.id), _launch_map_fight.bind(fi))
 		RunMap.KIND_GATE:
 			# Tier-1 PERSONAL GATE (§GAME SHAPE): YOUR seat steps through alone
 			var ex: Dictionary = GateContent.exam(_seat_key)
 			_map_stop(String(n["name"]), String(ex["body"]),
 				[{"label": "STEP THROUGH ALONE", "fx": {"result": String(ex["challenge"])}}],
-				Palette.GOLD_BRIGHT, _launch_gate_fight)
+				Palette.GOLD_BRIGHT,
+				_offer_oath_then.bind(String(GATE_ENC[_seat_key]), _launch_gate_fight))
 		RunMap.KIND_EVENT:
 			var ev := MapContent.event(String(n["event"]))
 			_map_stop(String(ev["title"]), String(ev["body"]), ev["choices"], Palette.VOID, _show_map)
@@ -958,6 +973,7 @@ func _launch_map_fight(fi: int) -> void:
 	_online = false
 	_ctrl = _local_ctrl
 	_ctrl.begin(s, SEAT_IDX[_seat_key])
+	_spawn_oath_banner()   # GEAR-2: the sworn deed rides the HUD
 
 ## A Tier-1 PERSONAL GATE exam (§GAME SHAPE): YOUR seat's class exam, fought alone —
 ## the class's solo fight, recast to its Realm-1 identity. Carry-in applies only to
@@ -984,6 +1000,7 @@ func _launch_gate_fight() -> void:
 	_online = false
 	_ctrl = _local_ctrl
 	_ctrl.begin(s, 0)
+	_spawn_oath_banner()   # GEAR-2: the sworn deed rides the HUD
 
 ## One node stop = one MapEventPanel; apply the chosen fx, then continue.
 func _map_stop(title: String, body: String, choices: Array, accent: Color, done: Callable) -> void:
@@ -1044,17 +1061,156 @@ func _arm_gear(u: Seat) -> void:
 	u.gear = _map_gear.duplicate()
 	u.gear_vars = {}
 
+## Tokens are ONE currency: scrap + oath purses feed the same purse the REFORGE
+## boon draft spends (raid-boons' `_run.tokens`). `_map_tokens` stays only as the
+## fallback bank for runless dev paths.
+func _gain_tokens(n: int) -> void:
+	if _run != null:
+		_run.tokens += n
+	else:
+		_map_tokens += n
+
+func _tokens_now() -> int:
+	return _run.tokens if _run != null else _map_tokens
+
+# ---------------------------------------------------------------- GEAR-2 (Oaths)
+
+## Gate exams key their Ledger pages by the exam's canonical encounter id.
+const GATE_ENC := {"tank": "gatekeeper", "blade": "warden", "caster": "priest", "healer": "rendmaw"}
+
+func _stakes() -> int:
+	return 3 - int(RaidContent.FLOORS[_floor]["ring"])   # + (version - 1), when versions exist
+
+## The Ledger page, pre-pull: the boss's rows (locked greyed) + its swearable oaths.
+## Swear one — or fight unsworn. Realm-1 skin: oaths render as SLAs.
+func _offer_oath_then(boss_id: String, launch: Callable) -> void:
+	_sworn = {}
+	_oath_result = {}
+	_oath_broken = false
+	var orows := Oaths.rows(boss_id)
+	if orows.is_empty():
+		launch.call()
+		return
+	_screen = "ledger"
+	_clear()
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 12)
+	center.add_child(box)
+	var banner := _title(box, "THE LEDGER", 40, Palette.GOLD_BRIGHT)
+	banner.add_theme_font_override("font", UiKit.title(900))
+	_title(box, "an oath may be sworn before this pull — SLAs are strictly optional", 14, Palette.TEXT_DIM)
+	# the page: every row, lock state + printed rarity
+	var got: Array = _gear_unlocks.get(boss_id, [])
+	for r in GearCatalog.table(boss_id):
+		var it := GearCatalog.item(String(r["item"]))
+		var unlocked: bool = got.has(String(r["item"]))
+		var line := "%s  %s · %s" % ["◆" if unlocked else "◇",
+			String(it["name"]).to_upper(), String(it.get("rarity", "haiku")).to_upper()]
+		if String(r["row"]) == "oath":
+			line += "  —  deed: %s" % String(r.get("deed_text", ""))
+		elif not unlocked:
+			line += "  —  first kill"
+		_title(box, line, 13, Palette.GOLD if unlocked else Palette.TEXT_DIM)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 10)
+	box.add_child(gap)
+	for r2 in orows:
+		var row: Dictionary = r2
+		var it2 := GearCatalog.item(String(row["item"]))
+		var unlocked2: bool = got.has(String(row["item"]))
+		var p := Oaths.purse(int(row.get("sev", 1)), _stakes())
+		var reward := ("+%d⏣ · the drop leans richer" % int(p["tokens"])) if unlocked2 \
+			else "kept = %s joins your Ledger" % String(it2["name"]).to_upper()
+		var b := Button.new()
+		b.text = "%s  ·  SEV %s  ·  %s   →   %s" % [
+			"RE-SWEAR" if unlocked2 else "SWEAR",
+			Oaths.sev_label(int(row.get("sev", 1))), String(row.get("deed_text", "")), reward]
+		b.add_theme_font_size_override("font_size", 15)
+		b.custom_minimum_size = Vector2(760, 42)
+		b.pressed.connect(func():
+			_sworn = row.duplicate(true)
+			_sworn["boss"] = boss_id
+			launch.call())
+		box.add_child(b)
+	var fb := Button.new()
+	fb.text = "FIGHT UNSWORN"
+	fb.add_theme_font_size_override("font_size", 15)
+	fb.custom_minimum_size = Vector2(300, 42)
+	fb.pressed.connect(func(): launch.call())
+	var cc2 := CenterContainer.new()
+	cc2.add_child(fb)
+	box.add_child(cc2)
+
+## The in-fight tracker: a quiet banner that turns crimson the moment a monotone
+## deed becomes unkeepable (view-only; verdict truth stays at _resolve_oath).
+func _spawn_oath_banner() -> void:
+	_oath_lbl = null
+	if _sworn.is_empty():
+		return
+	var l := Label.new()
+	l.text = "⚖ OATH — %s" % String(_sworn.get("deed_text", ""))
+	l.add_theme_font_size_override("font_size", 14)
+	l.add_theme_color_override("font_color", Palette.GOLD)
+	_place(l, 0.0, 1.0, 0.0, 1.0, 24, -124, 620, -100)
+	_ui.add_child(l)
+	_oath_lbl = l
+
+## Verdict at fight end (called from _on_end with the final state, win or lose).
+func _resolve_oath(s: CombatState, seat: Seat, won: bool) -> void:
+	_oath_result = {}
+	if _sworn.is_empty() or s == null or seat == null:
+		return
+	_oath_result = {"kept": won and Oaths.kept(_sworn.get("deed", {}), s, seat),
+		"sev": int(_sworn.get("sev", 1)), "item": String(_sworn.get("item", "")),
+		"boss": String(_sworn.get("boss", "")), "text": String(_sworn.get("deed_text", ""))}
+	_sworn = {}
+
 ## Roll the kill's drop (map mode only), run the ceremony, then continue the run.
 ## Rolls draw from _drop_rng only — the combat stream never notices loot.
 func _after_drop(boss_id: String, done: Callable) -> void:
 	if _map == null or _drop_rng == null:
 		done.call()
 		return
-	var d := Gear.roll(boss_id, String(SEAT_CLS[_seat_key]), _gear_unlocks, _drop_rng)
+	# GEAR-2: a KEPT oath cashes first — its row joins THIS kill's pool, and the
+	# purse bends THIS roll (rarity floor / pity ticks) + banks Tokens.
+	var bend: Dictionary = {}
+	var verdict := ""
+	if not _oath_result.is_empty() and String(_oath_result["boss"]) == boss_id:
+		if bool(_oath_result["kept"]):
+			var p := Oaths.purse(int(_oath_result["sev"]), _stakes())
+			var oid := String(_oath_result["item"])
+			var got0: Array = _gear_unlocks.get(boss_id, [])
+			var fresh: bool = not got0.has(oid)
+			if fresh:
+				got0.append(oid)
+				_gear_unlocks[boss_id] = got0
+				if DisplayServer.get_name() != "headless":
+					GearStore.save_unlocks(_gear_unlocks)
+			_gain_tokens(int(p["tokens"]))
+			_drop_pity += int(p["pity"])
+			bend = p
+			verdict = "⚖  OATH KEPT — SLA MET: +%d⏣%s" % [int(p["tokens"]),
+				"  ·  a new row is inked into the Ledger" if fresh else ""]
+		else:
+			verdict = "⚖  OATH BROKEN — SLA BREACHED (penalty clauses waived)"
+		_oath_result = {}
+	var d := Gear.roll(boss_id, String(SEAT_CLS[_seat_key]), _gear_unlocks, _drop_rng,
+		int(RaidContent.FLOORS[_floor]["ring"]), _drop_pity, bend)
 	if d.is_empty():
+		if verdict != "":
+			_toast_add(verdict)
 		done.call()
 		return
 	var id := String(d["item"])
+	# pity rides the OUTCOME: an opus drop resets the drought, anything else deepens it
+	if String(GearCatalog.item(id).get("rarity", "haiku")) == "opus":
+		_drop_pity = 0
+	else:
+		_drop_pity += 1
 	if bool(d["first"]):
 		# the SIGNATURE row is inked into the Ledger forever (survives the run)
 		var got: Array = _gear_unlocks.get(boss_id, [])
@@ -1064,16 +1220,18 @@ func _after_drop(boss_id: String, done: Callable) -> void:
 			GearStore.save_unlocks(_gear_unlocks)
 	if _map_gear.has(id):
 		# a dupe of an equipped curio auto-scraps — Tokens without ceremony
-		_map_tokens += GearCatalog.scrap_value(id)
+		if verdict != "":
+			_toast_add(verdict)
+		_gain_tokens(GearCatalog.scrap_value(id))
 		_toast_add("⚙  %s — duplicate recycled responsibly (+%d⏣)" % [
 			String(GearCatalog.item(id)["name"]), GearCatalog.scrap_value(id)])
 		done.call()
 		return
-	_show_drop(id, bool(d["first"]), done)
+	_show_drop(id, bool(d["first"]), done, verdict)
 
 ## The drop ceremony: the curio arrives on a tarot card ("PERIPHERAL ACQUIRED");
 ## EQUIP (2 slots — replacing scraps the old piece) or SCRAP straight to ⏣.
-func _show_drop(id: String, first: bool, done: Callable) -> void:
+func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -> void:
 	_screen = "drop"
 	_clear()
 	var it := GearCatalog.item(id)
@@ -1084,6 +1242,9 @@ func _show_drop(id: String, first: bool, done: Callable) -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 14)
 	center.add_child(box)
+	if verdict != "":   # GEAR-2: the oath's verdict crowns the ceremony
+		_title(box, verdict, 17,
+			Palette.WIN if verdict.contains("KEPT") else Palette.CRIMSON)
 	var banner := _title(box, "PERIPHERAL ACQUIRED", 42, Palette.GOLD_BRIGHT)
 	banner.add_theme_font_override("font", UiKit.title(900))
 	if first:
@@ -1123,7 +1284,7 @@ func _show_drop(id: String, first: bool, done: Callable) -> void:
 	sb.text = "SCRAP  (+%d⏣)" % GearCatalog.scrap_value(id)
 	sb.custom_minimum_size = Vector2(200, 44)
 	sb.pressed.connect(func():
-		_map_tokens += GearCatalog.scrap_value(id)
+		_gain_tokens(GearCatalog.scrap_value(id))
 		done.call())
 	row.add_child(sb)
 
@@ -1131,7 +1292,7 @@ func _show_drop(id: String, first: bool, done: Callable) -> void:
 func _gear_equip(id: String, replace_i: int) -> void:
 	if replace_i >= 0 and replace_i < _map_gear.size():
 		var old := String(_map_gear[replace_i])
-		_map_tokens += GearCatalog.scrap_value(old)
+		_gain_tokens(GearCatalog.scrap_value(old))
 		_map_gear_charges.erase(old)
 		_map_gear[replace_i] = id
 	else:
@@ -1142,7 +1303,7 @@ func _gear_equip(id: String, replace_i: int) -> void:
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
-	if _map_gear.is_empty() and _map_tokens == 0:
+	if _map_gear.is_empty() and _tokens_now() == 0:
 		return ""
 	var names: Array = []
 	for g in _map_gear:
@@ -1151,7 +1312,7 @@ func _gear_line() -> String:
 			nm += " ×%d" % int(_map_gear_charges[g])
 		names.append(nm)
 	var line := "PERIPHERALS:  " + ("  ·  ".join(PackedStringArray(names)) if not names.is_empty() else "—")
-	return line + "      ⏣ %d" % _map_tokens
+	return line + "      ⏣ %d" % _tokens_now()
 
 func _worst_wound() -> float:
 	var w := 0.0
@@ -1854,6 +2015,14 @@ func _process(delta: float) -> void:
 	var p := _ctrl.player()
 	var obs := CombatCore.observe(s, p)
 
+	# GEAR-2: the oath tracker turns the moment a monotone deed becomes unkeepable
+	if _oath_lbl != null and not _oath_broken and not _sworn.is_empty() and p != null \
+			and Oaths.broken_live(_sworn.get("deed", {}), s, p):
+		_oath_broken = true
+		_oath_lbl.text = "⚖ OATH BROKEN — %s" % String(_sworn.get("deed_text", ""))
+		_oath_lbl.add_theme_color_override("font_color", Palette.CRIMSON)
+		_big_text("OATH BROKEN", Palette.CRIMSON, 34, 0.9)
+
 	var live_add := _active_add(s)
 	if live_add != null:
 		_bar.boss_name = live_add.name
@@ -2452,6 +2621,11 @@ func _on_end(won: bool) -> void:
 		if u.role == "healer":
 			_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
 		var ex: Dictionary = GateContent.exam(_seat_key)
+		# GEAR-2: the sworn oath resolves on the exam's final state (win OR loss)
+		_resolve_oath(_ctrl.state, _ctrl.player(), won)
+		if not won and not _oath_result.is_empty():
+			_toast_add("⚖  OATH BROKEN — SLA BREACHED (penalty clauses waived)")
+			_oath_result = {}
 		# GEAR-1: a gate CLEAR is a kill — its Ledger table drops (class-marked page).
 		var after_gate: Callable = _show_map
 		if won:
@@ -2478,6 +2652,8 @@ func _on_end(won: bool) -> void:
 					_map_wounds[i] = minf(0.4, float(_map_wounds[i]) + 0.2)
 				if u.role == "healer":
 					_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		# GEAR-2: the sworn oath resolves on the fight's final state
+		_resolve_oath(_ctrl.state, _ctrl.player(), won)
 		if not won:
 			_show_end(false)
 			return

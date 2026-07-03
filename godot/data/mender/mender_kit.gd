@@ -32,6 +32,11 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		seat.resource = minf(cfg.mana_max, seat.resource + bell)
 	var rm := float(seat.vars.get("regen_mult", 1.0))
 	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt)
+	# GEAR-2: Scratchpad — regen trebles while a long wind-up thinks.
+	if GearFx.scratchpad_live(s, seat):
+		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt * 2.0)
+		if GearFx.flag_once(seat, &"scratchpad_pop"):
+			GearFx.pop(s, seat, &"scratchpad")
 
 	# LITANY decays a pip after litany_decay seconds without an in-condition beat — the
 	# chain is a live thing you must keep feeding, not a bank.
@@ -39,7 +44,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		var idle := int(seat.vars.get("litany_idle", 0)) + 1
 		if idle >= _tt(s, cfg.litany_decay):
 			idle = 0
-			seat.vars["litany"] = _litany(seat) - 1
+			if GearFx.once(seat, &"grace_period"):
+				GearFx.pop(s, seat, &"grace_period")   # GEAR-2: one pip stays lit
+			else:
+				seat.vars["litany"] = _litany(seat) - 1
 		seat.vars["litany_idle"] = idle
 
 	if aspect == "brinkwarden":
@@ -203,6 +211,16 @@ func on_overheal(_s: CombatState, caster: Seat, target: Seat, over: float) -> vo
 	if aspect == "tidecaller":
 		var r := float(caster.vars.get("reservoir", 0.0)) + over * _conv()
 		caster.vars["reservoir"] = minf(_res_max(), r)
+		# GEAR-2: Overflow Sluice — spill past a FULL Reservoir wards the tank at 0.5x.
+		if GearFx.has(caster, &"overflow_sluice") and r > _res_max():
+			var tk := CombatCore._tank_target(_s)
+			if tk != null and tk.alive():
+				tk.absorb += roundf((r - _res_max()) * 0.5)
+				tk.absorb_owner_i = _s.seats.find(caster)
+				tk.ward_until_tick = maxi(tk.ward_until_tick,
+					_s.tick + CombatCore.to_ticks(8.0, _s.config.fixed_hz))
+				if GearFx.flag_once(caster, &"sluice_pop"):
+					GearFx.pop(_s, caster, &"overflow_sluice")
 	if _b("overflow") and target != null:                  # Overflow: shield the target with the spill
 		# Top up toward Overflow's cap (hp_max*0.5) but ONLY GROW — never let the minf
 		# collapse an already-larger ward (Surge caps at hp_max, Ward is uncapped) down

@@ -49,6 +49,13 @@ func on_defense_press(s: CombatState, seat: Seat) -> void:
 ## Interrupt the boss's current cast. `source` is "space" or an interrupt-spell id.
 func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 	if s.telegraph == null or s.telegraph.ability.response != AbilityRes.Response.INTERRUPTIBLE:
+		if source == "space":
+			# GEAR-2: the WHIFF counts for oath deeds whether or not gear saves the
+			# cooldown (diag-only); Grace Period hands the wasted press back once.
+			CombatCore._bump_diag(s, seat, "kick_whiff")
+			if GearFx.once(seat, &"grace_period"):
+				seat.defense_ready_tick = s.tick
+				GearFx.pop(s, seat, &"grace_period")
 		CombatCore.emit_event(s, {"t": "int_whiff", "player": seat.is_player})
 		return
 	var rem := float(s.telegraph.start_tick + s.telegraph.dur_ticks - s.tick) * s.dt
@@ -69,6 +76,12 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 		if aspect == "disruptor":
 			var dmg := (cfg.bl_dmg_clean if clean else cfg.bl_dmg) * (1.4 if _b("punish") else 1.0)
 			_deal(s, seat, dmg, &"kick")
+			# GEAR-2: Echo Chamber — a clean kick at an already-FULL bank echoes a
+			# free 0.6x Overload without spending the stacks (the full-bank rider).
+			if GearFx.has(seat, &"echo_chamber") and clean \
+					and int(seat.vars.get("backlash", 0)) >= cfg.backlash_max:
+				_deal(s, seat, cfg.overload_per_bl * float(cfg.backlash_max) * 0.6, &"echo_chamber")
+				GearFx.pop(s, seat, &"echo_chamber")
 			_gain_backlash(seat, 2 if clean else 1)
 			if _b("backdot"):
 				seat.vars["boss_dot"] = {"until_tick": s.tick + _tt(s, 4.0), "dps": 14.0}
@@ -155,6 +168,11 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	var bell := GearFx.bell_grant(seat)
 	if bell > 0.0:
 		_gain_focus(seat, bell)
+	# GEAR-2: Scratchpad — focus trickles in while a long wind-up thinks.
+	if GearFx.scratchpad_live(s, seat):
+		_gain_focus(seat, 4.0 * s.dt)
+		if GearFx.flag_once(seat, &"scratchpad_pop"):
+			GearFx.pop(s, seat, &"scratchpad")
 	# Twin Void: the spent spare kick charge returns after mod_void_recharge seconds.
 	if _b("vcPropTwinVoid") and int(seat.vars.get("kick_spare", 1)) < 1 \
 			and s.tick >= int(seat.vars.get("kick_recharge_tick", 0)):
