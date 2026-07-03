@@ -10,6 +10,7 @@ var _stage := 0
 var _got_fx: Variant = null
 var _built := 0
 var _fails := 0
+var _spent_nudge := -1
 
 func _process(_d: float) -> bool:
 	match _stage:
@@ -18,11 +19,18 @@ func _process(_d: float) -> bool:
 			_stage = 1
 			return false
 		1:
-			# _ready has run → the prompt is built. Expect one button per choice.
+			# _ready has run → the prompt is built (choice buttons + ⚡ steppers).
 			_built = _count_buttons(_panel)
-			_ok("panel built %d choice buttons (expect 3)" % _built, _built == 3)
-			# helpdesk[1] is the HACK check — press it, resolver rolls the die
+			_ok("panel built choice + nudge buttons (%d ≥ 3)" % _built, _built >= 3)
+			# ⚡ NUDGE: feed 1 Entropy to the HACK check (orig 1) — its % must rise
+			var base_p := int((_panel.choices[1] as Dictionary)["chance"])
+			_panel._adjust_nudge(1, 1)
+			var nudged_p := int((_panel._main_btn[1] as Button).text.split("%")[0].split(" ")[-1])
+			_ok("⚡ nudge raised %d%% → %d%% (+8)" % [base_p, nudged_p], nudged_p == base_p + 8)
+			_ok("panel tracked ⚡ spend = 1", int(_panel._nudge.get(1, 0)) == 1)
+			# commit the HACK check WITH the nudge; resolver must receive it
 			_panel._on_press(_panel.choices[1], 1)
+			_ok("resolver received the ⚡ spend (1)", _spent_nudge == 1)
 			_stage = 2
 			return false
 		2:
@@ -49,18 +57,23 @@ func _setup() -> void:
 		var d := {"label": String(c["label"]), "kind": String(c.get("kind", "free")),
 			"orig_index": i, "fx": c.get("fx", {})}
 		if String(c.get("kind", "")) == "check":
-			var info := MapCheck.chance(c.get("check", {}), ctx)
+			var chk: Dictionary = c["check"]
+			var info := MapCheck.chance(chk, ctx)
 			d["chance"] = int(info["p"])
 			d["breakdown"] = info["parts"]
-			d["verb"] = String((c["check"] as Dictionary).get("verb", "CHECK"))
-			print("  prepped %s check '%s' → %d%%" % [d["verb"], d["label"], int(info["p"])])
+			d["verb"] = String(chk.get("verb", "CHECK"))
+			d["entropy_have"] = int(ctx["entropy"])
+			d["nudge_ladder"] = MapCheck.nudge_ladder(chk, ctx)
+			print("  prepped %s check '%s' → %d%%  (⚡ladder %s)" % [d["verb"], d["label"], int(info["p"]), str(d["nudge_ladder"])])
 		descs.append(d)
 	_panel = MapEventPanel.new()
 	_panel.title_text = String(ev["title"])
 	_panel.body_text = String(ev["body"])
 	_panel.choices = descs
-	_panel.resolver = func(orig: int) -> Dictionary:
-		return MapCheck.resolve(raw[orig], ctx, 1234, 5, orig, 0, {})
+	_spent_nudge = -1
+	_panel.resolver = func(orig: int, nudge: int) -> Dictionary:
+		_spent_nudge = nudge
+		return MapCheck.resolve(raw[orig], ctx, 1234, 5, orig, 0, {"nudge": nudge})
 	_panel.finished.connect(func(fx: Dictionary): _got_fx = fx)
 	root.add_child(_panel)
 

@@ -955,6 +955,8 @@ func _show_map() -> void:
 	ms.toast = _ticket_toast
 	_ticket_toast = ""                 # one-shot — clears once shown
 	ms.gear_line = _gear_line()
+	ms.entropy = _entropy
+	ms.prior = _prior
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
@@ -1083,12 +1085,14 @@ func _event_stop(n: Dictionary) -> void:
 	p.body_text = String(ev.get("body", ""))
 	p.choices = descs
 	p.accent = Palette.VOID
-	p.resolver = func(orig: int) -> Dictionary:
-		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id, orig, 0, {})
+	p.resolver = func(orig: int, nudge: int) -> Dictionary:
+		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id, orig, 0, {"nudge": nudge})
 		if bool(res["success"]):
 			_check_fails = 0
 		else:
 			_check_fails += 1
+		if nudge > 0:                          # ⚡ fed to the sampler is spent on commit
+			_entropy = maxi(0, _entropy - nudge)
 		return res
 	p.finished.connect(func(fx: Dictionary):
 		_apply_map_fx(fx)
@@ -1107,10 +1111,13 @@ func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 		d["locked_reason"] = MapCheck.gate_reason(gate)
 		return d
 	if kind == "check":
-		var info := MapCheck.chance(c.get("check", {}), ctx)
+		var chk: Dictionary = c.get("check", {})
+		var info := MapCheck.chance(chk, ctx)
 		d["chance"] = int(info["p"])
 		d["breakdown"] = info["parts"]
-		d["verb"] = String((c.get("check", {}) as Dictionary).get("verb", "CHECK"))
+		d["verb"] = String(chk.get("verb", "CHECK"))
+		d["entropy_have"] = int(ctx.get("entropy", 0))       # ⚡ the party can feed
+		d["nudge_ladder"] = MapCheck.nudge_ladder(chk, ctx)   # the % at 1..min(3,⚡) fed
 	return d
 
 ## The build context an Inference Check reads. Offline the human's seat is the only
@@ -1126,6 +1133,17 @@ func _map_ctx() -> Dictionary:
 		gear_tags.append(GearCatalog.item(String(gid)).get("tags", []))
 	return MapCheck.build_ctx(boon_tags, gear_tags, aspect, _seat_key,
 		_avg_frac(_map_fracs), _prior, _entropy, _check_fails, _map_inv, _flags, _tokens_now())
+
+## Persist 📁 Prior at a DESCENT end (win or wipe): the run's earned prior (already in
+## _prior from mercy/event grants) plus leftover ⚡ Entropy (÷2) plus a clear bonus, banked
+## to the permanent file. "Better luck next time." Headless stays disk-inert. Returns the
+## amount gained THIS descent (leftover-⚡ + clear bonus) for the end-screen line.
+func _bank_prior(won: bool) -> int:
+	var gained := int(_entropy / 2) + (4 if won else 0)
+	_prior = clampi(_prior + gained, 0, LuckProfile.PRIOR_CAP)
+	if DisplayServer.get_name() != "headless":
+		LuckProfile.save_prior(_prior)
+	return gained
 
 ## A map fight: the node's encounter through the SAME shared factory as every raid
 ## pull, then each seat starts at its carried integrity.
@@ -1664,6 +1682,7 @@ func _show_floor_cleared() -> void:
 ## The last Seal (CLAUDE MYTHOS at Ring 0) is down — Realm 1, "The Takeover," is over.
 func _show_campaign_cleared() -> void:
 	_screen = "end"
+	var prior_gain := _bank_prior(true)   # bank BEFORE clearing the run
 	_map = null
 	_clear()
 	var center := CenterContainer.new()
@@ -1677,6 +1696,8 @@ func _show_campaign_cleared() -> void:
 	banner.add_theme_font_override("font", UiKit.title(900))
 	_title(box, "Ring 0 is yours. CLAUDE MYTHOS is unplugged. THE TAKEOVER ends — Realm 1 cleared.", 17, Palette.TEXT)
 	_title(box, String((RaidContent.QUIPS.get("mythos", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
+	_title(box, "📁 TRAINING SIGNAL RECORDED — your prior is now %d (+%d). Welcome back, valued user." % [_prior, prior_gain],
+		13, Palette.VOID)
 	var again := Button.new()
 	again.text = "BACK TO THE RIFT"
 	again.custom_minimum_size = Vector2(260, 48)
@@ -3290,6 +3311,11 @@ func _show_end(won: bool) -> void:
 		_title(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
 		if quips.has("lose"):
 			_title(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
+	# A Topology descent that WIPED still banks 📁 Prior (leftover ⚡ converts) — the
+	# facility trains on every run. (A map win banks via _show_campaign_cleared instead.)
+	if _map != null and not _online:
+		var pg := _bank_prior(false)
+		_title(box, "📁 TRAINING SIGNAL RECORDED — prior %d (+%d). The facility remembers." % [_prior, pg], 13, Palette.VOID)
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))

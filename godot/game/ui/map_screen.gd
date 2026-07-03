@@ -20,6 +20,8 @@ var ring: int = -1                   ## MAP-2: current ring (drives realm title/
 var open_tickets: Array = []         ## MAP-2: titles of quests still open (header list)
 var toast: String = ""               ## MAP-2: one-shot ticket pickup/close banner
 var gear_line: String = ""           ## GEAR-1: equipped curios + ⏣ (raid map; "" = hidden)
+var entropy: int = 0                  ## ⚡ within-run luck pool (Inference Check); 0 hides
+var prior: int = 0                    ## 📁 across-run luck floor; 0 hides
 
 var _hover: int = -1
 var _selectable: Array = []
@@ -78,6 +80,10 @@ func _build_header() -> void:
 			int(inventory.get("shards", 0)), map.seal_shard_req]
 	if inventory.get("api_key", false):
 		status += "      [KEY: %s]" % MapContent.KEY_NAME
+	# The Inference Check meta rides the same status line: ⚡ Entropy (spend to bias a
+	# roll) + 📁 Prior (your file, a floor on every check).
+	if entropy > 0 or prior > 0:
+		status += "      ⚡%d   📁%d(+%d%%)" % [entropy, prior, LuckProfile.prior_floor(prior)]
 	_label(status, 15, Palette.TEXT, Vector2(0, 186), UiKit.display(600, 2))
 	# TICKETS (MAP-2): a one-shot toast for the last pickup/close, then the still-open list
 	if toast != "":

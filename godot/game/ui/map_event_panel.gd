@@ -21,16 +21,20 @@ var title_text := "NODE"
 var body_text := ""
 var choices: Array = []            ## [descriptor]
 var accent: Color = Palette.GOLD
-var resolver: Callable = Callable()   ## check resolver: (orig_index:int) -> Dictionary
+var resolver: Callable = Callable()   ## check resolver: (orig_index:int, nudge:int) -> Dictionary
 
 var _box: VBoxContainer
+var _nudge := {}                      ## orig_index -> ⚡ points fed (0..min(3,have))
+var _desc := {}                       ## orig_index -> descriptor (for live % recompute)
+var _main_btn := {}                   ## orig_index -> the commit Button (live % text)
+var _nudge_lbl := {}                  ## orig_index -> the "⚡N → P%" label
 
 func _ready() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := GlassPanel.new("PANEL", accent)
-	panel.custom_minimum_size = Vector2(700, 520)
+	panel.custom_minimum_size = Vector2(720, 630)   # tall enough for a 3-choice event w/ two checks + ⚡ steppers
 	center.add_child(panel)
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -57,6 +61,8 @@ func _add_choice_button(c: Dictionary, i: int) -> void:
 	var kind := String(c.get("kind", "free"))
 	var gated := bool(c.get("gated", false))
 	var orig: int = int(c.get("orig_index", i))
+	_desc[orig] = c
+	_nudge[orig] = 0
 
 	var b := Button.new()
 	b.custom_minimum_size = Vector2(560, 46)
@@ -65,6 +71,7 @@ func _add_choice_button(c: Dictionary, i: int) -> void:
 	# a check choice shows its % right on the button
 	if kind == "check" and not gated:
 		b.text = "%s          %d%%" % [String(c["label"]), int(c.get("chance", 0))]
+		_main_btn[orig] = b
 	if gated:
 		b.disabled = true
 		b.text = "🔒  " + String(c["label"])
@@ -81,14 +88,65 @@ func _add_choice_button(c: Dictionary, i: int) -> void:
 			var d := int((row as Array)[1])
 			parts += "  %s %s%d" % [String((row as Array)[0]), ("+" if d >= 0 else ""), d]
 		_sub("%s —%s" % [verb, parts], Palette.TEXT_DIM)
+		_add_nudge_row(c, orig)
 	else:
 		var hint := _fx_hint(c.get("fx", {}))
 		if hint != "":
 			_sub(hint, Palette.TEXT_DIM)
 
+## ⚡ NUDGE stepper: feed Entropy to raise this check's % before you commit. Shows the
+## live ladder ("⚡2 → 84%"); the die is unchanged, you're just topping the sampler.
+func _add_nudge_row(c: Dictionary, orig: int) -> void:
+	var ladder: Array = c.get("nudge_ladder", [])
+	if int(c.get("entropy_have", 0)) <= 0 or ladder.is_empty():
+		return
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 10)
+	var minus := _mini_btn("⚡ −")
+	minus.pressed.connect(_adjust_nudge.bind(orig, -1))
+	row.add_child(minus)
+	var lbl := Label.new()
+	lbl.text = "feed ⚡ to bias  (hold %d)" % int(c.get("entropy_have", 0))
+	lbl.custom_minimum_size = Vector2(300, 0)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 12)
+	lbl.add_theme_color_override("font_color", Palette.VOID)
+	row.add_child(lbl)
+	_nudge_lbl[orig] = lbl
+	var plus := _mini_btn("⚡ +")
+	plus.pressed.connect(_adjust_nudge.bind(orig, 1))
+	row.add_child(plus)
+	_box.add_child(row)
+
+func _mini_btn(t: String) -> Button:
+	var b := Button.new()
+	b.text = t
+	b.custom_minimum_size = Vector2(64, 34)
+	b.add_theme_font_size_override("font_size", 14)
+	return b
+
+func _adjust_nudge(orig: int, delta: int) -> void:
+	var c: Dictionary = _desc.get(orig, {})
+	var ladder: Array = c.get("nudge_ladder", [])
+	var cur := int(_nudge.get(orig, 0)) + delta
+	cur = clampi(cur, 0, ladder.size())
+	_nudge[orig] = cur
+	var p := int(c.get("chance", 0)) if cur == 0 else int(ladder[cur - 1])
+	if _main_btn.has(orig):
+		(_main_btn[orig] as Button).text = "%s          %d%%" % [String(c["label"]), p]
+	if _nudge_lbl.has(orig):
+		var l := _nudge_lbl[orig] as Label
+		if cur == 0:
+			l.text = "feed ⚡ to bias  (hold %d)" % int(c.get("entropy_have", 0))
+			l.add_theme_color_override("font_color", Palette.VOID)
+		else:
+			l.text = "⚡ %d fed  →  %d%%" % [cur, p]
+			l.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
+
 func _on_press(c: Dictionary, orig: int) -> void:
 	if String(c.get("kind", "free")) == "check" and resolver.is_valid():
-		var res: Dictionary = resolver.call(orig)
+		var res: Dictionary = resolver.call(orig, int(_nudge.get(orig, 0)))
 		_show_result(res.get("fx", {}), String(res.get("result", "")),
 			bool(res.get("success", false)), int(res.get("roll", -1)), int(res.get("p", 0)), true)
 	else:
