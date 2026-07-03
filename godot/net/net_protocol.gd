@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 9      # v9: WAGER kind + post-fail MULLIGAN — choice msg carries `attempt`; wagers roll a build-read die with a fixed stake
+const VERSION := 10     # v10: ONLINE PRIOR — the claim msg carries the client's 📁 Prior tier; the server trusts it and folds it into each seat's check floor + starting ⚡
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

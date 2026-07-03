@@ -234,6 +234,11 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_join(id, msg)
 		"claim":
 			_claim(id, String(msg.get("seat", "")))
+			# v10: the client transmits its 📁 Prior tier (the dedicated server can't read a
+			# client's user:// file, so it TRUSTS + caps it). Folds into the seat's check floor.
+			var rm := _room_of(id)
+			if not rm.is_empty() and (rm.get("players", {}) as Dictionary).has(id):
+				rm["players"][id]["prior"] = clampi(int(msg.get("prior", 0)), 0, LuckProfile.PRIOR_CAP)
 		"unclaim":
 			_unclaim(id)
 		"aspect":
@@ -350,7 +355,7 @@ func _join(id: int, msg: Dictionary) -> void:
 		_send(id, {"t": "err", "msg": "room is full"})
 		return
 	_peers[id] = {"name": pname, "room": code}
-	room["players"][id] = {"name": pname, "seat": "", "aspect": "", "cls": "", "ready": false}
+	room["players"][id] = {"name": pname, "seat": "", "aspect": "", "cls": "", "ready": false, "prior": 0}
 	if room["host"] == 0 or not room["players"].has(room["host"]):
 		room["host"] = id
 	_log("%s joined %s" % [pname, code])
@@ -413,8 +418,10 @@ func _start_map(id: int) -> void:
 		if not bool(pl["ready"]) and pid != id:
 			_send(id, {"t": "err", "msg": "%s isn't ready" % pl["name"]})
 			return
-		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false, "cls": String(pl.get("cls", ""))}
+		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false,
+			"cls": String(pl.get("cls", "")), "prior": int(pl.get("prior", 0))}   # v10: trusted client Prior
 	room["seat_cfg"] = seat_cfg
+	var leader_prior := int((room["players"] as Dictionary).get(room["host"], {}).get("prior", 0))
 	room["campaign"] = {
 		"map_seed": randi() & 0x7FFFFFFF, "floor": 0, "node": -1,
 		"inv": {}, "fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
@@ -423,10 +430,10 @@ func _start_map(id: int) -> void:
 		"boons": {},                 # online boons: seat_key -> {boon_id: true}, drafted over the descent
 		"draft_pending": [],         # human seats that still owe a pick this draft phase
 		"next_after_draft": "",      # "map" | "advance" — what to do once everyone's picked
-		# THE INFERENCE CHECK meta (v6): ⚡ Entropy is server-owned & broadcast; flags ripple
-		# across nodes; check_fails drives comeback pity. Prior online starts at 0 (the server
-		# can't read a client's user:// file — client-transmitted Prior is a later refinement).
-		"entropy": LuckProfile.starting_entropy(0), "flags": {}, "check_fails": 0,
+		# THE INFERENCE CHECK meta: ⚡ Entropy is server-owned & broadcast; flags ripple across
+		# nodes; check_fails drives comeback pity. Starting ⚡ scales off the LEADER's trusted
+		# 📁 Prior (v10); each seat's own Prior rides seat_cfg into its check floor.
+		"entropy": LuckProfile.starting_entropy(leader_prior), "flags": {}, "check_fails": 0,
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"

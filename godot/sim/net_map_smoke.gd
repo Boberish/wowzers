@@ -28,6 +28,7 @@ var spec_boons_seen := false   # a fight spec carried per-seat boons
 var checks_answered := 0       # v6: online INFERENCE CHECKS the leader resolved
 var check_toast_ok := true     # each check must produce a ✓/✗ dice toast
 var entropy_seen := -1         # last broadcast ⚡ (must never go negative)
+var first_entropy := -1        # v10: the descent's opening ⚡ (must reflect the leader's Prior)
 var pending_check := false     # awaiting the map toast after a check
 
 func _run_for(seat: String) -> RunState:
@@ -70,6 +71,8 @@ func _client(pname: String) -> Dictionary:
 		# v6: ⚡ Entropy must never go negative; a check's outcome rides in the toast (✓/✗)
 		if c["name"] == "Ava":
 			entropy_seen = int(msg.get("entropy", 0))
+			if first_entropy < 0:
+				first_entropy = entropy_seen
 			if entropy_seen < 0:
 				_fail("⚡ entropy went negative (%d)" % entropy_seen)
 			if pending_check:
@@ -152,8 +155,10 @@ func _process(delta: float) -> bool:
 		"boot":
 			if ava["connected"] and bo["connected"] \
 					and (ava["room"].get("players", []) as Array).size() == 2:
-				ava["net"].send({"t": "claim", "seat": "tank"})
-				bo["net"].send({"t": "claim", "seat": "healer"})
+				# v10: Ava is a veteran (📁 Prior 40 → +2% check floor + starting ⚡); the
+				# server trusts the claimed tier. Must not break lockstep.
+				ava["net"].send({"t": "claim", "seat": "tank", "prior": 40})
+				bo["net"].send({"t": "claim", "seat": "healer", "prior": 0})
 				phase = "claim"
 		"claim":
 			if _seat_of(ava, "Ava") == "tank" and _seat_of(bo, "Bo") == "healer":
@@ -292,6 +297,13 @@ func _finish() -> void:
 		checks_answered, str(check_toast_ok), str(entropy_seen >= 0)])
 	if not check_toast_ok:
 		_fail("an online check resolved without a ✓/✗ dice toast")
+		return
+	# v10: the leader Ava's Prior 40 → starting ⚡ = starting_entropy(40)
+	var want_ent := LuckProfile.starting_entropy(40)
+	print("online Prior: opening ⚡ = %d (expect starting_entropy(40)=%d) %s" % [
+		first_entropy, want_ent, ("PASS" if first_entropy == want_ent else "FAIL")])
+	if first_entropy != want_ent:
+		_fail("leader Prior didn't flow into starting ⚡ (%d vs %d)" % [first_entropy, want_ent])
 		return
 	print("desyncs: ava=%s bo=%s" % [str(ava["desync"]), str(bo["desync"])])
 	if min_open_frac >= 0.999:

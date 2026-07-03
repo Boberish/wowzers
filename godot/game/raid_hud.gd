@@ -559,7 +559,7 @@ func _show_lobby() -> void:
 			var cb := Button.new()
 			cb.text = "CLAIM"
 			cb.custom_minimum_size = Vector2(110, 34)
-			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key}))
+			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key, "prior": _my_prior()}))
 			row.add_child(cb)
 		elif claimant == me:
 			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
@@ -924,7 +924,7 @@ func _start_map_run() -> void:
 	# The Inference Check meta resets for a fresh descent. ⚡ Entropy seeds from 📁 Prior
 	# (the veteran's warm welcome); Prior itself loads once from the permanent file
 	# (headless stays disk-inert — smokes/sims start from a clean file).
-	_prior = LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
+	_prior = _my_prior()
 	_entropy = LuckProfile.starting_entropy(_prior)
 	_flags = {}
 	_check_fails = 0
@@ -1227,6 +1227,12 @@ func _bank_prior(won: bool) -> int:
 	if DisplayServer.get_name() != "headless":
 		LuckProfile.save_prior(_prior)
 	return gained
+
+## This client's 📁 Prior tier (headless/sims stay disk-inert). Sent to the server at
+## seat-claim (v10) so co-op checks read the veteran's warm welcome — the server can't
+## read a client's user:// file, so it trusts this.
+func _my_prior() -> int:
+	return LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
 
 ## A map fight: the node's encounter through the SAME shared factory as every raid
 ## pull, then each seat starts at its carried integrity.
