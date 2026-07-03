@@ -25,6 +25,14 @@ var resolver: Callable = Callable()   ## check resolver: (orig_index:int, nudge:
 
 var committed_index := -1             ## the orig_index the player pressed (online: sent to server)
 var committed_nudge := 0              ## ⚡ fed on that press (online: sent to server)
+var committed_seat := ""              ## the specialist that stepped up (online seat-picker)
+
+## SEAT-PICKER (online co-op): the party chooses WHICH seat attempts a check — its
+## build drives the %. `seats` = candidate seat keys (empty = no picker, e.g. offline);
+## each choice descriptor carries `by_seat` = {seat -> {chance,breakdown,ladder,gated,…}}.
+var seats: Array = []
+var suggested := ""
+var _acting := ""
 
 var _box: VBoxContainer
 var _nudge := {}                      ## orig_index -> ⚡ points fed (0..min(3,have))
@@ -48,17 +56,77 @@ func _ready() -> void:
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_box.add_theme_constant_override("separation", 12)
 	margin.add_child(_box)
+	if not seats.is_empty():                     # default to the suggested specialist
+		_acting = suggested if String(suggested) in seats else String(seats[0])
 	_show_prompt()
 
 func _show_prompt() -> void:
 	_clear()
+	_desc.clear()
+	_main_btn.clear()
+	_nudge_lbl.clear()
 	_title(title_text)
 	_body(body_text)
+	if not seats.is_empty():
+		_render_selector()
 	_box.add_child(_gap(4))
-	var idx := 0
 	for c in choices:
-		_add_choice_button(c, idx)
-		idx += 1
+		_add_choice_button(_effective(c), int((c as Dictionary).get("orig_index", 0)))
+
+## Merge a choice's seat-independent fields (label/kind/verb/fx) with the ACTING seat's
+## by_seat metadata (chance/breakdown/ladder/gate). Offline (no by_seat) reads flat fields.
+func _effective(c: Dictionary) -> Dictionary:
+	var m := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
+		"orig_index": int(c.get("orig_index", 0)), "fx": c.get("fx", {}),
+		"verb": String(c.get("verb", "CHECK")), "entropy_have": int(c.get("entropy_have", 0))}
+	var v: Dictionary = c
+	if c.has("by_seat") and _acting != "":
+		v = (c["by_seat"] as Dictionary).get(_acting, {})
+	if bool(v.get("gated", false)):
+		m["gated"] = true
+		m["locked_reason"] = String(v.get("locked_reason", "locked"))
+	elif String(m["kind"]) == "check":
+		m["chance"] = int(v.get("chance", c.get("chance", 0)))
+		m["breakdown"] = v.get("breakdown", c.get("breakdown", []))
+		m["nudge_ladder"] = v.get("ladder", c.get("nudge_ladder", []))
+	return m
+
+## "WHO STEPS UP" — a row of seat buttons; the current one is lit, ★ marks the best fit.
+func _render_selector() -> void:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 8)
+	var lead := Label.new()
+	lead.text = "WHO STEPS UP:"
+	lead.add_theme_font_size_override("font_size", 12)
+	lead.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	row.add_child(lead)
+	for st in seats:
+		var b := Button.new()
+		b.text = _seat_name(String(st)) + ("  ★" if String(st) == suggested else "")
+		b.custom_minimum_size = Vector2(120, 34)
+		b.add_theme_font_size_override("font_size", 13)
+		if String(st) == _acting:
+			b.disabled = true                    # the current specialist reads as selected
+			b.add_theme_color_override("font_color_disabled", Palette.GOLD_BRIGHT)
+		b.pressed.connect(_select_seat.bind(String(st)))
+		row.add_child(b)
+	_box.add_child(row)
+	_sub("the specialist's build drives the check  ·  ★ = best fit", Palette.TEXT_DIM)
+
+func _select_seat(st: String) -> void:
+	if st == _acting:
+		return
+	_acting = st
+	_show_prompt()
+
+func _seat_name(st: String) -> String:
+	match st:
+		"tank": return "TANK"
+		"blade": return "BLADE"
+		"caster": return "CASTER"
+		"healer": return "HEALER"
+	return st.to_upper()
 
 func _add_choice_button(c: Dictionary, i: int) -> void:
 	var kind := String(c.get("kind", "free"))
@@ -150,6 +218,7 @@ func _adjust_nudge(orig: int, delta: int) -> void:
 func _on_press(c: Dictionary, orig: int) -> void:
 	committed_index = orig
 	committed_nudge = int(_nudge.get(orig, 0))
+	committed_seat = _acting                     # the specialist that stepped up (online)
 	if String(c.get("kind", "free")) == "check" and resolver.is_valid():
 		var res: Dictionary = resolver.call(orig, int(_nudge.get(orig, 0)))
 		_show_result(res.get("fx", {}), String(res.get("result", "")),

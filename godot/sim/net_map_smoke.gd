@@ -198,18 +198,21 @@ func _answer_event(host: Dictionary) -> void:
 	var msg: Dictionary = host["stop"]
 	var meta: Array = msg.get("choices", [])
 	var ent := int(msg.get("entropy", 0))
-	# prefer a non-gated CHECK (to exercise the dice); else the first non-gated choice
+	var seat := String(msg.get("suggested", ""))     # v7: send the SUGGESTED specialist
+	# prefer a non-gated CHECK for that seat (exercise the dice); else the first non-gated
 	var pick := -1
 	var sc := {}
+	var bs := {}
 	for c in meta:
-		var cc: Dictionary = c
-		if not bool(cc.get("gated", false)) and String(cc.get("kind", "")) == "check":
-			pick = int(cc.get("i", 0)); sc = cc
+		var b: Dictionary = ((c as Dictionary).get("by_seat", {}) as Dictionary).get(seat, {})
+		if String((c as Dictionary).get("kind", "")) == "check" and not bool(b.get("gated", false)):
+			pick = int((c as Dictionary).get("i", 0)); sc = c; bs = b
 			break
 	if pick < 0:
 		for c in meta:
-			if not bool((c as Dictionary).get("gated", false)):
-				pick = int((c as Dictionary).get("i", 0)); sc = c
+			var b2: Dictionary = ((c as Dictionary).get("by_seat", {}) as Dictionary).get(seat, {})
+			if not bool(b2.get("gated", false)):
+				pick = int((c as Dictionary).get("i", 0)); sc = c; bs = b2
 				break
 	if pick < 0:
 		pick = 0
@@ -217,11 +220,11 @@ func _answer_event(host: Dictionary) -> void:
 	var kind := String(sc.get("kind", "free"))
 	if kind == "check":
 		checks_answered += 1
-		nudge = mini((sc.get("ladder", []) as Array).size(), ent)   # feed what we hold
+		nudge = mini((bs.get("ladder", []) as Array).size(), ent)   # feed what we hold
 		pending_check = true
-	print("[leader] answer '%s' choice %d (%s%s)" % [String(msg.get("title", "")), pick, kind,
-		("  ⚡×%d → %d%%" % [nudge, int(sc.get("chance", 0))]) if kind == "check" else ""])
-	(host["net"] as NetClient).send_choice(pick, nudge)
+	print("[leader] %s steps up: answer '%s' choice %d (%s%s)" % [seat, String(msg.get("title", "")),
+		pick, kind, ("  ⚡×%d → %d%%" % [nudge, int(bs.get("chance", 0))]) if kind == "check" else ""])
+	(host["net"] as NetClient).send_choice(pick, nudge, seat)
 
 func _leader_pick(host: Dictionary) -> void:
 	var msg: Dictionary = host["map"]

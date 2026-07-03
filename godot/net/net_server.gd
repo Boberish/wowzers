@@ -504,33 +504,29 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 			room["map_fight"] = {"node": int(n["id"]), "is_seal": String(n["kind"]) == RunMap.KIND_SEAL}
 			_launch_map_fight_srv(room, int(n["fight"]))
 		RunMap.KIND_EVENT:
-			# INFERENCE CHECK (v6): compute each choice's % / breakdown / gate for the
-			# ACTING seat (the leader, MVP) and broadcast the rich metadata so the leader
-			# renders real dice. The pure die (map_seed,node,choice) lets the leader show
-			# the ✓/✗ locally, identical to the server's authoritative resolve.
+			# INFERENCE CHECK (v7 — the SEAT-PICKER): compute each choice's % / breakdown /
+			# gate for EVERY candidate seat and broadcast `by_seat`, so the party can send
+			# their SPECIALIST to the terminal (the seat's build drives the check). The pure
+			# die (map_seed,node,choice) is seat-independent, so the leader shows the ✓/✗
+			# locally for the chosen seat, identical to the server's authoritative resolve.
 			var ev := MapContent.event(String(n["event"]))
 			cp["pending_event"] = String(n["event"])
-			var seat := _leader_seat(room)
-			var ctx := _map_ctx_srv(room, seat)
-			var choices: Array = []
+			var seats := _candidate_seats(room)
 			var raw: Array = ev.get("choices", [])
+			var choices: Array = []
 			for i in raw.size():
 				var c: Dictionary = raw[i]
-				var d := {"i": i, "label": String(c.get("label", "")), "kind": String(c.get("kind", "free"))}
-				var gate: Dictionary = c.get("gate", {})
-				if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
-					d["gated"] = true
-					d["locked_reason"] = MapCheck.gate_reason(gate)
-				elif String(c.get("kind", "")) == "check":
-					var info := MapCheck.chance(c.get("check", {}), ctx)
-					d["chance"] = int(info["p"])
-					d["breakdown"] = info["parts"]
-					d["verb"] = String((c.get("check", {}) as Dictionary).get("verb", "CHECK"))
-					d["ladder"] = MapCheck.nudge_ladder(c.get("check", {}), ctx)
+				var d := {"i": i, "label": String(c.get("label", "")),
+					"kind": String(c.get("kind", "free")),
+					"verb": String((c.get("check", {}) as Dictionary).get("verb", "CHECK")),
+					"by_seat": {}}
+				for st in seats:
+					d["by_seat"][st] = _choice_meta_for(c, _map_ctx_srv(room, st))
 				choices.append(d)
+			var suggested := _suggest_seat(seats, choices)
 			_broadcast(room, {"t": "mapstop", "event": String(n["event"]),
 				"node": int(n["id"]), "map_seed": int((cp["map"] as RunMap).seed),
-				"acting_seat": seat, "entropy": int(cp["entropy"]),
+				"seats": seats, "suggested": suggested, "entropy": int(cp["entropy"]),
 				"title": String(ev.get("title", "")), "body": String(ev.get("body", "")),
 				"choices": choices, "accent": "void"})
 		RunMap.KIND_COOLING:
@@ -571,7 +567,10 @@ func _pick_choice(id: int, msg: Dictionary) -> void:
 	if i < 0 or i >= choices.size():
 		return
 	var c: Dictionary = choices[i]
-	var seat := String(msg.get("seat", _leader_seat(room)))
+	# the party's chosen specialist (v7); an unknown seat falls back to the leader
+	var seat := String(msg.get("seat", ""))
+	if not (room.get("seat_cfg", {}) as Dictionary).has(seat):
+		seat = _leader_seat(room)
 	var ctx := _map_ctx_srv(room, seat)
 	# the pure decision (gate / roll / toast / ⚡ spend) — shared with the unit probe
 	var r := resolve_event_choice(c, ctx, int((cp["map"] as RunMap).seed), int(cp["node"]),
@@ -607,6 +606,46 @@ static func resolve_event_choice(c: Dictionary, ctx: Dictionary, map_seed: int, 
 	var fx: Dictionary = (c.get("fx", {}) as Dictionary).duplicate()
 	return {"accept": true, "is_check": false, "fx": fx, "toast": String(fx.get("result", "")),
 		"entropy_after": entropy_have, "success": true}
+
+## Candidate seats a check can be attempted by — every seat in the descent, in the
+## canonical tank→blade→caster→healer order (stable across machines).
+func _candidate_seats(room: Dictionary) -> Array:
+	var cfg: Dictionary = room.get("seat_cfg", {})
+	var out: Array = []
+	for st in RaidNet.SEAT_KEYS:
+		if cfg.has(st):
+			out.append(st)
+	return out
+
+## One choice's per-seat metadata: gate state, and (for a check) the % / breakdown /
+## ⚡ ladder as that seat's build reads it.
+func _choice_meta_for(c: Dictionary, ctx: Dictionary) -> Dictionary:
+	var m := {}
+	var gate: Dictionary = c.get("gate", {})
+	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
+		m["gated"] = true
+		m["locked_reason"] = MapCheck.gate_reason(gate)
+	elif String(c.get("kind", "")) == "check":
+		var info := MapCheck.chance(c.get("check", {}), ctx)
+		m["chance"] = int(info["p"])
+		m["breakdown"] = info["parts"]
+		m["ladder"] = MapCheck.nudge_ladder(c.get("check", {}), ctx)
+	return m
+
+## The seat the UI suggests: the one whose build gives the highest total check % (the
+## "specialist"). Ties break by seat order. No checks ⇒ the leader.
+static func _suggest_seat(seats: Array, choices: Array) -> String:
+	var best := ""
+	var best_score := -1
+	for st in seats:
+		var score := 0
+		for c in choices:
+			if String((c as Dictionary).get("kind", "")) == "check":
+				score += int(((c["by_seat"] as Dictionary).get(st, {}) as Dictionary).get("chance", 0))
+		if score > best_score:
+			best_score = score
+			best = String(st)
+	return best if best != "" else (String(seats[0]) if not seats.is_empty() else "tank")
 
 ## The seat that owns the route (the acting seat for checks, MVP).
 func _leader_seat(room: Dictionary) -> String:

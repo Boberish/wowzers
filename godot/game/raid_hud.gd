@@ -728,10 +728,11 @@ func _avg_frac(fracs: Array) -> float:
 	return t / float(fracs.size())
 
 ## An event panel: the LEADER picks a choice (sent to the server); others read it.
-## INFERENCE CHECK (v6): the server sends each choice's %/breakdown/gate for the acting
-## seat + ⚡ entropy; the leader renders real dice and shows the ✓/✗ LOCALLY (the pure die
-## keyed off the broadcast map_seed+node matches the server's authoritative resolve), then
-## sends {i, nudge}. Spectators read the prompt and see the outcome in the next map toast.
+## INFERENCE CHECK (v7 — SEAT-PICKER): the server sends each choice's by_seat metadata
+## (%/breakdown/gate for EVERY seat) + the suggested specialist + ⚡ entropy. The leader
+## picks WHO steps up, renders that seat's real dice, and shows the ✓/✗ LOCALLY (the pure
+## die keyed off map_seed+node matches the server's resolve for the SAME seat), then sends
+## {i, nudge, seat}. Spectators read the prompt and see the outcome in the next map toast.
 func _on_net_mapstop(msg: Dictionary) -> void:
 	_online_map = true
 	_screen = "mapstop"
@@ -748,35 +749,31 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 		for i in raw.size():
 			var c: Dictionary = raw[i]
 			var sc: Dictionary = meta[i] if i < meta.size() else {}
-			var d := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
-				"orig_index": i, "fx": c.get("fx", {})}
-			if bool(sc.get("gated", false)):
-				d["gated"] = true
-				d["locked_reason"] = String(sc.get("locked_reason", "locked"))
-			elif d["kind"] == "check":
-				d["chance"] = int(sc.get("chance", 0))
-				d["breakdown"] = sc.get("breakdown", [])
-				d["verb"] = String(sc.get("verb", "CHECK"))
-				d["entropy_have"] = ent
-				d["nudge_ladder"] = sc.get("ladder", [])
-			descs.append(d)
+			descs.append({"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
+				"orig_index": i, "fx": c.get("fx", {}), "verb": String(sc.get("verb", "CHECK")),
+				"entropy_have": ent, "by_seat": sc.get("by_seat", {})})
 		var p := MapEventPanel.new()
 		p.title_text = String(msg.get("title", ""))
 		p.body_text = String(msg.get("body", ""))
 		p.choices = descs
+		p.seats = msg.get("seats", [])
+		p.suggested = String(msg.get("suggested", ""))
 		p.accent = Palette.VOID
-		# Resolve locally for DISPLAY only (the pure die + the server's % → same verdict the
-		# server computes). Never applies fx — the server broadcasts the resulting integrity.
+		# Resolve locally for DISPLAY only, for the seat that STEPPED UP (p.committed_seat,
+		# set on press). The pure die + that seat's broadcast % == the server's resolve for
+		# the same seat. Never applies fx — the server broadcasts the resulting integrity.
 		p.resolver = func(orig: int, nudge: int) -> Dictionary:
 			var sc: Dictionary = meta[orig] if orig < meta.size() else {}
-			var ladder: Array = sc.get("ladder", [])
-			var pp := int(sc.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
+			var bs: Dictionary = (sc.get("by_seat", {}) as Dictionary).get(p.committed_seat, {})
+			var ladder: Array = bs.get("ladder", [])
+			var pp := int(bs.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
 			var roll := MapCheck.roll(mseed, node, orig, 0)
 			var success := roll < float(pp)
 			var leg: Dictionary = (raw[orig] as Dictionary).get("success" if success else "fail", {})
 			return {"success": success, "roll": roll, "p": pp,
 				"result": String(leg.get("result", "")), "fx": leg.get("fx", {})}
-		p.finished.connect(func(_fx: Dictionary): _net.send_choice(p.committed_index, p.committed_nudge))
+		p.finished.connect(func(_fx: Dictionary):
+			_net.send_choice(p.committed_index, p.committed_nudge, p.committed_seat))
 		p.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_ui.add_child(p)
 	else:

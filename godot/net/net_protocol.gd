@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 6      # v6: INFERENCE CHECK online — mapstop carries per-choice %/breakdown/gate + ⚡entropy; choice msg carries {i, nudge, seat}
+const VERSION := 7      # v7: SEAT-PICKER — mapstop carries per-choice by_seat{%/breakdown/gate/ladder} + suggested; party sends its specialist in {i, nudge, seat}
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 
