@@ -183,9 +183,10 @@ func _draw() -> void:
 		detail = true                          # solo duel: the ranking IS you — skip to spells
 	var fi := _focus_seat_i(s)
 
-	# ---- content height first (bg fits what's shown) ----
+	# ---- content height first (bg fits what's shown; detail adds its crumb line) ----
 	var rows := (_sources(s, fi, mode).size() if detail else rk.size())
-	var h := HDR + 6.0 + float(rows) * (ROW_D if detail else ROW_C) + FOOT + 4.0
+	var h := HDR + 6.0 + (18.0 if detail else 0.0) \
+		+ float(rows) * (ROW_D if detail else ROW_C) + FOOT + 4.0
 	h = maxf(h, HDR + FOOT + 26.0)
 
 	# ---- plaque ----
@@ -253,10 +254,13 @@ func _draw_compact(s: CombatState, rk: Array, y: float) -> float:
 		UiKit.text_shadowed(self, UiKit.body(600), Vector2(16, y + ROW_C - 8.0),
 			_seat_name(seat) + (" ◆" if seat.is_player else ""),
 			HORIZONTAL_ALIGNMENT_LEFT, size.x * 0.45, UiKit.SIZE["CAPTION"], name_col)
+		# total (bright) and rate (dim, its own column) — never read as one number
 		UiKit.text_shadowed(self, UiKit.display(650), Vector2(0, y + ROW_C - 8.0),
-			"%s   %s" % [_fmt(t), _fmt_rate(t / elapsed)],
-			HORIZONTAL_ALIGNMENT_RIGHT, size.x - 14, UiKit.SIZE["CAPTION"],
-			Palette.GOLD_BRIGHT if seat.is_player else Palette.TEXT_DIM)
+			_fmt(t), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 64, UiKit.SIZE["CAPTION"],
+			Palette.GOLD_BRIGHT if seat.is_player else Palette.TEXT)
+		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, y + ROW_C - 8.0),
+			_fmt_rate(t / elapsed), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 14,
+			UiKit.SIZE["MICRO"], Palette.TEXT_DIM)
 		y += ROW_C
 	if rk.is_empty():
 		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, y + 14), "· nothing yet ·",
