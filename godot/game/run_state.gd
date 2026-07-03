@@ -70,7 +70,14 @@ static func _base(cls: String, aspect: String, seed_v: int) -> RunState:
 ## Per-fight combat seed — CLOSED-FORM off (run_seed, enc_index), never a draft_rng
 ## draw, so spending Tokens in a draft can never shift the next fight's combat.
 func fight_seed() -> int:
-	return (run_seed * 1000003 + enc_index * 7919 + 1) & 0x7FFFFFFF
+	var s := (run_seed * 1000003 + enc_index * 7919 + 1) & 0x7FFFFFFF
+	# Topology map mode reuses enc_index across nodes (the ramp maps several combat
+	# nodes onto the same fight index), so fold the unique node id in — otherwise two
+	# same-index nodes seed state.rng identically and the fight plays back verbatim.
+	# Guarded: a linear run (map == null — every class sim + draft_sim) is untouched.
+	if map != null:
+		s = (s * 1000003 + (map_node + 1) * 6763) & 0x7FFFFFFF
+	return s
 
 func current_encounter() -> EncounterRes:
 	return encounters[enc_index]
