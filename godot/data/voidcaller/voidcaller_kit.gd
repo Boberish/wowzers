@@ -79,6 +79,9 @@ func _do_interrupt(s: CombatState, seat: Seat, source: String) -> void:
 				_heal(s, seat, 30.0, &"reprieve")
 		if _b("refund") and clean:                    # clean kick refunds half its cooldown
 			seat.defense_ready_tick = s.tick + _tt(s, defense_cd() * 0.5)
+		if GearFx.once(seat, &"spark_plug"):          # GEAR-1: first kick refunds half its cd
+			seat.defense_ready_tick = s.tick + _tt(s, defense_cd() * 0.5)
+			GearFx.pop(s, seat, &"spark_plug")
 	else:
 		var a: Dictionary = cfg.abilities[source]
 		if a.has("reflect"):
@@ -148,6 +151,10 @@ func on_strike_result(_s: CombatState, seat: Seat, _ability: AbilityRes,
 # --------------------------------------------------------------------------
 
 func upkeep(s: CombatState, seat: Seat) -> void:
+	# GEAR-1: LE CHAT's Bell — +30 starting focus, exactly once (gear-gated no-op).
+	var bell := GearFx.bell_grant(seat)
+	if bell > 0.0:
+		_gain_focus(seat, bell)
 	# Twin Void: the spent spare kick charge returns after mod_void_recharge seconds.
 	if _b("vcPropTwinVoid") and int(seat.vars.get("kick_spare", 1)) < 1 \
 			and s.tick >= int(seat.vars.get("kick_recharge_tick", 0)):
@@ -176,6 +183,7 @@ func modify_incoming(_s: CombatState, seat: Seat, dmg: float, _source: StringNam
 	return dmg
 
 func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringName, _size: int) -> void:
+	GearFx.damage_taken(s, seat)   # GEAR-1: death procs (Swan Song) — gear-gated no-op
 	if seat.casting.is_empty():
 		return
 	var c := seat.casting                             # pushback, capped at cast+push_cap
@@ -183,6 +191,12 @@ func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringNam
 	c["dur_ticks"] = mini(int(c["dur_ticks"]) + _tt(s, cfg.pushback), max_dur)
 	c["pushed"] = true
 	seat.gcd_until_tick = int(c["start_tick"]) + int(c["dur_ticks"])
+
+# --- GEAR-1: a boss self-heal was DENIED somewhere — Riftmaw Tooth pays focus ---
+func on_boss_heal_denied(s: CombatState, seat: Seat) -> void:
+	var g := GearFx.tooth_grant(s, seat)
+	if g > 0.0:
+		_gain_focus(seat, g)
 	CombatCore.emit_event(s, {"t": "pushback", "player": seat.is_player})
 
 # --------------------------------------------------------------------------

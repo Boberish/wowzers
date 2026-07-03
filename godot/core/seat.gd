@@ -39,6 +39,12 @@ var vars: Dictionary = {}
 ## its own counts (raid sims); `state.diag` stays the is_player mirror solo sims read.
 var diag: Dictionary = {}
 
+## GEAR-1: equipped curio ids (StringNames, ≤2) + their per-fight bookkeeping
+## (one-shot flags, charges). The engine never reads these — kits interpret them
+## (GearFx); empty = every gear branch is dead code (byte-identical gearless runs).
+var gear: Array = []
+var gear_vars: Dictionary = {}
+
 # --- shields / heals / timed effects (used by the healer + anyone healable) ---
 var absorb: float = 0.0                 ## damage shield; drained before HP
 var absorb_owner_i: int = -1            ## seats[] index of who granted the ward (-1 → the first healer).

@@ -79,6 +79,15 @@ var _map_ticket_total := 0         ## tickets placed on this floor (for the spri
 var _map_closed := 0               ## tickets closed this floor
 var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next map screen
 
+# GEAR-1 (Curios / Realm-1 "peripherals"): run-scoped loot. Items evaporate with the
+# run (win or wipe); only Ledger UNLOCKS persist (GearStore). Offline-only in v1 —
+# the online campaign spec folds `gear` in later (rides like tickets/inventory).
+var _map_gear: Array = []               ## equipped curio ids (≤ Gear.SLOTS)
+var _map_gear_charges: Dictionary = {}  ## active-item charges left this run
+var _map_tokens := 0                    ## ⏣ banked from scrap (MARKET spends them, GEAR-3)
+var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
+var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
+
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
 var _ui: Control
@@ -630,6 +639,14 @@ func _start_map_run() -> void:
 	_map_fracs = [1.0, 1.0, 1.0, 1.0]
 	_map_wounds = [0.0, 0.0, 0.0, 0.0]
 	_map_mana = 1.0
+	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
+	# Headless (smokes) stays disk-inert — tests inject _gear_unlocks directly.
+	_map_gear = []
+	_map_gear_charges = {}
+	_map_tokens = 0
+	if DisplayServer.get_name() != "headless":
+		_gear_unlocks = GearStore.load_unlocks()
+	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
 	_build_floor()
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
@@ -672,9 +689,24 @@ func _show_map() -> void:
 	ms.open_tickets = _open_ticket_lines()
 	ms.toast = _ticket_toast
 	_ticket_toast = ""                 # one-shot — clears once shown
+	ms.gear_line = _gear_line()
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
+	# GEAR-1: Cooling Paste — a USE button rides the map while a wound needs it
+	if _map_gear.has("cooling_paste") and int(_map_gear_charges.get("cooling_paste", 0)) > 0 \
+			and _worst_wound() > 0.0:
+		var pb := Button.new()
+		pb.text = "USE COOLING PASTE — repair corrupted sectors (%d left)" \
+			% int(_map_gear_charges["cooling_paste"])
+		pb.add_theme_font_size_override("font_size", 15)
+		pb.pressed.connect(func():
+			_map_gear_charges["cooling_paste"] = int(_map_gear_charges["cooling_paste"]) - 1
+			_apply_map_fx({"repair": true})
+			_ticket_toast = "🧴  COOLING PASTE — corrupted sectors repaired"
+			_show_map())
+		_place(pb, 0.5, 1.0, 0.5, 1.0, -290, -96, 290, -56)
+		_ui.add_child(pb)
 
 ## Short "still open" lines for the map header (title + where to turn it in).
 func _open_ticket_lines() -> Array:
@@ -723,6 +755,8 @@ func _ticket_at(n: Dictionary) -> void:
 		_map_tickets.erase(tclose)
 		_map_closed += 1
 		_apply_map_fx(td2.get("reward", {}))
+		if _map_gear.has("ticket_stub"):   # GEAR-1: the stub pays +5% party integrity
+			_apply_map_fx({"heal": 0.05})
 		_ticket_toast = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
 		if _map_closed >= _map_ticket_total and _map_ticket_total > 0:
 			_apply_map_fx(MapContent.SPRINT_RETRO_FX)
@@ -762,6 +796,7 @@ func _launch_map_fight(fi: int) -> void:
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var spec := RaidNet.make_spec(run_seed, {_seat_key: {"aspect": _aspect, "ai": false}}, String(enc.id))
 	var s := RaidNet.build(spec, _seat_key)
+	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	for i in s.seats.size():
 		if i < _map_fracs.size():
 			var u: Seat = s.seats[i]
@@ -787,6 +822,7 @@ func _launch_gate_fight() -> void:
 	_clear()
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect)
+	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
 	if _map != null:
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = s.seats[0]
@@ -849,6 +885,136 @@ func _apply_map_fx(fx: Dictionary) -> void:
 			if float(_map_fracs[i]) < float(_map_fracs[lo]):
 				lo = i
 		_map_fracs[lo] = clampf(float(_map_fracs[lo]) + 0.25, 0.05, 1.0)
+
+# ---------------------------------------------------------------- GEAR-1 (Curios)
+
+## Which class this seat key plays (gear rows are class-marked by class name).
+const SEAT_CLS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller", "healer": "mender"}
+
+## The human seat carries the run's equipped curios into a fight (offline map runs
+## only — the seat starts each pull with fresh per-fight gear bookkeeping).
+func _arm_gear(u: Seat) -> void:
+	u.gear = _map_gear.duplicate()
+	u.gear_vars = {}
+
+## Roll the kill's drop (map mode only), run the ceremony, then continue the run.
+## Rolls draw from _drop_rng only — the combat stream never notices loot.
+func _after_drop(boss_id: String, done: Callable) -> void:
+	if _map == null or _drop_rng == null:
+		done.call()
+		return
+	var d := Gear.roll(boss_id, String(SEAT_CLS[_seat_key]), _gear_unlocks, _drop_rng)
+	if d.is_empty():
+		done.call()
+		return
+	var id := String(d["item"])
+	if bool(d["first"]):
+		# the SIGNATURE row is inked into the Ledger forever (survives the run)
+		var got: Array = _gear_unlocks.get(boss_id, [])
+		got.append(id)
+		_gear_unlocks[boss_id] = got
+		if DisplayServer.get_name() != "headless":
+			GearStore.save_unlocks(_gear_unlocks)
+	if _map_gear.has(id):
+		# a dupe of an equipped curio auto-scraps — Tokens without ceremony
+		_map_tokens += GearCatalog.scrap_value(id)
+		_toast_add("⚙  %s — duplicate recycled responsibly (+%d⏣)" % [
+			String(GearCatalog.item(id)["name"]), GearCatalog.scrap_value(id)])
+		done.call()
+		return
+	_show_drop(id, bool(d["first"]), done)
+
+## The drop ceremony: the curio arrives on a tarot card ("PERIPHERAL ACQUIRED");
+## EQUIP (2 slots — replacing scraps the old piece) or SCRAP straight to ⏣.
+func _show_drop(id: String, first: bool, done: Callable) -> void:
+	_screen = "drop"
+	_clear()
+	var it := GearCatalog.item(id)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 14)
+	center.add_child(box)
+	var banner := _title(box, "PERIPHERAL ACQUIRED", 42, Palette.GOLD_BRIGHT)
+	banner.add_theme_font_override("font", UiKit.title(900))
+	if first:
+		_title(box, "★  FIRST KILL — a new row is inked into the Ledger", 15, Palette.GOLD)
+	var card := RelicCard.new(String(it["name"]),
+		String(it["desc"]) + "\n\n\"" + String(it.get("flavor", "")) + "\"",
+		"curio", String(it.get("rarity", "haiku")), false, "")
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE   # display only — buttons decide
+	var cc := CenterContainer.new()
+	cc.add_child(card)
+	box.add_child(cc)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	if _map_gear.size() < Gear.SLOTS:
+		var eb := Button.new()
+		eb.text = "EQUIP"
+		eb.custom_minimum_size = Vector2(200, 44)
+		eb.pressed.connect(func():
+			_gear_equip(id, -1)
+			done.call())
+		row.add_child(eb)
+	else:
+		# slots full: equipping means choosing which piece the new one replaces
+		for si in _map_gear.size():
+			var old := String(_map_gear[si])
+			var rb := Button.new()
+			rb.text = "REPLACE %s  (+%d⏣)" % [
+				String(GearCatalog.item(old)["name"]).to_upper(), GearCatalog.scrap_value(old)]
+			rb.custom_minimum_size = Vector2(300, 44)
+			rb.pressed.connect(func():
+				_gear_equip(id, si)
+				done.call())
+			row.add_child(rb)
+	var sb := Button.new()
+	sb.text = "SCRAP  (+%d⏣)" % GearCatalog.scrap_value(id)
+	sb.custom_minimum_size = Vector2(200, 44)
+	sb.pressed.connect(func():
+		_map_tokens += GearCatalog.scrap_value(id)
+		done.call())
+	row.add_child(sb)
+
+## Equip into a free slot (replace_i = -1) or over an existing piece (which scraps).
+func _gear_equip(id: String, replace_i: int) -> void:
+	if replace_i >= 0 and replace_i < _map_gear.size():
+		var old := String(_map_gear[replace_i])
+		_map_tokens += GearCatalog.scrap_value(old)
+		_map_gear_charges.erase(old)
+		_map_gear[replace_i] = id
+	else:
+		_map_gear.append(id)
+	var it := GearCatalog.item(id)
+	if bool(it.get("active", false)):
+		_map_gear_charges[id] = int(it.get("charges", 1))
+
+## The map header's curio strip ("" hides it before the first drop).
+func _gear_line() -> String:
+	if _map_gear.is_empty() and _map_tokens == 0:
+		return ""
+	var names: Array = []
+	for g in _map_gear:
+		var nm := String(GearCatalog.item(String(g)).get("name", String(g)))
+		if _map_gear_charges.has(g):
+			nm += " ×%d" % int(_map_gear_charges[g])
+		names.append(nm)
+	var line := "PERIPHERALS:  " + ("  ·  ".join(PackedStringArray(names)) if not names.is_empty() else "—")
+	return line + "      ⏣ %d" % _map_tokens
+
+func _worst_wound() -> float:
+	var w := 0.0
+	for x in _map_wounds:
+		w = maxf(w, float(x))
+	return w
+
+## Stack a gear toast under any pending ticket toast (both show on the next map).
+func _toast_add(msg: String) -> void:
+	_ticket_toast = msg if _ticket_toast == "" else _ticket_toast + "\n" + msg
 
 ## A floor Seal is down (but not the last): PRIVILEGE ELEVATION — descend to the
 ## next ring carrying the party's integrity/wounds/mana, or bank out to the Rift.
@@ -1776,6 +1942,11 @@ func _handle_event(ev: Dictionary) -> void:
 				_big_text("STAGGERED!", Palette.STEEL, 34, 0.6)
 			_dial.react("stagger")
 			_add_shake(5.0)
+		"curio":
+			# GEAR-1: a curio proc — pop the item's name so the fortune reads
+			if mine:
+				var cnm := String(GearCatalog.item(String(ev.get("id", ""))).get("name", "CURIO"))
+				_big_text("⚙ %s" % cnm.to_upper(), Palette.GOLD_BRIGHT, 30, 0.8)
 		"interrupt":
 			if bool(ev.get("was_heal", false)):
 				_big_text("DENIED!", Palette.KICK, 42)
@@ -1927,10 +2098,15 @@ func _on_end(won: bool) -> void:
 		if u.role == "healer":
 			_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
 		var ex: Dictionary = GateContent.exam(_seat_key)
+		# GEAR-1: a gate CLEAR is a kill — its Ledger table drops (class-marked page).
+		var after_gate: Callable = _show_map
+		if won:
+			var gate_bid := String(_ctrl.state.encounter.id)
+			after_gate = func(): _after_drop(gate_bid, _show_map)
 		_map_stop(String(_ctrl.state.encounter.name),
 			String(ex["win"] if won else ex["lose"]),
 			[{"label": "REJOIN THE RAID", "fx": {"result": String(GateContent.CAPPER[won])}}],
-			Palette.WIN if won else Palette.CRIMSON, _show_map)
+			Palette.WIN if won else Palette.CRIMSON, after_gate)
 		return
 	if _map != null and not _online:
 		# Topology floor: persist per-seat integrity + the healer's remaining mana.
@@ -1950,14 +2126,15 @@ func _on_end(won: bool) -> void:
 					_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
 		if not won:
 			_show_end(false)
-		elif String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL:
+			return
+		# GEAR-1: the kill's drop ceremony runs first, then the run continues wherever
+		# it was headed (map / elevation / campaign clear).
+		var after: Callable = _show_map
+		if String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL:
 			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
-			if _floor >= RaidContent.FLOORS.size() - 1:
-				_show_campaign_cleared()
-			else:
-				_show_floor_cleared()
-		else:
-			_show_map()
+			after = _show_campaign_cleared if _floor >= RaidContent.FLOORS.size() - 1 \
+				else _show_floor_cleared
+		_after_drop(String(_ctrl.state.encounter.id), after)
 		return
 	_show_end(won)
 

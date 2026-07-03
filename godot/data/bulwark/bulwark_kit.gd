@@ -36,6 +36,10 @@ func _tt(s: CombatState, seconds: float) -> int:
 
 # --- per-tick upkeep: exposed-window flag + Juggernaut Momentum decay ---
 func upkeep(s: CombatState, seat: Seat) -> void:
+	# GEAR-1: LE CHAT's Bell — +30 starting rage, exactly once (gear-gated no-op).
+	var bell := GearFx.bell_grant(seat)
+	if bell > 0.0:
+		_gain_rage(seat, bell)
 	# Duelist reward: correctly holding a Feint leaves the boss briefly Exposed.
 	# Maintain a bool here so outgoing_mult (which has no tick) can read it.
 	seat.vars["exposed"] = s.tick < int(seat.vars.get("exposed_until_tick", 0))
@@ -109,6 +113,19 @@ func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 		if n % 3 == 0:
 			_trigger_fire(s, seat, "third")
 	_guard_proc(s, seat, "negate")
+	# GEAR-1: Verification Stamp — the first clean guard each fight banks gauge.
+	if GearFx.once(seat, &"verify_stamp"):
+		if aspect == "warden":
+			_gain_counter(seat, 2)
+		else:
+			_gain_momentum(s, seat, 4)
+		GearFx.pop(s, seat, &"verify_stamp")
+
+# --- GEAR-1: a boss self-heal was DENIED somewhere — Riftmaw Tooth pays rage ---
+func on_boss_heal_denied(s: CombatState, seat: Seat) -> void:
+	var g := GearFx.tooth_grant(s, seat)
+	if g > 0.0:
+		_gain_rage(seat, g)
 
 # --- M7 string beats: grade payoffs. PERFECT = the riposte fantasy (Warden banks
 #     Counter + opens the Riposte window; Jugg banks Momentum). BAITED wipes the
@@ -160,6 +177,7 @@ func modify_incoming(s: CombatState, seat: Seat, dmg: float, _source: StringName
 
 # --- damage taken generates rage (all specs) and Momentum (Juggernaut) ---
 func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName, size: int) -> void:
+	GearFx.damage_taken(s, seat)   # GEAR-1: death procs (Swan Song) — gear-gated no-op
 	var fury := 1.3 if _b("furyGain") else 1.0
 	_gain_rage(seat, roundf(dmg * cfg.rage_from_dmg * fury))
 	# GUARD CHAIN: eating a heavy/crush you should have PARRIED drops the chain to HALF —

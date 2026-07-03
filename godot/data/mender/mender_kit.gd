@@ -26,6 +26,10 @@ func _nerve_rate() -> float:
 
 # --- per-tick: mana regen, Nerve accrual, advance the cast bar ---
 func upkeep(s: CombatState, seat: Seat) -> void:
+	# GEAR-1: LE CHAT's Bell — +30 starting mana, exactly once (gear-gated no-op).
+	var bell := GearFx.bell_grant(seat)
+	if bell > 0.0:
+		seat.resource = minf(cfg.mana_max, seat.resource + bell)
 	var rm := float(seat.vars.get("regen_mult", 1.0))
 	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt)
 
@@ -60,6 +64,16 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 			var id: String = c["id"]
 			seat.casting = {}
 			_resolve_spell(s, seat, id, tgt)
+
+# --- GEAR-1: gear proc seams. The healer is hittable (aoe beats), so it carries
+#     the death procs too; a denied boss heal pays the Riftmaw Tooth in mana. ---
+func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringName, _size: int) -> void:
+	GearFx.damage_taken(s, seat)   # Swan Song — gear-gated no-op
+
+func on_boss_heal_denied(s: CombatState, seat: Seat) -> void:
+	var g := GearFx.tooth_grant(s, seat)
+	if g > 0.0:
+		seat.resource = minf(cfg.mana_max, seat.resource + g)
 
 # --- M7: dodging cancels your cast bar. The beat gets answered but the heal is
 #     lost (mana is only charged at resolve, so nothing to refund — the cost is
@@ -159,6 +173,9 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 			CombatCore._bump_diag(s, seat, "dispel")   # class-signature skill signal (token mint)
 			if _b("mdTrigDispel"):
 				_md_trigger(s, seat, target, "dispel")  # Phase B: a Dispel = proc moment
+			if GearFx.has(seat, &"salt_vial"):          # GEAR-1: the cleanse also soothes
+				CombatCore.heal_unit(s, target, 25.0, seat, &"salt_vial")
+				GearFx.pop(s, seat, &"salt_vial")
 		"medit":
 			seat.resource = minf(cfg.mana_max, seat.resource + float(sp["restore"]))
 		"surge":
