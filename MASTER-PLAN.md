@@ -36,7 +36,7 @@
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
-| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1/2/3 MERGED (rings, gates, tickets, online). **+ INFERENCE CHECK (deep events) P0–P5 + SEAT-PICKER + P3 BRANCHES MERGED** — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events, offline AND online co-op (protocol v8, server resolves + traverses stages; client==server). Wager/mulligan + online-Prior open |
+| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1/2/3 MERGED (rings, gates, tickets, online). **+ INFERENCE CHECK (deep events) P0–P5 + SEAT-PICKER + BRANCHES + WAGER/MULLIGAN MERGED** — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events + wager kind + post-fail mulligan, offline AND online co-op (protocol v9, server resolves + traverses stages; client==server). Online-Prior + P6 marks open |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
 
 ---
@@ -412,6 +412,16 @@ nodes, not node kinds.
     desyncs; solo `map_sim` byte-identical; `raid_map_sim` re-baselined (pool 14; determinism/structure
     PASS, expert 100%, sloppy takes more check-attrition by design); WSLg `screenshot_branch` clean.
     ⚠ **v8: rebuild+redeploy.**
+  - **WAGER kind + post-fail MULLIGAN — protocol v8→v9.** WAGER = a choice that stakes a fixed cost
+    (integrity/tokens/entropy) then rolls a build-read die; the stake is paid WIN OR LOSE (the fail leg
+    has no extra bite). `MapCheck.check_like()` unifies check+wager; `resolve` folds the stake.
+    overtime_daemon's "Bill it" is now a wager. MULLIGAN = a post-fail reroll; since the leader already
+    resolves LOCALLY, it's a local reroll at attempt+1 (a fresh deterministic die) and only the FINAL
+    committed attempt crosses the wire — online stays SINGLE-COMMIT (no new server state). ⚡ spent =
+    nudge + attempt×2 (cap 3); ⚡-spend + pity moved to commit-time so previews are side-effect-free.
+    Verified: NEW `map_wager_probe` (stake folds win-or-lose; online ⚡ accounting 6−(1+2×2)=1;
+    server==client at attempt 2; panel offers mulligan on a fail) ALL OK; net_smoke(v9)/net_map_smoke
+    (zero desyncs)/solo byte-identical/raid_map_sim PASS. ⚠ **v9: rebuild+redeploy.**
   - **Gates:** NEW `sim/map_check_sim.gd` ALL PASS (die determinism, uniform p=60→60.0%, monotonicity,
     clamp[5,95], bands off=25/themed+aspect=76/specialist=91, pity cap, nudge, gates). NEW
     `sim/map_event_probe.gd` ALL OK (panel builds + HACK check 59% + nudge 59→67% + gate lock/unlock).
