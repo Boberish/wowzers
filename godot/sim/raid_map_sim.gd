@@ -22,6 +22,7 @@ const SKILLS := [
 
 var _fights: Array = []
 var _shard_req: int = 0       ## credential-shard gate for the current floor (MAP-3c ROOT)
+var _n_tickets: int = 0       ## MAP-2 ticket quests placed on the current floor
 var _gate_seat := "tank"
 
 func _initialize() -> void:
@@ -37,6 +38,7 @@ func _initialize() -> void:
 	for fl in RaidContent.FLOORS:
 		_fights = RaidContent.floor_fights(int(fl["ring"]))
 		_shard_req = int(fl["shard_req"])
+		_n_tickets = int(fl.get("tickets", 0))
 		var seal_name := String((_fights[_fights.size() - 1] as EncounterRes).name)
 		print("")
 		print("######## %s  →  Seal: %s ########" % [String(fl["title"]), seal_name])
@@ -71,9 +73,9 @@ func _initialize() -> void:
 ## Same seed twice ⇒ identical map fingerprint AND identical full-run trace
 ## (visited nodes + every fight checksum) — the co-op/daily-seed guarantee.
 func _prove_determinism() -> void:
-	var fp1 := RunMap.generate(1, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req).fingerprint()
-	var fp2 := RunMap.generate(1, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req).fingerprint()
-	var fp3 := RunMap.generate(2, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req).fingerprint()
+	var fp1 := RunMap.generate(1, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets).fingerprint()
+	var fp2 := RunMap.generate(1, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets).fingerprint()
+	var fp3 := RunMap.generate(2, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets).fingerprint()
 	print("map determinism: seed1==seed1 -> %s · seed1 vs seed2 -> %s" % [
 		("PASS" if fp1 == fp2 else "FAIL"),
 		("differ (good)" if fp1 != fp3 else "IDENTICAL (suspect!)")])
@@ -88,7 +90,7 @@ func _prove_determinism() -> void:
 	var ok := true
 	var gates_ok := true
 	for seed in range(1, 40):
-		var m := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req)
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
 		var n_gates := 0
 		for nd in m.nodes:
 			var fi := int(nd["fight"])
@@ -107,7 +109,40 @@ func _prove_determinism() -> void:
 		("PASS" if gates_ok else "FAIL")])
 	_prove_gates()
 	_prove_shard_gate(60)
+	_prove_tickets(40)
 	_prove_carry(50)
+
+## TICKETS (MAP-2): placement is deterministic, and every placed ticket is closeable
+## by construction — pickup and turn-in share a lane with the turn-in strictly later,
+## so the always-present same-lane spine connects them on some route.
+func _prove_tickets(seeds: int) -> void:
+	if _n_tickets <= 0:
+		return
+	var ok := true
+	var placed := 0
+	var closeable := 0
+	for seed in range(1, seeds + 1):
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
+		for tid in m.tickets:
+			placed += 1
+			var pu := -1
+			var ti := -1
+			for nd in m.nodes:
+				if String(nd.get("ticket_open", "")) == String(tid):
+					pu = int(nd["id"])
+				if String(nd.get("ticket_close", "")) == String(tid):
+					ti = int(nd["id"])
+			if pu >= 0 and ti >= 0 and int(m.node(pu)["lane"]) == int(m.node(ti)["lane"]) \
+					and int(m.node(pu)["row"]) < int(m.node(ti)["row"]):
+				closeable += 1
+			else:
+				ok = false
+	var a := RunMap.generate(7, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
+	var b := RunMap.generate(7, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
+	var det: bool = str(a.tickets) == str(b.tickets) and a.fingerprint() == b.fingerprint()
+	print("tickets (%d maps, %d/floor): placement det %s · closeable %d/%d %s" % [
+		seeds, _n_tickets, ("PASS" if det else "FAIL"), closeable, placed,
+		("PASS" if ok and closeable == placed else "FAIL")])
 
 ## Every seat's personal exam builds and replays deterministically (same seed ⇒
 ## same checksum), and a LOST gate wounds the seat without ending the walk.
@@ -133,7 +168,7 @@ func _prove_shard_gate(seeds: int) -> void:
 		return
 	var ok := true
 	for seed in range(1, seeds + 1):
-		var m := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req)
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
 		var seen := {}
 		var stack: Array = [[-1, 0]]                 # [from_id, shards] — start outside the map
 		var reached_seal := false
@@ -182,7 +217,7 @@ func _prove_carry(seeds: int) -> void:
 ## `carry` = {fracs: per-seat integrity, mana: the healer's fuel gauge} — mirrors
 ## the HUD's persistence exactly.
 func _walk(seed: int, sk: Dictionary) -> Dictionary:
-	var map := RunMap.generate(seed, _fights.size(), MapContent.event_ids(), GATE_QUOTA, _shard_req)
+	var map := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
 	var route := DetRng.new(seed * 7919 + 17)
 	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0}
 	var inv := {}
@@ -190,6 +225,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 	var fights := 0
 	var gates := 0
 	var gate_wins := 0
+	var closed := 0                    # tickets closed this walk (MAP-2)
 	var trace: Array = []
 	for hop in 32:
 		var choices: Array = map.reachable(pos, inv)
@@ -202,6 +238,21 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 			inv["api_key"] = true
 		if bool(n.get("shard", false)):
 			inv["shards"] = int(inv.get("shards", 0)) + 1
+		# TICKETS (MAP-2): pick up / close, mirroring the HUD's _ticket_at
+		var topen := String(n.get("ticket_open", ""))
+		if topen != "":
+			if not inv.has("tickets"):
+				inv["tickets"] = {}
+			(inv["tickets"] as Dictionary)[topen] = true
+		var tclose := String(n.get("ticket_close", ""))
+		if tclose != "":
+			var held: Dictionary = inv.get("tickets", {})
+			if held.has(tclose):
+				held.erase(tclose)
+				closed += 1
+				_apply_fx(MapContent.ticket(tclose).get("reward", {}), carry)
+				if closed >= map.tickets.size() and map.tickets.size() > 0:
+					_apply_fx(MapContent.SPRINT_RETRO_FX, carry)
 		match String(n["kind"]):
 			RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 				fights += 1
@@ -245,7 +296,7 @@ func _apply_fx(fx: Dictionary, carry: Dictionary) -> void:
 	var hurt := float(fx.get("hurt", 0.0))
 	for i in fracs.size():
 		fracs[i] = clampf(float(fracs[i]) + heal - hurt, 0.05, 1.0)
-	if bool(fx.get("draft", false)):
+	if bool(fx.get("draft", false)) or bool(fx.get("patch", false)):   # cache draft OR ticket patch
 		var lo := 0
 		for i in fracs.size():
 			if float(fracs[i]) < float(fracs[lo]):

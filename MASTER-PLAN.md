@@ -245,7 +245,7 @@ nodes, not node kinds.
 
 **Phases:**
 - **MAP-1 (solo PoC, Bulwark) — ✅ DONE, merged 2026-07-02 (`fd62f7b`).** `game/run_map.gd` (seeded 6-row × 3-lane DAG; quota'd kinds; one locked 401 backdoor + key on a feeder lane; locks gate only optional edges) · `game/map_content.gd` (Realm-1 skin: GPU Shrine caches, water-guzzling Cooling Stations, SIX authored events — careers fair / reservoir / allocation queue / alignment office / severance floor / captcha checkpoint) · `game/ui/map_screen.gd` (circuit-board render, 401→200 OK lock stamps, integrity readout) · `game/ui/map_event_panel.gd` · RunState +map/inventory/hp_frac (persistent integrity: fights start at run HP; events bruise, floor 5%) · Bulwark boss-select "THE TOPOLOGY" entry. **Verified:** `sim/map_sim.gd` determinism/structure/walker ALL PASS (300 seeds; avg 5.9 nodes · 3.65 fights · 28 backdoor runs); `sim/ui_smoke_map.gd` full loop PASS; classic `ui_smoke` PASSED + bulwark_sim determinism PASS ×3 (classic untouched). *Pending:* a WSLg GUI glance at the custom `_draw` (headless can't render it) — screenshot probe is a MAP-2 nicety.
-- **MAP-2 (depth) — RESCOPED 2026-07-03 (§GAME SHAPE):** all map depth lands on the RAID floors (the Bulwark solo map stays as-is, a practice fossil): tickets, secret rooms, ELITE, MARKET (gear stock per `PROGRESSION-PLAN.md`), 10+ events, art pass.
+- **MAP-2 (depth) — 🟢 PARTLY DONE (tickets + ring identity + events, `d2e51ea`); ELITE/MARKET/secret-rooms/art still open.** All map depth lands on the RAID floors (the Bulwark solo map stays a practice fossil). **DONE (raid-richness):** **TICKETS** — pickup→turn-in quests (`RunMap` `n_tickets`/`tickets[]` + `ticket_open`/`ticket_close` payloads, all guarded off = byte-identical solo map) resolved in `raid_hud._ticket_at` with rewards in the wound-attrition economy (repair-sector / integrity / refuel / patch, reused `_apply_map_fx`) + a **SPRINT-RETRO** bonus for closing every ticket on a floor; placed same-lane-forward so closeable by construction (`raid_map_sim._prove_tickets`: placement-det + closeable 40/40·80/80·80/80 PASS). Per-floor counts in `RaidContent.FLOORS` (R3:1/R2:2/R0:2). **Ring identity** — `MapContent.realm_title/sub(ring)` (user space → middleware → root), ring-aware `MapScreen` header + open-ticket list + toast + ticket node badges. **Expanded events** — +5 (helpdesk / model graveyard / prompt injection / rollback daemon / overtime daemon); the SOLO pool is FROZEN at the original 6 via `event_ids()` (pool size shifts rng draws → byte-identity), raid floors pull `raid_event_ids()` (all 11). Verified: raid_map_sim all floors PASS; solo map_sim byte-identical (5.90 nodes/20 keys/6 backdoor); ui smokes green; combat untouched. **STILL OPEN:** secret rooms, **ELITE** nodes, **MARKET** (needs GEAR loot to stock), 10+ events, map art pass, route-agnostic objectives.
 - **GATE nodes (Tier 1 personal exams, §GAME SHAPE) — ✅ DONE, merged 2026-07-03.**
   Every Ring-3 map now carries ONE **GATE** node ("SECURITY CHECKPOINT / AUTH GATE / THE
   TURNSTILE", gold pad, glyph `1`): YOUR seat steps through ALONE and fights its class exam —
@@ -429,16 +429,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
 - ☐ 2026-07-03 · `self-heal-meter` · §SYSTEMS — **Meter follow-up (Bill, direct): count SELF-heals** so the HEALING column answers "how much do I keep myself alive vs the healer". Kit `_heal` helpers (bulwark lifesteal/fortify/Vengeful Guard/Landslide/Warding Light · voidcaller kick-recovery/Reprieve/Umbral Mending · twinfang Red Harvest leech) compute effective-vs-overheal and call `CombatCore.meter_heal` on the seat itself, srcs named after the cards. Heal behavior unchanged → byte-identical gate on the three touched classes + raid; meter_probe extended. *(meter session)*
-- ☐ 2026-07-03 · `raid-richness` · §MAPS MAP-2 — **Make the raid map RICH & FUN (Bill, direct).**
-  The quest/objective + flavor layer on the Realm-1 floors: **TICKETS** (pickup at one node →
-  turn-in at a later one → reward paid in the wound-attrition economy: repair a corrupted sector /
-  integrity / refuel; close ALL on a floor = sprint-retro bonus), **per-ring identity** (Ring 3
-  user-space → Ring 2 middleware → Ring 0 root, ring-aware `MapContent.realm_title/sub` + node
-  flavor), and an **expanded event pool** (more Realm-1 events so floors don't repeat). Game-layer
-  only (`run_map`/`map_content`/`raid_hud`/`map_screen`/`raid_map_sim`); ZERO engine. Guarded:
-  `n_tickets=0`/ring-default = byte-identical map gen (solo map untouched). ⚠ no active session on
-  the map files now (gate-nodes/dps-meter merged; `sunder` is class-layer). Gate: map determinism,
-  raid+solo sims byte-identical with tickets off, raid_map_sim + smokes green. *(raid-finish session)*
+- ☑ 2026-07-03 · `raid-richness` · §MAPS MAP-2 — **Raid map RICH & FUN — MERGED to main (`d2e51ea`)**,
+  plan updated (§MAPS MAP-2 has the record), worktree removed. TICKETS quests (pickup→turn-in,
+  wound-economy rewards + sprint-retro bonus, closeable-by-construction, `_prove_tickets` PASS),
+  per-ring identity (`MapContent.realm_title/sub`), +5 events (solo pool frozen at 6 for byte-identity,
+  raid uses `raid_event_ids()` = 11). Game-layer only, zero engine; all guarded off = byte-identical
+  solo map + combat. Gate PASS: raid_map_sim all floors (tickets/shard/gate/structure/determinism) +
+  solo map_sim byte-identical + ui smokes + bulwark/raid determinism. **STILL OPEN in MAP-2:** ELITE
+  nodes, MARKET (needs GEAR loot), secret rooms, art pass. *(raid-finish session)*
 - ☑ 2026-07-03 · `realm1-floors` · §MAPS MAP-3c — **Finish Realm 1's raid — MERGED to main (`fafaf1a`)**,
   plan updated (§MAPS MAP-3c has the full record), worktree removed. GEMINI (Ring 2) + CLAUDE MYTHOS
   (Ring 0, credential-shard gated) are now playable floor Seals in a 3-floor RING descent;
