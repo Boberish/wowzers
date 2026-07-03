@@ -462,13 +462,29 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `healer-frames` · §GRAPHICS — **RAID-FRAME MEGA UPGRADE (Bill: bigger/awesome
-  healer frames; shield bigger + clearly on the RIGHT so incoming/dodge reads stay visible, or
-  movable; HoT countdown timers; real icons; sleek).** RaidFrame v2: XL healer variant, dedicated
-  gold SHIELD CREST (value + ward-expiry sweep) on the frame's right gutter + woven absorb
-  extension on the bar, HoT icon chips (RuneIcons) with countdown arcs + seconds, debuff wax seal
-  w/ countdown, hazard-striped incoming-damage slice, draggable raid panel (persisted). View-only
-  (raid_frame.gd + raid_hud.gd feed). Gate: ui smokes green + WSLg shots. *(healer-frames session)*
+- ☑ 2026-07-03 · `healer-frames` · §GRAPHICS — **RAID-FRAME MEGA UPGRADE — MERGED to main
+  (`353626d`) (Bill: bigger/awesome healer frames; shield bigger + clearly visible without
+  burying the dodge reads, or movable; HoT countdown timers; real icons; sleek).** `RaidFrame` v2
+  (view-only) with SIZE VARIANTS — classic 164×92 stays byte-for-layout for the frozen solo HUDs;
+  the game HUD uses **raid 240×102** (martial seats) and **XL 312×120 triage cards** (healer's
+  4-seat raid; the 5-frame gate sandbox auto-falls back to compact so the column clears the mana
+  orb). What's new on the card: (1) **SHIELD CREST** — a gilded heater shield in a dedicated
+  right gutter showing the absorb VALUE + a ward-expiry countdown ring (+seconds on XL); blooms
+  when a ward lands, ring-shockwaves when it eats a hit, crimson-pulses near expiry, ghost socket
+  when empty — plus a woven-gold absorb EXTENSION appended past the HP fill (overshield chevrons
+  when it clips). (2) **Incoming damage** is now a hazard-striped slice right-anchored on
+  fill+shield (the true eat order — shield first), so shields never bury the dodge read; lethal =
+  pulsing bar edge + "!" wedge. (3) **HoT icon chips** (real RuneIcons: renew/flash/mend/
+  laststand/growth) with countdown sweeps + seconds (XL), ripe-Growth gold halo kept. (4) Debuff
+  wax seal gains a countdown ring + timer. (5) Role spine, live %, hp/max, gilded YOU name.
+  (6) **The raid panel is MOVABLE**: drag the ≡ header (clamped on-screen, persisted per-layout
+  to `user://rift_ui.cfg`), double-click resets. HUD feed: absorb/ward/HoT/debuff remains off
+  live seats (`HOT_META` icon+duration table). **Gate PASS:** ui_smoke_raid (extended with a
+  drag/persist/reset assert) + mender/bloomweaver/map/net smokes ALL OK (net: zero desyncs);
+  NEW `sim/screenshot_healer_frames.gd` WSLg probe (force-stages wards/HoTs/DoT/bloodied so
+  every element is in frame) eyeballed at 1080p ×3 seats. Zero engine files touched. **NEXT
+  (unclaimed):** frame hover tooltip naming each HoT/ward with exact numbers; dispel CLICK
+  directly on the debuff seal; per-boss debuff icons. *(healer-frames session)*
 
 - ☑ 2026-07-03 · `armory-ui` · §GRAPHICS GEAR — **ARMOR SET pro GUI — MERGED to main (`7b78912`)
   (Bill: "modal, hover with stats, see current gear while choosing").** (1) **Rich hover cards**
