@@ -22,6 +22,12 @@ extends Resource
 # --- Enrage ramp ---
 @export var enrage_base: float = 6.0           ## raid dmg/sec added per second past enrage
 
+# --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
+#     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
+@export var sunder_max: float = 5.0            ## pip ceiling
+@export var sunder_k: float = 0.06             ## boss takes +6% MORE per pip (×1.30 at full)
+@export var sunder_decay: float = 1.1          ## pips bled per second when not fed (aggressive)
+
 # --- M7 strike strings + the universal dodge ---
 # Grade windows: seconds BEFORE a beat's impact that a dodge press still answers
 # it (perfect ⊂ good ⊂ graze; outside graze the press is a WHIFF). Sized for the

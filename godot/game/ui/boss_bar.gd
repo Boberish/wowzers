@@ -11,6 +11,8 @@ var hp_max: float = 1.0
 var phase_num: int = 1
 var phase_ats: Array = []      # phase .at thresholds (for notch marks)
 var enrage_in: float = INF     # seconds until enrage; <=0 = ENRAGED; INF = no enrage timer
+var sunder: float = 0.0        # tank SUNDER (0 = hidden); the boss's cracking wall
+var sunder_max: float = 5.0
 
 ## The 1-based phase index for the current boss HP (shared by every HUD; was copy-
 ## pasted as _phase_num into all six). Pure view helper, mirrors the display logic.
@@ -103,6 +105,24 @@ func _draw() -> void:
 		for i in np:
 			var px := size.x - 10.0 - float(np - 1 - i) * 16.0
 			UiKit.gilded_pip(self, Vector2(px, top - 10.0), 5.0, i < phase_num, Palette.CRIMSON)
+
+	# --- SUNDER: the tank's cracking wall, tucked over the bar's LEFT end. Fracture pips
+	#     fill as won reads crack the boss — while lit, EVERYONE's hits land harder. Hidden
+	#     when no tank feeds it (sunder == 0). ---
+	if sunder > 0.01:
+		var np_s := int(round(maxf(sunder_max, 1.0)))
+		var lit_f := sunder / maxf(sunder_max, 1.0)
+		for i in np_s:
+			var sx := 10.0 + float(i) * 16.0
+			var pf := clampf(lit_f * float(np_s) - float(i), 0.0, 1.0)
+			var scol := Palette.RAGE.lerp(Palette.CRIMSON, pf)
+			if pf > 0.05:
+				var gl := scol
+				gl.a = 0.18 + 0.14 * sin(_t * 5.0 + float(i))
+				draw_circle(Vector2(sx, top - 10.0), 9.0, gl)
+			UiKit.gilded_pip(self, Vector2(sx, top - 10.0), 5.0, pf > 0.5, scol)
+		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(6.0, top - 26.0), "SUNDER",
+			HORIZONTAL_ALIGNMENT_LEFT, 120.0, UiKit.SIZE["MICRO"], Palette.CRIMSON.lightened(0.2))
 
 	# --- engraved phase-threshold notches (dark groove + lit gold lip) ---
 	for at in phase_ats:

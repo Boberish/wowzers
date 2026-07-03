@@ -52,6 +52,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	var mo := int(seat.vars.get("momentum", 0))
 	if mo <= 0:
 		return
+	# SUNDER floor: riding high Momentum slowly cracks the wall — the Juggernaut's sticky
+	# FLOOR vs the Warden's parry SPIKES fill the same boss meter with different curves.
+	if mo >= cfg.sunder_jugg_at:
+		_crack(s, cfg.sunder_jugg_rate * s.dt)
 	var since := float(s.tick - int(seat.vars.get("last_aggro_tick", 0))) * s.dt
 	if since > _mom_delay():
 		var acc := float(seat.vars.get("mom_decay_acc", 0.0)) + s.dt
@@ -86,6 +90,7 @@ func on_negate(s: CombatState, seat: Seat, _ability: AbilityRes) -> void:
 		_feint_baited(s, seat)
 		return
 	CombatCore._bump_diag(s, seat, "negate")   # class-signature skill signal (token mint)
+	_crack(s, cfg.sunder_parry)                # a won read cracks the boss's wall (SUNDER)
 	if _b("retaliation") and _ability != null:
 		CombatCore.damage_boss(s, seat, _ability.amount, &"retaliation")   # Opus: hurl the swing back
 	if aspect == "warden":
@@ -114,6 +119,7 @@ func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
 	match grade:
 		StrikeRes.Grade.PERFECT:
 			_gain_rage(seat, cfg.strike_perfect_rage)
+			_crack(s, cfg.sunder_beat)             # a perfect beat cracks the wall (SUNDER)
 			if aspect == "warden":
 				_gain_counter(seat, cfg.strike_perfect_counter)
 				seat.vars["riposte_until_tick"] = s.tick + _tt(s, cfg.riposte_dur)
@@ -131,6 +137,7 @@ func on_strike_result(s: CombatState, seat: Seat, _ability: AbilityRes,
 				seat.vars["riposte_until_tick"] = 0
 		StrikeRes.Grade.READ:
 			_gain_rage(seat, cfg.strike_read_rage)
+			_crack(s, cfg.sunder_read)             # holding a feint beat cracks the wall (SUNDER)
 			seat.vars["exposed_until_tick"] = maxi(int(seat.vars.get("exposed_until_tick", 0)),
 				s.tick + _tt(s, cfg.strike_read_exposed))
 			if _b("trigRead"):
@@ -176,6 +183,7 @@ func on_damage_taken(s: CombatState, seat: Seat, dmg: float, source: StringName,
 	# revisit via a resolution-time hook if/when tanks can carry absorbs.
 	if _is_feint(s, source):
 		_gain_rage(seat, cfg.feint_read_rage)
+		_crack(s, cfg.sunder_read)   # reading a feint cracks the wall (SUNDER)
 		if aspect == "warden":
 			_gain_counter(seat, 1)   # a held feint is a WON READ → links the chain
 		seat.vars["exposed_until_tick"] = s.tick + _tt(s, cfg.feint_exposed_dur)
@@ -374,6 +382,14 @@ func _gain_momentum(s: CombatState, seat: Seat, x: int) -> void:
 func _heal(seat: Seat, x: float) -> void:
 	seat.hp = clampf(seat.hp + x, 0.0, seat.hp_max)
 
+## SUNDER: crack the boss's wall. Every won read feeds it; while it's up the boss takes
+## more from the whole team (co-op break-the-wall). Capped; decays fast in the engine.
+func _crack(s: CombatState, amt: float) -> void:
+	var before := s.boss.sunder
+	s.boss.sunder = minf(s.config.sunder_max, s.boss.sunder + amt)
+	if s.boss.sunder > before + 0.24:   # only pop the view on a meaningful chunk (not the jugg trickle)
+		CombatCore.emit_event(s, {"t": "sunder", "amt": s.boss.sunder})
+
 # --- observation for policies / HUD ---
 func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var out := {
@@ -385,6 +401,8 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"momentum": int(seat.vars.get("momentum", 0)),
 		"momentum_max": _mom_max(),
 		"overdrive": aspect == "juggernaut" and int(seat.vars.get("momentum", 0)) >= _mom_max(),
+		"sunder": s.boss.sunder,
+		"sunder_max": s.config.sunder_max,
 		"riposte_active": s.tick < int(seat.vars.get("riposte_until_tick", 0)),
 		"aspect": aspect,
 		"def_zone": _def()["zone"],

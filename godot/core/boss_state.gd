@@ -19,6 +19,11 @@ var silenced_until_tick: int = -1
 var exposed_until_tick: int = -1
 var expose_amt: float = 0.0
 var dmg_buff: float = 0.0
+## SUNDER — the tank's break meter (Bulwark only feeds it; 0 for everyone else, so all
+## other content is byte-identical). Every won mitigation read cracks the boss a little;
+## while sunder > 0 the boss takes (1 + sunder * config.sunder_k) MORE from ALL sources
+## (the co-op "break the wall" payoff). Decays aggressively toward 0 each tick.
+var sunder: float = 0.0
 
 ## Countdown timers in TICKS (faithful to the prototypes: ability timers freeze
 ## while a telegraph is winding up; melee keeps ticking).

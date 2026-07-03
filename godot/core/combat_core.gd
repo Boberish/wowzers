@@ -52,6 +52,8 @@ static func update(s: CombatState) -> void:
 		if seat.kit != null and seat.alive():
 			seat.kit.upkeep(s, seat)
 	_apply_seat_effects(s)                 # 2b. HoTs heal, DoTs tick, wards expire
+	if s.boss.sunder > 0.0:                # 2c. SUNDER bleeds toward 0 (guarded — only the tank feeds it)
+		s.boss.sunder = maxf(0.0, s.boss.sunder - s.config.sunder_decay * s.dt)
 	var ph := current_phase(s)             # 3. boss phase
 	_boss_think(s, ph)                     # 4. melee + advance/resolve telegraph, else pick next
 	_apply_group_damage(s, s.dt)           # 5. stat-block allies chip the boss
@@ -644,6 +646,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 	var mult := 1.0
 	if seat != null and seat.kit != null:
 		mult = seat.kit.outgoing_mult(seat)
+	if s.boss.sunder > 0.0:                     # SUNDER: the cracked wall takes MORE from everyone
+		mult *= 1.0 + s.boss.sunder * s.config.sunder_k
 	var d := roundf(raw * mult)
 	if s.boss.add_i >= 0:
 		s.boss.add_hp = maxf(0.0, s.boss.add_hp - d)   # an add holds the field — it eats the hit

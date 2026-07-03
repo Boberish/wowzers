@@ -38,6 +38,17 @@ extends Resource
 # shared
 @export var rage_from_dmg: float = 0.42
 
+# SUNDER feed (the tank cracks the boss with won reads; boss takes more from the WHOLE
+# team). Warden feeds spiky chunks it must re-crack every telegraph; Juggernaut feeds a
+# slow FLOOR while riding high momentum — so the two aspects fill the same boss meter with
+# visibly different curves. Fed ONLY by skill (a sloppy tank barely cracks it → the meter
+# preserves the skill gradient rather than flattening it).
+@export var sunder_parry: float = 1.4      ## a clean negate (parry/dodge) cracks this much (spiky)
+@export var sunder_read: float = 1.0       ## a held feint READ cracks this much
+@export var sunder_beat: float = 0.5       ## a PERFECT string-beat dodge cracks this much
+@export var sunder_jugg_rate: float = 0.6  ## Juggernaut: sunder/sec accrued while momentum is high (the floor)
+@export var sunder_jugg_at: int = 6        ## …the momentum threshold for the floor
+
 # The Duelist: consequences of reading (or misreading) a Feint. Punishing on purpose —
 # a perfect read takes ~none of this, so only sloppy play feels it.
 @export var feint_bait_dmg: float = 150.0    ## you PARRIED a feint — the bait connects

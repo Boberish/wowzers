@@ -19,8 +19,8 @@ const ABILITY_TIPS := {
 	"shockwave": {"stats": "50 rage  ·  55 dmg  ·  interrupts", "tip": "Panic button — interrupts the boss's current swing outright."},
 }
 const SPEC_TIP := {
-	"warden": {"name": "Guard Chain", "tip": "Every won read (parry / held feint / PERFECT beat) LINKS your Chain — each link boosts ALL your damage. But EAT a heavy you should've parried and the chain drops to HALF. Cash the whole streak with Vindicate. A combo you protect, not a counter you bank."},
-	"juggernaut": {"name": "Redline", "tip": "Dealing and eating hits builds Momentum (more damage AND mitigation). Below cap, Dodging DUMPS it — greed. At CAP you hit OVERDRIVE: dodging is free. Avalanche VENTS part of it for burst while you keep riding. Live at the redline."},
+	"warden": {"name": "Guard Chain", "tip": "Every won read (parry / held feint / PERFECT beat) LINKS your Chain — each link boosts ALL your damage. But EAT a heavy you should've parried and the chain drops to HALF. Cash the streak with Vindicate. Every read also SUNDERS the boss (the meter on its bar) — while cracked, EVERYONE hits it harder."},
+	"juggernaut": {"name": "Redline", "tip": "Dealing and eating hits builds Momentum (more damage AND mitigation). Below cap, Dodging DUMPS it — greed. At CAP you hit OVERDRIVE: dodging is free. Avalanche VENTS part for burst while you keep riding. Riding high also SUNDERS the boss (a rising floor on its meter) — the cracked wall takes more from everyone."},
 }
 
 var _ctrl: CombatController
@@ -377,6 +377,8 @@ func _process(delta: float) -> void:
 	_bar.boss_name = s.encounter.name
 	_bar.hp = s.boss.hp
 	_bar.hp_max = s.boss.hp_max
+	_bar.sunder = s.boss.sunder
+	_bar.sunder_max = s.config.sunder_max
 	_bar.phase_num = BossBar.phase_index(s)
 	if _bar.phase_ats.is_empty():	# immutable per fight; set once (bar is fresh each fight)
 		_bar.phase_ats = s.encounter.phases.map(func(ph): return ph.at)
@@ -474,6 +476,10 @@ func _handle_event(ev: Dictionary) -> void:
 		"chain_break":
 			if bool(ev.get("player", false)):
 				_big_text("CHAIN BROKEN", Palette.CRIMSON, 30, 0.6)   # ate a swing you should've parried
+		"sunder":
+			_dial.react("impact", 22.0)                              # the wall cracks — the boss flinches
+			if float(ev.get("amt", 0.0)) >= 4.5:
+				_big_text("WALL BROKEN", Palette.CRIMSON.lightened(0.2), 30, 0.7)   # sunder near-maxed
 		"hurt":
 			if bool(ev.get("player", false)):
 				var a := float(ev.get("amt", 0))
