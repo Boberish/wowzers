@@ -41,6 +41,8 @@ func _process(_d: float) -> bool:
 			Draft.take(hud._run, picks[0])
 		var grew := (hud._run.boons as Dictionary).size() > pre
 		hud._enter_node(hud._map.entry_id)                 # launch the entry fight
+		if String(hud._screen) == "ledger":               # GEAR-2: the oath offer interposes
+			_press("FIGHT UNSWORN")
 		var kit = hud._ctrl.state.seats[0].kit
 		var injected: bool = kit != null and (kit.boons as Dictionary).size() > 0 \
 			and (kit.boons as Dictionary).size() == (hud._run.boons as Dictionary).size()
