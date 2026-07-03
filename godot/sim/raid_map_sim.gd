@@ -226,6 +226,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 	var gates := 0
 	var gate_wins := 0
 	var closed := 0                    # tickets closed this walk (MAP-2)
+	var event_fails := 0               # consecutive Inference-Check fails → comeback pity
 	var trace: Array = []
 	for hop in 32:
 		var choices: Array = map.reachable(pos, inv)
@@ -276,11 +277,28 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				if bool(gres["won"]):
 					gate_wins += 1
 			RunMap.KIND_EVENT:
+				# Resolve the event like the HUD: build a ctx (the AI raid carries no
+				# boons, so checks read at ~base + integrity), pick a random AVAILABLE
+				# choice (skip locked gates), and roll checks on the deterministic die.
 				var ev := MapContent.event(String(n["event"]))
 				var chs: Array = ev.get("choices", [])
-				if not chs.is_empty():
-					var fx: Dictionary = (chs[route.next_u32() % chs.size()] as Dictionary).get("fx", {})
-					_apply_fx(fx, carry)
+				var ctx := MapCheck.build_ctx([], [], "", _gate_seat, _avg(carry["fracs"]),
+					0, 0, event_fails, inv, {}, 0)
+				var avail: Array = []
+				for ci in chs.size():
+					var cc: Dictionary = chs[ci]
+					var g: Dictionary = cc.get("gate", {})
+					if g.is_empty() or MapCheck.gate_ok(g, ctx):
+						avail.append(ci)
+				if not avail.is_empty():
+					var pick_i: int = avail[route.next_u32() % avail.size()]
+					var c: Dictionary = chs[pick_i]
+					if String(c.get("kind", "free")) == "check":
+						var res := MapCheck.resolve(c, ctx, map.seed, pos, pick_i, 0, {})
+						event_fails = 0 if bool(res["success"]) else event_fails + 1
+						_apply_fx(res["fx"], carry)
+					else:
+						_apply_fx(c.get("fx", {}), carry)
 			RunMap.KIND_COOLING:
 				_apply_fx({"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true}, carry)
 			RunMap.KIND_CACHE:

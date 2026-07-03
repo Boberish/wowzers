@@ -53,9 +53,9 @@ func _process(_delta: float) -> bool:
 			if panel == null:
 				quit(1)
 				return true
-			var fx: Dictionary = panel.choices[0]["fx"]
-			panel._on_choice(fx)          # builds the result view (UI path)
-			panel.finished.emit(fx)       # routes: apply fx → map / draft
+			var fx: Dictionary = panel.choices[0].get("fx", {})
+			panel._on_press(panel.choices[0], 0)   # builds the result view (real UI path)
+			panel.finished.emit(fx)                # simulate CONTINUE: apply fx → map / draft
 			_check(hud._run.hp_frac >= 0.05 and hud._run.hp_frac <= 1.0, "hp_frac bounded")
 		"draft":
 			# take any not-yet-owned boon; the empty-pool path routes back to the map itself

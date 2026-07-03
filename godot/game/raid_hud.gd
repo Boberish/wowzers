@@ -1051,8 +1051,7 @@ func _resolve_node(n: Dictionary) -> void:
 				Palette.GOLD_BRIGHT,
 				_offer_oath_then.bind(String(GATE_ENC[_seat_key]), _launch_gate_fight))
 		RunMap.KIND_EVENT:
-			var ev := MapContent.event(String(n["event"]))
-			_map_stop(String(ev["title"]), String(ev["body"]), ev["choices"], Palette.VOID, _show_map)
+			_event_stop(n)
 		RunMap.KIND_COOLING:
 			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
 				[{"label": "THROTTLE  (rest — +%d%% integrity · healer refuels · corrupted sectors repaired)" % int(MapContent.COOLING_HEAL * 100),
@@ -1063,6 +1062,70 @@ func _resolve_node(n: Dictionary) -> void:
 			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
 				[{"label": "SALVAGE A COMPONENT", "fx": {"draft": true, "result": MapContent.CACHE_RESULT}}],
 				Palette.GOLD, _show_map)
+
+## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
+## choice (a check computes its % + breakdown; a gated choice greys if unmet), and hands
+## the panel a resolver that rolls the deterministic die on commit. A free choice
+## resolves exactly like before. Kind-less legacy choices route the free path too.
+func _event_stop(n: Dictionary) -> void:
+	var ev := MapContent.event(String(n["event"]))
+	var ctx := _map_ctx()
+	var map_seed := _map.seed if _map != null else 0
+	var node_id := int(n["id"])
+	var raw: Array = ev.get("choices", [])
+	var descs: Array = []
+	for i in raw.size():
+		descs.append(_prep_choice(raw[i], i, ctx))
+	_screen = "mapstop"
+	_clear()
+	var p := MapEventPanel.new()
+	p.title_text = String(ev.get("title", ""))
+	p.body_text = String(ev.get("body", ""))
+	p.choices = descs
+	p.accent = Palette.VOID
+	p.resolver = func(orig: int) -> Dictionary:
+		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id, orig, 0, {})
+		if bool(res["success"]):
+			_check_fails = 0
+		else:
+			_check_fails += 1
+		return res
+	p.finished.connect(func(fx: Dictionary):
+		_apply_map_fx(fx)
+		_show_map())
+	p.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(p)
+
+## Present a single choice: gate first (greyed if unmet), then a check gets its % +
+## itemized breakdown; a free choice carries its fx straight through.
+func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
+	var kind := String(c.get("kind", "free"))
+	var d := {"label": String(c["label"]), "kind": kind, "orig_index": i, "fx": c.get("fx", {})}
+	var gate: Dictionary = c.get("gate", {})
+	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
+		d["gated"] = true
+		d["locked_reason"] = MapCheck.gate_reason(gate)
+		return d
+	if kind == "check":
+		var info := MapCheck.chance(c.get("check", {}), ctx)
+		d["chance"] = int(info["p"])
+		d["breakdown"] = info["parts"]
+		d["verb"] = String((c.get("check", {}) as Dictionary).get("verb", "CHECK"))
+	return d
+
+## The build context an Inference Check reads. Offline the human's seat is the only
+## full build (AI raiders carry no boons), so `boon_tags` is the human's owned boons
+## resolved to their synergy tags; role = the seat you pilot; aspect = your aspect.
+func _map_ctx() -> Dictionary:
+	var cat = Draft.catalog(_run) if _run != null else null
+	var aspect := String(_run.aspect) if _run != null else ""
+	var boons: Dictionary = _run.boons if _run != null else {}
+	var boon_tags := MapCheck.tags_for_boons(cat, aspect, boons)
+	var gear_tags: Array = []
+	for gid in _map_gear:
+		gear_tags.append(GearCatalog.item(String(gid)).get("tags", []))
+	return MapCheck.build_ctx(boon_tags, gear_tags, aspect, _seat_key,
+		_avg_frac(_map_fracs), _prior, _entropy, _check_fails, _map_inv, _flags, _tokens_now())
 
 ## A map fight: the node's encounter through the SAME shared factory as every raid
 ## pull, then each seat starts at its carried integrity.
