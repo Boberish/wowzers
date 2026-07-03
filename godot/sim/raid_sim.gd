@@ -18,14 +18,16 @@ const SKILLS := [
 
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "200"))
+	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	var only := _arg("boss", "")
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("party: Bulwark(warden) / Twinfang(venomancer) / Voidcaller(disruptor) / Mender(tidecaller)")
 	print("")
-	for b in bosses:
-		_prove_determinism(String(b))
+	if seed0 == 1:                         # shard 0 only (probes are seed-independent diagnostics)
+		for b in bosses:
+			_prove_determinism(String(b))
 	print("")
 
 	var rows: Array = []
@@ -39,7 +41,7 @@ func _initialize() -> void:
 			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
 				"miss": 0.0, "adds": 0.0}
 			var causes := {}
-			for seed in range(1, seeds + 1):
+			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(String(b), seed, sk, true)
 				r["skill"] = sk["label"]; r["seed"] = seed; r["boss"] = b; r["probe"] = "taunt"
 				rows.append(r)
@@ -61,7 +63,7 @@ func _initialize() -> void:
 				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n, _fmt(causes)])
 		print("")
-	if only == "" or only == "riftmaw":
+	if seed0 == 1 and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
 
 	_write_csv(_arg("out", "res://out/raid_results.csv"), rows)
