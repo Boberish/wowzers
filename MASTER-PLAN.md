@@ -421,6 +421,7 @@ nodes, not node kinds.
 ## TOOLING & INFRA
 
 **Now:** headless sims per class, UI smokes, screenshot tours, this repo is now GIT (baseline 2026-07-02). Worktree workflow live (see HOW TO WORK). **`scripts/psim.sh <sim> [seeds] [jobs] [-- extra args]`** shards any of the 5 class sims + raid_sim across cores (~4.5–5×; e.g. `psim.sh raid_sim 300 8 --boss=mythos`).
+- **`./tune.sh` (repo root, 2026-07-03) — the FAST raid-tuning loop for playtest tweaking** (Bill asked). Order-free args (`./tune.sh gemini 50 all`), quick defaults (riftmaw / 30 seeds / good+sloppy / **no probes** → ~15s vs ~48s; one tier ~7s), and **LIVE KNOBS that need no file edits**: `--dmg=1.3` (scale all boss damage), `--regen=0.4` (healer mana regen), `--fortify=0.5` (tank self-heal). New `raid_sim` flags: `--probes=0` (skip determinism+threat gates), `--skills=good`, `--dmg/--regen/--fortify` (applied to a fresh encounter per run → no leak; full path byte-identical). `./tune.sh --help` explains it. When a build feels right → bake the numbers into `raid_content.gd` + run the FULL sim (probes on) to confirm.
 **Next up:** CI-ish script that runs all sims + smokes in one command (the merge-back gate, `tools/verify-all.sh`); decide CSV output home (`godot/out/` is gitignored).
 **Open ideas:** auto-post sim bands into this file; seed-verified replay files for leaderboards.
 
