@@ -24,6 +24,10 @@ var hot_count: int = 0
 var dead: bool = false
 var bloodied: bool = false
 var is_target: bool = false
+var read_mode: String = ""       ## Mender aspect read overlay: "" | "tide" | "brink"
+var ripe: bool = false           ## Bloomweaver: this ally's Growth is in the harvest window
+var read_a: float = 0.60         ## Tidecaller waterline (keep bars above it)
+var read_b: float = 0.40         ## Brinkwarden band top (catch bars inside 0.15..read_b)
 
 var _pulse: float = 0.0
 var _flash_a: float = 0.0
@@ -155,6 +159,26 @@ func _draw() -> void:
 		UiKit.text_shadowed(self, UiKit.display(600), Vector2(bx, by + 17), str(int(round(_disp_hp))),
 			HORIZONTAL_ALIGNMENT_CENTER, barw, UiKit.SIZE["LABEL"], Palette.GOLD_BRIGHT)
 
+	# --- Mender aspect READ overlay: the two aspects want OPPOSITE things off the same
+	#     bar. Tidecaller keeps every bar ABOVE a teal waterline; Brinkwarden PARKS bars
+	#     inside a crimson band and catches them there. (Only the current aspect draws.) ---
+	if read_mode != "" and not dead:
+		if read_mode == "tide":
+			var lx := bx + barw * clampf(read_a, 0.0, 1.0)
+			var below := _disp_frac < read_a
+			var lc := Palette.STEEL.lightened(0.4)
+			lc.a = 0.75 + (0.2 * (0.5 + 0.5 * sin(_pulse * 2.0)) if below else 0.0)
+			draw_line(Vector2(lx, by - 1.0), Vector2(lx, by + barh + 1.0), lc, 2.0, true)
+			draw_line(Vector2(lx - 3.0, by - 3.5), Vector2(lx, by - 0.5), lc, 1.5, true)
+			draw_line(Vector2(lx + 3.0, by - 3.5), Vector2(lx, by - 0.5), lc, 1.5, true)
+		elif read_mode == "brink":
+			var x1 := bx + barw * 0.15
+			var x2 := bx + barw * clampf(read_b, 0.0, 1.0)
+			draw_rect(Rect2(x1, by + 2.0, x2 - x1, barh - 4.0),
+				Color(Palette.CRIMSON.r, Palette.CRIMSON.g, Palette.CRIMSON.b, 0.16))
+			draw_line(Vector2(x2, by - 1.0), Vector2(x2, by + barh + 1.0),
+				Color(Palette.CRIMSON.r, Palette.CRIMSON.g, Palette.CRIMSON.b, 0.6), 1.5, true)
+
 	# thin gilded bevel over the bar frame (lit top-left)
 	draw_line(Vector2(bx, by), Vector2(bx + barw, by), Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.5), 1.0, true)
 	draw_line(Vector2(bx, by + barh), Vector2(bx + barw, by + barh), Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.5), 1.0, true)
@@ -166,11 +190,16 @@ func _draw() -> void:
 		fl.set_corner_radius_all(9)
 		draw_style_box(fl, Rect2(0, 0, w, h))
 
-	# HoT gems (gilded, glowing green)
+	# HoT gems (gilded, glowing green) — Bloomweaver: a RIPE growth glows GOLD (harvest now!)
 	for i in mini(hot_count, 3):
 		var px := w - 14.0 - float(i) * 13.0
-		draw_circle(Vector2(px, 13.0), 6.5, Color(Palette.WIN.r, Palette.WIN.g, Palette.WIN.b, 0.20))
-		UiKit.gilded_pip(self, Vector2(px, 13.0), 4.0, true, Palette.WIN)
+		var gcol := Palette.GOLD_BRIGHT if (ripe and i == 0) else Palette.WIN
+		if ripe and i == 0:
+			var rh := Palette.GOLD_BRIGHT
+			rh.a = 0.28 + 0.22 * sin(_pulse * 2.2)
+			draw_circle(Vector2(px, 13.0), 10.0, rh)     # "◆ RIPE" glow
+		draw_circle(Vector2(px, 13.0), 6.5, Color(gcol.r, gcol.g, gcol.b, 0.20))
+		UiKit.gilded_pip(self, Vector2(px, 13.0), 4.0, true, gcol)
 
 	# dispellable debuff: a pulsing crimson wax seal
 	if has_debuff and not dead:

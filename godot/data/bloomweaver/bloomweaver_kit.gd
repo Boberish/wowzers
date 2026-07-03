@@ -16,6 +16,7 @@ var aspect: String = "wildgrove"
 var cfg: BloomweaverConfig
 var boons: Dictionary = {}
 var flourish: bool = false      ## Wildgrove garden bonus, recomputed each tick in upkeep
+var flourish_ripe: bool = false ## …and the field is RIPE (upgrades the bonus)
 
 func _init(_aspect: String, _cfg: BloomweaverConfig) -> void:
 	aspect = _aspect
@@ -34,8 +35,13 @@ func _bloom_eff() -> float:
 	return 1.05 if _b("quickbloom") else cfg.bloom_eff
 func _bark_shield() -> float:
 	return cfg.bark_shield * (1.4 if _b("thickbark") else 1.0)
-func _thorns() -> float:
-	return 0.70 if _b("barbs") else cfg.thorns_frac
+func _thorn_charge(seat: Seat) -> int:
+	return int(seat.vars.get("thorn_charge", 0))
+func _thorns(seat: Seat) -> float:
+	# reflect RAMPS with the snap-streak: base at 0 charge → thorns_max at full (barbs lifts both)
+	var base := 0.55 if _b("barbs") else cfg.thorns_frac
+	var top := (cfg.thorns_max + 0.10) if _b("barbs") else cfg.thorns_max
+	return lerpf(base, top, float(_thorn_charge(seat)) / float(cfg.thorn_charge_max))
 func _perfect_sap() -> float:
 	return cfg.perfect_sap + (10.0 if _b("perfectharvest") else 0.0)
 func _perfect_verd() -> float:
@@ -45,18 +51,38 @@ func _flourish_need() -> int:
 func _verd_heal_rate() -> float:
 	return cfg.verd_per_heal * (1.5 if _b("photosynth") else 1.0)
 
+## A Growth's matured fraction (0 = just planted, 1 = expiring). Ripeness drives the
+## Wildgrove harvest-timing game: a bloom in [ripe_lo, ripe_hi] gets the ripe bonus, and
+## Flourish lights on RIPE growths (not merely alive).
+func _ripe_frac(h: Dictionary) -> float:
+	var dur := maxf(1.0, float(h.get("dur", 1)))
+	return clampf(1.0 - float(h.get("left", 0)) / dur, 0.0, 1.0)
+func _is_ripe(h: Dictionary) -> bool:
+	var r := _ripe_frac(h)
+	return r >= cfg.ripe_lo and r <= cfg.ripe_hi
+func _ripe_mult(h: Dictionary) -> float:
+	return (1.0 + cfg.ripe_bonus) if _is_ripe(h) else 1.0
+
 # ---------------------------------------------------------------- per-tick
 func upkeep(s: CombatState, seat: Seat) -> void:
 	var rm := 1.25 if _b("sapflow") else 1.0
 	seat.resource = minf(cfg.sap_max, seat.resource + cfg.sap_regen * rm * s.dt)
 
-	# Flourish: the garden bonus is live while enough allies carry a Growth
+	# Flourish lights on a garden of the RIGHT SIZE (presence = the floor); a RIPE field
+	# UPGRADES it (flourish_bonus_ripe) — so tending to peak pays off without punishing a
+	# healer who's just keeping growths up.
 	if aspect == "wildgrove":
-		var n := 0
+		var alive := 0
+		var ripe := 0
 		for u in s.seats:
-			if u.role != "healer" and u.alive() and _find_growth(u) >= 0:
-				n += 1
-		flourish = n >= _flourish_need()
+			if u.role != "healer" and u.alive():
+				var gi := _find_growth(u)
+				if gi >= 0:
+					alive += 1
+					if _ripe_frac(u.hots[gi]) >= cfg.ripe_lo:
+						ripe += 1
+		flourish = alive >= _flourish_need()
+		flourish_ripe = flourish and ripe >= _flourish_need()
 
 	# WILT: a ward about to expire (this tick, in _apply_seat_effects) with absorb
 	# left = wasted Sap. View feedback + a sim diagnostic; no gameplay effect.
@@ -65,6 +91,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 				and u.ward_until_tick >= 0 and s.tick >= u.ward_until_tick:
 			seat.vars["stat_wilted"] = float(seat.vars.get("stat_wilted", 0.0)) + u.absorb
 			CombatCore.emit_event(s, {"t": "wilt", "seat": u, "amt": int(u.absorb)})
+			# a wilted ward BREAKS the Thornveil snap-streak (the "miss")
+			if aspect == "thornveil" and _thorn_charge(seat) > 0:
+				seat.vars["thorn_charge"] = 0
+				CombatCore.emit_event(s, {"t": "thorn_break", "player": seat.is_player})
 
 	# advance the cast bar (Overgrowth)
 	if not seat.casting.is_empty():
@@ -198,6 +228,7 @@ func _plant(s: CombatState, seat: Seat, u: Seat) -> void:
 		ev = maxi(1, int(ceil(float(ev) * cfg.mod_tick_mult)))   # Phase B: Quickening
 	u.hots.append({"gid": "growth", "tick": cfg.growth_tick,
 		"every": ev, "acc": 0, "left": _tt(s, _growth_dur()),
+		"dur": _tt(s, _growth_dur()),   # total lifetime → ripeness = 1 - left/dur
 		"caster_i": s.seats.find(seat), "src": &"growth"})
 	seat.vars["stat_planted"] = int(seat.vars.get("stat_planted", 0)) + 1
 	if _b("bwTrigPlant"):
@@ -223,10 +254,16 @@ func _bloom(s: CombatState, seat: Seat, u: Seat, mult: float = -1.0) -> void:
 	if i < 0:
 		return
 	var m := _bloom_eff() if mult < 0.0 else mult
+	# RIPEN: a Wildgrove harvest inside the ripe window blooms for a bonus (timing skill).
+	var ripe := aspect == "wildgrove" and _is_ripe(u.hots[i])
+	if ripe:
+		m *= (1.0 + cfg.ripe_bonus)
 	var amt := roundf(_remaining(u.hots[i]) * m)
 	u.hots.remove_at(i)
 	var eff := CombatCore.heal_unit(s, u, amt, seat, &"bloom")
 	seat.vars["stat_blooms"] = int(seat.vars.get("stat_blooms", 0)) + 1
+	if ripe:
+		seat.vars["stat_ripe_blooms"] = int(seat.vars.get("stat_ripe_blooms", 0)) + 1
 	_garden_proc(s, seat, u, "bloom")   # Phase B: the innate proc moment
 	CombatCore.emit_event(s, {"t": "bloom", "seat": u, "amt": int(eff)})
 
@@ -251,25 +288,32 @@ func _wildbloom(s: CombatState, seat: Seat) -> void:
 		elif _b("verdantsurge"):
 			_plant(s, seat, u)
 	seat.vars["verdance"] = 0.0
+	# BRIDGE: cashing Verdance refuels the pre-planting — Sap back per ally healed (breadth).
+	seat.resource = minf(cfg.sap_max, seat.resource + float(n) * cfg.wildbloom_sap)
 	CombatCore.emit_event(s, {"t": "wildbloom", "n": n})
 
 func _briarheart(s: CombatState, seat: Seat) -> void:
 	var verd := float(seat.vars.get("verdance", 0.0))
-	var per := roundf(verd * cfg.briar_conv)
+	# Briarheart UNLEASHES the streak: the thorn wards bite harder at high charge.
+	var per := roundf(verd * cfg.briar_conv * (1.0 + 0.1 * float(_thorn_charge(seat))))
 	var until := s.tick + _tt(s, cfg.briar_dur)
+	var n := 0
 	for u in s.seats:
 		if u.role != "healer" and u.alive():
 			u.absorb = minf(u.absorb + per, u.hp_max)
 			u.absorb_owner_i = s.seats.find(seat)
 			u.ward_until_tick = maxi(u.ward_until_tick, until)
+			n += 1
 	seat.vars["verdance"] = 0.0
+	# BRIDGE: Sap back per thorn ward placed (throughput).
+	seat.resource = minf(cfg.sap_max, seat.resource + float(n) * cfg.briar_sap)
 	CombatCore.emit_event(s, {"t": "briarheart"})
 
 # ---------------------------------------------------------------- aspect hooks
 ## Flourish (Wildgrove): a full garden empowers ALL your healing (ticks + blooms).
 func heal_mult(_target: Seat) -> float:
 	if aspect == "wildgrove" and flourish:
-		return 1.0 + cfg.flourish_bonus
+		return 1.0 + (cfg.flourish_bonus_ripe if flourish_ripe else cfg.flourish_bonus)
 	return 1.0
 
 ## Verdance builds from EFFECTIVE healing only — overheal earns nothing.
@@ -285,17 +329,22 @@ func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied
 	var v := float(healer.vars.get("verdance", 0.0)) + eaten * cfg.verd_per_absorb
 	healer.vars["verdance"] = minf(cfg.verdance_max, v)
 	if aspect == "thornveil":
-		var reflect := roundf(eaten * _thorns())
+		var reflect := roundf(eaten * _thorns(healer))   # reflect RAMPS with the snap-streak
 		if reflect > 0.0:
 			CombatCore.damage_boss(s, healer, reflect, &"thorns")
 			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + reflect
 	if emptied:
+		# A Perfect Ward is a SNAP — Sap/Verdance refund, and (Thornveil) it ramps the streak.
 		healer.resource = minf(cfg.sap_max, healer.resource + _perfect_sap())
 		healer.vars["verdance"] = minf(cfg.verdance_max,
 			float(healer.vars["verdance"]) + _perfect_verd())
 		if aspect == "thornveil":
-			CombatCore.damage_boss(s, healer, cfg.perfect_burst, &"perfect_burst")
-			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + cfg.perfect_burst
+			var ch := mini(_thorn_charge(healer) + 1, cfg.thorn_charge_max)
+			healer.vars["thorn_charge"] = ch
+			var burst := roundf(cfg.perfect_burst * (1.0 + 0.15 * float(ch)))   # burst scales w/ streak
+			CombatCore.damage_boss(s, healer, burst, &"perfect_burst")
+			healer.vars["stat_thorns"] = float(healer.vars.get("stat_thorns", 0.0)) + burst
+			CombatCore.emit_event(s, {"t": "thorn_snap", "player": healer.is_player, "charge": ch})
 		healer.vars["stat_perfect"] = int(healer.vars.get("stat_perfect", 0)) + 1
 		CombatCore._bump_diag(s, healer, "perfect_ward")   # class-signature skill signal (token mint)
 		if _b("evergreencycle") and target != null and target.role != "healer" and target.alive():
@@ -354,11 +403,15 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		if u.role == "healer":
 			continue
 		var gi := _find_growth(u)
+		var ripe := gi >= 0 and aspect == "wildgrove" and _is_ripe(u.hots[gi])
+		var rmult := (1.0 + cfg.ripe_bonus) if ripe else 1.0
 		party.append({"seat": u, "name": u.unit_name, "role": u.role,
 			"frac": u.hp_frac(), "hp": u.hp, "max": u.hp_max, "absorb": u.absorb,
 			"debuff": not u.debuff.is_empty(), "hots": u.hots.size(),
 			"growth": gi >= 0,
-			"growth_heal": (_remaining(u.hots[gi]) * _bloom_eff()) if gi >= 0 else 0.0,
+			"ripe": ripe,                                   # Wildgrove: growth is in the harvest window
+			"ripe_frac": _ripe_frac(u.hots[gi]) if gi >= 0 else 0.0,
+			"growth_heal": (_remaining(u.hots[gi]) * _bloom_eff() * rmult) if gi >= 0 else 0.0,
 			"dead": not u.alive()})
 	var tg_victim: Seat = null
 	var tg_all := false
@@ -376,9 +429,24 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"verdance": float(seat.vars.get("verdance", 0.0)),
 		"verdance_max": cfg.verdance_max,
 		"flourish": flourish,
+		"flourish_ripe": flourish_ripe,
 		"garden": _garden_count(s),
+		"ripe_garden": _ripe_garden_count(s),
+		"thorn_charge": _thorn_charge(seat),
+		"thorn_charge_max": cfg.thorn_charge_max,
+		"thorns_pct": _thorns(seat),
 		"casting": seat.casting,
 		"tg_victim": tg_victim,
 		"tg_all": tg_all,
 		"party": party,
 	}
+
+## How many living allies carry a RIPE growth (drives Flourish + the gauge read).
+func _ripe_garden_count(s: CombatState) -> int:
+	var n := 0
+	for u in s.seats:
+		if u.role != "healer" and u.alive():
+			var gi := _find_growth(u)
+			if gi >= 0 and _ripe_frac(u.hots[gi]) >= cfg.ripe_lo:
+				n += 1
+	return n

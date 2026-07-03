@@ -29,16 +29,27 @@ extends Resource
 @export var perfect_verd: float = 10.0     ## bonus Verdance on a Perfect Ward
 @export var strike_perfect_sap: float = 12.0  ## M7: a PERFECT dodge refunds Sap (Verdance stays healing-earned)
 
-# --- Wildgrove (garden aspect) ---
-@export var flourish_need: int = 3         ## living allies with Growth to light Flourish
+# --- Wildgrove (garden aspect) — RIPEN: a Growth matures over its life; harvest it in
+#     the ripe window for a bloom bonus, and Flourish now lights on RIPE growths (not just
+#     alive), so the grove's game is TENDING the field to peak and timing the harvest. ---
+@export var flourish_need: int = 3         ## allies with a Growth to light Flourish (presence = the floor)
 @export var flourish_bonus: float = 0.25   ## all your HoT ticks +25% while Flourish is lit
+@export var flourish_bonus_ripe: float = 0.42  ## …and MORE when the field is RIPE (tending pays off)
 @export var wildbloom_heal: float = 1.0    ## Wildbloom heals each Growth'd ally Verdance × this
+@export var ripe_lo: float = 0.45          ## matured fraction where the ripe window opens
+@export var ripe_hi: float = 0.88          ## …and closes (past = overripe, no bonus)
+@export var ripe_bonus: float = 0.6        ## a bloom harvested IN the ripe window ×(1 + this)
+@export var wildbloom_sap: float = 5.0     ## Bridge: Sap back per Growth'd ally Wildbloom heals
 
-# --- Thornveil (ward aspect) ---
-@export var thorns_frac: float = 0.45      ## absorbed damage reflected to the boss
-@export var perfect_burst: float = 26.0    ## bonus boss damage on a Perfect Ward
+# --- Thornveil (ward aspect) — SNAP-STREAK: consecutive Perfect Wards ("snaps") ramp the
+#     thorn reflect; a ward that WILTS (expires unconsumed) breaks the streak. ---
+@export var thorns_frac: float = 0.45      ## reflect at 0 charge (base)
+@export var thorns_max: float = 0.90       ## reflect at full charge (the streak ceiling)
+@export var thorn_charge_max: int = 5      ## snaps to full streak
+@export var perfect_burst: float = 26.0    ## bonus boss damage on a Perfect Ward (scales w/ charge)
 @export var briar_conv: float = 0.8        ## Briarheart ward per ally = Verdance × this
 @export var briar_dur: float = 8.0
+@export var briar_sap: float = 4.0         ## Bridge: Sap back per ward Briarheart plants
 
 ## The spellbook. No mana — costs are Sap; the signature spends Verdance.
 @export var spells: Dictionary = {
