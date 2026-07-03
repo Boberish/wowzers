@@ -194,7 +194,11 @@ and versions carry the long tail. Nothing is timed, ever; the core loop must sta
    curios armed on the human seat, `sim/gear_probe.gd` + byte-identical gearless gate.
    v1 caveats: OFFLINE raid-map only (fold `gear` into the online campaign spec later);
    scrap Tokens BANK only until MARKET (GEAR-3). **Item designs: `GEAR-CATALOG.md` §Rollout GEAR-1.**
-2. **GEAR-2:** sworn oaths (detectors off `seat.diag`) + the Ledger page UI + oath purses/severity scaling. **Oath rows + detector notes: `GEAR-CATALOG.md`.**
+2. **GEAR-2 — ✅ DONE, merged 2026-07-03 (`8d18685`; record in MASTER-PLAN Coordination Log):**
+   sworn oaths live on the raid campaign — Ledger offer screen, deed detectors (`game/oaths.gd`,
+   diag/vars only), in-fight tracker w/ live BROKEN, KEPT = row unlocks into that kill's pool +
+   stakes purse; rarity-first drop roll (ring weights/pity/bends); 7 oath-row curios.
+   **Oath rows + v1 deed notes: `GEAR-CATALOG.md`.**
 3. **GEAR-3:** MARKET gear stock + extraction schematics (map layer).
 4. **GEAR-4:** raid personal loot + Seal tables; crests/standing later (needs accounts).
 

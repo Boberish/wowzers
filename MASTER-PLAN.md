@@ -524,19 +524,31 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   green; bulwark determinism unchanged. Merged `twinfang-accel` cleanly. **NEXT:** ONLINE boons (the
   human's `run_seed`/picks ride the fight spec so replicas build identically — netcode follow-up);
   a verb/boon summary on the raid combat HUD (solo shows one; raid doesn't yet); gate-fight post-draft. *(raid-finish session)*
-- ☐ 2026-07-03 · `gear2` · §SYSTEMS GEAR-2 — **Sworn OATHS + Ledger offer + purses (Bill: "continue" after GEAR-1).**
-  Per PROGRESSION-PLAN + GEAR-CATALOG: swear ONE oath at the boss node (Ledger-lite offer screen)
-  → in-fight tracker banner + live BROKEN pop → resolve at the kill → **permanent row unlock joins
-  the same kill's drop pool** + stakes-scaled purse (Tokens + pity ticks / rarity floors,
-  `stakes = 3 − ring` until versions exist). Detector engine over `seat.diag`/`seat.vars` ONLY
-  (new unconditional diag bumps: curse_dropped/answered, chain_break, kick_whiff, bloodied_dip —
-  never checksummed). `Gear.roll` grows the real rarity-first draw (ring weights 70/25/5 →
-  40/38/22 + run pity). SEVEN new items implemented w/ oath rows: GRACE PERIOD · STICKY NOTE ·
-  SCRATCHPAD · DEBT COLLECTOR · ENCORE BELL · ECHO CHAMBER · OVERFLOW SLUICE (one per raid class
-  page + universals; combat-actives like MUTE BUTTON stay deferred — no G/H socket yet).
-  Gate: frozen A/B byte-identical gearless/unsworn on all sims + gear_probe extension + smokes.
-  ⚠ engine touches: THREAT_DROP/taunt diag + `_damage` dip diag + `BossState.last_curse_tick` —
-  all diag-family/write-only. *(gear-design session)*
+- ☑ 2026-07-03 · `gear2` · §SYSTEMS GEAR-2 — **Sworn OATHS + Ledger offer + purses — MERGED to main
+  (`8d18685`)**, worktree removed. The oath loop is LIVE on the raid campaign: swear ONE oath on
+  the boss's **Ledger offer screen** (page rows w/ lock gems + SWEAR / RE-SWEAR / FIGHT UNSWORN)
+  → in-fight ⚖ tracker banner (turns crimson + "OATH BROKEN" pop the moment a monotone deed dies)
+  → resolves at the kill: **OATH KEPT = the row unlocks INTO the same kill's drop pool** + a
+  stakes-scaled purse (`Oaths.purse`: Tokens + pity ticks / sonnet floor / opus guarantee,
+  `stakes = 3 − ring`); Realm-1 verdicts = SLA MET / SLA BREACHED. `game/oaths.gd` detector
+  engine reads `seat.diag`/`seat.vars` ONLY (new unconditional diag: curse_dropped/answered
+  [engine THREAT_DROP+taunt], chain_break, kick_whiff [kit mistake-counters — gear saves don't
+  hide deeds], bloodied_dip [`_damage` crossing]; + `BossState.last_curse_tick`). `Gear.roll` is
+  now the real **rarity-first draw** (ring weights 70/25/5 → 55/35/10 → 40/38/22, +5pp opus per
+  pity tick, purse bends, nearest-tier clamp). SEVEN new curios w/ oath rows: **GRACE PERIOD**
+  (one streak-break forgiven — 5 class meanings) · STICKY NOTE · SCRATCHPAD (regen ×3 in ≥6s
+  winds) · DEBT COLLECTOR · ENCORE BELL · **ECHO CHAMBER** (opus) · OVERFLOW SLUICE — every raid
+  class's gate page has a deed to chase. **Tokens unified**: scrap + purses feed raid-boons'
+  REFORGE purse (`_run.tokens` — one ⏣ currency). **Gate PASS:** fresh frozen-main A/B — all 6
+  sims CSVs byte-identical unsworn/gearless · map sims identical · `gear_probe` 51 checks ALL OK
+  (detectors, purse table, floor/pity/ring rolls, all 7 items + controls, geared determinism) ·
+  raid smoke drives swear→break→KEPT→purse→re-swear live · all 8 smokes + net_smoke green ·
+  raid-boons' probes green (their `raid_boon_probe` needed one press-through for the new Ledger
+  screen — the composed chain is win → verdict → drop card → REFORGE draft → DESCEND) · Ledger/
+  verdict screens eyeballed (`screenshot_drop`). **NEXT (unclaimed):** GEAR-3 (MARKET stock +
+  extraction schematics — tokens now have a real faucet); combat-actives socket (G/H) for MUTE
+  BUTTON-family items; version-gated rows await the Trial Ladder; fold gear+oaths into the
+  ONLINE campaign spec. *(gear-design session)*
 - ☑ 2026-07-03 · `gear1` · §SYSTEMS GEAR-1 — **GEAR-1 raid-campaign loot PoC — MERGED to main
   (`866592f`)**, worktree removed. The Curio game is LIVE on the raid campaign: `data/gear/`
   (GearCatalog: 9 signature items — Riftmaw Tooth / LE CHAT's Bell / Swan Song / Ticket Stub /
