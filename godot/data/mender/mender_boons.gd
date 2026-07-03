@@ -30,7 +30,7 @@ const TIDE := [
 	{"id": "tideconv", "type": "upgrade", "rarity": "haiku", "tags": ["reservoir", "overheal"], "title": "Undertow", "desc": "Bank 20% more overheal into the Reservoir."},
 ]
 const BRINK := [
-	{"id": "bloodpact", "type": "relic", "rarity": "sonnet", "tags": ["bloodied", "nerve"], "title": "Blood Pact", "desc": "Bloodied allies deal even more damage (+0.35 factor)."},
+	{"id": "bloodpact", "type": "relic", "rarity": "sonnet", "tags": ["bloodied", "nerve"], "title": "Blood Pact", "desc": "Bloodied allies feed you 50% more Nerve — the deeper you let them ride, the faster Last Stand recharges."},
 	{"id": "secondwind", "type": "relic", "rarity": "opus", "tags": ["laststand", "nerve", "bloodied"], "title": "Second Wind", "desc": "Last Stand also cleanses every debuff."},
 	{"id": "nerveplus", "type": "upgrade", "rarity": "haiku", "tags": ["nerve", "bloodied"], "title": "Steel Nerve", "desc": "Build Nerve faster while allies are bloodied."},
 ]

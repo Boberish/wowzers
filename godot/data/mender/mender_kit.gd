@@ -44,7 +44,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 			if u.role != "healer" and u.alive() and u.hp_frac() <= cfg.blood_thresh:
 				blood += 1
 		if blood > 0:
-			var nv := float(seat.vars.get("nerve", 0.0)) + _nerve_rate() * float(blood) * s.dt
+			# Blood Pact (re-cut): bloodied allies feed the healer MORE Nerve — rewarding the
+			# ride-the-edge gamble through YOUR resource, not standing alone as a DPS stat.
+			var rate := _nerve_rate() * (1.5 if _b("bloodpact") else 1.0)
+			var nv := float(seat.vars.get("nerve", 0.0)) + rate * float(blood) * s.dt
 			seat.vars["nerve"] = minf(cfg.nerve_max, nv)
 
 	if not seat.casting.is_empty():

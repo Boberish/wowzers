@@ -431,10 +431,17 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	seat.cooldowns["rupture"] = s.tick + _tt(s, float(a["cd"]))
 	var per := float(a["per"]) * (1.4 if _b("rupturing") else 1.0)
 	var v := _venom(seat)
-	_deal(s, seat, float(total) * per * float(v["syn_ramp"]), true, false, "rupture")
-	v["V"] = 0; v["F"] = 0; v["C"] = 0
-	v["fes_ticks"] = 0; v["syn_ramp"] = 1.0; v["syn_active"] = false
-	CombatCore.emit_event(s, {"t": "rupture", "total": total})
+	# Lingering Venom (boon): a SIP — a smaller detonation that keeps HALF the cocktail +
+	# Synergy warm, so the engine never craters (sustain). Default = SLAM (full, zeroes it).
+	var sip := _b("lingerVenom")
+	_deal(s, seat, float(total) * per * float(v["syn_ramp"]) * (0.62 if sip else 1.0), true, false, "rupture")
+	if sip:
+		v["V"] = int(v["V"]) / 2; v["F"] = int(v["F"]) / 2; v["C"] = int(v["C"]) / 2
+		v["fes_ticks"] = 0                                 # keep stacks + syn_ramp/syn_active warm
+	else:
+		v["V"] = 0; v["F"] = 0; v["C"] = 0
+		v["fes_ticks"] = 0; v["syn_ramp"] = 1.0; v["syn_active"] = false
+	CombatCore.emit_event(s, {"t": "rupture", "total": total, "sip": sip})
 	return true
 
 # ---------------------------------------------------------------- slot-verb Rhythm mods
