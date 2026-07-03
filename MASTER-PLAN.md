@@ -428,6 +428,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `self-heal-meter` · §SYSTEMS — **Meter follow-up (Bill, direct): count SELF-heals** so the HEALING column answers "how much do I keep myself alive vs the healer". Kit `_heal` helpers (bulwark lifesteal/fortify/Vengeful Guard/Landslide/Warding Light · voidcaller kick-recovery/Reprieve/Umbral Mending · twinfang Red Harvest leech) compute effective-vs-overheal and call `CombatCore.meter_heal` on the seat itself, srcs named after the cards. Heal behavior unchanged → byte-identical gate on the three touched classes + raid; meter_probe extended. *(meter session)*
 - ☐ 2026-07-03 · `raid-richness` · §MAPS MAP-2 — **Make the raid map RICH & FUN (Bill, direct).**
   The quest/objective + flavor layer on the Realm-1 floors: **TICKETS** (pickup at one node →
   turn-in at a later one → reward paid in the wound-attrition economy: repair a corrupted sector /
