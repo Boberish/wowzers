@@ -170,8 +170,13 @@ func on_overheal(_s: CombatState, caster: Seat, target: Seat, over: float) -> vo
 		var r := float(caster.vars.get("reservoir", 0.0)) + over * _conv()
 		caster.vars["reservoir"] = minf(_res_max(), r)
 	if _b("overflow") and target != null:                  # Overflow: shield the target with the spill
-		target.absorb = minf(target.absorb + roundf(over * 0.3), target.hp_max * 0.5)
-		target.absorb_owner_i = _s.seats.find(caster)
+		# Top up toward Overflow's cap (hp_max*0.5) but ONLY GROW — never let the minf
+		# collapse an already-larger ward (Surge caps at hp_max, Ward is uncapped) down
+		# to the cap, and only claim ownership when Overflow actually added shield.
+		var grown := minf(target.absorb + roundf(over * 0.3), target.hp_max * 0.5)
+		if grown > target.absorb:
+			target.absorb = grown
+			target.absorb_owner_i = _s.seats.find(caster)
 
 ## Opus boon: a Ward fully consumed detonates in light — heal + cleanse its bearer.
 func on_absorb(s: CombatState, healer: Seat, target: Seat, _eaten: float, emptied: bool) -> void:
