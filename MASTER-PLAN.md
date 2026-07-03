@@ -461,6 +461,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `build-panel` · §GRAPHICS — **Verb/boon summary on the game HUD (Bill).** The combat
+  HUD shows no build readout; the solo HUDs had a "YOUR GUARD" verb tooltip. Add an always-visible
+  compact panel (top-right of the combat screen) listing the assembled verb rules (per-class
+  `*_boons.verb_summary/guard_summary(_run.boons, _aspect)`) + the drafted boons (track `_taken_boons`
+  dicts in `_show_boon_draft` for title/rarity, no resolver). Offline map runs only (`_run != null`).
+  Screenshot-verified (WSLg render works here now). Game-layer/UI only, zero engine. Gate: ui_smoke_raid
+  + determinism unchanged + a combat screenshot with boons. *(raid-finish session)*
+
 - ☑ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu refresh + boot into the game HUD — MERGED to
   main (`d27a84f`)**, worktree removed. The game boots straight into the game HUD (`raid_main.tscn`);
   `main_menu` + the dev BossSelect front door are retired. Flow: **HOME** (PLAY / PLAY ONLINE / QUIT)
