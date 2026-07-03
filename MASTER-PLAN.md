@@ -36,7 +36,7 @@
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
-| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1 MERGED (solo PoC on Bulwark, Realm-1 skin) — MAP-2/3 open |
+| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1/2/3 MERGED (rings, gates, tickets, online). **+ INFERENCE CHECK (deep events) P0–P2+P4 MERGED** — build-read dice + ⚡Entropy/📁Prior luck meta, offline. Online parity (P5) + branches (P3) open |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
 
 ---
@@ -358,6 +358,40 @@ nodes, not node kinds.
   the `gate-nodes` + `dps-meter` sessions — merge main often; keep floor logic separable from the
   GATE node kind / meter panel. Boss content (`raid_content.gd`, the low-collision core) moves first.
   </details>
+- **THE INFERENCE CHECK — deep events + build-read dice + luck meta — 🟢 P0–P2 + P4 MERGED (offline), 2026-07-03.**
+  The map's events were a joke (every one = 2 flat buttons, ±integrity). They now READ YOUR BUILD
+  and print a success % — Across-the-Obelisk's "cards of Fire" adapted: a check counts your boons by
+  TAG (`Draft.catalog` synergy vocab) + aspect + trinity ROLE ("the specialist at the terminal") +
+  integrity + 📁Prior floor + comeback pity + ⚡ nudge, shown as an itemized breakdown before you
+  commit. The die is a pure `DetRng(map_seed,node,choice,attempt)` function → replayable, machine-
+  agnostic, ZERO new netcode. Design dossier: the `inference-check` artifact. Forks Bill locked
+  2026-07-03: solo stays shallow (raid-only depth) · ⚡ ENTROPY name · SOFT fails · party-picks-seat
+  (co-op) · post-fail mulligan.
+  - **P0 (plumbing, byte-identical):** `game/map_fx.gd` MapFx.apply — ONE applier replacing the three
+    hand-copies (raid_hud `_apply_map_fx` / net_server `_apply_fx_srv` / raid_map_sim `_apply_fx`).
+    `game/luck_profile.gd` (📁 Prior persistence). `raid_event_ids()` frozen to an explicit 11-id list.
+    Inert RunState/HUD fields (entropy/prior/flags/check_fails).
+  - **P1 (checks, offline):** `game/map_check.gd` MapCheck (pure resolver: build_ctx/chance/gate_ok/
+    roll/resolve). Enriched 3 raid-only events (helpdesk/model_graveyard/prompt_injection) with
+    free/check/gated grammar + success/fail legs + a top-level fx = online pre-parity fallback.
+    `map_event_panel` renders the % + breakdown + ✓/✗ verdict (legacy {label,fx} free path byte-compat).
+    raid_hud `_event_stop`/`_prep_choice`/`_map_ctx` resolve offline.
+  - **P2 (⚡ interactive) + P4 (📁 persistence):** the ⚡ NUDGE stepper (feed Entropy to raise a check
+    pre-commit, live ladder, spent on commit); ⚡/📁 shown on the map header; Prior banked to
+    `user://rift_prior.cfg` at descent end (win or wipe → "TRAINING SIGNAL RECORDED").
+  - **Gates:** NEW `sim/map_check_sim.gd` ALL PASS (die determinism, uniform p=60→60.0%, monotonicity,
+    clamp[5,95], bands off=25/themed+aspect=76/specialist=91, pity cap, nudge, gates). NEW
+    `sim/map_event_probe.gd` ALL OK (panel builds + HACK check 59% + nudge 59→67% + gate lock/unlock).
+    Solo `map_sim` byte-identical; `raid_map_sim` DELIBERATE re-baseline (walker resolves checks —
+    event attrition now real; determinism/structure/gates/shard/tickets PASS, expert 100% all rings,
+    descent curve intact); ui_smoke_raid/map + net_map_smoke green. VISUAL: `sim/screenshot_event.gd`
+    (WSLg) — prompt breakdown + ⚡ stepper + "✓ MODEL CONFIDENCE 76% — PASS" render clean.
+  - **NEXT (unclaimed):** P3 multi-stage BRANCHES + cross-node FLAGS (schema fields exist; the
+    'A Favor Returned' payoff). P2-remainder: MULLIGAN (post-fail reroll, attempt+1) · CUSHION · the
+    WAGER kind. **P5 ONLINE PARITY** (the leader currently sees flat labels + applies the fallback fx;
+    server doesn't resolve checks/gates yet — needs protocol bump, widened mapstop metadata + choice
+    spend, server MapCheck resolution, prior-at-lobby). More deep events (entropy_daemon / performance_
+    review authored in the dossier, not yet in data). P6 fight-altering marks (deferred).
 - **Acceptance (all phases):** map-gen determinism; solo sims + raid checksums byte-identical with maps off; smokes green.
 
 ## CLASSES
@@ -461,6 +495,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-03 · `topology-checks` · §MAPS — **THE INFERENCE CHECK — deep events + build-read dice +
+  ⚡Entropy/📁Prior luck meta — MERGED to main (Bill: "the map is a joke, just +integrity jokes; we
+  need deep decisions, side stuff like better luck next time, more than yes/no, an AtO-style dice
+  system adapted to us").** Phases P0 (unified MapFx applier, byte-identical) → P1 (MapCheck pure
+  resolver + 3 enriched raid events + breakdown panel, offline) → P2 (⚡ nudge stepper) + P4 (📁 Prior
+  persistence). Design dossier = the `inference-check` artifact; 5 forks locked (solo shallow · ENTROPY ·
+  soft fails · party-picks-seat · post-fail mulligan). Gates: NEW `map_check_sim`/`map_event_probe` ALL
+  PASS; solo `map_sim` byte-identical; `raid_map_sim` re-baselined (walker resolves checks, curve intact);
+  ui/net smokes green; WSLg `screenshot_event` clean. **OPEN follow-ups (unclaimed):** P3 branches+flags ·
+  P2-rest (mulligan/cushion/wager) · **P5 online parity** (protocol bump — leader sees flat labels + fallback
+  fx today) · more deep events · P6 marks. See §MAPS · THE INFERENCE CHECK.
 
 - ☑ 2026-07-03 · `healer-frames` · §GRAPHICS — **RAID-FRAME MEGA UPGRADE — MERGED to main
   (`353626d`) (Bill: bigger/awesome healer frames; shield bigger + clearly visible without
