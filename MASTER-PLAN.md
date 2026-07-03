@@ -461,16 +461,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu full refresh + boot into the game HUD (Bill).**
-  The game boots straight into the game HUD (`raid_main.tscn`), skipping the old `main_menu` class
-  picker (retired). New clean flow (reuse Gilded Reliquary cards): **HOME** (title + **PLAY** +
-  **PLAY ONLINE** + QUIT) → **CLASS** (the 4 raid seats: Bulwark/Twinfang/Voidcaller/Mender) →
-  **SUB-CLASS** (Aspect ceremony, exists) → **RAID** pick (one card: Realm 1 · The Takeover) →
-  `_start_map_run`. PLAY ONLINE keeps the existing connect/lobby. Replaces the dev BossSelect front
-  door (boss-select stays `--autostart` only). All `_show_select` returns → `_show_home`. Menus+docs
-  scope (no file rename/deletion — per Bill's answer). Game-layer/UI only, zero engine. ⚠ `raid_hud.gd`
-  shared w/ live sessions — merge main before merge-back. Gate: ui_smoke_raid + all class sims
-  byte-identical, WSLg glance if possible. *(raid-finish session)*
+- ☑ 2026-07-03 · `menu-refresh` · §GAME SHAPE — **Menu refresh + boot into the game HUD — MERGED to
+  main (`d27a84f`)**, worktree removed. The game boots straight into the game HUD (`raid_main.tscn`);
+  `main_menu` + the dev BossSelect front door are retired. Flow: **HOME** (PLAY / PLAY ONLINE / QUIT)
+  → **CLASS** (4 seats) → **SUB-CLASS** (Aspect) → **RAID** (Realm 1 card) → the descent. All
+  fight-end/Esc/leave returns → `_show_home` (`_show_select` is now a thin wrapper). Reuses AspectCard
+  for class + raid cards; boss-select stays `--autostart` dev only. Gate PASS: NEW `sim/menu_probe.gd`
+  (HOME→class→aspect→raid→live descent→HOME); ui_smoke_raid green; bulwark determinism unchanged;
+  boon/gear/floor probes green. **Menus+docs scope** (no file rename). **Pending:** a live WSLg glance
+  at the card/button layout (headless proves it builds, not the pixels). **NEXT:** the verb/boon
+  summary on the game HUD (deferred from the boon work); optional later — rename `raid_hud`→`game_hud`. *(raid-finish session)*
 - ☑ 2026-07-03 · `raid-boons` · §MAPS/§SYSTEMS — **Boon draft in the RAID campaign — MERGED to main
   (`0338a37`)**, worktree removed. Draft 2.0 (1-of-3 / rarities / build-your-verb) now runs in the
   raid descent OFFLINE: the human seat gets a `_run` (RunState via the class starter), a **REFORGE**
