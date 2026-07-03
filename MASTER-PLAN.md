@@ -428,6 +428,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-03 · `online-map` · §MAPS MAP-3b / §ONLINE — **Online co-op map traversal (Bill, direct).**
+  The Topology descent goes live co-op: the SERVER owns the campaign (map + per-seat integrity/
+  wounds + mana + inventory/tickets + floor), broadcasts it, the **leader picks the route**; only
+  FIGHTS stay lockstep. Fight specs gain a `carry` (fracs/wounds/mana) so online fights start at
+  carried state deterministically (`RaidNet.make_spec/build`). New protocol msgs (`mapstart`/`node`/
+  `choice` up · `map`/`mapstop`/`campaign` down, **VERSION 2→3**). Server campaign engine mirrors the
+  offline `raid_hud` map logic (node resolve, fx, floor advance, Seal→elevate/clear). Client renders
+  the server map (leader clickable) + event panels; fights unchanged. **v1 scope:** no GATE nodes
+  online (personal-exam-online deferred — `extra_quota={}`); leader-only route/choice (party vote
+  later). ⚠ touches `godot/net/*` + `raid_hud.gd` (shared w/ `self-heal-meter` — merge main before
+  merge-back; **rebuild the server with clients, protocol bump**). Gate: `net_smoke` extended to a
+  full 2-client map run (leader routes a floor, carried-state fights, floor advance, replicas agree,
+  zero desync); offline raid_map_sim + solo sims byte-identical; smokes green. *(raid-finish session)*
 - ☐ 2026-07-03 · main (docs only) · §SYSTEMS/PROGRESSION — **Gear catalog + boss-deed naming + difficulty scaling (Bill, direct):** rename the Ledger's "armed quests/feats" (quests = map TICKETS already), author the GEAR-1/2 item catalog with synergies against the class-fun reworks (Chain/Redline+Sunder · Accelerando/Poison-Wheel · Litany · Ripen/Snap) — Opus = combo build-arounds, Haiku = visible fun — and spec deed/drop scaling by Ring/version. Docs: PROGRESSION-PLAN amendments + new catalog doc. *(gear-design session)*
 - ☐ 2026-07-03 · `self-heal-meter` · §SYSTEMS — **Meter follow-up (Bill, direct): count SELF-heals** so the HEALING column answers "how much do I keep myself alive vs the healer". Kit `_heal` helpers (bulwark lifesteal/fortify/Vengeful Guard/Landslide/Warding Light · voidcaller kick-recovery/Reprieve/Umbral Mending · twinfang Red Harvest leech) compute effective-vs-overheal and call `CombatCore.meter_heal` on the seat itself, srcs named after the cards. Heal behavior unchanged → byte-identical gate on the three touched classes + raid; meter_probe extended. *(meter session)*
 - ☑ 2026-07-03 · `raid-richness` · §MAPS MAP-2 — **Raid map RICH & FUN — MERGED to main (`d2e51ea`)**,
