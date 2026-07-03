@@ -88,6 +88,7 @@ var _map_tokens := 0                    ## ⏣ banked from scrap (MARKET spends 
 var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
+var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -718,6 +719,7 @@ func _start_map_run() -> void:
 	_map_gear = []
 	_map_gear_charges = {}
 	_map_tokens = 0
+	_taken_boons = []
 	if DisplayServer.get_name() != "headless":
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
@@ -1134,6 +1136,7 @@ func _show_boon_draft(done: Callable) -> void:
 		"Take one. The ✦ card resonates with your build.", extras, Palette.GOLD)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_run, boon)
+		_taken_boons.append(boon)      # for the build panel (title + rarity)
 		done.call())
 	_ui.add_child(ds)
 
@@ -1231,6 +1234,7 @@ func _build_combat(s: CombatState) -> void:
 		_stage2d.setup(s, aspects)
 	_stage2d.bind_seats(s.seats)
 	_add_dev_tools()
+	_add_build_panel()
 
 	_shake_root = Control.new()
 	_shake_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1498,6 +1502,81 @@ func _dev_win() -> void:
 	# overkill the boss (and any active add) — the normal update loop then resolves
 	# the win exactly like a real kill, so drops/floor-advance run unchanged.
 	CombatCore.damage_boss(s, s.seats[0], s.boss.hp + s.boss.hp_max + 1.0)
+
+## The player's assembled verb, in the class's own words (build-your-verb boons).
+const VERB_LABEL := {"tank": "GUARD", "blade": "RHYTHM", "caster": "KICK", "healer": "TRIAGE"}
+
+func _verb_summary_lines() -> Array:
+	if _run == null:
+		return []
+	match _seat_key:
+		"blade": return TwinfangBoons.verb_summary(_run.boons, _aspect)
+		"caster": return VoidcallerBoons.verb_summary(_run.boons, _aspect)
+		"healer": return MenderBoons.verb_summary(_run.boons, _aspect)
+		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
+
+## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
+## so you can always see the run you've drafted. Offline descent only (_run present;
+## online boons ride the spec later). Rebuilt each fight, so it reflects new picks.
+func _add_build_panel() -> void:
+	if _run == null or _online:
+		return
+	var lines := _verb_summary_lines()
+	if _taken_boons.is_empty() and lines.is_empty():
+		return                                    # nothing drafted yet
+	var frame := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(Palette.BG0, 0.74)
+	sb.border_color = Color(Palette.GOLD_DIM, 0.55)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(5)
+	sb.content_margin_left = 12
+	sb.content_margin_right = 12
+	sb.content_margin_top = 9
+	sb.content_margin_bottom = 9
+	frame.add_theme_stylebox_override("panel", sb)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 3)
+	frame.add_child(col)
+	var hdr := Label.new()
+	hdr.text = "◆  YOUR %s" % String(VERB_LABEL.get(_seat_key, "BUILD"))
+	hdr.add_theme_font_size_override("font_size", 14)
+	hdr.add_theme_color_override("font_color", Palette.GOLD)
+	col.add_child(hdr)
+	for l in lines:
+		var lbl := Label.new()
+		lbl.text = "·  " + String(l)
+		lbl.add_theme_font_size_override("font_size", 11)
+		lbl.add_theme_color_override("font_color", Palette.TEXT)
+		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbl.custom_minimum_size = Vector2(276, 0)
+		col.add_child(lbl)
+	if not _taken_boons.is_empty():
+		var cap := Label.new()
+		cap.text = "BOONS  ·  %d" % _taken_boons.size()
+		cap.add_theme_font_size_override("font_size", 10)
+		cap.add_theme_color_override("font_color", Palette.GOLD_DIM)
+		col.add_child(cap)
+		for b in _taken_boons:
+			var bd: Dictionary = b
+			var bl := Label.new()
+			bl.text = "•  " + String(bd.get("title", "?"))
+			bl.add_theme_font_size_override("font_size", 11)
+			bl.add_theme_color_override("font_color", Palette.rarity_color(String(bd.get("rarity", "haiku"))))
+			col.add_child(bl)
+	_ui.add_child(frame)
+	# TOP-LEFT (below the dev button, above the party frames) — the top-right is the
+	# DPS meter's. Grows DOWN as the build fills out (content-sized height).
+	frame.anchor_left = 0.0
+	frame.anchor_top = 0.0
+	frame.anchor_right = 0.0
+	frame.anchor_bottom = 0.0
+	frame.grow_horizontal = Control.GROW_DIRECTION_END
+	frame.grow_vertical = Control.GROW_DIRECTION_END
+	frame.offset_left = 14
+	frame.offset_right = 320
+	frame.offset_top = 56
+	frame.offset_bottom = 56
 
 func _healer_hint() -> String:
 	var parts: Array = []
