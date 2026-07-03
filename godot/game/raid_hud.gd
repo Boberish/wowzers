@@ -197,7 +197,7 @@ func _show_select(seat: String = "tank") -> void:
 	sel.current = seat
 	sel.hint = "Pick a Seal: Vorathek is the classic pull; II–IV are the Machine Seals (they escalate). Every seat: F = dodge combo beats · Esc = menu. Seat verbs: SPACE = parry / dodge / KICK · Mender click-casts the frames."
 	sel.extras = [
-		{"label": "THE TOPOLOGY — RING 3 raid floor (map run: Vorathek gate → MISTRAL-7B)",
+		{"label": "THE TOPOLOGY — Realm 1 descent · Ring 3→0 (MISTRAL → GEMINI → MYTHOS)",
 			"cb": func(): _start_map_pick(sel.current)},
 		{"label": "🌐  PLAY ONLINE (live co-op)", "cb": _show_online},
 	]
@@ -1111,6 +1111,7 @@ func _build_combat(s: CombatState) -> void:
 			aspects[key] = String(kit.get("aspect")) if kit != null and kit.get("aspect") != null else ""
 		_stage2d.setup(s, aspects)
 	_stage2d.bind_seats(s.seats)
+	_add_dev_tools()
 
 	_shake_root = Control.new()
 	_shake_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1355,6 +1356,29 @@ func _build_band_healer() -> void:
 		_runes.append(rune)
 		_rune_ids.append(id)
 	_hint_line(_healer_hint())
+
+## DEV TOOL: an instant-WIN button to test the post-fight flow (drops, floor advance,
+## ring elevation, campaign clear) without grinding each fight. Debug/source builds
+## only, and OFFLINE only — killing the boss locally in an online lockstep fight would
+## desync every replica. Auto-hidden in headless (sims/smokes) and release exports.
+func _add_dev_tools() -> void:
+	if _online or DisplayServer.get_name() == "headless" or not OS.is_debug_build():
+		return
+	var win := Button.new()
+	win.text = "DEV ▶ WIN"
+	win.add_theme_font_size_override("font_size", 12)
+	win.modulate = Color(1.0, 1.0, 1.0, 0.5)
+	win.pressed.connect(_dev_win)
+	_place(win, 0, 0, 0, 0, 14, 14, 116, 44)     # top-left corner, out of the way
+	_ui.add_child(win)
+
+func _dev_win() -> void:
+	if _ctrl == null or _ctrl.state == null or _ctrl.state.over:
+		return
+	var s: CombatState = _ctrl.state
+	# overkill the boss (and any active add) — the normal update loop then resolves
+	# the win exactly like a real kill, so drops/floor-advance run unchanged.
+	CombatCore.damage_boss(s, s.seats[0], s.boss.hp + s.boss.hp_max + 1.0)
 
 func _healer_hint() -> String:
 	var parts: Array = []
