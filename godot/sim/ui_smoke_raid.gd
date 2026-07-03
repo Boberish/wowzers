@@ -23,9 +23,12 @@ func _process(_delta: float) -> bool:
 		hud._show_aspect_pick(seat_key)
 	print("aspect-pick screens (x4): ok")
 
+	# the healer seat's TWO classes: Mender (tidecaller/brinkwarden) + the second
+	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
 			["blade", "tempo"], ["caster", "disruptor"], ["caster", "silencer"],
-			["healer", "tidecaller"], ["healer", "brinkwarden"]]:
+			["healer", "tidecaller"], ["healer", "brinkwarden"],
+			["healer", "wildgrove"], ["healer", "thornveil"]]:
 		hud._launch(combo[0], combo[1])
 		var s: CombatState = hud._ctrl.state
 		var ticks := _drive(s, String(combo[0]))
@@ -188,6 +191,17 @@ func _process(_delta: float) -> bool:
 		{"t": "empower", "amt": 0.1},
 		{"t": "pushback", "player": true},
 		{"t": "cast_cancelled", "id": "mend"},
+		# Bloomweaver (second healer) events
+		{"t": "bloom", "seat": s2.seats[0], "amt": 60},
+		{"t": "warded", "seat": s2.seats[1]},
+		{"t": "saprot", "seat": s2.seats[2]},
+		{"t": "wilt", "seat": s2.seats[3], "amt": 30},
+		{"t": "perfect_ward", "seat": s2.seats[0]},
+		{"t": "lifesurge"},
+		{"t": "wildbloom", "n": 3},
+		{"t": "briarheart"},
+		{"t": "thorn_snap", "player": true, "charge": 3},
+		{"t": "thorn_break", "player": true},
 	]:
 		hud._handle_event(ev)
 	print("juice handlers (all classes): ok")
@@ -247,7 +261,17 @@ func _drive(s: CombatState, seat_key: String) -> int:
 				"healer":
 					# hover the tank and keep it topped; exercise click-cast gating too
 					hud._hover_seat = s.seats[0]
-					if (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):
+					if hud._healer_cls == "bloomweaver":
+						# Bloomweaver: plant/bloom Growth, ward (click-cast), lifesurge, signature
+						if (i % 48) == 0:
+							hud._cast("lifesurge")
+						elif (i % 40) == 0:
+							hud._bloomweaver_key(KEY_7)          # the aspect signature
+						elif (i % 16) == 0:
+							hud._cast_on(s.seats[0], "bark")     # ward the tank (chord path)
+						elif (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):
+							hud._cast("growth")
+					elif (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):
 						if (i % 24) == 0:
 							hud._cast_on(s.seats[0], "flash")
 						else:

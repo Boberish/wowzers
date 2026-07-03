@@ -64,7 +64,7 @@ static func exam(seat_key: String) -> Dictionary:
 ## The class's exam fight, exactly as the solo game builds it (party-of-one for the
 ## martial seats; the healer brings its sandboxed stat-block party) — display name
 ## and intro recast to the Realm-1 identity.
-static func make_state(seed: int, seat_key: String, aspect: String) -> CombatState:
+static func make_state(seed: int, seat_key: String, aspect: String, cls: String = "") -> CombatState:
 	var ex: Dictionary = exam(seat_key)
 	match seat_key:
 		"blade":
@@ -78,6 +78,13 @@ static func make_state(seed: int, seat_key: String, aspect: String) -> CombatSta
 			return VoidcallerContent.make_state(seed, aspect, VoidcallerContent.make_config(),
 				VoidcallerContent.make_voidcaller_config(), e2)
 		"healer":
+			# the healer seat has two classes — the Bloomweaver's exam is its own solo
+			# spike fight (Ashmaul), not the Mender's (Rendmaw).
+			if cls == "bloomweaver":
+				var eb := BloomweaverContent.make_ashmaul()
+				_recast(eb, ex)
+				return BloomweaverContent.make_state(seed, aspect, BloomweaverContent.make_config(),
+					BloomweaverContent.make_bloom_config(), eb)
 			var e3 := MenderContent.make_rendmaw()
 			_recast(e3, ex)
 			return MenderContent.make_state(seed, aspect, MenderContent.make_config(),
