@@ -604,8 +604,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   - **Stage:** the 2D raid stage renders a MenderRig2D for the Bloomweaver seat (graceful), now tinted by its
     aspects (verdance green / thorn amber); a bespoke Bloomweaver rig is a later art follow-up.
   - **Gate:** all six solo sims byte-identical A/B, raid determinism PASS (default + bloom), all 7 UI smokes +
-    meter_probe + raid_bloom_probe + net_smoke green. **Follow-ups:** bespoke Bloomweaver stage rig; mythos AI
-    finale tuning; unpark the Bloomweaver GEAR-CATALOG rows (ORCHARD BELL / CROWN OF BRIARS) now that it has a seat. *(bloom-raid session)*
+    meter_probe + raid_bloom_probe + net_smoke green.
+  - **Reconciled with the healing-rebalance first pass (`raid-tuning`, 405fce8):** the harder raid (melee/nova/DoT
+    ramp) engages the Bloomweaver too — its **Sap floor dips to ~46-55%** (a tighter resource constraint than the
+    Mender's ~88% mana), 100% win on Vorathek, deterministic. High overheal (~48%) is the proactive-HoT signature
+    (plant ahead → some ticks top an already-full ally — exactly why Verdance is earned only on EFFECTIVE healing).
+    Battle-rez (Rekindle) stays **Mender-only by design** — Bloomweaver PREVENTS deaths (wards/HoTs ahead) rather
+    than recovering from them. All 6 solo sims re-verified byte-identical post-reconcile.
+  - **Follow-ups:** bespoke Bloomweaver stage rig; mythos AI finale tuning; a raid Sap-lever + overheal trim if
+    Bill wants Bloomweaver's economy tuned like the Mender's (deferred — raid-healer rebalance pending Bill's
+    steer, see [[raid-healer-under-pressured]]); optional Bloomweaver battle-rez; unpark its GEAR-CATALOG rows
+    (ORCHARD BELL / CROWN OF BRIARS) now that it has a seat. *(bloom-raid session)*
 - ☑ 2026-07-03 · `gear1` · §SYSTEMS GEAR-1 — **GEAR-1 raid-campaign loot PoC — MERGED to main
   (`866592f`)**, worktree removed. The Curio game is LIVE on the raid campaign: `data/gear/`
   (GearCatalog: 9 signature items — Riftmaw Tooth / LE CHAT's Bell / Swan Song / Ticket Stub /
