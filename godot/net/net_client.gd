@@ -57,12 +57,15 @@ func send_mapstart() -> void:
 func send_node(id: int) -> void:
 	send({"t": "node", "id": id})
 
-## An event choice. `nudge` = ⚡ Entropy fed to a check (v6); `seat` = the acting seat
-## (the seat whose build drives the check — defaults to the leader server-side).
-func send_choice(i: int, nudge: int = 0, seat: String = "") -> void:
+## An event choice. `nudge` = ⚡ fed pre-commit (v6); `seat` = the acting specialist (v7);
+## `attempt` = post-fail mulligan rerolls the leader committed to (v9 — the server resolves
+## the SAME die at this attempt, spending nudge + attempt×cost ⚡).
+func send_choice(i: int, nudge: int = 0, seat: String = "", attempt: int = 0) -> void:
 	var m := {"t": "choice", "i": i, "nudge": nudge}
 	if seat != "":
 		m["seat"] = seat
+	if attempt > 0:
+		m["attempt"] = attempt
 	send(m)
 
 func send_pick(id: String) -> void:      ## online boons: this seat's drafted boon ("" = skip)

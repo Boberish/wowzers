@@ -70,7 +70,7 @@ func _build_panel() -> void:
 	panel.body_text = String(ev["body"])
 	panel.choices = descs
 	panel.accent = Palette.VOID
-	panel.resolver = func(orig: int, nudge: int) -> Dictionary:
-		return MapCheck.resolve(raw[orig], ctx, 999, 3, orig, 0, {"nudge": nudge})
+	panel.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
+		return MapCheck.resolve(raw[orig], ctx, 999, 3, orig, attempt, {"nudge": nudge})
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(panel)

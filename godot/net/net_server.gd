@@ -559,7 +559,8 @@ func _pick_choice(id: int, msg: Dictionary) -> void:
 	# the pure decision (gate / roll / toast / ⚡ spend). The die slot is per (page, choice)
 	# so a branch sub-page has its own roll — identical to the leader's local resolve.
 	var r := resolve_event_choice(c, ctx, int((cp["map"] as RunMap).seed), int(cp["node"]),
-		MapCheck.choice_slot(page, i), int(msg.get("nudge", 0)), int(cp["entropy"]))
+		MapCheck.choice_slot(page, i), int(msg.get("nudge", 0)), int(cp["entropy"]),
+		int(msg.get("attempt", 0)))     # post-fail mulligans the leader committed to
 	if not bool(r["accept"]):
 		return                               # can't commit a locked choice
 	if bool(r["is_check"]):
@@ -614,17 +615,20 @@ func _broadcast_mapstop(room: Dictionary, event_id: String, page: String) -> voi
 ## `accept:false` = a locked gate (reject). The die matches the client because both use the
 ## same (map_seed, node, i) and the same server-broadcast %.
 static func resolve_event_choice(c: Dictionary, ctx: Dictionary, map_seed: int, node_id: int,
-		i: int, nudge_req: int, entropy_have: int) -> Dictionary:
+		i: int, nudge_req: int, entropy_have: int, attempt: int = 0) -> Dictionary:
 	var gate: Dictionary = c.get("gate", {})
 	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
 		return {"accept": false}
-	if String(c.get("kind", "free")) == "check":
+	if MapCheck.check_like(String(c.get("kind", "free"))):
 		var nudge := clampi(nudge_req, 0, mini(MapCheck.NUDGE_MAX, entropy_have))
-		var res := MapCheck.resolve(c, ctx, map_seed, node_id, i, 0, {"nudge": nudge})
+		var att := clampi(attempt, 0, MapCheck.MULLIGAN_MAX)
+		# ⚡ spent = nudge (pre-commit) + rerolls (attempt × cost); the die honours `att`
+		var spend := nudge + att * MapCheck.MULLIGAN_COST
+		var res := MapCheck.resolve(c, ctx, map_seed, node_id, i, att, {"nudge": nudge})
 		var toast := ("✓ %d%% — " % int(res["p"]) if bool(res["success"]) \
 			else "✗ rolled %d vs %d%% — " % [int(res["roll"]), int(res["p"])]) + String(res["result"])
 		return {"accept": true, "is_check": true, "fx": res["fx"], "toast": toast,
-			"entropy_after": maxi(0, entropy_have - nudge), "success": bool(res["success"]),
+			"entropy_after": maxi(0, entropy_have - spend), "success": bool(res["success"]),
 			"p": int(res["p"]), "roll": int(res["roll"]), "nudge": nudge,
 			"goto": String(res.get("goto", ""))}          # a check leg may fail-forward
 	var fx: Dictionary = (c.get("fx", {}) as Dictionary).duplicate()
@@ -651,7 +655,8 @@ func _choice_meta_for(c: Dictionary, ctx: Dictionary) -> Dictionary:
 	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
 		m["gated"] = true
 		m["locked_reason"] = MapCheck.gate_reason(gate)
-	elif String(c.get("kind", "")) == "check":
+		return m
+	if MapCheck.check_like(String(c.get("kind", ""))):
 		var info := MapCheck.chance(c.get("check", {}), ctx)
 		m["chance"] = int(info["p"])
 		m["breakdown"] = info["parts"]

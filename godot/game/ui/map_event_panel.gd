@@ -31,6 +31,12 @@ var resolver: Callable = Callable()   ## check resolver: (orig_index:int, nudge:
 var committed_index := -1             ## the orig_index the player pressed (online: sent to server)
 var committed_nudge := 0              ## ⚡ fed on that press (online: sent to server)
 var committed_seat := ""              ## the specialist that stepped up (online seat-picker)
+var committed_attempt := 0            ## post-fail rerolls taken (online: sent so the server resolves the SAME die)
+var committed_is_check := false       ## the committed choice was a check/wager (drives ⚡-spend + pity)
+var committed_success := false        ## the committed roll's outcome (drives comeback pity)
+var _cur_orig := -1                   ## the check being resolved/mulligan'd right now
+var _cur_desc := {}
+var _attempt := 0
 
 ## SEAT-PICKER (online co-op): the party chooses WHICH seat attempts a check — its
 ## build drives the %. `seats` = candidate seat keys (empty = no picker, e.g. offline);
@@ -90,7 +96,7 @@ func _effective(c: Dictionary) -> Dictionary:
 	if bool(v.get("gated", false)):
 		m["gated"] = true
 		m["locked_reason"] = String(v.get("locked_reason", "locked"))
-	elif String(m["kind"]) == "check":
+	elif _check_like(String(m["kind"])):
 		m["chance"] = int(v.get("chance", c.get("chance", 0)))
 		m["breakdown"] = v.get("breakdown", c.get("breakdown", []))
 		m["nudge_ladder"] = v.get("ladder", c.get("nudge_ladder", []))
@@ -144,8 +150,8 @@ func _add_choice_button(c: Dictionary, i: int) -> void:
 	b.custom_minimum_size = Vector2(560, 46)
 	b.add_theme_font_size_override("font_size", 16)
 	b.text = String(c["label"])
-	# a check choice shows its % right on the button
-	if kind == "check" and not gated:
+	# a check / wager choice shows its % right on the button
+	if _check_like(kind) and not gated:
 		b.text = "%s          %d%%" % [String(c["label"]), int(c.get("chance", 0))]
 		_main_btn[orig] = b
 	if gated:
@@ -157,7 +163,9 @@ func _add_choice_button(c: Dictionary, i: int) -> void:
 	# sub-line: locked reason, the check verb + itemized breakdown, or the free fx hint
 	if gated:
 		_sub("🔒 " + String(c.get("locked_reason", "locked")), Palette.VOID)
-	elif kind == "check":
+	elif _check_like(kind):
+		if kind == "wager":
+			_sub("⚠ WAGER — stakes %s on the roll, win or lose" % String(c.get("stake_label", "")), Palette.CRUSH)
 		var verb := String(c.get("verb", "CHECK"))
 		var parts := ""
 		for row in c.get("breakdown", []):
@@ -220,16 +228,33 @@ func _adjust_nudge(orig: int, delta: int) -> void:
 			l.text = "⚡ %d fed  →  %d%%" % [cur, p]
 			l.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
 
+func _check_like(kind: String) -> bool:
+	return kind == "check" or kind == "wager"
+
 func _on_press(c: Dictionary, orig: int) -> void:
 	committed_index = orig
 	committed_nudge = int(_nudge.get(orig, 0))
 	committed_seat = _acting                     # the specialist that stepped up (online)
-	if String(c.get("kind", "free")) == "check" and resolver.is_valid():
-		var res: Dictionary = resolver.call(orig, int(_nudge.get(orig, 0)))
+	_cur_orig = orig
+	_cur_desc = c
+	_attempt = 0
+	_resolve_and_show()
+
+## Resolve the current choice at the current attempt (a mulligan bumps _attempt). Records
+## committed_* so the HUD can spend ⚡ (nudge + rerolls) and update comeback pity on commit.
+func _resolve_and_show() -> void:
+	var c: Dictionary = _cur_desc
+	if _check_like(String(c.get("kind", "free"))) and resolver.is_valid():
+		var res: Dictionary = resolver.call(_cur_orig, committed_nudge, _attempt)
+		committed_attempt = _attempt
+		committed_is_check = true
+		committed_success = bool(res.get("success", false))
 		_show_result(res.get("fx", {}), String(res.get("result", "")),
 			bool(res.get("success", false)), int(res.get("roll", -1)), int(res.get("p", 0)), true,
 			String(res.get("goto", "")))
 	else:
+		committed_is_check = false
+		committed_success = true
 		var fx: Dictionary = c.get("fx", {})
 		_show_result(fx, String(fx.get("result", "It is done.")), true, -1, 0, false,
 			String(c.get("next_page", "")))
@@ -241,12 +266,25 @@ func _show_result(fx: Dictionary, text: String, success: bool, roll: int, p: int
 	if was_check:
 		var col := Palette.WIN if success else Palette.LOSE
 		var verdict := ("✓  MODEL CONFIDENCE %d%%  —  PASS" % p) if success else ("✗  ROLLED %d vs %d%%  —  FAIL" % [roll, p])
+		if _attempt > 0:
+			verdict += "   (reroll %d)" % _attempt
 		_label(verdict, 15, col)
 	_body(text)
 	var outcome := _fx_hint(fx)
 	if outcome != "":
 		_label(outcome, 14, accent)
 	_box.add_child(_gap(6))
+	# POST-FAIL MULLIGAN: spend ⚡ to reroll the die (attempt+1 = a genuinely different roll)
+	if was_check and not success and _can_mulligan():
+		var mb := Button.new()
+		mb.text = "⚡ MULLIGAN  —  reroll  (−%d⚡)" % MapCheck.MULLIGAN_COST
+		mb.custom_minimum_size = Vector2(320, 44)
+		mb.add_theme_font_size_override("font_size", 15)
+		mb.add_theme_color_override("font_color", Palette.VOID)
+		mb.pressed.connect(func():
+			_attempt += 1
+			_resolve_and_show())
+		_box.add_child(mb)
 	var b := Button.new()
 	# OFFLINE multi-stage: if this leg leads to a follow-up stage, advance instead of ending
 	var stages := client_stages and next_page != ""
@@ -259,6 +297,12 @@ func _show_result(fx: Dictionary, text: String, success: bool, roll: int, p: int
 		else:
 			finished.emit(fx))
 	_box.add_child(b)
+
+## Can the party still reroll? Needs ⚡ left after the nudge + prior rerolls, and a cap.
+func _can_mulligan() -> bool:
+	var have := int((_cur_desc as Dictionary).get("entropy_have", 0))
+	var spent := committed_nudge + _attempt * MapCheck.MULLIGAN_COST
+	return _attempt < MapCheck.MULLIGAN_MAX and (have - spent) >= MapCheck.MULLIGAN_COST
 
 ## The reward/penalty preview line — themed for the whole Inference-Check vocab.
 func _fx_hint(fx: Dictionary) -> String:

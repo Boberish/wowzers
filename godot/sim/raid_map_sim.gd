@@ -293,7 +293,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				if not avail.is_empty():
 					var pick_i: int = avail[route.next_u32() % avail.size()]
 					var c: Dictionary = chs[pick_i]
-					if String(c.get("kind", "free")) == "check":
+					if MapCheck.check_like(String(c.get("kind", "free"))):
 						var res := MapCheck.resolve(c, ctx, map.seed, pos, pick_i, 0, {})
 						event_fails = 0 if bool(res["success"]) else event_fails + 1
 						_apply_fx(res["fx"], carry)

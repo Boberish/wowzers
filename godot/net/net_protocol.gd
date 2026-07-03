@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 8      # v8: MULTI-STAGE BRANCHES — mapstop carries `page`; the server traverses stages (branch/goto), broadcasting a fresh mapstop per stage
+const VERSION := 9      # v9: WAGER kind + post-fail MULLIGAN — choice msg carries `attempt`; wagers roll a build-read die with a fixed stake
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

@@ -70,7 +70,7 @@ func _show_page(ev: Dictionary, page: String, raw: Array) -> void:
 	panel.body_text = String(src.get("body", ""))
 	panel.choices = descs
 	panel.accent = Palette.VOID
-	panel.resolver = func(orig: int, nudge: int) -> Dictionary:
-		return MapCheck.resolve(raw[orig], ctx, 777, 4, MapCheck.choice_slot(page, orig), 0, {"nudge": nudge})
+	panel.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
+		return MapCheck.resolve(raw[orig], ctx, 777, 4, MapCheck.choice_slot(page, orig), attempt, {"nudge": nudge})
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(panel)

@@ -27,6 +27,8 @@ const PITY_PER := 8              ## +% per consecutive prior fail …
 const PITY_CAP := 32            ## … capped
 const NUDGE_PER := 8             ## +% per ⚡ fed pre-commit …
 const NUDGE_MAX := 3            ## … up to this many points
+const MULLIGAN_COST := 2        ## ⚡ per post-fail reroll (attempt+1 → a new deterministic die)
+const MULLIGAN_MAX := 3         ## most rerolls a single check allows
 const PRIOR_FLOOR_DIV := 20      ## prior/this = the floor % …
 const PRIOR_FLOOR_CAP := 10     ## … capped
 
@@ -70,6 +72,10 @@ static func tags_for_boons(cat: Variant, aspect: String, boons: Dictionary) -> A
 	return out
 
 # ---------------------------------------------------------------- the math
+## A check and a wager both roll a build-read die (a wager just adds a fixed stake).
+static func check_like(kind: String) -> bool:
+	return kind == "check" or kind == "wager"
+
 ## strength = how many owned boons+gear match the check's tags (each counted once).
 ## SELF = the largest single-tag cluster (build coherence — the early-run valve).
 static func strength(chk: Dictionary, ctx: Dictionary) -> int:
@@ -242,11 +248,21 @@ static func resolve(choice: Dictionary, ctx: Dictionary, map_seed: int, node_id:
 	var r := roll(map_seed, node_id, choice_i, attempt)
 	var success := r < float(p)
 	var leg: Dictionary = choice.get("success" if success else "fail", {})
+	var fx: Dictionary = (leg.get("fx", {}) as Dictionary).duplicate(true)
+	# WAGER: a fixed stake, paid on commit WIN OR LOSE (it IS the risk — the fail leg
+	# carries no extra bite per the soft-fail rule). Folded into the result fx.
+	var w: Dictionary = choice.get("wager", {})
+	if not w.is_empty():
+		var amt := float(w.get("amount", 0))
+		match String(w.get("stake", "integrity")):
+			"integrity": fx["hurt"] = float(fx.get("hurt", 0.0)) + amt
+			"tokens": fx["tokens"] = int(fx.get("tokens", 0)) - int(amt)
+			"entropy": fx["entropy"] = int(fx.get("entropy", 0)) - int(amt)
 	return {
 		"kind": String(choice.get("kind", "check")),
 		"p": p, "roll": r, "success": success, "parts": info["parts"],
 		"strength": int(info["strength"]),
-		"fx": (leg.get("fx", {}) as Dictionary).duplicate(true),
+		"fx": fx,
 		"goto": String(leg.get("goto", "")),
 		"result": String(leg.get("result", ("The check holds." if success else "The check fails."))),
 		"verb": String(chk.get("verb", "CHECK")),

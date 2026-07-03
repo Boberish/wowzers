@@ -751,9 +751,12 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 		for i in raw.size():
 			var c: Dictionary = raw[i]
 			var sc: Dictionary = meta[i] if i < meta.size() else {}
-			descs.append({"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
+			var d := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
 				"orig_index": i, "fx": c.get("fx", {}), "verb": String(sc.get("verb", "CHECK")),
-				"entropy_have": ent, "by_seat": sc.get("by_seat", {})})
+				"entropy_have": ent, "by_seat": sc.get("by_seat", {})}
+			if String(c.get("kind", "")) == "wager":
+				d["stake_label"] = _stake_label(c.get("wager", {}))
+			descs.append(d)
 		var p := MapEventPanel.new()
 		p.title_text = String(msg.get("title", ""))
 		p.body_text = String(msg.get("body", ""))
@@ -764,18 +767,31 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 		# Resolve locally for DISPLAY only, for the seat that STEPPED UP (p.committed_seat,
 		# set on press). The pure die + that seat's broadcast % == the server's resolve for
 		# the same seat. Never applies fx — the server broadcasts the resulting integrity.
-		p.resolver = func(orig: int, nudge: int) -> Dictionary:
+		# Resolve locally for DISPLAY at the chosen seat + attempt (mulligan). The die is a
+		# pure function of (map_seed, node, slot, attempt) so the server, resolving the SAME
+		# committed attempt, lands the SAME ✓/✗. Uses the full choice (incl. wager stake) so
+		# the reward hint matches what the server applies.
+		p.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
 			var sc: Dictionary = meta[orig] if orig < meta.size() else {}
 			var bs: Dictionary = (sc.get("by_seat", {}) as Dictionary).get(p.committed_seat, {})
 			var ladder: Array = bs.get("ladder", [])
 			var pp := int(bs.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
-			var roll := MapCheck.roll(mseed, node, MapCheck.choice_slot(page, orig), 0)
+			var roll := MapCheck.roll(mseed, node, MapCheck.choice_slot(page, orig), attempt)
 			var success := roll < float(pp)
-			var leg: Dictionary = (raw[orig] as Dictionary).get("success" if success else "fail", {})
+			var choice: Dictionary = raw[orig]
+			var leg: Dictionary = choice.get("success" if success else "fail", {})
+			var fx: Dictionary = (leg.get("fx", {}) as Dictionary).duplicate(true)
+			var w: Dictionary = choice.get("wager", {})   # fold the wager stake for the hint
+			if not w.is_empty():
+				var amt := float(w.get("amount", 0))
+				match String(w.get("stake", "integrity")):
+					"integrity": fx["hurt"] = float(fx.get("hurt", 0.0)) + amt
+					"tokens": fx["tokens"] = int(fx.get("tokens", 0)) - int(amt)
+					"entropy": fx["entropy"] = int(fx.get("entropy", 0)) - int(amt)
 			return {"success": success, "roll": roll, "p": pp,
-				"result": String(leg.get("result", "")), "fx": leg.get("fx", {})}
+				"result": String(leg.get("result", "")), "fx": fx}
 		p.finished.connect(func(_fx: Dictionary):
-			_net.send_choice(p.committed_index, p.committed_nudge, p.committed_seat))
+			_net.send_choice(p.committed_index, p.committed_nudge, p.committed_seat, p.committed_attempt))
 		p.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_ui.add_child(p)
 	else:
@@ -1127,27 +1143,33 @@ func _render_event_page(n: Dictionary, page_id: String, title: String, body: Str
 	p.choices = descs
 	p.accent = Palette.VOID
 	p.client_stages = true
-	p.resolver = func(orig: int, nudge: int) -> Dictionary:
-		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id,
-			MapCheck.choice_slot(page_id, orig), 0, {"nudge": nudge})
-		if bool(res["success"]):
-			_check_fails = 0
-		else:
-			_check_fails += 1
-		if nudge > 0:                          # ⚡ fed to the sampler is spent on commit
-			_entropy = maxi(0, _entropy - nudge)
-		return res
+	# Side-effect-free: the panel previews attempts (nudge + mulligan rerolls) freely; the
+	# ⚡ spend + comeback pity are applied once, on COMMIT (see _commit_event_spend).
+	p.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
+		return MapCheck.resolve(raw[orig], ctx, map_seed, node_id,
+			MapCheck.choice_slot(page_id, orig), attempt, {"nudge": nudge})
 	p.staged.connect(func(fx: Dictionary, page: String):
-		_apply_map_fx(fx)
+		_commit_event_spend(p, fx)
 		var ev := MapContent.event(String(n["event"]))
 		var pg: Dictionary = (ev.get("pages", {}) as Dictionary).get(page, {})
 		_render_event_page(n, page, String(pg.get("title", title)),
 			String(pg.get("body", "")), pg.get("choices", [])))
 	p.finished.connect(func(fx: Dictionary):
-		_apply_map_fx(fx)
+		_commit_event_spend(p, fx)
 		_show_map())
 	p.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(p)
+
+## Apply a committed event choice: its fx, the ⚡ spent (nudge + mulligan rerolls), and
+## comeback pity (reset on a pass, +1 on a fail). One place so branch stages + the final
+## commit account identically.
+func _commit_event_spend(p: MapEventPanel, fx: Dictionary) -> void:
+	_apply_map_fx(fx)
+	var spend := int(p.committed_nudge) + int(p.committed_attempt) * MapCheck.MULLIGAN_COST
+	if spend > 0:
+		_entropy = maxi(0, _entropy - spend)
+	if bool(p.committed_is_check):
+		_check_fails = 0 if bool(p.committed_success) else _check_fails + 1
 
 ## Present a single choice: gate first (greyed if unmet), then a check gets its % +
 ## itemized breakdown; a free/branch choice carries its fx + the page it opens (next_page).
@@ -1160,7 +1182,7 @@ func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 		d["gated"] = true
 		d["locked_reason"] = MapCheck.gate_reason(gate)
 		return d
-	if kind == "check":
+	if kind == "check" or kind == "wager":
 		var chk: Dictionary = c.get("check", {})
 		var info := MapCheck.chance(chk, ctx)
 		d["chance"] = int(info["p"])
@@ -1168,7 +1190,18 @@ func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 		d["verb"] = String(chk.get("verb", "CHECK"))
 		d["entropy_have"] = int(ctx.get("entropy", 0))       # ⚡ the party can feed
 		d["nudge_ladder"] = MapCheck.nudge_ladder(chk, ctx)   # the % at 1..min(3,⚡) fed
+		if kind == "wager":
+			d["stake_label"] = _stake_label(c.get("wager", {}))
 	return d
+
+## Human-readable wager stake ("10% integrity" / "2 ⏣" / "2 ⚡").
+func _stake_label(w: Dictionary) -> String:
+	var amt := float(w.get("amount", 0))
+	match String(w.get("stake", "integrity")):
+		"integrity": return "%d%% integrity" % int(round(amt * 100.0))
+		"tokens": return "%d ⏣" % int(amt)
+		"entropy": return "%d ⚡" % int(amt)
+	return ""
 
 ## The build context an Inference Check reads. Offline the human's seat is the only
 ## full build (AI raiders carry no boons), so `boon_tags` is the human's owned boons
