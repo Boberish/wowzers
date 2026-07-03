@@ -31,7 +31,7 @@
 | 3D stage | 🟡 Bulwark vertical slice only |
 | Co-op raid (R0/R1: any seat, any aspect, AI raiders) | ✅ Playable |
 | Netcode (R2/R2.5: lockstep WS server, Docker/tunnel deploy kit, Windows + browser clients) | ✅ DONE & verified (cross-OS identical checksums; see CLAUDE.md R2/R2.5) |
-| **Realms (raids = themed realms; Realm 1 "The Takeover" = AI irony)** | 🟠 Realm 1 in flight via `raid-seals`; solo reskin DE-SCOPED |
+| **Realms (raids = themed realms; Realm 1 "The Takeover" = AI irony)** | 🟢 Realm 1 PLAYABLE end-to-end: 3-floor RING descent (MISTRAL→GEMINI→MYTHOS) w/ GATE exams + shard gate (MAP-3c `fafaf1a`). Online nav (3b) + Realm 2 open |
 | **Raid Seals II–IV (online boss ladder: Mistral/Gemini/Claude-Mythos)** | ✅ DONE, merged `ac1aa25` (adds/chains/rand-beats engine + 3 bosses + lobby Seal pick, protocol v2 — see §RAID SEALS) |
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
@@ -287,7 +287,26 @@ nodes, not node kinds.
   unclaimed**; the map dict is wire-serializable by design. Later floors: Ring 2 → GEMINI
   ULTRA, Ring 1→0 → CLAUDE MYTHOS behind "root access requires every credential shard" —
   those floors should lean hard on wounds (their fights actually kill raiders).
-- **MAP-3c (REALM 1 COMPLETION — the first FULL raid) — 🟠 CLAIMED 2026-07-03 (`realm1-floors`).**
+- **MAP-3c (REALM 1 COMPLETION — the first FULL raid) — ✅ DONE, merged 2026-07-03 (`fafaf1a`).**
+  Realm 1 is now a complete RING descent: **Ring 3 (MISTRAL) → Ring 2 "THE MIDDLEWARE" (GEMINI) →
+  Ring 0 "ROOT" (CLAUDE MYTHOS, credential-shard gated)**. `RaidContent.FLOORS[]` drives the
+  sequence; `floor_fights(ring)` builds each floor (ring 3 default = byte-identical old call);
+  clearing a floor Seal ELEVATES to the next ring (`raid_hud._advance_floor`) carrying
+  integrity/wounds/mana, and the last Seal down = `_show_campaign_cleared` (ROOT ACCESS GRANTED).
+  The **credential-shard gate** (`RunMap` `shard_req`/`seal_shard_req`) places shards on whole mid
+  rows skipping the backdoor-jumped row → every route collects the requirement before the last mid
+  row (completable by construction; `raid_map_sim._prove_shard_gate` BFS proves it, 60 maps req 3
+  PASS). Each floor also carries one personal GATE exam (reconciled with the `gate-nodes` merge:
+  `_build_floor` passes `{KIND_GATE:1}` + `shard_req`). Bands (40 seeds): Ring 3 **100/100/97.5** ·
+  Ring 2 **100/100/92.5** · Ring 0 **100/100/47.5** (the intended MISTRAL→GEMINI→MYTHOS curve);
+  wounds bite deep (Ring 0 corrupted party 0% vs 38% full). Verified: raid_map_sim all-floors
+  determinism/structure/one-gate/gate-exams/shard-gate PASS; raid_sim + bulwark_sim checksums
+  byte-identical (dps-meter engine confirmed neutral); ui_smoke_raid + ui_smoke_map + map_sim green.
+  Debug: `--autostart=raidmap[:seat[:aspect]]`. **NEXT (unclaimed):** online nav (3b — leader picks
+  the node, fracs/wounds/ring ride the spec); per-ring `map_content` skin polish (Ring 2/0 flavor +
+  new events); harder GATE exam picks on deeper rings; a cumulative full-descent sim (carry across
+  all three floors, not per-floor-from-full).
+  <details><summary>original plan</summary>
   The gap: only Ring 3 exists as a playable floor; GEMINI + MYTHOS are fully built
   (`make_gemini`/`make_mythos`, tuned bands) but reachable ONLY via `--autostart`/boss-select — no
   floor houses them. This phase makes Realm 1 a complete 4-floor descent (Ring 3 → 2 → 1 → 0):
@@ -305,6 +324,7 @@ nodes, not node kinds.
   ⚠ **Shared-file coordination**: `run_map.gd`/`map_content.gd`/`run_state.gd`/`raid_hud.gd` overlap
   the `gate-nodes` + `dps-meter` sessions — merge main often; keep floor logic separable from the
   GATE node kind / meter panel. Boss content (`raid_content.gd`, the low-collision core) moves first.
+  </details>
 - **Acceptance (all phases):** map-gen determinism; solo sims + raid checksums byte-identical with maps off; smokes green.
 
 ## CLASSES
@@ -408,14 +428,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `realm1-floors` · §MAPS MAP-3c — **Finish Realm 1's raid (Bill, direct).** Build
-  the remaining floors so the already-built GEMINI (Ring 2) + CLAUDE MYTHOS (Ring 1→0, credential-
-  shard gate) become playable in the campaign; floor sequencing in `RunState` (ring 3→0, integrity/
-  wounds/mana/boons carry); per-ring `map_content` skins; extend `raid_map_sim` to all four rings.
-  Online nav (3b) is a separate later claim. ⚠ shared-risk `run_map.gd`/`map_content.gd`/
-  `run_state.gd`/`raid_hud.gd` with `gate-nodes` (NOT touching its GATE node kind) + `dps-meter` —
-  merge main before merge-back. Gate: map/raid determinism, raid sims byte-identical for existing
-  floors, `raid_map_sim` extended (all rings beatable), smokes green. *(raid-finish session)*
+- ☑ 2026-07-03 · `realm1-floors` · §MAPS MAP-3c — **Finish Realm 1's raid — MERGED to main (`fafaf1a`)**,
+  plan updated (§MAPS MAP-3c has the full record), worktree removed. GEMINI (Ring 2) + CLAUDE MYTHOS
+  (Ring 0, credential-shard gated) are now playable floor Seals in a 3-floor RING descent;
+  `RaidContent.FLOORS[]` + `floor_fights(ring)` + `raid_hud._build_floor`/`_advance_floor`/
+  `_show_floor_cleared`/`_show_campaign_cleared`; `RunMap` shard gate (completability BFS-proven).
+  Reconciled with the concurrently-merged `gate-nodes` (one personal GATE exam per floor —
+  `_build_floor` passes `{KIND_GATE:1}`+`shard_req`) and `dps-meter` (engine byte-identical, checksums
+  matched). Bands 100/100/97.5 · 100/100/92.5 · 100/100/47.5. Gate PASS: all sims determinism +
+  raid_sim/bulwark_sim byte-identical + all smokes green. **Online nav (3b) is the open follow-up.** *(raid-finish session)*
 - ☑ 2026-07-03 · `gate-nodes` · §MAPS/§GAME SHAPE — **Tier-1 PERSONAL GATE nodes — MERGED to main**, plan updated (§MAPS GATE entry has the full record), worktree removed. Zero engine files; `run_map.gd` gained the guarded `extra_quota` param (empty = byte-identical, proven: map_sim 300 seeds + raid_sim 60 identical vs frozen branch-point baseline); raid smoke drives the full gate flow (intro → exam → win writeback / loss = force-reboot wound, run continues); merged main in pre-merge-back (bulwark class-fun ④ landed mid-work — post-merge probes re-PASS). ⚠ realm1-floors session: the GATE kind is yours to reuse per floor (`{RunMap.KIND_GATE: 1}` in the floor's generate call); gate exam difficulty is currently Ring-3 teaching tier for all floors — deeper rings may want harder exam picks (a `GateContent.EXAMS` ring dimension). *(progression design session)*
 - ☑ 2026-07-03 · main · §GAME SHAPE — **RAID-ONLY locked with Bill (docs only)**: one game (raid campaign + PROVING GROUNDS practice card, unlock-inert); solo campaign/maps/HUD-polish retired-frozen; 15 solo bosses → personal-content pipeline (Tier-1 GATE nodes claimable / Tier-2 owned adds / Tier-3 split phase); **raid-first law**. PROGRESSION-PLAN Breadth/GEAR-1 retargeted; RAID-PLAN product shape amended. *(progression design session)*
 - ☑ 2026-07-03 · main · §SYSTEMS — **`PROGRESSION-PLAN.md` written (docs only, design locked with Bill)**: persistent meta-game = boss loot tables + armed feats + extraction schematics + World/Pools/Rank/Breadth tracks + standing; Monotonic Pool Law; material economy CUT (supersede notes added to RAID-PLAN). No code touched. GEAR-1 (Bulwark PoC) is claimable. *(progression design session)*
