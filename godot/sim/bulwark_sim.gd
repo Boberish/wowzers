@@ -10,12 +10,13 @@ const TICK_CAP_SEC := 240.0
 
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "300"))
+	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	var out_path := _arg("out", "res://out/bulwark_results.csv")
 	print("=== Project Rift — M1 Bulwark headless sim ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("")
 
-	_prove_determinism()
+	if seed0 == 1: _prove_determinism()
 	print("")
 
 	var rows: Array = []
@@ -45,7 +46,7 @@ func _initialize() -> void:
 			var heal_sum := 0.0
 			var causes := {}
 			var dsum := {}
-			for seed in range(1, seeds + 1):
+			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(seed, String(m["enc"]), String(m["aspect"]), float(sk["slack"]))
 				r["enc"] = m["enc"]; r["aspect"] = m["aspect"]; r["skill"] = sk["label"]; r["seed"] = seed
 				rows.append(r)
@@ -70,9 +71,9 @@ func _initialize() -> void:
 				print("             strike beats/run: %s" % _fmt_diag(dsum, seeds))
 		print("")
 
-	_prove_ally_path(seeds)
-	_prove_feint_gate(seeds)
-	_prove_guard_mods(seeds)
+	if seed0 == 1: _prove_ally_path(seeds)
+	if seed0 == 1: _prove_feint_gate(seeds)
+	if seed0 == 1: _prove_guard_mods(seeds)
 
 	_write_csv(out_path, rows)
 	print("wrote %d rows -> %s" % [rows.size(), ProjectSettings.globalize_path(out_path)])
