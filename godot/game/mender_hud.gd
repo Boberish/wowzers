@@ -8,16 +8,16 @@ const SPELL_KEYS := {"1": "flash", "2": "mend", "3": "renew", "4": "ward",
 	"5": "cascade", "6": "well", "q": "dispel", "e": "medit", "7": "signature"}
 # Click-cast mouse binds are rebindable (loaded from MenderBinds into `_binds`).
 const SPELL_TIPS := {
-	"flash": "Fast, pricey emergency heal. Brinkwarden: huge on a low target.",
-	"mend": "Efficient filler heal. Your bread-and-butter.",
+	"flash": "Fast, pricey emergency heal. Feeds LITANY — Tidecaller if it leaves them topped, Brinkwarden if it catches them low.",
+	"mend": "Efficient filler heal. Feeds LITANY — top AHEAD (Tide) or catch BEHIND (Brink) to light a pip.",
 	"renew": "Instant heal-over-time. Pre-cast it before damage.",
 	"ward": "Instant damage shield (absorb). Blunt a spike before it lands.",
 	"cascade": "Smart AoE — heals your 3 lowest allies.",
 	"well": "Instant raid heal to everyone (30s cooldown).",
 	"dispel": "Cleanse a debuff (the pulsing crimson marks). Off-GCD.",
 	"medit": "Restore 280 mana (45s cooldown). Off-GCD.",
-	"surge": "TIDECALLER: spend your Reservoir as raid shields — a beat AHEAD of a spike.",
-	"laststand": "BRINKWARDEN: spend Nerve for a huge raid heal + 45% DR. Catch the raid a beat BEHIND.",
+	"surge": "TIDECALLER: spend your Reservoir as raid shields — a beat AHEAD of a spike. FLYWHEEL: the damage those shields eat re-banks into the Reservoir, so it re-arms out of the hits it absorbs.",
+	"laststand": "BRINKWARDEN: spend most of your Nerve for a party DR window + a rolling heal that keeps allies BLOODIED — so your Nerve and the bloodied-damage buff survive the save. Catch the raid a beat BEHIND.",
 }
 
 var _ctrl: CombatController
@@ -36,6 +36,7 @@ var _judge: StrikeJudge
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _mana: LiquidOrb
 var _spec: SpecStrip
+var _litany_pips: LitanyPips
 var _castbar: CastChannel
 var _runes: Array = []
 var _frames: Array = []            ## [{frame, seat}]
@@ -101,9 +102,9 @@ func _show_select() -> void:
 	sel.subtitle = "HEALER — KEEP-ALIVE · PICK A FIGHT"
 	sel.aspects = [
 		{"id": "tidecaller", "label": "TIDECALLER", "accent": Palette.STEEL,
-			"blurb": "Tidecaller · bank overheal, Surge it into shields — play AHEAD"},
+			"blurb": "Tidecaller · keep every bar above the tide — build LITANY by topping AHEAD"},
 		{"id": "brinkwarden", "label": "BRINKWARDEN", "accent": Palette.MOMENTUM,
-			"blurb": "Brinkwarden · heals swell as allies drop — play BEHIND"},
+			"blurb": "Brinkwarden · park them in the red — build LITANY by catching BEHIND"},
 	]
 	sel.encounters = MenderContent.run_encounters()
 	sel.extras = [{"label": "Mouse Bindings", "cb": _show_binds}]
@@ -180,6 +181,7 @@ func _build_combat() -> void:
 		var fr := RaidFrame.new()
 		fr.unit_name = seat.unit_name
 		fr.role = seat.role
+		fr.read_mode = "tide" if _run.aspect == "tidecaller" else "brink"   # aspect read overlay
 		fr.hovered.connect(_on_frame_hover)
 		fr.unhovered.connect(_on_frame_unhover)
 		row.add_child(fr)
@@ -202,6 +204,14 @@ func _build_combat() -> void:
 	_spec.accent = Palette.STEEL if _run.aspect == "tidecaller" else Palette.MOMENTUM
 	_place(_spec, 0.5, 1, 0.5, 1, -220, -254, 220, -206)
 	_ui.add_child(_spec)
+
+	# LITANY — the combo pip meter, aspect-tinted with its fill rule engraved (sits above
+	# the spec strip). The visible chain the two aspects build from opposite play.
+	_litany_pips = LitanyPips.new()
+	_litany_pips.accent = Palette.STEEL if _run.aspect == "tidecaller" else Palette.CRIMSON
+	_litany_pips.rule = "TOP AHEAD" if _run.aspect == "tidecaller" else "CATCH LOW"
+	_place(_litany_pips, 0.5, 1, 0.5, 1, -110, -322, 110, -258)
+	_ui.add_child(_litany_pips)
 
 	# the benediction channel — sits just under the raid frames, invisible unless casting
 	_castbar = CastChannel.new()
@@ -547,6 +557,11 @@ func _process(_delta: float) -> void:
 
 	_mana.set_values(p.resource, _mcfg.mana_max)
 
+	# Litany pip meter (the visible combo)
+	if _litany_pips != null:
+		_litany_pips.pips = int(obs.get("litany", 0))
+		_litany_pips.pip_max = int(obs.get("litany_max", 5))
+
 	# spec readout
 	if _run.aspect == "tidecaller":
 		var res := float(obs.get("reservoir", 0.0))
@@ -680,6 +695,23 @@ func _handle_event(ev: Dictionary) -> void:
 		return
 	if t == "cast_cancelled":
 		_center_pop("cast cancelled", Palette.TEXT_DIM, 16)
+		return
+	# LITANY beat: that heal counted as a combo beat — flash the frame in the ASPECT
+	# colour (distinct from the green heal flash) so the chain reads on the party.
+	if t == "litany":
+		if _litany_pips != null:
+			_litany_pips.pips = int(ev.get("pips", 0))
+		var lseat = ev.get("seat")
+		if lseat != null and _frame_by_seat.has(lseat):
+			var ac: Color = Palette.STEEL if String(ev.get("aspect", "")) == "tidecaller" else Palette.CRIMSON
+			_frame_by_seat[lseat].flash(ac.lightened(0.15))
+		return
+	if t == "benediction":
+		if _litany_pips != null:
+			_litany_pips.bloom()
+		for e in _frames:
+			(e["frame"] as RaidFrame).flash(Palette.GOLD_BRIGHT)
+		_center_pop("BENEDICTION", Palette.GOLD_BRIGHT, 26)
 		return
 	if t == "heal":
 		_stat_eff += float(ev.get("amt", 0))

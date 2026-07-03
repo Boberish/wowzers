@@ -29,6 +29,15 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	var rm := float(seat.vars.get("regen_mult", 1.0))
 	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mana_regen * rm * s.dt)
 
+	# LITANY decays a pip after litany_decay seconds without an in-condition beat — the
+	# chain is a live thing you must keep feeding, not a bank.
+	if _litany(seat) > 0:
+		var idle := int(seat.vars.get("litany_idle", 0)) + 1
+		if idle >= _tt(s, cfg.litany_decay):
+			idle = 0
+			seat.vars["litany"] = _litany(seat) - 1
+		seat.vars["litany_idle"] = idle
+
 	if aspect == "brinkwarden":
 		var blood := 0
 		for u in s.seats:
@@ -116,13 +125,18 @@ func _resolve_spell(s: CombatState, seat: Seat, id: String, target: Seat) -> voi
 
 	match id:
 		"flash", "mend":
-			var clutch: bool = target.hp_frac() < cfg.mod_clutch_frac
+			var pre := target.hp_frac()
 			CombatCore.heal_unit(s, target, float(sp["heal"]), seat)
 			if id == "flash" and _b("afterglow"):
 				target.hots.append({"tick": 10.0, "every": _tt(s, 1.5), "acc": 0, "left": _tt(s, 3.0),
 					"caster_i": s.seats.find(seat)})
-			if clutch:
-				_triage_proc(s, seat, target, "clutch")   # Phase B: the innate proc moment
+			# LITANY: the aspect condition decides if this heal is a combo BEAT — Tidecaller
+			# banks a pip by topping AHEAD (leaves them ≥ foresight), Brinkwarden by catching
+			# BEHIND (the target WAS at/below bloodied). Mirror-image play, one meter.
+			var beat := (target.hp_frac() >= cfg.foresight_line) if aspect == "tidecaller" \
+				else (pre <= cfg.blood_thresh)
+			if beat:
+				_litany_beat(s, seat, target, "heal")
 		"renew":
 			target.hots.append({"tick": float(sp["hot_tick"]),
 				"every": _tt(s, float(sp["hot_every"])), "acc": 0, "left": _tt(s, float(sp["hot_dur"])),
@@ -178,52 +192,81 @@ func on_overheal(_s: CombatState, caster: Seat, target: Seat, over: float) -> vo
 			target.absorb = grown
 			target.absorb_owner_i = _s.seats.find(caster)
 
-## Opus boon: a Ward fully consumed detonates in light — heal + cleanse its bearer.
-func on_absorb(s: CombatState, healer: Seat, target: Seat, _eaten: float, emptied: bool) -> void:
+## Tidecaller FLYWHEEL: damage a shield absorbs re-banks a share into the Reservoir
+## (capped by reservoir_max — Surge re-arms out of the very hits it eats). Plus the Opus
+## Ward-consumed detonation (heal + cleanse its bearer).
+func on_absorb(s: CombatState, healer: Seat, target: Seat, eaten: float, emptied: bool) -> void:
+	if aspect == "tidecaller" and eaten > 0.0:
+		var r := float(healer.vars.get("reservoir", 0.0)) + eaten * cfg.surge_rebank_frac
+		healer.vars["reservoir"] = minf(_res_max(), r)
 	if emptied and _b("sanctifiedward") and target != null and target.alive():
 		CombatCore.heal_unit(s, target, 120.0, healer)
 		target.debuff = {}
 	if emptied and _b("mdTrigWard"):
 		_md_trigger(s, healer, target, "ward")   # Phase B: a consumed Ward = proc moment
 
-# ---------------------------------------------------------------- slot-verb Triage mods
-# Phase B (build-your-Triage): the innate proc moment is a CLUTCH HEAL (a single-target
-# heal resolving on an ally below mod_clutch_frac); TRIGGER pieces add moments, PAYLOAD
-# pieces fire on every proc, PROPERTY pieces reshape the verb. NO LOCKOUTS. All
-# _b()-gated — boonless sims stay byte-identical.
+# ---------------------------------------------------------------- LITANY + slot-verb Triage
+# The combo backbone: an IN-CONDITION heal (see _resolve_spell) or a drafted TRIGGER fires
+# a LITANY BEAT — it lights a pip, fires the drafted PAYLOAD pieces SCALED by the current
+# pip count, and the 5th pip cashes a party Benediction bloom then resets. The aspect
+# INVERTS the fill condition (Tidecaller top-ahead vs Brinkwarden catch-behind). All
+# payloads stay _b()-gated; boonless Mender now runs the pip meter + Benediction as its
+# core loop (no payloads) → retuned, NOT byte-identical (this is the rework).
+
+func _litany(seat: Seat) -> int:
+	return int(seat.vars.get("litany", 0))
 
 func _has_payloads() -> bool:
-	return _b("mdPayShield") or _b("mdPayMana") or _b("mdPayHot") or _b("mdPropBenediction")
+	return _b("mdPayShield") or _b("mdPayMana") or _b("mdPayHot")
 
-## A drafted trigger fired: built-in mana sip + one proc moment.
+## A LITANY BEAT: +1 pip; payloads fire scaled by the pip count; the 5th pip cashes
+## Benediction then resets. `target` may be null (a dodged beat) → payloads/flash fall
+## back to the lowest ally.
+func _litany_beat(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
+	seat.vars["litany_idle"] = 0
+	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic (= the meter)
+	var lit := _litany(seat) + 1
+	if lit >= cfg.litany_max:
+		_triage_payloads(s, seat, target, cfg.litany_max)   # payloads at full tier
+		_benediction(s, seat)                                # the 5th-pip party cash
+		seat.vars["litany"] = 0
+	else:
+		seat.vars["litany"] = lit
+		_triage_payloads(s, seat, target, lit)
+	CombatCore.emit_event(s, {"t": "litany", "seat": target, "player": seat.is_player,
+		"aspect": aspect, "pips": int(seat.vars["litany"]), "src": source})
+
+## The 5th-pip cash: bathe the party in light. mdPropBenediction (opus) makes it heal 50%
+## more AND cleanse a debuff per ally.
+func _benediction(s: CombatState, seat: Seat) -> void:
+	var heal := cfg.bene_heal * (1.5 if _b("mdPropBenediction") else 1.0)
+	for u in s.seats:
+		if u.role != "healer" and u.alive():
+			CombatCore.heal_unit(s, u, heal, seat)
+			if _b("mdPropBenediction"):
+				u.debuff = {}
+	CombatCore.emit_event(s, {"t": "benediction", "player": seat.is_player})
+
+## A drafted TRIGGER fired (Dispel / consumed Ward / PERFECT beat): mana sip + a Litany beat.
 func _md_trigger(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
 	seat.resource = minf(cfg.mana_max, seat.resource + cfg.mod_trig_mana)
-	_triage_proc(s, seat, target, source)
+	_litany_beat(s, seat, target, source)
 
-## One proc moment: fire every drafted payload once on the triaged ally (fallback:
-## the lowest-HP ally when the moment had no target, e.g. a dodged beat).
-func _triage_proc(s: CombatState, seat: Seat, target: Seat, source: String) -> void:
+## Fire every drafted PAYLOAD once, magnitudes scaled by the Litany tier.
+func _triage_payloads(s: CombatState, seat: Seat, target: Seat, tier: int) -> void:
 	if not _has_payloads():
 		return
-	seat.vars["verb_procs"] = int(seat.vars.get("verb_procs", 0)) + 1   # probe diagnostic
+	var scale := 1.0 + cfg.litany_per_pip * float(tier)
 	var tgt := target if (target != null and target.alive()) else _lowest_ally(s)
 	if _b("mdPayShield") and tgt != null:
-		tgt.absorb += cfg.mod_shield
+		tgt.absorb += roundf(cfg.mod_shield * scale)
 		tgt.absorb_owner_i = s.seats.find(seat)
 	if _b("mdPayMana"):
-		seat.resource = minf(cfg.mana_max, seat.resource + cfg.mod_mana)
+		seat.resource = minf(cfg.mana_max, seat.resource + roundf(cfg.mod_mana * scale))
 	if _b("mdPayHot") and tgt != null:
-		tgt.hots.append({"tick": cfg.mod_hot_tick, "every": _tt(s, 1.5), "acc": 0,
+		tgt.hots.append({"tick": roundf(cfg.mod_hot_tick * scale), "every": _tt(s, 1.5), "acc": 0,
 			"left": _tt(s, 3.0), "caster_i": s.seats.find(seat)})
-	if _b("mdPropBenediction"):
-		var n := int(seat.vars.get("bene_count", 0)) + 1
-		seat.vars["bene_count"] = n
-		if n % cfg.mod_bene_every == 0:      # Opus: every Nth proc bathes the party
-			for u in s.seats:
-				if u.role != "healer" and u.alive():
-					CombatCore.heal_unit(s, u, cfg.mod_bene_heal, seat)
-			CombatCore.emit_event(s, {"t": "benediction", "player": seat.is_player})
-	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player, "src": source})
+	CombatCore.emit_event(s, {"t": "verb_proc", "player": seat.is_player})
 
 func _lowest_ally(s: CombatState) -> Seat:
 	var best: Seat = null
@@ -264,15 +307,25 @@ func _surge(s: CombatState, seat: Seat) -> void:
 	seat.vars["reservoir"] = 0.0
 	CombatCore._emit(s, {"t": "surge"})
 
+## Last Stand — the brinkmanship save that stops eating its own engine. Instead of an
+## instant top (which yanks everyone OUT of bloodied, zeroing your Nerve income AND the
+## ally-damage buff), it lays a Nerve-scaled ROLLING HoT + the party DR window and spends
+## only ls_spend_frac of Nerve — so allies survive the spike but STAY on the edge, and the
+## high-wire keeps climbing across the save.
 func _laststand(s: CombatState, seat: Seat) -> void:
-	var base := roundf(float(seat.vars.get("nerve", 0.0)) * cfg.ls_heal)
+	var nerve := float(seat.vars.get("nerve", 0.0))
+	var spent := nerve * cfg.ls_spend_frac
+	var every := _tt(s, 1.5)
+	var ticks := maxi(1, int(round(cfg.ls_dur / 1.5)))
+	var per := roundf(spent * cfg.ls_heal / float(ticks))   # total heal spread over the window
 	for u in s.seats:
 		if u.role != "healer" and u.alive():
-			CombatCore.heal_unit(s, u, base, seat)
+			u.hots.append({"tick": per, "every": every, "acc": 0, "left": _tt(s, cfg.ls_dur),
+				"caster_i": s.seats.find(seat)})
 			if _b("secondwind"):
 				u.debuff = {}
 	s.raid_dr = {"amt": cfg.ls_dr, "until_tick": s.tick + _tt(s, cfg.ls_dur)}
-	seat.vars["nerve"] = 0.0
+	seat.vars["nerve"] = nerve - spent   # keep the rest — the gamble survives the save
 	CombatCore._emit(s, {"t": "laststand"})
 
 # --- observation: mana, spec resource, cast bar, and the party frames ---
@@ -297,6 +350,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"reservoir_max": _res_max(),
 		"nerve": float(seat.vars.get("nerve", 0.0)),
 		"nerve_max": cfg.nerve_max,
+		"litany": _litany(seat),
+		"litany_max": cfg.litany_max,
+		"foresight_line": cfg.foresight_line,
+		"blood_thresh": cfg.blood_thresh,
 		"casting": seat.casting,
 		"party": party,
 	}

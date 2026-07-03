@@ -8,9 +8,25 @@ extends Resource
 @export var mana_regen: float = 8.0        ## per second (× regen_mult × dt)
 @export var strike_perfect_mana: float = 20.0  ## M7: a PERFECT dodge refunds a sip of mana
 
+# --- LITANY: the visible combo pip meter (both aspects). An IN-CONDITION single-target
+#     heal lights a pip; payloads scale ×(1 + litany_per_pip · pips); the 5th pip cashes a
+#     party Benediction bloom and resets. The aspect INVERTS the fill condition — the two
+#     builds literally can't be piloted the same way to feed the same meter:
+#       Tidecaller: a heal LEAVING the target at/above foresight_line (topped AHEAD).
+#       Brinkwarden: a heal CATCHING the target at/below blood_thresh (0.40, played BEHIND).
+@export var litany_max: int = 5
+@export var litany_per_pip: float = 0.15   ## payloads scale ×(1 + this × current pips)
+@export var litany_decay: float = 3.0      ## seconds without an in-condition heal → lose a pip
+@export var foresight_line: float = 0.60   ## Tidecaller's beat line (Brinkwarden reuses blood_thresh)
+@export var bene_heal: float = 30.0        ## Benediction party-bloom heal per ally on the 5th pip
+@export var ls_spend_frac: float = 0.6     ## Last Stand spends this share of Nerve (keeps the rest)
+
 # Tidecaller
 @export var tide_conv: float = 0.55        ## fraction of overheal banked into the Reservoir
 @export var reservoir_max: float = 520.0
+@export var surge_rebank_frac: float = 0.35  ## the FLYWHEEL: damage a Tidecaller shield ABSORBS
+                                             ## re-banks this share into the Reservoir (capped by
+                                             ## reservoir_max) — Surge re-arms out of the hits it eats
 
 # Brinkwarden
 @export var brink_heal_scale: float = 1.5  ## heal ×(1 + (1-hp%)*scale) → 2.5× at 0%
