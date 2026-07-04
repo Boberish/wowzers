@@ -20,6 +20,12 @@ var rng: DetRng = null
 var _beat_key: int = -1
 var _beat_aims: Dictionary = {}
 var _beat_flinches: Dictionary = {}
+## THE OPENING: my aimed fire-tick for the current vulnerability window. Expert (lat 0)
+## aims dead on the peak; latency smears the aim off it (per-policy rng, one roll per
+## opening) so a sloppy blade lands in the window edge or misses it entirely.
+var _open_key: int = -1
+var _open_aim: int = 0
+var _dump_wait: int = 0         ## ticks a ready dump has waited for an opening (patience)
 
 func act(obs: Dictionary) -> Dictionary:
 	var tick := int(obs.get("tick", 0))
@@ -75,11 +81,32 @@ func act(obs: Dictionary) -> Dictionary:
 #     fast+hard cadence, then SPEND it — Coup consumes Flow, so cash it as a finisher spike
 #     in the execute window (boss < 40%) rather than dumping the BPM mid-fight.
 func _tempo(obs: Dictionary, energy: float) -> Dictionary:
-	if bool(obs.get("coup_ready", false)) and energy >= 42.0 \
-			and float(obs.get("boss_frac", 1.0)) < 0.50:
-		return _ab("coupdegrace")
+	# Classic path (openings disabled) — byte-identical to the pre-Opening Twinfang.
+	if not bool(obs.get("open_on", false)):
+		if bool(obs.get("coup_ready", false)) and energy >= 42.0 \
+				and float(obs.get("boss_frac", 1.0)) < 0.50:
+			return _ab("coupdegrace")
+		if int(obs.get("cp", 0)) >= int(obs.get("cp_max", 5)) and energy >= 37.0:
+			return _ab("eviscerate")
+		return _tempo_strike(obs, energy)
+
+	var ofire := _open_fire(obs)   # 1 = punish NOW · 0 = hold for the opening · -1 = no opening
+	# Coup: spend max Flow INTO the opening for the spike; else cash it in the execute window.
+	if bool(obs.get("coup_ready", false)) and energy >= 42.0:
+		if ofire == 1:
+			return _ab("coupdegrace")
+		if ofire == -1 and float(obs.get("boss_frac", 1.0)) < 0.50:
+			return _ab("coupdegrace")
+	# Eviscerate: bank full combo and dump it INTO the opening; be patient (holding builds
+	# Flow) but don't sandbag combo forever if the boss just won't swing.
 	if int(obs.get("cp", 0)) >= int(obs.get("cp_max", 5)) and energy >= 37.0:
-		return _ab("eviscerate")
+		if _patient(ofire, 45):
+			return _ab("eviscerate")
+	else:
+		_dump_wait = 0
+	return _tempo_strike(obs, energy)
+
+func _tempo_strike(obs: Dictionary, energy: float) -> Dictionary:
 	var target := int(obs.get("perfect_lo", 18)) + latency_ticks
 	if int(obs.get("since_strike", 0)) >= target and energy >= float(obs.get("strike_cost", 12.0)):
 		return _ab("strike")
@@ -93,25 +120,77 @@ func _tempo(obs: Dictionary, energy: float) -> Dictionary:
 func _venom(obs: Dictionary, energy: float) -> Dictionary:
 	var venom: Dictionary = obs.get("venom", {})
 	var cp := int(obs.get("cp", 0))
-	var since := int(obs.get("since_strike", 0))
+	var rupt_rdy := bool(obs.get("rupture_ready", false)) \
+		and int(obs.get("venom_total", 0)) >= 14 and bool(venom.get("syn_active", false))
 
-	# Detonate a big, synergised cocktail (rare — cd + the high bar keep the ramp alive).
-	if bool(obs.get("rupture_ready", false)) and int(obs.get("venom_total", 0)) >= 14 \
-			and bool(venom.get("syn_active", false)):
-		return _ab("rupture")
+	# Classic path (openings disabled) — byte-identical to the pre-Opening Twinfang.
+	if not bool(obs.get("open_on", false)):
+		if rupt_rdy:
+			return _ab("rupture")
+		if cp >= 4 and energy >= 27.0:
+			return _ab("envenom")
+		return _tempo_strike(obs, energy)
 
+	# Detonate a fat, synergised cocktail INTO an opening — but only a HARD-capped wait, so
+	# Rupture still fires near its normal cadence (holding longer just ticks more DoT and
+	# would rework Venom). The Opening rewards Tempo's timing far more than Venom's DoT bulk.
+	var ofire := _open_fire(obs)
+	if rupt_rdy:
+		if _patient(ofire, 18, true):
+			return _ab("rupture")
+	else:
+		_dump_wait = 0
 	# Fixate: spend banked combo into the lit lane (extra poison) once it's stocked up.
 	if cp >= 4 and energy >= 27.0:
 		return _ab("envenom")
-
-	# Strike in the green: rides the wheel (tops all three → synergy) + builds combo.
-	var target := int(obs.get("perfect_lo", 18)) + latency_ticks
-	if since >= target and energy >= float(obs.get("strike_cost", 12.0)):
-		return _ab("strike")
-	return {}
+	return _tempo_strike(obs, energy)
 
 func _ab(id: String) -> Dictionary:
 	return {"type": "ability", "id": id}
+
+# --- THE OPENING: decide whether to punish the boss's vulnerability window now ---
+## Returns 1 (fire a ready dump NOW — inside the window, at/after my aimed tick),
+## 0 (HOLD a ready dump — an opening is imminent, wait for it), or -1 (no opening —
+## fire opportunistically). My aim is cached once per opening; latency smears it off
+## the peak (per-policy rng), so sloppy play lands at the window edge or misses it.
+func _open_fire(obs: Dictionary) -> int:
+	var to := int(obs.get("open_to", -1))
+	if to < 0:
+		return -1
+	var tick := int(obs.get("tick", 0))
+	if tick > to:
+		return -1                       # window already closed → opportunistic
+	var peak := int(obs.get("open_peak", to))
+	if peak != _open_key:               # roll my aim once per opening
+		_open_key = peak
+		var noise := 0
+		if rng != null and latency_ticks > 0:
+			noise = int(round((rng.next_float() * 2.0 - 1.0) * float(latency_ticks) * 0.6))
+		_open_aim = peak + noise
+	var frm := int(obs.get("open_from", tick))
+	if tick >= _open_aim and tick >= frm:
+		return 1                        # inside the window, at/after my aim → punish
+	if float(frm - tick) <= 45.0:       # opening's peak within ~1.5s → hold for it
+		return 0
+	return -1                           # no opening near → bank (see _patient) then let go
+
+## Patience gate for a READY dump: punish the peak if we're in a window (ofire 1),
+## otherwise wait for one — up to `cap` ticks, then let it go so DPS never stalls.
+## `hard` = whether an already-VISIBLE opening (ofire 0) counts toward the cap: Tempo
+## sets hard=false, so it holds as long as a swing's peak is on the way (banking builds
+## Flow for free); Venom sets hard=true, so it waits only briefly and detonates near its
+## normal cadence (any held Rupture would just tick more DoT — that would rework Venom).
+func _patient(ofire: int, cap: int, hard: bool = false) -> bool:
+	if ofire == 1:
+		_dump_wait = 0
+		return true
+	if ofire == 0 and not hard:
+		return false                    # opening on the way — keep banking (no cap)
+	_dump_wait += 1                     # no opening near, or Venom's hard cap is ticking
+	if _dump_wait >= cap:
+		_dump_wait = 0
+		return true                     # waited long enough — don't sandbag
+	return false
 
 # --- M7 beat rolls (cached per string; latency_ticks doubles as the noise knob) ---
 func _beat_aim(tg: Dictionary, i: int) -> float:

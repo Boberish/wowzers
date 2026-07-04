@@ -28,12 +28,22 @@ var _result: String = ""      ## "perfect" | "early" | "late"
 var _result_t: float = 0.0    ## fade timer for the verdict flash
 var _press_f: float = 0.0     ## track fraction where the last Strike landed
 var _prev_prog: float = 0.0   ## last frame's needle position (pre-reset)
+var _prev_aim_f: float = 0.0  ## last frame's aim-line position (snapshot with the press)
+var _press_aim_f: float = 0.0 ## where the ideal beat sat when you pressed
+var _press_off_ticks: float = 0.0  ## signed ticks off the aim line (+ = late of it, − = early)
+var _bull: bool = false        ## a Perfect landed within ~50ms of the aim line
 
 ## Called by the HUD when a Strike lands (drained from the combat event stream).
 func show_result(r: String) -> void:
 	_result = r
 	_result_t = HOLD
 	_press_f = _prev_prog     # the needle has already snapped back — remember where it was
+	# Snapshot the aim line WITH the press so an accelerando shift during the 0.55s hold
+	# can't relabel how far off the ideal beat you were.
+	_press_aim_f = _prev_aim_f
+	var hi := maxf(1.0, float(maxi(scale_ticks, perfect_hi + 2)))
+	_press_off_ticks = (_press_f - _press_aim_f) * hi
+	_bull = _result == "perfect" and absf(_press_off_ticks) <= 1.5   # ~50ms — the flourish only
 
 func _process(delta: float) -> void:
 	_pulse += delta * 8.0
@@ -48,7 +58,11 @@ func _draw() -> void:
 	# window visibly moves EARLIER and NARROWS as Flow climbs, and the needle reaches it sooner.
 	var hi := maxf(1.0, float(maxi(scale_ticks, perfect_hi + 2)))
 	var early_f := clampf(float(swing_min) / hi, 0.0, 1.0)
-	var green_f := clampf(float(perfect_lo) / hi, 0.0, 1.0)
+	var lo_f := clampf(float(perfect_lo) / hi, 0.0, 1.0)          # green START (the window mouth)
+	var hi_f := clampf(float(perfect_hi) / hi, 0.0, 1.0)          # green END (bounded — no more overshoot)
+	var aim_tick := (float(perfect_lo) + float(perfect_hi)) * 0.5 # the bullseye = max margin either side
+	var aim_f := clampf(aim_tick / hi, 0.0, 1.0)
+	var near := clampf(1.0 - absf(float(since) - aim_tick) / 2.0, 0.0, 1.0)  # needle proximity to the plumb (±2t)
 	var prog := clampf(float(since) / hi, 0.0, 1.0)
 	var in_green := since >= perfect_lo and since <= perfect_hi
 	var past := since > perfect_hi
@@ -105,31 +119,79 @@ func _draw() -> void:
 		draw_line(Vector2(rx + 0.6, ty + th - 8.0), Vector2(rx + 0.6, ty + th - 3.0),
 			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.4), 1.0, true)
 
-	# ---- the PERFECT window — stained emerald glass with gem-marked boundaries ----
-	var gx := tx + tw * green_f
-	var gw := tw * (1.0 - green_f)
+	# ---- the PERFECT window — a BOUNDED emerald band [perfect_lo, perfect_hi] ----
+	# Bounded on BOTH sides (the old fill ran to the track edge, so late-but-in-view read
+	# as green). A brighter core pulls the eye toward the plumb without narrowing the hit
+	# test — the whole band still scores Perfect; the plumb is just where you AIM.
+	var lo_x := tx + tw * lo_f
+	var hi_x := tx + tw * hi_f
+	var aim_x := tx + tw * aim_f
+	var bw := maxf(hi_x - lo_x, 2.0)
+	var gem_r := clampf(bw * 0.15, 3.0, 5.0)   # boundary gems shrink when the band pinches (accelerando)
 	var gz := Palette.PERFECT
-	gz.a = 0.20 + (0.26 if in_green else 0.0)
-	draw_rect(Rect2(gx, ty + 2, gw - 2, th - 4), gz)
+	gz.a = 0.20 + (0.20 if in_green else 0.0)
+	draw_rect(Rect2(lo_x, ty + 2, bw - 1, th - 4), gz)
+	var core_half := minf(bw * 0.5, tw * 3.0 / hi)   # ±3 ticks of brighter "sweet spot" around the plumb
+	var core := Palette.PERFECT.lightened(0.15)
+	core.a = 0.14 + 0.18 * near + (0.08 if in_green else 0.0)
+	draw_rect(Rect2(aim_x - core_half, ty + 3, core_half * 2.0, th - 6), core)
 	# inner glow border + gloss
 	var ig := Palette.PERFECT
 	ig.a = 0.45 if in_green else 0.25
-	draw_rect(Rect2(gx + 1, ty + 3, gw - 4, th - 6), ig, false, 1.2)
-	draw_rect(Rect2(gx + 1, ty + 3, gw - 4, th * 0.30), Color(1, 1, 1, 0.10))
-	if in_green:      # travelling shimmer while the press would be Perfect
-		var sx := gx + fmod(_pulse * 34.0, maxf(gw - 8.0, 1.0))
+	draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th - 6), ig, false, 1.2)
+	draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th * 0.30), Color(1, 1, 1, 0.10))
+	if in_green and bw > 16.0:      # travelling shimmer while the press would be Perfect
+		var sx := lo_x + fmod(_pulse * 34.0, maxf(bw - 8.0, 1.0))
 		var sh := Palette.PERFECT.lightened(0.5)
 		sh.a = 0.38
 		draw_rect(Rect2(sx, ty + 3, 7.0, th - 6), sh)
-	# chiselled boundary + cut gems at the window mouth and the early line
-	for bd in [[tx + ex, false], [gx, true]]:
+
+	# ---- the "too LATE" reach past perfect_hi — amber, the mirror of the crimson early wall ----
+	# so the green now has an unmistakable END: early-fail (crimson, back-lean) and late-fail
+	# (amber→crimson, forward-lean) bracket the band. A late press still LANDS but earns no Flow.
+	var late_w := (tx + tw) - hi_x
+	if late_w > 1.0:
+		var late := Palette.RAGE
+		late.a = 0.28
+		draw_rect(Rect2(hi_x, ty + 2, late_w - 2, th - 4), late)
+		var deep := Palette.CRIMSON_DEEP    # opportunity visibly runs out toward the edge
+		deep.a = 0.20
+		draw_rect(Rect2(hi_x + late_w * 0.45, ty + 2, late_w * 0.55 - 2, th - 4), deep)
+		for hx in range(int(hi_x) + 6, int(tx + tw) - 2, 11):
+			draw_line(Vector2(float(hx) - 4.0, ty + 4.0), Vector2(float(hx) + 6.0, ty + th - 4.0),
+				Color(0, 0, 0, 0.22), 2.0, true)
+
+	# ---- three gem-set mullions: early wall · green OPEN · green CLOSE ----
+	for bd in [[tx + ex, Palette.GOLD_DIM, Palette.CRIMSON_DEEP.lightened(0.15), false, gem_r],
+			[lo_x, Palette.PERFECT, Palette.PERFECT.darkened(0.1), in_green, gem_r],
+			[hi_x, Palette.PERFECT, Palette.PERFECT, in_green, gem_r + 0.5]]:
 		var bx: float = bd[0]
-		var is_green: bool = bd[1]
+		var accent: Color = bd[1]
+		var gembody: Color = bd[2]
+		var glow: bool = bd[3]
+		var gr: float = bd[4]
 		draw_line(Vector2(bx, ty + 2), Vector2(bx, ty + th - 2), Palette.BG0, 3.0, true)
-		draw_line(Vector2(bx + 1.0, ty + 2), Vector2(bx + 1.0, ty + th - 2),
-			Palette.PERFECT if is_green else Palette.GOLD_DIM, 1.5, true)
-		_gem(Vector2(bx, ty - 3.0), 5.0, Palette.PERFECT if is_green else Palette.CRIMSON_DEEP.lightened(0.15),
-			is_green and in_green)
+		draw_line(Vector2(bx + 1.0, ty + 2), Vector2(bx + 1.0, ty + th - 2), accent, 1.5, true)
+		_gem(Vector2(bx, ty - 3.0), gr, gembody, glow)
+
+	# ---- THE AIM PLUMB — a thin STATIONARY gilded sight through the band centre ----
+	# Gold (not mint) + still (not sweeping) + sight-post chevrons (not a diamond head) so it
+	# never reads as the moving needle. It LOCKS ON: bloom + pip brighten as the needle nears.
+	if near > 0.0:
+		var bloom := Palette.GOLD_BRIGHT
+		bloom.a = 0.10 + 0.30 * near
+		draw_rect(Rect2(aim_x - (3.0 + 3.0 * near), ty - 2.0, 2.0 * (3.0 + 3.0 * near), th + 4.0), bloom)
+	# a dark seat for contrast, a bold gilded stroke, and a crisp white hairline core so the
+	# target reads as a definite AIM-HERE line at all times — the whole green still scores.
+	draw_line(Vector2(aim_x, ty - 6.0), Vector2(aim_x, ty + th + 6.0), Palette.BG0, 3.0, true)
+	var acol := Palette.GOLD_BRIGHT
+	acol.a = 0.82 + 0.18 * near
+	draw_line(Vector2(aim_x, ty - 6.0), Vector2(aim_x, ty + th + 6.0), acol, 1.6, true)
+	draw_line(Vector2(aim_x, ty - 4.0), Vector2(aim_x, ty + th + 4.0), Color(1, 1, 1, 0.45 + 0.40 * near), 0.7, true)
+	_sight_post(Vector2(aim_x, ty - 7.0), 1.0, near)
+	_sight_post(Vector2(aim_x, ty + th + 7.0), -1.0, near)
+	_gem(Vector2(aim_x, ty + th * 0.5), 3.4 + 1.4 * near,
+		Palette.GOLD_BRIGHT if near > 0.5 else Palette.GOLD, near > 0.6)
 
 	# ---- verdict tint + ghost needle at the pressed spot ----
 	if flashing:
@@ -144,13 +206,24 @@ func _draw() -> void:
 		var br := 6.0 + 22.0 * (1.0 - fa)
 		gcol.a = 0.7 * fa
 		draw_arc(Vector2(px, ty - 8.0), br, 0.0, TAU, 24, gcol, 2.0, true)
+		# offset connector — SEE how far the press landed from the ideal beat (the plumb)
+		var conn := Palette.GOLD_BRIGHT if _bull else _result_color()
+		conn.a = 0.55 * fa
+		draw_line(Vector2(px, ty - 12.0), Vector2(aim_x, ty - 12.0), conn, 1.0, true)
+		draw_line(Vector2(px, ty - 15.0), Vector2(px, ty - 9.0), conn, 1.0, true)
+		draw_line(Vector2(aim_x, ty - 15.0), Vector2(aim_x, ty - 9.0), conn, 1.0, true)
 		if _result == "perfect":
+			var reach := 9.0 + (7.0 if _bull else 0.0)   # tighter aim → longer, brighter rays
 			for k in 6:
 				var a := TAU * float(k) / 6.0 - PI / 2.0
 				var d := Vector2(cos(a), sin(a))
 				var rc := Palette.GOLD_BRIGHT
-				rc.a = 0.8 * fa
-				draw_line(Vector2(px, ty - 8.0) + d * (br + 2.0), Vector2(px, ty - 8.0) + d * (br + 9.0), rc, 1.6, true)
+				rc.a = (0.95 if _bull else 0.8) * fa
+				draw_line(Vector2(px, ty - 8.0) + d * (br + 2.0), Vector2(px, ty - 8.0) + d * (br + reach), rc, 1.6, true)
+			if _bull:      # dead-centre flourish
+				var ring := Palette.PERFECT
+				ring.a = 0.7 * fa
+				draw_arc(Vector2(px, ty - 8.0), 14.0, 0.0, TAU, 28, ring, 2.0, true)
 
 	# ---- the gilded needle: motion trail, shaft, diamond head ----
 	var mx := tx + tw * prog
@@ -179,7 +252,8 @@ func _draw() -> void:
 	UiKit.filigree_corner(self, Vector2(tx - 2, ty - 2), Vector2(1, 1), 8.0)
 	UiKit.filigree_corner(self, Vector2(tx + tw + 2, ty - 2), Vector2(-1, 1), 8.0)
 	_gem(Vector2(tx, ty + th * 0.5), 8.0, Palette.CRIMSON_DEEP.lightened(0.1), false)
-	_gem(Vector2(tx + tw, ty + th * 0.5), 8.0, Palette.PERFECT.darkened(0.25), in_green)
+	# right cap now terminates the LATE reach, not the green — amber until you're truly past
+	_gem(Vector2(tx + tw, ty + th * 0.5), 8.0, (Palette.CRIMSON if past else Palette.RAGE).darkened(0.15), past)
 
 	# ---- the message line beneath the track ----
 	var my := ty + th + 22.0
@@ -202,6 +276,7 @@ func _draw() -> void:
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], Palette.TEXT_DIM)
 
 	_prev_prog = prog
+	_prev_aim_f = aim_f
 
 ## a small cut gem (rotated diamond, gold bezel, specular; glows when live)
 func _gem(at: Vector2, r: float, body: Color, live: bool) -> void:
@@ -240,7 +315,24 @@ func _result_color() -> Color:
 		_: return Palette.CRIMSON
 
 func _result_text() -> String:
+	if _bull:
+		return "BULLSEYE!"
 	match _result:
-		"perfect": return "PERFECT!"
+		"perfect":
+			# high-granularity feedback: how many ms off the ideal beat you were
+			return "PERFECT!  %+.0f ms" % (_press_off_ticks * (1000.0 / 30.0))
 		"early": return "EARLY — NO FLOW"
 		_: return "LATE — NO FLOW"
+
+## an inward sight-post chevron that points at the aim plumb (dir +1 above the track / −1 below),
+## fattening + brightening as the needle locks on. Together the two form the bullseye crosshair.
+func _sight_post(at: Vector2, dir: float, near: float) -> void:
+	var sz := 4.0 + 1.5 * near
+	var col := Palette.GOLD_BRIGHT
+	col.a = 0.70 + 0.30 * near
+	var lft := Vector2(at.x - sz, at.y - dir * sz)
+	var rgt := Vector2(at.x + sz, at.y - dir * sz)
+	draw_line(lft, at, col, 2.0, true)
+	draw_line(rgt, at, col, 2.0, true)
+	var hl := Color(1, 1, 1, 0.25 + 0.30 * near)   # a specular edge so it reads as cut metal
+	draw_line(lft, at, hl, 1.0, true)

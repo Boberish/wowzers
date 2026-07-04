@@ -43,15 +43,25 @@ static var ASPECTS := {
 ## Bloomweaver (below) — `_healer_cls` decides which pair the ceremony/toggles show.
 static var BLOOM_ASPECTS := [
 	{"id": "wildgrove", "name": "WILDGROVE", "accent": Palette.VERDANCE, "icon": "wildbloom",
-		"desc": "RIPEN the garden: tend Growths to the harvest window, BLOOM them for burst, light Flourish across the raid."},
+		"desc": "STACK seeds fast, then let the bed COOK from a trickle to a roar; BLOOM it for burst, and light Flourish across the raid with a full field."},
 	{"id": "thornveil", "name": "THORNVEIL", "accent": Palette.THORN, "icon": "briarheart",
 		"desc": "SNAP-STREAK wards: each Perfect Ward ramps the thorns that reflect damage back — heal by hurting the boss."},
 ]
 
-## The Aspect pair for a seat, honouring the healer's chosen CLASS.
+## The blade seat is polymorphic too — Twinfang (rhythm) or Reckoner (the swing).
+static var RECKONER_ASPECTS := [
+	{"id": "colossus", "name": "THE COLOSSUS", "accent": Palette.RAGE, "icon": "rampage",
+		"desc": "COMMIT the perfect swing — read the boss, land the True apex, bank Poise and STAGGER it. Punishing; precision is the whole game."},
+	{"id": "berserker", "name": "THE BERSERKER", "accent": Palette.MOMENTUM, "icon": "avalanche",
+		"desc": "Build MOMENTUM and hyperarmor THROUGH the hits — a Rage snowball that carries a sloppy rhythm. Forgiving; just keep swinging."},
+]
+
+## The Aspect pair for a seat, honouring the seat's chosen CLASS.
 func _aspects_for(seat_key: String) -> Array:
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return BLOOM_ASPECTS
+	if seat_key == "blade" and _blade_cls == "reckoner":
+		return RECKONER_ASPECTS
 	return ASPECTS[seat_key]
 
 ## The Aspect pair for a lobby seat given an explicit class (online — the healer
@@ -59,22 +69,29 @@ func _aspects_for(seat_key: String) -> Array:
 func _lobby_aspects(seat_key: String, cls: String) -> Array:
 	if seat_key == "healer" and cls == "bloomweaver":
 		return BLOOM_ASPECTS
+	if seat_key == "blade" and cls == "reckoner":
+		return RECKONER_ASPECTS
 	return ASPECTS[seat_key]
 
-## The seat's display name, honouring the healer class (Mender vs Bloomweaver).
+## The seat's display name, honouring the seat class.
 func _seat_display_name(seat_key: String) -> String:
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return "THE BLOOMWEAVER"
+	if seat_key == "blade" and _blade_cls == "reckoner":
+		return "THE RECKONER"
 	return String(SEAT_NAMES.get(seat_key, "RAIDER"))
 
-## The class currently filling a seat (only the healer seat is polymorphic).
+## The class currently filling a seat (the healer and blade seats are polymorphic).
 func _seat_cls_now() -> String:
-	return _healer_cls if _seat_key == "healer" else String(SEAT_CLASS.get(_seat_key, "bulwark"))
+	if _seat_key == "healer": return _healer_cls
+	if _seat_key == "blade": return _blade_cls
+	return String(SEAT_CLASS.get(_seat_key, "bulwark"))
 
 ## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
 ## right kit + the lobby/sim/net all agree). Non-healer seats keep their native class.
 func _human_seat_cfg() -> Dictionary:
 	_sync_healer_cls()
+	_sync_blade_cls()
 	return {_seat_key: {"aspect": _aspect, "ai": false, "cls": _seat_cls_now()}}
 
 ## Keep _healer_cls consistent with the chosen aspect (the aspect uniquely identifies
@@ -87,6 +104,51 @@ func _sync_healer_cls() -> void:
 		_healer_cls = "bloomweaver"
 	elif _aspect == "tidecaller" or _aspect == "brinkwarden":
 		_healer_cls = "mender"
+
+## Keep _blade_cls consistent with the chosen aspect (the aspect uniquely identifies
+## the blade class: Reckoner = colossus/berserker · Twinfang = tempo/venomancer).
+func _sync_blade_cls() -> void:
+	if _seat_key != "blade":
+		return
+	if _aspect == "colossus" or _aspect == "berserker":
+		_blade_cls = "reckoner"
+	elif _aspect == "tempo" or _aspect == "venomancer":
+		_blade_cls = "twinfang"
+
+## COMMANDER: make _party cover exactly the three seats the human doesn't occupy.
+## Defaults = the verified comp RaidNet.make_spec would fill in anyway; prior picks
+## survive a seat change between descents (only the vacated/claimed seats reset).
+func _ensure_party() -> void:
+	if _party.has(_seat_key):
+		_party.erase(_seat_key)
+	for key in RaidNet.SEAT_KEYS:
+		if key == _seat_key or _party.has(key):
+			continue
+		var cls := String(SEAT_CLASS.get(key, "bulwark"))
+		_party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
+
+## COMMANDER: the full 4-seat spec cfg — your seat + the commanded AI raiders. With
+## no party overrides this emits exactly the defaults make_spec fills in for missing
+## keys, so the spec (and the fight) stays byte-identical to the pre-commander game.
+func _party_seat_cfg() -> Dictionary:
+	var cfg := _human_seat_cfg()
+	_ensure_party()
+	for key in _party:
+		cfg[key] = {"aspect": String(_party[key]["aspect"]), "ai": true,
+			"cls": String(_party[key]["cls"])}
+	return cfg
+
+## COMMANDER: per-seat boons for the spec (yours + the AI raiders'); RaidNet.build
+## folds each into its seat's kit. Empty sets are omitted (spec unchanged = no drafts).
+func _seat_boons_now() -> Dictionary:
+	var out := {}
+	if _run != null and not _run.boons.is_empty():
+		out[_seat_key] = _run.boons
+	for key in _ai_runs:
+		var r: RunState = _ai_runs[key]
+		if r != null and not r.boons.is_empty():
+			out[key] = r.boons
+	return out
 
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
@@ -153,6 +215,12 @@ var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat 
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
 var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
 
+# COMMANDER (Bill, 2026-07-04): solo raid = you build the WHOLE party. The three AI
+# raiders' class/aspect are picked on the pre-descent PARTY screen, and their boons
+# are drafted BY YOU after every won fight — the AI only drives the rotation.
+var _party: Dictionary = {}             ## AI seats only: seat_key -> {cls, aspect}
+var _ai_runs: Dictionary = {}           ## AI seats only: seat_key -> RunState (their boon runs)
+
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
 var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
 var _oath_result: Dictionary = {}       ## resolved at fight end, consumed by the drop flow
@@ -191,6 +259,7 @@ var _challenge: AbilityRune        ## tank only
 var _spec: SpecGauge               ## tank
 var _tf_gauge: TwinfangGauge       ## blade
 var _rhythm: RhythmBar             ## blade
+var _opening: OpeningBar           ## blade — THE OPENING (punish the boss's swing)
 var _strike_idx: int = -1
 var _vc_gauge: VoidcallerGauge     ## caster
 var _pcast: PlayerCastBar          ## caster
@@ -200,6 +269,9 @@ var _mcfg: MenderConfig            ## healer (Mender)
 var _bcfg: BloomweaverConfig       ## healer (Bloomweaver)
 var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
 var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver
+var _blade_cls: String = "twinfang" ## which class fills the blade seat: twinfang | reckoner
+var _rcfg: ReckonerConfig             ## the Reckoner's config (set in _make_loadout when the blade is a Reckoner)
+var _rk_gauge: ReckonerGauge          ## the Reckoner's WIND/APEX swing instrument
 var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
@@ -265,6 +337,7 @@ func _show_home() -> void:
 	_gate_live = false
 	_online_map = false
 	_run = null                       # no descent = no boon run (fresh one per descent)
+	_ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
 	_clear()
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -308,6 +381,7 @@ func _show_class_select() -> void:
 	var cards := [
 		["tank", "bulwark", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
 		["blade", "twinfang", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
+		["blade", "reckoner", "THE RECKONER", "rampage", Palette.RAGE, "MELEE · COMMIT — an auto-swing you shape with two timed taps (wind × strike): huge hits, hyperarmor, and STAGGER.  (Colossus / Berserker)"],
 		["caster", "voidcaller", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
 		["healer", "mender", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — react to the storm, click-cast big heals + shields.  (Tidecaller / Brinkwarden)"],
 		["healer", "bloomweaver", "THE BLOOMWEAVER", "wildbloom", Palette.VERDANCE, "HEALER · ANTICIPATE — no mana; plant HoTs & wards AHEAD, bloom them on the spike.  (Wildgrove / Thornveil)"],
@@ -351,7 +425,7 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	var card := AspectCard.new("REALM 1 · THE TAKEOVER",
 		"The ironic AI takeover. Descend the Topology, Ring 3 → 0 — MISTRAL → GEMINI → CLAUDE MYTHOS. Route the node map, carry your wounds, draft your build. (More realms to come.)",
 		Palette.CRIMSON, "")
-	card.chosen.connect(func(): _start_map_run())
+	card.chosen.connect(func(): _show_party_setup())   # COMMANDER: assemble the raid first
 	mid.add_child(card)
 	var back := Button.new()
 	back.text = "◂ back to aspect"
@@ -365,6 +439,89 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 ## returns to the one HOME menu (the old dev BossSelect front door is retired).
 func _show_select(_seat: String = "tank") -> void:
 	_show_home()
+
+# ============================================================ PARTY SETUP (COMMANDER)
+## You command the whole warband: each AI raider's class + aspect is YOUR call here,
+## and their boons are yours to draft after every won fight — in combat the AI only
+## drives the rotation. Defaults = the verified comp, so pressing straight through
+## DESCEND is the same raid as before commander mode existed.
+func _show_party_setup() -> void:
+	_screen = "party"
+	_clear()
+	_ensure_party()
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 9)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -360, -300, 360, 300)
+	_ui.add_child(box)
+	var hl := _title(box, "ASSEMBLE YOUR RAID", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(box, "their class, their aspect, their boons — your call. the AI only drives the rotation.",
+		13, Palette.TEXT_DIM)
+	var gap0 := Control.new()
+	gap0.custom_minimum_size = Vector2(0, 8)
+	box.add_child(gap0)
+	for key in RaidNet.SEAT_KEYS:
+		var mine: bool = key == _seat_key
+		var cls: String = _seat_cls_now() if mine else String(_party[key]["cls"])
+		var aspect: String = _aspect if mine else String(_party[key]["aspect"])
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 10)
+		box.add_child(row)
+		var disp := "THE BLOOMWEAVER" if (key == "healer" and cls == "bloomweaver") \
+			else String(SEAT_NAMES[key])
+		var lab := Label.new()
+		lab.text = "%-15s %s  ·  %s" % [disp, ("YOU" if mine else "AI"), aspect.capitalize()]
+		lab.custom_minimum_size = Vector2(420, 32)
+		lab.add_theme_font_size_override("font_size", 16)
+		lab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if mine else Palette.TEXT)
+		row.add_child(lab)
+		if not mine:
+			if key == "healer":     # the healer seat is the only polymorphic CLASS
+				var clsb := Button.new()
+				clsb.text = "◈ " + ("BLOOMWEAVER" if cls == "bloomweaver" else "MENDER")
+				clsb.custom_minimum_size = Vector2(150, 32)
+				clsb.pressed.connect(func():
+					var nc := "mender" if cls == "bloomweaver" else "bloomweaver"
+					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
+					_show_party_setup())
+				row.add_child(clsb)
+			var ab := Button.new()
+			ab.text = "ASPECT ⇄"
+			ab.custom_minimum_size = Vector2(110, 32)
+			ab.pressed.connect(func():
+				var pool: Array = _lobby_aspects(String(key), cls)
+				var nxt := String(pool[0]["id"]) if aspect == String(pool[1]["id"]) \
+					else String(pool[1]["id"])
+				_party[key]["aspect"] = nxt
+				_show_party_setup())
+			row.add_child(ab)
+		# the chosen aspect's one-line identity, dim, under each row
+		for a in _lobby_aspects(String(key), cls):
+			if String(a["id"]) == aspect:
+				var d := _title(box, String(a["desc"]), 12, Palette.TEXT_DIM)
+				d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				d.custom_minimum_size = Vector2(600, 0)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 12)
+	box.add_child(gap)
+	var go := Button.new()
+	go.text = "⚔    DESCEND"
+	go.custom_minimum_size = Vector2(260, 52)
+	go.add_theme_font_size_override("font_size", 19)
+	go.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
+	go.pressed.connect(_start_map_run)
+	var goc := CenterContainer.new()
+	goc.add_child(go)
+	box.add_child(goc)
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	back.pressed.connect(func(): _show_raid_select(_seat_key, _aspect))
+	_place(back, 0.5, 1, 0.5, 1, -80, -58, 80, -24)
+	_ui.add_child(back)
 
 # ============================================================ ASPECT PICK
 ## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
@@ -383,6 +540,8 @@ func _start_map_pick(seat_id: String) -> void:
 func _pick_class(seat_id: String, cls: String) -> void:
 	if seat_id == "healer":
 		_healer_cls = cls
+	elif seat_id == "blade":
+		_blade_cls = cls
 	_show_aspect_pick(seat_id)
 
 func _show_aspect_pick(seat_id: String) -> void:
@@ -881,6 +1040,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	if seat_id == "bloom" or seat_id == "bloomweaver":
 		seat_id = "healer"
 		_healer_cls = "bloomweaver"
+	if seat_id == "reckoner":              # debug alias: the blade seat as a Reckoner
+		seat_id = "blade"
+		_blade_cls = "reckoner"
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	# a healer aspect id disambiguates the class (must resolve BEFORE the pool lookup)
 	if _seat_key == "healer":
@@ -888,6 +1050,11 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 			_healer_cls = "bloomweaver"
 		elif aspect == "tidecaller" or aspect == "brinkwarden":
 			_healer_cls = "mender"
+	if _seat_key == "blade":
+		if aspect == "colossus" or aspect == "berserker":
+			_blade_cls = "reckoner"
+		elif aspect == "tempo" or aspect == "venomancer":
+			_blade_cls = "twinfang"
 	var pool: Array = _aspects_for(_seat_key)
 	_aspect = String(pool[0]["id"])
 	for a in pool:
@@ -902,8 +1069,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	_screen = "combat"
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
+	# (COMMANDER: the assembled party's aspects/classes ride single-Seal pulls too)
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), _enc_id)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -948,8 +1116,16 @@ func _start_map_run() -> void:
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
 	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
-	# its picks ride into every pull (AI raiders stay on the verified boon-less comp).
+	# its picks ride into every pull.
 	_run = _make_run()
+	# COMMANDER: each AI raider gets its own boon run too — you draft on their behalf
+	# after every won fight. Seeds decorrelated from yours (disjoint draft streams).
+	_ensure_party()
+	_ai_runs = {}
+	for key in _party:
+		_ai_runs[key] = _make_seat_run(String(_party[key]["cls"]),
+			String(_party[key]["aspect"]),
+			int((_run.run_seed ^ (0x515EED + int(SEAT_IDX[key]) * 0x9E3779)) & 0x7FFFFFFF))
 	_build_floor()
 
 ## A minimal RunState for the human seat, just to carry boons + the draft economy
@@ -957,14 +1133,23 @@ func _start_map_run() -> void:
 ## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
 func _make_run() -> RunState:
 	_sync_healer_cls()
-	match _seat_key:
-		"blade": return RunState.start_twinfang(_aspect)
-		"caster": return RunState.start_voidcaller(_aspect)
-		"healer": return (RunState.start_bloomweaver(_aspect) if _healer_cls == "bloomweaver"
-			else RunState.start_mender(_aspect))
-		_: return RunState.start(_aspect)
+	_sync_blade_cls()
+	return _make_seat_run(_seat_cls_now(), _aspect, -1)
+
+## COMMANDER: a boon RunState for ANY seat (class starter by cls) — the commander
+## drafts on behalf of the AI raiders, so they carry the same run machinery you do.
+func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
+	match cls:
+		"reckoner": return RunState.start_reckoner(aspect, seed_v)
+		"twinfang": return RunState.start_twinfang(aspect, seed_v)
+		"voidcaller": return RunState.start_voidcaller(aspect, seed_v)
+		"mender": return RunState.start_mender(aspect, seed_v)
+		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
+		_: return RunState.start(aspect, seed_v)
 
 ## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
+## (Map pulls also ride ALL seats' boons through the spec — see _seat_boons_now;
+## this direct injection stays for the GATE path, which builds outside RaidNet.)
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
@@ -1253,7 +1438,9 @@ func _launch_map_fight(fi: int) -> void:
 	_clear()
 	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), String(enc.id))
+	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
+	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(enc.id), {}, _seat_boons_now())
 	var s := RaidNet.build(spec, _seat_key)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
@@ -1750,29 +1937,64 @@ func _show_boon_draft(done: Callable) -> void:
 		return
 	if _ctrl != null and _ctrl.state != null:
 		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
-	var picks := Draft.roll_offers(_run)
+	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
+	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
+	var chain := done
+	var order: Array = []
+	for key in RaidNet.SEAT_KEYS:
+		if _ai_runs.has(key):
+			order.append(key)
+	order.reverse()
+	for key in order:
+		var k := String(key)
+		var next := chain
+		chain = func(): _show_seat_draft(k, next)
+	_show_seat_draft(_seat_key, chain)
+
+## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
+## AI drafts spend the SHARED ⏣ bank: Draft's economy reads run.tokens, so the bank
+## is mirrored into the AI run for the screen and the remainder banked back out.
+func _show_seat_draft(key: String, done: Callable) -> void:
+	var mine: bool = key == _seat_key
+	var run: RunState = _run if mine else (_ai_runs.get(key) as RunState)
+	if run == null:
+		done.call()
+		return
+	if not mine and _run != null:
+		run.tokens = _run.tokens
+	var picks := Draft.roll_offers(run)
 	if picks.is_empty():
 		done.call()
 		return
 	_screen = "draft"
 	_clear()
 	var extras: Array = []
-	if _run.tokens > 0:
-		extras.append("%d Tokens banked — REROLL / LOCK a card." % _run.tokens)
-	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
-		"Take one — every piece forges into your set.", extras, Palette.GOLD)
+	if run.tokens > 0:
+		extras.append("%d Tokens banked — REROLL / LOCK a card." % run.tokens)
+	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
+		else String(SEAT_NAMES.get(key, "RAIDER"))
+	var headline := "REFORGE — the kill reshapes your kit" if mine \
+		else "REFORGE — %s · AI ALLY" % disp
+	var flavor := "Take one — every piece forges into your set." if mine \
+		else "You command the build — the AI only drives the rotation."
+	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
 	ds.boon_taken.connect(func(boon: Dictionary):
-		Draft.take(_run, boon)
-		_taken_boons.append(boon)      # for the build panel (title + rarity)
-		# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
-		var slot := ArmorSlots.slot_of(boon)
-		var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
-		_toast_add("⚒  %s REFORGED — %s is piece %d" % [
-			ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
+		Draft.take(run, boon)
+		if mine:
+			_taken_boons.append(boon)      # for the build panel (title + rarity)
+			# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
+			var slot := ArmorSlots.slot_of(boon)
+			var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
+			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
+				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
+		else:
+			if _run != null:
+				_run.tokens = run.tokens   # bank the remainder back to the shared pool
+			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
-	# ARMORY: the set-so-far stands beside the forge (cards stay centered)
-	if not _taken_boons.is_empty() or not _map_gear.is_empty():
+	# ARMORY: the set-so-far stands beside YOUR forge (cards stay centered)
+	if mine and (not _taken_boons.is_empty() or not _map_gear.is_empty()):
 		var doll := ArmorDoll.new()
 		_place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
 			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
@@ -1853,8 +2075,12 @@ func _show_campaign_cleared() -> void:
 
 func _make_loadout() -> Array:
 	_sync_healer_cls()
+	_sync_blade_cls()
 	match _seat_key:
 		"blade":
+			if _blade_cls == "reckoner":
+				_rcfg = ReckonerConfig.new()
+				return _rcfg.loadout(_aspect)
 			return TwinfangConfig.new().loadout(_aspect)
 		"caster":
 			return VoidcallerConfig.new().loadout(_aspect)
@@ -2094,11 +2320,20 @@ func _build_band_tank() -> void:
 		"" if _gate_live else "    ·    T — CHALLENGE (taunt)"])
 
 func _build_band_blade() -> void:
+	if _blade_cls == "reckoner":
+		_build_band_reckoner()
+		return
 	_rhythm = RhythmBar.new()
 	# YOUR metronome sits in your own column — the boss's Judgment Channel owns
 	# the line under the reticle on the right
 	_place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
 	_shake_root.add_child(_rhythm)
+	# THE OPENING — the offense-side vulnerability gauge, stacked above your metronome:
+	# read the boss's swing and slam your dumps into the molten sweet spot.
+	_opening = OpeningBar.new()
+	_opening.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place(_opening, 0.35, 0, 0.35, 0, -360, 548, 360, 636)
+	_shake_root.add_child(_opening)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.ENERGY, "ENERGY", true)
 	_tf_gauge = TwinfangGauge.new()
@@ -2120,6 +2355,32 @@ func _build_band_blade() -> void:
 	_add_runes(row, _loadout)
 	_strike_idx = _rune_ids.find("strike")
 	_hint_line("SPACE — DODGE (protects Flow)    ·    F — DODGE beats    ·    hold aggro low — the boss eats loose blades")
+
+## The Reckoner's band: HP + RAGE orbs, the WIND/APEX swing instrument, and the
+## Overswing/Ultraswing/Onslaught/Signature rune rail. The SWING itself is SPACE
+## (tap to wind, tap again for the apex) — not a rune.
+func _build_band_reckoner() -> void:
+	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
+	_res_orb = _orb(Palette.RAGE, "RAGE", true)
+	_rk_gauge = ReckonerGauge.new()
+	_rk_gauge.aspect = _aspect
+	_place(_rk_gauge, 0.5, 1, 0.5, 1, -540, -470, 180, -170)   # THE FORGE: 720×300, in the player's column, clear of the boss cast bar
+	_shake_root.add_child(_rk_gauge)
+	var row := _rune_row(-360.0, 360.0)
+	_guard = AbilityRune.new()
+	_guard.label = "DODGE"
+	_guard.key_label = "F"
+	_guard.icon_id = "dodge"
+	_guard.accent = Palette.STEEL
+	_guard.tooltip_text = "Dodge the boss's swing (F). The Colossus would rather hyperarmor through — but the dodge is there when you need it."
+	_guard.pressed.connect(func(): _ctrl.human({"type": "dodge"}))
+	row.add_child(_guard)
+	var sep := Control.new()
+	sep.custom_minimum_size = Vector2(14, 0)
+	row.add_child(sep)
+	_add_runes(row, _loadout, Palette.RAGE)
+	_strike_idx = -1
+	_hint_line("SPACE — the SWING: tap to WIND (weight), tap again for the STRIKE apex (power)    ·    1/2/3/4 — Overswing · Ultraswing · Onslaught · Signature    ·    F — DODGE")
 
 func _build_band_caster() -> void:
 	_pcast = PlayerCastBar.new()
@@ -2340,7 +2601,7 @@ func _toggle_pause() -> void:
 		return
 	if not _online and _ctrl != null:
 		_ctrl.paused = true
-	_pause = PauseOverlay.new(SEAT_CLASS.get(_seat_key, "bulwark"), _aspect,
+	_pause = PauseOverlay.new(_seat_cls_now(), _aspect,
 		_owned_boon_labels(), not _online)
 	_pause.resumed.connect(_resume_pause)
 	_pause.quit_to_menu.connect(_pause_quit)
@@ -2494,6 +2755,11 @@ func _input(event: InputEvent) -> void:
 		match _seat_key:
 			"healer":
 				_healer_key(event.keycode)
+			"blade":
+				if _blade_cls == "reckoner":
+					_reckoner_key(event.keycode)
+				else:
+					_martial_key(event.keycode)
 			_:
 				_martial_key(event.keycode)
 		return
@@ -2546,8 +2812,9 @@ func _healer_key(code: int) -> void:
 		KEY_7: _cast(_signature())
 		KEY_R: _cast("revive")             # battle-rez: hover a FALLEN raider's frame, press R
 
-## Bloomweaver keys: 1-4 Growth/Barkskin/Overgrowth/Thornlash · Q Sap Rot · E Lifesurge
-## · 7 the aspect signature. SPACE/F dodges (cancels an Overgrowth cast — the discipline).
+## Bloomweaver keys: 1 Growth (STACKS a seed) · 2 Barkskin · 3 Overgrowth · 4 BLOOM
+## (cash a bed) · 5 Thornlash · Q Sap Rot · E Lifesurge · 7 the aspect signature.
+## SPACE/F dodges (cancels an Overgrowth cast — the discipline).
 func _bloomweaver_key(code: int) -> void:
 	match code:
 		KEY_SPACE, KEY_F:
@@ -2555,10 +2822,27 @@ func _bloomweaver_key(code: int) -> void:
 		KEY_1: _cast("growth")
 		KEY_2: _cast("bark")
 		KEY_3: _cast("overgrowth")
-		KEY_4: _cast("lash")
+		KEY_4: _cast("bloom")
+		KEY_5: _cast("lash")
 		KEY_Q: _cast("saprot")
 		KEY_E: _cast("lifesurge")
 		KEY_7: _cast(_signature())
+
+## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
+## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.
+func _reckoner_key(code: int) -> void:
+	match code:
+		KEY_SPACE:
+			var ph := int(_ctrl.player().vars.get("phase", 0))
+			# wind phases (0 WIND, 3 onslaught-wind) send "wind"; strike phases send "strike"
+			var id := "wind" if (ph == 0 or ph == 3) else "strike"
+			_ctrl.human({"type": "ability", "id": id})
+		KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1: _use_ability(0)
+		KEY_2: _use_ability(1)
+		KEY_3: _use_ability(2)
+		KEY_4: _use_ability(3)
 
 func _use_ability(i: int) -> void:
 	if _screen == "combat" and i >= 0 and i < _rune_ids.size():
@@ -2635,6 +2919,14 @@ func _cast_on_bloom(seat: Seat, id: String) -> void:
 	if id == "saprot" and seat.debuff.is_empty(): ready = false
 	if sp.has("spec") and float(p.vars.get("verdance", 0.0)) < _bcfg.verd_min_spend: ready = false
 	if id == "lifesurge" and int(CombatCore.observe(s, p).get("garden", 0)) <= 0: ready = false
+	var kit := p.kit as BloomweaverKit
+	if id == "bloom" and (kit == null or kit._find_growth(seat) < 0): ready = false   # nothing to cash
+	if id == "growth" and kit != null:
+		var gbi := kit._find_growth(seat)
+		if gbi >= 0 and int(seat.hots[gbi].get("stacks", 1)) >= kit._soft_cap() \
+				and int(seat.hots[gbi].get("stacks", 1)) < _bcfg.hard_cap \
+				and float(p.vars.get("verdance", 0.0)) < _bcfg.overcap_verd:
+			ready = false                                                            # over-cap needs Verdance
 	var fr := _frame_of(seat)
 	if fr != null:
 		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
@@ -2826,11 +3118,12 @@ func _rich_hots(seat: Seat, hzf: float) -> Array:
 		var meta: Array = HOT_META.get(src, HOT_META["hot"])
 		out.append({"icon": String(meta[0]), "src": src,
 			"remain": maxf(float(int(h["left"]) - int(h["acc"])) / hzf, 0.0),
-			"total": float(meta[1])})
+			"total": float(meta[1]),
+			"count": int(h.get("stacks", 1))})   # Bloomweaver seed bed: show the stack depth (×N)
 	return out
 
 ## Healer-only frame overlays: telegraphed incoming damage + (Mender) the cast's heal
-## ghost / (Bloomweaver) Growth ripeness on every frame + the BLOOM cash-out on hover.
+## ghost / (Bloomweaver) seed-bed COOK state on every frame + the BLOOM cash-out on hover.
 func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 	if s.telegraph != null:
 		var ab := s.telegraph.ability
@@ -2871,8 +3164,8 @@ func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 			if fr != null and amt > 0.0:
 				fr.incoming_dmg_frac = amt / v.hp_max
 				fr.incoming_lethal = amt >= v.hp + v.absorb
-	# Bloomweaver: Growth ripeness on every frame (gold gem) + the BLOOM value a
-	# double-tap would cash right now, ghosted on the hovered frame.
+	# Bloomweaver: the seed bed's COOK state on every frame (gold chip at full ramp) +
+	# the BLOOM value a cash-out would restore right now, ghosted on the hovered frame.
 	if _healer_cls == "bloomweaver":
 		for pe in obs.get("party", []):
 			var u: Seat = pe.get("seat")
@@ -2881,7 +3174,7 @@ func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 			var frp := _frame_of(u)
 			if frp == null:
 				continue
-			frp.ripe = bool(pe.get("ripe", false))
+			frp.ripe = bool(pe.get("cooked", false))       # gold chip when the bed is COOKED (full ramp)
 			if u == _hover_seat and u.hp_max > 0.0:
 				frp.incoming_frac = clampf(float(pe.get("growth_heal", 0.0)) / u.hp_max, 0.0, 1.0)
 		return
@@ -2948,6 +3241,9 @@ func _render_band_tank(s: CombatState, p: Seat, obs: Dictionary) -> void:
 		_challenge.cd_frac = clampf(float(ch - s.tick) / float(CombatCore.to_ticks(8.0, s.config.fixed_hz)), 0.0, 1.0)
 
 func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	if _blade_cls == "reckoner":
+		_render_band_reckoner(s, p, obs)
+		return
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_res_orb.set_values(float(obs.get("energy", 0.0)), float(obs.get("energy_max", 100.0)))
 	_rhythm.since = int(obs.get("since_strike", 0))
@@ -2964,6 +3260,17 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_tf_gauge.flow_mult = float(obs.get("flow_mult", 1.0))
 	_tf_gauge.tier = int(obs.get("tier", 0))
 	_tf_gauge.venom = obs.get("venom", {"V": 0, "F": 0, "C": 0, "syn_ramp": 1.0, "syn_active": false})
+	if _opening != null:
+		# THE OPENING — the boss's vulnerability window; armed = a dump is ready to punish it
+		_opening.now_tick = int(obs.get("tick", 0))
+		_opening.from_tick = int(obs.get("open_from", -1))
+		_opening.peak_tick = int(obs.get("open_peak", -1))
+		_opening.to_tick = int(obs.get("open_to", -1))
+		_opening.core_ticks = int(obs.get("open_core_ticks", 3))
+		_opening.bonus_now = float(obs.get("open_bonus_now", 0.0))
+		_opening.active = int(obs.get("open_to", -1)) >= _opening.now_tick
+		_opening.armed = int(obs.get("cp", 0)) >= 1 or bool(obs.get("coup_ready", false)) \
+			or bool(obs.get("rupture_ready", false)) or float(obs.get("energy", 0.0)) >= 28.0
 	var energy := float(obs.get("energy", 0.0))
 	var cpn := int(obs.get("cp", 0))
 	var in_green: bool = _rhythm.since >= _rhythm.perfect_lo and _rhythm.since <= _rhythm.perfect_hi
@@ -3001,6 +3308,41 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
+
+func _render_band_reckoner(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	_hp_orb.set_values(p.hp, p.hp_max)
+	_res_orb.set_values(float(obs.get("rage", 0.0)), float(obs.get("rage_max", 100.0)))
+	var g := _rk_gauge
+	g.phase = int(obs.get("phase", 0))
+	g.since_wind = int(obs.get("seq_since_wind", 0)) if g.phase == 3 else int(obs.get("since_wind", 0))
+	g.wind_len = int(obs.get("wind_len", 27))
+	g.even_lo = int(obs.get("even_lo", 9))
+	g.heavy_lo = int(obs.get("heavy_lo", 18))
+	g.over_lo = int(obs.get("over_lo", 23))
+	g.over_armed = bool(obs.get("over_armed", false))
+	g.to_apex = int(obs.get("to_apex", 999))
+	g.true_half = int(obs.get("true_half", 1))
+	g.apex_total = maxi(1, int(round((_rcfg.apex_delay if _rcfg != null else 0.4) * s.config.fixed_hz)))
+	g.momentum = float(obs.get("momentum", 0.0))
+	g.momentum_max = float(obs.get("momentum_max", 8.0))
+	g.poise = float(obs.get("poise", 0.0))
+	g.poise_max = float(obs.get("poise_max", 100.0))
+	g.stagger = bool(obs.get("stagger", false))
+	g.seq_nw = int(obs.get("seq_nw", 0))
+	g.seq_ns = int(obs.get("seq_ns", 0))
+	g.seat_ref = p
+	for i in _runes.size():
+		var id: String = _rune_ids[i]
+		var usable := true
+		match id:
+			"overswing": usable = bool(obs.get("over_ready", true))
+			"ultraswing": usable = bool(obs.get("ultra_ready", true))
+			"onslaught", "sunder", "berserk": usable = bool(obs.get("ons_ready", true))
+		_runes[i].affordable = usable
+		_runes[i].usable = usable
+		_runes[i].cd_frac = 0.0
+	_guard.usable = s.tick >= int(p.defense_ready_tick)
+	_guard.cd_frac = 0.0
 
 func _render_band_caster(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_hp_orb.set_values(p.hp, p.hp_max)
@@ -3105,9 +3447,10 @@ func _render_band_bloomweaver(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_hp_orb.set_values(p.resource, _bcfg.sap_max)
 	_verd.verdance = float(obs.get("verdance", 0.0))
 	_verd.flourish = bool(obs.get("flourish", false))
-	_verd.flourish_ripe = bool(obs.get("flourish_ripe", false))
+	_verd.flourish_hi = bool(obs.get("flourish_hi", false))
 	_verd.garden = int(obs.get("garden", 0))
-	_verd.ripe_garden = int(obs.get("ripe_garden", 0))
+	_verd.total_seeds = int(obs.get("total_seeds", 0))
+	_verd.flourish_lo = int(_bcfg.flourish_seeds_lo)
 	_verd.thorns = int(float(p.vars.get("stat_thorns", 0.0)))
 	_verd.thorn_charge = int(obs.get("thorn_charge", 0))
 	_verd.thorn_charge_max = int(obs.get("thorn_charge_max", 5))
@@ -3147,6 +3490,10 @@ func _handle_event(ev: Dictionary) -> void:
 	var mine := bool(ev.get("player", false))
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	if _rk_gauge != null:
+		_rk_gauge.on_event(ev)     # THE FORGE: wind/apex stamps + verdict banner + history
+		if mine and _blade_cls == "reckoner":
+			_reckoner_juice(ev)
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"negate":
@@ -3261,6 +3608,14 @@ func _handle_event(ev: Dictionary) -> void:
 		"coup":
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_add_shake(7.0)
+		"opening":
+			# THE OPENING — a dump landed in the boss's vulnerability window
+			if mine and _opening != null:
+				var g := String(ev.get("grade", ""))
+				_opening.show_result(g)
+				if g == "peak":
+					_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
+					_add_shake(4.0)
 		"kick_whiff", "int_whiff":
 			if mine:
 				_big_text("whiff", Palette.TEXT_DIM, 20, 0.5)
@@ -3335,6 +3690,33 @@ func _seat_accent() -> Color:
 		"caster": return Palette.KICK
 		"healer": return Palette.WIN
 	return Palette.GOLD
+
+## THE FORGE screen juice — verdict floats + shake + boss recoil for the Reckoner's hits
+## (the instrument's own stamps/banner/history come from _rk_gauge.on_event; damage floats
+## ride the paired boss_hit event for free).
+func _reckoner_juice(ev: Dictionary) -> void:
+	match String(ev.get("t", "")):
+		"swing":
+			if bool(ev.get("clash", false)):
+				_big_text("CLASH!", Palette.GOLD_BRIGHT, 46)
+				_add_shake(12.0)
+				_dial.react("stagger")
+			elif String(ev.get("weight", "")) == "Over":
+				_big_text("OVERSWING!", Palette.HEAVY, 42)
+				_add_shake(10.0)
+			elif String(ev.get("power", "")) == "True":
+				_big_text("TRUE!", Palette.PERFECT, 40)
+				_add_shake(8.0)
+		"poise_break":
+			_big_text("STAGGER!", Palette.STEEL, 34, 0.6)
+			_add_shake(6.0)
+			_dial.react("stagger")
+		"ultra":
+			_big_text("ULTRA!", Palette.KICK, 36)
+			_add_shake(6.0)
+		"onslaught":
+			_big_text("ONSLAUGHT — ALL TRUE!" if bool(ev.get("all_true", false)) else "ONSLAUGHT", Palette.PERFECT, 40)
+			_add_shake(10.0)
 
 func _add_shake(amt: float) -> void:
 	_shake_amt = minf(20.0, maxf(_shake_amt, amt))

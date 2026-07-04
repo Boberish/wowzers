@@ -421,7 +421,7 @@ static func _tank(aspect: String) -> Seat:
 	return u
 
 static func _blade(aspect: String) -> Seat:
-	var tcfg := TwinfangConfig.new()
+	var tcfg := TwinfangConfig.new()   # THE OPENING is live for every raid Twinfang fight (open_enabled default)
 	var u := Seat.new()
 	u.role = "dps"; u.unit_name = "The Twinfang"; u.fidelity = "full"
 	u.hp_max = tcfg.hp_max; u.hp = tcfg.hp_max; u.dps = 0.0
@@ -480,6 +480,31 @@ static func _healer_seat(cls: String, aspect: String) -> Seat:
 		return _bloomweaver(aspect if aspect != "" else "wildgrove")
 	return _mender(aspect if aspect != "" else "tidecaller")
 
+## The SECOND melee-DPS class in the raid: Reckoner (a Warrior — the auto-advancing
+## two-tap swing). Same BLADE SEAT, different CLASS — chosen via make_state's `classes`
+## dict / the fight spec's per-seat `cls`. Mirrors the solo factory (_make_reckoner),
+## minus is_player. Rage builds from swinging; starts with a little.
+static func _reckoner(aspect: String) -> Seat:
+	var rcfg := ReckonerConfig.new()
+	var u := Seat.new()
+	u.role = "dps"; u.unit_name = "The Reckoner"; u.fidelity = "full"
+	u.hp_max = rcfg.hp_max; u.hp = rcfg.hp_max; u.dps = 0.0
+	u.resource = 40.0; u.resource_max = rcfg.rage_max
+	u.kit = ReckonerKit.new(aspect, rcfg)
+	u.policy = ReckonerPolicy.new()
+	u.vars = {"phase": 0, "wind_start": 6, "momentum": 0.0, "poise": 0.0, "weight": "",
+		"over_armed": false, "ultra_armed": false, "stagger_until": 0,
+		"seq_winds": [], "seq_strikes": []}
+	return u
+
+## Build the blade seat for whichever melee-DPS CLASS the seat carries (default Twinfang).
+## Aspect defaults per class: Twinfang→venomancer (the verified comp), Reckoner→colossus.
+## An empty cls/aspect reproduces `_blade("venomancer")` bit-for-bit (byte-identical).
+static func _blade_seat(cls: String, aspect: String) -> Seat:
+	if cls == "reckoner":
+		return _reckoner(aspect if aspect != "" else "colossus")
+	return _blade(aspect if aspect != "" else "venomancer")
+
 ## Build a raid fight. `aspects` may override any seat's Aspect; `player` names the
 ## human seat ("tank"/"blade"/"caster"/"healer") for diag mirroring — every seat is
 ## policy-driven until a driver swaps a human adapter in (R1).
@@ -494,7 +519,7 @@ static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
 	var s := CombatCore.create_state(enc, make_config(), seed)
 	var seats := {
 		"tank": _tank(String(aspects.get("tank", "warden"))),
-		"blade": _blade(String(aspects.get("blade", "venomancer"))),
+		"blade": _blade_seat(String(classes.get("blade", "twinfang")), String(aspects.get("blade", ""))),
 		"caster": _caster(String(aspects.get("caster", "disruptor"))),
 		"healer": _healer_seat(String(classes.get("healer", "mender")),
 			String(aspects.get("healer", ""))),

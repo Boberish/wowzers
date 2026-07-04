@@ -534,6 +534,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## CURRENT / OPEN IDEAS (parking lot — promote into a section when claimed)
 
+- **TEAM-COMP layer (Bill 2026-07-04, deliberately split from the commander merge — "another subject,
+  focus the ai pick 1st"):** damage SCHOOLS (physical / void / poison / nature) + per-boss resist/immune/
+  weak profiles so the party you assemble answers the encounter. Design sketch from the commander session:
+  guarded mult in `CombatCore.damage_boss` (the SUNDER amp is the precedent slot; empty profile = 1.0 =
+  byte-identical), school mapping via a `ClassKit.school_of(src)` no-op hook riding the existing meter `src`
+  labels, profiles on `EncounterRes`, HUD RESISTED/WEAK pops + profile lines on the party screen / Seal
+  tooltips. Tuning rule: Seals get soft multipliers (±15–30%); full IMMUNE only for supplemental schools
+  (poison / thorns) and only on skirmish trash, so a class kit is never bricked mid-Seal. COMMANDER v1 is the
+  lever that makes profiles a real decision (re-aspect your raiders per fight). Needs its own claim + the
+  full byte-identical/retune gate (it IS an engine touch).
 - Game title candidates: *UNPLUGGED*, *Ctrl+Alt+DEFEAT*, *KILLSWITCH*, *RIFT: Do Not Trust Its Outputs* (these read Realm-1-flavored now; a realm-neutral title may fit better).
 - **Future realm seeds** (each = Seals ladder + map skin + joke register): *THE BUREAUCRACY* (paperwork hell — stamp-golems, queue mechanics, "please hold" telegraphs); *THE UNDERCROFT* (necropolis played straight — the contrast realm); *THE DEEP* (abyssal leviathans, pressure as attrition); *THE CLOCKWORK COURT* (fae mechanisms, rhythm-heavy strings); *THE KAIJU WEATHER STATION* (one enormous boss per floor).
 - Rewind verb (deterministic-engine showpiece) — parked, see Classes.
@@ -556,6 +566,86 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the `kill-switch` artifact. **OPEN:** re-price the parked heal events back into the pool · P2 (party_out_mult
   DMG-amp + enrage_offset STALL + two-way Forge/sacrifice-gear) · P3 (live PULL THE PLUG + finale retune).
 
+- ☑ 2026-07-04 · `topo-bloom-raid` · §CLASSES/§GRAPHICS — **SEEDFALL wired into THE game HUD + balanced as a RAID seat — MERGED (`0a3a70e`, merge `dfbc72f`).** (Bill: "why is this on solo? everything should be on the raid only — swap to raid mode … adapt to the updated healer UI.") Corrects the earlier Seedfall pass, which had wired the DEAD solo `bloomweaver_hud` (ONE-HUD-LAW slip). Kit/config/boons/policy/binds/gauge were already shared + correct; this brings the *input + display* onto `raid_hud`'s Bloomweaver band + the raid-frame MEGA-upgrade chips.
+  - **raid_hud band:** KEY_4 = BLOOM (cash a bed) · KEY_5 = Thornlash (was 4 = lash); `_cast_on_bloom` gates Bloom on a bed-present + over-cap on Verdance; the Verdance gauge reads TOTAL PARTY SEEDS + Flourish tiers (ripen fields dropped); Wildgrove class blurb reworded to stacking. **raid_frame:** the seed bed renders as a growth chip with a **×N stack-depth badge** + a **gold COOK glow** at full ramp (reuses the frame's `ripe` gold path). Bloom rune auto-appears (loadout `order()` includes it); right-click Bloom chord ships via BloomweaverBinds. View-only — no engine/kit change; diff = raid_hud + raid_frame only → all sims byte-identical.
+  - **RAID balance (Bill: raid-only; `raid_sim --healer=bloomweaver`, 100 seeds, det PASS both aspects):** expert **100 on all four bosses**; good 100/100/94/**59**, sloppy (wild) 63/100/54/**5** · (thorn) 99/100/58/**8**. Riftmaw/Mistral comfortable, Gemini a mid-check, **Mythos the brutal finale** (good ~59, sloppy ~5-8, almost all `healer_death`). PRE-EXISTING + flavor-consistent — the old one-seed kit was already `mythos wild 100/60/14`; Seedfall held the good tier (60→59), sloppy dropped (the ramp punishes thrash-replanting, by design). NOT globally buffed (would trivialize the other 3 fights + solo).
+  - **Gate:** ui_smoke_raid ALL OK on fully-merged main (Seedfall + reckoner + openings + commander) · raid determinism PASS (4 bosses) · net_smoke ALL OK · view-only diff → 6 solo sims + raid byte-identical. Solo `bloomweaver_sim` is now a LEGACY kit harness (the raid seat is the balance source of truth).
+  - **NEXT (unclaimed):** the **Mythos-finale proactive-healer gap** (good 59 / sloppy 5) is the standing balance follow-up — needs Bill's steer (deeper Bloomweaver self-triage AI over the long finale, or a proactive-healer-friendly finale tweak; do NOT fix with a shared-content nerf that also hits the Mender). Also: the dead solo `bloomweaver_hud` still carries vestigial Seedfall edits (harmless — leave for the dead-HUD cleanup sweep) · Constrict boon branch · AI over-cap probe.
+- ☑ 2026-07-04 · `reckoner` · §CLASSES — **THE RECKONER (Warrior, 6th playable class) — DONE, MERGED to main.** The blade/melee-DPS seat is now a CLASS CHOICE (Twinfang ⇄ Reckoner), mirroring the `bloom-raid` `cls`-threading (default `twinfang` → byte-identical). Verb **COMMIT**: an auto-advancing swing shaped by TWO tick-stamped presses — WIND (weight: Quick/Even/Heavy/Over) × STRIKE (apex power: Finesse / True ±1t / Overload) — degrade-never-whiff; abilities **Overswing** (wind-end haymaker) / **Ultraswing** (inserted bonus beat) / **Onslaught** (VENT 3-wind+3-strike phrase); resources Rage / Momentum / Poise-Break→STAGGER; **Clash** (apex onto a boss impact tick). Aspects **Colossus** (punishing/stagger) / **Berserker** (forgiving; Momentum snowball + hyperarmor). Ported from a tuned browser greybox (True band ±1t).
+  - **Engine/class (ZERO CombatCore change — snaps onto ClassKit hooks + seat.vars; only view-only `wind_commit` event added):** `data/reckoner/{config,kit,boons,content}.gd` + `sim/policies/reckoner_policy.gd` + `sim/reckoner_sim.gd` + `sim/raid_reckoner_probe.gd`; cls-wiring in `raid_net` (cls_of/make_policy/default_aspect) + `raid_content` (_reckoner/_blade_seat/make_state) + `run_state.start_reckoner` + `psim.sh`.
+  - **HUD (the one game HUD):** `_blade_cls` plumbing (mirrors `_healer_cls`) — 6th class card, aspect ceremony, `_build_band_reckoner`/`_render_band_reckoner`, `_reckoner_key` (SPACE = phase-aware wind/strike swing · F dodge · 1-4 abilities). **"THE FORGE" instrument** (`game/ui/reckoner_gauge.gd`, from a UI-spec workflow): a big linear WIND bellows bar (zones + EVEN money-core + fixed aim gate + sweeping hammer-notch) above a radial contracting ANVIL ring (constant close onto an emerald TRUE hub + NOW), Momentum pips + Poise meter, scale-punched verdict banner + paired grade-history gems; event-driven verdict/juice (`on_event` + `_reckoner_juice`: TRUE!/OVERSWING!/CLASH!/STAGGER!/ULTRA!/ONSLAUGHT! + free grade-colored damage floats).
+  - **Verified:** reckoner_sim determinism PASS (both aspects); bands **Colossus 100/95/82 · 100/85/55**, **Berserker 100/100/92 · 100/100/75** (the timing gate drives it, avg Momentum 7→1); raid_reckoner_probe ALL OK (Reckoner blade WINS riftmaw/mistral/mythos, metered, spec routes cls→kit+ReckonerPolicy); **byte-identical default comp** (raid_sim + twinfang_sim checksums identical). Merged `main` (Commander / THE OPENING / Seedfall) cleanly — `_make_run` folded into Commander's `_make_seat_run` (+ reckoner case), `_sync_blade_cls` kept alongside the party fns.
+  - **NEXT (unclaimed):** reckoner stage2d PUPPET (reuses twinfang rig), rune ICON art, AUDIO cues, online net_server lobby toggle + personal GATE fork (gate_content), class_codex entry; make reckoner a COMMANDER-selectable AI blade class (party toggle); the 5 UPGRADE BRANCHES (Buffer Overflow / Batch / Overclock / Force Quit / Race Condition). Debug: `--autostart=reckoner:colossus|berserker`. Sim: `scripts/psim.sh reckoner_sim 300`. See [[reckoner-warrior-proposal]].
+
+
+- ☑ 2026-07-04 · `openings-poc` · §CLASSES/§GRAPHICS — **THE OPENING — a new offense-side timing verb — MERGED to main (fast-forward).**
+  (Bill: "our verbs are too centered around the tank/dodging stuff… meh for dps and heals, lets try new verbs
+  more general and fun" → picked ① THE OPENING → "a vulnerable hit timing bar, hit your evis and venoms right
+  when/around/after they hit" → "much prettier and fancy" + "add it to the raid mode, always on raid, for all
+  twinfang raid fights".) Inverts the telegraph from DANGER→OPPORTUNITY: a boss swing OVEREXTENDS it, opening a
+  vulnerability window around the impact tick; the blade's DUMPS (Eviscerate/Coup/Rupture/Flurry) landed in the
+  sweet spot (just after impact) hit ×1.90 at the peak, tapering to ×1.05 at the edges, nothing outside. The
+  offense-side inverse of dodge/riposte — you don't answer the swing, you punish the recovery. **Kit-local, ZERO
+  engine change:** `twinfang_config` open_* tuning + master `open_enabled`; `twinfang_kit` `_stamp_opening`
+  (upkeep watches `s.telegraph`, schedules the window in `seat.vars`, deterministic) + graded `_opening_bonus`
+  in `_deal` + `_opening_note` aspect kicker (Tempo +Flow / Venom +poison on a PEAK) + `observe()` open_*/open_on;
+  `twinfang_policy` dump PATIENCE (bank a ready dump for the window, skill-scaled aim via the per-policy DetRng;
+  classic path when open_on=false → byte-identical). **Live in the raid** (`raid_content`/`gate_content`
+  open_enabled on — the boss's swings at the tank open the blade's window) with the OpeningBar wired into
+  `raid_hud`'s blade band (the one HUD). **Fancy `opening_bar.gd`** — Gilded Reliquary: gold frame + filigree,
+  engraved plaque, a molten crimson→ember WOUND that breathes, a sweet-spot that IGNITES, a sweeping plumb needle
+  with a motion trail + boundary gems, and a spark-burst PUNISH. Rewards Tempo (timing aspect) strongly, Venom
+  (forgiving DoT) lightly — sharpens the aspect contrast. **Verified:** twinfang open=off byte-identical to main
+  (720 rows); other 4 class sims byte-identical (determinism PASS, matching checksums); raid determinism PASS
+  (4 Seals); **Gemini A/B 150 seeds — openings SPED kills (expert 70.1→61.6s) and NUDGED sloppy UP 60.7→65.3**
+  (faster kill = less healer exposure) → balance-neutral-to-positive, no retune; ui_smoke_raid + ui_smoke_twinfang
+  PASS; WSLg render clean (blade leads the damage meter). **Merge hygiene:** checkpointed Bill's finished-but-
+  uncommitted working-tree UI polish first (`d254441` — rhythm-bar bounded-green fix + gauge_gallery + class_codex
+  Bloomweaver page + raid_hud `_seat_cls_now`), so the branch built on the latest (raid_hud 3-way auto-merged).
+  Debug: `godot --path godot game/twinfang_main.tscn -- --autostart=tempo:executioner` (solo) or PLAY→blade→Seal
+  (raid). Probe: `sim/screenshot_opening.gd`. See [[openings-verb]]. **NEXT (parked):** window-cadence tune if the
+  raid wants more openings; roll the verb out to Voidcaller (punish casts) + the wider roster; other parked verbs
+  (Overclock/Vent, Charge&Release for healers).
+
+- ☑ 2026-07-04 · `commander` · §SYSTEMS/§CLASSES — **COMMANDER v1 — you build the WHOLE party — MERGED to main.**
+  (Bill, direct: "when you play single player with the AI, you pick their upgrades and their setups as well —
+  it's just the auto rotation during the fight that the AI does." The team-comp resist layer was split off
+  mid-session per Bill's steer — "another subject, focus the ai pick 1st"; see the parking lot.) The solo raid
+  is now a commander game, ZERO engine files touched (everything rides the netcode spec plumbing that already
+  carried per-seat aspects/cls/boons):
+  - **PARTY SETUP screen** ("ASSEMBLE YOUR RAID", `raid_hud._show_party_setup`) between the realm card and the
+    descent: each AI seat = ASPECT ⇄ toggle + the healer seat's class toggle (Mender ⇄ Bloomweaver), aspect
+    blurb per row, your seat pinned gold. `_party {seat -> {cls, aspect}}` persists across descents in-session;
+    defaults = the verified comp. `_party_seat_cfg()` emits the full 4-seat spec cfg — at defaults it is
+    IDENTICAL to what `make_spec` fills for missing keys, so untouched = byte-identical by construction
+    (probe-proven). Commanded aspects also ride single-Seal `_launch` pulls.
+  - **You draft the AI raiders' boons:** `_ai_runs {seat -> RunState}` (draft streams decorrelated off the
+    human's `run_seed`); the post-fight REFORGE now CHAINS one DraftScreen per seat — yours first, then each
+    AI ally ("REFORGE — THE TWINFANG · AI ALLY / you command the build — the AI only drives the rotation") —
+    all spending the ONE shared ⏣ bank (mirrored into the AI run per screen, remainder banked back; rerolls/
+    locks/upsells work there too). All seats' boons ride the spec via `make_spec(..., seat_boons)` →
+    `RaidNet.build` folds each into its kit; boon procs are kit-side so AI policies need zero changes.
+    Online untouched (`_ai_runs` stays empty online; commander-online = a lobby-UI follow-up).
+  - **Gate PASS:** NEW `sim/commander_probe.gd` 14 checks ALL OK (default-cfg spec byte-identity · commanded
+    aspects/classes/boons land in the right kits · commanded fight deterministic over 600 ticks · draft chain
+    = you + 3 AI, one boon each, shared bank intact) · **all six sims byte-identical** vs the frozen-main
+    baseline (100 seeds via psim, logs AND per-seed CSVs: raid + 5 classes) · menu_probe / raid_boon_probe /
+    map_advance_probe extended + green · ui_smoke_raid gained a commander section (party toggles, commanded
+    descent, 4-draft chain) + net_smoke + ui_smoke_map ALL OK · NEW `sim/screenshot_commander.gd` WSLg probe
+    (party default/commanded + AI draft screen) eyeballed clean at 1080p.
+  - **NEXT (unclaimed):** ONLINE commander (host configures the AI seats in the lobby — the spec already
+    carries it) · draft-pacing lever if 4 drafts/fight drags in playtest (AI drafts only at Seal/gate kills,
+    or an AUTO-pick button per ally) · AI builds surfaced on the map (armor doll / build panel are human-only
+    today) · `Draft.mint` could count the AI seats' fight performance into the shared bank. *(commander session)*
+- ☑ 2026-07-04 · `topo-bloom-seedfall` · §CLASSES — **BLOOMWEAVER REWORK "SEEDFALL": stacking + ramping seeds — MERGED to main (`b6e0346`, merge `8b3f5a5`).** (Bill: "the 'maturing' [ripen] thing is only meh… be able to STACK seeds… the HoT scales, resets when you stack — stack fast then let it cook.") Replaces the disliked RIPEN/harvest-window with a STACKING, RAMPING garden. Design via 24-agent workflow → artifact https://claude.ai/code/artifact/ecf1462b-6471-4d15-846c-21df88179414 ; Bill picked all 4 recommended forks (core-only scope / dedicated Bloom key + double-tap alias / full ramp reset / Constrict as a future boon branch). See [[bloomweaver-seedfall-rework]].
+  - **Mechanic (ZERO CombatCore change — rides `seat.hots` [already a stacking Array] + `kit.upkeep` running the tick BEFORE `_apply_seat_effects`):** Growth STACKS a seed onto an ally's BED (soft cap 3 / grove 4, hard cap 5). One SHARED ramp per bed: a fresh/reset bed ticks at `ramp_floor` (0.35 / grove 0.40) and climbs to full over `ramp_time` 4.5s; ANY new seed RESETS it (`ramp_reset_frac` 0 = full reset, exposed as a sim knob). upkeep rewrites each bed's `tick = seed_base(8.5)·ramp·stacks` every frame → the engine fires the ramped value that same tick. Stack FAST, then hands-off to COOK.
+  - **Cash-out:** dedicated **BLOOM** rune (key 4; Thornlash → 5) cashes fires-left × ramped tick × `bloom_eff` 0.9 (Clean Harvest boon → lossless ×1.15 for 15 Verdance). Growth on a HARD-capped bed ALIASES to Bloom (the double-tap gesture Bill kept). Lifesurge mass-blooms. Overgrowth/Sap Rot refresh WITHOUT resetting the ramp (topping a cooked field doesn't knock it down).
+  - **Overcap / shields / Verdance:** 4th–5th seed spends 15 Verdance (refused if short — never silently drains). **Barkskin** sized by seeds under it (+15%/seed grove, +24% thornveil, cap +120%); **Perfect Ward COOKS the bed** to full ramp atop its Sap/Verdance refund. Verdance still = the efficiency gauge (earned only from effective heals + absorbs; overheal/wilt earn 0 → greedy over-stacking self-punishes, which makes uncapped stacking safe).
+  - **Aspects:** Wildgrove FLOURISH relit on TOTAL PARTY SEEDS (Σ stacks ≥6 → +25%, ≥10 → +40%; ripen deleted), soft cap 4, floor 0.40, Wildbloom COOKS the whole garden. Thornveil = seeds-as-armor (reflect scales with streak × seeds, Briarheart seed-fattened, snap-streak kept). **Constrict support branch DEFERRED** (ships as a boon branch when Bill wants it — a `ConstrictAllyKit` reading the coil via the `dps_factor` sentinel, zero-engine solo).
+  - **Boons reworked (all `_b()`-gated):** +Ironbark Roots (shield/seed) · Bountiful Bed (soft cap +1) · Clean Harvest (lossless Bloom for Verdance) · Thornbomb (Bloom rakes boss ×seeds); Deep Roots/Quickbloom/Quickening/Evergreen retuned to seeds; slot-verb Garden system kept.
+  - **GATE PASS:** other 5 classes **BYTE-IDENTICAL** (bulwark/mender/twinfang/voidcaller checksums matched frozen-main baseline exactly) · determinism PASS (both aspects + all 4 raid bosses) · **net_smoke ALL OK** (replica agreement + AI takeover) · ui_smoke_bloomweaver green. Diff = bloomweaver-only + its VerdanceGauge (kept vestigial `flourish_ripe`/`ripe_garden` fields so raid_hud's setters don't error). Bands (300 seeds, merged tree @ `sap_regen` 9): teachers 100 flat; Hollowking **wildgrove 93/77/59 · thornveil 91/83/83** — steeper skill gradient than the old 99/94/76 (the "stack fast" discipline bites the sloppy tier); Thornveil the forgiving aspect.
+  - **Concurrent-merge reconciliation:** the `resource-tax` pass (`cf29902`) landed on main mid-work and had cut Bloomweaver `sap_regen` 12→9 ("planting is a Sap budget"). The merge combined cleanly (my config rewrite kept that line byte-identical to base, so git applied their 9.0 on top of my new seed fields); **9.0 is HONORED** (it sharpens Seedfall's stack-fast Sap budget — thematically aligned), `seed_base` 8.5 held, and the bands above were RE-CONFIRMED on the merged tree (`git diff e3a56e5 HEAD` = bloomweaver + gauge + plan ONLY → other 5 classes provably byte-identical to current main).
+  - **NEXT:** ☑ raid-seat Bloomweaver `raid_hud` wiring — DONE in `topo-bloom-raid` (see the entry above). Remaining: the AI rarely over-caps (human-facing tool; a probe could exercise it) · **Constrict** boon branch when wanted · bespoke raid stage rig · a human WSLg pixel-glance of the new seed ×N chips / cook glow / gauge · the Mythos-finale proactive-healer gap (see `topo-bloom-raid`).
 - ☑ 2026-07-03 · `topology-checks` · §MAPS — **THE INFERENCE CHECK — deep events + build-read dice +
   ⚡Entropy/📁Prior luck meta — MERGED to main (Bill: "the map is a joke, just +integrity jokes; we
   need deep decisions, side stuff like better luck next time, more than yes/no, an AtO-style dice

@@ -20,6 +20,8 @@ const ALLY_SLACK := 0.06
 static func default_aspect(key: String, cls: String) -> String:
 	if key == "healer" and cls == "bloomweaver":
 		return "wildgrove"
+	if key == "blade" and cls == "reckoner":
+		return "colossus"
 	return String(DEFAULT_ASPECT.get(key, ""))
 
 ## Which healer class a seat is running (read off its kit) — so a disconnect takeover
@@ -28,7 +30,14 @@ static func cls_of(seat: Seat) -> String:
 	if seat == null or seat.kit == null:
 		return ""
 	var scr: Script = seat.kit.get_script()
-	return "bloomweaver" if (scr != null and String(scr.get_global_name()) == "BloomweaverKit") else ""
+	if scr == null:
+		return ""
+	var gn := String(scr.get_global_name())
+	if gn == "BloomweaverKit":
+		return "bloomweaver"
+	if gn == "ReckonerKit":
+		return "reckoner"
+	return ""
 
 ## A fight spec (broadcast in the server's `start` message):
 ##   {seed:int, enc:<Seal id>, seats:[{key,aspect,ai:bool} x4 in SEAT_KEYS order],
@@ -117,6 +126,11 @@ static func make_policy(key: String, seed_v: int, cls: String = "") -> Policy:
 			tp.rng = DetRng.new(seed_v * 2749 + 1337)
 			return tp
 		"blade":
+			if cls == "reckoner":
+				var rp := ReckonerPolicy.new()
+				rp.latency_ticks = ALLY_LATENCY
+				rp.rng = DetRng.new(seed_v * 2749 + 2338)
+				return rp
 			var bp := TwinfangPolicy.new()
 			bp.latency_ticks = ALLY_LATENCY
 			bp.rng = DetRng.new(seed_v * 2749 + 2338)

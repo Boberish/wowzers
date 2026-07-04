@@ -12,9 +12,12 @@ var verdance: float = 0.0
 var verdance_max: float = 100.0
 var min_spend: float = 20.0
 var flourish: bool = false          ## Wildgrove: garden bonus is live
-var flourish_ripe: bool = false     ## …and the field is RIPE (upgraded bonus)
-var garden: int = 0                 ## allies carrying a Growth
-var ripe_garden: int = 0            ## …of which are RIPE (harvest window)
+var flourish_hi: bool = false       ## …and the field is LUSH (upgraded bonus)
+var garden: int = 0                 ## allies carrying a seed bed
+var total_seeds: int = 0            ## Σ seeds across the party (lights Flourish)
+var flourish_lo: int = 6            ## total seeds that light Flourish
+var flourish_ripe: bool = false     ## DEPRECATED (Seedfall dropped ripen) — kept so external setters don't error
+var ripe_garden: int = 0            ## DEPRECATED — retained for raid_hud/gallery compatibility
 var thorns: int = 0                 ## Thornveil: total reflected damage
 var thorn_charge: int = 0           ## Thornveil: snap-streak (0..max)
 var thorn_charge_max: int = 5
@@ -100,29 +103,28 @@ func _draw() -> void:
 			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.5), 1.2, true)
 		for i in 4:
 			var gp := Vector2(gx0 - spacing * float(i), c.y)
-			var on := i < garden
-			var is_ripe := i < ripe_garden            # RIPE growths glow gold (harvest window)
-			if on and (flourish or is_ripe):
-				var gh := Palette.GOLD_BRIGHT if is_ripe else Palette.VERDANCE
+			var on := i < garden                       # allies carrying a bed (breadth)
+			if on and flourish:
+				var gh := Palette.VERDANCE
 				gh.a = 0.20 + 0.14 * sin(_pulse * 2.2 + float(i))
 				draw_circle(gp, 14.0, gh)
-			UiKit.gilded_pip(self, gp, 8.0, on, Palette.GOLD_BRIGHT if is_ripe else Palette.VERDANCE)
+			UiKit.gilded_pip(self, gp, 8.0, on, Palette.VERDANCE)
 		UiKit.engraved_plaque(self, Vector2(gx0 - spacing * 1.5, h - 11.0),
-			"%d RIPE" % ripe_garden if ripe_garden > 0 else "GARDEN", ripe_garden >= 3)
+			"%d SEEDS" % total_seeds, flourish)
 
 	# ---- the payoff line ----
 	if aspect == "wildgrove":
-		if flourish_ripe:
+		if flourish_hi:
 			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(c.x + 40.0, h - 7.0),
-				"◆ FLOURISH — RIPE FIELD +42% ◆", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
+				"◆ LUSH FIELD +40% ◆", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
 				Palette.GOLD_BRIGHT.lerp(Palette.VERDANCE, 0.5 + 0.5 * sin(_pulse * 2.0)))
 		elif flourish:
 			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(c.x + 40.0, h - 7.0),
-				"FLOURISH +25% — RIPEN FOR MORE", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
+				"FLOURISH +25% — STACK FOR MORE", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
 				Palette.VERDANCE.lerp(Palette.GOLD_BRIGHT, 0.4))
 		else:
 			UiKit.engraved_plaque(self, Vector2(c.x + 168.0, h - 13.0),
-				"3 GROWTHS LIGHT FLOURISH", false)
+				"%d / %d SEEDS → FLOURISH" % [total_seeds, flourish_lo], false)
 	else:
 		# THORN CHARGE — the snap-streak: pips light per consecutive Perfect Ward, reflect ramps.
 		var tx0 := c.x + 78.0

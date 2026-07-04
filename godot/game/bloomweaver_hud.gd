@@ -5,17 +5,18 @@
 ## fully eaten, wilts fade grey. Sap orb + Verdance petal ring. Esc -> class menu.
 extends Control
 
-const SPELL_KEYS := {"1": "growth", "2": "bark", "3": "overgrowth", "4": "lash",
+const SPELL_KEYS := {"1": "growth", "2": "bark", "3": "overgrowth", "4": "bloom", "5": "lash",
 	"q": "saprot", "e": "lifesurge", "7": "signature"}
 const SPELL_TIPS := {
-	"growth": "Plant a heal-over-time that RIPENS. RECAST on a Growth'd ally to BLOOM it — cash the remaining ticks. WILDGROVE: harvest in the RIPE window (gold gem) for a bonus, and 3 ripe growths upgrade Flourish. Plant early, harvest at peak.",
-	"bark": "Instant ward. If damage FULLY consumes it: PERFECT WARD — Sap refund + bonus Verdance. THORNVEIL: each Perfect Ward is a SNAP that ramps your thorn reflect; let one wilt and the streak breaks.",
-	"overgrowth": "2s cast: plant Growth on the whole party. The blanket that starts the garden.",
+	"growth": "Plant a SEED, or recast to STACK more (soft cap 3, grove 4). Each new seed RESETS the bed's shared ramp — seeds start weak and climb to full over ~4.5s, so stack FAST then let it COOK. Past the soft cap a seed OVER-CAPS by spending Verdance. At the hard cap, another tap BLOOMS.",
+	"bloom": "Cash a bed: instantly heal its remaining ramped ticks (×90%; more when cooked or with Clean Harvest). The garden you planted, harvested on demand.",
+	"bark": "Instant ward, sized BIGGER by the seeds under it. If damage FULLY consumes it: PERFECT WARD — Sap + Verdance refund, and it COOKS the bed to full ramp. THORNVEIL: each Perfect Ward SNAPS the thorn reflect; let one wilt and the streak breaks.",
+	"overgrowth": "2s cast: plant/refresh a seed on the whole party (a refresh does NOT reset the ramp). The blanket that starts the garden.",
 	"lash": "Flick a thorn at the boss (18). The greed button for calm windows.",
-	"saprot": "Cleanse a debuff and leave a Growth where it was — rot becomes flowers. Off-GCD.",
-	"lifesurge": "BLOOM every Growth at 125%, at once. The panic button is the garden you already planted. Off-GCD, 30s.",
-	"wildbloom": "WILDGROVE: spend all Verdance — heal every Growth'd ally for that much and restart their Growths. Refunds Sap per ally (the garden re-funds itself).",
-	"briarheart": "THORNVEIL: spend all Verdance — thorned wards on the whole party, biting harder at high snap-streak. Refunds Sap per ward placed.",
+	"saprot": "Cleanse a debuff and leave a seed where it was — rot becomes flowers (no ramp reset). Off-GCD.",
+	"lifesurge": "BLOOM every bed at 125%, at once. The panic button is the garden you already planted. Off-GCD, 30s.",
+	"wildbloom": "WILDGROVE: spend all Verdance — heal every seeded ally (more for deep beds) and COOK the whole garden to peak. Refunds Sap per ally.",
+	"briarheart": "THORNVEIL: spend all Verdance — thorned wards on the whole party, fatter for deep beds and high snap-streak. Refunds Sap per ward placed.",
 }
 
 var _ctrl: CombatController
@@ -101,13 +102,13 @@ func _show_select() -> void:
 	sel.subtitle = "HEALER — ANTICIPATE · PICK A FIGHT"
 	sel.aspects = [
 		{"id": "wildgrove", "label": "WILDGROVE", "accent": Palette.VERDANCE,
-			"blurb": "Wildgrove · tend the field to RIPE, harvest at peak — the gardener's timing game"},
+			"blurb": "Wildgrove · stack seeds wide & deep, light Flourish, cook the whole field — breadth × depth"},
 		{"id": "thornveil", "label": "THORNVEIL", "accent": Palette.THORN,
-			"blurb": "Thornveil · SNAP wards on the hit, ramp the thorn streak — a combo meter on a healer"},
+			"blurb": "Thornveil · seeds build the wall — SNAP wards on the hit, ramp the thorn streak"},
 	]
 	sel.encounters = BloomweaverContent.run_encounters()
 	sel.extras = [{"label": "Mouse Bindings", "cb": _show_binds}]
-	sel.hint = "Hover an ally + 1-4 / Q / E / 7 to cast   ·   double-tap Growth = BLOOM   ·   SPACE/F = Dodge   ·   Esc = class menu"
+	sel.hint = "Hover an ally + 1-5 / Q / E / 7   ·   1 Growth STACKS a seed · 4 Bloom cashes it   ·   stack fast, then cook   ·   SPACE/F = Dodge   ·   Esc = class menu"
 	sel.chosen.connect(_start_run)
 	sel.back_pressed.connect(func(): get_tree().change_scene_to_file("res://game/main.tscn"))
 	sel.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -276,7 +277,8 @@ func _input(event: InputEvent) -> void:
 		KEY_1: _cast("growth")
 		KEY_2: _cast("bark")
 		KEY_3: _cast("overgrowth")
-		KEY_4: _cast("lash")
+		KEY_4: _cast("bloom")
+		KEY_5: _cast("lash")
 		KEY_Q: _cast("saprot")
 		KEY_E: _cast("lifesurge")
 		KEY_7: _cast(_signature())
@@ -350,6 +352,14 @@ func _cast_on(seat: Seat, id: String) -> void:
 		ready = false
 	elif id == "lifesurge" and kit != null and kit._garden_count(s) == 0:
 		ready = false
+	elif id == "bloom" and (kit == null or kit._find_growth(seat) < 0):
+		ready = false                                   # nothing planted = nothing to cash
+	elif id == "growth" and kit != null:
+		var gbi := kit._find_growth(seat)
+		if gbi >= 0 and int(seat.hots[gbi].get("stacks", 1)) >= kit._soft_cap() \
+				and int(seat.hots[gbi].get("stacks", 1)) < _bcfg.hard_cap \
+				and float(p.vars.get("verdance", 0.0)) < _bcfg.overcap_verd:
+			ready = false                               # over-cap needs Verdance
 	if not ready:
 		if _frame_by_seat.has(seat):
 			_frame_by_seat[seat].flash(Palette.TEXT_DIM)   # muted flash = "not ready"
@@ -495,11 +505,12 @@ func _process(_delta: float) -> void:
 		fr.maxhp = int(round(seat.hp_max))
 		fr.absorb_frac = (seat.absorb / seat.hp_max) if seat.hp_max > 0.0 else 0.0
 		fr.has_debuff = not seat.debuff.is_empty()
-		fr.hot_count = seat.hots.size()
-		fr.ripe = false                          # Wildgrove: gold HoT gem when the Growth is ripe
+		fr.hot_count = 0                          # seed pips = the stack count
+		fr.ripe = false                          # gold gem when the bed is COOKED (at full ramp)
 		for pe in obs.get("party", []):
 			if pe.get("seat") == seat:
-				fr.ripe = bool(pe.get("ripe", false))
+				fr.hot_count = int(pe.get("stacks", 0))
+				fr.ripe = bool(pe.get("cooked", false))
 				break
 		fr.dead = not seat.alive()
 		fr.bloodied = seat.alive() and seat.hp_frac() <= 0.35
@@ -533,9 +544,10 @@ func _process(_delta: float) -> void:
 	# Verdance petal ring
 	_verd.verdance = float(obs.get("verdance", 0.0))
 	_verd.flourish = bool(obs.get("flourish", false))
-	_verd.flourish_ripe = bool(obs.get("flourish_ripe", false))
+	_verd.flourish_hi = bool(obs.get("flourish_hi", false))
 	_verd.garden = int(obs.get("garden", 0))
-	_verd.ripe_garden = int(obs.get("ripe_garden", 0))
+	_verd.total_seeds = int(obs.get("total_seeds", 0))
+	_verd.flourish_lo = int(_bcfg.flourish_seeds_lo)
 	_verd.thorns = int(float(p.vars.get("stat_thorns", 0.0)))
 	_verd.thorn_charge = int(obs.get("thorn_charge", 0))
 	_verd.thorn_charge_max = int(obs.get("thorn_charge_max", 5))
@@ -689,7 +701,7 @@ func _handle_event(ev: Dictionary) -> void:
 		"bloom":
 			if fr != null:
 				fr.flash(Palette.VERDANCE)
-				_float_over(fr, "BLOOM +%d" % int(ev.get("amt", 0)), Palette.VERDANCE, -34.0, 17)
+				_float_over(fr, "BLOOM ×%d  +%d" % [int(ev.get("stacks", 1)), int(ev.get("amt", 0))], Palette.VERDANCE, -34.0, 17)
 		"perfect_ward":
 			if fr != null:
 				fr.flash(Palette.GOLD_BRIGHT)

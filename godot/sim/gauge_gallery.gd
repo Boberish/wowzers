@@ -31,8 +31,9 @@ func _initialize() -> void:
 		g.position = Vector2(60 + 640 * float(i % 3), 120 + 320 * float(i / 3))
 		g.size = Vector2(600, 130)
 		root_c.add_child(g)
-	# rhythm bar states: waiting / in-the-green / late / held PERFECT verdict
-	var rb_since: Array = [6, 24, 40, 3]
+	# rhythm bar states: approaching / dead-centre green (plumb lit) / JUST past the green
+	# (must read amber, NOT green — the bug fix) / held PERFECT verdict (off-centre → shows ms)
+	var rb_since: Array = [15, 24, 31, 3]
 	for i in 4:
 		var rb := RhythmBar.new()
 		rb.since = int(rb_since[i])

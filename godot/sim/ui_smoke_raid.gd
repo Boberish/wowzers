@@ -26,7 +26,8 @@ func _process(_delta: float) -> bool:
 	# the healer seat's TWO classes: Mender (tidecaller/brinkwarden) + the second
 	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
-			["blade", "tempo"], ["caster", "disruptor"], ["caster", "silencer"],
+			["blade", "tempo"], ["blade", "colossus"], ["blade", "berserker"],
+			["caster", "disruptor"], ["caster", "silencer"],
 			["healer", "tidecaller"], ["healer", "brinkwarden"],
 			["healer", "wildgrove"], ["healer", "thornveil"]]:
 		hud._launch(combo[0], combo[1])
@@ -67,6 +68,42 @@ func _process(_delta: float) -> bool:
 		print("mythos add phase live: add_i=%d bar='%s' ok" % [sm.boss.add_i, hud._bar.boss_name])
 	else:
 		print("mythos add phase: skipped (over=%s) — banners still exercised" % str(sm.over))
+
+	# COMMANDER: the pre-descent PARTY screen — assemble the AI raiders (aspect ⇄,
+	# healer class toggle), DESCEND spawns their boon runs, and the post-fight
+	# REFORGE chains one draft per seat (yours first) on the shared ⏣ bank.
+	hud._seat_key = "tank"
+	hud._aspect = "warden"
+	hud._party = {}
+	hud._show_party_setup()
+	assert(String(hud._screen) == "party", "party screen didn't build")
+	var cpa := _press(hud, "ASPECT")          # SOME AI row's toggle (row order is a UI detail)
+	var cpc := _press(hud, "◈")               # healer class toggle: Mender -> Bloomweaver
+	assert(cpa and cpc, "party toggle buttons missing")
+	assert(String(hud._party["healer"]["cls"]) == "bloomweaver",
+		"healer class toggle didn't stick: %s" % str(hud._party))
+	hud._party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
+	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._party)])
+	var cpd := _press(hud, "⚔")               # DESCEND
+	assert(cpd and String(hud._screen) == "map" and hud._ai_runs.size() == 3,
+		"DESCEND didn't start the commanded descent")
+	print("commander descent: ok blade=%s healer=%s" % [
+		String((hud._ai_runs["blade"] as RunState).aspect),
+		String((hud._ai_runs["healer"] as RunState).char_class)])
+	hud._show_boon_draft(hud._show_map)       # the chain: you, then each AI raider
+	var ctakes := 0
+	while String(hud._screen) == "draft" and ctakes < 8:
+		var cds = _find_draft(hud)
+		if cds == null:
+			break
+		cds.emit_signal("boon_taken", cds._offers[0])
+		ctakes += 1
+	assert(String(hud._screen) == "map", "draft chain didn't hand back to the map")
+	print("commander REFORGE chain: ok drafts=%d ai_boons=%d/%d/%d" % [ctakes,
+		(hud._ai_runs["blade"] as RunState).boons.size(),
+		(hud._ai_runs["caster"] as RunState).boons.size(),
+		(hud._ai_runs["healer"] as RunState).boons.size()])
+	hud._party = {}                            # back to the verified default comp
 
 	# Topology raid floor (MAP-3a): map screen -> gate fight -> back on the map,
 	# node fx (raid patch, refuel, wound repair), the privilege-elevated screen
@@ -318,7 +355,10 @@ func _drive(s: CombatState, seat_key: String) -> int:
 					elif bool(obs.get("gcd_ready", false)):
 						hud._ctrl.human({"type": "ability", "id": ("rampage" if float(obs.get("rage", 0.0)) >= 40.0 else "cleave")})
 				"blade":
-					if not tg.is_empty() and bool(tg.get("defensible", false)) \
+					if hud._blade_cls == "reckoner":
+						var rph := int(obs.get("phase", 0))
+						hud._ctrl.human({"type": "ability", "id": ("wind" if (rph == 0 or rph == 3) else "strike")})
+					elif not tg.is_empty() and bool(tg.get("defensible", false)) \
 							and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)) \
 							and float(tg.get("remaining", 9.0)) <= 0.4:
 						hud._ctrl.human({"type": "defense"})
@@ -367,3 +407,15 @@ func _press(hud: Node, prefix: String) -> bool:
 		for c in n.get_children():
 			stack.append(c)
 	return false
+
+## The one LIVE DraftScreen (skips screens _clear() queue-freed this frame — the
+## COMMANDER chain builds the next seat's screen in the same frame).
+func _find_draft(hud: Node):
+	var stack: Array = [hud._ui]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is DraftScreen and not n.is_queued_for_deletion():
+			return n
+		for c in n.get_children():
+			stack.append(c)
+	return null
