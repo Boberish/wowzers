@@ -70,8 +70,10 @@ static func make_state(seed: int, seat_key: String, aspect: String, cls: String 
 		"blade":
 			var e := TwinfangContent.make_warden()
 			_recast(e, ex)
+			var btcfg := TwinfangContent.make_twinfang_config()
+			btcfg.open_enabled = false   # gate stays byte-identical (SOLO-Twinfang PoC only)
 			return TwinfangContent.make_state(seed, aspect, TwinfangContent.make_config(),
-				TwinfangContent.make_twinfang_config(), e)
+				btcfg, e)
 		"caster":
 			var e2 := VoidcallerContent.make_priest()
 			_recast(e2, ex)

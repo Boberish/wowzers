@@ -105,6 +105,13 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 		d *= 1.3
 	if crit:
 		d *= 2.0
+	# THE OPENING: a dump landed in the boss's vulnerability window hits harder (graded
+	# by how centred on the sweet spot). Strikes/perfects are NOT dumps — they keep their
+	# own rhythm. All hits of a multi-hit dump (Flurry) share the same window.
+	if _is_dump(kind):
+		var ob := _opening_bonus(s, seat)
+		if ob > 0.0:
+			d *= (1.0 + ob)
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
@@ -121,6 +128,79 @@ func _poison_boss(s: CombatState, seat: Seat, dmg: float) -> void:
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	CombatCore.meter_dmg(s, seat, &"poison", d)
 	CombatCore.emit_event(s, {"t": "poison", "amt": int(d), "seat": seat})
+
+# --------------------------------------------------------------------------
+# THE OPENING — the offense-side timing verb. A telegraphed boss swing overextends
+# it: the kit watches s.telegraph, stamps a vulnerability window around the impact
+# tick into seat.vars (deterministic, no engine change), and your DUMPS punish it.
+# --------------------------------------------------------------------------
+
+const DUMP_KINDS := ["finisher", "coup", "rupture", "flurry"]
+
+func _is_dump(kind: String) -> bool:
+	return kind in DUMP_KINDS
+
+## Called every upkeep tick: when a DEFENSIBLE single-swing telegraph appears, schedule
+## its opening. Deferred while a previous window is still live so a fresh swing can't
+## clobber an opening you're mid-punish on (boss cooldowns give the deferral room).
+func _stamp_opening(s: CombatState, seat: Seat) -> void:
+	if not cfg.open_enabled or s.telegraph == null:
+		return
+	var ab := s.telegraph.ability
+	if ab.response != AbilityRes.Response.DEFENSIBLE or not ab.strikes.is_empty():
+		return
+	if int(seat.vars.get("open_tg", -999999)) == s.telegraph.start_tick:
+		return
+	if s.tick <= int(seat.vars.get("open_to", -1)):
+		return
+	var impact := s.telegraph.start_tick + s.telegraph.dur_ticks
+	seat.vars["open_tg"] = s.telegraph.start_tick
+	seat.vars["open_from"] = impact - _tt(s, cfg.open_pre_sec)
+	seat.vars["open_to"] = impact + _tt(s, cfg.open_post_sec)
+	seat.vars["open_peak"] = impact + _tt(s, cfg.open_peak_sec)
+	seat.vars["open_size"] = int(ab.size)
+
+## The graded damage bonus for a dump landing at s.tick: full open_bonus inside the core
+## (sweet spot), tapering to open_min_bonus at the window edges, 0.0 outside the window.
+func _opening_bonus(s: CombatState, seat: Seat) -> float:
+	if not cfg.open_enabled:
+		return 0.0
+	var to := int(seat.vars.get("open_to", -1))
+	if to < 0:
+		return 0.0
+	var frm := int(seat.vars.get("open_from", 0))
+	if s.tick < frm or s.tick > to:
+		return 0.0
+	var peak := int(seat.vars.get("open_peak", frm))
+	var core := _tt(s, cfg.open_core_sec)
+	var dist: int = absi(s.tick - peak)
+	if dist <= core:
+		return cfg.open_bonus
+	var half := (peak - frm) if s.tick <= peak else (to - peak)
+	var span := maxf(1.0, float(half - core))
+	var f := clampf((float(dist) - float(core)) / span, 0.0, 1.0)
+	return lerpf(cfg.open_bonus, cfg.open_min_bonus, f)
+
+## Fired once per dump (after it lands): diagnostics + the aspect kicker on a PEAK read
+## (Tempo bank Flow, Venom stack the lit lane) + a view-only pop. The DAMAGE bonus itself
+## already applied inside _deal — this is the feedback and the read-reward.
+func _opening_note(s: CombatState, seat: Seat, kind: String) -> void:
+	if not cfg.open_enabled:
+		return
+	var b := _opening_bonus(s, seat)
+	if b <= 0.0:
+		CombatCore._bump_diag(s, seat, "open_whiff")   # a dump with no opening to punish
+		return
+	var peak := b >= cfg.open_bonus - 0.0001
+	CombatCore._bump_diag(s, seat, "open_peak" if peak else "open_hit")
+	if peak:
+		if aspect == "tempo":
+			for _i in cfg.open_flow:
+				_gain_flow(seat)
+		elif aspect == "venomancer":
+			_apply_venom(seat, WHEEL_KEYS[_wheel(seat)], cfg.open_venom)
+	CombatCore.emit_event(s, {"t": "opening", "grade": ("peak" if peak else "hit"),
+		"player": seat.is_player, "kind": kind})
 
 # --------------------------------------------------------------------------
 # Venom (Venomancer): three poison types on the boss, kept in seat.vars.
@@ -183,6 +263,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 
 	if aspect == "venomancer":
 		_tick_venom(s, seat)
+
+	# THE OPENING: schedule a vulnerability window when the boss commits a swing.
+	_stamp_opening(s, seat)
 
 func _tick_venom(s: CombatState, seat: Seat) -> void:
 	var v := _venom(seat)
@@ -395,6 +478,7 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 	seat.vars["cp"] = 0
 	if _b("tfTrigSpender") and cp >= cfg.cp_max:
 		_tf_trigger(s, seat, "spender")    # Phase B: a full-point finisher = proc moment
+	_opening_note(s, seat, "finisher")     # THE OPENING: read-reward if it hit the window
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
 	return true
 
@@ -441,6 +525,7 @@ func _flurry(s: CombatState, seat: Seat) -> bool:
 	for _i in int(a["hits"]):
 		_deal(s, seat, float(a["dmg"]), true, false, "flurry")
 	_gain_cp(seat, int(a["cp"]))
+	_opening_note(s, seat, "flurry")       # THE OPENING (all three hits shared the window)
 	return true
 
 func _coup(s: CombatState, seat: Seat) -> bool:
@@ -456,6 +541,7 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 	seat.vars["flow"] = clampi(cfg.coup_flow_seed, 0, max_flow())   # ride vs spend: the spike costs your BPM
 	seat.vars["flow_decay_acc"] = 0
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
+	_opening_note(s, seat, "coup")                       # THE OPENING (fires after the Flow reset)
 	CombatCore.emit_event(s, {"t": "coup", "player": seat.is_player})
 	if GearFx.has(seat, &"encore_bell"):                 # GEAR-2: the bell rings after the finisher
 		seat.vars["encore_left"] = 3
@@ -486,6 +572,7 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	else:
 		v["V"] = 0; v["F"] = 0; v["C"] = 0
 		v["fes_ticks"] = 0; v["syn_ramp"] = 1.0; v["syn_active"] = false
+	_opening_note(s, seat, "rupture")      # THE OPENING: detonate in the window for the spike
 	CombatCore.emit_event(s, {"t": "rupture", "total": total, "sip": sip})
 	return true
 
@@ -557,6 +644,26 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 			"syn_ramp": float(v.get("syn_ramp", 1.0)), "syn_active": bool(v.get("syn_active", false))},
 		"venom_total": _venom_total(seat),
 	}
+	# THE OPENING — the vulnerability window (absolute ticks; -1 once it has expired /
+	# none scheduled). The policy times its dumps to open_peak; the HUD draws the bar.
+	out["open_on"] = cfg.open_enabled   # off → the policy uses the classic dump logic
+	var o_to := int(seat.vars.get("open_to", -1))
+	if cfg.open_enabled and o_to >= s.tick:
+		var o_from := int(seat.vars.get("open_from", 0))
+		out["open_from"] = o_from
+		out["open_peak"] = int(seat.vars.get("open_peak", o_from))
+		out["open_to"] = o_to
+		out["open_core_ticks"] = _tt(s, cfg.open_core_sec)
+		out["open_size"] = int(seat.vars.get("open_size", 0))
+		out["open_active"] = s.tick >= o_from
+		out["open_bonus_now"] = _opening_bonus(s, seat)   # HUD: live grade of a dump RIGHT NOW
+	else:
+		out["open_from"] = -1
+		out["open_peak"] = -1
+		out["open_to"] = -1
+		out["open_active"] = false
+		out["open_bonus_now"] = 0.0
+
 	if _b("tfPropTwinStep"):   # Twin Step charge pips (Phase B)
 		out["guard_charges"] = int(seat.vars.get("dodge_spare", 1)) \
 			+ (1 if s.tick >= seat.defense_ready_tick else 0)
