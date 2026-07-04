@@ -308,6 +308,10 @@ func _class(id: int, cls: String) -> void:
 		room["players"][id]["cls"] = cls
 		room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
 		_broadcast_room(room)
+	elif seat == "blade" and (cls == "twinfang" or cls == "reckoner"):
+		room["players"][id]["cls"] = cls
+		room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
+		_broadcast_room(room)
 
 func _ready_flag(id: int, on: bool) -> void:
 	var room := _room_of(id)
@@ -330,7 +334,7 @@ func _boss_pick(id: int, enc: String) -> void:
 func _valid_aspects(seat: String, cls: String = "") -> Array:
 	match seat:
 		"tank": return ["warden", "juggernaut"]
-		"blade": return ["tempo", "venomancer"]
+		"blade": return ["colossus", "berserker"] if cls == "reckoner" else ["tempo", "venomancer"]
 		"caster": return ["disruptor", "silencer"]
 		_: return ["wildgrove", "thornveil"] if cls == "bloomweaver" else ["tidecaller", "brinkwarden"]
 

@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 10     # v10: ONLINE PRIOR — the claim msg carries the client's 📁 Prior tier; the server trusts it and folds it into each seat's check floor + starting ⚡
+const VERSION := 11     # v11: blade seat CLASS choice online (Twinfang / Reckoner) — lobby toggle + server accepts a blade class msg. v10: ONLINE PRIOR — the claim msg carries the client's 📁 Prior tier; the server folds it into each seat's check floor + starting ⚡
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

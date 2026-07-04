@@ -220,6 +220,22 @@ func _process(_delta: float) -> bool:
 			break
 	print("gate LOST -> rebooted through: screen=%s frac=%.2f wound=%.2f map_alive=%s" % [
 		hud._screen, hud._map_fracs[0], hud._map_wounds[0], str(hud._map != null)])
+	# the blade seat's OTHER class: the Reckoner's personal GATE = its Sentinel exam
+	hud._seat_key = "blade"
+	hud._blade_cls = "reckoner"
+	hud._aspect = "colossus"
+	hud._launch_gate_fight()
+	var grk: CombatState = hud._ctrl.state
+	for gi in 60:
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+	var rkkit := "<none>"
+	if grk.seats[0].kit != null and grk.seats[0].kit.get_script() != null:
+		rkkit = String(grk.seats[0].kit.get_script().get_global_name())
+	assert(rkkit == "ReckonerKit", "reckoner gate didn't build a ReckonerKit (got %s)" % rkkit)
+	print("gate exam blade/RECKONER ok  enc=%s boss='%s' kit=%s" % [
+		String(grk.encounter.id), String(grk.encounter.name), rkkit])
+	hud._blade_cls = "twinfang"
 	# every other seat's exam builds its band + fights live for a moment
 	for gseat in ["blade", "caster", "healer"]:
 		hud._seat_key = gseat

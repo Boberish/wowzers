@@ -730,6 +730,16 @@ func _show_lobby() -> void:
 				clsb.pressed.connect(func():
 					_net.send({"t": "class", "cls": "mender" if mycls == "bloomweaver" else "bloomweaver"}))
 				row.add_child(clsb)
+			if key == "blade":      # toggle the blade CLASS (Twinfang ⇄ Reckoner)
+				var bcls := String(me.get("cls", "twinfang"))
+				if bcls == "":
+					bcls = "twinfang"
+				var bclsb := Button.new()
+				bclsb.text = "◈ " + ("RECKONER" if bcls == "reckoner" else "TWINFANG")
+				bclsb.custom_minimum_size = Vector2(150, 34)
+				bclsb.pressed.connect(func():
+					_net.send({"t": "class", "cls": "twinfang" if bcls == "reckoner" else "reckoner"}))
+				row.add_child(bclsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 34)

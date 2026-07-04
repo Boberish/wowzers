@@ -68,6 +68,13 @@ static func make_state(seed: int, seat_key: String, aspect: String, cls: String 
 	var ex: Dictionary = exam(seat_key)
 	match seat_key:
 		"blade":
+			# the blade seat has two classes — the Reckoner's exam is its own solo boss
+			# (the Sentinel), recast to the FIREWALL identity like the Mender/Bloomweaver split.
+			if cls == "reckoner":
+				var er := ReckonerContent.make_sentinel()
+				_recast(er, ex)
+				return ReckonerContent.make_state(seed, aspect, ReckonerContent.make_config(),
+					ReckonerContent.make_reckoner_config(), er)
 			var e := TwinfangContent.make_warden()
 			_recast(e, ex)
 			return TwinfangContent.make_state(seed, aspect, TwinfangContent.make_config(),
