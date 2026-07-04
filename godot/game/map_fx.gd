@@ -25,6 +25,7 @@ extends RefCounted
 
 const HP_FLOOR := 0.05           ## events bruise but never kill — only combat kills
 const WOUND_CAP := 0.6           ## corrupted sectors can pile, but not past this
+const CHARGE_MAX := 100          ## ⏻ THE KILL SWITCH meter ceiling
 
 static func apply(cp: Dictionary, fx: Dictionary) -> void:
 	var fracs: Array = cp.get("fracs", [])
@@ -73,6 +74,13 @@ static func apply(cp: Dictionary, fx: Dictionary) -> void:
 	var d_pri := int(fx.get("prior", 0))
 	if d_pri != 0 and cp.has("prior"):
 		cp["prior"] = maxi(0, int(cp.get("prior", 0)) + d_pri)
+	# ⏻ THE KILL SWITCH — a signed charge delta (feed +, drain −), clamped 0..100.
+	# `charge_set` forces an absolute value (e.g. the arming panel after a spend).
+	var d_ch := int(fx.get("charge", 0))
+	if d_ch != 0 and cp.has("charge"):
+		cp["charge"] = clampi(int(cp.get("charge", 0)) + d_ch, 0, CHARGE_MAX)
+	if fx.has("charge_set") and cp.has("charge"):
+		cp["charge"] = clampi(int(fx["charge_set"]), 0, CHARGE_MAX)
 
 	# --- access / inventory ---
 	if cp.has("inv"):

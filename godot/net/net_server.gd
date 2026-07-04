@@ -257,6 +257,8 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_pick_node(id, int(msg.get("id", -1)))
 		"choice":
 			_pick_choice(id, msg)
+		"arm":
+			_arm_choice(id, msg)
 		"pick":
 			_pick_boon(id, String(msg.get("id", "")))
 		"input":
@@ -438,7 +440,8 @@ func _start_map(id: int) -> void:
 		# nodes; check_fails drives comeback pity. Starting ⚡ scales off the LEADER's trusted
 		# 📁 Prior (v10); each seat's own Prior rides seat_cfg into its check floor.
 		"entropy": LuckProfile.starting_entropy(leader_prior), "flags": {}, "check_fails": 0,
-		"marks": {},                 # P6: a pending fight-altering mark (sabotage the next Seal)
+		"marks": {},                 # a pending fight-altering mark (KILL SWITCH cash-out / curse)
+		"charge": clampi(leader_prior / 25, 0, 4),   # ⏻ THE KILL SWITCH — party-shared 0..100 meter
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"
@@ -514,7 +517,15 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 	match String(n["kind"]):
 		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 			room["map_fight"] = {"node": int(n["id"]), "is_seal": String(n["kind"]) == RunMap.KIND_SEAL}
-			_launch_map_fight_srv(room, int(n["fight"]))
+			# THE KILL SWITCH: at a Seal with ⏻ banked, offer the OVERCLOCK arming first
+			# (the leader cash-outs; the mark rides the pull). Else pull straight away.
+			var fights: Array = cp["fights"]
+			var enc: EncounterRes = fights[clampi(int(n["fight"]), 0, fights.size() - 1)]
+			if String(n["kind"]) == RunMap.KIND_SEAL and int(cp["charge"]) > 0:
+				room["pending_arm"] = int(n["fight"])
+				_broadcast(room, {"t": "arming", "charge": int(cp["charge"]), "boss": String(enc.name)})
+			else:
+				_launch_map_fight_srv(room, int(n["fight"]))
 		RunMap.KIND_EVENT:
 			# INFERENCE CHECK (v7 — the SEAT-PICKER): compute each choice's % / breakdown /
 			# gate for EVERY candidate seat and broadcast `by_seat`, so the party can send
@@ -525,12 +536,14 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 			cp["pending_page"] = ""
 			_broadcast_mapstop(room, String(n["event"]), "")
 		RunMap.KIND_COOLING:
-			_apply_fx_srv(cp, {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true})
-			cp["toast"] = "COOLING STATION — throttled: integrity up, sectors repaired, reserves topped."
+			# STOP LAUNDERING: no wound-clear (that was the bug), no fake integrity. Throttle
+			# spare cycles into the breaker (+⏻) and ease the healer's reserves (mana bites now).
+			_apply_fx_srv(cp, {"charge": 10, "mana": 0.75})
+			cp["toast"] = "COOLING — spare cycles throttled into the breaker: +10 ⏻ · reserves eased. (Sectors need a DEFRAG.)"
 			_broadcast_map(room)
 		RunMap.KIND_CACHE:
-			_apply_fx_srv(cp, {"patch": true})
-			cp["toast"] = "CACHE HIT — salvage routed to your most battered raider (+25%)."
+			_apply_fx_srv(cp, {"charge": 25})
+			cp["toast"] = "CACHE HIT — a breaker component, still warm: +25 ⏻ toward the Kill Switch."
 			_broadcast_map(room)
 		_:
 			_broadcast_map(room)
@@ -722,6 +735,22 @@ func _avg_frac_srv(fracs: Array) -> float:
 
 ## A fight node: fold the carried campaign state into the spec and PULL, identically
 ## to a single-Seal fight — the lockstep replicas build the same carried opening.
+## The leader commits the OVERCLOCK arming at a Seal: spend ⏻ → a fight-mark (authoritative;
+## the server recomputes the mark from {kind, spend} so a client can't forge it), then pull.
+func _arm_choice(id: int, msg: Dictionary) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "map" or room["host"] != id or not room.has("pending_arm"):
+		return
+	var cp: Dictionary = room["campaign"]
+	var kind := String(msg.get("kind", "bank"))
+	var spend := clampi(int(msg.get("spend", 0)), 0, int(cp["charge"]))
+	if kind != "bank" and spend > 0:
+		cp["charge"] = int(cp["charge"]) - spend
+		(cp["marks"] as Dictionary).merge(RaidMarks.overclock(kind, spend), true)
+	var fi := int(room["pending_arm"])
+	room.erase("pending_arm")
+	_launch_map_fight_srv(room, fi)
+
 func _launch_map_fight_srv(room: Dictionary, fi: int) -> void:
 	var cp: Dictionary = room["campaign"]
 	var fights: Array = cp["fights"]
@@ -761,6 +790,7 @@ func _broadcast_map(room: Dictionary) -> void:
 		"fracs": cp["fracs"], "wounds": cp["wounds"], "mana": float(cp["mana"]),
 		"tickets": titles, "closed": int(cp["closed"]), "total": int(cp["total"]),
 		"entropy": int(cp["entropy"]),              # ⚡ the within-run luck pool (server-owned)
+		"charge": int(cp["charge"]),                # ⏻ THE KILL SWITCH meter (server-owned)
 		"toast": String(cp["toast"])})
 
 # ------------------------------------------------------------ send helpers

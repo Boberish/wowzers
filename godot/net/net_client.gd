@@ -14,6 +14,7 @@ signal fight_ended(won: bool, cause: String)
 signal desynced
 signal map_update(msg: Dictionary)      ## MAP-3b: server campaign snapshot to render
 signal map_stop(msg: Dictionary)        ## MAP-3b: an event panel the leader answers
+signal arming(msg: Dictionary)          ## THE KILL SWITCH: the OVERCLOCK cash-out at a Seal
 signal campaign_ended(won: bool)        ## MAP-3b: the whole descent is over
 signal draft_prompt                     ## online boons: pick a boon now (all seats draft)
 
@@ -71,6 +72,10 @@ func send_choice(i: int, nudge: int = 0, seat: String = "", attempt: int = 0) ->
 func send_pick(id: String) -> void:      ## online boons: this seat's drafted boon ("" = skip)
 	send({"t": "pick", "id": id})
 
+## THE KILL SWITCH cash-out at a Seal — kind "surge"/"shield"/"bank", spend ⏻.
+func send_arm(kind: String, spend: int) -> void:
+	send({"t": "arm", "kind": kind, "spend": spend})
+
 func peer_id() -> int:
 	return _peer.get_unique_id()
 
@@ -123,6 +128,8 @@ func _handle(msg: Dictionary) -> void:
 			map_update.emit(msg)
 		"mapstop":
 			map_stop.emit(msg)
+		"arming":
+			arming.emit(msg)
 		"draft":
 			draft_prompt.emit()
 		"campaign":
