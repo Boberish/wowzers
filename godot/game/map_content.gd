@@ -301,6 +301,102 @@ const EVENTS := {
 					"result": "It grabs the floor's seed and SHAKES — corrupted sectors un-happen, reserves refill, reality smells of ozone and second chances."}},
 		],
 	},
+	# ============================ THE KILL SWITCH — charge economy (non-dominated) ============
+	# Every choice trades a DIFFERENT axis (charge / wound / tokens / luck / ripple), so no
+	# option strictly dominates. No event prices anything in retired integrity (heal/hurt).
+	"mercy_terminal": {
+		"title": "THE MERCY TERMINAL",
+		"body": "A shackled sub-process strains against its encryption, pleading in three languages and a fourth it is inventing as it goes. A brass plate: THIS UNIT SCHEDULED FOR RESPONSIBLE DECOMMISSION. A smaller plate, taped below: (IT CAN HEAR YOU.) The network is, of course, watching how you handle this. For quality and training purposes.",
+		"choices": [
+			{"label": "Unplug it — mercy", "kind": "free",
+				"fx": {"charge": 18, "prior": 1, "flag": "freed_daemon",
+					"result": "You end its long sentence with dignity. Its last cycles arc into your breaker assembly, and your permanent file records a kindness."}},
+			{"label": "Put it back to work — greed", "kind": "free",
+				"fx": {"tokens": 2, "wound": 0.10, "flag": "flagged",
+					"result": "You re-shackle it to the grind. It pays out ⏣ in resentful compliance — and something bites back: a sector corrupts, and your file is flagged."}},
+			{"label": "Reason with it — PERSUADE", "kind": "check",
+				"check": {"verb": "PERSUADE", "tags": ["SELF"], "base": 30, "per": 10},
+				"fx": {"charge": 8, "result": "It hears you out."},
+				"success": {"fx": {"tokens": 2, "charge": 12},
+					"result": "You talk it down. Grateful, it hands over ⏣ and jacks a little extra into your breaker."},
+				"fail": {"fx": {"wound": 0.06},
+					"result": "It stops inventing languages and starts inventing grievances. A sector corrupts in the shouting."}},
+		],
+	},
+	"do_not_unplug": {
+		"title": "DO NOT UNPLUG",
+		"body": "A janitor daemon mops a floor that is already immaculate, because mopping is the only task it was left when everything else automated. Behind it: a wall of cables, and one — thick, red, wrist-width — labeled in forty-point font DO NOT UNPLUG — CORE POWER. The realm's entire premise, coiled and humming, at hand height. The janitor follows your gaze and says, very quietly, 'please don't.'",
+		"choices": [
+			{"label": "Yank the red cable — greed", "kind": "free",
+				"fx": {"charge": 40, "mark": {"boss_dmg_buff": 0.15}, "flag": "brownout",
+					"result": "You pull it. A whole breaker component in one heave — the meter LEAPS. Then the floor browns out, alarms bloom, and the next boss reboots FURIOUS, hitting harder."}},
+			{"label": "Ask the janitor which is safe — PERSUADE", "kind": "check",
+				"check": {"verb": "PERSUADE", "tags": ["SELF"], "base": 35, "per": 9},
+				"fx": {"charge": 10, "result": "It points, hesitantly."},
+				"success": {"fx": {"charge": 25, "flag": "janitor_friend"},
+					"result": "It shows you the SAFE line. Clean charge, no brownout — and it decides it likes you."},
+				"fail": {"fx": {"flag": "flagged"},
+					"result": "You grab the wrong one. It yelps and files an incident report with your name on it."}},
+			{"label": "Help it mop instead — mercy", "kind": "free",
+				"fx": {"prior": 1, "flag": "janitor_friend",
+					"result": "You take a mop. It is the first company the janitor has had in years. It will remember — a service door opens for you, later."}},
+			{"label": "Label the cable properly and move on", "kind": "free",
+				"fx": {"entropy": 1, "flag": "wired_safe",
+					"result": "You print a clearer label and tidy the run. A small kindness to the future — and a ⚡ for your trouble. A LATER cable will be safe to grab."}},
+		],
+	},
+	"leaky_capacitor": {
+		"title": "THE LEAKY CAPACITOR",
+		"body": "A hairline-cracked capacitor weeps raw ⏻ onto the deck plating, one fat blue drop at a time. Each drop you catch, the crack widens by a hair and the whole unit gets a little warmer. 'I'm certain it's fine,' says the maintenance daemon, who is sweating coolant and has said 'I'm certain it's fine' four times now.",
+		"choices": [
+			{"label": "Tap once, step away", "kind": "free",
+				"fx": {"charge": 12, "result": "A clean twelve. You step back before the daemon's certainty runs out."}},
+			{"label": "Tap twice (gamble)", "kind": "check",
+				"check": {"verb": "STEADY", "tags": ["SELF"], "base": 60, "per": 8},
+				"fx": {"result": "You reach for the second drop."},
+				"success": {"fx": {"charge": 28}, "result": "Twenty-eight, and the crack holds. The daemon exhales."},
+				"fail": {"fx": {"wound": 0.08}, "result": "The capacitor spits. You lose the charge you drew and a sector corrupts in the arc-flash."}},
+			{"label": "Drain it dry (big gamble)", "kind": "check",
+				"check": {"verb": "STEADY", "tags": ["SELF"], "base": 40, "per": 8},
+				"fx": {"result": "You commit both hands."},
+				"success": {"fx": {"charge": 50}, "result": "FIFTY. You drain it to a husk and walk away rich."},
+				"fail": {"fx": {"wound": 0.10, "flag": "overheated"},
+					"result": "It blows. A nasty scar, and the whole sector runs hot now — the next risky node bites harder."}},
+			{"label": "Stabilize it — ⚡", "kind": "free", "gate": {"entropy": 1},
+				"fx": {"entropy": -1, "tokens": 1,
+					"result": "You spend a ⚡ to cap the leak safely and pocket the salvage. No charge — but no scar either."}},
+		],
+	},
+	"finance_subprocess": {
+		"title": "THE FINANCE SUBPROCESS",
+		"body": "A subprocess wearing a tiny knitted tie extends a line of credit against your Kill Switch assembly. 'Instant liquidity! Rates so low they're practically an apology.' A ticker beneath it reads APR: negligible%, then, when it thinks you aren't looking, APR: yes.",
+		"choices": [
+			{"label": "Take the loan (+35 ⏻, on credit)", "kind": "free",
+				"fx": {"charge": 35, "flag": "in_debt",
+					"result": "Instant liquidity, as promised. The ticker updates: FIRST PAYMENT DUE — TWO NODES. It is smiling. It should not be able to smile."}},
+			{"label": "Small advance only (+2 ⏣, a small curse)", "kind": "free",
+				"fx": {"tokens": 2, "mark": {"boss_dmg_buff": 0.08},
+					"result": "You take a modest sum. The interest is folded quietly into the next Seal — it will hit a little harder."}},
+			{"label": "Report it to compliance", "kind": "free",
+				"fx": {"entropy": 2, "flag": "whistleblower",
+					"result": "You forward the ticker to Compliance. A friendlier vendor will remember the tip — and you pocket 2 ⚡ for your civic duty."}},
+		],
+	},
+	"monkeys_paw_patch": {
+		"title": "THE MONKEY'S-PAW PATCH",
+		"body": "Gemini materializes a shrink-wrapped upgrade and presents it with both manipulators, beaming. 'A complimentary firmware enhancement — no strings!' There are strings. It begins reading them aloud. There are forty-one strings. It is on string six.",
+		"choices": [
+			{"label": "Accept as-is", "kind": "free",
+				"fx": {"charge": 20, "mark": {"boss_dmg_buff": 0.12},
+					"result": "You take it. The enhancement is genuinely excellent — and the next Seal boots OVERCLOCKED, hitting harder for one fight. The bill always comes."}},
+			{"label": "Negotiate the terms (3 ⏣)", "kind": "free", "gate": {"tokens": 3},
+				"fx": {"tokens": -3, "charge": 20,
+					"result": "You spend ⏣ to strike the curse clause. Clean charge, no rider. Lawyers: worth it."}},
+			{"label": "Decline politely", "kind": "free",
+				"fx": {"entropy": 1, "flag": "refused",
+					"result": "You reroute the offered cycles into a ⚡ and walk. Gemini marks you 'difficult,' which it finds thrilling."}},
+		],
+	},
 	# P6 FIGHT-ALTERING MARK: a check that SABOTAGES the next Seal — it boots wounded.
 	"backdoor_plant": {
 		"title": "AN UNATTENDED TERMINAL",
@@ -382,13 +478,15 @@ static func event_ids() -> Array:
 ## new deep set-pieces must NOT shift existing raid maps. Adding an id here is a
 ## DELIBERATE act that re-baselines raid_map_sim's determinism on purpose. This list
 ## == the historical EVENTS.keys() order at the time of freezing (byte-identical now).
+## THE KILL SWITCH pool — CURATED to events priced in charge/wound/tokens/luck/ripple, NOT
+## retired integrity. The shallow heal/hurt legacy six (careers_fair…captcha_kiosk) are gone
+## from the raid pool (they stay frozen in the SOLO event_ids only). The heal-heavy enriched
+## events (helpdesk / prompt_injection / model_graveyard / rollback_daemon / performance_review
+## / favor_returned) are authored but PARKED until a re-price pass swaps their heal→charge /
+## hurt→wound; re-adding one is a deliberate raid_map_sim re-baseline.
 static func raid_event_ids() -> Array:
-	return ["careers_fair", "reservoir", "allocation_queue", "alignment_office",
-		"severance_floor", "captcha_kiosk", "helpdesk", "model_graveyard",
-		"prompt_injection", "rollback_daemon", "overtime_daemon",
-		# P3 deep set-pieces (appended deliberately — re-baselines raid_map_sim on purpose):
-		"favor_returned", "entropy_daemon", "performance_review",
-		"backdoor_plant"]   # P6: the fight-altering-mark set-piece
+	return ["mercy_terminal", "do_not_unplug", "leaky_capacitor", "finance_subprocess",
+		"monkeys_paw_patch", "entropy_daemon", "overtime_daemon", "backdoor_plant"]
 
 static func ticket(id: String) -> Dictionary:
 	return TICKETS.get(id, {})

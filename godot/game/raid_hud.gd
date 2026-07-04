@@ -1099,7 +1099,12 @@ func _resolve_node(n: Dictionary) -> void:
 			# GEAR-2: the boss's Ledger page offers its oaths before the pull
 			var fi := int(n["fight"])
 			var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
-			_offer_oath_then(String(enc.id), _launch_map_fight.bind(fi))
+			var proceed := _offer_oath_then.bind(String(enc.id), _launch_map_fight.bind(fi))
+			# THE KILL SWITCH: at a Seal, cash out the ⏻ meter (OVERCLOCK PRIME) before the pull
+			if String(n["kind"]) == RunMap.KIND_SEAL and _map_charge > 0:
+				_show_arming(String(enc.name), proceed)
+			else:
+				proceed.call()
 		RunMap.KIND_GATE:
 			# Tier-1 PERSONAL GATE (§GAME SHAPE): YOUR seat steps through alone
 			var ex: Dictionary = GateContent.exam(_seat_key)
@@ -1275,6 +1280,22 @@ func _launch_map_fight(fi: int) -> void:
 func _apply_next_fight_mark(s: CombatState) -> void:
 	RaidMarks.apply(s, _map_marks)   # SHARED with RaidNet.build — one applier, never diverges
 	_map_marks = {}
+
+## THE KILL SWITCH cash-out (OVERCLOCK PRIME): a linear spend dial before a Seal. Committing
+## a spend deducts ⏻ and folds the resolved mark into the pending fight-mark; banking skips it.
+func _show_arming(boss_name: String, proceed: Callable) -> void:
+	_screen = "arming"
+	_clear()
+	var ap := ArmingPanel.new()
+	ap.charge = _map_charge
+	ap.boss_name = boss_name
+	ap.armed.connect(func(mark: Dictionary, spent: int):
+		_map_charge = maxi(0, _map_charge - spent)
+		(_map_marks as Dictionary).merge(mark, true)
+		proceed.call())
+	ap.banked.connect(func(): proceed.call())
+	ap.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(ap)
 
 ## A Tier-1 PERSONAL GATE exam (§GAME SHAPE): YOUR seat's class exam, fought alone —
 ## the class's solo fight, recast to its Realm-1 identity. Carry-in applies only to

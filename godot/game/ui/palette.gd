@@ -16,6 +16,7 @@ static var WELL_TOP := Color("10101a")     # recessed well variant top
 
 static var GOLD := Color("e6b463")
 static var GOLD_BRIGHT := Color("ffdc93")
+static var CHARGE := Color("4bd4e8")        # ⏻ THE KILL SWITCH — electric cyan
 static var GOLD_DIM := Color("6f5330")
 
 static var CRIMSON := Color("d0413a")

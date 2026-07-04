@@ -219,7 +219,8 @@ func _prove_carry(seeds: int) -> void:
 func _walk(seed: int, sk: Dictionary) -> Dictionary:
 	var map := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
 	var route := DetRng.new(seed * 7919 + 17)
-	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0, "marks": {}}
+	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
+		"marks": {}, "charge": 0}
 	var inv := {}
 	var pos := -1
 	var fights := 0
@@ -257,6 +258,14 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 		match String(n["kind"]):
 			RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 				fights += 1
+				# THE KILL SWITCH: at a Seal, auto-cash-out the whole meter as an OVERCLOCK
+				# SURGE (mirrors the arming panel's spend-all) so the sim exercises the loop.
+				if String(n["kind"]) == RunMap.KIND_SEAL and int(carry["charge"]) > 0:
+					var ch := int(carry["charge"])
+					(carry["marks"] as Dictionary).merge({
+						"boss_hp_cut": float(ch) / 100.0 * RaidMarks.HP_CUT_CAP,
+						"boot_freeze": int(round(float(ch) / 100.0 * 90.0))}, true)
+					carry["charge"] = 0
 				var res := _fight(seed * 131 + pos, int(n["fight"]), carry, sk)
 				trace.append(int(res["checksum"]))
 				if not bool(res["won"]):
@@ -336,10 +345,10 @@ func _gate_fight(fight_seed: int, seat_key: String, carry: Dictionary, sk: Dicti
 		"healer":
 			(u.policy as MenderPolicy).latency_ticks = int(sk["hlat"])
 	var ri: int = RaidNet.SEAT_KEYS.find(seat_key)
-	var fracs: Array = carry["fracs"]
+	var fracs: Array = carry["fracs"]      # vestigial — the reboot write-back + readout use it
 	var wounds: Array = carry["wounds"]
 	u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(wounds[ri]))))
-	u.hp = maxf(1.0, roundf(u.hp_max * float(fracs[ri])))
+	u.hp = u.hp_max                         # integrity retired: boot full of the wounded pool
 	if u.role == "healer":
 		u.resource = roundf(u.resource_max * float(carry["mana"]))
 	var cap := int(FIGHT_CAP_SEC / s.dt)
@@ -360,13 +369,11 @@ func _gate_fight(fight_seed: int, seat_key: String, carry: Dictionary, sk: Dicti
 	return {"won": s.won, "checksum": s.checksum}
 
 func _fight(fight_seed: int, fi: int, carry: Dictionary, sk: Dictionary) -> Dictionary:
-	var fracs: Array = carry["fracs"]
-	var enc: EncounterRes = _fights[clampi(fi, 0, _fights.size() - 1)]
+	var fracs: Array = carry["fracs"]      # vestigial (integrity retired) — only the reboot
+	var enc: EncounterRes = _fights[clampi(fi, 0, _fights.size() - 1)]   # write-back + readout use it
 	var s := RaidContent.make_state(fight_seed, RaidContent.encounter_by_id(String(enc.id)))
-	# P6: consume a pending sabotage mark (mirrors RaidNet.build / _apply_next_fight_mark)
-	var mcut := float((carry.get("marks", {}) as Dictionary).get("boss_hp_cut", 0.0))
-	if mcut > 0.0 and s.boss != null:
-		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - mcut)))
+	# consume a pending fight-mark (KILL SWITCH cash-out / curse) via the SHARED applier
+	RaidMarks.apply(s, carry.get("marks", {}))
 	carry["marks"] = {}
 	var tp := s.seats[0].policy as RaidTankPolicy
 	tp.reaction_slack = float(sk["slack"])
@@ -380,10 +387,11 @@ func _fight(fight_seed: int, fi: int, carry: Dictionary, sk: Dictionary) -> Dict
 	(s.seats[3].policy as MenderPolicy).latency_ticks = int(sk["hlat"])
 	var wounds: Array = carry["wounds"]
 	for i in s.seats.size():
-		if i < fracs.size():
+		if i < wounds.size():
 			var u: Seat = s.seats[i]
+			# integrity retired: boot FULL of the wound-reduced pool; mana still carries
 			u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(wounds[i]))))
-			u.hp = maxf(1.0, roundf(u.hp_max * float(fracs[i])))
+			u.hp = u.hp_max
 			if u.role == "healer":
 				u.resource = roundf(u.resource_max * float(carry["mana"]))
 	var cap := int(FIGHT_CAP_SEC / s.dt)
