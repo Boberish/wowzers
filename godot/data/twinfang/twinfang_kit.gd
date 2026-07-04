@@ -12,6 +12,8 @@ extends ClassKit
 var aspect: String = "tempo"           ## "tempo" | "venomancer"
 var cfg: TwinfangConfig
 var boons: Dictionary = {}             ## id -> true (drafted upgrades/relics/spells)
+var creed_id: String = "drumline"      ## TEMPO rework: the run's risk temperament (Tempo only)
+var modules: Dictionary = {}           ## TEMPO rework: equipped UI Modules, id -> true (Opening/Edge/…)
 
 func _init(_aspect: String, _cfg: TwinfangConfig) -> void:
 	aspect = _aspect
@@ -19,6 +21,38 @@ func _init(_aspect: String, _cfg: TwinfangConfig) -> void:
 
 func _b(id: String) -> bool:
 	return bool(boons.get(id, false))
+
+func _m(id: String) -> bool:
+	return bool(modules.get(id, false))
+
+# --- CREEDS (Tempo rework, TEMPO-PLAN §3): a slip's cost + Flow's reward value ---
+func _creed() -> Dictionary:
+	return TwinfangCreeds.get_creed(creed_id)
+
+func _creed_flow_value() -> float:
+	if aspect != "tempo":
+		return 1.0
+	return float(_creed().get("flow_value", 1.0))
+
+## A SLIP — a missed Perfect Strike or an eaten swing — paid in your groove/window per Creed.
+func _creed_slip(s: CombatState, seat: Seat) -> void:
+	if aspect != "tempo" or _flow(seat) <= 0:
+		return
+	var c := _creed()
+	match String(c.get("slip", "flow_loss")):
+		"shatter":
+			seat.vars["flow"] = 0
+		"freeze":
+			pass                                   # Flow untouched — the window pays instead
+		_:
+			seat.vars["flow"] = maxi(0, _flow(seat) - int(c.get("slip_amt", 2)))
+	seat.vars["flow_decay_acc"] = 0
+	var lock := float(c.get("lock_sec", 0.0))
+	if lock > 0.0:
+		seat.vars["window_lock_until"] = s.tick + _tt(s, lock)
+		seat.vars["window_locked"] = true
+	CombatCore._bump_diag(s, seat, "slip")
+	CombatCore.emit_event(s, {"t": "creed_slip", "player": seat.is_player, "creed": creed_id})
 
 func _tt(s: CombatState, sec: float) -> int:
 	return CombatCore.to_ticks(sec, s.config.fixed_hz)
@@ -34,7 +68,7 @@ func max_flow() -> int:
 	return cfg.flow_max + (2 if _b("flowCap") else 0)
 
 func _flow_mult(seat: Seat) -> float:
-	return 1.0 + float(_flow(seat)) * cfg.flow_per
+	return 1.0 + float(_flow(seat)) * cfg.flow_per * _creed_flow_value()   # CREED: glass pays more per point
 
 ## Tempo transforms the kit in tiers as Flow climbs: 1 = double-hit Perfects,
 ## 2 = +combo & energy refund, 3 = Coup de Grâce ready (max Flow).
@@ -69,13 +103,28 @@ func _tempo_t(seat: Seat) -> float:
 	# anchors for 3 strikes (encore_left is only ever written by the gear branch).
 	if int(seat.vars.get("encore_left", 0)) > 0:
 		return 0.0
+	# CREED (Held Breath): a slip locks the tight window to base for a beat (upkeep clears it).
+	if bool(seat.vars.get("window_locked", false)):
+		return 0.0
 	return clampf(float(_flow(seat)) / float(max_flow()), 0.0, 1.0)
 func _swing_min_sec(seat: Seat) -> float:
 	return lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat))
 func _perfect_lo_sec(seat: Seat) -> float:
-	return lerpf(cfg.perfect_start, cfg.perfect_start_lo, _tempo_t(seat))
+	return _edge_window(seat)[0]
 func _perfect_hi_sec(seat: Seat) -> float:
-	return lerpf(cfg.perfect_end, cfg.perfect_end_lo, _tempo_t(seat))
+	return _edge_window(seat)[1]
+## The live Perfect window [lo, hi] in seconds. MODULE (The Edge): narrows the window around
+## its centre for a bigger Perfect payoff — "narrow for damage." Base window otherwise.
+func _edge_window(seat: Seat) -> Array:
+	var t := _tempo_t(seat)
+	var lo := lerpf(cfg.perfect_start, cfg.perfect_start_lo, t)
+	var hi := lerpf(cfg.perfect_end, cfg.perfect_end_lo, t)
+	if aspect == "tempo" and _m("edge"):
+		var mid := (lo + hi) * 0.5
+		var half := (hi - lo) * 0.5 * cfg.edge_window_mult
+		lo = mid - half
+		hi = mid + half
+	return [lo, hi]
 
 # --- Venomancer POISON WHEEL: the lit lane (0=V, 1=F, 2=C) — the lane the NEXT Strike
 #     feeds. A Strike stacks it then ADVANCES the wheel (riding V→F→C tops all three →
@@ -202,6 +251,24 @@ func _opening_note(s: CombatState, seat: Seat, kind: String) -> void:
 	CombatCore.emit_event(s, {"t": "opening", "grade": ("peak" if peak else "hit"),
 		"player": seat.is_player, "kind": kind})
 
+## Called once when a DUMP lands (Evis/Coup/Rupture/Flurry) — the Opening read-reward plus
+## any equipped Module payoff (Deathmark detonation). Central "a dump landed" hook.
+func _dump_landed(s: CombatState, seat: Seat, kind: String) -> void:
+	_opening_note(s, seat, kind)
+	_deathmark_detonate(s, seat)
+
+## MODULE (The Deathmark): a dump cashes every stamped Mark for a burst, then clears them.
+func _deathmark_detonate(s: CombatState, seat: Seat) -> void:
+	if not _m("deathmark"):
+		return
+	var m := int(seat.vars.get("marks", 0))
+	if m <= 0:
+		return
+	seat.vars["marks"] = 0
+	_deal(s, seat, float(m) * cfg.mark_dmg, true, false, "detonate")
+	CombatCore._bump_diag(s, seat, "detonate")
+	CombatCore.emit_event(s, {"t": "detonate", "player": seat.is_player, "marks": m})
+
 # --------------------------------------------------------------------------
 # Venom (Venomancer): three poison types on the boss, kept in seat.vars.
 # --------------------------------------------------------------------------
@@ -252,8 +319,13 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 			and s.tick >= int(seat.vars.get("dodge_recharge_tick", 0)):
 		seat.vars["dodge_spare"] = 1
 
-	# Flow decays toward 0 between Perfects (Virtuoso relic slows it 50%).
-	if _flow(seat) > 0:
+	# CREED (Held Breath): the window lock expires here; Flow is frozen while it's active.
+	if bool(seat.vars.get("window_locked", false)) and s.tick >= int(seat.vars.get("window_lock_until", 0)):
+		seat.vars["window_locked"] = false
+
+	# Flow decays toward 0 between Perfects (Virtuoso relic slows it 50%). Frozen while a
+	# Held-Breath window lock is active.
+	if _flow(seat) > 0 and not bool(seat.vars.get("window_locked", false)):
 		var acc := int(seat.vars.get("flow_decay_acc", 0)) + 1
 		var every := _tt(s, cfg.flow_decay_every * (1.5 if _b("virtuoso") else 1.0))
 		if acc >= every:
@@ -326,9 +398,10 @@ func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringNam
 		if GearFx.once(seat, &"grace_period"):
 			GearFx.pop(s, seat, &"grace_period")   # GEAR-2: the song survives one landed swing
 		else:
-			seat.vars["flow"] = 0
-			seat.vars["flow_decay_acc"] = 0
-			CombatCore.emit_event(s, {"t": "flow_lost", "player": seat.is_player})
+			var before := _flow(seat)
+			_creed_slip(s, seat)                   # REWORK: eating a swing is a SLIP (the Creed pays it)
+			if _flow(seat) < before:
+				CombatCore.emit_event(s, {"t": "flow_lost", "player": seat.is_player})
 
 # --- GEAR-1: a boss self-heal was DENIED somewhere — Riftmaw Tooth pays energy ---
 func on_boss_heal_denied(s: CombatState, seat: Seat) -> void:
@@ -432,8 +505,8 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	var cp := int(a["cp"])
 	if perfect:
 		CombatCore._bump_diag(s, seat, "perfect_strike")   # class-signature skill signal (token mint)
-		base = roundf(base * 1.6)
-		cp = 2
+		base = roundf(base * 1.6 * (cfg.edge_perfect_mult if _m("edge") else 1.0))   # MODULE (Edge): bigger Perfects
+		cp = 1                                             # REWORK: Perfect gives +1 combo, not +2 (wind-up, not spam)
 		var crit := false
 		if _b("fifthCrit"):
 			var pc := int(seat.vars.get("perfect_count", 0)) + 1
@@ -441,22 +514,25 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 			if pc % 5 == 0:
 				crit = true
 		_deal(s, seat, base, true, crit, "perfect")
-		_rhythm_proc(s, seat, "perfect")   # Phase B: the innate proc moment
+		# REWORK: NO innate "every Perfect" proc — payloads fire only on earned moments (drafted triggers).
 		CombatCore.emit_event(s, {"t": "perfect", "player": seat.is_player})
 		if aspect == "tempo":
 			_gain_flow(seat)                                                  # Flow = BPM (Tempo only)
+			if _m("deathmark"):                                              # MODULE (Deathmark): stamp the boss
+				seat.vars["marks"] = mini(int(seat.vars.get("marks", 0)) + 1, cfg.mark_cap)
 			var t := flow_tier(seat)
 			if t >= 1:
 				_deal(s, seat, roundf(float(a["dmg"]) * 0.6), true, false, "perfect")   # Tier 1: extra hit
 			if t >= 2:
-				cp += 1                                                       # Tier 2: +combo, refund
-				_gain_energy(seat, 6.0)
+				_gain_energy(seat, 6.0)                                       # Tier 2: energy refund (combo bonus removed)
 		else:
 			_wheel_strike(s, seat, true)                                     # ride the wheel (Perfect)
 	else:
 		_deal(s, seat, base, true, false)
 		if aspect == "venomancer":
 			_wheel_strike(s, seat, false)                                    # ride the wheel (normal)
+		else:
+			_creed_slip(s, seat)                                             # REWORK: a missed Perfect is a SLIP (Creed pays it)
 	_gain_cp(seat, cp)
 	if _b("strikeEnergy") and perfect:
 		_gain_energy(seat, 6.0)
@@ -478,7 +554,7 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 	seat.vars["cp"] = 0
 	if _b("tfTrigSpender") and cp >= cfg.cp_max:
 		_tf_trigger(s, seat, "spender")    # Phase B: a full-point finisher = proc moment
-	_opening_note(s, seat, "finisher")     # THE OPENING: read-reward if it hit the window
+	_dump_landed(s, seat, "finisher")     # THE OPENING: read-reward if it hit the window
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
 	return true
 
@@ -525,7 +601,7 @@ func _flurry(s: CombatState, seat: Seat) -> bool:
 	for _i in int(a["hits"]):
 		_deal(s, seat, float(a["dmg"]), true, false, "flurry")
 	_gain_cp(seat, int(a["cp"]))
-	_opening_note(s, seat, "flurry")       # THE OPENING (all three hits shared the window)
+	_dump_landed(s, seat, "flurry")       # THE OPENING (all three hits shared the window)
 	return true
 
 func _coup(s: CombatState, seat: Seat) -> bool:
@@ -541,7 +617,7 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 	seat.vars["flow"] = clampi(cfg.coup_flow_seed, 0, max_flow())   # ride vs spend: the spike costs your BPM
 	seat.vars["flow_decay_acc"] = 0
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
-	_opening_note(s, seat, "coup")                       # THE OPENING (fires after the Flow reset)
+	_dump_landed(s, seat, "coup")                       # THE OPENING (fires after the Flow reset)
 	CombatCore.emit_event(s, {"t": "coup", "player": seat.is_player})
 	if GearFx.has(seat, &"encore_bell"):                 # GEAR-2: the bell rings after the finisher
 		seat.vars["encore_left"] = 3
@@ -572,7 +648,7 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	else:
 		v["V"] = 0; v["F"] = 0; v["C"] = 0
 		v["fes_ticks"] = 0; v["syn_ramp"] = 1.0; v["syn_active"] = false
-	_opening_note(s, seat, "rupture")      # THE OPENING: detonate in the window for the spike
+	_dump_landed(s, seat, "rupture")      # THE OPENING: detonate in the window for the spike
 	CombatCore.emit_event(s, {"t": "rupture", "total": total, "sip": sip})
 	return true
 
@@ -663,6 +739,17 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		out["open_to"] = -1
 		out["open_active"] = false
 		out["open_bonus_now"] = 0.0
+
+	# CREED + MODULES (Tempo rework) — for the HUD combo board / verdict pops / policy
+	out["creed"] = creed_id
+	out["creed_name"] = String(_creed().get("name", ""))
+	out["flow_value"] = _creed_flow_value()
+	out["window_locked"] = bool(seat.vars.get("window_locked", false))
+	out["modules"] = modules.keys()
+	out["edge"] = _m("edge")                                     # MODULE gauges for the HUD
+	if _m("deathmark"):
+		out["marks"] = int(seat.vars.get("marks", 0))
+		out["marks_max"] = cfg.mark_cap
 
 	if _b("tfPropTwinStep"):   # Twin Step charge pips (Phase B)
 		out["guard_charges"] = int(seat.vars.get("dodge_spare", 1)) \

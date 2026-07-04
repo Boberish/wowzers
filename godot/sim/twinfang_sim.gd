@@ -23,6 +23,10 @@ func _initialize() -> void:
 	if seed0 == 1: _prove_verb_mods(seeds)
 	print("")
 	if seed0 == 1: _prove_opening(seeds)
+	print("")
+	if seed0 == 1: _prove_creed(seeds)
+	print("")
+	if seed0 == 1: _prove_modules(seeds)
 
 	var rows: Array = []
 	var matchups := [
@@ -85,11 +89,11 @@ func _encounter(name: String) -> EncounterRes:
 	return TwinfangContent.make_executioner() if name == "executioner" else TwinfangContent.make_warden()
 
 func _run_one(seed: int, enc_name: String, aspect: String, latency: int,
-		boons: Dictionary = {}, open_on: bool = true) -> Dictionary:
+		boons: Dictionary = {}, open_on: bool = true, creed := "drumline", mods := {}) -> Dictionary:
 	var cfg := TwinfangContent.make_config()
 	var tcfg := TwinfangContent.make_twinfang_config()
 	tcfg.open_enabled = open_on   # THE OPENING A/B: off = classic Twinfang (byte-identical baseline)
-	var s := TwinfangContent.make_state(seed, aspect, cfg, tcfg, _encounter(enc_name), boons)
+	var s := TwinfangContent.make_state(seed, aspect, cfg, tcfg, _encounter(enc_name), boons, creed, mods)
 	var pol := s.seats[0].policy as TwinfangPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 1337)   # separate reproducible beat-read stream
@@ -149,6 +153,48 @@ func _prove_opening(seeds: int) -> void:
 	var d1 := _run_one(17, "executioner", "tempo", 6, {}, true)
 	var d2 := _run_one(17, "executioner", "tempo", 6, {}, true)
 	print("  determinism (openings on): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
+
+## TEMPO REWORK probe: the CREED risk gradient (Tempo / Executioner). Drumline (steady, −2
+## Flow/slip) vs Flourish (glass, Flow→0/slip but +50% Flow value). Proves the two feel
+## different across skill — glass rewards clean play and punishes sloppy — and stays det.
+func _prove_creed(seeds: int) -> void:
+	var n := mini(seeds, 120)
+	print("CREED probe (Tempo / Executioner, %d seeds — the risk gradient):" % n)
+	print("  skill    drumline-win  flourish-win   drum-TTK  flour-TTK   slips/run(flour)")
+	for row in [{"l": "expert", "v": 0}, {"l": "good", "v": 6}, {"l": "sloppy", "v": 14}]:
+		var lat := int(row["v"])
+		var dw := 0; var fw := 0; var dt := 0.0; var ft := 0.0; var dn := 0; var fn := 0; var slips := 0.0
+		for seed in range(1, n + 1):
+			var d := _run_one(seed, "executioner", "tempo", lat, {}, true, "drumline")
+			var f := _run_one(seed, "executioner", "tempo", lat, {}, true, "flourish")
+			if d["won"]: dw += 1; dt += float(d["ttk_sec"]); dn += 1
+			if f["won"]: fw += 1; ft += float(f["ttk_sec"]); fn += 1
+			slips += float((f.get("diag", {}) as Dictionary).get("slip", 0))
+		print("  %-7s  %6.1f%%      %6.1f%%     %6.1fs   %6.1fs      %6.2f" % [
+			row["l"], 100.0 * dw / n, 100.0 * fw / n,
+			(dt / dn if dn > 0 else 0.0), (ft / fn if fn > 0 else 0.0), slips / n])
+	var a := _run_one(17, "executioner", "tempo", 6, {}, true, "flourish")
+	var b := _run_one(17, "executioner", "tempo", 6, {}, true, "flourish")
+	print("  determinism (flourish): %s" % ("PASS" if a["checksum"] == b["checksum"] else "FAIL"))
+
+## TEMPO REWORK probe: the MODULES engage + stay deterministic (Tempo / Executioner @good).
+## None (base) vs The Edge (tighter window, bigger Perfects) vs The Deathmark (mark → detonate).
+func _prove_modules(seeds: int) -> void:
+	var n := mini(seeds, 100)
+	print("MODULE probe (Tempo / Executioner @good, %d seeds):" % n)
+	var cells := [{"l": "none", "m": {}}, {"l": "edge", "m": {"edge": true}},
+		{"l": "deathmark", "m": {"deathmark": true}}]
+	for c in cells:
+		var w := 0; var ttk := 0.0; var wn := 0; var det := 0.0
+		for seed in range(1, n + 1):
+			var r := _run_one(seed, "executioner", "tempo", 6, {}, true, "drumline", c["m"])
+			if r["won"]: w += 1; ttk += float(r["ttk_sec"]); wn += 1
+			det += float((r.get("diag", {}) as Dictionary).get("detonate", 0))
+		print("  %-10s win %5.1f%%  ttk %5.1fs  detonates/run %.2f" % [
+			c["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), det / n])
+	var d1 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"edge": true, "deathmark": true})
+	var d2 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"edge": true, "deathmark": true})
+	print("  determinism (edge+deathmark): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)

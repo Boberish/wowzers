@@ -72,6 +72,12 @@ extends Resource
 @export var open_flow: int = 1              ## Tempo: +Flow on a PEAK dump (reading the boss pays BPM)
 @export var open_venom: int = 2             ## Venom: +poison to the lit lane on a PEAK dump
 
+# --- TEMPO REWORK · MODULE tuning (illustrative — tuned after the systems land) ---
+@export var edge_window_mult: float = 0.7   ## The Edge: Perfect window width ×this (tighter = riskier)
+@export var edge_perfect_mult: float = 1.25 ## The Edge: a Perfect Strike deals ×this (the reward)
+@export var mark_cap: int = 5               ## The Deathmark: max marks stamped on the boss
+@export var mark_dmg: float = 16.0          ## The Deathmark: burst per mark when a dump detonates them
+
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap
