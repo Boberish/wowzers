@@ -88,6 +88,41 @@ func _sync_healer_cls() -> void:
 	elif _aspect == "tidecaller" or _aspect == "brinkwarden":
 		_healer_cls = "mender"
 
+## COMMANDER: make _party cover exactly the three seats the human doesn't occupy.
+## Defaults = the verified comp RaidNet.make_spec would fill in anyway; prior picks
+## survive a seat change between descents (only the vacated/claimed seats reset).
+func _ensure_party() -> void:
+	if _party.has(_seat_key):
+		_party.erase(_seat_key)
+	for key in RaidNet.SEAT_KEYS:
+		if key == _seat_key or _party.has(key):
+			continue
+		var cls := String(SEAT_CLASS.get(key, "bulwark"))
+		_party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
+
+## COMMANDER: the full 4-seat spec cfg — your seat + the commanded AI raiders. With
+## no party overrides this emits exactly the defaults make_spec fills in for missing
+## keys, so the spec (and the fight) stays byte-identical to the pre-commander game.
+func _party_seat_cfg() -> Dictionary:
+	var cfg := _human_seat_cfg()
+	_ensure_party()
+	for key in _party:
+		cfg[key] = {"aspect": String(_party[key]["aspect"]), "ai": true,
+			"cls": String(_party[key]["cls"])}
+	return cfg
+
+## COMMANDER: per-seat boons for the spec (yours + the AI raiders'); RaidNet.build
+## folds each into its seat's kit. Empty sets are omitted (spec unchanged = no drafts).
+func _seat_boons_now() -> Dictionary:
+	var out := {}
+	if _run != null and not _run.boons.is_empty():
+		out[_seat_key] = _run.boons
+	for key in _ai_runs:
+		var r: RunState = _ai_runs[key]
+		if r != null and not r.boons.is_empty():
+			out[key] = r.boons
+	return out
+
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
 	"strike": "Strike", "eviscerate": "Eviscerate", "kick": "Kick", "envenom": "Envenom",
@@ -151,6 +186,12 @@ var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger 
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
 var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
+
+# COMMANDER (Bill, 2026-07-04): solo raid = you build the WHOLE party. The three AI
+# raiders' class/aspect are picked on the pre-descent PARTY screen, and their boons
+# are drafted BY YOU after every won fight — the AI only drives the rotation.
+var _party: Dictionary = {}             ## AI seats only: seat_key -> {cls, aspect}
+var _ai_runs: Dictionary = {}           ## AI seats only: seat_key -> RunState (their boon runs)
 
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
 var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
@@ -264,6 +305,7 @@ func _show_home() -> void:
 	_gate_live = false
 	_online_map = false
 	_run = null                       # no descent = no boon run (fresh one per descent)
+	_ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
 	_clear()
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -350,7 +392,7 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	var card := AspectCard.new("REALM 1 · THE TAKEOVER",
 		"The ironic AI takeover. Descend the Topology, Ring 3 → 0 — MISTRAL → GEMINI → CLAUDE MYTHOS. Route the node map, carry your wounds, draft your build. (More realms to come.)",
 		Palette.CRIMSON, "")
-	card.chosen.connect(func(): _start_map_run())
+	card.chosen.connect(func(): _show_party_setup())   # COMMANDER: assemble the raid first
 	mid.add_child(card)
 	var back := Button.new()
 	back.text = "◂ back to aspect"
@@ -364,6 +406,89 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 ## returns to the one HOME menu (the old dev BossSelect front door is retired).
 func _show_select(_seat: String = "tank") -> void:
 	_show_home()
+
+# ============================================================ PARTY SETUP (COMMANDER)
+## You command the whole warband: each AI raider's class + aspect is YOUR call here,
+## and their boons are yours to draft after every won fight — in combat the AI only
+## drives the rotation. Defaults = the verified comp, so pressing straight through
+## DESCEND is the same raid as before commander mode existed.
+func _show_party_setup() -> void:
+	_screen = "party"
+	_clear()
+	_ensure_party()
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 9)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -360, -300, 360, 300)
+	_ui.add_child(box)
+	var hl := _title(box, "ASSEMBLE YOUR RAID", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(box, "their class, their aspect, their boons — your call. the AI only drives the rotation.",
+		13, Palette.TEXT_DIM)
+	var gap0 := Control.new()
+	gap0.custom_minimum_size = Vector2(0, 8)
+	box.add_child(gap0)
+	for key in RaidNet.SEAT_KEYS:
+		var mine: bool = key == _seat_key
+		var cls: String = _seat_cls_now() if mine else String(_party[key]["cls"])
+		var aspect: String = _aspect if mine else String(_party[key]["aspect"])
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 10)
+		box.add_child(row)
+		var disp := "THE BLOOMWEAVER" if (key == "healer" and cls == "bloomweaver") \
+			else String(SEAT_NAMES[key])
+		var lab := Label.new()
+		lab.text = "%-15s %s  ·  %s" % [disp, ("YOU" if mine else "AI"), aspect.capitalize()]
+		lab.custom_minimum_size = Vector2(420, 32)
+		lab.add_theme_font_size_override("font_size", 16)
+		lab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if mine else Palette.TEXT)
+		row.add_child(lab)
+		if not mine:
+			if key == "healer":     # the healer seat is the only polymorphic CLASS
+				var clsb := Button.new()
+				clsb.text = "◈ " + ("BLOOMWEAVER" if cls == "bloomweaver" else "MENDER")
+				clsb.custom_minimum_size = Vector2(150, 32)
+				clsb.pressed.connect(func():
+					var nc := "mender" if cls == "bloomweaver" else "bloomweaver"
+					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
+					_show_party_setup())
+				row.add_child(clsb)
+			var ab := Button.new()
+			ab.text = "ASPECT ⇄"
+			ab.custom_minimum_size = Vector2(110, 32)
+			ab.pressed.connect(func():
+				var pool: Array = _lobby_aspects(String(key), cls)
+				var nxt := String(pool[0]["id"]) if aspect == String(pool[1]["id"]) \
+					else String(pool[1]["id"])
+				_party[key]["aspect"] = nxt
+				_show_party_setup())
+			row.add_child(ab)
+		# the chosen aspect's one-line identity, dim, under each row
+		for a in _lobby_aspects(String(key), cls):
+			if String(a["id"]) == aspect:
+				var d := _title(box, String(a["desc"]), 12, Palette.TEXT_DIM)
+				d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				d.custom_minimum_size = Vector2(600, 0)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 12)
+	box.add_child(gap)
+	var go := Button.new()
+	go.text = "⚔    DESCEND"
+	go.custom_minimum_size = Vector2(260, 52)
+	go.add_theme_font_size_override("font_size", 19)
+	go.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
+	go.pressed.connect(_start_map_run)
+	var goc := CenterContainer.new()
+	goc.add_child(go)
+	box.add_child(goc)
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	back.pressed.connect(func(): _show_raid_select(_seat_key, _aspect))
+	_place(back, 0.5, 1, 0.5, 1, -80, -58, 80, -24)
+	_ui.add_child(back)
 
 # ============================================================ ASPECT PICK
 ## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
@@ -899,8 +1024,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	_screen = "combat"
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
+	# (COMMANDER: the assembled party's aspects/classes ride single-Seal pulls too)
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), _enc_id)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -944,8 +1070,16 @@ func _start_map_run() -> void:
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
 	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
-	# its picks ride into every pull (AI raiders stay on the verified boon-less comp).
+	# its picks ride into every pull.
 	_run = _make_run()
+	# COMMANDER: each AI raider gets its own boon run too — you draft on their behalf
+	# after every won fight. Seeds decorrelated from yours (disjoint draft streams).
+	_ensure_party()
+	_ai_runs = {}
+	for key in _party:
+		_ai_runs[key] = _make_seat_run(String(_party[key]["cls"]),
+			String(_party[key]["aspect"]),
+			int((_run.run_seed ^ (0x515EED + int(SEAT_IDX[key]) * 0x9E3779)) & 0x7FFFFFFF))
 	_build_floor()
 
 ## A minimal RunState for the human seat, just to carry boons + the draft economy
@@ -953,14 +1087,21 @@ func _start_map_run() -> void:
 ## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
 func _make_run() -> RunState:
 	_sync_healer_cls()
-	match _seat_key:
-		"blade": return RunState.start_twinfang(_aspect)
-		"caster": return RunState.start_voidcaller(_aspect)
-		"healer": return (RunState.start_bloomweaver(_aspect) if _healer_cls == "bloomweaver"
-			else RunState.start_mender(_aspect))
-		_: return RunState.start(_aspect)
+	return _make_seat_run(_seat_cls_now(), _aspect, -1)
+
+## COMMANDER: a boon RunState for ANY seat (class starter by cls) — the commander
+## drafts on behalf of the AI raiders, so they carry the same run machinery you do.
+func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
+	match cls:
+		"twinfang": return RunState.start_twinfang(aspect, seed_v)
+		"voidcaller": return RunState.start_voidcaller(aspect, seed_v)
+		"mender": return RunState.start_mender(aspect, seed_v)
+		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
+		_: return RunState.start(aspect, seed_v)
 
 ## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
+## (Map pulls also ride ALL seats' boons through the spec — see _seat_boons_now;
+## this direct injection stays for the GATE path, which builds outside RaidNet.)
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
@@ -1244,7 +1385,9 @@ func _launch_map_fight(fi: int) -> void:
 	_clear()
 	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), String(enc.id))
+	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
+	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(enc.id), {}, _seat_boons_now())
 	var s := RaidNet.build(spec, _seat_key)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
@@ -1705,29 +1848,64 @@ func _show_boon_draft(done: Callable) -> void:
 		return
 	if _ctrl != null and _ctrl.state != null:
 		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
-	var picks := Draft.roll_offers(_run)
+	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
+	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
+	var chain := done
+	var order: Array = []
+	for key in RaidNet.SEAT_KEYS:
+		if _ai_runs.has(key):
+			order.append(key)
+	order.reverse()
+	for key in order:
+		var k := String(key)
+		var next := chain
+		chain = func(): _show_seat_draft(k, next)
+	_show_seat_draft(_seat_key, chain)
+
+## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
+## AI drafts spend the SHARED ⏣ bank: Draft's economy reads run.tokens, so the bank
+## is mirrored into the AI run for the screen and the remainder banked back out.
+func _show_seat_draft(key: String, done: Callable) -> void:
+	var mine: bool = key == _seat_key
+	var run: RunState = _run if mine else (_ai_runs.get(key) as RunState)
+	if run == null:
+		done.call()
+		return
+	if not mine and _run != null:
+		run.tokens = _run.tokens
+	var picks := Draft.roll_offers(run)
 	if picks.is_empty():
 		done.call()
 		return
 	_screen = "draft"
 	_clear()
 	var extras: Array = []
-	if _run.tokens > 0:
-		extras.append("%d Tokens banked — REROLL / LOCK a card." % _run.tokens)
-	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
-		"Take one — every piece forges into your set.", extras, Palette.GOLD)
+	if run.tokens > 0:
+		extras.append("%d Tokens banked — REROLL / LOCK a card." % run.tokens)
+	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
+		else String(SEAT_NAMES.get(key, "RAIDER"))
+	var headline := "REFORGE — the kill reshapes your kit" if mine \
+		else "REFORGE — %s · AI ALLY" % disp
+	var flavor := "Take one — every piece forges into your set." if mine \
+		else "You command the build — the AI only drives the rotation."
+	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
 	ds.boon_taken.connect(func(boon: Dictionary):
-		Draft.take(_run, boon)
-		_taken_boons.append(boon)      # for the build panel (title + rarity)
-		# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
-		var slot := ArmorSlots.slot_of(boon)
-		var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
-		_toast_add("⚒  %s REFORGED — %s is piece %d" % [
-			ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
+		Draft.take(run, boon)
+		if mine:
+			_taken_boons.append(boon)      # for the build panel (title + rarity)
+			# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
+			var slot := ArmorSlots.slot_of(boon)
+			var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
+			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
+				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
+		else:
+			if _run != null:
+				_run.tokens = run.tokens   # bank the remainder back to the shared pool
+			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
-	# ARMORY: the set-so-far stands beside the forge (cards stay centered)
-	if not _taken_boons.is_empty() or not _map_gear.is_empty():
+	# ARMORY: the set-so-far stands beside YOUR forge (cards stay centered)
+	if mine and (not _taken_boons.is_empty() or not _map_gear.is_empty()):
 		var doll := ArmorDoll.new()
 		_place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
 			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
