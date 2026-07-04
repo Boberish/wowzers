@@ -13,6 +13,7 @@ const HP_CUT_CAP := 0.35          ## a full 100⏻ dump caps here (linear below)
 const DMG_BUFF_CAP := 0.55        ## the boss self-empower cap (mirrors combat_core)
 const SURGE_FREEZE_TICKS := 90    ## a full SURGE dump → this many ticks (3s) of frozen boss timers
 const SHIELD_ABSORB_MAX := 220.0  ## a full SHIELD PRIME dump → this much absorb on every seat
+const STALL_MAX_SEC := 16.0       ## a full STALL dump → this many seconds of enrage delay
 
 ## The OVERCLOCK PRIME cash-out: turn a ⏻ spend into a fight-mark. SHARED by the arming
 ## panel (preview) AND the authoritative server (so a client can't forge the effect).
@@ -24,6 +25,8 @@ static func overclock(kind: String, spend: int) -> Dictionary:
 				"boot_freeze": int(round(float(n) / 100.0 * SURGE_FREEZE_TICKS))}
 		"shield":
 			return {"party_absorb": float(n) / 100.0 * SHIELD_ABSORB_MAX}
+		"stall":
+			return {"enrage_offset": float(n) / 100.0 * STALL_MAX_SEC}
 	return {}
 
 static func apply(s: CombatState, mark: Dictionary) -> void:
@@ -51,3 +54,11 @@ static func apply(s: CombatState, mark: Dictionary) -> void:
 	if absorb > 0.0:
 		for u in s.seats:
 			u.absorb = maxf(u.absorb, absorb)
+	# DMG-AMP — the raid hits HARDER all fight (bites the DPS/enrage race + self-heal bosses).
+	var amp := float(mark.get("party_out_mult", 0.0))
+	if amp > 1.0:
+		s.party_out_mult = maxf(s.party_out_mult, amp)
+	# STALL (+s, blessing) / enrage-sooner (−s, curse) — shifts the enrage timer.
+	var eoff := float(mark.get("enrage_offset", 0.0))
+	if eoff != 0.0:
+		s.enrage_offset += eoff

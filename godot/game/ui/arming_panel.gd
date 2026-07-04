@@ -16,15 +16,17 @@ var _box: VBoxContainer
 var _slider: HSlider
 var _surge_lbl: Label
 var _shield_lbl: Label
+var _stall_lbl: Label
 var _surge_btn: Button
 var _shield_btn: Button
+var _stall_btn: Button
 
 func _ready() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := GlassPanel.new("PANEL", Palette.CHARGE)
-	panel.custom_minimum_size = Vector2(700, 500)
+	panel.custom_minimum_size = Vector2(700, 600)
 	center.add_child(panel)
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -71,6 +73,14 @@ func _ready() -> void:
 	_shield_btn.pressed.connect(_on_shield)
 	_box.add_child(_shield_btn)
 
+	_box.add_child(_gap(2))
+	_stall_lbl = _mklabel("", 12, Palette.TEXT_DIM)
+	_stall_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_box.add_child(_stall_lbl)
+	_stall_btn = _mkbtn("")
+	_stall_btn.pressed.connect(_on_stall)
+	_box.add_child(_stall_btn)
+
 	_box.add_child(_gap(6))
 	var bank := _mkbtn("BANK IT  —  keep climbing toward the finale")
 	bank.pressed.connect(func(): banked.emit())
@@ -86,19 +96,26 @@ func _refresh() -> void:
 	var cut := int(round(float(surge.get("boss_hp_cut", 0.0)) * 100.0))
 	var freeze := snappedf(float(surge.get("boot_freeze", 0)) / 30.0, 0.1)
 	var absorb := int(round(float((RaidMarks.overclock("shield", n) as Dictionary).get("party_absorb", 0.0))))
+	var stall := snappedf(float((RaidMarks.overclock("stall", n) as Dictionary).get("enrage_offset", 0.0)), 0.1)
 	_surge_lbl.text = "the boss boots at %d%% HP, its timers frozen ~%.1fs — a free opening" % [100 - cut, freeze]
 	_shield_lbl.text = "each raider opens behind a %d-point absorb wall — eats a one-shot" % absorb
+	_stall_lbl.text = "enrage delayed ~%.1fs — breathing room for a healer-heavy pull" % stall
 	_surge_btn.text = "⚡ SURGE   (spend %d ⏻)" % n
 	_shield_btn.text = "🛡 SHIELD PRIME   (spend %d ⏻)" % n
+	_stall_btn.text = "⏳ STALL   (spend %d ⏻)" % n
 	var can := n > 0
 	_surge_btn.disabled = not can
 	_shield_btn.disabled = not can
+	_stall_btn.disabled = not can
 
 func _on_surge() -> void:
 	armed.emit("surge", _spend())
 
 func _on_shield() -> void:
 	armed.emit("shield", _spend())
+
+func _on_stall() -> void:
+	armed.emit("stall", _spend())
 
 # ---- builders
 func _title(t: String) -> void:

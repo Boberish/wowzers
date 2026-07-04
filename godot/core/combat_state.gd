@@ -22,6 +22,10 @@ var encounter: EncounterRes
 ## Party-wide damage reduction {amt, until_tick} (Brinkwarden Last Stand).
 var raid_dr: Dictionary = {}
 
+# THE KILL SWITCH pre-fight primes (default-safe → every fight byte-identical when unset):
+var party_out_mult: float = 1.0     ## OVERCLOCK DMG-amp — scales the raid's outgoing to the boss
+var enrage_offset: float = 0.0      ## OVERCLOCK STALL (+s) / enrage-sooner curse (−s); NEVER mutate encounter.enrage_at
+
 ## How the fight is lost. "player" = solo duel (is_player death). "raid" = role
 ## extinction (no living tank / no living healer / no living dps → wipe).
 var loss_mode: String = "player"

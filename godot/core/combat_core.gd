@@ -671,6 +671,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 		mult = seat.kit.outgoing_mult(seat)
 	if s.boss.sunder > 0.0:                     # SUNDER: the cracked wall takes MORE from everyone
 		mult *= 1.0 + s.boss.sunder * s.config.sunder_k
+	if s.party_out_mult != 1.0:                 # OVERCLOCK DMG-amp prime (default 1.0 → byte-neutral)
+		mult *= s.party_out_mult
 	var d := roundf(raw * mult)
 	if s.boss.add_i >= 0:
 		s.boss.add_hp = maxf(0.0, s.boss.add_hp - d)   # an add holds the field — it eats the hit
@@ -822,7 +824,9 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			s.boss.hp = 0.0
 
 static func _apply_enrage(s: CombatState, dt: float) -> void:
-	var e := s.encounter.enrage_at
+	# OVERCLOCK STALL (+s) delays enrage; a curse (−s) hastens it. Read off a COPY —
+	# never mutate the shared EncounterRes. Default offset 0.0 → byte-identical.
+	var e := s.encounter.enrage_at + s.enrage_offset
 	if e > 0.0 and s.time() >= e:
 		var over := s.time() - e
 		var ed := s.config.enrage_base * over * dt
