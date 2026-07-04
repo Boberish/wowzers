@@ -656,6 +656,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   HoTs/wards + Meditate's 280 battery); a true OOM wall needs trimming those efficiency tools (a Mender design
   call) or much more sustained damage. (c) rez feel: it rarely fires in AI sims (AI dies in cascades, not
   isolation) — it's mostly a human/co-op save; watch it in co-op.
+- ☑ 2026-07-04 · `resource-tax` · §BOSSES + §CLASSES — **RESOURCE-TAX pass (SECOND healing/resource pass) —
+  MERGED to main (`cf29902`).** Closes open item (b) above (mana-as-a-wall) + Bill's playtest steer: "mana is
+  still infinite, fights are short, too much resource regen — hurt mana a lot to overshoot the middle, similar
+  with other resources, and battles should be longer." Unlike the first pass (raid-gated `regen_mult`), this
+  trims the Mender's **efficiency tools at the config level** (so it bites everywhere the Mender plays):
+  `mana_regen 8→4.5` · **Meditate 280→160, cd 45→55** (the flagged battery) · core heal costs ×~1.5
+  (flash 22→33 / mend 16→24 / renew 18→27 / ward 20→30 / cascade 40→58 / well 30→46 / surge 22 / laststand 28 /
+  revive 340→380). Other resources (softer — "keep execution the focus"): **Twinfang energy 20→18** (gentle;
+  14 broke Tempo's accelerando — good-tier missed enrage, so backed off), **Bloomweaver sap 12→9**; Voidcaller
+  Focus (build-and-spend) + Bulwark rage (combat-gen) left as the already-gated exemplars. **Longer fights** —
+  raid Seals HP +~17% / enrage +~20% (riftmaw 13500→15500/90 · mistral 13500/95 · gemini 16500/108 · mythos
+  19000/142).
+  **Result (raid_sim 200 seeds):** healer mana floor now DIPS to **exp 46-57% / good 0-48% / sloppy OOM-wall**
+  (was never <42%, idle 9-54%) — you finally watch the bar; fights **+20-25% longer**. Bands: expert 100 all
+  Seals · good 96-100 · sloppy riftmaw 80 / mistral 100 / gemini 60 / mythos 22. Determinism PASS ×4 Seals;
+  threat gate load-bearing (OFF 0.45 dps deaths vs ON 0.00); solo Mender bands intact (choir ~79/83, rendmaw/
+  rotweaver ~100); Twinfang warden-tempo 100/100/0 & exec-tempo 100/88/0 & venom healthy; Bloomweaver bands
+  intact; Bulwark/Voidcaller untouched (localized change verified); ui_smoke_raid ALL OK.
+  **NEXT (wants Bill's playtest feel — the "middle" dial):** this landing keeps EXPERTS comfortable (floor ~half)
+  and punishes good/sloppy — if mana should bite experts too (true overshoot), cut `mana_regen` further (4.5→~3)
+  and/or costs up; if too harsh, ease regen back up. Still open from pass 1: (a) Mistral has no lethal dodge-check
+  (100/100/100); (c) rez feel in co-op. See [[raid-healer-under-pressured]].
 - ☑ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons — MERGED to main
   (`24dd28a`)**, worktree removed. The Draft 2.0 boon draft now works in online co-op: each human
   seat drafts its OWN boons after each won fight, and the picks ride the fight SPEC per seat
