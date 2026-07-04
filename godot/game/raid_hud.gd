@@ -138,7 +138,8 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 var _entropy: int = 0
 var _prior: int = 0
 var _flags: Dictionary = {}
-var _map_marks: Dictionary = {}    ## P6: a pending fight-altering mark (sabotage the next Seal)
+var _map_marks: Dictionary = {}    ## a pending fight-altering mark (KILL SWITCH cash-out / fight-curse)
+var _map_charge: int = 0           ## ⏻ THE KILL SWITCH — a party-shared 0..100 meter, carries the descent
 var _check_fails: int = 0          ## consecutive check fails → comeback pity (resets on any pass)
 
 # GEAR-1 (Curios / Realm-1 "peripherals"): run-scoped loot. Items evaporate with the
@@ -711,6 +712,7 @@ func _on_net_map(msg: Dictionary) -> void:
 	ms.open_tickets = msg.get("tickets", [])
 	ms.toast = String(msg.get("toast", ""))
 	ms.entropy = int(msg.get("entropy", 0))   # ⚡ the within-run luck pool (server-owned, v6)
+	ms.charge = int(msg.get("charge", 0))     # ⏻ THE KILL SWITCH meter (server-owned)
 	ms.interactive = _map_is_leader
 	if _map_is_leader:
 		ms.node_entered.connect(func(id: int): _net.send_node(id))
@@ -929,6 +931,7 @@ func _start_map_run() -> void:
 	_entropy = LuckProfile.starting_entropy(_prior)
 	_flags = {}
 	_map_marks = {}
+	_map_charge = clampi(_prior / 25, 0, 4)   # a veteran's file pre-warms the switch a little
 	_check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _gear_unlocks directly.
@@ -1007,6 +1010,7 @@ func _show_map() -> void:
 	_ticket_toast = ""                 # one-shot — clears once shown
 	ms.gear_line = _gear_line()
 	ms.entropy = _entropy
+	ms.charge = _map_charge
 	ms.prior = _prior
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1107,13 +1111,12 @@ func _resolve_node(n: Dictionary) -> void:
 			_event_stop(n)
 		RunMap.KIND_COOLING:
 			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
-				[{"label": "THROTTLE  (rest — +%d%% integrity · healer refuels · corrupted sectors repaired)" % int(MapContent.COOLING_HEAL * 100),
-					"fx": {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true,
-						"result": MapContent.COOLING_RESULT}}],
+				[{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
+					"fx": {"charge": 10, "mana": 0.75, "result": MapContent.COOLING_RESULT}}],
 				Palette.FLOW, _show_map)
 		RunMap.KIND_CACHE:
 			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
-				[{"label": "SALVAGE A COMPONENT", "fx": {"draft": true, "result": MapContent.CACHE_RESULT}}],
+				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)", "fx": {"charge": 25, "result": MapContent.CACHE_RESULT}}],
 				Palette.GOLD, _show_map)
 
 ## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
@@ -1249,15 +1252,15 @@ func _launch_map_fight(fi: int) -> void:
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
 	for i in s.seats.size():
-		if i < _map_fracs.size():
+		if i < _map_wounds.size():
 			var u: Seat = s.seats[i]
-			# CORRUPTED SECTORS first (a max-HP cut no heal can fix), then the
-			# carried integrity fraction of what's LEFT.
+			# INTEGRITY RETIRED: CORRUPTED SECTORS cut max HP (the sole HP stake), then boot
+			# FULL of what's left — a carried HP fraction is meaningless (a healer tops it off).
 			u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_map_wounds[i]))))
-			u.hp = maxf(1.0, roundf(u.hp_max * float(_map_fracs[i])))
-			if u.role == "healer":    # the fuel gauge: mana carries between nodes
+			u.hp = u.hp_max
+			if u.role == "healer":    # the fuel gauge: mana carries between nodes (it bites now)
 				u.resource = roundf(u.resource_max * _map_mana)
-	_apply_next_fight_mark(s)   # P6: a pending sabotage mark weakens THIS boss, then clears
+	_apply_next_fight_mark(s)   # the KILL SWITCH cash-out / a fight-curse weakens THIS boss, then clears
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1270,9 +1273,7 @@ func _launch_map_fight(fi: int) -> void:
 ## then clear it. Absent (no mark) = the fight is byte-identical. Mirrors RaidNet.build's
 ## online carry-mark so offline + online sabotage land the same boss HP.
 func _apply_next_fight_mark(s: CombatState) -> void:
-	var cut := float(_map_marks.get("boss_hp_cut", 0.0))
-	if cut > 0.0 and s.boss != null:
-		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - cut)))
+	RaidMarks.apply(s, _map_marks)   # SHARED with RaidNet.build — one applier, never diverges
 	_map_marks = {}
 
 ## A Tier-1 PERSONAL GATE exam (§GAME SHAPE): YOUR seat's class exam, fought alone —
@@ -1290,7 +1291,7 @@ func _launch_gate_fight() -> void:
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = s.seats[0]
 		u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_map_wounds[ri]))))
-		u.hp = maxf(1.0, roundf(u.hp_max * float(_map_fracs[ri])))
+		u.hp = u.hp_max                 # integrity retired: boot full of the wounded pool
 		if u.role == "healer":
 			u.resource = roundf(u.resource_max * _map_mana)
 	_gate_live = true
@@ -1340,11 +1341,13 @@ func _apply_map_fx(fx: Dictionary) -> void:
 	var cp := {
 		"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
 		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags, "marks": _map_marks,
+		"charge": _map_charge,
 	}
 	MapFx.apply(cp, fx)
 	_map_mana = float(cp["mana"])
 	_entropy = int(cp["entropy"])
 	_prior = int(cp["prior"])
+	_map_charge = int(cp["charge"])
 	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
 	if int(fx.get("tokens", 0)) != 0:
 		_gain_tokens(int(fx["tokens"]))

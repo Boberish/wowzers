@@ -434,7 +434,8 @@ func _start_map(id: int) -> void:
 		# nodes; check_fails drives comeback pity. Starting ⚡ scales off the LEADER's trusted
 		# 📁 Prior (v10); each seat's own Prior rides seat_cfg into its check floor.
 		"entropy": LuckProfile.starting_entropy(leader_prior), "flags": {}, "check_fails": 0,
-		"marks": {},                 # P6: a pending fight-altering mark (sabotage the next Seal)
+		"marks": {},                 # a pending fight-altering mark (KILL SWITCH cash-out / curse)
+		"charge": clampi(leader_prior / 25, 0, 4),   # ⏻ THE KILL SWITCH — party-shared 0..100 meter
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"
@@ -521,12 +522,14 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 			cp["pending_page"] = ""
 			_broadcast_mapstop(room, String(n["event"]), "")
 		RunMap.KIND_COOLING:
-			_apply_fx_srv(cp, {"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true})
-			cp["toast"] = "COOLING STATION — throttled: integrity up, sectors repaired, reserves topped."
+			# STOP LAUNDERING: no wound-clear (that was the bug), no fake integrity. Throttle
+			# spare cycles into the breaker (+⏻) and ease the healer's reserves (mana bites now).
+			_apply_fx_srv(cp, {"charge": 10, "mana": 0.75})
+			cp["toast"] = "COOLING — spare cycles throttled into the breaker: +10 ⏻ · reserves eased. (Sectors need a DEFRAG.)"
 			_broadcast_map(room)
 		RunMap.KIND_CACHE:
-			_apply_fx_srv(cp, {"patch": true})
-			cp["toast"] = "CACHE HIT — salvage routed to your most battered raider (+25%)."
+			_apply_fx_srv(cp, {"charge": 25})
+			cp["toast"] = "CACHE HIT — a breaker component, still warm: +25 ⏻ toward the Kill Switch."
 			_broadcast_map(room)
 		_:
 			_broadcast_map(room)
@@ -757,6 +760,7 @@ func _broadcast_map(room: Dictionary) -> void:
 		"fracs": cp["fracs"], "wounds": cp["wounds"], "mana": float(cp["mana"]),
 		"tickets": titles, "closed": int(cp["closed"]), "total": int(cp["total"]),
 		"entropy": int(cp["entropy"]),              # ⚡ the within-run luck pool (server-owned)
+		"charge": int(cp["charge"]),                # ⏻ THE KILL SWITCH meter (server-owned)
 		"toast": String(cp["toast"])})
 
 # ------------------------------------------------------------ send helpers

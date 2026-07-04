@@ -89,23 +89,22 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 	# what's left; the healer's mana carries too). Mirrors the offline _launch_map_fight.
 	var carry: Dictionary = spec.get("carry", {})
 	if not carry.is_empty():
-		var fracs: Array = carry.get("fracs", [])
+		# INTEGRITY RETIRED: fights boot at FULL HP of the WOUND-reduced pool (a carried HP
+		# fraction is meaningless — a healer tops it off in seconds). WOUNDS (max-HP cuts a
+		# heal can't fix) are the sole HP stake; MANA still carries (the resource-tax pass
+		# made it bite). An empty carry (a bare raid/single-Seal fight) skips this → identical.
 		var wounds: Array = carry.get("wounds", [])
 		var mana := float(carry.get("mana", 1.0))
 		for i in s.seats.size():
 			var u: Seat = s.seats[i]
 			if i < wounds.size():
 				u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(wounds[i]))))
-			if i < fracs.size():
-				u.hp = maxf(1.0, roundf(u.hp_max * float(fracs[i])))
+			u.hp = u.hp_max                       # boot FULL of the (wounded) pool
 			if u.role == "healer":
 				u.resource = roundf(u.resource_max * mana)
-	# P6 FIGHT-ALTERING MARK: an event may sabotage the next Seal (it boots WOUNDED).
-	# Rides the carry → the spec, so both replicas apply it identically. Absent = no-op.
-	var mark: Dictionary = carry.get("mark", {})
-	var cut := float(mark.get("boss_hp_cut", 0.0))
-	if cut > 0.0 and s.boss != null:
-		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - cut)))
+	# FIGHT-ALTERING MARK (THE KILL SWITCH cash-out + devil's-bargain curse): rides the
+	# carry → the spec, applied identically on every replica via the SHARED RaidMarks.
+	RaidMarks.apply(s, carry.get("mark", {}))
 	return s
 
 ## The standard AI raider for a seat — MUST be constructed identically everywhere

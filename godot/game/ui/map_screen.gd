@@ -22,6 +22,7 @@ var toast: String = ""               ## MAP-2: one-shot ticket pickup/close bann
 var gear_line: String = ""           ## GEAR-1: equipped curios + ⏣ (raid map; "" = hidden)
 var entropy: int = 0                  ## ⚡ within-run luck pool (Inference Check); 0 hides
 var prior: int = 0                    ## 📁 across-run luck floor; 0 hides
+var charge: int = -1                  ## ⏻ THE KILL SWITCH meter 0..100; <0 hides (solo map)
 
 var _hover: int = -1
 var _selectable: Array = []
@@ -74,7 +75,9 @@ func _build_header() -> void:
 	_label(rsub, 13, Palette.TEXT_DIM, Vector2(0, 148), UiKit.display(500, 3))
 	if subtitle != "":
 		_label(subtitle, 16, Palette.GOLD_BRIGHT, Vector2(0, 166), UiKit.title(700))
-	var status := "INTEGRITY %d%%" % int(round(hp_frac * 100.0))
+	# INTEGRITY only reads on the SOLO practice map (charge<0); the raid RETIRED it — a
+	# healer tops HP off, so the sole HP stake there is a corrupted sector (see wounds).
+	var status := ("INTEGRITY %d%%" % int(round(hp_frac * 100.0))) if charge < 0 else ""
 	if map.seal_shard_req > 0:
 		status += "      [CREDENTIAL SHARDS: %d / %d]" % [
 			int(inventory.get("shards", 0)), map.seal_shard_req]
@@ -84,6 +87,8 @@ func _build_header() -> void:
 	# roll) + 📁 Prior (your file, a floor on every check).
 	if entropy > 0 or prior > 0:
 		status += "      ⚡%d   📁%d(+%d%%)" % [entropy, prior, LuckProfile.prior_floor(prior)]
+	if charge >= 0:
+		status += "      ⏻ %d%% ARMED" % charge
 	_label(status, 15, Palette.TEXT, Vector2(0, 186), UiKit.display(600, 2))
 	# TICKETS (MAP-2): a one-shot toast for the last pickup/close, then the still-open list
 	if toast != "":
