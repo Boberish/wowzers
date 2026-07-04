@@ -543,6 +543,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-04 · `commander` · §SYSTEMS/§CLASSES — **CLAIMED: COMMANDER pivot + TEAM-COMP layer (Bill, direct):**
+  "when you play single player with the AI, you pick their upgrades and their setups as well — it's just the
+  auto rotation during the fight that the AI does" + "team comp matters: physical and magical resistances or
+  immunities, weaknesses to poison, stuff like that." Build order: (1) COMMANDER v1 offline — pre-descent
+  PARTY LOADOUT screen (AI seat aspects + healer class), per-seat REFORGE drafts (you draft the AI raiders'
+  boons too, shared ⏣ pool), boons/aspects ride the existing spec/`_inject_boons` paths; defaults untouched =
+  byte-identical. (2) DAMAGE SCHOOLS + boss resist/immune/weak profiles (guarded engine mult in `damage_boss`,
+  Realm-1 encounter profiles, HUD RESIST/WEAK feedback) so the party you assemble actually matters per fight.
+  Online rides later (spec already carries per-seat aspects/cls/boons). *(commander session)*
 - ☑ 2026-07-04 · `topo-bloom-seedfall` · §CLASSES — **BLOOMWEAVER REWORK "SEEDFALL": stacking + ramping seeds — MERGED to main (`b6e0346`, merge `8b3f5a5`).** (Bill: "the 'maturing' [ripen] thing is only meh… be able to STACK seeds… the HoT scales, resets when you stack — stack fast then let it cook.") Replaces the disliked RIPEN/harvest-window with a STACKING, RAMPING garden. Design via 24-agent workflow → artifact https://claude.ai/code/artifact/ecf1462b-6471-4d15-846c-21df88179414 ; Bill picked all 4 recommended forks (core-only scope / dedicated Bloom key + double-tap alias / full ramp reset / Constrict as a future boon branch). See [[bloomweaver-seedfall-rework]].
   - **Mechanic (ZERO CombatCore change — rides `seat.hots` [already a stacking Array] + `kit.upkeep` running the tick BEFORE `_apply_seat_effects`):** Growth STACKS a seed onto an ally's BED (soft cap 3 / grove 4, hard cap 5). One SHARED ramp per bed: a fresh/reset bed ticks at `ramp_floor` (0.35 / grove 0.40) and climbs to full over `ramp_time` 4.5s; ANY new seed RESETS it (`ramp_reset_frac` 0 = full reset, exposed as a sim knob). upkeep rewrites each bed's `tick = seed_base(8.5)·ramp·stacks` every frame → the engine fires the ramped value that same tick. Stack FAST, then hands-off to COOK.
   - **Cash-out:** dedicated **BLOOM** rune (key 4; Thornlash → 5) cashes fires-left × ramped tick × `bloom_eff` 0.9 (Clean Harvest boon → lossless ×1.15 for 15 Verdance). Growth on a HARD-capped bed ALIASES to Bloom (the double-tap gesture Bill kept). Lifesurge mass-blooms. Overgrowth/Sap Rot refresh WITHOUT resetting the ramp (topping a cooked field doesn't knock it down).
