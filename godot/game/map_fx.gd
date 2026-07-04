@@ -26,6 +26,7 @@ extends RefCounted
 const HP_FLOOR := 0.05           ## events bruise but never kill — only combat kills
 const WOUND_CAP := 0.6           ## corrupted sectors can pile, but not past this
 const CHARGE_MAX := 100          ## ⏻ THE KILL SWITCH meter ceiling
+const SKIRMISH_CHARGE := 8       ## ⏻ scavenged from a cleared skirmish (the reliable feed)
 
 static func apply(cp: Dictionary, fx: Dictionary) -> void:
 	var fracs: Array = cp.get("fracs", [])

@@ -3811,6 +3811,9 @@ func _on_end(won: bool) -> void:
 		if not won:
 			_show_end(false)
 			return
+		# THE KILL SWITCH: scavenge ⏻ from a cleared SKIRMISH (not the Seal — you cash out there)
+		if String(_map.node(_map_node)["kind"]) == RunMap.KIND_COMBAT:
+			_map_charge = mini(100, _map_charge + MapFx.SKIRMISH_CHARGE)
 		# GEAR-1: the kill's drop ceremony runs first, then the run continues wherever
 		# it was headed (map / elevation / campaign clear).
 		var after: Callable = _show_map

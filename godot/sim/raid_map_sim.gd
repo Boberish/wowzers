@@ -24,6 +24,7 @@ var _fights: Array = []
 var _shard_req: int = 0       ## credential-shard gate for the current floor (MAP-3c ROOT)
 var _n_tickets: int = 0       ## MAP-2 ticket quests placed on the current floor
 var _gate_seat := "tank"
+var _charge_at_seal: Array = []   # ⏻ ECON diagnostic: charge banked when a Seal is reached
 
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "60"))
@@ -44,6 +45,7 @@ func _initialize() -> void:
 		print("######## %s  →  Seal: %s ########" % [String(fl["title"]), seal_name])
 		print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
 		_prove_determinism()
+		_charge_at_seal = []
 		print("skill    clear%%   avg fights  avg integrity(end)  gates(won/fought)  losses at")
 		print("---------------------------------------------------------------------------------")
 		for sk in SKILLS:
@@ -68,7 +70,22 @@ func _initialize() -> void:
 			print("%-7s  %5.1f%%      %5.2f            %5.2f            %d/%d          %s" % [
 				sk["label"], 100.0 * cleared / n, fight_sum / n,
 				(integ_sum / maxf(1.0, float(cleared))), gate_wins, gates, _fmt(losses)])
+		# ⏻ ECON: avg charge banked when a Seal is reached, + the SURGE cut it buys
+		var avg_ch := _avg_i(_charge_at_seal)
+		print("  ⏻ charge@Seal: avg %.0f · max %d · SURGE cut ~%.0f%% boss HP" % [
+			avg_ch, _max_i(_charge_at_seal), avg_ch / 100.0 * RaidMarks.HP_CUT_CAP * 100.0])
 	quit()
+
+func _avg_i(a: Array) -> float:
+	if a.is_empty(): return 0.0
+	var t := 0
+	for v in a: t += int(v)
+	return float(t) / a.size()
+
+func _max_i(a: Array) -> int:
+	var m := 0
+	for v in a: m = maxi(m, int(v))
+	return m
 
 ## Same seed twice ⇒ identical map fingerprint AND identical full-run trace
 ## (visited nodes + every fight checksum) — the co-op/daily-seed guarantee.
@@ -260,11 +277,12 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				fights += 1
 				# THE KILL SWITCH: at a Seal, auto-cash-out the whole meter as an OVERCLOCK
 				# SURGE (mirrors the arming panel's spend-all) so the sim exercises the loop.
+				if String(n["kind"]) == RunMap.KIND_SEAL:
+					_charge_at_seal.append(int(carry["charge"]))   # econ diagnostic
 				if String(n["kind"]) == RunMap.KIND_SEAL and int(carry["charge"]) > 0:
 					var ch := int(carry["charge"])
-					(carry["marks"] as Dictionary).merge({
-						"boss_hp_cut": float(ch) / 100.0 * RaidMarks.HP_CUT_CAP,
-						"boot_freeze": int(round(float(ch) / 100.0 * 90.0))}, true)
+					(carry["marks"] as Dictionary).merge(
+						RaidMarks.overclock("surge", ch), true)
 					carry["charge"] = 0
 				var res := _fight(seed * 131 + pos, int(n["fight"]), carry, sk)
 				trace.append(int(res["checksum"]))
@@ -273,6 +291,8 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 						"integrity": _avg(carry["fracs"]),
 						"loss_at": String((_fights[int(n["fight"])] as EncounterRes).id),
 						"trace": str(trace)}
+				if String(n["kind"]) == RunMap.KIND_COMBAT:   # scavenge a breaker component
+					carry["charge"] = mini(100, int(carry["charge"]) + MapFx.SKIRMISH_CHARGE)
 				if String(n["kind"]) == RunMap.KIND_SEAL:
 					return {"cleared": true, "fights": fights, "gates": gates, "gate_wins": gate_wins,
 						"integrity": _avg(carry["fracs"]), "loss_at": "", "trace": str(trace)}

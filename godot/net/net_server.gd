@@ -161,6 +161,8 @@ func _end_fight(room: Dictionary) -> void:
 			_reset_lobby(room)
 			return
 		var seal := bool((room.get("map_fight", {}) as Dictionary).get("is_seal", false))
+		if not seal:                                # scavenge ⏻ from a cleared skirmish
+			cp["charge"] = mini(100, int(cp["charge"]) + MapFx.SKIRMISH_CHARGE)
 		if seal and int(cp["floor"]) + 1 >= RaidContent.FLOORS.size():
 			_broadcast(room, {"t": "campaign", "won": true})   # the last Seal (ROOT) — realm won
 			room["campaign"] = null
