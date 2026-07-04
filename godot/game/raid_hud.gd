@@ -231,6 +231,7 @@ var _challenge: AbilityRune        ## tank only
 var _spec: SpecGauge               ## tank
 var _tf_gauge: TwinfangGauge       ## blade
 var _rhythm: RhythmBar             ## blade
+var _opening: OpeningBar           ## blade — THE OPENING (punish the boss's swing)
 var _strike_idx: int = -1
 var _vc_gauge: VoidcallerGauge     ## caster
 var _pcast: PlayerCastBar          ## caster
@@ -2232,6 +2233,12 @@ func _build_band_blade() -> void:
 	# the line under the reticle on the right
 	_place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
 	_shake_root.add_child(_rhythm)
+	# THE OPENING — the offense-side vulnerability gauge, stacked above your metronome:
+	# read the boss's swing and slam your dumps into the molten sweet spot.
+	_opening = OpeningBar.new()
+	_opening.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place(_opening, 0.35, 0, 0.35, 0, -360, 548, 360, 636)
+	_shake_root.add_child(_opening)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.ENERGY, "ENERGY", true)
 	_tf_gauge = TwinfangGauge.new()
@@ -3108,6 +3115,17 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_tf_gauge.flow_mult = float(obs.get("flow_mult", 1.0))
 	_tf_gauge.tier = int(obs.get("tier", 0))
 	_tf_gauge.venom = obs.get("venom", {"V": 0, "F": 0, "C": 0, "syn_ramp": 1.0, "syn_active": false})
+	if _opening != null:
+		# THE OPENING — the boss's vulnerability window; armed = a dump is ready to punish it
+		_opening.now_tick = int(obs.get("tick", 0))
+		_opening.from_tick = int(obs.get("open_from", -1))
+		_opening.peak_tick = int(obs.get("open_peak", -1))
+		_opening.to_tick = int(obs.get("open_to", -1))
+		_opening.core_ticks = int(obs.get("open_core_ticks", 3))
+		_opening.bonus_now = float(obs.get("open_bonus_now", 0.0))
+		_opening.active = int(obs.get("open_to", -1)) >= _opening.now_tick
+		_opening.armed = int(obs.get("cp", 0)) >= 1 or bool(obs.get("coup_ready", false)) \
+			or bool(obs.get("rupture_ready", false)) or float(obs.get("energy", 0.0)) >= 28.0
 	var energy := float(obs.get("energy", 0.0))
 	var cpn := int(obs.get("cp", 0))
 	var in_green: bool = _rhythm.since >= _rhythm.perfect_lo and _rhythm.since <= _rhythm.perfect_hi
@@ -3406,6 +3424,14 @@ func _handle_event(ev: Dictionary) -> void:
 		"coup":
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_add_shake(7.0)
+		"opening":
+			# THE OPENING — a dump landed in the boss's vulnerability window
+			if mine and _opening != null:
+				var g := String(ev.get("grade", ""))
+				_opening.show_result(g)
+				if g == "peak":
+					_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
+					_add_shake(4.0)
 		"kick_whiff", "int_whiff":
 			if mine:
 				_big_text("whiff", Palette.TEXT_DIM, 20, 0.5)

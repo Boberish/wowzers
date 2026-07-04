@@ -39,6 +39,7 @@ var _book: Control = null
 var _bar: BossBar
 var _dial: BossCastDial
 var _rhythm: RhythmBar
+var _opening: OpeningBar         # THE OPENING — the offense-side vulnerability-window bar
 var _judge: StrikeJudge
 var _meter: MeterPanel          # the DPS meter window (M cycles views)
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
@@ -171,6 +172,13 @@ func _build_combat() -> void:
 	# the boss's Judgment Channel answers it under the reticle on the right
 	_place(_rhythm, 0.29, 0, 0.29, 0, -360, 656, 360, 756)
 	_shake_root.add_child(_rhythm)
+
+	# THE OPENING — the offense-side vulnerability bar, stacked just above your rhythm
+	# metronome: read the boss's swing and slam your dumps into the sweet spot.
+	_opening = OpeningBar.new()
+	_opening.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place(_opening, 0.29, 0, 0.29, 0, -360, 576, 360, 648)
+	_shake_root.add_child(_opening)
 
 	_judge = StrikeJudge.new()
 	_judge.verb = VERB
@@ -380,6 +388,17 @@ func _process(delta: float) -> void:
 	_rhythm.flow_max = int(obs.get("flow_max", 6))
 	var in_green := _rhythm.since >= _rhythm.perfect_lo and _rhythm.since <= _rhythm.perfect_hi
 
+	# THE OPENING bar — the boss's vulnerability window; armed = a dump is ready to punish it
+	_opening.now_tick = int(obs.get("tick", 0))
+	_opening.from_tick = int(obs.get("open_from", -1))
+	_opening.peak_tick = int(obs.get("open_peak", -1))
+	_opening.to_tick = int(obs.get("open_to", -1))
+	_opening.core_ticks = int(obs.get("open_core_ticks", 3))
+	_opening.bonus_now = float(obs.get("open_bonus_now", 0.0))
+	_opening.active = int(obs.get("open_to", -1)) >= _opening.now_tick
+	_opening.armed = int(obs.get("cp", 0)) >= 1 or bool(obs.get("coup_ready", false)) \
+		or bool(obs.get("rupture_ready", false)) or float(obs.get("energy", 0.0)) >= 28.0
+
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_en_orb.set_values(obs.get("energy", 0.0), obs.get("energy_max", 100.0))
 
@@ -511,6 +530,15 @@ func _handle_event(ev: Dictionary) -> void:
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_do_flash(Palette.PERFECT, 0.20)
 			_add_shake(7.0)
+		"opening":
+			# THE OPENING — a dump landed in the boss's vulnerability window
+			if bool(ev.get("player", false)) and _opening != null:
+				var g := String(ev.get("grade", ""))
+				_opening.show_result(g)
+				if g == "peak":
+					_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
+					_do_flash(Palette.GOLD, 0.12)
+					_add_shake(4.0)
 		"negate":
 			if bool(ev.get("player", false)):
 				_big_text("DODGE!", Palette.FLOW, 40, 0.55)

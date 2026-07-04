@@ -9,15 +9,20 @@ extends SceneTree
 
 const TICK_CAP_SEC := 180.0
 
+var _open_default := true   # --open=off runs the whole sim as classic Twinfang (byte-identical baseline)
+
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "300"))
 	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
+	_open_default = _arg("open", "on") != "off"
 	print("=== Project Rift — M5 Twinfang headless sim ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("")
 	if seed0 == 1: _prove_determinism()
 	print("")
 	if seed0 == 1: _prove_verb_mods(seeds)
+	print("")
+	if seed0 == 1: _prove_opening(seeds)
 
 	var rows: Array = []
 	var matchups := [
@@ -44,7 +49,7 @@ func _initialize() -> void:
 			var causes := {}
 			var dsum := {}
 			for seed in range(seed0, seed0 + seeds):
-				var r := _run_one(seed, String(m["enc"]), String(m["aspect"]), int(sk["lat"]))
+				var r := _run_one(seed, String(m["enc"]), String(m["aspect"]), int(sk["lat"]), {}, _open_default)
 				r["enc"] = m["enc"]; r["aspect"] = m["aspect"]; r["skill"] = sk["label"]; r["seed"] = seed
 				rows.append(r)
 				var rd: Dictionary = r.get("diag", {})
@@ -67,6 +72,9 @@ func _initialize() -> void:
 				env_sum / float(seeds), psn_sum / float(seeds), _fmt(causes)])
 			if not dsum.is_empty():
 				print("              strike beats/run: %s" % _fmt_diag(dsum, seeds))
+				var op := _fmt_open(dsum, seeds)
+				if op != "":
+					print("              openings/run:    %s" % op)
 		print("")
 
 	_write_csv(_arg("out", "res://out/twinfang_results.csv"), rows)
@@ -77,9 +85,10 @@ func _encounter(name: String) -> EncounterRes:
 	return TwinfangContent.make_executioner() if name == "executioner" else TwinfangContent.make_warden()
 
 func _run_one(seed: int, enc_name: String, aspect: String, latency: int,
-		boons: Dictionary = {}) -> Dictionary:
+		boons: Dictionary = {}, open_on: bool = true) -> Dictionary:
 	var cfg := TwinfangContent.make_config()
 	var tcfg := TwinfangContent.make_twinfang_config()
+	tcfg.open_enabled = open_on   # THE OPENING A/B: off = classic Twinfang (byte-identical baseline)
 	var s := TwinfangContent.make_state(seed, aspect, cfg, tcfg, _encounter(enc_name), boons)
 	var pol := s.seats[0].policy as TwinfangPolicy
 	pol.latency_ticks = latency
@@ -111,6 +120,35 @@ func _prove_verb_mods(seeds: int) -> void:
 		100.0 * bw / n, 100.0 * mw / n, procs / n, ("PASS" if det else "FAIL"),
 		("PASS" if (mw >= bw and procs > 0.0 and det) else "FAIL")])
 	print("")
+
+## THE OPENING probe: A/B the vulnerability-window verb ON vs OFF (Tempo / Executioner)
+## across the skill sweep. Proves it engages (peaks land), moves DPS (faster TTK on),
+## preserves the gradient (expert punishes the peak, sloppy misses the window), and stays
+## deterministic. Off == classic Twinfang (the byte-identical baseline verified separately).
+func _prove_opening(seeds: int) -> void:
+	var n := mini(seeds, 120)
+	print("THE OPENING probe (Tempo / Executioner, %d paired seeds — off vs on):" % n)
+	print("  skill    off-win  on-win   off-TTK  on-TTK   peaks/run hits/run whiff/run")
+	for row in [{"l": "expert", "v": 0}, {"l": "good", "v": 6}, {"l": "sloppy", "v": 14}]:
+		var lat := int(row["v"])
+		var offw := 0; var onw := 0
+		var offttk := 0.0; var onttk := 0.0; var offn := 0; var onn := 0
+		var pk := 0.0; var ht := 0.0; var wf := 0.0
+		for seed in range(1, n + 1):
+			var a := _run_one(seed, "executioner", "tempo", lat, {}, false)
+			var b := _run_one(seed, "executioner", "tempo", lat, {}, true)
+			if a["won"]: offw += 1; offttk += float(a["ttk_sec"]); offn += 1
+			if b["won"]: onw += 1; onttk += float(b["ttk_sec"]); onn += 1
+			var bd: Dictionary = b.get("diag", {})
+			pk += float(bd.get("open_peak", 0)); ht += float(bd.get("open_hit", 0))
+			wf += float(bd.get("open_whiff", 0))
+		print("  %-7s  %5.1f%%  %5.1f%%   %6.1fs  %6.1fs   %6.2f   %6.2f   %6.2f" % [
+			row["l"], 100.0 * offw / n, 100.0 * onw / n,
+			(offttk / offn if offn > 0 else 0.0), (onttk / onn if onn > 0 else 0.0),
+			pk / n, ht / n, wf / n])
+	var d1 := _run_one(17, "executioner", "tempo", 6, {}, true)
+	var d2 := _run_one(17, "executioner", "tempo", 6, {}, true)
+	print("  determinism (openings on): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)
@@ -154,6 +192,14 @@ func _run(s: CombatState) -> Dictionary:
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
 	}
+
+## THE OPENING per-run averages (peak / hit-window / whiffed-dump).
+func _fmt_open(d: Dictionary, seeds: int) -> String:
+	var parts: Array = []
+	for k in ["open_peak", "open_hit", "open_whiff"]:
+		if d.has(k):
+			parts.append("%s %.2f" % [k.substr(5), float(d[k]) / float(seeds)])
+	return " · ".join(parts)
 
 ## M7 strike-grade averages per run.
 func _fmt_diag(d: Dictionary, seeds: int) -> String:

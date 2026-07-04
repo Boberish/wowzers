@@ -421,7 +421,7 @@ static func _tank(aspect: String) -> Seat:
 	return u
 
 static func _blade(aspect: String) -> Seat:
-	var tcfg := TwinfangConfig.new()
+	var tcfg := TwinfangConfig.new()   # THE OPENING is live for every raid Twinfang fight (open_enabled default)
 	var u := Seat.new()
 	u.role = "dps"; u.unit_name = "The Twinfang"; u.fidelity = "full"
 	u.hp_max = tcfg.hp_max; u.hp = tcfg.hp_max; u.dps = 0.0

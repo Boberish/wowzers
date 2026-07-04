@@ -553,6 +553,35 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-04 · `openings-poc` · §CLASSES/§GRAPHICS — **THE OPENING — a new offense-side timing verb — MERGED to main (fast-forward).**
+  (Bill: "our verbs are too centered around the tank/dodging stuff… meh for dps and heals, lets try new verbs
+  more general and fun" → picked ① THE OPENING → "a vulnerable hit timing bar, hit your evis and venoms right
+  when/around/after they hit" → "much prettier and fancy" + "add it to the raid mode, always on raid, for all
+  twinfang raid fights".) Inverts the telegraph from DANGER→OPPORTUNITY: a boss swing OVEREXTENDS it, opening a
+  vulnerability window around the impact tick; the blade's DUMPS (Eviscerate/Coup/Rupture/Flurry) landed in the
+  sweet spot (just after impact) hit ×1.90 at the peak, tapering to ×1.05 at the edges, nothing outside. The
+  offense-side inverse of dodge/riposte — you don't answer the swing, you punish the recovery. **Kit-local, ZERO
+  engine change:** `twinfang_config` open_* tuning + master `open_enabled`; `twinfang_kit` `_stamp_opening`
+  (upkeep watches `s.telegraph`, schedules the window in `seat.vars`, deterministic) + graded `_opening_bonus`
+  in `_deal` + `_opening_note` aspect kicker (Tempo +Flow / Venom +poison on a PEAK) + `observe()` open_*/open_on;
+  `twinfang_policy` dump PATIENCE (bank a ready dump for the window, skill-scaled aim via the per-policy DetRng;
+  classic path when open_on=false → byte-identical). **Live in the raid** (`raid_content`/`gate_content`
+  open_enabled on — the boss's swings at the tank open the blade's window) with the OpeningBar wired into
+  `raid_hud`'s blade band (the one HUD). **Fancy `opening_bar.gd`** — Gilded Reliquary: gold frame + filigree,
+  engraved plaque, a molten crimson→ember WOUND that breathes, a sweet-spot that IGNITES, a sweeping plumb needle
+  with a motion trail + boundary gems, and a spark-burst PUNISH. Rewards Tempo (timing aspect) strongly, Venom
+  (forgiving DoT) lightly — sharpens the aspect contrast. **Verified:** twinfang open=off byte-identical to main
+  (720 rows); other 4 class sims byte-identical (determinism PASS, matching checksums); raid determinism PASS
+  (4 Seals); **Gemini A/B 150 seeds — openings SPED kills (expert 70.1→61.6s) and NUDGED sloppy UP 60.7→65.3**
+  (faster kill = less healer exposure) → balance-neutral-to-positive, no retune; ui_smoke_raid + ui_smoke_twinfang
+  PASS; WSLg render clean (blade leads the damage meter). **Merge hygiene:** checkpointed Bill's finished-but-
+  uncommitted working-tree UI polish first (`d254441` — rhythm-bar bounded-green fix + gauge_gallery + class_codex
+  Bloomweaver page + raid_hud `_seat_cls_now`), so the branch built on the latest (raid_hud 3-way auto-merged).
+  Debug: `godot --path godot game/twinfang_main.tscn -- --autostart=tempo:executioner` (solo) or PLAY→blade→Seal
+  (raid). Probe: `sim/screenshot_opening.gd`. See [[openings-verb]]. **NEXT (parked):** window-cadence tune if the
+  raid wants more openings; roll the verb out to Voidcaller (punish casts) + the wider roster; other parked verbs
+  (Overclock/Vent, Charge&Release for healers).
+
 - ☑ 2026-07-04 · `commander` · §SYSTEMS/§CLASSES — **COMMANDER v1 — you build the WHOLE party — MERGED to main.**
   (Bill, direct: "when you play single player with the AI, you pick their upgrades and their setups as well —
   it's just the auto rotation during the fight that the AI does." The team-comp resist layer was split off
