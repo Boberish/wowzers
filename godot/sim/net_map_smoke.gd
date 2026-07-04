@@ -26,6 +26,7 @@ var nodes_picked := 0
 var drafts_done := 0            # online boons: how many times a client drafted
 var spec_boons_seen := false   # a fight spec carried per-seat boons
 var checks_answered := 0       # v6: online INFERENCE CHECKS the leader resolved
+var armed_online := false      # v11: the leader cashed the Kill Switch at a Seal (⏻>0)
 var check_toast_ok := true     # each check must produce a ✓/✗ dice toast
 var entropy_seen := -1         # last broadcast ⚡ (must never go negative)
 var first_entropy := -1        # v10: the descent's opening ⚡ (must reflect the leader's Prior)
@@ -52,7 +53,7 @@ func _initialize() -> void:
 func _client(pname: String) -> Dictionary:
 	var c := {"name": pname, "net": NetClient.new(), "ctrl": NetCombatController.new(),
 		"connected": false, "room": {}, "you": "", "mode": "lobby", "map": {},
-		"stop": {}, "awaiting": false, "desync": false, "last_in": 0,
+		"stop": {}, "arming": {}, "awaiting": false, "desync": false, "last_in": 0,
 		"campaign_won": null, "errs": [], "run": null, "boons": 0}
 	var net: NetClient = c["net"]
 	var ctrl: NetCombatController = c["ctrl"]
@@ -90,6 +91,10 @@ func _client(pname: String) -> Dictionary:
 	net.map_stop.connect(func(msg):
 		c["stop"] = msg
 		c["mode"] = "mapstop"
+		c["awaiting"] = true)
+	net.arming.connect(func(msg):        # THE KILL SWITCH cash-out prompt at a Seal
+		c["arming"] = msg
+		c["mode"] = "arming"
 		c["awaiting"] = true)
 	net.campaign_ended.connect(func(won):
 		c["mode"] = "done"
@@ -182,6 +187,11 @@ func _process(delta: float) -> bool:
 			if host["mode"] == "map" and bool(host["awaiting"]):
 				host["awaiting"] = false
 				_leader_pick(host)
+			elif host["mode"] == "arming" and bool(host["awaiting"]):
+				host["awaiting"] = false
+				var ch := int((host["arming"] as Dictionary).get("charge", 0))
+				armed_online = armed_online or ch > 0
+				(host["net"] as NetClient).send_arm("surge", ch)   # cash the meter as SURGE
 			elif host["mode"] == "mapstop" and bool(host["awaiting"]):
 				host["awaiting"] = false
 				_answer_event(host)
@@ -293,6 +303,7 @@ func _finish() -> void:
 	print("online boons: drafts=%d (ava=%d bo=%d) · rode a spec=%s" % [
 		drafts_done, int(ava["boons"]), int(bo["boons"]), str(spec_boons_seen)])
 	print("campaign_won: ava=%s bo=%s" % [str(ava["campaign_won"]), str(bo["campaign_won"])])
+	print("online Kill Switch armed at a Seal: %s" % str(armed_online))
 	print("online checks answered: %d · every check produced a ✓/✗ toast: %s · ⚡ never negative: %s" % [
 		checks_answered, str(check_toast_ok), str(entropy_seen >= 0)])
 	if not check_toast_ok:

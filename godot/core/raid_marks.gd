@@ -11,6 +11,20 @@ extends RefCounted
 
 const HP_CUT_CAP := 0.35          ## a full 100⏻ dump caps here (linear below)
 const DMG_BUFF_CAP := 0.55        ## the boss self-empower cap (mirrors combat_core)
+const SURGE_FREEZE_TICKS := 90    ## a full SURGE dump → this many ticks (3s) of frozen boss timers
+const SHIELD_ABSORB_MAX := 220.0  ## a full SHIELD PRIME dump → this much absorb on every seat
+
+## The OVERCLOCK PRIME cash-out: turn a ⏻ spend into a fight-mark. SHARED by the arming
+## panel (preview) AND the authoritative server (so a client can't forge the effect).
+static func overclock(kind: String, spend: int) -> Dictionary:
+	var n := clampi(spend, 0, 100)
+	match kind:
+		"surge":
+			return {"boss_hp_cut": float(n) / 100.0 * HP_CUT_CAP,
+				"boot_freeze": int(round(float(n) / 100.0 * SURGE_FREEZE_TICKS))}
+		"shield":
+			return {"party_absorb": float(n) / 100.0 * SHIELD_ABSORB_MAX}
+	return {}
 
 static func apply(s: CombatState, mark: Dictionary) -> void:
 	if mark.is_empty() or s.boss == null:

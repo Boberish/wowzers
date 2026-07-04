@@ -14,7 +14,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 10     # v10: ONLINE PRIOR — the claim msg carries the client's 📁 Prior tier; the server trusts it and folds it into each seat's check floor + starting ⚡
+const VERSION := 11     # v11: THE KILL SWITCH — ⏻ charge in the map frame; `arming` prompt + `arm` cash-out at a Seal (OVERCLOCK PRIME)
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

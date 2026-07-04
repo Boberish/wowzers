@@ -6,12 +6,8 @@
 class_name ArmingPanel
 extends Control
 
-signal armed(mark: Dictionary, spent: int)   ## a spend committed → this mark rides the pull
-signal banked()                               ## keep climbing toward the live UNPLUG
-
-const SURGE_MAX_CUT := 0.35     ## a full 100 ⏻ dump → this % off the boss
-const SURGE_FREEZE := 90        ## a full dump → this many ticks (3s) of frozen boss timers
-const SHIELD_MAX := 220.0       ## a full dump → this much absorb on every seat
+signal armed(kind: String, spend: int)   ## a spend committed ("surge"/"shield") → the pull gets the mark
+signal banked()                            ## keep climbing toward the live UNPLUG
 
 var charge := 0
 var boss_name := "THE SEAL"
@@ -86,9 +82,10 @@ func _spend() -> int:
 
 func _refresh() -> void:
 	var n := _spend()
-	var cut := int(round(float(n) / 100.0 * SURGE_MAX_CUT * 100.0))
-	var freeze := snappedf(float(n) / 100.0 * SURGE_FREEZE / 30.0, 0.1)
-	var absorb := int(round(float(n) / 100.0 * SHIELD_MAX))
+	var surge: Dictionary = RaidMarks.overclock("surge", n)
+	var cut := int(round(float(surge.get("boss_hp_cut", 0.0)) * 100.0))
+	var freeze := snappedf(float(surge.get("boot_freeze", 0)) / 30.0, 0.1)
+	var absorb := int(round(float((RaidMarks.overclock("shield", n) as Dictionary).get("party_absorb", 0.0))))
 	_surge_lbl.text = "the boss boots at %d%% HP, its timers frozen ~%.1fs — a free opening" % [100 - cut, freeze]
 	_shield_lbl.text = "each raider opens behind a %d-point absorb wall — eats a one-shot" % absorb
 	_surge_btn.text = "⚡ SURGE   (spend %d ⏻)" % n
@@ -98,13 +95,10 @@ func _refresh() -> void:
 	_shield_btn.disabled = not can
 
 func _on_surge() -> void:
-	var n := _spend()
-	armed.emit({"boss_hp_cut": float(n) / 100.0 * SURGE_MAX_CUT,
-		"boot_freeze": int(round(float(n) / 100.0 * SURGE_FREEZE))}, n)
+	armed.emit("surge", _spend())
 
 func _on_shield() -> void:
-	var n := _spend()
-	armed.emit({"party_absorb": float(n) / 100.0 * SHIELD_MAX}, n)
+	armed.emit("shield", _spend())
 
 # ---- builders
 func _title(t: String) -> void:

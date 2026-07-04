@@ -257,6 +257,8 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_pick_node(id, int(msg.get("id", -1)))
 		"choice":
 			_pick_choice(id, msg)
+		"arm":
+			_arm_choice(id, msg)
 		"pick":
 			_pick_boon(id, String(msg.get("id", "")))
 		"input":
@@ -511,7 +513,15 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 	match String(n["kind"]):
 		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 			room["map_fight"] = {"node": int(n["id"]), "is_seal": String(n["kind"]) == RunMap.KIND_SEAL}
-			_launch_map_fight_srv(room, int(n["fight"]))
+			# THE KILL SWITCH: at a Seal with ⏻ banked, offer the OVERCLOCK arming first
+			# (the leader cash-outs; the mark rides the pull). Else pull straight away.
+			var fights: Array = cp["fights"]
+			var enc: EncounterRes = fights[clampi(int(n["fight"]), 0, fights.size() - 1)]
+			if String(n["kind"]) == RunMap.KIND_SEAL and int(cp["charge"]) > 0:
+				room["pending_arm"] = int(n["fight"])
+				_broadcast(room, {"t": "arming", "charge": int(cp["charge"]), "boss": String(enc.name)})
+			else:
+				_launch_map_fight_srv(room, int(n["fight"]))
 		RunMap.KIND_EVENT:
 			# INFERENCE CHECK (v7 — the SEAT-PICKER): compute each choice's % / breakdown /
 			# gate for EVERY candidate seat and broadcast `by_seat`, so the party can send
@@ -721,6 +731,22 @@ func _avg_frac_srv(fracs: Array) -> float:
 
 ## A fight node: fold the carried campaign state into the spec and PULL, identically
 ## to a single-Seal fight — the lockstep replicas build the same carried opening.
+## The leader commits the OVERCLOCK arming at a Seal: spend ⏻ → a fight-mark (authoritative;
+## the server recomputes the mark from {kind, spend} so a client can't forge it), then pull.
+func _arm_choice(id: int, msg: Dictionary) -> void:
+	var room := _room_of(id)
+	if room.is_empty() or room["phase"] != "map" or room["host"] != id or not room.has("pending_arm"):
+		return
+	var cp: Dictionary = room["campaign"]
+	var kind := String(msg.get("kind", "bank"))
+	var spend := clampi(int(msg.get("spend", 0)), 0, int(cp["charge"]))
+	if kind != "bank" and spend > 0:
+		cp["charge"] = int(cp["charge"]) - spend
+		(cp["marks"] as Dictionary).merge(RaidMarks.overclock(kind, spend), true)
+	var fi := int(room["pending_arm"])
+	room.erase("pending_arm")
+	_launch_map_fight_srv(room, fi)
+
 func _launch_map_fight_srv(room: Dictionary, fi: int) -> void:
 	var cp: Dictionary = room["campaign"]
 	var fights: Array = cp["fights"]

@@ -431,6 +431,7 @@ func _ensure_net() -> void:
 	_net.desynced.connect(_on_desync)
 	_net.map_update.connect(_on_net_map)        # MAP-3b
 	_net.map_stop.connect(_on_net_mapstop)
+	_net.arming.connect(_on_net_arming)         # THE KILL SWITCH cash-out
 	_net.campaign_ended.connect(_on_net_campaign)
 	_net.draft_prompt.connect(_on_net_draft)    # online boons
 
@@ -1281,6 +1282,26 @@ func _apply_next_fight_mark(s: CombatState) -> void:
 	RaidMarks.apply(s, _map_marks)   # SHARED with RaidNet.build — one applier, never diverges
 	_map_marks = {}
 
+## Online OVERCLOCK arming at a Seal: the leader cash-outs (the server owns the ⏻ + mark);
+## spectators wait. Sends {kind, spend}; the server pulls the fight after.
+func _on_net_arming(msg: Dictionary) -> void:
+	_online_map = true
+	_screen = "arming"
+	_clear()
+	if _map_is_leader:
+		var ap := ArmingPanel.new()
+		ap.charge = int(msg.get("charge", 0))
+		ap.boss_name = String(msg.get("boss", "THE SEAL"))
+		ap.armed.connect(func(kind: String, spend: int): _net.send_arm(kind, spend))
+		ap.banked.connect(func(): _net.send_arm("bank", 0))
+		ap.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_ui.add_child(ap)
+	else:
+		var center := CenterContainer.new()
+		center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_ui.add_child(center)
+		_title(center, "⏻  the leader is arming the Kill Switch…", 18, Palette.CHARGE)
+
 ## THE KILL SWITCH cash-out (OVERCLOCK PRIME): a linear spend dial before a Seal. Committing
 ## a spend deducts ⏻ and folds the resolved mark into the pending fight-mark; banking skips it.
 func _show_arming(boss_name: String, proceed: Callable) -> void:
@@ -1289,9 +1310,9 @@ func _show_arming(boss_name: String, proceed: Callable) -> void:
 	var ap := ArmingPanel.new()
 	ap.charge = _map_charge
 	ap.boss_name = boss_name
-	ap.armed.connect(func(mark: Dictionary, spent: int):
-		_map_charge = maxi(0, _map_charge - spent)
-		(_map_marks as Dictionary).merge(mark, true)
+	ap.armed.connect(func(kind: String, spend: int):
+		_map_charge = maxi(0, _map_charge - spend)
+		(_map_marks as Dictionary).merge(RaidMarks.overclock(kind, spend), true)
 		proceed.call())
 	ap.banked.connect(func(): proceed.call())
 	ap.set_anchors_preset(Control.PRESET_FULL_RECT)
