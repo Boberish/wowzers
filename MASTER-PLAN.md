@@ -553,6 +553,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 📋 2026-07-04 · main (docs only) · §CLASSES — **`TEMPO-PLAN.md` written (design phase, NOT built).** Deep
+  redesign of Twinfang·Tempo into a risk/reward "greed dial" + a class-FRAMEWORK meant to generalize (Tempo is
+  the pilot). LOCKED with Bill: **Creeds** (miss-penalty temperament — Flourish/Drumline/Held Breath [Bloodwaltz
+  cut]; draft 1-of-3 random @ run start from a per-class unlocked pool; event-node swap for a wound/Token
+  penalty) · **Modules** (Hades-weapon UI addons, each adds a HUD gauge — Opening[built]/Edge/Deathmark/
+  Metronome/Hemorrhage; pick **1** at END of Floor 1, NOT 2, NOT at start) · **triggers OFF the auto-attack**
+  (remove the innate "every Perfect Strike" proc → payloads fire only on earned moments, bigger per proc) ·
+  **combo-gen fix** (Perfect +1 not +2, drop Tier-2 combo → a wind-up you spend) · **WHEN/THEN/ALWAYS** rename +
+  a visual "combo board" for legibility · **rarity = build-definingness** (Model A, numbers scale to trigger
+  frequency, Monotonic-Pool-safe) · **per-class levels = unlock count, overall = sum** (the PROGRESSION-PLAN
+  Rank track made visible; reconciled, no new grind currency). Full spec in `TEMPO-PLAN.md`; see [[tempo-redesign]]
+  memory. FUTURE (parked): titles · cosmetic transmog · social lobbies. **NEXT:** lock the open content picks
+  (§10) → build the RISK CORE + 2 Creeds + combo-fix first (§11). Bill is fine-tuning the trigger/effect menu.
+  *(tempo-design session)*
+
 - ☑ 2026-07-04 · `reckoner-online` · §CLASSES/§ONLINE/§MAPS — **THE RECKONER — ONLINE + personal GATE — DONE, MERGED to main.** Finishes the Reckoner's full integration (offline class + FORGE UI already merged). (1) **Online:** the blade seat is now a lobby CLASS toggle (Twinfang ⇄ Reckoner), mirroring the healer's — `net_server._class` accepts a blade class msg, `_valid_aspects` returns colossus/berserker when `cls == reckoner`, and `raid_hud`'s lobby shows the ◈ TWINFANG/RECKONER button. NetProtocol **v11→v12** (KILL SWITCH also took v11 concurrently; merged to v12). The netcode spec already threads per-seat `cls` generically (Commander/bloom-raid plumbing), so RaidNet `build`→ReckonerKit + `make_policy`→ReckonerPolicy (AI takeover) ride the wire unchanged. (2) **Personal GATE:** `GateContent.make_state`'s blade branch forks on `cls == reckoner` → the Reckoner's own solo boss (the **Sentinel**) recast to the FIREWALL identity (mirrors the Mender/Bloomweaver gate split); the stage puppet stays the placeholder rig. Works offline (map GATE node) and online. **Verified:** `net_smoke` ALL OK with a HUMAN reckoner blade + bloomweaver healer online — both replicas build ReckonerKit/BloomweaverKit and agree on IDENTICAL checksums, AI takeover clean; `ui_smoke_raid` ALL OK (new `gate exam blade/RECKONER` = ReckonerKit vs Sentinel/FIREWALL, healer gate kept last so the juice test holds); **byte-identical default comp** (all changes guarded by `cls == reckoner` / `seat == blade`; offline sims unaffected). ⚠ **Protocol v12: rebuild + redeploy the server with clients** (v11 rejected at handshake). **NEXT (unclaimed):** the deferred cosmetics (reckoner stage2d puppet, rune icons, audio); a commander-selectable reckoner AI blade; the 5 upgrade branches. See [[reckoner-warrior-proposal]].
 
 - ☑ 2026-07-04 · `killswitch` · §MAPS + §BOSSES — **THE KILL SWITCH P1 (node-variety + retire integrity) —
