@@ -71,9 +71,9 @@ func _setup() -> void:
 	_panel.body_text = String(ev["body"])
 	_panel.choices = descs
 	_spent_nudge = -1
-	_panel.resolver = func(orig: int, nudge: int) -> Dictionary:
+	_panel.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
 		_spent_nudge = nudge
-		return MapCheck.resolve(raw[orig], ctx, 1234, 5, orig, 0, {"nudge": nudge})
+		return MapCheck.resolve(raw[orig], ctx, 1234, 5, orig, attempt, {"nudge": nudge})
 	_panel.finished.connect(func(fx: Dictionary): _got_fx = fx)
 	root.add_child(_panel)
 

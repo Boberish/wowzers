@@ -82,6 +82,11 @@ static func apply(cp: Dictionary, fx: Dictionary) -> void:
 		if bool(fx.get("shard", false)):
 			inv["shards"] = int(inv.get("shards", 0)) + 1
 
+	# --- P6 fight-altering mark: sabotage the NEXT Seal (merged into cp.marks; applied
+	# at the next fight build, then cleared). Absent = untouched. ---
+	if fx.has("mark") and cp.has("marks"):
+		(cp["marks"] as Dictionary).merge(fx["mark"] as Dictionary, true)
+
 	# --- cross-node run flags (Phase 3 ripple; map-layer only) ---
 	if cp.has("flags"):
 		var flags: Dictionary = cp["flags"]

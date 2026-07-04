@@ -90,5 +90,44 @@ func _initialize() -> void:
 	if not glue_ok:
 		fails += 1
 
+	# ---- SEAT-PICKER (v7): each seat's build reads the SAME check differently; the die is
+	# seat-INDEPENDENT; and the leader's local resolve for the CHOSEN seat == the server's.
+	var seat_ctx := {
+		"tank": MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.8, 0, 4, 0, {}, {}, 0),
+		"caster": MapCheck.build_ctx([["interrupt"], ["interrupt"]], [], "disruptor", "caster", 0.8, 0, 4, 0, {}, {}, 0),
+		"blade": MapCheck.build_ctx([], [], "tempo", "blade", 0.8, 0, 4, 0, {}, {}, 0),
+		"healer": MapCheck.build_ctx([], [], "tidecaller", "healer", 0.8, 0, 4, 0, {}, {}, 0),
+	}
+	var hackc: Dictionary = (MapContent.event("helpdesk")["choices"] as Array)[1]   # HACK: interrupt, role caster
+	var chk2: Dictionary = hackc["check"]
+	var by_seat := {}
+	for st in seat_ctx:
+		by_seat[st] = int(MapCheck.chance(chk2, seat_ctx[st])["p"])
+	# the caster (interrupt boons + role-at-terminal) must clearly out-read the others
+	var caster_best: bool = int(by_seat["caster"]) > int(by_seat["tank"]) \
+		and int(by_seat["caster"]) > int(by_seat["blade"]) and int(by_seat["caster"]) > int(by_seat["healer"])
+	# per-seat agreement + seat-independent die
+	var seat_ok := true
+	var roll_ref := MapCheck.roll(4242, 5, 1, 0)
+	for st in seat_ctx:
+		var ladder2: Array = MapCheck.nudge_ladder(chk2, seat_ctx[st])
+		for nudge in [0, 1, 3]:
+			var eff: int = mini(nudge, ladder2.size())
+			var p_cli := int(by_seat[st]) if eff == 0 else int(ladder2[eff - 1])
+			var res2 := MapCheck.resolve(hackc, seat_ctx[st], 4242, 5, 1, 0, {"nudge": eff})
+			if int(res2["p"]) != p_cli or not is_equal_approx(float(res2["roll"]), roll_ref):
+				seat_ok = false
+	# _suggest_seat picks the caster given the by_seat chances
+	var cmeta := [{"kind": "check", "by_seat": {}}]
+	for st in seat_ctx:
+		(cmeta[0]["by_seat"] as Dictionary)[st] = {"chance": int(by_seat[st])}
+	var sug := NetServer._suggest_seat(["tank", "blade", "caster", "healer"], cmeta)
+	var pick_ok: bool = caster_best and seat_ok and sug == "caster"
+	print("seat-picker: by_seat={tank:%d blade:%d caster:%d healer:%d} · caster best %s · per-seat client==server + die seat-independent %s · suggest=%s %s" % [
+		int(by_seat["tank"]), int(by_seat["blade"]), int(by_seat["caster"]), int(by_seat["healer"]),
+		str(caster_best), str(seat_ok), sug, str(pick_ok)])
+	if not pick_ok:
+		fails += 1
+
 	print("MAP CHECK ONLINE PROBE: %s" % ("ALL PASS" if fails == 0 else "%d FAIL" % fails))
 	quit(0 if fails == 0 else 1)

@@ -10,7 +10,12 @@ extends Resource
 
 @export var hp_max: float = 310.0
 @export var energy_max: float = 100.0
-@export var energy_regen: float = 20.0      ## per second
+@export var energy_regen: float = 18.0      ## per second — RESOURCE-TAX pass: cut from 20 (gently).
+                                            ## Strike costs 12 and the rhythm gates you to ~one per
+                                            ## 0.6-0.95s, so at 20/s energy never emptied. At 17 a
+                                            ## finisher-heavy stretch (Evisc 25 / Coup 30) taxes the
+                                            ## bar — but NOT so hard it breaks Tempo's accelerando DPS
+                                            ## engine (14 did: good-tier missed the enrage race).
 
 @export var cp_max: int = 5                 ## combo points
 @export var flow_max: int = 6
@@ -48,6 +53,24 @@ extends Resource
 @export var dodge_active: float = 0.55      ## how long a dodge stays "active"
 @export var dodge_zone: float = 0.42        ## the visible answer window (last stretch of the swing)
 @export var dodge_cd: float = 2.4
+
+# --- THE OPENING (offense-side verb) — a boss swing OVEREXTENDS it: around each
+#     telegraphed swing's impact a VULNERABILITY window opens on the BOSS, and your
+#     DUMPS (Eviscerate / Coup / Rupture / Flurry) landed in it hit harder. It's the
+#     inverse of the dodge bar — you don't answer the swing, you PUNISH the recovery.
+#     Graded: the core (sweet spot, just AFTER impact) pays full open_bonus, tapering to
+#     open_min_bonus at the window edges, nothing outside. Basic Strikes keep their own
+#     self-rhythm groove untouched — the Opening times your BURST, not your beat, so
+#     Twinfang now has two timing layers. Kit-local + deterministic (no engine change).
+@export var open_enabled: bool = true       ## master switch (sims A/B it off = classic Twinfang)
+@export var open_pre_sec: float = 0.18      ## window opens this long BEFORE impact
+@export var open_post_sec: float = 0.42     ## ...and stays open this long AFTER ("when/around/after they hit")
+@export var open_peak_sec: float = 0.10     ## sweet-spot centre, this long AFTER impact
+@export var open_core_sec: float = 0.10     ## +/- this around the peak = full bonus
+@export var open_bonus: float = 0.90        ## peak dump damage bonus (x1.90) — a real spike
+@export var open_min_bonus: float = 0.05    ## edge-of-window dump bonus (x1.05) — a tight peak is the skill
+@export var open_flow: int = 1              ## Tempo: +Flow on a PEAK dump (reading the boss pays BPM)
+@export var open_venom: int = 2             ## Venom: +poison to the lit lane on a PEAK dump
 
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)

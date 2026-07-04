@@ -219,7 +219,7 @@ func _prove_carry(seeds: int) -> void:
 func _walk(seed: int, sk: Dictionary) -> Dictionary:
 	var map := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), GATE_QUOTA, _shard_req, _n_tickets)
 	var route := DetRng.new(seed * 7919 + 17)
-	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0}
+	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0, "marks": {}}
 	var inv := {}
 	var pos := -1
 	var fights := 0
@@ -293,7 +293,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				if not avail.is_empty():
 					var pick_i: int = avail[route.next_u32() % avail.size()]
 					var c: Dictionary = chs[pick_i]
-					if String(c.get("kind", "free")) == "check":
+					if MapCheck.check_like(String(c.get("kind", "free"))):
 						var res := MapCheck.resolve(c, ctx, map.seed, pos, pick_i, 0, {})
 						event_fails = 0 if bool(res["success"]) else event_fails + 1
 						_apply_fx(res["fx"], carry)
@@ -363,6 +363,11 @@ func _fight(fight_seed: int, fi: int, carry: Dictionary, sk: Dictionary) -> Dict
 	var fracs: Array = carry["fracs"]
 	var enc: EncounterRes = _fights[clampi(fi, 0, _fights.size() - 1)]
 	var s := RaidContent.make_state(fight_seed, RaidContent.encounter_by_id(String(enc.id)))
+	# P6: consume a pending sabotage mark (mirrors RaidNet.build / _apply_next_fight_mark)
+	var mcut := float((carry.get("marks", {}) as Dictionary).get("boss_hp_cut", 0.0))
+	if mcut > 0.0 and s.boss != null:
+		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - mcut)))
+	carry["marks"] = {}
 	var tp := s.seats[0].policy as RaidTankPolicy
 	tp.reaction_slack = float(sk["slack"])
 	tp.rng = DetRng.new(fight_seed * 2749 + 1337)

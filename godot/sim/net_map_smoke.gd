@@ -28,6 +28,7 @@ var spec_boons_seen := false   # a fight spec carried per-seat boons
 var checks_answered := 0       # v6: online INFERENCE CHECKS the leader resolved
 var check_toast_ok := true     # each check must produce a ✓/✗ dice toast
 var entropy_seen := -1         # last broadcast ⚡ (must never go negative)
+var first_entropy := -1        # v10: the descent's opening ⚡ (must reflect the leader's Prior)
 var pending_check := false     # awaiting the map toast after a check
 
 func _run_for(seat: String) -> RunState:
@@ -70,6 +71,8 @@ func _client(pname: String) -> Dictionary:
 		# v6: ⚡ Entropy must never go negative; a check's outcome rides in the toast (✓/✗)
 		if c["name"] == "Ava":
 			entropy_seen = int(msg.get("entropy", 0))
+			if first_entropy < 0:
+				first_entropy = entropy_seen
 			if entropy_seen < 0:
 				_fail("⚡ entropy went negative (%d)" % entropy_seen)
 			if pending_check:
@@ -152,8 +155,10 @@ func _process(delta: float) -> bool:
 		"boot":
 			if ava["connected"] and bo["connected"] \
 					and (ava["room"].get("players", []) as Array).size() == 2:
-				ava["net"].send({"t": "claim", "seat": "tank"})
-				bo["net"].send({"t": "claim", "seat": "healer"})
+				# v10: Ava is a veteran (📁 Prior 40 → +2% check floor + starting ⚡); the
+				# server trusts the claimed tier. Must not break lockstep.
+				ava["net"].send({"t": "claim", "seat": "tank", "prior": 40})
+				bo["net"].send({"t": "claim", "seat": "healer", "prior": 0})
 				phase = "claim"
 		"claim":
 			if _seat_of(ava, "Ava") == "tank" and _seat_of(bo, "Bo") == "healer":
@@ -198,18 +203,21 @@ func _answer_event(host: Dictionary) -> void:
 	var msg: Dictionary = host["stop"]
 	var meta: Array = msg.get("choices", [])
 	var ent := int(msg.get("entropy", 0))
-	# prefer a non-gated CHECK (to exercise the dice); else the first non-gated choice
+	var seat := String(msg.get("suggested", ""))     # v7: send the SUGGESTED specialist
+	# prefer a non-gated CHECK for that seat (exercise the dice); else the first non-gated
 	var pick := -1
 	var sc := {}
+	var bs := {}
 	for c in meta:
-		var cc: Dictionary = c
-		if not bool(cc.get("gated", false)) and String(cc.get("kind", "")) == "check":
-			pick = int(cc.get("i", 0)); sc = cc
+		var b: Dictionary = ((c as Dictionary).get("by_seat", {}) as Dictionary).get(seat, {})
+		if String((c as Dictionary).get("kind", "")) == "check" and not bool(b.get("gated", false)):
+			pick = int((c as Dictionary).get("i", 0)); sc = c; bs = b
 			break
 	if pick < 0:
 		for c in meta:
-			if not bool((c as Dictionary).get("gated", false)):
-				pick = int((c as Dictionary).get("i", 0)); sc = c
+			var b2: Dictionary = ((c as Dictionary).get("by_seat", {}) as Dictionary).get(seat, {})
+			if not bool(b2.get("gated", false)):
+				pick = int((c as Dictionary).get("i", 0)); sc = c; bs = b2
 				break
 	if pick < 0:
 		pick = 0
@@ -217,11 +225,11 @@ func _answer_event(host: Dictionary) -> void:
 	var kind := String(sc.get("kind", "free"))
 	if kind == "check":
 		checks_answered += 1
-		nudge = mini((sc.get("ladder", []) as Array).size(), ent)   # feed what we hold
+		nudge = mini((bs.get("ladder", []) as Array).size(), ent)   # feed what we hold
 		pending_check = true
-	print("[leader] answer '%s' choice %d (%s%s)" % [String(msg.get("title", "")), pick, kind,
-		("  ⚡×%d → %d%%" % [nudge, int(sc.get("chance", 0))]) if kind == "check" else ""])
-	(host["net"] as NetClient).send_choice(pick, nudge)
+	print("[leader] %s steps up: answer '%s' choice %d (%s%s)" % [seat, String(msg.get("title", "")),
+		pick, kind, ("  ⚡×%d → %d%%" % [nudge, int(bs.get("chance", 0))]) if kind == "check" else ""])
+	(host["net"] as NetClient).send_choice(pick, nudge, seat)
 
 func _leader_pick(host: Dictionary) -> void:
 	var msg: Dictionary = host["map"]
@@ -289,6 +297,13 @@ func _finish() -> void:
 		checks_answered, str(check_toast_ok), str(entropy_seen >= 0)])
 	if not check_toast_ok:
 		_fail("an online check resolved without a ✓/✗ dice toast")
+		return
+	# v10: the leader Ava's Prior 40 → starting ⚡ = starting_entropy(40)
+	var want_ent := LuckProfile.starting_entropy(40)
+	print("online Prior: opening ⚡ = %d (expect starting_entropy(40)=%d) %s" % [
+		first_entropy, want_ent, ("PASS" if first_entropy == want_ent else "FAIL")])
+	if first_entropy != want_ent:
+		_fail("leader Prior didn't flow into starting ⚡ (%d vs %d)" % [first_entropy, want_ent])
 		return
 	print("desyncs: ava=%s bo=%s" % [str(ava["desync"]), str(bo["desync"])])
 	if min_open_frac >= 0.999:

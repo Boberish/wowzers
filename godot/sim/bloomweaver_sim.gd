@@ -43,6 +43,10 @@ func _initialize() -> void:
 			var perfect := 0.0
 			var wilted := 0.0
 			var thorns := 0.0
+			var overcaps := 0.0
+			var cook_sum := 0.0
+			var stack_sum := 0.0
+			var bloom_n := 0.0
 			var dsum := {}
 			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(seed, String(m["enc"]), String(m["aspect"]), int(sk["lat"]))
@@ -53,6 +57,8 @@ func _initialize() -> void:
 					dsum[k] = int(dsum.get(k, 0)) + int(rd[k])
 				blooms += float(r["blooms"]); perfect += float(r["perfect"])
 				wilted += float(r["wilted"]); thorns += float(r["thorns"])
+				overcaps += float(r["overcaps"]); cook_sum += float(r["cook_sum"])
+				stack_sum += float(r["stack_sum"]); bloom_n += float(r["blooms"])
 				if r["won"]:
 					wins += 1; ttk_sum += float(r["ttk_sec"])
 				else:
@@ -64,6 +70,10 @@ func _initialize() -> void:
 			print("%-11s %-10s %-7s  %6.1f%%   %8.1fs      %5.1f  %5.1f  %5.0f  %6.0f   %s" % [
 				m["enc"], m["aspect"], sk["label"], wr, avg,
 				blooms / n, perfect / n, wilted / n, thorns / n, _fmt(causes)])
+			var cook_pct := (100.0 * cook_sum / bloom_n) if bloom_n > 0.0 else 0.0
+			var avg_stk := (stack_sum / bloom_n) if bloom_n > 0.0 else 0.0
+			print("            seeds: overcaps/run %.1f · bloom@ %d%% cooked · avg %.1f stacks/bloom" % [
+				overcaps / n, int(cook_pct), avg_stk])
 			if not dsum.is_empty():
 				print("            healer beats/run: %s" % _fmt_diag(dsum, seeds))
 		print("")
@@ -142,6 +152,9 @@ func _run(s: CombatState) -> Dictionary:
 		"wilted": float(hv.get("stat_wilted", 0.0)),
 		"thorns": float(hv.get("stat_thorns", 0.0)),
 		"planted": int(hv.get("stat_planted", 0)),
+		"overcaps": int(hv.get("stat_overcaps", 0)),
+		"cook_sum": float(hv.get("stat_bloom_cook_sum", 0.0)),
+		"stack_sum": int(hv.get("stat_bloom_stack_sum", 0)),
 		"diag": s.diag,
 		"checksum": s.checksum,
 	}

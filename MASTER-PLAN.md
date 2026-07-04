@@ -36,7 +36,7 @@
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
-| **Maps ("The Topology" — AtO-style node runs)** | 🟡 MAP-1/2/3 MERGED (rings, gates, tickets, online). **+ INFERENCE CHECK (deep events) P0–P2+P4+P5 MERGED** — build-read dice + ⚡Entropy/📁Prior luck meta, offline AND online co-op (protocol v6, server resolves; client==server 240/240). Branches (P3) + seat-picker + online-Prior open |
+| **Maps ("The Topology" — AtO-style node runs)** | ✅ MAP-1/2/3 + **INFERENCE CHECK COMPLETE** (P0–P6 + seat-picker + branches + wager/mulligan + online-Prior + fight-marks) — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events + wager kind + post-fail mulligan, offline AND online co-op (protocol v9, server resolves + traverses stages; client==server). protocol v10; FEATURE-COMPLETE (all follow-ups merged) |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
 
 ---
@@ -385,10 +385,43 @@ nodes, not node kinds.
     (map_seed,node,choice) lets the leader show the ✓/✗ LOCALLY, identical to the server's resolve —
     zero lockstep gymnastics. `net_server.resolve_event_choice` (PURE static: gate→roll→toast→⚡-spend)
     is the shared authority; the campaign holds server-owned ⚡Entropy/flags/check_fails; mapstop carries
-    per-choice %/breakdown/gate/ladder; `send_choice(i,nudge,seat)`. **Acting seat = the leader (MVP)** —
-    the protocol carries `seat` so a seat-picker is a UI-only add (the "party picks the seat" fork).
+    per-choice %/breakdown/gate/ladder; `send_choice(i,nudge,seat)`.
     **Online Prior starts at 0** (a dedicated server can't read a client's `user://` file — client-
     transmitted Prior tier is a small follow-up). ⚠ **v6: rebuild+redeploy the server with clients.**
+  - **SEAT-PICKER (the "party picks the seat" fork) — protocol v6→v7.** In co-op the leader chooses
+    WHICH seat steps up to a check — that seat's build drives the %. mapstop carries per-choice
+    `by_seat` ({seat → %/breakdown/ladder/gate}) for every candidate seat + a `suggested` specialist;
+    the panel has a **"WHO STEPS UP"** selector (★ = best fit) that re-renders every check % live; the
+    choice sends `{i, nudge, seat}` and the server resolves with that seat's ctx. The die is
+    seat-INDEPENDENT, so the leader's local ✓/✗ for the chosen seat == the server's. Verified: probe
+    per-seat client==server + die-seat-independent + suggest=caster (by_seat {tank:20 blade:20
+    caster:59 healer:20}); WSLg `screenshot_seatpick` (CASTER 60% → switch TANK → 21%). ⚠ **v7:
+    rebuild+redeploy.**
+  - **P3 MULTI-STAGE BRANCHES + CROSS-NODE FLAGS + more events — protocol v7→v8.** An event can
+    `branch` into a follow-up stage (arbitrary depth), a check leg can `goto` (fail-forward) into a
+    stage, and a `flag` set at one node ripples into a LATER node. `MapCheck.choice_slot(page,i)` gives
+    each stage its own die (root unchanged → byte-identical). OFFLINE: the panel stages client-side
+    (`staged` signal, "PROCEED →"); `raid_hud._render_event_page` renders each stage. ONLINE: the SERVER
+    owns staging (`cp.pending_page`; `_broadcast_mapstop(event,page)` per stage; `_pick_choice` traverses
+    branch/goto). New content (14 raid events now): **rollback_daemon** = a branch (Hear the catch →
+    out-argue check → fail-forward → scrubbed); **overtime_daemon** sets `covered_shift`/`freed_daemon`
+    flags; NEW **favor_returned** (flag-gated cross-node payoff), **entropy_daemon** (⏣→⚡ / GAMBLE /
+    ⚡-gated floor reroll), **performance_review** (nudge + prior-gate). Verified: NEW `map_branch_probe`
+    (structure/slots/staging/flag-gates + ONLINE glue: server goto='catch', catch check server==client
+    on the sub-page slot) ALL OK; `net_map_smoke` (v8) resolved 2 online checks w/ ✓/✗ toasts, zero
+    desyncs; solo `map_sim` byte-identical; `raid_map_sim` re-baselined (pool 14; determinism/structure
+    PASS, expert 100%, sloppy takes more check-attrition by design); WSLg `screenshot_branch` clean.
+    ⚠ **v8: rebuild+redeploy.**
+  - **WAGER kind + post-fail MULLIGAN — protocol v8→v9.** WAGER = a choice that stakes a fixed cost
+    (integrity/tokens/entropy) then rolls a build-read die; the stake is paid WIN OR LOSE (the fail leg
+    has no extra bite). `MapCheck.check_like()` unifies check+wager; `resolve` folds the stake.
+    overtime_daemon's "Bill it" is now a wager. MULLIGAN = a post-fail reroll; since the leader already
+    resolves LOCALLY, it's a local reroll at attempt+1 (a fresh deterministic die) and only the FINAL
+    committed attempt crosses the wire — online stays SINGLE-COMMIT (no new server state). ⚡ spent =
+    nudge + attempt×2 (cap 3); ⚡-spend + pity moved to commit-time so previews are side-effect-free.
+    Verified: NEW `map_wager_probe` (stake folds win-or-lose; online ⚡ accounting 6−(1+2×2)=1;
+    server==client at attempt 2; panel offers mulligan on a fail) ALL OK; net_smoke(v9)/net_map_smoke
+    (zero desyncs)/solo byte-identical/raid_map_sim PASS. ⚠ **v9: rebuild+redeploy.**
   - **Gates:** NEW `sim/map_check_sim.gd` ALL PASS (die determinism, uniform p=60→60.0%, monotonicity,
     clamp[5,95], bands off=25/themed+aspect=76/specialist=91, pity cap, nudge, gates). NEW
     `sim/map_event_probe.gd` ALL OK (panel builds + HACK check 59% + nudge 59→67% + gate lock/unlock).
@@ -501,6 +534,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## CURRENT / OPEN IDEAS (parking lot — promote into a section when claimed)
 
+- **TEAM-COMP layer (Bill 2026-07-04, deliberately split from the commander merge — "another subject,
+  focus the ai pick 1st"):** damage SCHOOLS (physical / void / poison / nature) + per-boss resist/immune/
+  weak profiles so the party you assemble answers the encounter. Design sketch from the commander session:
+  guarded mult in `CombatCore.damage_boss` (the SUNDER amp is the precedent slot; empty profile = 1.0 =
+  byte-identical), school mapping via a `ClassKit.school_of(src)` no-op hook riding the existing meter `src`
+  labels, profiles on `EncounterRes`, HUD RESISTED/WEAK pops + profile lines on the party screen / Seal
+  tooltips. Tuning rule: Seals get soft multipliers (±15–30%); full IMMUNE only for supplemental schools
+  (poison / thorns) and only on skirmish trash, so a class kit is never bricked mid-Seal. COMMANDER v1 is the
+  lever that makes profiles a real decision (re-aspect your raiders per fight). Needs its own claim + the
+  full byte-identical/retune gate (it IS an engine touch).
 - Game title candidates: *UNPLUGGED*, *Ctrl+Alt+DEFEAT*, *KILLSWITCH*, *RIFT: Do Not Trust Its Outputs* (these read Realm-1-flavored now; a realm-neutral title may fit better).
 - **Future realm seeds** (each = Seals ladder + map skin + joke register): *THE BUREAUCRACY* (paperwork hell — stamp-golems, queue mechanics, "please hold" telegraphs); *THE UNDERCROFT* (necropolis played straight — the contrast realm); *THE DEEP* (abyssal leviathans, pressure as attrition); *THE CLOCKWORK COURT* (fae mechanisms, rhythm-heavy strings); *THE KAIJU WEATHER STATION* (one enormous boss per floor).
 - Rewind verb (deterministic-engine showpiece) — parked, see Classes.
@@ -510,21 +553,95 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-03 · `reckoner` · §CLASSES — **The Reckoner (Warrior, 6th class) — IN PROGRESS.** The blade/melee-DPS seat becomes a class choice (Twinfang ⇄ Reckoner), mirroring the `bloom-raid` `cls`-threading (default `twinfang` → byte-identical). New verb COMMIT: an auto-advancing swing shaped by two tick-stamped presses — WIND (weight) × STRIKE (apex power) — a 3×3 grid, degrade-never-whiff; abilities Overswing/Ultraswing/Onslaught; resources Rage/Momentum/Poise-Break; aspects Colossus (punishing) / Berserker (forgiving, hyperarmor). Ported from a tuned browser greybox (True band ±1t). Stage 1 (this branch): kit/config/content/policy/sim + cls-wiring in raid_net/raid_content/run_state + raid_reckoner_probe. Stage 2 (later): raid-HUD class band + gauge + gate_content + net_server lobby. Gate: reckoner_sim determinism+bands, raid_reckoner_probe, byte-identical default comp (twinfang_sim + raid_sim).
+- ☑ 2026-07-04 · `reckoner` · §CLASSES — **THE RECKONER (Warrior, 6th playable class) — DONE, MERGED to main.** The blade/melee-DPS seat is now a CLASS CHOICE (Twinfang ⇄ Reckoner), mirroring the `bloom-raid` `cls`-threading (default `twinfang` → byte-identical). Verb **COMMIT**: an auto-advancing swing shaped by TWO tick-stamped presses — WIND (weight: Quick/Even/Heavy/Over) × STRIKE (apex power: Finesse / True ±1t / Overload) — degrade-never-whiff; abilities **Overswing** (wind-end haymaker) / **Ultraswing** (inserted bonus beat) / **Onslaught** (VENT 3-wind+3-strike phrase); resources Rage / Momentum / Poise-Break→STAGGER; **Clash** (apex onto a boss impact tick). Aspects **Colossus** (punishing/stagger) / **Berserker** (forgiving; Momentum snowball + hyperarmor). Ported from a tuned browser greybox (True band ±1t).
+  - **Engine/class (ZERO CombatCore change — snaps onto ClassKit hooks + seat.vars; only view-only `wind_commit` event added):** `data/reckoner/{config,kit,boons,content}.gd` + `sim/policies/reckoner_policy.gd` + `sim/reckoner_sim.gd` + `sim/raid_reckoner_probe.gd`; cls-wiring in `raid_net` (cls_of/make_policy/default_aspect) + `raid_content` (_reckoner/_blade_seat/make_state) + `run_state.start_reckoner` + `psim.sh`.
+  - **HUD (the one game HUD):** `_blade_cls` plumbing (mirrors `_healer_cls`) — 6th class card, aspect ceremony, `_build_band_reckoner`/`_render_band_reckoner`, `_reckoner_key` (SPACE = phase-aware wind/strike swing · F dodge · 1-4 abilities). **"THE FORGE" instrument** (`game/ui/reckoner_gauge.gd`, from a UI-spec workflow): a big linear WIND bellows bar (zones + EVEN money-core + fixed aim gate + sweeping hammer-notch) above a radial contracting ANVIL ring (constant close onto an emerald TRUE hub + NOW), Momentum pips + Poise meter, scale-punched verdict banner + paired grade-history gems; event-driven verdict/juice (`on_event` + `_reckoner_juice`: TRUE!/OVERSWING!/CLASH!/STAGGER!/ULTRA!/ONSLAUGHT! + free grade-colored damage floats).
+  - **Verified:** reckoner_sim determinism PASS (both aspects); bands **Colossus 100/95/82 · 100/85/55**, **Berserker 100/100/92 · 100/100/75** (the timing gate drives it, avg Momentum 7→1); raid_reckoner_probe ALL OK (Reckoner blade WINS riftmaw/mistral/mythos, metered, spec routes cls→kit+ReckonerPolicy); **byte-identical default comp** (raid_sim + twinfang_sim checksums identical). Merged `main` (Commander / THE OPENING / Seedfall) cleanly — `_make_run` folded into Commander's `_make_seat_run` (+ reckoner case), `_sync_blade_cls` kept alongside the party fns.
+  - **NEXT (unclaimed):** reckoner stage2d PUPPET (reuses twinfang rig), rune ICON art, AUDIO cues, online net_server lobby toggle + personal GATE fork (gate_content), class_codex entry; make reckoner a COMMANDER-selectable AI blade class (party toggle); the 5 UPGRADE BRANCHES (Buffer Overflow / Batch / Overclock / Force Quit / Race Condition). Debug: `--autostart=reckoner:colossus|berserker`. Sim: `scripts/psim.sh reckoner_sim 300`. See [[reckoner-warrior-proposal]].
 
+
+- ☑ 2026-07-04 · `openings-poc` · §CLASSES/§GRAPHICS — **THE OPENING — a new offense-side timing verb — MERGED to main (fast-forward).**
+  (Bill: "our verbs are too centered around the tank/dodging stuff… meh for dps and heals, lets try new verbs
+  more general and fun" → picked ① THE OPENING → "a vulnerable hit timing bar, hit your evis and venoms right
+  when/around/after they hit" → "much prettier and fancy" + "add it to the raid mode, always on raid, for all
+  twinfang raid fights".) Inverts the telegraph from DANGER→OPPORTUNITY: a boss swing OVEREXTENDS it, opening a
+  vulnerability window around the impact tick; the blade's DUMPS (Eviscerate/Coup/Rupture/Flurry) landed in the
+  sweet spot (just after impact) hit ×1.90 at the peak, tapering to ×1.05 at the edges, nothing outside. The
+  offense-side inverse of dodge/riposte — you don't answer the swing, you punish the recovery. **Kit-local, ZERO
+  engine change:** `twinfang_config` open_* tuning + master `open_enabled`; `twinfang_kit` `_stamp_opening`
+  (upkeep watches `s.telegraph`, schedules the window in `seat.vars`, deterministic) + graded `_opening_bonus`
+  in `_deal` + `_opening_note` aspect kicker (Tempo +Flow / Venom +poison on a PEAK) + `observe()` open_*/open_on;
+  `twinfang_policy` dump PATIENCE (bank a ready dump for the window, skill-scaled aim via the per-policy DetRng;
+  classic path when open_on=false → byte-identical). **Live in the raid** (`raid_content`/`gate_content`
+  open_enabled on — the boss's swings at the tank open the blade's window) with the OpeningBar wired into
+  `raid_hud`'s blade band (the one HUD). **Fancy `opening_bar.gd`** — Gilded Reliquary: gold frame + filigree,
+  engraved plaque, a molten crimson→ember WOUND that breathes, a sweet-spot that IGNITES, a sweeping plumb needle
+  with a motion trail + boundary gems, and a spark-burst PUNISH. Rewards Tempo (timing aspect) strongly, Venom
+  (forgiving DoT) lightly — sharpens the aspect contrast. **Verified:** twinfang open=off byte-identical to main
+  (720 rows); other 4 class sims byte-identical (determinism PASS, matching checksums); raid determinism PASS
+  (4 Seals); **Gemini A/B 150 seeds — openings SPED kills (expert 70.1→61.6s) and NUDGED sloppy UP 60.7→65.3**
+  (faster kill = less healer exposure) → balance-neutral-to-positive, no retune; ui_smoke_raid + ui_smoke_twinfang
+  PASS; WSLg render clean (blade leads the damage meter). **Merge hygiene:** checkpointed Bill's finished-but-
+  uncommitted working-tree UI polish first (`d254441` — rhythm-bar bounded-green fix + gauge_gallery + class_codex
+  Bloomweaver page + raid_hud `_seat_cls_now`), so the branch built on the latest (raid_hud 3-way auto-merged).
+  Debug: `godot --path godot game/twinfang_main.tscn -- --autostart=tempo:executioner` (solo) or PLAY→blade→Seal
+  (raid). Probe: `sim/screenshot_opening.gd`. See [[openings-verb]]. **NEXT (parked):** window-cadence tune if the
+  raid wants more openings; roll the verb out to Voidcaller (punish casts) + the wider roster; other parked verbs
+  (Overclock/Vent, Charge&Release for healers).
+
+- ☑ 2026-07-04 · `commander` · §SYSTEMS/§CLASSES — **COMMANDER v1 — you build the WHOLE party — MERGED to main.**
+  (Bill, direct: "when you play single player with the AI, you pick their upgrades and their setups as well —
+  it's just the auto rotation during the fight that the AI does." The team-comp resist layer was split off
+  mid-session per Bill's steer — "another subject, focus the ai pick 1st"; see the parking lot.) The solo raid
+  is now a commander game, ZERO engine files touched (everything rides the netcode spec plumbing that already
+  carried per-seat aspects/cls/boons):
+  - **PARTY SETUP screen** ("ASSEMBLE YOUR RAID", `raid_hud._show_party_setup`) between the realm card and the
+    descent: each AI seat = ASPECT ⇄ toggle + the healer seat's class toggle (Mender ⇄ Bloomweaver), aspect
+    blurb per row, your seat pinned gold. `_party {seat -> {cls, aspect}}` persists across descents in-session;
+    defaults = the verified comp. `_party_seat_cfg()` emits the full 4-seat spec cfg — at defaults it is
+    IDENTICAL to what `make_spec` fills for missing keys, so untouched = byte-identical by construction
+    (probe-proven). Commanded aspects also ride single-Seal `_launch` pulls.
+  - **You draft the AI raiders' boons:** `_ai_runs {seat -> RunState}` (draft streams decorrelated off the
+    human's `run_seed`); the post-fight REFORGE now CHAINS one DraftScreen per seat — yours first, then each
+    AI ally ("REFORGE — THE TWINFANG · AI ALLY / you command the build — the AI only drives the rotation") —
+    all spending the ONE shared ⏣ bank (mirrored into the AI run per screen, remainder banked back; rerolls/
+    locks/upsells work there too). All seats' boons ride the spec via `make_spec(..., seat_boons)` →
+    `RaidNet.build` folds each into its kit; boon procs are kit-side so AI policies need zero changes.
+    Online untouched (`_ai_runs` stays empty online; commander-online = a lobby-UI follow-up).
+  - **Gate PASS:** NEW `sim/commander_probe.gd` 14 checks ALL OK (default-cfg spec byte-identity · commanded
+    aspects/classes/boons land in the right kits · commanded fight deterministic over 600 ticks · draft chain
+    = you + 3 AI, one boon each, shared bank intact) · **all six sims byte-identical** vs the frozen-main
+    baseline (100 seeds via psim, logs AND per-seed CSVs: raid + 5 classes) · menu_probe / raid_boon_probe /
+    map_advance_probe extended + green · ui_smoke_raid gained a commander section (party toggles, commanded
+    descent, 4-draft chain) + net_smoke + ui_smoke_map ALL OK · NEW `sim/screenshot_commander.gd` WSLg probe
+    (party default/commanded + AI draft screen) eyeballed clean at 1080p.
+  - **NEXT (unclaimed):** ONLINE commander (host configures the AI seats in the lobby — the spec already
+    carries it) · draft-pacing lever if 4 drafts/fight drags in playtest (AI drafts only at Seal/gate kills,
+    or an AUTO-pick button per ally) · AI builds surfaced on the map (armor doll / build panel are human-only
+    today) · `Draft.mint` could count the AI seats' fight performance into the shared bank. *(commander session)*
+- ☑ 2026-07-04 · `topo-bloom-seedfall` · §CLASSES — **BLOOMWEAVER REWORK "SEEDFALL": stacking + ramping seeds — MERGED to main (`b6e0346`, merge `8b3f5a5`).** (Bill: "the 'maturing' [ripen] thing is only meh… be able to STACK seeds… the HoT scales, resets when you stack — stack fast then let it cook.") Replaces the disliked RIPEN/harvest-window with a STACKING, RAMPING garden. Design via 24-agent workflow → artifact https://claude.ai/code/artifact/ecf1462b-6471-4d15-846c-21df88179414 ; Bill picked all 4 recommended forks (core-only scope / dedicated Bloom key + double-tap alias / full ramp reset / Constrict as a future boon branch). See [[bloomweaver-seedfall-rework]].
+  - **Mechanic (ZERO CombatCore change — rides `seat.hots` [already a stacking Array] + `kit.upkeep` running the tick BEFORE `_apply_seat_effects`):** Growth STACKS a seed onto an ally's BED (soft cap 3 / grove 4, hard cap 5). One SHARED ramp per bed: a fresh/reset bed ticks at `ramp_floor` (0.35 / grove 0.40) and climbs to full over `ramp_time` 4.5s; ANY new seed RESETS it (`ramp_reset_frac` 0 = full reset, exposed as a sim knob). upkeep rewrites each bed's `tick = seed_base(8.5)·ramp·stacks` every frame → the engine fires the ramped value that same tick. Stack FAST, then hands-off to COOK.
+  - **Cash-out:** dedicated **BLOOM** rune (key 4; Thornlash → 5) cashes fires-left × ramped tick × `bloom_eff` 0.9 (Clean Harvest boon → lossless ×1.15 for 15 Verdance). Growth on a HARD-capped bed ALIASES to Bloom (the double-tap gesture Bill kept). Lifesurge mass-blooms. Overgrowth/Sap Rot refresh WITHOUT resetting the ramp (topping a cooked field doesn't knock it down).
+  - **Overcap / shields / Verdance:** 4th–5th seed spends 15 Verdance (refused if short — never silently drains). **Barkskin** sized by seeds under it (+15%/seed grove, +24% thornveil, cap +120%); **Perfect Ward COOKS the bed** to full ramp atop its Sap/Verdance refund. Verdance still = the efficiency gauge (earned only from effective heals + absorbs; overheal/wilt earn 0 → greedy over-stacking self-punishes, which makes uncapped stacking safe).
+  - **Aspects:** Wildgrove FLOURISH relit on TOTAL PARTY SEEDS (Σ stacks ≥6 → +25%, ≥10 → +40%; ripen deleted), soft cap 4, floor 0.40, Wildbloom COOKS the whole garden. Thornveil = seeds-as-armor (reflect scales with streak × seeds, Briarheart seed-fattened, snap-streak kept). **Constrict support branch DEFERRED** (ships as a boon branch when Bill wants it — a `ConstrictAllyKit` reading the coil via the `dps_factor` sentinel, zero-engine solo).
+  - **Boons reworked (all `_b()`-gated):** +Ironbark Roots (shield/seed) · Bountiful Bed (soft cap +1) · Clean Harvest (lossless Bloom for Verdance) · Thornbomb (Bloom rakes boss ×seeds); Deep Roots/Quickbloom/Quickening/Evergreen retuned to seeds; slot-verb Garden system kept.
+  - **GATE PASS:** other 5 classes **BYTE-IDENTICAL** (bulwark/mender/twinfang/voidcaller checksums matched frozen-main baseline exactly) · determinism PASS (both aspects + all 4 raid bosses) · **net_smoke ALL OK** (replica agreement + AI takeover) · ui_smoke_bloomweaver green. Diff = bloomweaver-only + its VerdanceGauge (kept vestigial `flourish_ripe`/`ripe_garden` fields so raid_hud's setters don't error). Bands (300 seeds, merged tree @ `sap_regen` 9): teachers 100 flat; Hollowking **wildgrove 93/77/59 · thornveil 91/83/83** — steeper skill gradient than the old 99/94/76 (the "stack fast" discipline bites the sloppy tier); Thornveil the forgiving aspect.
+  - **Concurrent-merge reconciliation:** the `resource-tax` pass (`cf29902`) landed on main mid-work and had cut Bloomweaver `sap_regen` 12→9 ("planting is a Sap budget"). The merge combined cleanly (my config rewrite kept that line byte-identical to base, so git applied their 9.0 on top of my new seed fields); **9.0 is HONORED** (it sharpens Seedfall's stack-fast Sap budget — thematically aligned), `seed_base` 8.5 held, and the bands above were RE-CONFIRMED on the merged tree (`git diff e3a56e5 HEAD` = bloomweaver + gauge + plan ONLY → other 5 classes provably byte-identical to current main).
+  - **NEXT (unclaimed):** raid-seat Bloomweaver's `raid_hud` still uses the OLD bloom-double-tap input + shows a stale gauge seed count (the solo rework changed the kit — needs a raid_hud bloom-key/gauge pass; solo is correct, raid doesn't crash) · the AI rarely over-caps (human-facing tool; a probe could exercise it) · **Constrict** boon branch when wanted · bespoke raid stage rig · a human WSLg pixel-glance of the new seed pips / cook gem / gauge.
 - ☑ 2026-07-03 · `topology-checks` · §MAPS — **THE INFERENCE CHECK — deep events + build-read dice +
   ⚡Entropy/📁Prior luck meta — MERGED to main (Bill: "the map is a joke, just +integrity jokes; we
   need deep decisions, side stuff like better luck next time, more than yes/no, an AtO-style dice
   system adapted to us").** Phases P0 (unified MapFx applier, byte-identical) → P1 (MapCheck pure
   resolver + 3 enriched raid events + breakdown panel, offline) → P2 (⚡ nudge stepper) + P4 (📁 Prior
-  persistence) → **P5 ONLINE PARITY (protocol v6 — co-op gets the real dice; server resolves,
-  client==server 240/240)**. Design dossier = the `inference-check` artifact; 5 forks locked (solo shallow ·
-  ENTROPY · soft fails · party-picks-seat · post-fail mulligan). Gates: NEW `map_check_sim`/
-  `map_event_probe`/`map_check_online_probe` ALL PASS; solo `map_sim` byte-identical; `raid_map_sim`
-  re-baselined (walker resolves checks, curve intact); `net_smoke`(v6)/`net_map_smoke`(zero desyncs)/ui
-  smokes green; WSLg `screenshot_event` clean. ⚠ **v6: rebuild+redeploy the server with clients.**
-  **OPEN follow-ups (unclaimed):** P3 branches+flags · P2-rest (mulligan/cushion/wager) · online
-  seat-picker + online Prior · more deep events · P6 marks. See §MAPS · THE INFERENCE CHECK.
+  persistence) → **P5 ONLINE PARITY + SEAT-PICKER** → **P3 MULTI-STAGE BRANCHES + cross-node FLAGS +
+  14 events (protocol v8 — server traverses stages)**. Design dossier = the `inference-check` artifact;
+  5 forks locked (solo shallow · ENTROPY · soft fails · party-picks-seat · post-fail mulligan). Gates:
+  NEW `map_check_sim`/`map_event_probe`/`map_check_online_probe`(+seat-picker)/`map_branch_probe`(+online
+  glue) ALL PASS; solo `map_sim` byte-identical; `raid_map_sim` re-baselined (pool 14, walker resolves
+  checks, curve intact); `net_smoke`(v8)/`net_map_smoke`(2 online checks, zero desyncs)/ui smokes green;
+  WSLg `screenshot_event`+`screenshot_seatpick`+`screenshot_branch` clean. ⚠ **v8: rebuild+redeploy the
+  server with clients.** **OPEN follow-ups (unclaimed):** P2-rest (mulligan/cushion/wager) · online Prior
+  (client transmits its tier) · P6 fight-altering marks. See §MAPS · THE INFERENCE CHECK.
 
 - ☑ 2026-07-03 · `healer-frames` · §GRAPHICS — **RAID-FRAME MEGA UPGRADE — MERGED to main
   (`353626d`) (Bill: bigger/awesome healer frames; shield bigger + clearly visible without
@@ -624,6 +741,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   HoTs/wards + Meditate's 280 battery); a true OOM wall needs trimming those efficiency tools (a Mender design
   call) or much more sustained damage. (c) rez feel: it rarely fires in AI sims (AI dies in cascades, not
   isolation) — it's mostly a human/co-op save; watch it in co-op.
+- ☑ 2026-07-04 · `resource-tax` · §BOSSES + §CLASSES — **RESOURCE-TAX pass (SECOND healing/resource pass) —
+  MERGED to main (`cf29902`).** Closes open item (b) above (mana-as-a-wall) + Bill's playtest steer: "mana is
+  still infinite, fights are short, too much resource regen — hurt mana a lot to overshoot the middle, similar
+  with other resources, and battles should be longer." Unlike the first pass (raid-gated `regen_mult`), this
+  trims the Mender's **efficiency tools at the config level** (so it bites everywhere the Mender plays):
+  `mana_regen 8→4.5` · **Meditate 280→160, cd 45→55** (the flagged battery) · core heal costs ×~1.5
+  (flash 22→33 / mend 16→24 / renew 18→27 / ward 20→30 / cascade 40→58 / well 30→46 / surge 22 / laststand 28 /
+  revive 340→380). Other resources (softer — "keep execution the focus"): **Twinfang energy 20→18** (gentle;
+  14 broke Tempo's accelerando — good-tier missed enrage, so backed off), **Bloomweaver sap 12→9**; Voidcaller
+  Focus (build-and-spend) + Bulwark rage (combat-gen) left as the already-gated exemplars. **Longer fights** —
+  raid Seals HP +~17% / enrage +~20% (riftmaw 13500→15500/90 · mistral 13500/95 · gemini 16500/108 · mythos
+  19000/142).
+  **Result (raid_sim 200 seeds):** healer mana floor now DIPS to **exp 46-57% / good 0-48% / sloppy OOM-wall**
+  (was never <42%, idle 9-54%) — you finally watch the bar; fights **+20-25% longer**. Bands: expert 100 all
+  Seals · good 96-100 · sloppy riftmaw 80 / mistral 100 / gemini 60 / mythos 22. Determinism PASS ×4 Seals;
+  threat gate load-bearing (OFF 0.45 dps deaths vs ON 0.00); solo Mender bands intact (choir ~79/83, rendmaw/
+  rotweaver ~100); Twinfang warden-tempo 100/100/0 & exec-tempo 100/88/0 & venom healthy; Bloomweaver bands
+  intact; Bulwark/Voidcaller untouched (localized change verified); ui_smoke_raid ALL OK.
+  **NEXT (wants Bill's playtest feel — the "middle" dial):** this landing keeps EXPERTS comfortable (floor ~half)
+  and punishes good/sloppy — if mana should bite experts too (true overshoot), cut `mana_regen` further (4.5→~3)
+  and/or costs up; if too harsh, ease regen back up. Still open from pass 1: (a) Mistral has no lethal dodge-check
+  (100/100/100); (c) rez feel in co-op. See [[raid-healer-under-pressured]].
 - ☑ 2026-07-03 · `online-boons` · §MAPS MAP-3b / §SYSTEMS — **Online co-op boons — MERGED to main
   (`24dd28a`)**, worktree removed. The Draft 2.0 boon draft now works in online co-op: each human
   seat drafts its OWN boons after each won fight, and the picks ride the fight SPEC per seat

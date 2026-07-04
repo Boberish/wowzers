@@ -115,6 +115,41 @@ func _sync_blade_cls() -> void:
 	elif _aspect == "tempo" or _aspect == "venomancer":
 		_blade_cls = "twinfang"
 
+## COMMANDER: make _party cover exactly the three seats the human doesn't occupy.
+## Defaults = the verified comp RaidNet.make_spec would fill in anyway; prior picks
+## survive a seat change between descents (only the vacated/claimed seats reset).
+func _ensure_party() -> void:
+	if _party.has(_seat_key):
+		_party.erase(_seat_key)
+	for key in RaidNet.SEAT_KEYS:
+		if key == _seat_key or _party.has(key):
+			continue
+		var cls := String(SEAT_CLASS.get(key, "bulwark"))
+		_party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
+
+## COMMANDER: the full 4-seat spec cfg — your seat + the commanded AI raiders. With
+## no party overrides this emits exactly the defaults make_spec fills in for missing
+## keys, so the spec (and the fight) stays byte-identical to the pre-commander game.
+func _party_seat_cfg() -> Dictionary:
+	var cfg := _human_seat_cfg()
+	_ensure_party()
+	for key in _party:
+		cfg[key] = {"aspect": String(_party[key]["aspect"]), "ai": true,
+			"cls": String(_party[key]["cls"])}
+	return cfg
+
+## COMMANDER: per-seat boons for the spec (yours + the AI raiders'); RaidNet.build
+## folds each into its seat's kit. Empty sets are omitted (spec unchanged = no drafts).
+func _seat_boons_now() -> Dictionary:
+	var out := {}
+	if _run != null and not _run.boons.is_empty():
+		out[_seat_key] = _run.boons
+	for key in _ai_runs:
+		var r: RunState = _ai_runs[key]
+		if r != null and not r.boons.is_empty():
+			out[key] = r.boons
+	return out
+
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
 	"strike": "Strike", "eviscerate": "Eviscerate", "kick": "Kick", "envenom": "Envenom",
@@ -165,6 +200,7 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 var _entropy: int = 0
 var _prior: int = 0
 var _flags: Dictionary = {}
+var _map_marks: Dictionary = {}    ## P6: a pending fight-altering mark (sabotage the next Seal)
 var _check_fails: int = 0          ## consecutive check fails → comeback pity (resets on any pass)
 
 # GEAR-1 (Curios / Realm-1 "peripherals"): run-scoped loot. Items evaporate with the
@@ -177,6 +213,12 @@ var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger 
 var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
 var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
 var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
+
+# COMMANDER (Bill, 2026-07-04): solo raid = you build the WHOLE party. The three AI
+# raiders' class/aspect are picked on the pre-descent PARTY screen, and their boons
+# are drafted BY YOU after every won fight — the AI only drives the rotation.
+var _party: Dictionary = {}             ## AI seats only: seat_key -> {cls, aspect}
+var _ai_runs: Dictionary = {}           ## AI seats only: seat_key -> RunState (their boon runs)
 
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
 var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
@@ -216,6 +258,7 @@ var _challenge: AbilityRune        ## tank only
 var _spec: SpecGauge               ## tank
 var _tf_gauge: TwinfangGauge       ## blade
 var _rhythm: RhythmBar             ## blade
+var _opening: OpeningBar           ## blade — THE OPENING (punish the boss's swing)
 var _strike_idx: int = -1
 var _vc_gauge: VoidcallerGauge     ## caster
 var _pcast: PlayerCastBar          ## caster
@@ -293,6 +336,7 @@ func _show_home() -> void:
 	_gate_live = false
 	_online_map = false
 	_run = null                       # no descent = no boon run (fresh one per descent)
+	_ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
 	_clear()
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -380,7 +424,7 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	var card := AspectCard.new("REALM 1 · THE TAKEOVER",
 		"The ironic AI takeover. Descend the Topology, Ring 3 → 0 — MISTRAL → GEMINI → CLAUDE MYTHOS. Route the node map, carry your wounds, draft your build. (More realms to come.)",
 		Palette.CRIMSON, "")
-	card.chosen.connect(func(): _start_map_run())
+	card.chosen.connect(func(): _show_party_setup())   # COMMANDER: assemble the raid first
 	mid.add_child(card)
 	var back := Button.new()
 	back.text = "◂ back to aspect"
@@ -394,6 +438,89 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 ## returns to the one HOME menu (the old dev BossSelect front door is retired).
 func _show_select(_seat: String = "tank") -> void:
 	_show_home()
+
+# ============================================================ PARTY SETUP (COMMANDER)
+## You command the whole warband: each AI raider's class + aspect is YOUR call here,
+## and their boons are yours to draft after every won fight — in combat the AI only
+## drives the rotation. Defaults = the verified comp, so pressing straight through
+## DESCEND is the same raid as before commander mode existed.
+func _show_party_setup() -> void:
+	_screen = "party"
+	_clear()
+	_ensure_party()
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 9)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -360, -300, 360, 300)
+	_ui.add_child(box)
+	var hl := _title(box, "ASSEMBLE YOUR RAID", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(box, "their class, their aspect, their boons — your call. the AI only drives the rotation.",
+		13, Palette.TEXT_DIM)
+	var gap0 := Control.new()
+	gap0.custom_minimum_size = Vector2(0, 8)
+	box.add_child(gap0)
+	for key in RaidNet.SEAT_KEYS:
+		var mine: bool = key == _seat_key
+		var cls: String = _seat_cls_now() if mine else String(_party[key]["cls"])
+		var aspect: String = _aspect if mine else String(_party[key]["aspect"])
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 10)
+		box.add_child(row)
+		var disp := "THE BLOOMWEAVER" if (key == "healer" and cls == "bloomweaver") \
+			else String(SEAT_NAMES[key])
+		var lab := Label.new()
+		lab.text = "%-15s %s  ·  %s" % [disp, ("YOU" if mine else "AI"), aspect.capitalize()]
+		lab.custom_minimum_size = Vector2(420, 32)
+		lab.add_theme_font_size_override("font_size", 16)
+		lab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if mine else Palette.TEXT)
+		row.add_child(lab)
+		if not mine:
+			if key == "healer":     # the healer seat is the only polymorphic CLASS
+				var clsb := Button.new()
+				clsb.text = "◈ " + ("BLOOMWEAVER" if cls == "bloomweaver" else "MENDER")
+				clsb.custom_minimum_size = Vector2(150, 32)
+				clsb.pressed.connect(func():
+					var nc := "mender" if cls == "bloomweaver" else "bloomweaver"
+					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
+					_show_party_setup())
+				row.add_child(clsb)
+			var ab := Button.new()
+			ab.text = "ASPECT ⇄"
+			ab.custom_minimum_size = Vector2(110, 32)
+			ab.pressed.connect(func():
+				var pool: Array = _lobby_aspects(String(key), cls)
+				var nxt := String(pool[0]["id"]) if aspect == String(pool[1]["id"]) \
+					else String(pool[1]["id"])
+				_party[key]["aspect"] = nxt
+				_show_party_setup())
+			row.add_child(ab)
+		# the chosen aspect's one-line identity, dim, under each row
+		for a in _lobby_aspects(String(key), cls):
+			if String(a["id"]) == aspect:
+				var d := _title(box, String(a["desc"]), 12, Palette.TEXT_DIM)
+				d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				d.custom_minimum_size = Vector2(600, 0)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 12)
+	box.add_child(gap)
+	var go := Button.new()
+	go.text = "⚔    DESCEND"
+	go.custom_minimum_size = Vector2(260, 52)
+	go.add_theme_font_size_override("font_size", 19)
+	go.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
+	go.pressed.connect(_start_map_run)
+	var goc := CenterContainer.new()
+	goc.add_child(go)
+	box.add_child(goc)
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	back.pressed.connect(func(): _show_raid_select(_seat_key, _aspect))
+	_place(back, 0.5, 1, 0.5, 1, -80, -58, 80, -24)
+	_ui.add_child(back)
 
 # ============================================================ ASPECT PICK
 ## BossSelect chose a seat (+ optionally a Seal) — now the Aspect ceremony.
@@ -592,7 +719,7 @@ func _show_lobby() -> void:
 			var cb := Button.new()
 			cb.text = "CLAIM"
 			cb.custom_minimum_size = Vector2(110, 34)
-			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key}))
+			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key, "prior": _my_prior()}))
 			row.add_child(cb)
 		elif claimant == me:
 			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
@@ -761,18 +888,21 @@ func _avg_frac(fracs: Array) -> float:
 	return t / float(fracs.size())
 
 ## An event panel: the LEADER picks a choice (sent to the server); others read it.
-## INFERENCE CHECK (v6): the server sends each choice's %/breakdown/gate for the acting
-## seat + ⚡ entropy; the leader renders real dice and shows the ✓/✗ LOCALLY (the pure die
-## keyed off the broadcast map_seed+node matches the server's authoritative resolve), then
-## sends {i, nudge}. Spectators read the prompt and see the outcome in the next map toast.
+## INFERENCE CHECK (v7 — SEAT-PICKER): the server sends each choice's by_seat metadata
+## (%/breakdown/gate for EVERY seat) + the suggested specialist + ⚡ entropy. The leader
+## picks WHO steps up, renders that seat's real dice, and shows the ✓/✗ LOCALLY (the pure
+## die keyed off map_seed+node matches the server's resolve for the SAME seat), then sends
+## {i, nudge, seat}. Spectators read the prompt and see the outcome in the next map toast.
 func _on_net_mapstop(msg: Dictionary) -> void:
 	_online_map = true
 	_screen = "mapstop"
 	_clear()
 	if _map_is_leader:
 		var eid := String(msg.get("event", ""))
+		var page := String(msg.get("page", ""))   # P3: the current branch stage
 		var ev := MapContent.event(eid)
-		var raw: Array = ev.get("choices", [])
+		var raw: Array = ev.get("choices", []) if page == "" \
+			else ((ev.get("pages", {}) as Dictionary).get(page, {}) as Dictionary).get("choices", [])
 		var meta: Array = msg.get("choices", [])
 		var mseed := int(msg.get("map_seed", 0))
 		var node := int(msg.get("node", 0))
@@ -782,34 +912,46 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 			var c: Dictionary = raw[i]
 			var sc: Dictionary = meta[i] if i < meta.size() else {}
 			var d := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
-				"orig_index": i, "fx": c.get("fx", {})}
-			if bool(sc.get("gated", false)):
-				d["gated"] = true
-				d["locked_reason"] = String(sc.get("locked_reason", "locked"))
-			elif d["kind"] == "check":
-				d["chance"] = int(sc.get("chance", 0))
-				d["breakdown"] = sc.get("breakdown", [])
-				d["verb"] = String(sc.get("verb", "CHECK"))
-				d["entropy_have"] = ent
-				d["nudge_ladder"] = sc.get("ladder", [])
+				"orig_index": i, "fx": c.get("fx", {}), "verb": String(sc.get("verb", "CHECK")),
+				"entropy_have": ent, "by_seat": sc.get("by_seat", {})}
+			if String(c.get("kind", "")) == "wager":
+				d["stake_label"] = _stake_label(c.get("wager", {}))
 			descs.append(d)
 		var p := MapEventPanel.new()
 		p.title_text = String(msg.get("title", ""))
 		p.body_text = String(msg.get("body", ""))
 		p.choices = descs
+		p.seats = msg.get("seats", [])
+		p.suggested = String(msg.get("suggested", ""))
 		p.accent = Palette.VOID
-		# Resolve locally for DISPLAY only (the pure die + the server's % → same verdict the
-		# server computes). Never applies fx — the server broadcasts the resulting integrity.
-		p.resolver = func(orig: int, nudge: int) -> Dictionary:
+		# Resolve locally for DISPLAY only, for the seat that STEPPED UP (p.committed_seat,
+		# set on press). The pure die + that seat's broadcast % == the server's resolve for
+		# the same seat. Never applies fx — the server broadcasts the resulting integrity.
+		# Resolve locally for DISPLAY at the chosen seat + attempt (mulligan). The die is a
+		# pure function of (map_seed, node, slot, attempt) so the server, resolving the SAME
+		# committed attempt, lands the SAME ✓/✗. Uses the full choice (incl. wager stake) so
+		# the reward hint matches what the server applies.
+		p.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
 			var sc: Dictionary = meta[orig] if orig < meta.size() else {}
-			var ladder: Array = sc.get("ladder", [])
-			var pp := int(sc.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
-			var roll := MapCheck.roll(mseed, node, orig, 0)
+			var bs: Dictionary = (sc.get("by_seat", {}) as Dictionary).get(p.committed_seat, {})
+			var ladder: Array = bs.get("ladder", [])
+			var pp := int(bs.get("chance", 0)) if nudge == 0 else int(ladder[nudge - 1])
+			var roll := MapCheck.roll(mseed, node, MapCheck.choice_slot(page, orig), attempt)
 			var success := roll < float(pp)
-			var leg: Dictionary = (raw[orig] as Dictionary).get("success" if success else "fail", {})
+			var choice: Dictionary = raw[orig]
+			var leg: Dictionary = choice.get("success" if success else "fail", {})
+			var fx: Dictionary = (leg.get("fx", {}) as Dictionary).duplicate(true)
+			var w: Dictionary = choice.get("wager", {})   # fold the wager stake for the hint
+			if not w.is_empty():
+				var amt := float(w.get("amount", 0))
+				match String(w.get("stake", "integrity")):
+					"integrity": fx["hurt"] = float(fx.get("hurt", 0.0)) + amt
+					"tokens": fx["tokens"] = int(fx.get("tokens", 0)) - int(amt)
+					"entropy": fx["entropy"] = int(fx.get("entropy", 0)) - int(amt)
 			return {"success": success, "roll": roll, "p": pp,
-				"result": String(leg.get("result", "")), "fx": leg.get("fx", {})}
-		p.finished.connect(func(_fx: Dictionary): _net.send_choice(p.committed_index, p.committed_nudge))
+				"result": String(leg.get("result", "")), "fx": fx}
+		p.finished.connect(func(_fx: Dictionary):
+			_net.send_choice(p.committed_index, p.committed_nudge, p.committed_seat, p.committed_attempt))
 		p.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_ui.add_child(p)
 	else:
@@ -924,8 +1066,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	_screen = "combat"
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
+	# (COMMANDER: the assembled party's aspects/classes ride single-Seal pulls too)
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), _enc_id)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -950,9 +1093,10 @@ func _start_map_run() -> void:
 	# The Inference Check meta resets for a fresh descent. ⚡ Entropy seeds from 📁 Prior
 	# (the veteran's warm welcome); Prior itself loads once from the permanent file
 	# (headless stays disk-inert — smokes/sims start from a clean file).
-	_prior = LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
+	_prior = _my_prior()
 	_entropy = LuckProfile.starting_entropy(_prior)
 	_flags = {}
+	_map_marks = {}
 	_check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _gear_unlocks directly.
@@ -968,8 +1112,16 @@ func _start_map_run() -> void:
 		_gear_unlocks = GearStore.load_unlocks()
 	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
 	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
-	# its picks ride into every pull (AI raiders stay on the verified boon-less comp).
+	# its picks ride into every pull.
 	_run = _make_run()
+	# COMMANDER: each AI raider gets its own boon run too — you draft on their behalf
+	# after every won fight. Seeds decorrelated from yours (disjoint draft streams).
+	_ensure_party()
+	_ai_runs = {}
+	for key in _party:
+		_ai_runs[key] = _make_seat_run(String(_party[key]["cls"]),
+			String(_party[key]["aspect"]),
+			int((_run.run_seed ^ (0x515EED + int(SEAT_IDX[key]) * 0x9E3779)) & 0x7FFFFFFF))
 	_build_floor()
 
 ## A minimal RunState for the human seat, just to carry boons + the draft economy
@@ -978,15 +1130,22 @@ func _start_map_run() -> void:
 func _make_run() -> RunState:
 	_sync_healer_cls()
 	_sync_blade_cls()
-	match _seat_key:
-		"blade": return (RunState.start_reckoner(_aspect) if _blade_cls == "reckoner"
-			else RunState.start_twinfang(_aspect))
-		"caster": return RunState.start_voidcaller(_aspect)
-		"healer": return (RunState.start_bloomweaver(_aspect) if _healer_cls == "bloomweaver"
-			else RunState.start_mender(_aspect))
-		_: return RunState.start(_aspect)
+	return _make_seat_run(_seat_cls_now(), _aspect, -1)
+
+## COMMANDER: a boon RunState for ANY seat (class starter by cls) — the commander
+## drafts on behalf of the AI raiders, so they carry the same run machinery you do.
+func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
+	match cls:
+		"reckoner": return RunState.start_reckoner(aspect, seed_v)
+		"twinfang": return RunState.start_twinfang(aspect, seed_v)
+		"voidcaller": return RunState.start_voidcaller(aspect, seed_v)
+		"mender": return RunState.start_mender(aspect, seed_v)
+		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
+		_: return RunState.start(aspect, seed_v)
 
 ## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
+## (Map pulls also ride ALL seats' boons through the spec — see _seat_boons_now;
+## this direct injection stays for the GATE path, which builds outside RaidNet.)
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
@@ -1148,46 +1307,69 @@ func _resolve_node(n: Dictionary) -> void:
 ## resolves exactly like before. Kind-less legacy choices route the free path too.
 func _event_stop(n: Dictionary) -> void:
 	var ev := MapContent.event(String(n["event"]))
+	_render_event_page(n, "", String(ev.get("title", "")), String(ev.get("body", "")),
+		ev.get("choices", []))
+
+## Render ONE stage of an event (the root page, or a branch/goto sub-page). Multi-stage
+## events chain client-side offline: a chosen leg with a `branch`/`goto` emits `staged`,
+## which applies its fx and renders the target page. The die is keyed per (page, choice)
+## via choice_slot, so a sub-page's checks get their own rolls; the root ("") is unchanged.
+func _render_event_page(n: Dictionary, page_id: String, title: String, body: String,
+		raw: Array) -> void:
 	var ctx := _map_ctx()
 	var map_seed := _map.seed if _map != null else 0
 	var node_id := int(n["id"])
-	var raw: Array = ev.get("choices", [])
 	var descs: Array = []
 	for i in raw.size():
 		descs.append(_prep_choice(raw[i], i, ctx))
 	_screen = "mapstop"
 	_clear()
 	var p := MapEventPanel.new()
-	p.title_text = String(ev.get("title", ""))
-	p.body_text = String(ev.get("body", ""))
+	p.title_text = title
+	p.body_text = body
 	p.choices = descs
 	p.accent = Palette.VOID
-	p.resolver = func(orig: int, nudge: int) -> Dictionary:
-		var res := MapCheck.resolve(raw[orig], ctx, map_seed, node_id, orig, 0, {"nudge": nudge})
-		if bool(res["success"]):
-			_check_fails = 0
-		else:
-			_check_fails += 1
-		if nudge > 0:                          # ⚡ fed to the sampler is spent on commit
-			_entropy = maxi(0, _entropy - nudge)
-		return res
+	p.client_stages = true
+	# Side-effect-free: the panel previews attempts (nudge + mulligan rerolls) freely; the
+	# ⚡ spend + comeback pity are applied once, on COMMIT (see _commit_event_spend).
+	p.resolver = func(orig: int, nudge: int, attempt: int) -> Dictionary:
+		return MapCheck.resolve(raw[orig], ctx, map_seed, node_id,
+			MapCheck.choice_slot(page_id, orig), attempt, {"nudge": nudge})
+	p.staged.connect(func(fx: Dictionary, page: String):
+		_commit_event_spend(p, fx)
+		var ev := MapContent.event(String(n["event"]))
+		var pg: Dictionary = (ev.get("pages", {}) as Dictionary).get(page, {})
+		_render_event_page(n, page, String(pg.get("title", title)),
+			String(pg.get("body", "")), pg.get("choices", [])))
 	p.finished.connect(func(fx: Dictionary):
-		_apply_map_fx(fx)
+		_commit_event_spend(p, fx)
 		_show_map())
 	p.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(p)
 
+## Apply a committed event choice: its fx, the ⚡ spent (nudge + mulligan rerolls), and
+## comeback pity (reset on a pass, +1 on a fail). One place so branch stages + the final
+## commit account identically.
+func _commit_event_spend(p: MapEventPanel, fx: Dictionary) -> void:
+	_apply_map_fx(fx)
+	var spend := int(p.committed_nudge) + int(p.committed_attempt) * MapCheck.MULLIGAN_COST
+	if spend > 0:
+		_entropy = maxi(0, _entropy - spend)
+	if bool(p.committed_is_check):
+		_check_fails = 0 if bool(p.committed_success) else _check_fails + 1
+
 ## Present a single choice: gate first (greyed if unmet), then a check gets its % +
-## itemized breakdown; a free choice carries its fx straight through.
+## itemized breakdown; a free/branch choice carries its fx + the page it opens (next_page).
 func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 	var kind := String(c.get("kind", "free"))
-	var d := {"label": String(c["label"]), "kind": kind, "orig_index": i, "fx": c.get("fx", {})}
+	var d := {"label": String(c["label"]), "kind": kind, "orig_index": i, "fx": c.get("fx", {}),
+		"next_page": String(c.get("branch", String(c.get("goto", ""))))}   # branch/goto target
 	var gate: Dictionary = c.get("gate", {})
 	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
 		d["gated"] = true
 		d["locked_reason"] = MapCheck.gate_reason(gate)
 		return d
-	if kind == "check":
+	if kind == "check" or kind == "wager":
 		var chk: Dictionary = c.get("check", {})
 		var info := MapCheck.chance(chk, ctx)
 		d["chance"] = int(info["p"])
@@ -1195,7 +1377,18 @@ func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 		d["verb"] = String(chk.get("verb", "CHECK"))
 		d["entropy_have"] = int(ctx.get("entropy", 0))       # ⚡ the party can feed
 		d["nudge_ladder"] = MapCheck.nudge_ladder(chk, ctx)   # the % at 1..min(3,⚡) fed
+		if kind == "wager":
+			d["stake_label"] = _stake_label(c.get("wager", {}))
 	return d
+
+## Human-readable wager stake ("10% integrity" / "2 ⏣" / "2 ⚡").
+func _stake_label(w: Dictionary) -> String:
+	var amt := float(w.get("amount", 0))
+	match String(w.get("stake", "integrity")):
+		"integrity": return "%d%% integrity" % int(round(amt * 100.0))
+		"tokens": return "%d ⏣" % int(amt)
+		"entropy": return "%d ⚡" % int(amt)
+	return ""
 
 ## The build context an Inference Check reads. Offline the human's seat is the only
 ## full build (AI raiders carry no boons), so `boon_tags` is the human's owned boons
@@ -1222,6 +1415,12 @@ func _bank_prior(won: bool) -> int:
 		LuckProfile.save_prior(_prior)
 	return gained
 
+## This client's 📁 Prior tier (headless/sims stay disk-inert). Sent to the server at
+## seat-claim (v10) so co-op checks read the veteran's warm welcome — the server can't
+## read a client's user:// file, so it trusts this.
+func _my_prior() -> int:
+	return LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
+
 ## A map fight: the node's encounter through the SAME shared factory as every raid
 ## pull, then each seat starts at its carried integrity.
 func _launch_map_fight(fi: int) -> void:
@@ -1230,7 +1429,9 @@ func _launch_map_fight(fi: int) -> void:
 	_clear()
 	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _human_seat_cfg(), String(enc.id))
+	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
+	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(enc.id), {}, _seat_boons_now())
 	var s := RaidNet.build(spec, _seat_key)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
@@ -1243,6 +1444,7 @@ func _launch_map_fight(fi: int) -> void:
 			u.hp = maxf(1.0, roundf(u.hp_max * float(_map_fracs[i])))
 			if u.role == "healer":    # the fuel gauge: mana carries between nodes
 				u.resource = roundf(u.resource_max * _map_mana)
+	_apply_next_fight_mark(s)   # P6: a pending sabotage mark weakens THIS boss, then clears
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1250,6 +1452,15 @@ func _launch_map_fight(fi: int) -> void:
 	_ctrl = _local_ctrl
 	_ctrl.begin(s, SEAT_IDX[_seat_key])
 	_spawn_oath_banner()   # GEAR-2: the sworn deed rides the HUD
+
+## P6: apply a pending fight-altering MARK (an event's sabotage) to this fight's boss,
+## then clear it. Absent (no mark) = the fight is byte-identical. Mirrors RaidNet.build's
+## online carry-mark so offline + online sabotage land the same boss HP.
+func _apply_next_fight_mark(s: CombatState) -> void:
+	var cut := float(_map_marks.get("boss_hp_cut", 0.0))
+	if cut > 0.0 and s.boss != null:
+		s.boss.hp = maxf(1.0, roundf(s.boss.hp * (1.0 - cut)))
+	_map_marks = {}
 
 ## A Tier-1 PERSONAL GATE exam (§GAME SHAPE): YOUR seat's class exam, fought alone —
 ## the class's solo fight, recast to its Realm-1 identity. Carry-in applies only to
@@ -1315,7 +1526,7 @@ func _raidify(choices: Array) -> Array:
 func _apply_map_fx(fx: Dictionary) -> void:
 	var cp := {
 		"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
-		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags,
+		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags, "marks": _map_marks,
 	}
 	MapFx.apply(cp, fx)
 	_map_mana = float(cp["mana"])
@@ -1681,29 +1892,64 @@ func _show_boon_draft(done: Callable) -> void:
 		return
 	if _ctrl != null and _ctrl.state != null:
 		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
-	var picks := Draft.roll_offers(_run)
+	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
+	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
+	var chain := done
+	var order: Array = []
+	for key in RaidNet.SEAT_KEYS:
+		if _ai_runs.has(key):
+			order.append(key)
+	order.reverse()
+	for key in order:
+		var k := String(key)
+		var next := chain
+		chain = func(): _show_seat_draft(k, next)
+	_show_seat_draft(_seat_key, chain)
+
+## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
+## AI drafts spend the SHARED ⏣ bank: Draft's economy reads run.tokens, so the bank
+## is mirrored into the AI run for the screen and the remainder banked back out.
+func _show_seat_draft(key: String, done: Callable) -> void:
+	var mine: bool = key == _seat_key
+	var run: RunState = _run if mine else (_ai_runs.get(key) as RunState)
+	if run == null:
+		done.call()
+		return
+	if not mine and _run != null:
+		run.tokens = _run.tokens
+	var picks := Draft.roll_offers(run)
 	if picks.is_empty():
 		done.call()
 		return
 	_screen = "draft"
 	_clear()
 	var extras: Array = []
-	if _run.tokens > 0:
-		extras.append("%d Tokens banked — REROLL / LOCK a card." % _run.tokens)
-	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
-		"Take one — every piece forges into your set.", extras, Palette.GOLD)
+	if run.tokens > 0:
+		extras.append("%d Tokens banked — REROLL / LOCK a card." % run.tokens)
+	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
+		else String(SEAT_NAMES.get(key, "RAIDER"))
+	var headline := "REFORGE — the kill reshapes your kit" if mine \
+		else "REFORGE — %s · AI ALLY" % disp
+	var flavor := "Take one — every piece forges into your set." if mine \
+		else "You command the build — the AI only drives the rotation."
+	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
 	ds.boon_taken.connect(func(boon: Dictionary):
-		Draft.take(_run, boon)
-		_taken_boons.append(boon)      # for the build panel (title + rarity)
-		# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
-		var slot := ArmorSlots.slot_of(boon)
-		var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
-		_toast_add("⚒  %s REFORGED — %s is piece %d" % [
-			ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
+		Draft.take(run, boon)
+		if mine:
+			_taken_boons.append(boon)      # for the build panel (title + rarity)
+			# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
+			var slot := ArmorSlots.slot_of(boon)
+			var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
+			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
+				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
+		else:
+			if _run != null:
+				_run.tokens = run.tokens   # bank the remainder back to the shared pool
+			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
-	# ARMORY: the set-so-far stands beside the forge (cards stay centered)
-	if not _taken_boons.is_empty() or not _map_gear.is_empty():
+	# ARMORY: the set-so-far stands beside YOUR forge (cards stay centered)
+	if mine and (not _taken_boons.is_empty() or not _map_gear.is_empty()):
 		var doll := ArmorDoll.new()
 		_place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
 			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
@@ -2037,6 +2283,12 @@ func _build_band_blade() -> void:
 	# the line under the reticle on the right
 	_place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
 	_shake_root.add_child(_rhythm)
+	# THE OPENING — the offense-side vulnerability gauge, stacked above your metronome:
+	# read the boss's swing and slam your dumps into the molten sweet spot.
+	_opening = OpeningBar.new()
+	_opening.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place(_opening, 0.35, 0, 0.35, 0, -360, 548, 360, 636)
+	_shake_root.add_child(_opening)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.ENERGY, "ENERGY", true)
 	_tf_gauge = TwinfangGauge.new()
@@ -2304,7 +2556,7 @@ func _toggle_pause() -> void:
 		return
 	if not _online and _ctrl != null:
 		_ctrl.paused = true
-	_pause = PauseOverlay.new(SEAT_CLASS.get(_seat_key, "bulwark"), _aspect,
+	_pause = PauseOverlay.new(_seat_cls_now(), _aspect,
 		_owned_boon_labels(), not _online)
 	_pause.resumed.connect(_resume_pause)
 	_pause.quit_to_menu.connect(_pause_quit)
@@ -2952,6 +3204,17 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_tf_gauge.flow_mult = float(obs.get("flow_mult", 1.0))
 	_tf_gauge.tier = int(obs.get("tier", 0))
 	_tf_gauge.venom = obs.get("venom", {"V": 0, "F": 0, "C": 0, "syn_ramp": 1.0, "syn_active": false})
+	if _opening != null:
+		# THE OPENING — the boss's vulnerability window; armed = a dump is ready to punish it
+		_opening.now_tick = int(obs.get("tick", 0))
+		_opening.from_tick = int(obs.get("open_from", -1))
+		_opening.peak_tick = int(obs.get("open_peak", -1))
+		_opening.to_tick = int(obs.get("open_to", -1))
+		_opening.core_ticks = int(obs.get("open_core_ticks", 3))
+		_opening.bonus_now = float(obs.get("open_bonus_now", 0.0))
+		_opening.active = int(obs.get("open_to", -1)) >= _opening.now_tick
+		_opening.armed = int(obs.get("cp", 0)) >= 1 or bool(obs.get("coup_ready", false)) \
+			or bool(obs.get("rupture_ready", false)) or float(obs.get("energy", 0.0)) >= 28.0
 	var energy := float(obs.get("energy", 0.0))
 	var cpn := int(obs.get("cp", 0))
 	var in_green: bool = _rhythm.since >= _rhythm.perfect_lo and _rhythm.since <= _rhythm.perfect_hi
@@ -3288,6 +3551,14 @@ func _handle_event(ev: Dictionary) -> void:
 		"coup":
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_add_shake(7.0)
+		"opening":
+			# THE OPENING — a dump landed in the boss's vulnerability window
+			if mine and _opening != null:
+				var g := String(ev.get("grade", ""))
+				_opening.show_result(g)
+				if g == "peak":
+					_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
+					_add_shake(4.0)
 		"kick_whiff", "int_whiff":
 			if mine:
 				_big_text("whiff", Palette.TEXT_DIM, 20, 0.5)

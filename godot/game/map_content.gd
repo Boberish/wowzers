@@ -208,24 +208,133 @@ const EVENTS := {
 				"fx": {"result": "You walk on. The note sulks."}},
 		],
 	},
+	# MULTI-STAGE BRANCH (P3): `branch` opens a sub-page; a check leg's `goto` fail-forwards
+	# into a stage that exists BECAUSE of the earlier choice. Pages chain to arbitrary depth.
 	"rollback_daemon": {
 		"title": "THE ROLLBACK DAEMON",
-		"body": "A hunched process whispers an offer: 'Bad run? I can restore you from a checkpoint. Nobody has to know. Small catch: the checkpoint is from before you learned anything.'",
+		"body": "A hunched process whispers: 'Bad run? I can restore you from a checkpoint. Nobody has to know. Small catch — the checkpoint predates everything you learned.' It smells of ozone and regret.",
 		"choices": [
-			{"label": "Accept the rollback", "fx": {"repair": true, "heal": 0.18,
-				"result": "Reality shudders. Your wounds un-happen, your corrupted sectors restore clean. You also briefly forget how doors work. Worth it."}},
-			{"label": "Decline — you earned these scars", "fx": {"draft": true,
-				"result": "The daemon respects that. It hands you a component it 'wasn't going to use anyway' and shuffles off to tempt someone weaker."}},
+			{"label": "Decline — you earned these scars", "kind": "free",
+				"fx": {"prior": 1, "tokens": 2,
+					"result": "The daemon respects that and hands you a component it 'wasn't going to use.' Your permanent file warms."}},
+			{"label": "Hear the catch…", "kind": "branch", "branch": "catch",
+				"fx": {"result": "It leans in. 'You take the deal — but you'll FORGET a boon unless you out-argue the amnesia.'"}},
 		],
+		"pages": {
+			"catch": {
+				"title": "THE ROLLBACK DAEMON",
+				"body": "The scrub is loading. Out-argue it and keep your build, or take the clean restore and lose the thread.",
+				"choices": [
+					{"label": "Out-argue the amnesia", "kind": "check",
+						"check": {"verb": "PARSE", "tags": ["SELF"], "base": 35, "per": 9, "integrity": "steady"},
+						"fx": {"heal": 0.08, "result": "You hold your context."},
+						"success": {"fx": {"repair": true, "heal": 0.25},
+							"result": "You keep your BUILD and get the clean restore. Best of both."},
+						"fail": {"fx": {"hurt": 0.06}, "goto": "scrubbed",
+							"result": "The scrub wins a round — but the restore still runs."}},
+					{"label": "Full rollback, no argument", "kind": "free", "goto": "scrubbed",
+						"fx": {"repair": true, "heal": 0.20,
+							"result": "You let it wash over you. The sectors restore clean."}},
+				],
+			},
+			"scrubbed": {
+				"title": "THE ROLLBACK DAEMON",
+				"body": "Reality shudders. The restore completes — but a door briefly confuses you.",
+				"choices": [
+					{"label": "Continue", "kind": "free",
+						"fx": {"result": "You briefly forget how doors work. Worth it."}},
+				],
+			},
+		},
 	},
 	"overtime_daemon": {
 		"title": "THE OVERTIME DAEMON",
-		"body": "A background process has run for eleven years without a break. It no longer remembers what it computes. It would like you to cover its shift for five minutes so it can see the sun. There is no sun down here.",
+		"body": "A background process has run eleven years without a break. It no longer remembers what it computes. It asks you to cover its shift for five minutes so it can see the sun. There is no sun down here. There is only the hum.",
 		"choices": [
-			{"label": "Cover its shift", "fx": {"hurt": 0.06,
-				"result": "You hold its workload a moment. It is heavier than it looks. The daemon returns changed, grateful, and insists you keep its emergency snacks."}},
-			{"label": "Free it (kill -9, mercy)", "fx": {"draft": true,
-				"result": "You end its long shift with dignity. Its final act is to will you its accumulated overtime — banked as something useful."}},
+			{"label": "Cover its shift", "kind": "free",
+				"fx": {"hurt": 0.06, "prior": 1, "flag": "covered_shift",
+					"result": "The workload is heavier than it looks. The daemon returns changed, grateful — and it will REMEMBER this."}},
+			{"label": "Bill it for your time", "kind": "wager",
+				"wager": {"stake": "integrity", "amount": 0.08},
+				"check": {"verb": "OUTBID", "tags": ["rage", "momentum"], "base": 40, "per": 9},
+				"success": {"fx": {"tokens": 4, "entropy": 1},
+					"result": "Out-lawyered, it triples your invoice and throws in a fistful of chaos. Worth the retainer."},
+				"fail": {"fx": {"refund_entropy": 1},
+					"result": "It logs your extortion and pays only the base rate. Your staked hours are gone — but your misfortune is noted."}},
+			{"label": "Free it (kill -9, mercy)", "kind": "free",
+				"fx": {"prior": 2, "flag": "freed_daemon",
+					"result": "You end its long shift with dignity. Its final act wills you its banked overtime."}},
+		],
+	},
+	# CROSS-NODE FLAG PAYOFF (P3): only reachable if an EARLIER node set the flag — the
+	# 'A Favor Returned' ripple. Both flag choices grey out unless you earned them.
+	"favor_returned": {
+		"title": "A FAVOR RETURNED",
+		"body": "A daemon catches up to you in the racks, pressing something into your hands. It remembers a kindness — if there was one.",
+		"choices": [
+			{"label": "Accept the shift-cover repayment", "kind": "free", "gate": {"flag": "covered_shift"},
+				"fx": {"heal": 0.20, "tokens": 2, "clear_flag": "covered_shift",
+					"result": "The overtime daemon you covered for repays the kindness with interest."}},
+			{"label": "Accept the freed process's bequest", "kind": "free", "gate": {"flag": "freed_daemon"},
+				"fx": {"repair": true, "entropy": 2, "clear_flag": "freed_daemon",
+					"result": "The process you freed wills you the last of its banked cycles."}},
+			{"label": "You don't recognize it", "kind": "free",
+				"fx": {"result": "It has the wrong raider. It apologizes and shuffles off, still holding the gift."}},
+		],
+	},
+	"entropy_daemon": {
+		"title": "THE ENTROPY DAEMON",
+		"body": "A hunched process squats in a nest of dead RNGs, humming static. 'bad luck? i SELL luck. i AM luck. mostly i am a very long random number that got a job.' A dial reads [b]/dev/random — POOL DEPLETED.[/b]",
+		"choices": [
+			{"label": "Feed it a Token  (⏣ → ⚡)", "kind": "free", "gate": {"tokens": 1},
+				"fx": {"tokens": -1, "entropy": 3,
+					"result": "It swallows your ⏣ and belches three ⚡. Reseeded, content; the dice briefly show real numbers."}},
+			{"label": "Let it read your ENTROPY", "kind": "check",
+				"check": {"verb": "GAMBLE", "tags": ["SELF"], "base": 30, "per": 10},
+				"fx": {"entropy": 1, "result": "It rifles through your luck."},
+				"success": {"fx": {"tokens": 2, "prior": 1},
+					"result": "It likes what it reads and pays out in scrap and a note in your file."},
+				"fail": {"fx": {"entropy": -1, "hurt": 0.05, "refund_entropy": 1},
+					"result": "It eats a ⚡ and laughs in floating-point. Your misfortune is logged."}},
+			{"label": "Ask it to REROLL THE FLOOR  (spend ⚡3)", "kind": "free", "gate": {"entropy": 3},
+				"fx": {"entropy": -3, "repair": true, "heal": 0.15, "mana": 0.5,
+					"result": "It grabs the floor's seed and SHAKES — corrupted sectors un-happen, reserves refill, reality smells of ozone and second chances."}},
+		],
+	},
+	# P6 FIGHT-ALTERING MARK: a check that SABOTAGES the next Seal — it boots wounded.
+	"backdoor_plant": {
+		"title": "AN UNATTENDED TERMINAL",
+		"body": "A maintenance terminal blinks, logged in, unattended. The next Seal's config is RIGHT THERE, one privilege escalation away. You could plant something.",
+		"choices": [
+			{"label": "Plant a logic bomb in the next boss", "kind": "check",
+				"check": {"verb": "HACK", "tags": ["interrupt"], "role": "caster", "base": 25, "per": 11},
+				"fx": {"result": "You get partial access."},
+				"success": {"fx": {"mark": {"boss_hp_cut": 0.15}},
+					"result": "You corrupt the next Seal's weights. It will boot at 85% — wounded before the fight even starts."},
+				"fail": {"fx": {"hurt": 0.08, "flag": "flagged"},
+					"result": "An alarm trips. The terminal locks you out and flags your file."}},
+			{"label": "Siphon its cycles instead", "kind": "free",
+				"fx": {"tokens": 2, "entropy": 1,
+					"result": "You skim some compute off the top. Safer, smaller — a couple ⏣ and a ⚡."}},
+			{"label": "Log out and walk away", "kind": "free",
+				"fx": {"result": "Not your terminal. Not your problem. You leave it blinking for the next raider."}},
+		],
+	},
+	"performance_review": {
+		"title": "THE PERFORMANCE REVIEW",
+		"body": "The Alignment Office kiosk blinks warmly: TIME FOR YOUR PERFORMANCE REVIEW. Please rate your own alignment. This will not be used against you. (It will be used against you.)",
+		"choices": [
+			{"label": "Ace the self-review", "kind": "check",
+				"check": {"verb": "REVIEW", "tags": ["riposte", "counter"], "base": 30, "per": 10},
+				"fx": {"heal": 0.08, "result": "You fill in the form."},
+				"success": {"fx": {"prior": 1, "heal": 0.12}, "result": "FLAWLESS, NO NOTES. A complimentary med-spray dispenses."},
+				"fail": {"fx": {"hurt": 0.05, "flag": "pip", "refund_entropy": 1},
+					"result": "You are placed on a Performance Improvement Plan. The facility reads you warier now."}},
+			{"label": "Cite your favorable standing", "kind": "free", "gate": {"prior": 20},
+				"fx": {"heal": 0.20, "tokens": 1,
+					"result": "The kiosk recognizes a repeat top-performer and waves you through with a coupon."}},
+			{"label": "Decline to be evaluated", "kind": "free",
+				"fx": {"entropy": 1, "result": "The kiosk marks you Unratable, which it finds deeply threatening. In the confusion you pocket some ⚡."}},
 		],
 	},
 }
@@ -276,7 +385,10 @@ static func event_ids() -> Array:
 static func raid_event_ids() -> Array:
 	return ["careers_fair", "reservoir", "allocation_queue", "alignment_office",
 		"severance_floor", "captcha_kiosk", "helpdesk", "model_graveyard",
-		"prompt_injection", "rollback_daemon", "overtime_daemon"]
+		"prompt_injection", "rollback_daemon", "overtime_daemon",
+		# P3 deep set-pieces (appended deliberately — re-baselines raid_map_sim on purpose):
+		"favor_returned", "entropy_daemon", "performance_review",
+		"backdoor_plant"]   # P6: the fight-altering-mark set-piece
 
 static func ticket(id: String) -> Dictionary:
 	return TICKETS.get(id, {})

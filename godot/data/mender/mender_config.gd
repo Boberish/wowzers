@@ -5,7 +5,10 @@ extends Resource
 
 @export var gcd: float = 1.2
 @export var mana_max: float = 900.0
-@export var mana_regen: float = 8.0        ## per second (× regen_mult × dt)
+@export var mana_regen: float = 4.5        ## per second (× regen_mult × dt) — RESOURCE-TAX pass:
+                                           ## halved from 8. Mana is a fight-long BUDGET you ration,
+                                           ## not a trickle you're always topped off on. Raid stacks
+                                           ## ×regen_mult 0.5 → ~2.25/s, so spamming actually drains.
 @export var strike_perfect_mana: float = 20.0  ## M7: a PERFECT dodge refunds a sip of mana
 
 # --- LITANY: the visible combo pip meter (both aspects). An IN-CONDITION single-target
@@ -39,21 +42,24 @@ extends Resource
 @export var ls_dur: float = 3.0
 
 ## The spellbook. `effect` is inferred from the fields present.
+# RESOURCE-TAX pass: core heal costs ×~1.5, Meditate battery cut 280→160 (cd 45→55).
+# Each cast should feel like it spends something; Meditate is a real cooldown decision,
+# not a free top-off. (Old: flash22/mend16/renew18/ward20/cascade40/well30; medit 280/45s.)
 @export var spells: Dictionary = {
-	"flash":     {"name": "Flash Heal", "key": "1", "mana": 22.0, "cast": 1.5, "cd": 0.0,  "target": true,  "heal": 70.0},
-	"mend":      {"name": "Mend",       "key": "2", "mana": 16.0, "cast": 2.6, "cd": 0.0,  "target": true,  "heal": 95.0},
-	"renew":     {"name": "Renew",      "key": "3", "mana": 18.0, "cast": 0.0, "cd": 0.0,  "target": true,  "hot_tick": 12.0, "hot_every": 1.5, "hot_dur": 9.0},
-	"ward":      {"name": "Ward",       "key": "4", "mana": 20.0, "cast": 0.0, "cd": 6.0,  "target": true,  "shield": 60.0, "ward_dur": 6.0},
-	"cascade":   {"name": "Cascade",    "key": "5", "mana": 40.0, "cast": 2.0, "cd": 8.0,  "target": false, "heal": 45.0, "aoe": "lowest3"},
-	"well":      {"name": "Wellspring", "key": "6", "mana": 30.0, "cast": 0.0, "cd": 30.0, "target": false, "heal": 90.0, "aoe": "all"},
-	"dispel":    {"name": "Dispel",     "key": "q", "mana": 10.0, "cast": 0.0, "cd": 8.0,  "target": true,  "offgcd": true, "dispel": true},
-	"medit":     {"name": "Meditate",   "key": "e", "mana": 0.0,  "cast": 0.0, "cd": 45.0, "target": false, "offgcd": true, "restore": 280.0},
-	"surge":     {"name": "Surge",      "key": "7", "mana": 15.0, "cast": 0.0, "cd": 0.0,  "target": false, "spec": "tidecaller"},
-	"laststand": {"name": "Last Stand", "key": "7", "mana": 20.0, "cast": 0.0, "cd": 0.0,  "target": false, "spec": "brinkwarden"},
+	"flash":     {"name": "Flash Heal", "key": "1", "mana": 33.0, "cast": 1.5, "cd": 0.0,  "target": true,  "heal": 70.0},
+	"mend":      {"name": "Mend",       "key": "2", "mana": 24.0, "cast": 2.6, "cd": 0.0,  "target": true,  "heal": 95.0},
+	"renew":     {"name": "Renew",      "key": "3", "mana": 27.0, "cast": 0.0, "cd": 0.0,  "target": true,  "hot_tick": 12.0, "hot_every": 1.5, "hot_dur": 9.0},
+	"ward":      {"name": "Ward",       "key": "4", "mana": 30.0, "cast": 0.0, "cd": 6.0,  "target": true,  "shield": 60.0, "ward_dur": 6.0},
+	"cascade":   {"name": "Cascade",    "key": "5", "mana": 58.0, "cast": 2.0, "cd": 8.0,  "target": false, "heal": 45.0, "aoe": "lowest3"},
+	"well":      {"name": "Wellspring", "key": "6", "mana": 46.0, "cast": 0.0, "cd": 30.0, "target": false, "heal": 90.0, "aoe": "all"},
+	"dispel":    {"name": "Dispel",     "key": "q", "mana": 12.0, "cast": 0.0, "cd": 8.0,  "target": true,  "offgcd": true, "dispel": true},
+	"medit":     {"name": "Meditate",   "key": "e", "mana": 0.0,  "cast": 0.0, "cd": 55.0, "target": false, "offgcd": true, "restore": 160.0},
+	"surge":     {"name": "Surge",      "key": "7", "mana": 22.0, "cast": 0.0, "cd": 0.0,  "target": false, "spec": "tidecaller"},
+	"laststand": {"name": "Last Stand", "key": "7", "mana": 28.0, "cast": 0.0, "cd": 0.0,  "target": false, "spec": "brinkwarden"},
 	# BATTLE REZ (raid only — targets a DEAD ally). A big commitment: a long channel that
 	# locks you out of triage, ~38% of your pool, and a long cooldown. Bringing a fallen
 	# raider back is meant to feel like a save, not a routine button.
-	"revive":    {"name": "Rekindle",   "key": "r", "mana": 340.0, "cast": 6.0, "cd": 120.0, "target": true, "revive": true, "revive_frac": 0.40},
+	"revive":    {"name": "Rekindle",   "key": "r", "mana": 380.0, "cast": 6.0, "cd": 120.0, "target": true, "revive": true, "revive_frac": 0.40},
 }
 
 ## Ability bar order (the signature is appended per aspect).
