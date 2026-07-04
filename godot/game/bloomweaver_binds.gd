@@ -15,15 +15,16 @@ const CHORD_SHORT := {
 	"left": "L", "right": "R", "middle": "Mid",
 	"shift+left": "Sh+L", "shift+right": "Sh+R", "ctrl+left": "Ct+L", "ctrl+right": "Ct+R",
 }
-## Left = Growth (double-click a Growth'd frame = BLOOM — the core gesture).
+## Left = Growth (STACKS a seed; a further tap at the hard cap BLOOMS). Right-click =
+## Bloom the hovered bed on demand (the dedicated cash-out).
 const DEFAULTS := {
-	"left": "growth", "right": "bark",
-	"middle": "saprot",
+	"left": "growth", "right": "bloom",
+	"middle": "bark",
 	"shift+left": "overgrowth", "shift+right": "signature",
-	"ctrl+left": "lifesurge", "ctrl+right": "lash",
+	"ctrl+left": "lifesurge", "ctrl+right": "saprot",
 }
 ## Spells assignable to a chord ("none" = unbound; "signature" = the Aspect's spender).
-const SPELL_OPTIONS := ["none", "growth", "bark", "overgrowth", "lash", "saprot", "lifesurge", "signature"]
+const SPELL_OPTIONS := ["none", "growth", "bloom", "bark", "overgrowth", "lash", "saprot", "lifesurge", "signature"]
 
 static func load_binds() -> Dictionary:
 	var b: Dictionary = DEFAULTS.duplicate(true)
