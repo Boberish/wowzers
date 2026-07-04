@@ -43,7 +43,7 @@ static var ASPECTS := {
 ## Bloomweaver (below) — `_healer_cls` decides which pair the ceremony/toggles show.
 static var BLOOM_ASPECTS := [
 	{"id": "wildgrove", "name": "WILDGROVE", "accent": Palette.VERDANCE, "icon": "wildbloom",
-		"desc": "RIPEN the garden: tend Growths to the harvest window, BLOOM them for burst, light Flourish across the raid."},
+		"desc": "STACK seeds fast, then let the bed COOK from a trickle to a roar; BLOOM it for burst, and light Flourish across the raid with a full field."},
 	{"id": "thornveil", "name": "THORNVEIL", "accent": Palette.THORN, "icon": "briarheart",
 		"desc": "SNAP-STREAK wards: each Perfect Ward ramps the thorns that reflect damage back — heal by hurting the boss."},
 ]
@@ -2679,8 +2679,9 @@ func _healer_key(code: int) -> void:
 		KEY_7: _cast(_signature())
 		KEY_R: _cast("revive")             # battle-rez: hover a FALLEN raider's frame, press R
 
-## Bloomweaver keys: 1-4 Growth/Barkskin/Overgrowth/Thornlash · Q Sap Rot · E Lifesurge
-## · 7 the aspect signature. SPACE/F dodges (cancels an Overgrowth cast — the discipline).
+## Bloomweaver keys: 1 Growth (STACKS a seed) · 2 Barkskin · 3 Overgrowth · 4 BLOOM
+## (cash a bed) · 5 Thornlash · Q Sap Rot · E Lifesurge · 7 the aspect signature.
+## SPACE/F dodges (cancels an Overgrowth cast — the discipline).
 func _bloomweaver_key(code: int) -> void:
 	match code:
 		KEY_SPACE, KEY_F:
@@ -2688,7 +2689,8 @@ func _bloomweaver_key(code: int) -> void:
 		KEY_1: _cast("growth")
 		KEY_2: _cast("bark")
 		KEY_3: _cast("overgrowth")
-		KEY_4: _cast("lash")
+		KEY_4: _cast("bloom")
+		KEY_5: _cast("lash")
 		KEY_Q: _cast("saprot")
 		KEY_E: _cast("lifesurge")
 		KEY_7: _cast(_signature())
@@ -2768,6 +2770,14 @@ func _cast_on_bloom(seat: Seat, id: String) -> void:
 	if id == "saprot" and seat.debuff.is_empty(): ready = false
 	if sp.has("spec") and float(p.vars.get("verdance", 0.0)) < _bcfg.verd_min_spend: ready = false
 	if id == "lifesurge" and int(CombatCore.observe(s, p).get("garden", 0)) <= 0: ready = false
+	var kit := p.kit as BloomweaverKit
+	if id == "bloom" and (kit == null or kit._find_growth(seat) < 0): ready = false   # nothing to cash
+	if id == "growth" and kit != null:
+		var gbi := kit._find_growth(seat)
+		if gbi >= 0 and int(seat.hots[gbi].get("stacks", 1)) >= kit._soft_cap() \
+				and int(seat.hots[gbi].get("stacks", 1)) < _bcfg.hard_cap \
+				and float(p.vars.get("verdance", 0.0)) < _bcfg.overcap_verd:
+			ready = false                                                            # over-cap needs Verdance
 	var fr := _frame_of(seat)
 	if fr != null:
 		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
@@ -2959,11 +2969,12 @@ func _rich_hots(seat: Seat, hzf: float) -> Array:
 		var meta: Array = HOT_META.get(src, HOT_META["hot"])
 		out.append({"icon": String(meta[0]), "src": src,
 			"remain": maxf(float(int(h["left"]) - int(h["acc"])) / hzf, 0.0),
-			"total": float(meta[1])})
+			"total": float(meta[1]),
+			"count": int(h.get("stacks", 1))})   # Bloomweaver seed bed: show the stack depth (×N)
 	return out
 
 ## Healer-only frame overlays: telegraphed incoming damage + (Mender) the cast's heal
-## ghost / (Bloomweaver) Growth ripeness on every frame + the BLOOM cash-out on hover.
+## ghost / (Bloomweaver) seed-bed COOK state on every frame + the BLOOM cash-out on hover.
 func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 	if s.telegraph != null:
 		var ab := s.telegraph.ability
@@ -3004,8 +3015,8 @@ func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 			if fr != null and amt > 0.0:
 				fr.incoming_dmg_frac = amt / v.hp_max
 				fr.incoming_lethal = amt >= v.hp + v.absorb
-	# Bloomweaver: Growth ripeness on every frame (gold gem) + the BLOOM value a
-	# double-tap would cash right now, ghosted on the hovered frame.
+	# Bloomweaver: the seed bed's COOK state on every frame (gold chip at full ramp) +
+	# the BLOOM value a cash-out would restore right now, ghosted on the hovered frame.
 	if _healer_cls == "bloomweaver":
 		for pe in obs.get("party", []):
 			var u: Seat = pe.get("seat")
@@ -3014,7 +3025,7 @@ func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 			var frp := _frame_of(u)
 			if frp == null:
 				continue
-			frp.ripe = bool(pe.get("ripe", false))
+			frp.ripe = bool(pe.get("cooked", false))       # gold chip when the bed is COOKED (full ramp)
 			if u == _hover_seat and u.hp_max > 0.0:
 				frp.incoming_frac = clampf(float(pe.get("growth_heal", 0.0)) / u.hp_max, 0.0, 1.0)
 		return
@@ -3238,9 +3249,10 @@ func _render_band_bloomweaver(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_hp_orb.set_values(p.resource, _bcfg.sap_max)
 	_verd.verdance = float(obs.get("verdance", 0.0))
 	_verd.flourish = bool(obs.get("flourish", false))
-	_verd.flourish_ripe = bool(obs.get("flourish_ripe", false))
+	_verd.flourish_hi = bool(obs.get("flourish_hi", false))
 	_verd.garden = int(obs.get("garden", 0))
-	_verd.ripe_garden = int(obs.get("ripe_garden", 0))
+	_verd.total_seeds = int(obs.get("total_seeds", 0))
+	_verd.flourish_lo = int(_bcfg.flourish_seeds_lo)
 	_verd.thorns = int(float(p.vars.get("stat_thorns", 0.0)))
 	_verd.thorn_charge = int(obs.get("thorn_charge", 0))
 	_verd.thorn_charge_max = int(obs.get("thorn_charge_max", 5))

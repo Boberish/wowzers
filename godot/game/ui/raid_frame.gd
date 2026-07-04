@@ -439,6 +439,14 @@ func _draw_hot_chips(bx: float, by: float, barh: float, barw: float, xl: bool) -
 		var total := maxf(float(hd.get("total", 0.0)), 0.05)
 		var hf := clampf(remain / total, 0.0, 1.0)
 		draw_arc(cc, cs * 0.62, -PI * 0.5, -PI * 0.5 + TAU * hf, 26, accent, 2.5, true)
+		# stacking-HoT depth badge (Bloomweaver seed bed): "×N" in a gilded pip, top-right
+		var cnt := int(hd.get("count", 1))
+		if cnt > 1:
+			var bc := cc + Vector2(cs * 0.46, -cs * 0.46)
+			draw_circle(bc, cs * 0.34, Palette.BG0)
+			draw_circle(bc, cs * 0.30, accent)
+			UiKit.text_shadowed(self, UiKit.display(800), Vector2(bc.x - cs * 0.5, bc.y - cs * 0.36),
+				"×%d" % cnt, HORIZONTAL_ALIGNMENT_CENTER, cs, UiKit.SIZE["MICRO"], Palette.BG0)
 		if xl:
 			UiKit.text_shadowed(self, UiKit.display(600), Vector2(cc.x - cs * 0.5 - 4.0, y0 + cs + 11.0),
 				_fmt_secs(remain), HORIZONTAL_ALIGNMENT_CENTER, cs + 8.0,
