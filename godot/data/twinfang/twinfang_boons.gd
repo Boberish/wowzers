@@ -79,8 +79,26 @@ static func verb_summary(boons: Dictionary, _aspect: String) -> Array:
 	if trig.is_empty() and pay.is_empty() and prop.is_empty():
 		return []
 	var out: Array = []
-	out.append("Proc moments: PERFECT Strike" + ("" if trig.is_empty() else " · " + " · ".join(trig)))
-	out.append("On every proc: " + (" · ".join(pay) if not pay.is_empty() else "(no payloads drafted yet)"))
+	# REWORK: WHEN/THEN/ALWAYS framing, and NO innate "PERFECT Strike" — effects fire only
+	# on your drafted moments (a payload with no trigger does nothing until you draft one).
+	out.append("WHEN: " + (" · ".join(trig) if not trig.is_empty() else "(no triggers drafted yet)"))
+	out.append("THEN: " + (" · ".join(pay) if not pay.is_empty() else "(no effects drafted yet)"))
 	if not prop.is_empty():
-		out.append("Properties: " + " · ".join(prop))
+		out.append("ALWAYS: " + " · ".join(prop))
 	return out
+
+## Structured WHEN/THEN/ALWAYS lists for the combo-board GUI (VerbBoard). Each entry is a
+## short player-facing label. Reads whatever's drafted — resilient to boon-content tuning.
+static func verb_board(boons: Dictionary) -> Dictionary:
+	var whens: Array = []
+	var thens: Array = []
+	var always: Array = []
+	if boons.get("tfTrigEvade", false): whens.append("Clean Dodge")
+	if boons.get("tfTrigSpender", false): whens.append("Full Finisher")
+	if boons.get("tfTrigBeat", false): whens.append("Perfect Beat")
+	if boons.get("tfPayLash", false): thens.append("Cut boss 6")
+	if boons.get("tfPayEnergy", false): thens.append("+3 energy")
+	if boons.get("tfPayLeech", false): thens.append("Heal 5")
+	if boons.get("tfPropWindow", false): always.append("Window +20%")
+	if boons.get("tfPropTwinStep", false): always.append("2nd dodge charge")
+	return {"when": whens, "then": thens, "always": always}

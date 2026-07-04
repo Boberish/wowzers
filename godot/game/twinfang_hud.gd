@@ -46,6 +46,7 @@ var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _hp_orb: LiquidOrb
 var _en_orb: LiquidOrb
 var _gauge: TwinfangGauge
+var _board: VerbBoard            ## TEMPO rework: the WHEN/THEN/ALWAYS combo board
 var _runes: Array = []
 var _guard: AbilityRune
 var _progress: Label
@@ -216,6 +217,12 @@ func _build_combat() -> void:
 	# the winged spec medallion owns the band between the stage and the rune rail
 	_place(_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
 	_shake_root.add_child(_gauge)
+
+	# TEMPO rework — the combo board (WHEN/THEN/ALWAYS + Creed + Modules), top-left corner
+	_board = VerbBoard.new()
+	_board.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place(_board, 0, 0, 0, 0, 20, 92, 372, 300)
+	_shake_root.add_child(_board)
 
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -401,6 +408,14 @@ func _process(delta: float) -> void:
 
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_en_orb.set_values(obs.get("energy", 0.0), obs.get("energy_max", 100.0))
+
+	if _board != null:   # TEMPO rework — the WHEN/THEN/ALWAYS combo board
+		var vb := TwinfangBoons.verb_board(_run.boons)
+		var mnames: Array = []
+		for mid in obs.get("modules", []):
+			mnames.append(String(TwinfangModules.get_module(String(mid)).get("name", mid)))
+		_board.set_verb(String(obs.get("creed_name", "")), mnames,
+			vb.get("when", []), vb.get("then", []), vb.get("always", []))
 
 	_gauge.combo = int(obs.get("cp", 0))
 	_gauge.combo_max = int(obs.get("cp_max", 5))
