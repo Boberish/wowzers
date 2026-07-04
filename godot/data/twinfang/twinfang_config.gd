@@ -10,7 +10,12 @@ extends Resource
 
 @export var hp_max: float = 310.0
 @export var energy_max: float = 100.0
-@export var energy_regen: float = 20.0      ## per second
+@export var energy_regen: float = 18.0      ## per second — RESOURCE-TAX pass: cut from 20 (gently).
+                                            ## Strike costs 12 and the rhythm gates you to ~one per
+                                            ## 0.6-0.95s, so at 20/s energy never emptied. At 17 a
+                                            ## finisher-heavy stretch (Evisc 25 / Coup 30) taxes the
+                                            ## bar — but NOT so hard it breaks Tempo's accelerando DPS
+                                            ## engine (14 did: good-tier missed the enrage race).
 
 @export var cp_max: int = 5                 ## combo points
 @export var flow_max: int = 6

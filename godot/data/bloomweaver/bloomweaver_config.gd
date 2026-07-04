@@ -7,7 +7,10 @@ extends Resource
 
 @export var gcd: float = 1.0
 @export var sap_max: float = 100.0
-@export var sap_regen: float = 12.0        ## per second (× regen_mult × dt) — energy-style
+@export var sap_regen: float = 9.0         ## per second (× regen_mult × dt) — energy-style.
+                                           ## RESOURCE-TAX pass: cut from 12. Growth 15 / Bark 25 /
+                                           ## Overgrowth 40 now can't be chained forever — planting
+                                           ## the field is a Sap budget, not a free reflex.
 
 # --- Verdance (spec gauge, both aspects). Earned, never regenerated. ---
 @export var verdance_max: float = 100.0
