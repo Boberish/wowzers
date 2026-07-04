@@ -93,6 +93,41 @@ re-introduce a solo/raid split. Read this before building any player-facing syst
 
 ---
 
+## CLASS FRAMEWORK v2 — the Tempo-piloted ROSTER REWORK (locked with Bill, 2026-07-04)
+
+**The bold move:** every class gets re-thought from the ground up onto ONE new framework. Full spec:
+**`TEMPO-PLAN.md`**. This supersedes the ad-hoc per-class kits — the class-fun reworks + slot-verbs were the
+right instincts; this makes them a *system*. Each class becomes: a **core timing minigame** (the verb) →
+**Creeds** (run-start risk temperament, 1-of-3 random from a per-class unlocked pool, swappable at an event for a
+penalty) → **Modules** (Hades-weapon UI addons, each adds a HUD gauge, pick **1** at end of Floor 1) →
+**WHEN/THEN/ALWAYS boons** (triggers OFF the auto-attack — earned moments only, fired big; the jargon renamed +
+drawn as a visual "combo board") → all gated by **per-class LEVELS = a count of your unlocks** (overall level =
+the SUM; the PROGRESSION-PLAN Rank track made visible, NOT a new grind currency). Rarity = *build-definingness*,
+not bigger numbers (Model A, frequency-scaled, Monotonic-Pool-safe).
+
+**How we execute it — ONE CLASS AT A TIME:**
+- **TWINFANG · TEMPO is the active pilot.** We rebuild it whole — core loop (combo becomes a wind-up you spend,
+  not an always-full bar), Creeds (Flourish/Drumline/Held Breath), Modules (Opening[built]/Edge/Deathmark/…),
+  triggers & effects — proving the framework's feel before porting.
+- **The rest of the roster is RESET / FROZEN** (Bulwark, Voidcaller, Mender, Bloomweaver, Reckoner). They **stay
+  in the code and remain playable in the raid** on their current versions (the comp still needs tank/blade/
+  caster/healer — the game does NOT go offline), but they are **OUT OF DATE until their rework** and are
+  **queued** for the same Creed-by-Creed / trigger-by-trigger treatment, one at a time, after Tempo lands. They
+  get **retuned eventually** — not now.
+- **They are EXCLUDED FROM SIMS for now** (Bill, 2026-07-04): don't run or gate on the other class sims — they'd
+  only measure out-of-date kits. The Tempo rework loop is **`twinfang_sim.gd` (Twinfang solo)**. The "keep every
+  other class byte-identical" regression gate is therefore **DROPPED for the reworked roster** — the Tempo rework
+  may freely touch the draft system / shared UI / guarded engine hooks. Sims are **frozen, not deleted** — they
+  stay in the tree as the spine we re-green class by class. *Still hold:* CombatCore stays a pure deterministic
+  reducer, and determinism PASS on whatever IS active (Twinfang). The raid sim keeps running only as a
+  crash/integration smoke while its blade seat is in flux.
+
+**Build order:** risk core (combo-fix + Flow-as-greed-dial + Flourish/Drumline, simmed) → Modules (Floor-1 pick
++ Edge/Deathmark) → the WHEN/THEN board + tutorial → the level/unlock ledger → then the next class. **FUTURE
+(parked):** titles · cosmetic transmog · social lobbies. Open content picks: `TEMPO-PLAN.md` §10.
+
+---
+
 ## REALMS & THEMES — every raid is a themed realm
 
 **The frame (Bill, 2026-07-02):** the game has MANY raids over time, and **each raid is its own themed REALM** — the Rift tears into somewhere new each time. Solo classes/bosses KEEP the core dark-fantasy Rift identity (the solo reskin is DE-SCOPED — see salvage note below). A realm = a boss ladder (Seals) + a Topology map skin + a joke register + a supporting cast. Realm bibles live here.
@@ -443,7 +478,13 @@ nodes, not node kinds.
 
 ## CLASSES
 
-**Now:** 5 classes done & verified (2 tanks-of-verbs pattern: mitigate/keep-alive/rhythm/interrupt/anticipate). Aspect pairs everywhere. Raid seats for all 4 roles.
+> ⚠ **ROSTER REWORK IN PROGRESS (2026-07-04) — see §CLASS FRAMEWORK v2 + `TEMPO-PLAN.md`.** Every class is being
+> re-thought onto the new Creed/Module/WHEN-THEN/level framework, ONE AT A TIME. **Twinfang·Tempo is the active
+> pilot;** the rest are FROZEN (functional in the raid on current versions, balance no longer maintained) and
+> queued. Sim/dev focus = Twinfang; the byte-identical gate is relaxed for the reworked roster. The notes below
+> describe the *pre-rework* state — kept for reference until each class is redone.
+
+**Pre-rework state:** 6 classes built & verified (Bulwark, Twinfang, Voidcaller, Mender, Bloomweaver, Reckoner). Aspect pairs everywhere. Raid seats for all 4 roles.
 **Game-shape note (2026-07-03):** the per-class solo gauntlets are PRACTICE surfaces now (§GAME SHAPE) — class work targets the raid seats first; kit changes still gate on the class sims as always.
 **Next up (any agent can claim):**
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
