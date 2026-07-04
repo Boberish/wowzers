@@ -28,7 +28,9 @@ func _press(prefix: String) -> bool:
 	return false
 
 func _find_draft(node: Node):
-	if node is DraftScreen:
+	# skip screens _clear() has already queue-freed (still in-tree this frame) —
+	# the COMMANDER draft chain builds the next screen in the same frame
+	if node is DraftScreen and not node.is_queued_for_deletion():
 		return node
 	for c in node.get_children():
 		var r = _find_draft(c)
@@ -77,8 +79,12 @@ func _process(_delta: float) -> bool:
 				print("[%s] FAIL: drop card had no continue button" % seat)
 				fails += 1
 		var drafted := false
-		if String(hud._screen) == "draft":         # REFORGE boon draft — take one to continue
-			drafted = _take_draft()
+		# REFORGE boon drafts — COMMANDER chains one per seat (you, then each AI
+		# raider), so keep taking until the chain hands the screen onward.
+		var guard := 0
+		while String(hud._screen) == "draft" and guard < 8:
+			drafted = _take_draft() or drafted
+			guard += 1
 		var after_scr := String(hud._screen)
 		var has_descend := _press("DESCEND")       # press it if present (advances the floor)
 		var floor_after := int(hud._floor)

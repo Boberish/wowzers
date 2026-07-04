@@ -534,6 +534,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## CURRENT / OPEN IDEAS (parking lot — promote into a section when claimed)
 
+- **TEAM-COMP layer (Bill 2026-07-04, deliberately split from the commander merge — "another subject,
+  focus the ai pick 1st"):** damage SCHOOLS (physical / void / poison / nature) + per-boss resist/immune/
+  weak profiles so the party you assemble answers the encounter. Design sketch from the commander session:
+  guarded mult in `CombatCore.damage_boss` (the SUNDER amp is the precedent slot; empty profile = 1.0 =
+  byte-identical), school mapping via a `ClassKit.school_of(src)` no-op hook riding the existing meter `src`
+  labels, profiles on `EncounterRes`, HUD RESISTED/WEAK pops + profile lines on the party screen / Seal
+  tooltips. Tuning rule: Seals get soft multipliers (±15–30%); full IMMUNE only for supplemental schools
+  (poison / thorns) and only on skirmish trash, so a class kit is never bricked mid-Seal. COMMANDER v1 is the
+  lever that makes profiles a real decision (re-aspect your raiders per fight). Needs its own claim + the
+  full byte-identical/retune gate (it IS an engine touch).
 - Game title candidates: *UNPLUGGED*, *Ctrl+Alt+DEFEAT*, *KILLSWITCH*, *RIFT: Do Not Trust Its Outputs* (these read Realm-1-flavored now; a realm-neutral title may fit better).
 - **Future realm seeds** (each = Seals ladder + map skin + joke register): *THE BUREAUCRACY* (paperwork hell — stamp-golems, queue mechanics, "please hold" telegraphs); *THE UNDERCROFT* (necropolis played straight — the contrast realm); *THE DEEP* (abyssal leviathans, pressure as attrition); *THE CLOCKWORK COURT* (fae mechanisms, rhythm-heavy strings); *THE KAIJU WEATHER STATION* (one enormous boss per floor).
 - Rewind verb (deterministic-engine showpiece) — parked, see Classes.
@@ -543,15 +553,36 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-04 · `commander` · §SYSTEMS/§CLASSES — **CLAIMED: COMMANDER pivot + TEAM-COMP layer (Bill, direct):**
-  "when you play single player with the AI, you pick their upgrades and their setups as well — it's just the
-  auto rotation during the fight that the AI does" + "team comp matters: physical and magical resistances or
-  immunities, weaknesses to poison, stuff like that." Build order: (1) COMMANDER v1 offline — pre-descent
-  PARTY LOADOUT screen (AI seat aspects + healer class), per-seat REFORGE drafts (you draft the AI raiders'
-  boons too, shared ⏣ pool), boons/aspects ride the existing spec/`_inject_boons` paths; defaults untouched =
-  byte-identical. (2) DAMAGE SCHOOLS + boss resist/immune/weak profiles (guarded engine mult in `damage_boss`,
-  Realm-1 encounter profiles, HUD RESIST/WEAK feedback) so the party you assemble actually matters per fight.
-  Online rides later (spec already carries per-seat aspects/cls/boons). *(commander session)*
+- ☑ 2026-07-04 · `commander` · §SYSTEMS/§CLASSES — **COMMANDER v1 — you build the WHOLE party — MERGED to main.**
+  (Bill, direct: "when you play single player with the AI, you pick their upgrades and their setups as well —
+  it's just the auto rotation during the fight that the AI does." The team-comp resist layer was split off
+  mid-session per Bill's steer — "another subject, focus the ai pick 1st"; see the parking lot.) The solo raid
+  is now a commander game, ZERO engine files touched (everything rides the netcode spec plumbing that already
+  carried per-seat aspects/cls/boons):
+  - **PARTY SETUP screen** ("ASSEMBLE YOUR RAID", `raid_hud._show_party_setup`) between the realm card and the
+    descent: each AI seat = ASPECT ⇄ toggle + the healer seat's class toggle (Mender ⇄ Bloomweaver), aspect
+    blurb per row, your seat pinned gold. `_party {seat -> {cls, aspect}}` persists across descents in-session;
+    defaults = the verified comp. `_party_seat_cfg()` emits the full 4-seat spec cfg — at defaults it is
+    IDENTICAL to what `make_spec` fills for missing keys, so untouched = byte-identical by construction
+    (probe-proven). Commanded aspects also ride single-Seal `_launch` pulls.
+  - **You draft the AI raiders' boons:** `_ai_runs {seat -> RunState}` (draft streams decorrelated off the
+    human's `run_seed`); the post-fight REFORGE now CHAINS one DraftScreen per seat — yours first, then each
+    AI ally ("REFORGE — THE TWINFANG · AI ALLY / you command the build — the AI only drives the rotation") —
+    all spending the ONE shared ⏣ bank (mirrored into the AI run per screen, remainder banked back; rerolls/
+    locks/upsells work there too). All seats' boons ride the spec via `make_spec(..., seat_boons)` →
+    `RaidNet.build` folds each into its kit; boon procs are kit-side so AI policies need zero changes.
+    Online untouched (`_ai_runs` stays empty online; commander-online = a lobby-UI follow-up).
+  - **Gate PASS:** NEW `sim/commander_probe.gd` 14 checks ALL OK (default-cfg spec byte-identity · commanded
+    aspects/classes/boons land in the right kits · commanded fight deterministic over 600 ticks · draft chain
+    = you + 3 AI, one boon each, shared bank intact) · **all six sims byte-identical** vs the frozen-main
+    baseline (100 seeds via psim, logs AND per-seed CSVs: raid + 5 classes) · menu_probe / raid_boon_probe /
+    map_advance_probe extended + green · ui_smoke_raid gained a commander section (party toggles, commanded
+    descent, 4-draft chain) + net_smoke + ui_smoke_map ALL OK · NEW `sim/screenshot_commander.gd` WSLg probe
+    (party default/commanded + AI draft screen) eyeballed clean at 1080p.
+  - **NEXT (unclaimed):** ONLINE commander (host configures the AI seats in the lobby — the spec already
+    carries it) · draft-pacing lever if 4 drafts/fight drags in playtest (AI drafts only at Seal/gate kills,
+    or an AUTO-pick button per ally) · AI builds surfaced on the map (armor doll / build panel are human-only
+    today) · `Draft.mint` could count the AI seats' fight performance into the shared bank. *(commander session)*
 - ☑ 2026-07-04 · `topo-bloom-seedfall` · §CLASSES — **BLOOMWEAVER REWORK "SEEDFALL": stacking + ramping seeds — MERGED to main (`b6e0346`, merge `8b3f5a5`).** (Bill: "the 'maturing' [ripen] thing is only meh… be able to STACK seeds… the HoT scales, resets when you stack — stack fast then let it cook.") Replaces the disliked RIPEN/harvest-window with a STACKING, RAMPING garden. Design via 24-agent workflow → artifact https://claude.ai/code/artifact/ecf1462b-6471-4d15-846c-21df88179414 ; Bill picked all 4 recommended forks (core-only scope / dedicated Bloom key + double-tap alias / full ramp reset / Constrict as a future boon branch). See [[bloomweaver-seedfall-rework]].
   - **Mechanic (ZERO CombatCore change — rides `seat.hots` [already a stacking Array] + `kit.upkeep` running the tick BEFORE `_apply_seat_effects`):** Growth STACKS a seed onto an ally's BED (soft cap 3 / grove 4, hard cap 5). One SHARED ramp per bed: a fresh/reset bed ticks at `ramp_floor` (0.35 / grove 0.40) and climbs to full over `ramp_time` 4.5s; ANY new seed RESETS it (`ramp_reset_frac` 0 = full reset, exposed as a sim knob). upkeep rewrites each bed's `tick = seed_base(8.5)·ramp·stacks` every frame → the engine fires the ramped value that same tick. Stack FAST, then hands-off to COOK.
   - **Cash-out:** dedicated **BLOOM** rune (key 4; Thornlash → 5) cashes fires-left × ramped tick × `bloom_eff` 0.9 (Clean Harvest boon → lossless ×1.15 for 15 Verdance). Growth on a HARD-capped bed ALIASES to Bloom (the double-tap gesture Bill kept). Lifesurge mass-blooms. Overgrowth/Sap Rot refresh WITHOUT resetting the ramp (topping a cooked field doesn't knock it down).
