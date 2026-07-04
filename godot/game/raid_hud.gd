@@ -2473,7 +2473,7 @@ func _toggle_pause() -> void:
 		return
 	if not _online and _ctrl != null:
 		_ctrl.paused = true
-	_pause = PauseOverlay.new(SEAT_CLASS.get(_seat_key, "bulwark"), _aspect,
+	_pause = PauseOverlay.new(_seat_cls_now(), _aspect,
 		_owned_boon_labels(), not _online)
 	_pause.resumed.connect(_resume_pause)
 	_pause.quit_to_menu.connect(_pause_quit)
