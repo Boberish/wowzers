@@ -36,7 +36,7 @@
 | **Draft 2.0 + Tokens + slot-verbs (Phases A+B+C)** | ✅ COMPLETE 2026-07-02 — build-your-verb live on ALL FIVE classes (Guard/Rhythm/Kick/Triage/Garden), LOCK/REROLL/UPSELL economy, 5 opus charge/transform capstones (see §SYSTEMS). Next §SYSTEMS frontier: Trial Ladder (D) |
 | **Trial Ladder ("Versions")** | 🔴 NEW — planned (now also the RANK track + version-gated loot rows, see `PROGRESSION-PLAN.md`) |
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
-| **Maps ("The Topology" — AtO-style node runs)** | ✅ MAP-1/2/3 + **INFERENCE CHECK COMPLETE** (P0–P6 + seat-picker + branches + wager/mulligan + online-Prior + fight-marks) — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events + wager kind + post-fail mulligan, offline AND online co-op (protocol v9, server resolves + traverses stages; client==server). protocol v10; FEATURE-COMPLETE (all follow-ups merged) |
+| **Maps ("The Topology" — AtO-style node runs)** | ✅ MAP-1/2/3 + **INFERENCE CHECK** + **THE KILL SWITCH P1** (⏻ shared meter · OVERCLOCK arming offline+online · integrity RETIRED · 5 charge events; protocol v11). Phase 2/3 (biting blessings + Forge + live UNPLUG) open.  ~~INFERENCE CHECK COMPLETE~~ (P0–P6 + seat-picker + branches + wager/mulligan + online-Prior + fight-marks) — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events + wager kind + post-fail mulligan, offline AND online co-op (protocol v9, server resolves + traverses stages; client==server). protocol v10; FEATURE-COMPLETE (all follow-ups merged) |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
 
 ---
@@ -542,6 +542,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-04 · `killswitch` · §MAPS + §BOSSES — **THE KILL SWITCH P1 (node-variety + retire integrity) —
+  MERGED (Bill: boring one-click nodes; integrity doesn't work — a healer tops HP off; a shared 'big
+  charge-up move' you feed/empty in events; non-dominated choices; bad-luck variety).** Retired INTEGRITY
+  (fights boot full-HP minus wounds; wounds the sole HP stake; Cooling stops laundering). ⏻ CHARGE — a
+  party-shared 0-100 meter carrying the descent, fed by nodes, cashed at a Seal via the OVERCLOCK arming
+  dial (SURGE/SHIELD, linear) — offline AND online (protocol v11, server-authoritative). `core/raid_marks.gd`
+  the shared fight-mark applier. 5 new non-dominated charge events (mercy_terminal fixes Bill's +2-vs-+1).
+  ⚠ **KEPT MANA** — the concurrent resource-tax pass (cf29902) made it bite, so retiring it was reversed.
+  Gates: solo map_sim byte-identical · map_charge_probe/map_mark_probe ALL PASS · net_smoke/net_map_smoke
+  (arming fires, zero desyncs) · raid_sim + bulwark determinism unchanged · WSLg arming dial clean. Design:
+  the `kill-switch` artifact. **OPEN:** re-price the parked heal events back into the pool · P2 (party_out_mult
+  DMG-amp + enrage_offset STALL + two-way Forge/sacrifice-gear) · P3 (live PULL THE PLUG + finale retune).
 
 - ☑ 2026-07-03 · `topology-checks` · §MAPS — **THE INFERENCE CHECK — deep events + build-read dice +
   ⚡Entropy/📁Prior luck meta — MERGED to main (Bill: "the map is a joke, just +integrity jokes; we
