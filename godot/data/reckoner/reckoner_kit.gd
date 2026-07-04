@@ -123,7 +123,7 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if ph == PH_WIND:
 		var ws := int(seat.vars.get("wind_start", 0))
 		if s.tick > ws + _tt(s, cfg.wind_len):
-			_commit(s, seat, "Even", ws + _tt(s, cfg.wind_len))   # no tap → mediocre auto-Even
+			_commit(s, seat, "Even", ws + _tt(s, cfg.wind_len), 1.0, true)   # no tap → mediocre auto-Even
 	elif ph == PH_FALL:
 		var dl := int(seat.vars.get("apex_tick", 0)) + _tt(s, cfg.overload_late) + _tt(s, cfg.strike_deadline)
 		if s.tick > dl:
@@ -161,7 +161,7 @@ func _press_wind(s: CombatState, seat: Seat) -> bool:
 			return false                        # window not open yet
 		var f := clampf(float(s.tick - ws) / float(maxi(1, _tt(s, cfg.wind_len))), 0.0, 0.999)
 		var weight := "Over" if bool(seat.vars.get("over_armed", false)) and f >= cfg.over_lo else _weight_at(f)
-		_commit(s, seat, weight, s.tick)
+		_commit(s, seat, weight, s.tick, f, false)
 		return true
 	elif ph == PH_SEQW:
 		var ss := int(seat.vars.get("seq_substart", 0))
@@ -172,12 +172,15 @@ func _press_wind(s: CombatState, seat: Seat) -> bool:
 		return true
 	return false
 
-func _commit(s: CombatState, seat: Seat, weight: String, at_tick: int) -> void:
+func _commit(s: CombatState, seat: Seat, weight: String, at_tick: int, frac := 1.0, forced := false) -> void:
 	seat.vars["over_armed"] = false
 	seat.vars["weight"] = weight
 	seat.vars["commit_tick"] = at_tick
 	seat.vars["apex_tick"] = at_tick + _tt(s, cfg.apex_delay)
 	seat.vars["phase"] = PH_FALL
+	# view-only (checksum-free): drives the WIND verdict stamp + banner + history gem
+	CombatCore.emit_event(s, {"t": "wind_commit", "player": seat.is_player, "seat": seat,
+		"weight": weight, "frac": frac, "forced": forced})
 
 func _press_strike(s: CombatState, seat: Seat) -> bool:
 	var ph := _ph(seat)
@@ -444,6 +447,8 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"ultra_ready": s.tick >= int(seat.cooldowns.get("ultraswing", 0)) and seat.resource >= cfg.ultra_cost,
 		"ons_ready": s.tick >= int(seat.cooldowns.get("onslaught", 0)) and seat.resource >= cfg.ons_cost,
 		"stagger": s.tick < int(seat.vars.get("stagger_until", 0)),
+		"seq_nw": (seat.vars.get("seq_winds", []) as Array).size(),
+		"seq_ns": (seat.vars.get("seq_strikes", []) as Array).size(),
 		"def_zone": cfg.def_zone,
 		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,
 	}

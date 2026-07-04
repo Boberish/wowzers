@@ -2067,7 +2067,7 @@ func _build_band_reckoner() -> void:
 	_res_orb = _orb(Palette.RAGE, "RAGE", true)
 	_rk_gauge = ReckonerGauge.new()
 	_rk_gauge.aspect = _aspect
-	_place(_rk_gauge, 0.5, 1, 0.5, 1, -320, -320, 320, -168)
+	_place(_rk_gauge, 0.5, 1, 0.5, 1, -540, -470, 180, -170)   # THE FORGE: 720×300, in the player's column, clear of the boss cast bar
 	_shake_root.add_child(_rk_gauge)
 	var row := _rune_row(-360.0, 360.0)
 	_guard = AbilityRune.new()
@@ -3009,6 +3009,9 @@ func _render_band_reckoner(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.poise = float(obs.get("poise", 0.0))
 	g.poise_max = float(obs.get("poise_max", 100.0))
 	g.stagger = bool(obs.get("stagger", false))
+	g.seq_nw = int(obs.get("seq_nw", 0))
+	g.seq_ns = int(obs.get("seq_ns", 0))
+	g.seat_ref = p
 	for i in _runes.size():
 		var id: String = _rune_ids[i]
 		var usable := true
@@ -3167,6 +3170,10 @@ func _handle_event(ev: Dictionary) -> void:
 	var mine := bool(ev.get("player", false))
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	if _rk_gauge != null:
+		_rk_gauge.on_event(ev)     # THE FORGE: wind/apex stamps + verdict banner + history
+		if mine and _blade_cls == "reckoner":
+			_reckoner_juice(ev)
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"negate":
@@ -3355,6 +3362,33 @@ func _seat_accent() -> Color:
 		"caster": return Palette.KICK
 		"healer": return Palette.WIN
 	return Palette.GOLD
+
+## THE FORGE screen juice — verdict floats + shake + boss recoil for the Reckoner's hits
+## (the instrument's own stamps/banner/history come from _rk_gauge.on_event; damage floats
+## ride the paired boss_hit event for free).
+func _reckoner_juice(ev: Dictionary) -> void:
+	match String(ev.get("t", "")):
+		"swing":
+			if bool(ev.get("clash", false)):
+				_big_text("CLASH!", Palette.GOLD_BRIGHT, 46)
+				_add_shake(12.0)
+				_dial.react("stagger")
+			elif String(ev.get("weight", "")) == "Over":
+				_big_text("OVERSWING!", Palette.HEAVY, 42)
+				_add_shake(10.0)
+			elif String(ev.get("power", "")) == "True":
+				_big_text("TRUE!", Palette.PERFECT, 40)
+				_add_shake(8.0)
+		"poise_break":
+			_big_text("STAGGER!", Palette.STEEL, 34, 0.6)
+			_add_shake(6.0)
+			_dial.react("stagger")
+		"ultra":
+			_big_text("ULTRA!", Palette.KICK, 36)
+			_add_shake(6.0)
+		"onslaught":
+			_big_text("ONSLAUGHT — ALL TRUE!" if bool(ev.get("all_true", false)) else "ONSLAUGHT", Palette.PERFECT, 40)
+			_add_shake(10.0)
 
 func _add_shake(amt: float) -> void:
 	_shake_amt = minf(20.0, maxf(_shake_amt, amt))
