@@ -18,6 +18,8 @@ var since: int = 0            ## ticks since last Strike
 var swing_min: int = 13       ## ticks; before this a Strike is ignored
 var perfect_lo: int = 18
 var perfect_hi: int = 29
+var bull_frac: float = 0.18    ## GRADED WINDOW (§2c): Bullseye = centre this fraction of the half-window
+var perfect_frac: float = 0.55 ## …Perfect = centre this fraction; the flanks between it and the edge are GOOD
 var scale_ticks: int = 33     ## FIXED time-scale denominator (constant, NOT perfect_hi) so the
                               ## accelerando is visible: as the window shrinks it slides LEFT on a
                               ## fixed ruler instead of the whole bar rescaling with it.
@@ -131,10 +133,18 @@ func _draw() -> void:
 	var gz := Palette.PERFECT
 	gz.a = 0.20 + (0.20 if in_green else 0.0)
 	draw_rect(Rect2(lo_x, ty + 2, bw - 1, th - 4), gz)
-	var core_half := minf(bw * 0.5, tw * 3.0 / hi)   # ±3 ticks of brighter "sweet spot" around the plumb
-	var core := Palette.PERFECT.lightened(0.15)
-	core.a = 0.14 + 0.18 * near + (0.08 if in_green else 0.0)
-	draw_rect(Rect2(aim_x - core_half, ty + 3, core_half * 2.0, th - 6), core)
+	# GRADED WINDOW (§2c): the flat band above is the GOOD zone (it LANDS, no Flow). A
+	# brighter PERFECT core and a gold BULLSEYE centre show where the beat actually scores —
+	# the whole point of aiming dead-centre now that the flanks only tread water.
+	var half := bw * 0.5
+	var pf := clampf(perfect_frac, 0.05, 1.0)
+	var bf := clampf(bull_frac, 0.02, pf)
+	var core := Palette.PERFECT.lightened(0.18)
+	core.a = 0.22 + 0.16 * near + (0.10 if in_green else 0.0)
+	draw_rect(Rect2(aim_x - half * pf, ty + 3, half * pf * 2.0, th - 6), core)
+	var bull := Palette.GOLD_BRIGHT
+	bull.a = 0.30 + 0.28 * near + (0.12 if in_green else 0.0)
+	draw_rect(Rect2(aim_x - half * bf, ty + 4, half * bf * 2.0, th - 8), bull)
 	# inner glow border + gloss
 	var ig := Palette.PERFECT
 	ig.a = 0.45 if in_green else 0.25

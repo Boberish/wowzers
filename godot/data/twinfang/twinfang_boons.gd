@@ -8,30 +8,46 @@
 class_name TwinfangBoons
 extends RefCounted
 
+## SHARED — both aspects can draft these (spells + universal utility). Kept small so the
+## Venomancer draft (frozen, being redone) isn't flooded with Tempo-only Flow cards.
 const SHARED := [
-	{"id": "flowCap", "type": "upgrade", "rarity": "haiku", "tags": ["flow"], "title": "Momentum", "desc": "Flow cap +2 — a higher ceiling for every Flow bonus."},
-	{"id": "strikeEnergy", "type": "upgrade", "rarity": "sonnet", "tags": ["perfect", "flow"], "title": "Efficiency", "desc": "Perfect Strikes refund 6 energy — sustain the rhythm longer."},
-	{"id": "dodgeCp", "type": "relic", "rarity": "sonnet", "tags": ["dodge", "combo"], "title": "Riposte", "desc": "Every dodge grants 2 combo points — dodging feeds your rotation."},
-	{"id": "execute", "type": "relic", "rarity": "sonnet", "tags": ["combo"], "title": "Finish It", "desc": "Below 35% boss HP, your damage is +30%."},
-	{"id": "flurry", "type": "spell", "rarity": "sonnet", "tags": ["combo"], "title": "Flurry", "desc": "New spell (5): 28 energy for a 3-hit, +2 combo burst. Fast points under pressure."},
-	{"id": "dancersgrace", "type": "relic", "rarity": "opus", "tags": ["perfect", "flow", "combo"], "title": "Dancer's Grace", "desc": "A PERFECT dodge primes your blades — the next Strike is automatically Perfect."},
-	# --- Rhythm mod pieces (Phase B slot-verbs) ---
-	{"id": "tfTrigEvade", "slot": "trigger", "type": "relic", "rarity": "sonnet", "tags": ["dodge", "perfect"], "title": "Ghost Step", "desc": "New proc moment: a clean dodge also triggers your Rhythm payloads (+6 energy)."},
-	{"id": "tfTrigSpender", "slot": "trigger", "type": "relic", "rarity": "sonnet", "tags": ["combo", "perfect"], "title": "Killing Tempo", "desc": "New proc moment: a full 5-point finisher triggers your payloads (+6 energy)."},
-	{"id": "tfTrigBeat", "slot": "trigger", "type": "relic", "rarity": "sonnet", "tags": ["dodge", "perfect"], "title": "Beat Dancer", "desc": "New proc moment: a PERFECT combo-beat dodge triggers your payloads (+6 energy)."},
-	{"id": "tfPayLash", "slot": "payload", "type": "relic", "rarity": "sonnet", "tags": ["perfect", "flow"], "title": "Razor Echo", "desc": "Rhythm payload: every proc cuts the boss for 6."},
-	{"id": "tfPayEnergy", "slot": "payload", "type": "relic", "rarity": "haiku", "tags": ["perfect", "flow"], "title": "Quickblood", "desc": "Rhythm payload: every proc restores 3 energy."},
-	{"id": "tfPayLeech", "slot": "payload", "type": "relic", "rarity": "haiku", "tags": ["perfect"], "title": "Red Harvest", "desc": "Rhythm payload: every proc mends you for 5."},
-	{"id": "tfPropWindow", "slot": "property", "type": "upgrade", "rarity": "haiku", "tags": ["perfect", "flow"], "title": "Wide Tempo", "desc": "Rhythm property: the PERFECT window is 20% wider on each side."},
-	{"id": "tfPropTwinStep", "slot": "property", "type": "upgrade", "rarity": "opus", "tags": ["dodge", "perfect"], "title": "Twin Step", "desc": "Rhythm property: a SECOND dodge charge — step twice back-to-back; the spare returns after 6s."},
+	{"id": "flurry", "type": "spell", "rarity": "sonnet", "tags": ["combo", "spell"], "title": "Flurry", "desc": "New spell: 28 energy for a 3-hit, +2 combo burst. Fast points under pressure."},
+	{"id": "gracenote", "type": "spell", "rarity": "haiku", "tags": ["spell", "energy"], "title": "Grace Note", "desc": "New spell (18 energy, cd 2): an off-beat jab that does NOT touch your rhythm clock — pure filler woven between beats."},
+	{"id": "coda", "type": "spell", "rarity": "sonnet", "tags": ["spell", "perfect"], "title": "Coda", "desc": "New spell (25 energy, cd 10): your next Strike is ALL-GREEN — one guaranteed Perfect. Get back on the horse."},
+	{"id": "strikeEnergy", "type": "upgrade", "rarity": "sonnet", "tags": ["perfect", "energy"], "title": "Efficiency", "desc": "Perfect Strikes refund 6 energy — sustain the rhythm longer."},
+	{"id": "rudeKick", "type": "upgrade", "rarity": "haiku", "tags": ["kick"], "title": "Rude Interruption", "desc": "Kick's cooldown is 2s shorter — interrupt more often."},
 ]
+
+## TEMPO — the reworked address-organized slate (STRIKE · WINDOW · FLOW · EVISCERATE · COUP).
+## Every card names the button or dial it touches (the legibility rule). Numbers = base;
+## the tier ladder (Slice 2) scales them per instance. VENOM below is frozen (redone later).
 const TEMPO := [
-	{"id": "encore", "type": "upgrade", "rarity": "sonnet", "tags": ["flow"], "title": "Encore", "desc": "Double-hit (Tier 1) kicks in at Flow 2 instead of 3."},
-	{"id": "crescendo", "type": "upgrade", "rarity": "haiku", "tags": ["coupdegrace", "flow"], "title": "Crescendo", "desc": "Coup de Grâce hits 40% harder."},
+	# --- STRIKE — the crit + read package ---
+	{"id": "fifthCrit", "type": "relic", "rarity": "sonnet", "tags": ["crit", "perfect", "strike"], "title": "Killer's Eye", "desc": "Every 5th Perfect Strike is a guaranteed crit."},
+	{"id": "heartseeker", "type": "relic", "rarity": "sonnet", "tags": ["crit", "bullseye", "strike"], "title": "Heartseeker", "desc": "BULLSEYE Strikes (dead centre of the window) are guaranteed crits."},
+	{"id": "serrated", "type": "upgrade", "rarity": "haiku", "tags": ["crit", "strike"], "title": "Serrated Fate", "desc": "Your crits deal 40% more damage."},
+	{"id": "opportunist", "type": "relic", "rarity": "sonnet", "tags": ["crit", "strike"], "title": "Opportunist", "desc": "Strikes landed WHILE the boss winds up gain +25% crit chance — dance through the telegraph."},
+	{"id": "ambush", "type": "relic", "rarity": "sonnet", "tags": ["bullseye", "strike"], "title": "Ambush", "desc": "Your FIRST Strike each fight lands as a Bullseye — open on the perfect note."},
+	# --- THE WINDOW — where the green sits ---
+	{"id": "wideTempo", "type": "upgrade", "rarity": "haiku", "tags": ["window"], "title": "Wide Tempo", "desc": "Your Perfect window is 15% wider on each side."},
+	{"id": "fencersLine", "type": "relic", "rarity": "sonnet", "tags": ["window", "bullseye"], "title": "Fencer's Line", "desc": "A Bullseye widens your NEXT window by 25% — nail one, the next comes easier."},
+	{"id": "rubato", "type": "relic", "rarity": "sonnet", "tags": ["window"], "title": "Rubato", "desc": "The Perfect window sits earlier — same skill, a faster song."},
+	# --- FLOW — the greed dial ---
+	{"id": "flowCap", "type": "upgrade", "rarity": "haiku", "tags": ["flow"], "title": "Momentum", "desc": "Flow cap +2 — a higher ceiling for every Flow bonus."},
+	{"id": "tightrope", "type": "relic", "rarity": "sonnet", "tags": ["flow"], "title": "Tightrope", "desc": "While at MAX Flow, your damage is +15% — living on the edge pays."},
+	{"id": "heldNote", "type": "relic", "rarity": "sonnet", "tags": ["flow"], "title": "Held Note", "desc": "Flow does not decay while the boss winds up a swing — read the telegraph in peace."},
+	{"id": "encore", "type": "upgrade", "rarity": "sonnet", "tags": ["flow"], "title": "Encore", "desc": "The double-hit (Flow Tier 1) kicks in at Flow 2 instead of 3."},
+	{"id": "shatterfall", "type": "relic", "rarity": "sonnet", "tags": ["flow", "crash"], "title": "Shatterfall", "desc": "When a slip crashes your Flow from 4+, the shattered tempo detonates for 25 per point lost."},
+	{"id": "doubleTime", "type": "relic", "rarity": "opus", "tags": ["flow"], "title": "Double Time", "desc": "SIGNATURE: at max Flow the accelerando never stops — each further Perfect tightens the window AND adds +4% damage, stacking until you crash."},
+	# --- EVISCERATE — the dump ---
 	{"id": "eviPlus", "type": "upgrade", "rarity": "haiku", "tags": ["eviscerate", "combo"], "title": "Deep Cuts", "desc": "Eviscerate deals +8 damage per combo point.", "req": "eviscerate"},
-	{"id": "syncopation", "type": "relic", "rarity": "opus", "tags": ["flow", "perfect"], "title": "Syncopation", "desc": "At max Flow, your Strikes cost no energy — ride the solo forever."},
-	{"id": "virtuoso", "type": "relic", "rarity": "sonnet", "tags": ["flow"], "title": "Virtuoso", "desc": "Flow decays 50% slower between Perfects."},
-	{"id": "fifthCrit", "type": "relic", "rarity": "sonnet", "tags": ["perfect"], "title": "Killer's Eye", "desc": "Every 5th Perfect Strike is a guaranteed crit."},
+	{"id": "execute", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "execute"], "title": "Finish It", "desc": "Below 35% boss HP, your Eviscerate deals +35% — hold combo for the kill.", "req": "eviscerate"},
+	{"id": "overkill", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "combo"], "title": "Overkill", "desc": "Combo built past the cap banks (up to 3) into your next Eviscerate for +6 each.", "req": "eviscerate"},
+	{"id": "staccato", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "crash"], "title": "Staccato Fury", "desc": "After a Flow crash, your next Eviscerate is FREE and deals +50%.", "req": "eviscerate"},
+	# --- COUP DE GRÂCE ---
+	{"id": "crescendo", "type": "upgrade", "rarity": "haiku", "tags": ["coupdegrace", "flow"], "title": "Crescendo", "desc": "Coup de Grâce hits 40% harder."},
+	{"id": "syncopation", "type": "relic", "rarity": "opus", "tags": ["flow", "energy"], "title": "Syncopation", "desc": "SIGNATURE: at max Flow your Strikes cost no energy, and a GOOD grades up to Perfect — ride the solo forever."},
+	{"id": "daCapo", "type": "relic", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "title": "Da Capo", "desc": "Coup leaves you +1 Flow seed — come back from the top, not from walking pace."},
 ]
 const VENOM := [
 	{"id": "potent", "type": "upgrade", "rarity": "haiku", "tags": ["poison"], "title": "Potent Toxins", "desc": "All poison ticks 30% harder."},
@@ -51,7 +67,7 @@ static func spec_pool(aspect: String) -> Array:
 ## The Aspect's mechanic vocabulary — feeds the synergy slot's build-tag set.
 static func aspect_tags(aspect: String) -> Array:
 	if aspect == "tempo":
-		return ["flow", "perfect", "combo"]
+		return ["flow", "perfect", "combo", "crit", "bullseye", "window", "tempo"]
 	return ["poison", "combo", "perfect"]
 
 ## Apply a chosen boon to the run.

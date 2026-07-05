@@ -106,8 +106,17 @@ func _tempo(obs: Dictionary, energy: float) -> Dictionary:
 		_dump_wait = 0
 	return _tempo_strike(obs, energy)
 
+## GRADED WINDOW (§2c): aim for the CENTRE of the green (Bullseye/Perfect), not its early
+## edge — the flanks are now only a Good (no Flow). Latency smears the press LATE off centre,
+## so a skilled blade nails the core while a sloppy one drifts into Good/Miss. Scaled because
+## a full reaction delay dwarfs the ~10-tick window; ~0.35 lands the gradient across the tiers.
+const STRIKE_LAT_SCALE := 0.30
 func _tempo_strike(obs: Dictionary, energy: float) -> Dictionary:
-	var target := int(obs.get("perfect_lo", 18)) + latency_ticks
+	var lo := int(obs.get("perfect_lo", 18))
+	var hi := int(obs.get("perfect_hi", 28))
+	# aim CENTRE (−1 compensates the 1-tick enqueue delay so lat 0 lands dead centre);
+	# latency then smears the press late off centre → Bullseye/Perfect/Good/Miss gradient.
+	var target := maxi(lo, (lo + hi) / 2 - 1 + int(round(float(latency_ticks) * STRIKE_LAT_SCALE)))
 	if int(obs.get("since_strike", 0)) >= target and energy >= float(obs.get("strike_cost", 12.0)):
 		return _ab("strike")
 	return {}

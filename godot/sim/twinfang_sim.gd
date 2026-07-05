@@ -15,6 +15,11 @@ func _initialize() -> void:
 	var seeds := int(_arg("seeds", "300"))
 	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	_open_default = _arg("open", "on") != "off"
+	print("*** DEPRECATED (2026-07-05): the SOLO bosses (Warden/Executioner) are retired 'old")
+	print("*** trash' — do NOT tune the Tempo rework here. The GATE is res://sim/raid_sim.gd")
+	print("*** (Seals: Mistral/Gemini/Mythos), Tempo blade via `--blade=tempo`. Kept only as a")
+	print("*** fast local mechanics/determinism check for the shared kit. ***")
+	print("")
 	print("=== Project Rift — M5 Twinfang headless sim ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("")
@@ -27,6 +32,8 @@ func _initialize() -> void:
 	if seed0 == 1: _prove_creed(seeds)
 	print("")
 	if seed0 == 1: _prove_modules(seeds)
+	print("")
+	if seed0 == 1: _prove_cards(seeds)
 
 	var rows: Array = []
 	var matchups := [
@@ -76,6 +83,9 @@ func _initialize() -> void:
 				env_sum / float(seeds), psn_sum / float(seeds), _fmt(causes)])
 			if not dsum.is_empty():
 				print("              strike beats/run: %s" % _fmt_diag(dsum, seeds))
+				var sg := _fmt_strikes(dsum, seeds)
+				if sg != "":
+					print("              strike grades/run: %s" % sg)
 				var op := _fmt_open(dsum, seeds)
 				if op != "":
 					print("              openings/run:    %s" % op)
@@ -245,6 +255,40 @@ func _fmt_open(d: Dictionary, seeds: int) -> String:
 	for k in ["open_peak", "open_hit", "open_whiff"]:
 		if d.has(k):
 			parts.append("%s %.2f" % [k.substr(5), float(d[k]) / float(seeds)])
+	return " · ".join(parts)
+
+## TEMPO REWORK · new-slate probe: representative card builds engage + stay deterministic
+## (Tempo / Executioner @good). Bare vs crit vs greed/flow vs window vs eviscerate packages.
+func _prove_cards(seeds: int) -> void:
+	var n := mini(seeds, 100)
+	print("NEW-SLATE probe (Tempo / Executioner @good, %d seeds — the reworked draft):" % n)
+	var cells := [
+		{"l": "bare", "b": {}},
+		{"l": "crit", "b": {"heartseeker": true, "serrated": true, "opportunist": true, "ambush": true}},
+		{"l": "greed", "b": {"tightrope": true, "shatterfall": true, "doubleTime": true, "flowCap": true}},
+		{"l": "window", "b": {"wideTempo": true, "fencersLine": true, "rubato": true}},
+		{"l": "evisc", "b": {"eviPlus": true, "overkill": true, "staccato": true, "execute": true}},
+	]
+	for c in cells:
+		var w := 0; var ttk := 0.0; var wn := 0; var bull := 0.0
+		for seed in range(1, n + 1):
+			var r := _run_one(seed, "executioner", "tempo", 6, c["b"])
+			if r["won"]: w += 1; ttk += float(r["ttk_sec"]); wn += 1
+			bull += float((r.get("diag", {}) as Dictionary).get("s_bull", 0))
+		print("  %-8s win %5.1f%%  ttk %5.1fs  bullseyes/run %.2f" % [
+			c["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), bull / n])
+	var mix := {"heartseeker": true, "serrated": true, "tightrope": true, "doubleTime": true,
+		"wideTempo": true, "overkill": true, "staccato": true, "execute": true, "rubato": true}
+	var d1 := _run_one(9, "executioner", "tempo", 6, mix)
+	var d2 := _run_one(9, "executioner", "tempo", 6, mix)
+	print("  determinism (fat mixed build): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
+
+## Strike-timing grade averages per run (the graded window §2c: Bullseye/Perfect/Good/Miss).
+func _fmt_strikes(d: Dictionary, seeds: int) -> String:
+	var parts: Array = []
+	for k in ["s_bull", "s_perfect", "s_good", "s_miss"]:
+		if d.has(k):
+			parts.append("%s %.1f" % [k.substr(2), float(d[k]) / float(seeds)])
 	return " · ".join(parts)
 
 ## M7 strike-grade averages per run.

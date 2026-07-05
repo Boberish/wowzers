@@ -78,6 +78,38 @@ extends Resource
 @export var mark_cap: int = 5               ## The Deathmark: max marks stamped on the boss
 @export var mark_dmg: float = 16.0          ## The Deathmark: burst per mark when a dump detonates them
 
+# --- TEMPO REWORK · GRADED WINDOW (§2c, Option B) — the Perfect window is subdivided.
+#     Within the live [lo,hi] green, position is normalized 0(centre)…1(edge). The dead
+#     centre is BULLSEYE (elite read), the core is PERFECT, the flanks are GOOD (it lands,
+#     partial damage, NO Flow, no slip — treading water), outside = a MISS (base + slip).
+@export var grade_bull_frac: float = 0.18   ## |p|<=this = Bullseye (centre 18% of the window)
+@export var grade_perfect_frac: float = 0.55 ## |p|<=this = Perfect (centre core); beyond → Good
+@export var bull_mult: float = 1.8          ## Bullseye Strike damage (vs Perfect's 1.6) — dead centre bites
+@export var good_mult: float = 1.0          ## Good Strike damage — it LANDS at base, no Flow, no slip;
+                                            ## its value is preserving Flow (not crashing), NOT bonus dmg,
+                                            ## so treading water can't limp a sloppy blade past a DPS check
+
+# --- TEMPO REWORK · new card tuning (Slice 1; illustrative — sim/feel-tune) ---
+@export var serrated_bonus: float = 0.40    ## Serrated Fate: crits deal +this
+@export var opportunist_crit: float = 0.25  ## Opportunist: crit chance on a Strike during a boss wind-up
+@export var tightrope_mult: float = 0.15    ## Tightrope: +this damage while at max Flow
+@export var shatterfall_per: float = 25.0   ## Shatterfall: damage per Flow point lost in a 4+ crash
+@export var overkill_per: float = 6.0       ## Overkill: banked over-cap combo adds this to next Eviscerate
+@export var overkill_cap: int = 3           ## Overkill: max banked over-cap points
+@export var staccato_mult: float = 0.5      ## Staccato Fury: post-crash Eviscerate deals +this (and is free)
+@export var staccato_flow_min: int = 3      ## …only arms when the crash was from >= this Flow
+@export var execute_mult: float = 0.35      ## Finish It: Eviscerate +this below 35% boss HP
+@export var rubato_shift: float = 0.05      ## Rubato: the window sits this many seconds earlier
+@export var wide_pad: float = 0.15          ## Wide Tempo: widen the window this fraction each side
+@export var fencer_pad: float = 0.25        ## Fencer's Line: the strike AFTER a Bullseye is this much wider
+@export var da_capo_seed: int = 1           ## Da Capo: Coup's Flow seed +this
+@export var rude_cd_cut: float = 2.0        ## Rude Interruption: Kick cooldown −this seconds
+# DOUBLE TIME (signature): at max Flow, each further Perfect adds an "overdrive" stack.
+@export var doubletime_dmg: float = 0.04    ## +this damage per overdrive stack (flow-scaled hits)
+@export var doubletime_tighten: float = 0.06 ## window shrinks this fraction per stack…
+@export var doubletime_min_frac: float = 0.35 ## …but never below this fraction of its width
+@export var doubletime_cap: int = 12        ## overdrive stack ceiling (window-floor backstop)
+
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap
@@ -96,6 +128,9 @@ extends Resource
 	"flurry":      {"name": "Flurry",        "key": "5", "energy": 28.0, "dmg": 13.0, "cp": 2, "hits": 3},
 	"coupdegrace": {"name": "Coup de Grâce", "key": "4", "energy": 30.0, "cd": 5.0, "spec": "tempo", "dmg": 120.0},
 	"rupture":     {"name": "Rupture",       "key": "4", "energy": 22.0, "cd": 3.5, "spec": "venomancer", "per": 9.0},
+	# TEMPO REWORK · draftable spells (new buttons; fill bar slots 5+)
+	"gracenote":   {"name": "Grace Note",    "key": "6", "energy": 18.0, "dmg": 14.0, "cd": 2.0},
+	"coda":        {"name": "Coda",          "key": "7", "energy": 25.0, "cd": 10.0},
 }
 
 ## The four-slot bar for an Aspect (signature appended last). Draft spells fill 5+.

@@ -1136,7 +1136,7 @@ func _start_map_run() -> void:
 		_ai_runs[key] = _make_seat_run(String(_party[key]["cls"]),
 			String(_party[key]["aspect"]),
 			int((_run.run_seed ^ (0x515EED + int(SEAT_IDX[key]) * 0x9E3779)) & 0x7FFFFFFF))
-	_build_floor()
+	_show_creed_pick(_build_floor)   # TEMPO: swear a Creed at descent start (blade/Twinfang only)
 
 ## A minimal RunState for the human seat, just to carry boons + the draft economy
 ## (class/aspect/draft_rng/tokens/pity). Its encounter chain is ignored — the raid
@@ -1163,6 +1163,13 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
+		# TEMPO REWORK (offline plumbing): fold the run's Creed + Modules into the blade
+		# kit. Guarded to TwinfangKit — other classes carry neither, so this is a no-op there.
+		if seat.kit is TwinfangKit:
+			var tk := seat.kit as TwinfangKit
+			if _run.creed != "":
+				tk.creed_id = _run.creed
+			tk.modules = _run.modules.duplicate()
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -1188,6 +1195,8 @@ func _advance_floor() -> void:
 	_floor += 1
 	if _floor >= RaidContent.FLOORS.size():
 		_show_campaign_cleared()
+	elif _floor == 1:
+		_show_module_pick(_build_floor)   # TEMPO: end of Floor 1 elevation → install a Module
 	else:
 		_build_floor()
 
@@ -2027,6 +2036,90 @@ func _close_armor_modal() -> void:
 	if _armor_modal != null:
 		_armor_modal.queue_free()
 	_armor_modal = null
+
+# ============================================================ TEMPO REWORK — Creed / Module picks
+## The framework picks only exist for a HUMAN blade running the reworked class (Twinfang).
+## Every other seat/class skips straight through — empty is fine (per Bill: non-conforming
+## classes leave empty pages). Offline plumbing; online carry is a later follow-up.
+func _blade_tempo_human() -> bool:
+	return _seat_key == "blade" and _seat_cls_now() == "twinfang"
+
+## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
+func _show_creed_pick(done: Callable) -> void:
+	if _run == null or not _blade_tempo_human() or _run.creed != "":
+		done.call()
+		return
+	var ids: Array = TwinfangCreeds.v1_ids().duplicate()   # the shipping pool (grows with unlocks)
+	if ids.size() > 3 and _run.draft_rng != null:          # sample 3 deterministically when it's bigger
+		for i in range(ids.size() - 1, 0, -1):
+			var j := int(_run.draft_rng.next_u32() % (i + 1))
+			var t = ids[i]; ids[i] = ids[j]; ids[j] = t
+		ids = ids.slice(0, 3)
+	_screen = "creed"
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
+	_ui.add_child(head)
+	var hl := _title(head, "SWEAR A CREED", 34, Palette.CRIMSON)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run", 15, Palette.TEXT_DIM)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
+	_ui.add_child(box)
+	for id in ids:
+		var c: Dictionary = TwinfangCreeds.get_creed(String(id))
+		var card := AspectCard.new(String(c.get("name", id)) + "  ·  " + String(c.get("kicker", "")),
+			String(c.get("blurb", "")), Palette.CRIMSON, "flurry")
+		card.chosen.connect(_pick_creed.bind(String(id), done))
+		box.add_child(card)
+
+func _pick_creed(id: String, done: Callable) -> void:
+	if _run != null:
+		_run.creed = id
+	_toast_add("⚔  Creed sworn — %s" % String(TwinfangCreeds.get_creed(id).get("name", id)))
+	done.call()
+
+## End of Floor 1: INSTALL A MODULE — a new HUD gauge + way to play (§4). Forced pick.
+func _show_module_pick(done: Callable) -> void:
+	if _run == null or not _blade_tempo_human():
+		done.call()
+		return
+	var avail: Array = []
+	for id in TwinfangModules.built_ids():                 # only the implemented modules are offerable
+		if not _run.modules.has(String(id)):
+			avail.append(String(id))
+	if avail.is_empty():
+		done.call()
+		return
+	_screen = "module"
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
+	_ui.add_child(head)
+	var hl := _title(head, "INSTALL A MODULE", 34, Palette.FLOW)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "A   N E W   G A U G E ,   A   N E W   W A Y   T O   P L A Y  —  pick one", 15, Palette.TEXT_DIM)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
+	_ui.add_child(box)
+	for id in avail:
+		var m: Dictionary = TwinfangModules.get_module(String(id))
+		var card := AspectCard.new(String(m.get("name", id)) + "  ·  " + String(m.get("kicker", "")),
+			String(m.get("blurb", "")), Palette.FLOW, "flurry")
+		card.chosen.connect(_pick_module.bind(String(id), done))
+		box.add_child(card)
+
+func _pick_module(id: String, done: Callable) -> void:
+	if _run != null:
+		_run.modules[id] = true
+	_toast_add("⬡  Module installed — %s" % String(TwinfangModules.get_module(id).get("name", id)))
+	done.call()
 
 func _show_floor_cleared() -> void:
 	_screen = "end"
@@ -3260,6 +3353,8 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_rhythm.swing_min = int(obs.get("swing_min_ticks", 13))
 	_rhythm.perfect_lo = int(obs.get("perfect_lo", 18))
 	_rhythm.perfect_hi = int(obs.get("perfect_hi", 29))
+	_rhythm.bull_frac = float(obs.get("grade_bull_frac", 0.18))       # GRADED WINDOW (§2c) zones
+	_rhythm.perfect_frac = float(obs.get("grade_perfect_frac", 0.55))
 	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando visible
 	_rhythm.flow = int(obs.get("flow", 0)) if String(obs.get("aspect", "")) == "tempo" else 0
 	_rhythm.flow_max = int(obs.get("flow_max", 6))
@@ -3604,11 +3699,20 @@ func _handle_event(ev: Dictionary) -> void:
 			_add_shake(6.0)
 		# ---- class extras (only fire for the class that emits them) ----
 		"strike":
+			# GRADED WINDOW (§2c): flash the rhythm bar + pop the graded verdict.
 			if mine and _rhythm != null:
-				_rhythm.show_result(String(ev.get("result", "")))
+				var res := String(ev.get("result", ""))
+				_rhythm.show_result("perfect" if (res == "perfect" or res == "bullseye") else res)
+				match res:
+					"bullseye":
+						_big_text("BULLSEYE!", Palette.GOLD_BRIGHT, 38)
+						_add_shake(5.0)
+					"perfect":
+						_big_text("PERFECT!", Palette.PERFECT, 34)
+					"good":
+						_big_text("good", Palette.TEXT_DIM, 22, 0.42)
 		"perfect":
-			if mine:
-				_big_text("PERFECT!", Palette.PERFECT, 34)
+			pass   # the graded "strike" verdict (Bullseye/Perfect) owns the pop now (§2c)
 		"flow_lost":
 			if mine:
 				_big_text("FLOW LOST!", Palette.CRIMSON, 30)

@@ -23,6 +23,34 @@ func _process(_delta: float) -> bool:
 		hud._show_aspect_pick(seat_key)
 	print("aspect-pick screens (x4): ok")
 
+	# TEMPO REWORK framework plumbing: SWEAR A CREED → INSTALL A MODULE → fold into the blade kit.
+	hud._seat_key = "blade"
+	hud._aspect = "tempo"
+	hud._sync_blade_cls()
+	hud._run = hud._make_run()
+	assert(hud._run.char_class == "twinfang", "blade run should be twinfang")
+	var flags := {"creed": false, "mod": false, "skip": false}   # dict = by-ref so lambdas can mutate it
+	hud._show_creed_pick(func(): flags.creed = true)
+	assert(hud._screen == "creed" and not flags.creed, "creed pick should SHOW and wait for a choice")
+	hud._pick_creed("flourish", func(): flags.creed = true)
+	assert(hud._run.creed == "flourish" and flags.creed, "picking a creed sets run.creed + continues")
+	hud._show_module_pick(func(): flags.mod = true)
+	assert(hud._screen == "module" and not flags.mod, "module pick should SHOW and wait")
+	hud._pick_module("edge", func(): flags.mod = true)
+	assert(hud._run.modules.has("edge") and flags.mod, "picking a module sets run.modules + continues")
+	# the blade kit actually CARRIES the sworn creed + installed module after injection
+	var bseat: Seat = RaidContent._blade_seat("twinfang", "tempo")
+	hud._inject_boons(bseat)
+	var bk := bseat.kit as TwinfangKit
+	assert(bk.creed_id == "flourish" and bk.modules.has("edge"), "creed+module fold into the blade kit")
+	# non-conforming seat is EMPTY: a tank skips both picks (done fires immediately, no screen)
+	hud._seat_key = "tank"
+	hud._run.creed = ""
+	hud._show_creed_pick(func(): flags.skip = true)
+	assert(flags.skip, "a non-blade seat skips the creed pick (empty page, per design)")
+	hud._seat_key = "blade"
+	print("TEMPO framework: creed pick + module pick + kit inject ok; non-blade skips clean")
+
 	# the healer seat's TWO classes: Mender (tidecaller/brinkwarden) + the second
 	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],

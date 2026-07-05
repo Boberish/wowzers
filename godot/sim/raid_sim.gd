@@ -14,6 +14,7 @@ extends SceneTree
 # healer). Class-fixed to Mender everywhere else in the pipeline; this is the sim knob.
 var _healer_cls := "mender"
 var _haspect := ""
+var _baspect := ""    # --blade=tempo runs the reworked Tempo blade (default = the venomancer comp)
 
 # --- FAST-ITERATION + LIVE TUNING knobs (for playtest tweaking — see ./tune.sh) ---
 # During tuning you don't need 200 seeds or the correctness gates; you need a fast
@@ -37,6 +38,7 @@ func _initialize() -> void:
 	var only := _arg("boss", "")
 	_healer_cls = _arg("healer", "mender")
 	_haspect = _arg("haspect", "")
+	_baspect = _arg("blade", "")
 	_probes = _arg("probes", "1") != "0"
 	_dmg = float(_arg("dmg", "1"))
 	_regen = float(_arg("regen", "-1"))
@@ -136,8 +138,10 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	var enc := RaidContent.encounter_by_id(boss)
 	if _dmg != 1.0:
 		_scale_damage(enc)                               # --dmg override (fresh enc per run — no leak)
-	var s := RaidContent.make_state(seed, enc,
-		({"healer": _haspect} if _haspect != "" else {}), "tank", {"healer": _healer_cls})
+	var _asp := {}
+	if _haspect != "": _asp["healer"] = _haspect
+	if _baspect != "": _asp["blade"] = _baspect
+	var s := RaidContent.make_state(seed, enc, _asp, "tank", {"healer": _healer_cls})
 	var tank := s.seats[0]
 	var blade := s.seats[1]
 	var caster := s.seats[2]
