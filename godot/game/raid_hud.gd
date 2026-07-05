@@ -3925,13 +3925,65 @@ func _on_end(won: bool) -> void:
 			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
 			after = _show_campaign_cleared if _floor >= RaidContent.FLOORS.size() - 1 \
 				else _show_floor_cleared
-		# gear drop first, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear)
+		# THE RECKONING first — the raid ranked by damage + the fight's biggest hit —
+		# THEN gear drop, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear).
 		# ARMORY: only a Seal kill is a drop EVENT here — skirmish repeats pay salvage
 		var seal_kill: bool = String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL
-		_after_drop(String(_ctrl.state.encounter.id),
-			func(): _show_boon_draft(after), seal_kill)
+		var enc_id := String(_ctrl.state.encounter.id)
+		_show_fight_recap(func(): _after_drop(enc_id,
+			func(): _show_boon_draft(after), seal_kill))
 		return
 	_show_end(won)
+
+## The single biggest DAMAGE hit of the fight — across every raider + source (the meter
+## tracks per-source `max`). Returns {src, amt, who} or {} if nothing discrete landed.
+func _biggest_hit(s: CombatState) -> Dictionary:
+	var best := {}
+	for i in s.meter:
+		var dmg: Dictionary = (s.meter[i] as Dictionary).get("dmg", {})
+		for src in dmg:
+			var mx := float((dmg[src] as Dictionary).get("max", 0.0))
+			if mx > float(best.get("amt", 0.0)):
+				var who := ""
+				if int(i) >= 0 and int(i) < s.seats.size():
+					who = String((s.seats[int(i)] as Seat).unit_name)
+				best = {"src": src, "amt": mx, "who": who}
+	return best
+
+## AFTER EVERY WON FIGHT: THE RECKONING — the raid ranked by damage (click a raider for
+## their per-spell breakdown), your personal grade plaque, and the fight's BIGGEST HIT.
+## Reuses MeterPanel/RecapPanel; CONTINUE runs `done` (→ loot drop → boon reforge → map).
+func _show_fight_recap(done: Callable) -> void:
+	if _ctrl == null or _ctrl.state == null:
+		done.call()
+		return
+	_screen = "recap"
+	_clear()
+	var s: CombatState = _ctrl.state
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 14)
+	_place(box, 0.5, 0.5, 0.5, 0.5, -320, -250, 320, 265)
+	_ui.add_child(box)
+	var hl := _title(box, "THE RECKONING", 34, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(box, String(s.encounter.name) + "  —  DOWN", 14, Palette.TEXT_DIM)
+	var big := _biggest_hit(s)
+	if not big.is_empty():
+		_title(box, "★  BIGGEST HIT   %s  —  %d   (%s)" % [MeterPanel.pretty_src(big["src"]),
+			int(big["amt"]), String(big["who"])], 16, Palette.GOLD_BRIGHT)
+	if _ctrl.player() != null:
+		box.add_child(RecapPanel.new(s, _ctrl.player(), _recap_stats))
+	var cont := Button.new()
+	cont.custom_minimum_size = Vector2(220, 48)
+	cont.add_theme_font_size_override("font_size", 18)
+	cont.text = "CONTINUE ▸"
+	cont.pressed.connect(func(): done.call())
+	box.add_child(cont)
+	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
+	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+	_place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
+	_ui.add_child(rmeter)
 
 func _show_end(won: bool) -> void:
 	_screen = "end"

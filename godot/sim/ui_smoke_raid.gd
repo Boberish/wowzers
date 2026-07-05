@@ -51,6 +51,17 @@ func _process(_delta: float) -> bool:
 	hud._seat_key = "blade"
 	print("TEMPO framework: creed pick + module pick + kit inject ok; non-blade skips clean")
 
+	# THE RECKONING — the per-fight recap builds off a driven fight's damage meter.
+	hud._launch("blade", "tempo")
+	var rs: CombatState = hud._ctrl.state
+	_drive(rs, "blade")
+	var big: Dictionary = hud._biggest_hit(rs)
+	flags.skip = false
+	hud._show_fight_recap(func(): flags.skip = true)
+	assert(hud._screen == "recap" and not flags.skip, "fight recap should SHOW + wait for CONTINUE")
+	print("THE RECKONING: recap builds; biggest hit amt=%d src=%s" % [
+		int(big.get("amt", 0)), str(big.get("src", "-"))])
+
 	# the healer seat's TWO classes: Mender (tidecaller/brinkwarden) + the second
 	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
