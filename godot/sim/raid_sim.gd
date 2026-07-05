@@ -15,6 +15,7 @@ extends SceneTree
 var _healer_cls := "mender"
 var _haspect := ""
 var _baspect := ""    # --blade=tempo runs the reworked Tempo blade (default = the venomancer comp)
+var _brig := ""       # --rig=when:then wires the blade's Combo rig (e.g. --rig=coup:overcharge)
 
 # --- FAST-ITERATION + LIVE TUNING knobs (for playtest tweaking — see ./tune.sh) ---
 # During tuning you don't need 200 seeds or the correctness gates; you need a fast
@@ -39,6 +40,7 @@ func _initialize() -> void:
 	_healer_cls = _arg("healer", "mender")
 	_haspect = _arg("haspect", "")
 	_baspect = _arg("blade", "")
+	_brig = _arg("rig", "")
 	_probes = _arg("probes", "1") != "0"
 	_dmg = float(_arg("dmg", "1"))
 	_regen = float(_arg("regen", "-1"))
@@ -154,6 +156,10 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	tp.reaction_slack = float(sk["slack"])
 	tp.rng = DetRng.new(seed * 2749 + 1337)
 	tp.use_challenge = use_challenge
+	if _brig != "" and blade.kit is TwinfangKit:      # wire the Combo rig for the probe
+		var parts := _brig.split(":")
+		if parts.size() == 2:
+			(blade.kit as TwinfangKit).rig = {"when": parts[0], "then": parts[1]}
 	var bp := blade.policy as TwinfangPolicy
 	bp.latency_ticks = int(sk["lat"])
 	bp.rng = DetRng.new(seed * 2749 + 2338)

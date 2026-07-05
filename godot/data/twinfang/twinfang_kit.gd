@@ -14,6 +14,7 @@ var cfg: TwinfangConfig
 var boons: Dictionary = {}             ## id -> true (drafted upgrades/relics/spells)
 var creed_id: String = "drumline"      ## TEMPO rework: the run's risk temperament (Tempo only)
 var modules: Dictionary = {}           ## TEMPO rework: equipped UI Modules, id -> true (Opening/Edge/…)
+var rig: Dictionary = {}               ## TEMPO §5: the run's ONE Combo rig — {"when": id, "then": id}
 
 # TEMPO REWORK · GRADED WINDOW (§2c): one landing zone, four tiers by centredness.
 enum { G_MISS = 0, G_GOOD = 1, G_PERFECT = 2, G_BULL = 3 }
@@ -185,6 +186,35 @@ func _wheel_strike(s: CombatState, seat: Seat, perfect: bool) -> void:
 ## Poison ticks bypass this (they scale with neither Flow nor Execute — see _upkeep).
 ## `kind` tags the SOURCE for the view layer only (auto Strike vs a finisher/signature),
 ## so the HUD can colour non-auto-attacks distinctly — it never touches the checksum.
+## COMBO RIG (§5) — a WHEN moment fired: if the run's wired WHEN matches, apply the wired THEN
+## at its computed magnitude (a modest side-boost). Deterministic; a view-only pop shows it work.
+func _rig_fire(s: CombatState, seat: Seat, when_id: String) -> void:
+	if aspect != "tempo" or rig.is_empty() or String(rig.get("when", "")) != when_id:
+		return
+	var then_id := String(rig.get("then", ""))
+	var mag := TwinfangRig.magnitude(when_id, then_id)
+	if mag <= 0:
+		return
+	match TwinfangRig.then_kind(then_id):
+		"damage":
+			_deal(s, seat, float(mag), false, false, "echo")     # flat — the board's number is honest
+		"energy":
+			_gain_energy(seat, float(mag))
+		"crit":
+			seat.vars["rig_crit"] = int(seat.vars.get("rig_crit", 0)) + mag
+		"bleed":
+			seat.vars["bleed_left"] = mag
+			seat.vars["bleed_per"] = maxi(1, int(round(float(mag) / 4.0)))
+			seat.vars["bleed_acc"] = 0
+		"empower":
+			seat.vars["rig_empower"] = maxi(int(seat.vars.get("rig_empower", 0)), mag)   # next dump +mag%
+		"expose":
+			seat.vars["rig_expose_amt"] = mag
+			seat.vars["rig_expose_until"] = s.tick + _tt(s, 2.0)
+	CombatCore._bump_diag(s, seat, "rig_fire")
+	CombatCore.emit_event(s, {"t": "rig_fire", "player": seat.is_player,
+		"when": when_id, "then": then_id, "mag": mag})
+
 func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool,
 		kind := "strike") -> float:
 	var d := raw
@@ -195,6 +225,15 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 		var od := int(seat.vars.get("overdrive", 0))          # DOUBLE TIME: overdrive damage
 		if od > 0:
 			d *= (1.0 + float(od) * cfg.doubletime_dmg)
+	# COMBO RIG (§5) — Expose: the boss takes +% from ALL your damage for a beat.
+	if int(seat.vars.get("rig_expose_until", 0)) >= s.tick:
+		d *= (1.0 + float(seat.vars.get("rig_expose_amt", 0)) / 100.0)
+	# COMBO RIG (§5) — Overcharge: your NEXT dump hits harder (consumed by the first dump).
+	if _is_dump(kind):
+		var emp := int(seat.vars.get("rig_empower", 0))
+		if emp > 0:
+			d *= (1.0 + float(emp) / 100.0)
+			seat.vars["rig_empower"] = 0
 	# FINISH IT (boon): the execute now lives on the SPENDER — Eviscerate only, below 35%.
 	if _b("execute") and kind == "finisher" and s.boss.hp_max > 0.0 and s.boss.hp / s.boss.hp_max < 0.35:
 		d *= (1.0 + cfg.execute_mult)
@@ -296,6 +335,7 @@ func _opening_note(s: CombatState, seat: Seat, kind: String) -> void:
 				_gain_flow(seat)
 		elif aspect == "venomancer":
 			_apply_venom(seat, WHEEL_KEYS[_wheel(seat)], cfg.open_venom)
+		_rig_fire(s, seat, "punish")       # COMBO RIG (§5): a dump PUNISHED the Opening
 	CombatCore.emit_event(s, {"t": "opening", "grade": ("peak" if peak else "hit"),
 		"player": seat.is_player, "kind": kind})
 
@@ -354,6 +394,16 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if bell > 0.0:
 		_gain_energy(seat, bell)
 	_gain_energy(seat, cfg.energy_regen * s.dt)
+	# COMBO RIG (§5) — Bloodletter: a kit-side bleed ticks 1/s until spent.
+	var bl := int(seat.vars.get("bleed_left", 0))
+	if bl > 0:
+		var bacc := int(seat.vars.get("bleed_acc", 0)) + 1
+		if bacc >= _tt(s, 1.0):
+			bacc = 0
+			var per := mini(int(seat.vars.get("bleed_per", 1)), bl)
+			_deal(s, seat, float(per), false, false, "bleed")
+			seat.vars["bleed_left"] = bl - per
+		seat.vars["bleed_acc"] = bacc
 	# ARMORY (strong bell): the warm start hums — regen doubles for the first 10s.
 	if GearFx.bell_live(s, seat):
 		_gain_energy(seat, cfg.energy_regen * s.dt)
@@ -550,6 +600,9 @@ func _roll_crit(s: CombatState, seat: Seat, bullseye: bool, is_perfect: bool) ->
 	if _b("opportunist") and s.telegraph != null:
 		if s.rng.next_float() < cfg.opportunist_crit:
 			crit = true
+	if int(seat.vars.get("rig_crit", 0)) > 0:      # COMBO RIG (§5) — Killing Edge charge
+		seat.vars["rig_crit"] = int(seat.vars["rig_crit"]) - 1
+		crit = true
 	return crit
 
 ## The rhythm. Strike too early (< swing_min) and it's ignored (no cost). Inside the green
@@ -600,7 +653,18 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 		_deal(s, seat, base, true, crit, "perfect")
 		CombatCore.emit_event(s, {"t": "perfect", "player": seat.is_player})
 		if aspect == "tempo":
+			var was_max := _flow(seat) >= max_flow()
 			_gain_flow(seat)                                                  # Flow = BPM (Tempo only)
+			# COMBO RIG (§5) WHEN moments — Peak (just hit max), Riff (every 3rd Perfect), Bullseye
+			if not was_max and _flow(seat) >= max_flow():
+				_rig_fire(s, seat, "peak")
+			var rr := int(seat.vars.get("rig_riff", 0)) + 1
+			if rr >= 3:
+				rr = 0
+				_rig_fire(s, seat, "riff")
+			seat.vars["rig_riff"] = rr
+			if bullseye:
+				_rig_fire(s, seat, "bullseye")
 			if _b("doubleTime") and _flow(seat) >= max_flow():               # SIGNATURE: overdrive climbs at the top
 				seat.vars["overdrive"] = mini(int(seat.vars.get("overdrive", 0)) + 1, cfg.doubletime_cap)
 			if _m("deathmark"):                                              # MODULE (Deathmark): stamp the boss
@@ -655,8 +719,8 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 		seat.vars["staccato_ready"] = false
 	_deal(s, seat, dmg, true, false, "finisher")
 	seat.vars["cp"] = 0
-	if _b("tfTrigSpender") and cp >= cfg.cp_max:
-		_tf_trigger(s, seat, "spender")    # Phase B: a full-point finisher = proc moment
+	if cp >= cfg.cp_max:
+		_rig_fire(s, seat, "finale")       # COMBO RIG (§5): a full 5-combo Eviscerate
 	_dump_landed(s, seat, "finisher")     # THE OPENING: read-reward if it hit the window
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
 	return true
@@ -746,6 +810,7 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 	seat.vars["flow_decay_acc"] = 0
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
 	_dump_landed(s, seat, "coup")                       # THE OPENING (fires after the Flow reset)
+	_rig_fire(s, seat, "coup")                          # COMBO RIG (§5): empower rides the NEXT dump
 	CombatCore.emit_event(s, {"t": "coup", "player": seat.is_player})
 	if GearFx.has(seat, &"encore_bell"):                 # GEAR-2: the bell rings after the finisher
 		seat.vars["encore_left"] = 3
