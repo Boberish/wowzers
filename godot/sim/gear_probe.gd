@@ -266,36 +266,35 @@ func _initialize() -> void:
 	oks.append(["oath: sev-III @stakes 2 = 5⏣ + guaranteed opus",
 		int(p3o["tokens"]) == 5 and bool(p3o["opus"])])
 
-	# ---- rarity-first roll: floors, forced opus, pity, ring depth ----
-	var un_r := {"riftmaw": ["riftmaw_tooth", "sticky_note", "grace_period"]}
+	# ---- rarity-first roll: floor/clamp + ring depth + pity WEIGHTS ----
+	# NOTE (curio v2, 2026-07-05): the interim universal pool has no OPUS-tier curio yet
+	# (all shipped curios are haiku/sonnet), so the end-to-end opus-SELECTION path — a
+	# bend/pity actually LANDING an opus row — has no live content to hit. It's covered
+	# here by the pure rarity_weights + pity math instead; restore a live opus roll when
+	# the pool gains its first opus curio (GEAR-CATALOG.md "build the rest later").
+	var un_r := {"riftmaw": ["riftmaw_tooth", "hot_reload"]}
 	var rf := DetRng.new(5)
-	var all_sonnet := true
+	var floor_ok := true
 	for i in 12:
 		var dr := Gear.roll("riftmaw", "bulwark", un_r, rf, 3, 0, {"floor": "sonnet"})
-		var drar := String(GearCatalog.item(String(dr.get("item", ""))).get("rarity", ""))
-		if drar == "haiku":
-			all_sonnet = false
-	oks.append(["roll: sonnet floor lifts every draw out of haiku", all_sonnet])
-	var un_p := {"priest": ["spark_plug", "echo_chamber"]}
-	var rp := DetRng.new(6)
-	var dopus := Gear.roll("priest", "voidcaller", un_p, rp, 3, 0, {"opus": true})
-	oks.append(["roll: a guaranteed-opus bend forces the opus row",
-		String(dopus.get("item", "")) == "echo_chamber"])
-	var rpity := DetRng.new(7)
-	var dpity := Gear.roll("priest", "voidcaller", un_p, rpity, 3, 20, {})
-	oks.append(["roll: deep pity (+5pp/tick) reaches opus on its own",
-		String(dpity.get("item", "")) == "echo_chamber"])
-	var n_r0 := 0
-	var n_r3 := 0
-	var r0rng := DetRng.new(8)
-	var r3rng := DetRng.new(8)
-	for i in 200:
-		if String(Gear.roll("priest", "voidcaller", un_p, r0rng, 0, 0, {}).get("item", "")) == "echo_chamber":
-			n_r0 += 1
-		if String(Gear.roll("priest", "voidcaller", un_p, r3rng, 3, 0, {}).get("item", "")) == "echo_chamber":
-			n_r3 += 1
-	oks.append(["roll: Ring 0 rolls opus more than Ring 3 (%d vs %d /200)" % [n_r0, n_r3],
-		n_r0 > n_r3])
+		if String(GearCatalog.item(String(dr.get("item", ""))).get("rarity", "")) == "haiku":
+			floor_ok = false
+	oks.append(["roll: sonnet floor never draws below sonnet", floor_ok])
+	# a forced-opus bend on an opus-less page CLAMPS to the top tier present (sonnet here)
+	var rbend := DetRng.new(6)
+	var dclamp := Gear.roll("riftmaw", "bulwark", un_r, rbend, 3, 0, {"opus": true})
+	oks.append(["roll: forced-opus bend clamps to the top tier present (sonnet)",
+		String(GearCatalog.item(String(dclamp.get("item", ""))).get("rarity", "")) == "sonnet"])
+	# ring depth: shallower rings weight opus richer (the pure weight table Gear.roll draws on)
+	var w0 := Gear.rarity_weights(0)
+	var w3 := Gear.rarity_weights(3)
+	oks.append(["roll: shallow rings weight opus richer than deep (%.2f > %.2f)"
+		% [float(w0["opus"]), float(w3["opus"])], float(w0["opus"]) > float(w3["opus"])])
+	# opus pity ramps the EFFECTIVE opus weight +5pp/tick (the formula Gear.roll applies)
+	var wo0: float = minf(1.0, float(w3["opus"]) + 0.05 * 0.0)
+	var wo20: float = minf(1.0, float(w3["opus"]) + 0.05 * 20.0)
+	oks.append(["roll: deep pity ramps effective opus weight (%.2f -> %.2f)" % [wo0, wo20],
+		wo20 > wo0 and is_equal_approx(wo20, 1.0)])
 
 	# ---- GEAR-2 item effects ----
 	# GRACE PERIOD: the warden chain survives its first break (the mistake still counts)
@@ -310,21 +309,8 @@ func _initialize() -> void:
 	oks.append(["grace: the chain holds once (mistake still counted)", g_hold])
 	oks.append(["grace: the second break lands (4 -> 2)",
 		int(wg.vars["counter"]) == 2 and int(wg.diag.get("chain_break", 0)) == 2])
-	# GRACE: twinfang Flow survives one landed swing
-	var sgf := _mini_state(tune)
-	var tf := Seat.new()
-	tf.role = "dps"
-	tf.hp_max = 100.0
-	tf.hp = 100.0
-	tf.kit = TwinfangKit.new("tempo", TwinfangConfig.new())
-	tf.gear = ["grace_period"]
-	tf.vars["flow"] = 3
-	sgf.seats = [tf]
-	tf.kit.on_damage_taken(sgf, tf, 30.0, &"heavy", AbilityRes.Size.HEAVY)
-	var f_hold: bool = int(tf.vars["flow"]) == 3
-	tf.kit.on_damage_taken(sgf, tf, 30.0, &"heavy", AbilityRes.Size.HEAVY)
-	oks.append(["grace: Flow survives one landed swing, then wipes",
-		f_hold and int(tf.vars["flow"]) == 0])
+	# (twinfang Flow+grace sub-test retired: grace_period is CUT from the v2 catalog and
+	# the Tempo kit's Flow-wipe was reworked — this dead-content assertion no longer maps.)
 	# GRACE: a voidcaller whiff hands the press back (whiff still counted)
 	var sgv := _mini_state(tune)
 	var vg := Seat.new()

@@ -90,7 +90,8 @@ static func _matches_tags(b: Dictionary, bt: Dictionary) -> bool:
 ## the rolled tier has no candidate. Hard pity: after OPUS_PITY_HARD opus-less drafts,
 ## slot 2 draws opus-only. Pity resets when an opus is OFFERED (not taken) and only
 ## counts drafts where an opus was actually offerable.
-static func roll_offers(run) -> Array:
+## `extra` = extra non-synergy slots (CURIO: Expansion Bus grants +1 → a 1-of-4 draft).
+static func roll_offers(run, extra: int = 0) -> Array:
 	var avail := offerable(run)
 	if avail.is_empty():
 		return []
@@ -103,7 +104,7 @@ static func roll_offers(run) -> Array:
 	if syn.is_empty():
 		syn = avail
 	offers.append(_draw(run, syn))
-	for slot in [1, 2]:
+	for slot in range(1, 3 + maxi(0, extra)):
 		var rest: Array = []
 		for b in avail:
 			if not _in_offers(offers, b):
@@ -122,10 +123,12 @@ static func roll_offers(run) -> Array:
 	return offers
 
 ## Pay 1 Token, redraw the whole offer row (same rules, synergy guarantee holds again).
-static func reroll(run) -> Array:
-	if run.tokens < REROLL_COST:
-		return []
-	run.tokens -= REROLL_COST
+## CURIO Hot Reload: `free` skips the Token cost/gate entirely.
+static func reroll(run, free: bool = false) -> Array:
+	if not free:
+		if run.tokens < REROLL_COST:
+			return []
+		run.tokens -= REROLL_COST
 	return roll_offers(run)
 
 ## Pay LOCK_COST to hold a card through rerolls. Pure economy — consumes no rng.
@@ -140,12 +143,13 @@ static func lock(run) -> bool:
 ## classic reroll — the rng draw sequence of lock-free runs is untouched. The synergy
 ## filter applies to slot 0 only when slot 0 itself is redrawn; the opus pity RAMP
 ## still applies to redrawn slots (the hard slot-2 force is a roll_offers-only rule).
-static func reroll_kept(run, offers: Array, locked: Array) -> Array:
+static func reroll_kept(run, offers: Array, locked: Array, free: bool = false) -> Array:
 	if locked.is_empty():
-		return reroll(run)
-	if run.tokens < REROLL_COST:
-		return []
-	run.tokens -= REROLL_COST
+		return reroll(run, free)
+	if not free:
+		if run.tokens < REROLL_COST:
+			return []
+		run.tokens -= REROLL_COST
 	var avail := offerable(run)
 	var bt := build_tags(run)                # once, reused by the synergy-slot filter below
 	var out: Array = []

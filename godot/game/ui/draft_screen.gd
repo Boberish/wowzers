@@ -19,6 +19,7 @@ var _mid: VBoxContainer
 var _tokens_lbl: Label
 var _row: HBoxContainer
 var _reroll: Button
+var free_reroll: bool = false  ## CURIO Hot Reload: rerolls cost 0 (caller sets from equipped gear)
 
 func _init(run, offers: Array, headline: String, flavor: String, extra_lines: Array = [],
 		extra_color: Color = Palette.STEEL) -> void:
@@ -124,8 +125,12 @@ func _rebuild() -> void:
 	var t: int = _run.tokens
 	_tokens_lbl.text = "TOKENS · %d — spend them responsibly" % t
 	_tokens_lbl.add_theme_color_override("font_color", Palette.GOLD if t > 0 else Palette.TEXT_DIM)
-	_reroll.text = "REROLL THE OFFER · %d ⏣" % Draft.REROLL_COST
-	_reroll.disabled = _run.tokens < Draft.REROLL_COST
+	if free_reroll:
+		_reroll.text = "REROLL THE OFFER · FREE"
+		_reroll.disabled = false
+	else:
+		_reroll.text = "REROLL THE OFFER · %d ⏣" % Draft.REROLL_COST
+		_reroll.disabled = _run.tokens < Draft.REROLL_COST
 
 func _on_taken(i: int) -> void:
 	boon_taken.emit(_offers[i])
@@ -141,7 +146,7 @@ func _on_unlock(i: int) -> void:
 	_rebuild()
 
 func _on_reroll() -> void:
-	var next := Draft.reroll_kept(_run, _offers, _locked)
+	var next := Draft.reroll_kept(_run, _offers, _locked, free_reroll)
 	if not next.is_empty():
 		_offers = next
 	_rebuild()

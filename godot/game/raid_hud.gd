@@ -988,7 +988,8 @@ func _on_net_draft() -> void:
 	if _run == null:
 		_net.send_pick("")
 		return
-	var picks := Draft.roll_offers(_run)
+	# CURIO Expansion Bus: +1 slot → a 1-of-4 draft (online).
+	var picks := Draft.roll_offers(_run, 1 if _map_gear.has("expansion_bus") else 0)
 	if picks.is_empty():
 		_net.send_pick("")
 		_show_online_wait("Reforge pool exhausted — waiting for the raid…")
@@ -997,6 +998,7 @@ func _on_net_draft() -> void:
 	_clear()
 	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
 		"Take one. Your raid is drafting too.", [], Palette.GOLD)
+	ds.free_reroll = _map_gear.has("hot_reload")  # CURIO Hot Reload
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_run, boon)
 		_taken_boons.append(boon)
@@ -1618,6 +1620,8 @@ func _arm_gear(u: Seat) -> void:
 ## boon draft spends (raid-boons' `_run.tokens`). `_map_tokens` stays only as the
 ## fallback bank for runless dev paths.
 func _gain_tokens(n: int) -> void:
+	if n > 0 and _map_gear.has("hashgrinder"):   # CURIO Hashgrinder: all Token income doubled
+		n *= 2
 	if _run != null:
 		_run.tokens += n
 	else:
@@ -1962,7 +1966,7 @@ func _show_boon_draft(done: Callable) -> void:
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
-		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
+		_gain_tokens(Draft.mint(_ctrl.state, _run.char_class))  # routes through Hashgrinder ×2
 	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
 	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
 	var chain := done
@@ -1988,7 +1992,8 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 		return
 	if not mine and _run != null:
 		run.tokens = _run.tokens
-	var picks := Draft.roll_offers(run)
+	# CURIO Expansion Bus (your seat only): +1 slot → a 1-of-4 draft.
+	var picks := Draft.roll_offers(run, 1 if (mine and _map_gear.has("expansion_bus")) else 0)
 	if picks.is_empty():
 		done.call()
 		return
@@ -2004,6 +2009,7 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	var flavor := "Take one — every piece forges into your set." if mine \
 		else "You command the build — the AI only drives the rotation."
 	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
+	ds.free_reroll = mine and _map_gear.has("hot_reload")  # CURIO Hot Reload (your seat only)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(run, boon)
 		if mine:
