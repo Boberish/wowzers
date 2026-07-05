@@ -215,6 +215,22 @@ named — *"side-effect damage is killing the boss and I don't know why."* Repla
 run**: a single, legible circuit you wire, watch light up, and know cold. It's **another milestone ceremony**
 (same species as Creed/Module), NOT a growing system.
 
+### 5.0 ✅ BUILT & MERGED 2026-07-05 (`ecfbb75`) — the greed-dial payout
+The rig ships. **The balancer AND the reason to reach for rare WHENs, in one system:** a THEN's magnitude is
+**computed from the WHEN it's plugged into** (`base × mult`), so frequent WHENs pay small and rare WHENs pay a
+**premium — collectible only if you actually LAND them** (the rig is itself a small greed dial, on theme). One
+formula in `data/twinfang/twinfang_rig.gd`, **no pairing rules**; the wiring board shows the number before you commit.
+- **WHENs** (`mult` ≈ inverse-frequency × premium): Riff 1.0 · Bullseye 1.9 · Finale 4.4 · Punish 6.5 · Peak 6.9 ·
+  Coup 8.4.  **THENs** (`base` at Riff): Echo 12 dmg · Second Wind 5 energy · Killing Edge crit-charges ·
+  Bloodletter 8 bleed · Overcharge 6% next-dump (the Coup build-up) · Expose 3%. *(v1 numbers — tune by playtest
+  feel; all in one table.)*
+- Wired at the **first draft** (`_show_rig_wire` 3+3 board, ButtonGroup + live readout), **re-wired at end of
+  Floor 2**; folded into the blade kit via `_inject_boons` (blade/Tempo human only, else empty). Shows
+  persistently in the **build panel** + pops "<THEN> +N" on fire.
+- Power = **SIDE BOOST** (Mythos ~4% TTK / ~10% of the blade's own damage). Determinism PASS; `raid_sim --rig=when:then`.
+- **Trimmed vs 5b/5c below:** the greed-dial premium REPLACES the floor version-bump as the "stays-relevant"
+  mechanism (no floor-scaling in v1); the Detonate/Mark WHENs (module-gated) are parked with the module roster.
+
 ### 5a. The rename 🔒
 Retire the jargon: Trigger → **WHEN** · Payload → **THEN** · Property → **ALWAYS** — and ALWAYS pieces are now
 just **classics** (the property slot is retired; see the audit). A rig reads as one sentence:

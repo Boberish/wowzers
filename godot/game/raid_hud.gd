@@ -2710,7 +2710,12 @@ func _verb_summary_lines() -> Array:
 	if _run == null:
 		return []
 	match _seat_key:
-		"blade": return TwinfangBoons.verb_summary(_run.boons, _aspect)
+		"blade":
+			# TEMPO §5: show the wired Combo rig in the build panel (Twinfang only).
+			if _blade_cls == "twinfang" and not _run.rig.is_empty():
+				return ["⚡ Combo — " + TwinfangRig.describe(
+					String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
+			return TwinfangBoons.verb_summary(_run.boons, _aspect)
 		"caster": return VoidcallerBoons.verb_summary(_run.boons, _aspect)
 		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
