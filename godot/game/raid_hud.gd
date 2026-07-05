@@ -1170,6 +1170,7 @@ func _inject_boons(seat: Seat) -> void:
 			if _run.creed != "":
 				tk.creed_id = _run.creed
 			tk.modules = _run.modules.duplicate()
+			tk.rig = _run.rig.duplicate()      # TEMPO §5: the wired Combo rig
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -1197,6 +1198,8 @@ func _advance_floor() -> void:
 		_show_campaign_cleared()
 	elif _floor == 1:
 		_show_module_pick(_build_floor)   # TEMPO: end of Floor 1 elevation → install a Module
+	elif _floor == 2:
+		_show_rig_wire(_build_floor)      # TEMPO §5: re-wire the Combo at end of Floor 2
 	else:
 		_build_floor()
 
@@ -1954,6 +1957,10 @@ func _show_boon_draft(done: Callable) -> void:
 	if _run == null:
 		done.call()
 		return
+	# TEMPO §5: the FIRST draft is where you wire your Combo (blade/Tempo only), then the boons.
+	if _blade_tempo_human() and _run.rig.is_empty():
+		_show_rig_wire(func(): _show_boon_draft(done))
+		return
 	if _ctrl != null and _ctrl.state != null:
 		_run.tokens += Draft.mint(_ctrl.state, _run.char_class)
 	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
@@ -2120,6 +2127,95 @@ func _pick_module(id: String, done: Callable) -> void:
 		_run.modules[id] = true
 	_toast_add("⬡  Module installed — %s" % String(TwinfangModules.get_module(id).get("name", id)))
 	done.call()
+
+# ---- TEMPO §5: the ONE Combo rig — wire a WHEN → THEN (first draft; re-wire at Floor 2) ----
+var _rig_w := ""
+var _rig_t := ""
+var _rig_readout: Label = null
+var _rig_confirm: Button = null
+
+## WIRE YOUR COMBO — pick 1 of 3 WHENs + 1 of 3 THENs; the readout shows the computed number
+## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
+func _show_rig_wire(done: Callable) -> void:
+	if _run == null or not _blade_tempo_human():
+		done.call()
+		return
+	var whens := TwinfangRig.offer(TwinfangRig.when_ids(), _run.draft_rng, 3)
+	var thens := TwinfangRig.offer(TwinfangRig.then_ids(), _run.draft_rng, 3)
+	_rig_w = ""
+	_rig_t = ""
+	_screen = "rig"
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -450, 46, 450, 150)
+	_ui.add_child(head)
+	var hl := _title(head, "RE-WIRE YOUR COMBO" if not _run.rig.is_empty() else "WIRE YOUR COMBO", 32, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	_title(head, "one MOMENT → one PAYOFF, all run  —  rare moments pay MORE, if you can land them", 14, Palette.TEXT_DIM)
+	var cols := HBoxContainer.new()
+	cols.alignment = BoxContainer.ALIGNMENT_CENTER
+	cols.add_theme_constant_override("separation", 54)
+	_place(cols, 0.5, 0.5, 0.5, 0.5, -440, -180, 440, 150)
+	_ui.add_child(cols)
+	cols.add_child(_rig_col("WHEN — the moment", whens, TwinfangRig.WHENS, true))
+	cols.add_child(_rig_col("THEN — the payoff", thens, TwinfangRig.THENS, false))
+	var foot := VBoxContainer.new()
+	foot.alignment = BoxContainer.ALIGNMENT_CENTER
+	foot.add_theme_constant_override("separation", 12)
+	_place(foot, 0.5, 1, 0.5, 1, -320, -160, 320, -28)
+	_ui.add_child(foot)
+	_rig_readout = _title(foot, "pick a moment and a payoff", 18, Palette.TEXT_DIM)
+	_rig_confirm = Button.new()
+	_rig_confirm.text = "WIRE IT ▸"
+	_rig_confirm.custom_minimum_size = Vector2(200, 44)
+	_rig_confirm.disabled = true
+	_rig_confirm.pressed.connect(func():
+		_run.rig = {"when": _rig_w, "then": _rig_t}
+		_toast_add("⚡  Combo wired — " + TwinfangRig.describe(_rig_w, _rig_t))
+		done.call())
+	foot.add_child(_rig_confirm)
+
+func _rig_col(label: String, ids: Array, table: Dictionary, is_when: bool) -> VBoxContainer:
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	_title(col, label, 13, Palette.CRIMSON if is_when else Palette.FLOW)
+	var group := ButtonGroup.new()
+	for id in ids:
+		var d: Dictionary = table.get(String(id), {})
+		var b := Button.new()
+		b.toggle_mode = true
+		b.button_group = group
+		b.custom_minimum_size = Vector2(330, 62)
+		b.clip_text = true
+		b.text = "%s — %s" % [String(d.get("name", id)), String(d.get("blurb", ""))]
+		if is_when:
+			b.toggled.connect(_rig_on_when.bind(String(id)))
+		else:
+			b.toggled.connect(_rig_on_then.bind(String(id)))
+		col.add_child(b)
+	return col
+
+func _rig_on_when(on: bool, id: String) -> void:
+	if on: _rig_w = id
+	_rig_refresh()
+
+func _rig_on_then(on: bool, id: String) -> void:
+	if on: _rig_t = id
+	_rig_refresh()
+
+func _rig_refresh() -> void:
+	if _rig_readout == null:
+		return
+	if _rig_w != "" and _rig_t != "":
+		_rig_readout.text = TwinfangRig.describe(_rig_w, _rig_t)
+		_rig_readout.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
+		if _rig_confirm != null:
+			_rig_confirm.disabled = false
+	else:
+		_rig_readout.text = "pick a moment and a payoff"
+		if _rig_confirm != null:
+			_rig_confirm.disabled = true
 
 func _show_floor_cleared() -> void:
 	_screen = "end"
@@ -3722,6 +3818,11 @@ func _handle_event(ev: Dictionary) -> void:
 		"coup":
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_add_shake(7.0)
+		"rig_fire":
+			# TEMPO §5 — the Combo rig fired: a small pop so you SEE your build work.
+			if mine:
+				var tn := String((TwinfangRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
+				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.FLOW, 22, 0.5)
 		"opening":
 			# THE OPENING — a dump landed in the boss's vulnerability window
 			if mine and _opening != null:

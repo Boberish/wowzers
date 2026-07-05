@@ -51,6 +51,22 @@ func _process(_delta: float) -> bool:
 	hud._seat_key = "blade"
 	print("TEMPO framework: creed pick + module pick + kit inject ok; non-blade skips clean")
 
+	# TEMPO §5 — the Combo rig: the wire board builds, a WHEN+THEN pick enables it, it folds in.
+	hud._run.rig = {}
+	flags.skip = false
+	hud._show_rig_wire(func(): flags.skip = true)
+	assert(hud._screen == "rig" and not flags.skip and hud._rig_confirm != null and hud._rig_confirm.disabled,
+		"rig wire shows + waits, confirm disabled until both picked")
+	hud._rig_on_when(true, "coup")
+	hud._rig_on_then(true, "overcharge")
+	assert(not hud._rig_confirm.disabled and hud._rig_w == "coup" and hud._rig_t == "overcharge",
+		"picking a WHEN + THEN enables WIRE IT")
+	hud._run.rig = {"when": "coup", "then": "overcharge"}   # simulate the confirm
+	var bseat2: Seat = RaidContent._blade_seat("twinfang", "tempo")
+	hud._inject_boons(bseat2)
+	assert((bseat2.kit as TwinfangKit).rig.get("when", "") == "coup", "the rig folds into the blade kit")
+	print("TEMPO rig: %s — board builds, pick enables, folds into kit" % TwinfangRig.describe("coup", "overcharge"))
+
 	# THE RECKONING — the per-fight recap builds off a driven fight's damage meter.
 	hud._launch("blade", "tempo")
 	var rs: CombatState = hud._ctrl.state
