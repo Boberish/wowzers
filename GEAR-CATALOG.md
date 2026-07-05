@@ -30,6 +30,56 @@ combat item below names its hook and its combo so implementation is mechanical.
 - **Gear noun (proposal for the open Q, not locked):** global **CURIO**, Realm-1 display skin
   **PERIPHERAL**. ("Relic" stays the boon card.)
 
+---
+
+## ⚠ UNIVERSAL CURIO POOL v2 — the direction changed (Bill, 2026-07-05)
+
+**Read this before the per-boss pages below — those are now legacy.** From the Tempo-pilot curio pass, the
+curio layer was redirected: curios are now a **single UNIVERSAL (cross-spec) FORTUNE / RUN-SHAPING pool** —
+no per-class curios (kills the Bloomweaver-dark gap + per-class authoring; every class draws the same trinkets).
+Retention is unaffected: you still unlock via boss oaths into a collection Ledger — the *reward* is just usable
+by any class; the deep per-class retention moves to **Creeds / Modules / cards** (the class layer).
+
+**THREE HARD RULES** (supersede the old lane law for curios): (1) **never touch the combat verb** — no Flow /
+Perfect-graded window / strike-result hook / Marks (those are Creed/Module/card territory); (2) **always-on
+rule-changes / "while X" conditionals / set-bonuses — NO one-shot or per-floor/per-fight counter budgets** (gate
+only on natural beats: at a Seal, when you'd die, on a boss kill); (3) **no ability-charms** (nothing hung on
+Kick/finisher/Dodge). Plus **(Bill, 07-05) no DOUBLE creeds/modules** — a curio may pick/swap/upgrade your one
+Creed + one Module, never let you hold two.
+
+**CUT — the 10 old verb-welded/class curios** (from `gear_catalog.gd`, the content pass): Powder Vial · Encore
+Bell · Grace Period · Verification Stamp · Sticky Note · Debt Collector · Spark Plug · Echo Chamber · Salt Vial ·
+Overflow Sluice. **KEEP** (already clean universal fortune): Swan Song · Cooling Paste · Scratchpad · Le Chat's
+Bell (energy, NOT Flow) · Ticket Stub · Riftmaw Tooth.
+
+**THE WORKING POOL (~18 universal curios, rarity = the guardrail — run-warpers are Opus/RARE):**
+
+| Surface | Curio | Rarity | Always-on effect |
+|---|---|---|---|
+| Draft | **Expansion Bus** | Sonnet | Boon drafts are always **1-of-4** (set w/ any 2nd Fortune → 1-of-5). |
+| Draft | **Cache Buffer** | Opus | Decline any draft to BANK it (no cap); at a Seal, cash all as one **1-of-(2+banked)** mega-draft. |
+| Draft | **Mirror Array** | Sonnet | Your synergy-slot boon counts as **two** for stacking/synergy. |
+| Draft | **Sync Coupler** | Haiku | Slot-0 synergy option guaranteed every draft, +1 rarity tier. |
+| Module/Creed | **Root Access** ⭐ | Opus | Floor-1 Module pick shows your **ENTIRE unlocked pool** — take any one. |
+| Module/Creed | **Reflash Bay** | Sonnet | At every Seal, swap your Module **OR** Creed for any unlocked, free. |
+| Module/Creed | **Overclocked Firmware** | Haiku | Creed & Module always equipped **+1 tier**. |
+| Map | **Panopticon Lens** | Haiku | Entering a floor reveals its whole Topology. |
+| Map | **Port Forwarder** | Sonnet | Descend into **any** node on the next row (graph no longer constrains). |
+| Map | **Replay Buffer** | Opus | Every CACHE node **resolves twice**. |
+| Map | **Root Credential** | Sonnet | All GATEs open free (access-key cost = 0). |
+| Econ/Slot | **Bootleg Expansion Port** ⭐ | Opus | A **3rd curio slot**; warranty void: **−25 max integrity permanently**, un-repairable. |
+| Econ/Slot | **Hashgrinder Rig** | Sonnet | **All Token income ×2**, forever. |
+| Econ/Slot | **Deprecation Notice** | Sonnet | **Haiku delisted** — every drop/Cache/Market rolls Sonnet+. |
+| Econ/Slot | **Ratchet Firmware** | Haiku | Drop pity — a Haiku reward raises the next drop's floor until Sonnet+ lands. |
+| Set/Wild | **The Rig** (Overclock Chip + Liquid Cooler) | Sonnet ×2 | Solo mild; SET → every boon **+1 tier** at **+1 wound/combat**. |
+| Set/Wild | **Autosave / Cloud Rollback** ⭐ | Opus | Rewrites death: when you'd die, roll back to your last Seal at 1 integrity, boss heals full. |
+| Set/Wild | **Fork Bomb** ⭐ | Sonnet | Draft an **Opus** boon → **draft again** (recurses). |
+| Set/Wild | **Reverse Engineer** | Sonnet | Each boss kill bolts that boss's signature into your Ledger as a passive. |
+
+**CUT from the pool (Bill 07-05, too strong / breaks identity):** Hivemind Fork (2 creeds) · Two-Factor pair
+(2 creeds + 2 modules). One identity, never doubled. Source: bold-curio design pass (`wf_dea97f02`). Status:
+approved "for now" — working pool, not final; the per-boss pages below are legacy pending the content pass.
+
 ## Drop scaling by depth (starting values, knobs on `TuningConfig`)
 
 **ARMORY cadence (2026-07-03): drops are EVENTS.** Rolls fire only at Seal kills, gate
