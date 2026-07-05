@@ -15,7 +15,6 @@ const SHARED := [
 	{"id": "gracenote", "type": "spell", "rarity": "haiku", "tags": ["spell", "energy"], "title": "Grace Note", "desc": "New spell (18 energy, cd 2): an off-beat jab that does NOT touch your rhythm clock — pure filler woven between beats."},
 	{"id": "coda", "type": "spell", "rarity": "sonnet", "tags": ["spell", "perfect"], "title": "Coda", "desc": "New spell (25 energy, cd 10): your next Strike is ALL-GREEN — one guaranteed Perfect. Get back on the horse."},
 	{"id": "strikeEnergy", "type": "upgrade", "rarity": "sonnet", "tags": ["perfect", "energy"], "title": "Efficiency", "desc": "Perfect Strikes refund 6 energy — sustain the rhythm longer."},
-	{"id": "rudeKick", "type": "upgrade", "rarity": "haiku", "tags": ["kick"], "title": "Rude Interruption", "desc": "Kick's cooldown is 2s shorter — interrupt more often."},
 ]
 
 ## TEMPO — the reworked address-organized slate (STRIKE · WINDOW · FLOW · EVISCERATE · COUP).
@@ -27,7 +26,6 @@ const TEMPO := [
 	{"id": "heartseeker", "type": "relic", "rarity": "sonnet", "tags": ["crit", "bullseye", "strike"], "title": "Heartseeker", "desc": "BULLSEYE Strikes (dead centre of the window) are guaranteed crits."},
 	{"id": "serrated", "type": "upgrade", "rarity": "haiku", "tags": ["crit", "strike"], "title": "Serrated Fate", "desc": "Your crits deal 40% more damage."},
 	{"id": "opportunist", "type": "relic", "rarity": "sonnet", "tags": ["crit", "strike"], "title": "Opportunist", "desc": "Strikes landed WHILE the boss winds up gain +25% crit chance — dance through the telegraph."},
-	{"id": "ambush", "type": "relic", "rarity": "sonnet", "tags": ["bullseye", "strike"], "title": "Ambush", "desc": "Your FIRST Strike each fight lands as a Bullseye — open on the perfect note."},
 	# --- THE WINDOW — where the green sits ---
 	{"id": "wideTempo", "type": "upgrade", "rarity": "haiku", "tags": ["window"], "title": "Wide Tempo", "desc": "Your Perfect window is 15% wider on each side."},
 	{"id": "fencersLine", "type": "relic", "rarity": "sonnet", "tags": ["window", "bullseye"], "title": "Fencer's Line", "desc": "A Bullseye widens your NEXT window by 25% — nail one, the next comes easier."},
