@@ -143,6 +143,32 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
 - Fallback knob if pure rolls whiff in playtests: roll-2-keep-1. Ship pure first.
 - Gear is run-scoped, ALWAYS: win or wipe, items evaporate; unlocks and banked schematics remain.
 
+#### ✅ CURIO ECONOMY v2 — amendment (Bill, 2026-07-05, from the Tempo-pilot curio pass)
+Playtest-derived fixes to the drop feel ("I unlock cool things then only get a small drop chance,
+and drops land too late — 2nd + last Seal, and the final drop is wasted post-kill"):
+- **The MARKET is the PRIMARY, reliable path; rare drops become the JACKPOT bonus.** Reframe of
+  record: **unlocking a curio adds it to your MARKET inventory** (a rotating offer drawn from your
+  unlocked pool) — so an unlock is something you can *pursue* (earn Tokens → buy it), not a lottery
+  ticket. The event-drop stays as the exciting cherry on top. This dissolves the "unlock → rarely
+  see it" frustration without a pre-run loadout (the Market offer is a rotating random subset, bought
+  MID-RUN with Tokens earned mid-run — you steer a hand, never pre-assemble one).
+- **Markets appear from Floor 1, several per run** (pacing fix — curios come online early enough to
+  matter). Map-gen quota should guarantee ≥1 Market per floor from Ring 3.
+- **The final Seal pays META, not an in-run curio** (fixes the wasted post-kill drop): level/unlock
+  progress + a carry-out reward for the *next* run. Skill at the finale → long-term power, not a dead drop.
+- **Reroll = a BANKED consumable bought at the Market** (Bill): buy a reroll charge with Tokens, hold
+  it, spend it on ANY later draft until used. This MOVES reroll off the draft-screen Token button and
+  becomes the natural cap on build-control ("steer, don't solve" — you reroll as many times as you
+  bought, never infinitely). Tokens' spend = curios · reroll charges · wound repair · occasional boon.
+- **Curio CONTENT direction (Tempo pilot, cross-spec):** curios are the *fortune/run-shaping* layer,
+  **cross-spec** (never touch Flow/window/strike-hook/Marks — those are Creed/Module/rig territory).
+  Led by **DRAFT-SHAPERS** (A/B Test = +1 draft option · Version Control = bank a passed boon ·
+  Hotfix = 2 boons from one draft · Merge Conflict = swap a boon at a Seal) as the rare exciting core,
+  with modest **survival / capped-gamble / small ability-charm / anti-heal-strat** spice. **Passive
+  pets/drones CUT** (meh without skill → that's a future Hunter class). See [[combat-upgrade-load]] +
+  the curio design pass. The verb-touching offenders (Encore Bell / Grace Period / Le Chat / Second
+  Opinion / Powder Vial) get cut/reworked per TEMPO-PLAN's lane rule.
+
 ### What gear IS (design space per lane discipline)
 Procs tied to verbs ("after a perfect parry, next Guard is instant"), **actives with charges**
 (a new button — huge in a one-verb game; e.g. consume to clear a wound), **set pairs** (the
