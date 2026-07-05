@@ -10,6 +10,9 @@ var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voi
 var aspect: String = "warden"
 var loadout: Array = []           ## ability ids in key order (1..N)
 var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
+# --- TEMPO REWORK framework (plumbing; blade/Tempo only for now — other classes leave these empty) ---
+var creed: String = ""            ## run-start risk temperament (TwinfangCreeds id); "" = default
+var modules: Dictionary = {}      ## equipped UI Modules id -> true (picked at Floor-1 elevation)
 var enc_index: int = 0
 var encounters: Array = []        ## Array[EncounterRes]
 
