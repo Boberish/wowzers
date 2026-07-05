@@ -76,43 +76,9 @@ static func apply(b: Dictionary, run) -> void:
 	else:
 		run.boons[b["id"]] = true
 
-## Assembled "YOUR RHYTHM" display lines (tooltips / tome). Empty when no mod pieces
-## are drafted. Numbers mirror TwinfangConfig mod_* defaults.
-static func verb_summary(boons: Dictionary, _aspect: String) -> Array:
-	var trig: Array = []
-	var pay: Array = []
-	var prop: Array = []
-	if boons.get("tfTrigEvade", false): trig.append("clean dodge")
-	if boons.get("tfTrigSpender", false): trig.append("5-point finisher")
-	if boons.get("tfTrigBeat", false): trig.append("PERFECT beat")
-	if boons.get("tfPayLash", false): pay.append("cut 6")
-	if boons.get("tfPayEnergy", false): pay.append("+3 energy")
-	if boons.get("tfPayLeech", false): pay.append("mend 5")
-	if boons.get("tfPropWindow", false): prop.append("window +20%")
-	if boons.get("tfPropTwinStep", false): prop.append("2 dodge charges")
-	if trig.is_empty() and pay.is_empty() and prop.is_empty():
-		return []
-	var out: Array = []
-	# REWORK: WHEN/THEN/ALWAYS framing, and NO innate "PERFECT Strike" — effects fire only
-	# on your drafted moments (a payload with no trigger does nothing until you draft one).
-	out.append("WHEN: " + (" · ".join(trig) if not trig.is_empty() else "(no triggers drafted yet)"))
-	out.append("THEN: " + (" · ".join(pay) if not pay.is_empty() else "(no effects drafted yet)"))
-	if not prop.is_empty():
-		out.append("ALWAYS: " + " · ".join(prop))
-	return out
-
-## Structured WHEN/THEN/ALWAYS lists for the combo-board GUI (VerbBoard). Each entry is a
-## short player-facing label. Reads whatever's drafted — resilient to boon-content tuning.
-static func verb_board(boons: Dictionary) -> Dictionary:
-	var whens: Array = []
-	var thens: Array = []
-	var always: Array = []
-	if boons.get("tfTrigEvade", false): whens.append("Clean Dodge")
-	if boons.get("tfTrigSpender", false): whens.append("Full Finisher")
-	if boons.get("tfTrigBeat", false): whens.append("Perfect Beat")
-	if boons.get("tfPayLash", false): thens.append("Cut boss 6")
-	if boons.get("tfPayEnergy", false): thens.append("+3 energy")
-	if boons.get("tfPayLeech", false): thens.append("Heal 5")
-	if boons.get("tfPropWindow", false): always.append("Window +20%")
-	if boons.get("tfPropTwinStep", false): always.append("2nd dodge charge")
-	return {"when": whens, "then": thens, "always": always}
+## The blade's build-summary lines for the raid build panel (raid_hud._verb_summary_lines).
+## The reworked Tempo has no WHEN/THEN slot-verb board anymore — its build IS the drafted
+## boons + its Creed/Module — so this is empty for now. verb_board() and the old slot-verb
+## display were RETIRED 2026-07-05 with the dead VerbBoard combo GUI.
+static func verb_summary(_boons: Dictionary, _aspect: String) -> Array:
+	return []

@@ -46,7 +46,6 @@ var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _hp_orb: LiquidOrb
 var _en_orb: LiquidOrb
 var _gauge: TwinfangGauge
-var _board: VerbBoard            ## TEMPO rework: the WHEN/THEN/ALWAYS combo board
 var _runes: Array = []
 var _guard: AbilityRune
 var _progress: Label
@@ -217,12 +216,6 @@ func _build_combat() -> void:
 	# the winged spec medallion owns the band between the stage and the rune rail
 	_place(_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
 	_shake_root.add_child(_gauge)
-
-	# TEMPO rework — the combo board (WHEN/THEN/ALWAYS + Creed + Modules), top-left corner
-	_board = VerbBoard.new()
-	_board.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_place(_board, 0, 0, 0, 0, 20, 92, 372, 300)
-	_shake_root.add_child(_board)
 
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -408,14 +401,6 @@ func _process(delta: float) -> void:
 
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_en_orb.set_values(obs.get("energy", 0.0), obs.get("energy_max", 100.0))
-
-	if _board != null:   # TEMPO rework — the WHEN/THEN/ALWAYS combo board
-		var vb := TwinfangBoons.verb_board(_run.boons)
-		var mnames: Array = []
-		for mid in obs.get("modules", []):
-			mnames.append(String(TwinfangModules.get_module(String(mid)).get("name", mid)))
-		_board.set_verb(String(obs.get("creed_name", "")), mnames,
-			vb.get("when", []), vb.get("then", []), vb.get("always", []))
 
 	_gauge.combo = int(obs.get("cp", 0))
 	_gauge.combo_max = int(obs.get("cp_max", 5))
@@ -645,11 +630,8 @@ func _show_guard_tip() -> void:
 	_tip_title.text = "Dodge"
 	_tip_stats.text = "Space  ·  2.4s cooldown"
 	var desc := "Evade a telegraphed swing in its window. Getting HIT by a swing wipes your Flow — so dodging protects your damage as much as your health."
-	var gl := TwinfangBoons.verb_summary(_run.boons, _run.aspect)
-	if not gl.is_empty():
-		desc += "\n" + "\n".join(gl)          # Phase B: the assembled YOUR RHYTHM rules
 	_tip_desc.text = desc
-	_position_tip_above(_guard, 120.0 + (24.0 + 44.0 * gl.size()) if not gl.is_empty() else 120.0)
+	_position_tip_above(_guard, 120.0)
 
 func _hide_tip() -> void:
 	if _tip != null:
@@ -672,9 +654,6 @@ func _toggle_book() -> void:
 		_book = null
 		return
 	var dtip := "Dodge a swing in its window — it protects your FLOW, not just your health. A landed swing wipes the rhythm."
-	var dgl := TwinfangBoons.verb_summary(_run.boons, _run.aspect)
-	if not dgl.is_empty():
-		dtip += "\n" + "\n".join(dgl)         # Phase B: the assembled YOUR RHYTHM rules
 	var abilities: Array = [{"icon": "dodge", "name": "DODGE", "key": "SPC",
 		"stats": "0.55s window  ·  2.4s cd",
 		"tip": dtip}]
