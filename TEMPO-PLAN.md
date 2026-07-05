@@ -1,6 +1,8 @@
 # TEMPO-PLAN — the Tempo Rogue redesign + the Creed / Module / Level framework
 
-**Status:** DESIGN (2026-07-04). Nothing built yet except **The Opening** (merged, `4f071bd`).
+**Status:** DESIGN + BUILD IN FLIGHT (2026-07-04). **The Opening** merged (`4f071bd`); the **risk-core slice**
+(combo-fix + Flow-dial + Creeds/Modules scaffold) is building on branch `tempo-pilot`. The audit-iteration
+decisions (see the ✅ block below) are folded into this doc — reconcile them into the build when that slice merges.
 **Scope:** this reworks the **Twinfang · Tempo** aspect into a risk/reward "greed dial," AND introduces a
 class-framework (Creeds · Modules · WHEN/THEN clarity · per-class levels) that is meant to **generalize to
 every class** later — Tempo is the pilot. Companion docs: `PROGRESSION-PLAN.md` (meta), `GEAR-CATALOG.md`
@@ -9,6 +11,62 @@ every class** later — Tempo is the pilot. Companion docs: `PROGRESSION-PLAN.md
 · **System codex** https://claude.ai/code/artifact/d89a2854-0101-4db5-ac60-5f73f7351bb1
 
 Legend: **🔒 LOCKED** (decided with Bill) · **🟡 OPEN** (Bill tuning / to lock before build) · **🔮 FUTURE** (parked).
+
+---
+
+## ✅ AUDIT ITERATION — what locked 2026-07-04
+
+A full triage of every Twinfang element (audit board:
+https://claude.ai/code/artifact/884e4af5-5831-469b-971f-eb63405e5038) plus a design pass on the trigger system.
+Headlines — details folded into the sections below:
+
+- **WHEN/THEN redefined → ONE Combo rig per run** (§5). Wire 1 WHEN → 1 THEN at the first draft; re-wire once at
+  end of Floor 2; scales with floor; never stacks. The stackable "any WHEN fires the whole board" model is CUT.
+- **Dodge is NOT Twinfang's verb.** Dodge stays a bare safety verb; every dodge-feeds-offense boon is cut
+  (Riposte, Ghost Step, Beat Dancer, Twin Step, Dancer's Grace). WHENs are **offense-only**.
+- **The Perfect window is GRADED** (§2c, Option B): Bullseye / Perfect / Good, base tightened.
+- **Drumline pays its safety as a wider window** (§3) — so the base window can run firm.
+- **Tier-2 combo bonus removed** (over Flow 5 = +energy only, not +combo); Syncopation stays.
+- **Le Chat's Bell → start warm with Flow (~3–4), not resources.**
+- **CUT (10):** Riposte · Dancer's Grace · Ghost Step · Beat Dancer · Quickblood · Red Harvest · Twin Step ·
+  Virtuoso (blunts the Creeds) · Powder Vial · Riftmaw's Hunger.
+- **RECYCLE/FOLD:** Wide Tempo → classic · Razor Echo → the Echo THEN · Killing Tempo → the Full-Finisher WHEN.
+- **BALANCE-WATCH (kept):** Second Opinion (doubles a rig fire) · Grace Period (shouldn't save Flow on Flourish)
+  · Killer's Eye (could go Bullseye-flavored).
+- **Classics stay the draft bread; spells stay the rare treat** (add 1–2 more so Flurry isn't lonely).
+
+---
+
+## ✅ MODULE / CURIO / VENOM RECONCILIATION — locked 2026-07-05 (with Bill)
+
+Grounded in a full cross-spec + layer-fit audit (workflow `wf_1bdad49f`). Bill's calls:
+
+- **Modules are PER-SPEC, not cross-spec.** For the pilot, **The Opening is Tempo's ONE module**;
+  Edge / Deathmark / Metronome / Hemorrhage are **PARKED as drafts** (dormant code/ideas, NOT offered) —
+  we decide later whether any become shared, per-spec, or fold into cards. So the Floor-1 "pick 1 of 3
+  modules" flow + the `specs` cross-spec filter are **shelved** until there's a real module roster. (Pull
+  the Edge/Deathmark mechanics out of the *offered* module set; they can stay in the kit, gated off.)
+- **⚠ Edge leak to fix if kept live:** the +25% Perfect-damage mult is NOT aspect-gated (only the window
+  narrow is) — a Venom seat equipping Edge would get the damage free. Gate it, or leave Edge parked.
+- **MODULE ↔ CURIO lane rule = DECISION OF RECORD.** **Module** = transforms the class VERB (curated,
+  1/run, no drop, not a trinket). **Curio** = FORTUNE + an OFF-VERB button (rarity-printed, 2 trinket
+  sockets, dropped as events) that **NEVER touches Flow / the Perfect(-graded) window / the strike-result
+  hook / Marks** — those are Creed/Module/rig territory. Curios make the *loot* fun; the verb stays sacred.
+  - **Curios currently VIOLATING the lane → cut/rework:** Powder Vial (keep CUT — +Flow on Kick) · Encore
+    Bell (forces the window WIDE = literal anti-Edge → re-flavor to a verb-neutral finisher reward) · LE
+    CHAT's Bell (do NOT adopt "start with Flow ~3-4"; keep it an ENERGY warm-start — fix the doc, code is
+    already energy) · Grace Period (Flow survives a slip → guts Flourish; make Creed-aware or narrow) ·
+    Second Opinion (must NOT double a rig proc — only the base grade reward).
+  - **Bill's open design ask:** *what SHOULD curios do that's fun, in the fortune/off-verb lane?* → a
+    dedicated design pass is running (workflow `wf_cb1ef961` — economy/luck · survival · off-rhythm gadgets
+    · ability-economy · big gambles/theme). Menu folds in here when it lands.
+- **VENOMANCER = a complete future clean-slate remake.** Ignore the current Venom entirely for now.
+  **Creeds are Tempo-only** (Flow-based); Venom gets its own risk temperament (wheel/synergy) in its remake.
+- **⚠ BRANCH RECONCILIATION:** two parallel Tempo branches must merge — `tempo-pilot` (my Creed/Module/
+  core + the verb_board GUI) and `tempo-boons` (the agent's graded window + address-organized card slate,
+  UNCOMMITTED in `../wow-tempo-boons`). Note: the new card slate **removed the WHEN/THEN draft buckets**
+  (they became the single §5 combo-rig), so the **verb_board GUI reads now-empty buckets** — it must be
+  re-pointed at the rig, and the rig system itself confirmed/built.
 
 ---
 
@@ -65,6 +123,20 @@ already proccing constantly.
   pairing them.
 - It *rescues* the big moments — Peak becomes worth building around because it's rare, not constant.
 
+### 2c. The Perfect window is GRADED, not binary 🔒 (Option B, locked 2026-07-04)
+Today a Strike is Perfect-or-nothing and the green is **generous (~0.35s)** — at low Flow the beat barely tests
+you. Fix: **tighten the base window** and **split it into skill tiers**, so nailing the beat is a real read and
+the tiers themselves become the board's timing moments:
+- **Bullseye** — dead center (~0.05s): the tightest read → a rare **WHEN**, the best payoffs.
+- **Perfect** — the core (~0.14s): full ×1.6 + Flow + the Aspect tier-kickers (today's Perfect).
+- **Good** — the flanks (~0.08s/side): it LANDS, partial damage, little/no Flow (no double-hit).
+- **Early / Late** — outside: base hit only (today's non-Perfect behavior).
+
+You rarely *whiff*, but *nailing Perfect* takes skill — and the split hands the board three ready-made timing
+WHENs (Bullseye / Perfect / Good). The accelerando still slides + tightens the whole stack with Flow. Because
+**Drumline** (§3) now pays its safety as a **wider window**, the base can run firm — sloppy players opt into the
+loose beat; everyone else earns the tight one. Numbers illustrative — sim the feel.
+
 ---
 
 ## 3. CREEDS — how you pay for a slip 🔒 (rules) / 🟡 (which ship)
@@ -84,7 +156,7 @@ a boring damage number.
 | Creed | Temperament | A slip does… | Paired reward |
 |---|---|---|---|
 | **The Flourish** | Glass | Flow → 0 **and** knocked to walking pace (window snaps wide, rebuild the ramp) | each Flow point pays **+50%** more |
-| **The Drumline** | Steady (default) | **−2 Flow**, nothing else — stumble, keep dancing | baseline Flow value; the forgiving learner Creed |
+| **The Drumline** | Steady (default) | **−2 Flow**, nothing else — stumble, keep dancing | **a wider Perfect window** (safety is opt-in → lets the base window run tight, §2c) + baseline Flow value; the forgiving learner Creed |
 | **The Held Breath** | Tempo-cost | **freezes Flow** (no loss/decay) but **locks the tight window 2s** | progress paused, never lost; recovery-window play |
 
 *(Bloodwaltz — the "cut yourself + Expose the boss" Creed — CUT by Bill 2026-07-04.)*
@@ -122,32 +194,62 @@ Edge = the greed dial). Metronome / Hemorrhage later.
 **🟡 open:** is **The Edge** a Module (equip the greed) or baked into base Tempo for everyone? Leaning **Module**
 (keeps base Tempo clean; the greedy narrow-window play is a run choice).
 
+**Notes (2026-07-04 audit):**
+- The base rhythm is **self-timed taps** — no external metronome; each landed Strike resets the window (see the
+  input-mechanic breakdown). **The Metronome module** is precisely the "true continuous beat you play ON" layer;
+  the default stays quickdraw-timed. *(If a running beat should ever be the DEFAULT feel, that's a core change,
+  not a module — decide before the risk-core locks the loop.)*
+- **Deathmark owns the Detonate WHEN + Mark +1 THEN** — they enter the Combo board **only when Deathmark is
+  equipped**, so you never draft a dead card.
+- **Edge vs Bullseye vs accelerando** all mean "tighter = more" — keep them distinct (Edge = a togglable heat
+  you push; Bullseye = the graded-window center; accelerando = passive), or Edge should absorb Bullseye.
+- **Hemorrhage vs a Rend THEN** overlap — bleeds are a Module identity OR a board effect, not both.
+
 ---
 
-## 5. WHEN / THEN / ALWAYS — the boon system, made legible 🔒 (rules) / 🟡 (content, Bill tuning)
+## 5. THE COMBO — the WHEN/THEN mechanic, REDEFINED 🔒 (single-rig model, 2026-07-04)
+
+**The pivot (locked with Bill):** the stackable "any WHEN fires the whole THEN board" model is **CUT**. It
+re-created the trickle §2b kills (5 pieces all firing = wallpaper again) and produced the exact failure Bill
+named — *"side-effect damage is killing the boss and I don't know why."* Replaced with **ONE Combo rig per
+run**: a single, legible circuit you wire, watch light up, and know cold. It's **another milestone ceremony**
+(same species as Creed/Module), NOT a growing system.
 
 ### 5a. The rename 🔒
-Retire the jargon. Trigger → **WHEN** · Payload → **THEN** · Property → **ALWAYS**. The whole build reads as one
-sentence: *"**WHEN** a Riff or a Peak → **THEN** mark the boss and quicken; **ALWAYS** a wider window."*
+Retire the jargon: Trigger → **WHEN** · Payload → **THEN** · Property → **ALWAYS** — and ALWAYS pieces are now
+just **classics** (the property slot is retired; see the audit). A rig reads as one sentence:
+*"**WHEN** I land a Riff → **THEN** the boss bleeds."* You plugged the wire, so you know why the damage lands.
 
-### 5b. The board 🔒
-A visual panel (draft-screen live preview + a compact HUD strip + the Spellbook): every **WHEN** on the left,
-every **THEN** on the right, arrows showing the crux the old tooltip hid — **any single WHEN fires the entire
-THEN stack.** The HUD node **pulses + floats its number** each time a moment fires (you *see* your build work).
+### 5b. One rig, wired by you 🔒
+- **Wire ONE WHEN → ONE THEN** at your **first draft** (after fight 1) — a small board: ~3 WHENs left, ~3 THENs
+  right, plug a single wire.
+- **The THEN's number is set by the WHEN it's wired to** — Echo hits ~16 on Riff (frequent), ~45 on Peak (once
+  a ramp). Frequent-small vs rare-huge is the player's decision, and balance is **one lookup table**, not
+  combinatorics. *(This is where Model-A frequency-scaling actually lives — §6.)*
+- **It does NOT grow within a run** — no Amplify / second-wire ladder (that was the sprawl). One rig, whole run.
+- **Re-wire once, at end of Floor 2** — optionally swap the WHEN and/or THEN, free ("change it up" for the
+  finale). The only mid-run change; it never bloats.
+- **The rig's numbers scale with FLOOR** (baked, not drafted) so a never-touched rig stays relevant into Floor
+  3. Realm-1 flavor: a **version bump** at each elevation — *"Combo v2.0 — Echo damage increased. No other
+  changes."*
 
-### 5c. The menus (illustrative — Bill is fine-tuning these) 🟡
-**WHEN (earned moments — no auto-attack):** Riff (3 Perfects) · Peak (reach max Flow) · Bullseye (dead-center
-strike, tighter than Perfect) · Punish (a dump lands in the Opening) · Detonate (pop a Deathmark / execute a low
-boss) · Full Finisher · Clean Dodge.
-**THEN (effects with identity — show on the boss or feed the tempo):** Mark +1 · Echo (delayed phantom hit) ·
-Quicken (tighten window / +tempo 3s) · Expose (boss takes +% one beat) · Rend (open/refresh a bleed) · Surge
-(+1 Flow). *Retire heal / energy trickle to a rare utility slot.*
-**ALWAYS (reshape a rule):** Wider window · Second dodge charge · (transform-tier pieces).
+### 5c. The menus — OFFENSE ONLY 🔒/🟡 (dodge is not Twinfang's verb)
+**Dodge stays a bare safety verb** (audit lock 2026-07-04). Every dodge-feeds-offense boon was cut, so
+**Clean Dodge is OFF the WHEN menu** — Twinfang's moments are pure offense.
+- **WHEN (earned offense moments — no auto-attack proc):** Riff (3 Perfects) · Full Finisher (a 5-cp dump) ·
+  Peak (reach max Flow) · Bullseye (dead-center Strike — the graded-window core, §2c) · Punish (a dump in the
+  Opening) · Detonate (pop a Deathmark — Deathmark module only, §4).
+- **THEN (identity effects — show on the boss or feed the tempo):** Echo (delayed phantom hit — ex-Razor Echo) ·
+  Rend (open/refresh a bleed) · Quicken (tighten window / +tempo 3s) · Expose (boss takes +% one beat) ·
+  Mark +1 (Deathmark module only). **No +Flow ("Surge") THEN** — Flow is earned by clean Perfects only, or the
+  greed dial dies (audit landmine). Heal/energy-trickle THENs are CUT (Quickblood / Red Harvest).
+- **ALWAYS → folded into classics** (Wide Tempo, etc.). The three-slot trigger/payload/property taxonomy is
+  **retired**; recycled pieces (Killing Tempo → the Full-Finisher WHEN · Razor Echo → the Echo THEN) become the
+  board's card pool.
 
 ### 5d. Tutorial 🔒
-No wall of text — **build it in front of the player**: draft 1 hands a matched WHEN+THEN and lets it fire; the
-next draft adds a WHEN and the arrows converge ("oh, my dodge fires it too"); a one-line coach mark names the
-shape. Done.
+Build it in front of the player: the **first draft IS the wiring screen** — plug one wire, watch it fire, a
+one-line coach mark names the shape. No wall of text. Done.
 
 ---
 
@@ -184,15 +286,17 @@ unlocked late), or stay flavor-equal like Hades aspects?
 - This is the existing `PROGRESSION-PLAN.md` **Rank track made visible** — no account currency, no parallel grind
   (the plan deliberately cut account XP). Creeds / Modules / curios are the unlockables.
 
-**Run-flow timeline** (Tempo example):
+**Run-flow timeline** (Tempo example — updated 2026-07-04):
 | When | Choice |
 |---|---|
 | between runs | level up → **unlock more Creeds/Modules** into your pools |
 | run start | draft **1 of 3 random Creeds** + your Aspect |
-| every won fight | 1-of-3 boon draft *(exists)* |
+| **first draft (after fight 1)** | **wire your Combo** — 1 WHEN + 1 THEN (§5) |
+| every won fight | 1-of-3 **classic** boon draft (classics + spells only — no board pieces) |
 | some event nodes | **re-draft your Creed** for a penalty |
 | **end of Floor 1** | pick **1 Module** |
-| Floors 2–3 | keep drafting boons; Creed + Module ride with you |
+| **end of Floor 2** | **re-wire the Combo** (optional free swap) |
+| Floors 2–3 | keep drafting classics; Creed + Module + Combo ride with you |
 
 ---
 
@@ -213,15 +317,19 @@ then port. The same board serves all five verbs; only the card words change.
 
 ---
 
-## 10. OPEN decisions to lock before/at build 🟡
+## 10. OPEN decisions 🟡 (several CLOSED 2026-07-04 — see §5 + the audit summary up top)
 
-1. **Rarity Model A vs B** (recommend A).
-2. **Which Creeds ship v1** (recommend Flourish + Drumline).
-3. **Which Modules ship v1** (recommend Opening + Edge + Deathmark).
-4. **The Edge — Module or baked-in?** (leaning Module).
-5. **Creed/Module rarity flavor?** (a wild legendary Creed, or all flavor-equal?).
-6. **The WHEN/THEN menu + numbers** — Bill is fine-tuning triggers/effects; lock the shipping set.
-7. **Level unlock ladder** — what event unlocks what, and the starter pool.
+1. ~~Rarity Model A vs B~~ → **A** (frequency-scaling now lives in the Combo's WHEN→THEN number table, §5b).
+2. ~~Which Creeds ship v1~~ → **Flourish + Drumline** (Drumline's reward = a wider window); Held Breath v1.1.
+3. ~~Which Modules ship v1~~ → **Opening + Edge + Deathmark**.
+4. **The Edge — Module or baked-in?** (still leaning Module — open).
+5. **Creed/Module rarity flavor?** (open — a wild legendary Creed, or all flavor-equal?).
+6. ~~The WHEN/THEN menu~~ → **redefined to the single Combo rig** (§5); offense-only WHENs, no +Flow THEN. Exact
+   per-WHEN numbers still to sim.
+7. **Level unlock ladder** — what event unlocks what, and the starter pool (open).
+8. **Graded-window numbers** (§2c) — Bullseye / Perfect / Good widths at base + max Flow, to sim.
+9. **Dancer's Grace's effect** (auto-Perfect next Strike) — cut as a *dodge* boon; re-home it on an offensive
+   trigger (a Peak, or an Opus) or drop entirely? (parked — the effect is good, only its dodge trigger was cut.)
 
 ---
 
