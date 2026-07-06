@@ -38,6 +38,14 @@ func _creed_flow_value() -> float:
 		return 1.0
 	return float(_creed().get("flow_value", 1.0))
 
+## LARGO creed: the slow-and-sharp temperament — slower beats, tighter window, harder Perfects.
+func _largo() -> bool:
+	return aspect == "tempo" and bool(_creed().get("largo", false))
+
+## OVERDRIVE (module): a FEVER is live — every Strike auto-lands all-green and free.
+func _fever(s: CombatState, seat: Seat) -> bool:
+	return _m("overdrive") and s.tick < int(seat.vars.get("fever_until", 0))
+
 ## A SLIP — a missed Perfect Strike or an eaten swing — paid in your groove/window per Creed.
 func _creed_slip(s: CombatState, seat: Seat) -> void:
 	if aspect != "tempo" or _flow(seat) <= 0:
@@ -53,13 +61,19 @@ func _creed_slip(s: CombatState, seat: Seat) -> void:
 			seat.vars["flow"] = maxi(0, _flow(seat) - int(c.get("slip_amt", 2)))
 	seat.vars["flow_decay_acc"] = 0
 	var lost := before - _flow(seat)
+	# F17: Held Breath's freeze loses no Flow, but it still counts as a CRASH EVENT so the
+	# crash-keyed cards (Shatterfall / Staccato) aren't dead under it — pay off the frozen tempo.
+	var crash_from := before if String(c.get("slip", "")) == "freeze" else lost
 	seat.vars["overdrive"] = 0                      # DOUBLE TIME: the ride ends the instant you slip
+	if _b("hone"):                                  # A7 (Whetted Edge): a slip DULLS the Edge meter
+		seat.vars["edge"] = maxi(0, int(seat.vars.get("edge", 0)) - cfg.edge_slip_dull)
+	seat.vars["tl_stacks"] = 0                       # THROUGH-LINE: any slip breaks the line
 	# SHATTERFALL (boon): a crash from 4+ Flow detonates the shattered tempo as damage —
 	# a PAYOFF fired AFTER the slap, never instead of it (the rebuild loss still stands).
-	if _b("shatterfall") and before >= 4 and lost > 0:
-		_deal(s, seat, float(lost) * cfg.shatterfall_per, true, false, "shatter")
+	if _b("shatterfall") and before >= 4 and crash_from > 0:
+		_deal(s, seat, float(crash_from) * cfg.shatterfall_per, true, false, "shatter")
 	# STACCATO FURY (boon): a real crash arms a free, harder next Eviscerate.
-	if _b("staccato") and before >= cfg.staccato_flow_min and lost > 0:
+	if _b("staccato") and before >= cfg.staccato_flow_min and crash_from > 0:
 		seat.vars["staccato_ready"] = true
 	var lock := float(c.get("lock_sec", 0.0))
 	if lock > 0.0:
@@ -127,7 +141,7 @@ func _tempo_t(seat: Seat) -> float:
 		return 0.0
 	return clampf(float(_flow(seat)) / float(max_flow()), 0.0, 1.0)
 func _swing_min_sec(seat: Seat) -> float:
-	return lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat))
+	return lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat)) * (cfg.largo_beat_mult if _largo() else 1.0)
 func _perfect_lo_sec(seat: Seat) -> float:
 	return _edge_window(seat)[0]
 func _perfect_hi_sec(seat: Seat) -> float:
@@ -149,7 +163,9 @@ func _edge_window(seat: Seat) -> Array:
 	if _b("fencersLine") and bool(seat.vars.get("fencer_next", false)):
 		pad += cfg.fencer_pad
 	if pad > 0.0:
-		var w := (hi - lo) * pad
+		# F19: wideners TAPER with Flow — full help at walking pace, nothing at max Flow.
+		var taper := (1.0 - t) if cfg.widener_taper else 1.0
+		var w := (hi - lo) * pad * taper
 		lo -= w; hi += w
 	# THE EDGE (module): narrows around the centre for a bigger Perfect payoff.
 	if aspect == "tempo" and _m("edge"):
@@ -165,6 +181,14 @@ func _edge_window(seat: Seat) -> Array:
 		var half2 := (hi - lo) * 0.5 * f
 		lo = mid2 - half2
 		hi = mid2 + half2
+	# LARGO creed: the beat runs slower (window sits later) and TIGHTER (fewer, sharper Perfects).
+	if _largo():
+		lo *= cfg.largo_beat_mult
+		hi *= cfg.largo_beat_mult
+		var midL := (lo + hi) * 0.5
+		var halfL := (hi - lo) * 0.5 * cfg.largo_window_mult
+		lo = midL - halfL
+		hi = midL + halfL
 	return [lo, hi]
 
 # --- Venomancer POISON WHEEL: the lit lane (0=V, 1=F, 2=C) — the lane the NEXT Strike
@@ -241,6 +265,8 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 		d *= 2.0
 		if _b("serrated"):                                    # SERRATED FATE: crits deal more
 			d *= (1.0 + cfg.serrated_bonus)
+		if _b("assassinsNote") and _in_opening(s, seat):      # ASSASSIN'S NOTE: crits in the Opening bite harder
+			d *= (1.0 + cfg.assassin_open_mult)
 	# THE OPENING: a dump landed in the boss's vulnerability window hits harder (graded
 	# by how centred on the sweet spot). Strikes/perfects are NOT dumps — they keep their
 	# own rhythm. All hits of a multi-hit dump (Flurry) share the same window.
@@ -255,6 +281,8 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 			d *= (1.0 + cfg.press_advantage_mult)
 		if _b("coldOpen") and _flow(seat) <= cfg.cold_open_flow_max:
 			d *= (1.0 + cfg.cold_open_mult)
+		if _b("throughline"):                                 # THROUGH-LINE: consecutive Perfects escalate the tap
+			d *= (1.0 + cfg.throughline_per * float(seat.vars.get("tl_stacks", 0)))
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
@@ -435,6 +463,23 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if bool(seat.vars.get("window_locked", false)) and s.tick >= int(seat.vars.get("window_lock_until", 0)):
 		seat.vars["window_locked"] = false
 
+	# OVERDRIVE (module): when the FEVER ends, the ride crashes Flow down to a seed and rebuilds.
+	if bool(seat.vars.get("fever_armed", false)) and s.tick >= int(seat.vars.get("fever_until", 0)):
+		seat.vars["fever_armed"] = false
+		seat.vars["flow"] = mini(_flow(seat), cfg.overdrive_seed)
+		seat.vars["flow_decay_acc"] = 0
+		CombatCore.emit_event(s, {"t": "overdrive_crash", "player": seat.is_player})
+	# UNDERSTUDY (boon): a spent groove-save recharges over time, up to the cap.
+	if aspect == "tempo" and _b("understudy"):
+		var usc := int(seat.vars.get("us_charges", cfg.understudy_charges))
+		if usc < cfg.understudy_charges and s.tick >= int(seat.vars.get("us_recharge_tick", 0)):
+			seat.vars["us_charges"] = usc + 1
+			if usc + 1 < cfg.understudy_charges:
+				seat.vars["us_recharge_tick"] = s.tick + _tt(s, cfg.understudy_recharge)
+	# BATTLE HYMN (support): publish the raid-haste tier while you hold high Flow (the raid reads it).
+	if aspect == "tempo" and _b("battleHymn"):
+		seat.vars["battle_hymn_tier"] = _flow(seat) if _flow(seat) >= cfg.battle_hymn_flow_min else 0
+
 	# Flow decays toward 0 between Perfects. Frozen while a Held-Breath window lock is active,
 	# and HELD NOTE (boon) pauses it while the boss winds up a swing (read the telegraph in peace).
 	var held := _b("heldNote") and s.telegraph != null
@@ -510,6 +555,11 @@ func on_damage_taken(s: CombatState, seat: Seat, _dmg: float, _source: StringNam
 	if size != AbilityRes.Size.NONE and _flow(seat) > 0:
 		if GearFx.once(seat, &"grace_period"):
 			GearFx.pop(s, seat, &"grace_period")   # GEAR-2: the song survives one landed swing
+		elif aspect == "tempo" and _b("understudy") and int(seat.vars.get("us_charges", cfg.understudy_charges)) > 0:
+			# UNDERSTUDY (boon): spend a groove-save — the swing lands, but your Flow survives it.
+			seat.vars["us_charges"] = int(seat.vars.get("us_charges", cfg.understudy_charges)) - 1
+			seat.vars["us_recharge_tick"] = s.tick + _tt(s, cfg.understudy_recharge)
+			CombatCore.emit_event(s, {"t": "understudy_save", "player": seat.is_player})
 		else:
 			var before := _flow(seat)
 			_creed_slip(s, seat)                   # REWORK: eating a swing is a SLIP (the Creed pays it)
@@ -602,17 +652,16 @@ func _strike_grade(since: int, lo: int, hi: int) -> int:
 
 ## Consolidated crit roll. fifthCrit counts only true Perfects (is_perfect); Heartseeker
 ## fires on a Bullseye; Opportunist rolls a chance on ANY Strike during a boss wind-up.
-func _roll_crit(s: CombatState, seat: Seat, bullseye: bool, is_perfect: bool) -> bool:
+## CRIT (A7 — the Whetted Edge): base Tempo has NO crits. Two opt-in sources:
+## Heartseeker (Bullseyes always crit) and HONE's standing EDGE meter (every hit rolls
+## crit ~per-point). Nothing is consumed — Edge is maintained by clean rhythm, dulled by slips.
+func _roll_crit(s: CombatState, seat: Seat, bullseye: bool, _is_perfect: bool) -> bool:
 	var crit := false
-	if is_perfect and _b("fifthCrit"):
-		var pc := int(seat.vars.get("perfect_count", 0)) + 1
-		seat.vars["perfect_count"] = pc
-		if pc % 5 == 0:
-			crit = true
-	if bullseye and _b("heartseeker"):
+	if bullseye and _b("heartseeker"):             # HEARTSEEKER: the standalone entry — Bullseyes always crit
 		crit = true
-	if _b("opportunist") and s.telegraph != null:
-		if s.rng.next_float() < cfg.opportunist_crit:
+	if _b("hone"):                                 # HONE (keystone): the standing Edge meter grants crit chance
+		var edge := int(seat.vars.get("edge", 0))
+		if edge > 0 and s.rng.next_float() < float(edge) * cfg.hone_crit_per_pt:
 			crit = true
 	if int(seat.vars.get("rig_crit", 0)) > 0:      # COMBO RIG (§5) — Killing Edge charge
 		seat.vars["rig_crit"] = int(seat.vars["rig_crit"]) - 1
@@ -625,13 +674,16 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	var a: Dictionary = cfg.abilities["strike"]
 	var last := int(seat.vars.get("last_strike_tick", -100000))
 	var since := s.tick - last
-	if since < _tt(s, _swing_min_sec(seat)):
+	var fever := _fever(s, seat)                       # OVERDRIVE FEVER bypasses the rhythm gate (auto-chain)
+	if not fever and since < _tt(s, _swing_min_sec(seat)):
 		return false                                   # too early — the press is dropped
 	# DOUBLE TIME: the overdrive ride only lives at max Flow — the moment you dip, it's gone.
 	if _flow(seat) < max_flow():
 		seat.vars["overdrive"] = 0
 	var cost := float(a["energy"])
-	if aspect == "tempo" and _b("syncopation") and _flow(seat) >= max_flow():
+	if fever:
+		cost = 0.0                                     # OVERDRIVE FEVER: free strikes
+	elif aspect == "tempo" and _b("syncopation") and _flow(seat) >= max_flow():
 		cost = 0.0
 	if aspect == "venomancer" and int(seat.vars.get("encore_left", 0)) > 0:
 		cost = maxf(0.0, cost - 6.0)                   # GEAR-2: Encore Bell (Venom side)
@@ -641,14 +693,12 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 	var lo := _tt(s, _perfect_lo_sec(seat))
 	var hi := _tt(s, _perfect_hi_sec(seat))
 	var grade := _strike_grade(since, lo, hi)
-	if _b("ambush") and not bool(seat.vars.get("ambush_used", false)):
-		seat.vars["ambush_used"] = true                # AMBUSH: the fight's first Strike is a Bullseye
-		grade = maxi(grade, G_BULL)
+	if fever:
+		grade = G_BULL                                 # OVERDRIVE FEVER: every strike lands dead-centre
 	if bool(seat.vars.get("coda_ready", false)):
 		seat.vars["coda_ready"] = false                # CODA (spell): the primed beat is all-green
 		grade = maxi(grade, G_PERFECT)
-	if aspect == "tempo" and _b("syncopation") and grade == G_GOOD and _flow(seat) >= max_flow():
-		grade = G_PERFECT                              # SYNCOPATION: a Good grades up at the top
+	# F26: base Syncopation is COST-ONLY now — the Good→Perfect grade-up moves to a future Opus rune.
 	var perfect := grade >= G_PERFECT
 	var bullseye := grade == G_BULL
 	seat.resource -= cost
@@ -662,13 +712,26 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 		CombatCore._bump_diag(s, seat, "perfect_strike")   # class-signature skill signal (token mint)
 		CombatCore._bump_diag(s, seat, "s_bull" if bullseye else "s_perfect")
 		var gm := (cfg.bull_mult if bullseye else 1.6)     # dead centre bites harder than the core
-		base = roundf(base * gm * (cfg.edge_perfect_mult if _m("edge") else 1.0))   # MODULE (Edge): bigger Perfects
+		base = roundf(base * gm * (cfg.edge_perfect_mult if _m("edge") else 1.0) * (cfg.largo_hit_mult if _largo() else 1.0))   # Edge / LARGO: bigger Perfects
 		var crit := _roll_crit(s, seat, bullseye, true)
 		_deal(s, seat, base, true, crit, "perfect")
 		CombatCore.emit_event(s, {"t": "perfect", "player": seat.is_player})
 		if aspect == "tempo":
+			_gain_energy(seat, cfg.strike_bull_refund if bullseye else cfg.strike_perfect_refund)   # F11: BASE energy refund
 			var was_max := _flow(seat) >= max_flow()
 			_gain_flow(seat)                                                  # Flow = BPM (Tempo only)
+			if _b("hone"):                                                    # A7: hone the Edge meter with clean rhythm
+				seat.vars["edge"] = mini(int(seat.vars.get("edge", 0)) + (cfg.edge_bull_gain if bullseye else cfg.edge_perfect_gain), cfg.edge_max)
+			if _b("throughline"):                                             # THROUGH-LINE: extend the run
+				seat.vars["tl_stacks"] = mini(int(seat.vars.get("tl_stacks", 0)) + 1, cfg.throughline_cap)
+			if _m("overdrive") and was_max and not fever:                     # OVERDRIVE: max-Flow Perfects fill the meter
+				var od2 := int(seat.vars.get("od_meter", 0)) + 1
+				if od2 >= cfg.overdrive_fill:
+					seat.vars["fever_until"] = s.tick + _tt(s, cfg.overdrive_fever_sec)   # FEVER!
+					seat.vars["fever_armed"] = true
+					CombatCore._bump_diag(s, seat, "fever")
+					od2 = 0
+				seat.vars["od_meter"] = od2
 			# COMBO RIG (§5) WHEN moments — Peak (just hit max), Riff (every 3rd Perfect), Bullseye
 			if not was_max and _flow(seat) >= max_flow():
 				_rig_fire(s, seat, "peak")
@@ -692,6 +755,8 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 			_wheel_strike(s, seat, true)                                     # ride the wheel (Perfect)
 	elif grade == G_GOOD:
 		CombatCore._bump_diag(s, seat, "s_good")
+		if aspect == "tempo":
+			seat.vars["flow_decay_acc"] = 0                                  # F8: a GOOD MAINTAINS — it holds the groove (pauses decay)
 		_deal(s, seat, roundf(base * cfg.good_mult), true, _roll_crit(s, seat, false, false), "strike")
 		if aspect == "venomancer":
 			_wheel_strike(s, seat, false)
@@ -705,9 +770,9 @@ func _strike(s: CombatState, seat: Seat) -> bool:
 			_creed_slip(s, seat)                                             # REWORK: a missed beat is a SLIP (Creed pays it)
 	# FENCER'S LINE: a Bullseye widens the NEXT window (one-shot); any other grade clears it.
 	seat.vars["fencer_next"] = (bullseye and _b("fencersLine"))
-	_gain_cp(seat, cp)
+	_gain_cp(seat, cp + (cfg.bull_bonus_cp if bullseye else 0))   # F15: a Bullseye grants extra combo (superset of Perfect)
 	if _b("strikeEnergy") and perfect:
-		_gain_energy(seat, 6.0)
+		_gain_energy(seat, cfg.efficiency_refund)                 # Efficiency: stacks ON TOP of the base refund
 	# Tell the view HOW this strike landed so the rhythm bar can flash a clear verdict.
 	var result := (("bullseye" if bullseye else "perfect") if perfect
 		else ("good" if grade == G_GOOD else ("early" if since < lo else "late")))
