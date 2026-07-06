@@ -390,38 +390,43 @@ screens. **Side dividend:** longer fights are the lever that finally makes the h
 economy bite (the logged inert-mana finding — mana ≥93%, idle 93–98% — was a fight-length
 symptom as much as a tuning one).
 
-### The two LAWS
+### The three LAWS (verdict pass folded, Bill 2026-07-06)
 1. **NO FLAT SPONGES.** Every added minute of fight length arrives with a *structure
-   beat* (a new pack member, a phase, a verse, an arena, an add) — never the same
-   intensity stretched. HP boosts ride structure.
-2. **DEMAND ROTATION.** A long fight rotates which skill is loaded (defense-heavy verse →
-   offense window → movement beat → setup pause) instead of sustaining everything —
-   scheduled focus peaks with real valleys. The dodge ration budgets its ~3–8 beats
-   **per segment**, placed at moments (pillar #2 unchanged, applied per-segment).
+   beat* (a new pack member, an arena, an add wave) — never the same intensity stretched.
+   HP boosts ride structure.
+2. **DEMAND ROTATION.** A long fight rotates which skill is loaded instead of sustaining
+   everything — scheduled focus peaks with real valleys. The dodge ration budgets its
+   ~3–8 beats **per segment**, placed at moments (pillar #2 unchanged, applied per-segment).
+3. **NO HARD STOPS — valleys are DIEGETIC** (Bill's ruling: a pause "adds more stress...
+   and how do we pause a battle? that's hard to keep your flow"). The battle clock never
+   freezes into a text screen or countdown. The breather IS the fiction: the next pack
+   member walking in (2–3s, no telegraphs), the boss withdrawing behind an add cycle,
+   the chase transit. You stay in the arena, hands on the kit, pressure simply low.
 
-### The GRAMMAR (fight shapes — Bill: "mix all those to keep it fresh")
+### The GRAMMAR (fight shapes — Bill's verdict pass, 2026-07-06)
 All shapes are INTRA-battle (zero menu time) and Single-Target-Law-clean (one telegraph
 stream, always — packs are strictly sequential):
-1. **PACK** (Bill's) — 1–4 enemies fought sequentially in ONE battle: two smalls + a
-   captain = a medium fight; 3–4 smalls = a gauntlet; one long duel. 2–3s walk-in
-   breathers between members. **Heat carries:** per-class combo state (Flow / vials / rig
-   charge) persists across the pack — the payoff Bill's missing ("combo comes online" and
-   STAYS online); each rework defines its pack-carry rule like it defines its PERFECT
-   payoff. Forge assembles packs from BODY archetypes (SWARM smalls → BRUTE captain).
-2. **VERSE / CHORUS boss** (the default long-boss shape) — alternating authored pressure
-   VERSES and punish CHORUSES (the OPENING verb generalized into a phase grammar), verses
-   escalating (v2 adds a beat, v3 compresses). Length via repetition-with-escalation.
-3. **REPRIEVE (phase-pause)** (Bill's) — scripted no-threat windows at phase breaks with
-   a JOB: triage / plant / pre-brew / bank — a setup window, not dead air. Set-piece
-   variant: **THE DENY** — the boss channels a long recovery (heals N% unless kicked):
-   the party holds dumps for the window (interrupt-by-ability's showcase moment).
-4. **THE CHASE** — a running battle: the enemy flees at HP thresholds, the stage shifts
-   (2–3 arenas, same HP pool), transit carries one authored dodge-string. The fight that
-   moves — zone-fiction gold (the Huskman captain fleeing deeper).
-5. **INTERLUDE WAVES** — the boss withdraws, light adds cycle through (proven Seal tech):
-   an intensity valley that stays active.
-6. **SIDE-DUEL / AURA-ADD** — mid-fight, one seat's personal add (gate-tech in-fight) or
-   a boss-buffing elite (the Manastorm steal): one seat's spotlight inside a long fight.
+1. **PACK — KEPT, the primary shape** — 1–4 enemies fought sequentially in ONE battle:
+   two smalls + a captain = a medium fight; 3–4 smalls = a gauntlet; one long duel.
+   2–3s walk-in breathers between members (the diegetic valley). **Heat carries:**
+   per-class combo state (Flow / vials / rig charge) persists across the pack — the
+   payoff Bill's missing ("combo comes online" and STAYS online); each rework defines
+   its pack-carry rule like it defines its PERFECT payoff. Forge assembles packs from
+   BODY archetypes (SWARM smalls → BRUTE captain).
+2. **THE CHASE — KEPT** — a running battle: the enemy flees at HP thresholds, the stage
+   shifts (2–3 arenas, same HP pool), transit carries one authored dodge-string. The
+   fight that moves — zone-fiction gold (the Huskman captain fleeing deeper).
+3. **INTERLUDE WAVES — KEPT (lukewarm)** — the boss withdraws, light adds cycle through
+   (proven Seal tech): an intensity valley that stays active. Use sparingly.
+
+**CUT (Bill's verdict pass — do not resurrect casually):**
+- **Verse/chorus phase grammar** — illegible as a concept ("i don't really get it");
+  the *instinct* (escalating authored pressure + punish windows) survives informally in
+  how Seals are already authored, but it is not a named system.
+- **REPRIEVE phase-pause + THE DENY** — a pause with jobs is MORE stress, not less; a
+  hard-stop pause has no flow-preserving mechanism (see Law 3). Never pause a battle.
+- **SIDE-DUEL / AURA-ADD** — "very anti fun stuff," ditched for now (the Manastorm
+  aura-add steal goes back on the shelf).
 
 ### Length bands (starting targets — tune.sh; enrage + regen retune with them)
 Zone skirmish 60–90s (the commute stays snappy) · zone elite/PACK 2–4 min · zone capstone
@@ -429,9 +434,11 @@ Zone skirmish 60–90s (the commute stays snappy) · zone elite/PACK 2–4 min �
 world boss 5–10 min. Zone spine stays mostly skirmish-weight so route-to-door holds the
 30–45 min attunement budget; packs live on side chains + capstones first.
 
-**Sequencing:** the grammar lands with W2 (the Forge gets a SHAPE axis: pack/duel/gauntlet)
-+ the boss PILLAR PASS (Seals retuned onto verse/chorus + reprieve + bands). Healer regen /
-mana curves rebalance WITH the bands, not before (the inert-mana fix rides this).
+**Sequencing:** Bill feel-tests raw length FIRST (the `--fightlen=` dev scalar — global
+HP/enrage multiplier, byte-identical absent); the grammar then lands with W2 (the Forge
+gets a SHAPE axis: pack/duel/gauntlet) + the boss PILLAR PASS (Seals retuned onto packs/
+chase shapes + the bands). Healer regen / mana curves rebalance WITH the bands, not
+before (the inert-mana fix rides this).
 
 ---
 
