@@ -116,8 +116,32 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		var burn := m * cfg.react_consume * dt
 		seat.vars["venom"] = maxf(0.0, _venom(seat) - burn)
 		seat.vars["rot"] = maxf(0.0, _rot(seat) - burn)
-	# 5) damage: reaction + the weak single-poison drip, banked into discrete landings
-	var dps := _react_dps(seat) + (_venom(seat) + _rot(seat)) * cfg.raw_mult
+	# 4b) MODULES that run off the reaction (all guarded — no module = base path below).
+	var react := _react_dps(seat)
+	# THIRD REAGENT: an ACTIVE catalyst amps the reaction for its window; the bar charges.
+	if _m("third_reagent"):
+		if int(seat.vars.get("reagent_until", 0)) >= s.tick:
+			react *= (1.0 + cfg.reagent_amp)
+		seat.vars["reagent"] = minf(1.0, float(seat.vars.get("reagent", 0.0)) + cfg.reagent_fill * dt)
+	# FERMENTATION: a meter fills while the reaction is good; at full it auto-detonates.
+	if _m("fermentation"):
+		if good:
+			var fm := float(seat.vars.get("ferment", 0.0)) + cfg.ferment_fill * dt
+			if fm >= 1.0:
+				seat.vars["ferment"] = fm - 1.0
+				var fb := roundf(cfg.ferment_burst * _pot_mult(seat) * cfg.dmg_scale)
+				CombatCore.damage_boss(s, seat, fb, &"ferment")
+				CombatCore._bump_diag(s, seat, "ferments")
+				CombatCore.emit_event(s, {"t": "brew_ferment", "player": seat.is_player, "seat": seat, "amt": int(fb)})
+			else:
+				seat.vars["ferment"] = fm
+	# 5) damage: reaction + the weak single-poison drip, banked into discrete landings.
+	#    REACTION-VESSEL ⭐: the reaction BANKS (deals nothing) — Rupture dumps it (see _rupture).
+	var raw := (_venom(seat) + _rot(seat)) * cfg.raw_mult
+	if _m("reaction_vessel"):
+		seat.vars["vessel"] = float(seat.vars.get("vessel", 0.0)) + react * dt * cfg.dmg_scale
+		react = 0.0
+	var dps := react + raw
 	seat.vars["react_bank"] = float(seat.vars.get("react_bank", 0.0)) + dps * dt * cfg.dmg_scale
 	if s.tick % REACT_LAND_EVERY == 0:
 		var bank := float(seat.vars.get("react_bank", 0.0))
@@ -140,7 +164,23 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 			return _pour(s, seat)
 		&"rupture":
 			return _rupture(s, seat)
+		&"catalyst":
+			return _catalyst(s, seat)
 	return false
+
+## THIRD REAGENT (module): spend a FULL catalyst bar → amp the reaction for reagent_dur.
+## A partial bar can't drop (the gauge must fill). Guarded — a no-op without the module.
+func _catalyst(s: CombatState, seat: Seat) -> bool:
+	if not _m("third_reagent") or float(seat.vars.get("reagent", 0.0)) < 1.0:
+		return false
+	seat.vars["reagent"] = 0.0
+	seat.vars["reagent_until"] = s.tick + _tt(s, cfg.reagent_dur)
+	CombatCore._bump_diag(s, seat, "catalysts")
+	CombatCore.emit_event(s, {"t": "brew_catalyst", "player": seat.is_player, "seat": seat})
+	return true
+
+func _tt(s: CombatState, sec: float) -> int:
+	return CombatCore.to_ticks(sec, s.config.fixed_hz)
 
 func _start_charge(seat: Seat, side: String) -> bool:
 	if String(seat.vars.get("charging", "")) != "":
@@ -211,6 +251,12 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	var peak := _potency(seat) >= 0.9
 	# CREED (Volatile): bigger Ruptures (×1.25). Base ×1.0.
 	var burst := roundf(m * cfg.rupture_per * _pot_mult(seat) * cfg.dmg_scale * _cr_f("rupture_mult"))
+	# REACTION-VESSEL ⭐: dump the whole banked Vessel on top of the burst, then empty it.
+	var vessel := 0.0
+	if _m("reaction_vessel"):
+		vessel = float(seat.vars.get("vessel", 0.0))
+		burst += roundf(vessel * cfg.vessel_release)
+		seat.vars["vessel"] = 0.0
 	seat.vars["venom"] = _venom(seat) * cfg.rupture_keep
 	seat.vars["rot"] = _rot(seat) * cfg.rupture_keep
 	CombatCore.damage_boss(s, seat, burst, &"rupture")
@@ -218,7 +264,7 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 	if peak:
 		CombatCore._bump_diag(s, seat, "rupture_peak")
 	CombatCore.emit_event(s, {"t": "brew_rupture", "player": seat.is_player, "seat": seat,
-		"amt": int(burst), "peak": peak})
+		"amt": int(burst), "peak": peak, "vessel": int(vessel)})
 	return true
 
 # --------------------------------------------------------------------------
@@ -261,6 +307,15 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"brew_min": m,
 		"rupture_min": cfg.rupture_min,
 		"no_rupture": _cr_b("no_rupture"),               # CREED (Purist): don't tap Rupture, sustain
+		# MODULES — gauges + policy hooks (only meaningful when the module is equipped).
+		"mod_third_reagent": _m("third_reagent"),
+		"mod_fermentation": _m("fermentation"),
+		"mod_reaction_vessel": _m("reaction_vessel"),
+		"reagent": float(seat.vars.get("reagent", 0.0)),
+		"reagent_ready": float(seat.vars.get("reagent", 0.0)) >= 1.0,
+		"reagent_active": int(seat.vars.get("reagent_until", 0)) >= s.tick,
+		"ferment": float(seat.vars.get("ferment", 0.0)),
+		"vessel": float(seat.vars.get("vessel", 0.0)),
 		# the "ripe" cue: fuel × power, the artifact's rupGlow — the HUD sigil + policy read it
 		"ripe_glow": minf(1.0, m / cfg.ripe_fuel) * (cfg.ripe_glow_min + (1.0 - cfg.ripe_glow_min) * _potency(seat)),
 		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,

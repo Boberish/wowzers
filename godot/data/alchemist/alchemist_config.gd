@@ -55,6 +55,17 @@ extends Resource
 @export var ripe_fuel: float = 8.0       ## min(V,R) that reads as "full fuel" on the Rupture sigil
 @export var ripe_glow_min: float = 0.35  ## the glow the fuel alone can reach at zero potency
 
+# --- MODULES (Floor-1 pick; all guarded — no module = byte-identical base) ---
+# Third Reagent: a catalyst bar charges, tap to amp the reaction for a window.
+@export var reagent_fill: float = 0.10   ## catalyst charge per second (≈10s to full)
+@export var reagent_amp: float = 0.60    ## reaction ×(1+this) while the catalyst is active
+@export var reagent_dur: float = 5.0     ## seconds the amp lasts after a drop
+# Fermentation: a meter fills while fed+balanced, auto-detonates at full (the calm module).
+@export var ferment_fill: float = 0.11   ## meter per second while the reaction is good (≈9s)
+@export var ferment_burst: float = 150.0 ## detonation damage at full, ×potency mult ×dmg_scale
+# Reaction-Vessel (⭐): the reaction banks here instead of dealing; Rupture dumps it.
+@export var vessel_release: float = 1.0  ## multiplier on the Vessel dump at Rupture
+
 # --- dodge (the defensive verb — standard footwork numbers for the base build;
 #     the F3 auto-evasion identity is an OPEN call settled by playtest) ---
 @export var dodge_active: float = 0.55
@@ -74,6 +85,7 @@ extends Resource
 	"brew_rot":   {"name": "Brew Rot",   "key": "2"},
 	"pour":       {"name": "Pour",       "key": "release"},
 	"rupture":    {"name": "Rupture",    "key": "3"},
+	"catalyst":   {"name": "Drop Catalyst", "key": "4"},  # only live with The Third Reagent module
 }
 
 ## The bar for an Aspect. The Brew is the whole class (working-name filler aspect id).

@@ -80,6 +80,12 @@ func act(obs: Dictionary) -> Dictionary:
 			return {"type": "ability", "id": "pour"}
 		return {}
 
+	# 2b) MODULE (Third Reagent): drop the catalyst when the bar is full AND the reaction is
+	#     worth amping — real fuel plus decent potency, so the whole window pays.
+	if bool(obs.get("reagent_ready", false)) and not bool(obs.get("reagent_active", false)):
+		if float(obs.get("brew_min", 0.0)) >= 4.0 and float(obs.get("potency", 0.0)) >= 0.45:
+			return {"type": "ability", "id": "catalyst"}
+
 	# 3) the ripe peak — cash the wave. Fuel + potency high, or potency pinned at the
 	#    plateau with real fuel banked (no hoarding — the F4 wave law). CREED (Purist): no
 	#    Rupture exists — skip entirely and let the reaction plateau (pure sustain).

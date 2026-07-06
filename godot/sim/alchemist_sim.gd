@@ -63,6 +63,7 @@ func _initialize() -> void:
 		print("")
 
 	_creed_ab(seeds, seed0)
+	_module_ab(seeds, seed0)
 
 	_write_csv(_arg("out", "res://out/alchemist_results.csv"), rows)
 	print("wrote %d rows -> %s" % [rows.size(),
@@ -107,12 +108,15 @@ func _creed_ab(seeds: int, seed0: int) -> void:
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int, creed := "") -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "") -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
 	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
+	var kit := s.seats[0].kit as AlchemistKit
 	if creed != "":
-		(s.seats[0].kit as AlchemistKit).creed_id = creed   # SLICE A: swear the posture
+		kit.creed_id = creed                    # SLICE A: swear the posture
+	if module != "":
+		kit.modules = {module: true}            # SLICE B: install the module
 	var pol := s.seats[0].policy as AlchemistPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 4441)   # separate reproducible brew-aim stream
@@ -122,6 +126,7 @@ func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)
 	var pot_acc := 0.0
 	var pot_samples := 0
+	var peak_vessel := 0.0
 	while not s.over and s.tick < cap:
 		var seat := s.seats[0]
 		if seat.policy != null and seat.alive():
@@ -132,6 +137,7 @@ func _run(s: CombatState) -> Dictionary:
 		s.events.clear()
 		pot_acc += float(seat.vars.get("potency", 0.0))
 		pot_samples += 1
+		peak_vessel = maxf(peak_vessel, float(seat.vars.get("vessel", 0.0)))
 	if not s.over:
 		s.loss_cause = "timeout"
 	if s.loss_cause == "player_death" and s.encounter.enrage_at > 0.0 and s.time() >= s.encounter.enrage_at:
@@ -141,6 +147,7 @@ func _run(s: CombatState) -> Dictionary:
 		"ttk_sec": s.time(),
 		"boss_hp_left": s.boss.hp,
 		"avg_potency": (pot_acc / float(pot_samples)) if pot_samples > 0 else 0.0,
+		"peak_vessel": peak_vessel,
 		"diag": s.diag,
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
@@ -170,6 +177,44 @@ func _prove_determinism() -> void:
 	print("  Volatile@good seed 5 == seed 5  -> %s   (checksum %d, %s)" % [
 		("PASS" if g["checksum"] == h["checksum"] else "FAIL"), g["checksum"],
 		("win" if g["won"] else g["loss_cause"])])
+	# a MODULE run too (the Vessel banks float-heavy accumulation — assert it's reproducible).
+	var i := _run_one(7, "crucible", 6, "", "reaction_vessel")
+	var j := _run_one(7, "crucible", 6, "", "reaction_vessel")
+	print("  Vessel@good   seed 7 == seed 7  -> %s   (checksum %d, %s)" % [
+		("PASS" if i["checksum"] == j["checksum"] else "FAIL"), i["checksum"],
+		("win" if i["won"] else i["loss_cause"])])
+
+## SLICE B gate — each Module must produce a DISTINCT, sane profile and keep determinism.
+## "" is the byte-identical base. Third Reagent = a small amp; Fermentation = auto-detonations;
+## Reaction-Vessel = the cannon (0 reaction landings between big Rupture dumps).
+func _module_ab(seeds: int, seed0: int) -> void:
+	print("MODULE A/B — Crucible @ good lat6 (%d seeds/module):" % seeds)
+	print("module            win-rate  avg TTK   ruptures(peak)  ferments  catalysts  peak-vessel")
+	print("-----------------------------------------------------------------------------------------")
+	for mod in ["", "third_reagent", "fermentation", "reaction_vessel"]:
+		var wins := 0
+		var ttk_sum := 0.0
+		var dsum := {}
+		var vessel_sum := 0.0
+		for seed in range(seed0, seed0 + seeds):
+			var r := _run_one(seed, "crucible", 6, "", mod)
+			var rd: Dictionary = r.get("diag", {})
+			for k in rd:
+				dsum[k] = int(dsum.get(k, 0)) + int(rd[k])
+			vessel_sum += float(r.get("peak_vessel", 0.0))
+			if r["won"]:
+				wins += 1; ttk_sum += float(r["ttk_sec"])
+		var wr := 100.0 * float(wins) / float(seeds)
+		var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+		var lbl: String = "(base)" if String(mod) == "" else String(mod)
+		print("%-17s %6.1f%%   %7.1fs    %4.1f (%4.1f)     %5.1f     %5.1f      %7.0f" % [
+			lbl, wr, avg,
+			float(dsum.get("ruptures", 0)) / float(seeds),
+			float(dsum.get("rupture_peak", 0)) / float(seeds),
+			float(dsum.get("ferments", 0)) / float(seeds),
+			float(dsum.get("catalysts", 0)) / float(seeds),
+			vessel_sum / float(seeds)])
+	print("")
 
 ## Pour-grade averages per run (the vial gradient: potent/hot should dominate expert,
 ## fizzle/spoiled should climb as the tier gets sloppy).

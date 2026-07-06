@@ -2154,6 +2154,22 @@ func _fw_creed_ids(fw: String) -> Array:
 func _fw_creed(fw: String, id: String) -> Dictionary:
 	return AlchemistCreeds.get_creed(id) if fw == "alchemist" else TwinfangCreeds.get_creed(id)
 
+## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
+## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
+func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+	if fw != "alchemist":
+		return TwinfangModules.built_ids()
+	var out: Array = []
+	for id in AlchemistModules.built_ids():
+		if creed != "" and AlchemistModules.has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		out.append(id)
+	return out
+
+func _fw_module(fw: String, id: String) -> Dictionary:
+	return AlchemistModules.get_module(id) if fw == "alchemist" else TwinfangModules.get_module(id)
+
 ## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
 func _show_creed_pick(done: Callable) -> void:
 	var fw := _fw()
@@ -2197,11 +2213,12 @@ func _pick_creed(id: String, done: Callable) -> void:
 
 ## End of Floor 1: INSTALL A MODULE — a new HUD gauge + way to play (§4). Forced pick.
 func _show_module_pick(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human():
+	var fw := _fw()
+	if _run == null or fw == "":
 		done.call()
 		return
 	var avail: Array = []
-	for id in TwinfangModules.built_ids():                 # only the implemented modules are offerable
+	for id in _fw_module_offer_ids(fw, _run.creed):        # implemented + creed-allowed modules
 		if not _run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
@@ -2222,7 +2239,7 @@ func _show_module_pick(done: Callable) -> void:
 	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in avail:
-		var m: Dictionary = TwinfangModules.get_module(String(id))
+		var m: Dictionary = _fw_module(fw, String(id))
 		var card := AspectCard.new(String(m.get("name", id)) + "  ·  " + String(m.get("kicker", "")),
 			String(m.get("blurb", "")), Palette.FLOW, "flurry")
 		card.chosen.connect(_pick_module.bind(String(id), done))
@@ -2231,7 +2248,7 @@ func _show_module_pick(done: Callable) -> void:
 func _pick_module(id: String, done: Callable) -> void:
 	if _run != null:
 		_run.modules[id] = true
-	_toast_add("⬡  Module installed — %s" % String(TwinfangModules.get_module(id).get("name", id)))
+	_toast_add("⬡  Module installed — %s" % String(_fw_module(_fw(), id).get("name", id)))
 	done.call()
 
 # ---- TEMPO §5: the ONE Combo rig — wire a WHEN → THEN (first draft; re-wire at Floor 2) ----
@@ -3213,6 +3230,8 @@ func _alchemist_key(code: int) -> void:
 				_ctrl.human({"type": "ability", "id": "brew_rot"})
 		KEY_3, KEY_R:
 			_ctrl.human({"type": "ability", "id": "rupture"})
+		KEY_4:
+			_ctrl.human({"type": "ability", "id": "catalyst"})   # MODULE (Third Reagent): drop it in
 
 ## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
 ## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.
@@ -3806,6 +3825,14 @@ func _render_band_alchemist(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.react_dps = float(obs.get("react_dps", 0.0))
 	g.ripe_glow = float(obs.get("ripe_glow", 0.0))
 	g.brew_min = float(obs.get("brew_min", 0.0))
+	# MODULES (slice B): the equipped one lights a compact gauge on the instrument.
+	g.mod_third_reagent = bool(obs.get("mod_third_reagent", false))
+	g.mod_fermentation = bool(obs.get("mod_fermentation", false))
+	g.mod_reaction_vessel = bool(obs.get("mod_reaction_vessel", false))
+	g.mod_reagent = float(obs.get("reagent", 0.0))
+	g.mod_reagent_active = bool(obs.get("reagent_active", false))
+	g.mod_ferment = float(obs.get("ferment", 0.0))
+	g.mod_vessel = float(obs.get("vessel", 0.0))
 	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)

@@ -41,6 +41,16 @@ var react_dps := 0.0
 var ripe_glow := 0.0
 var brew_min := 0.0
 
+# --- MODULE gauges (slice B — only the equipped one draws) ---
+var mod_third_reagent := false
+var mod_fermentation := false
+var mod_reaction_vessel := false
+var mod_reagent := 0.0             ## catalyst charge 0..1
+var mod_reagent_active := false    ## the amp window is live
+var mod_ferment := 0.0             ## ferment meter 0..1
+var mod_vessel := 0.0              ## banked Vessel damage (normalised against VESSEL_FULL)
+const VESSEL_FULL := 400.0         ## display normaliser for the Vessel bar
+
 # --- eased display state (the fluidity layer — springs toward the live fields) ---
 var _venom_d := 0.0
 var _rot_d := 0.0
@@ -194,6 +204,11 @@ func on_event(ev: Dictionary) -> void:
 		"brew_dud":
 			_set_banner("nothing to rupture", Palette.TEXT_DIM, 0.6)
 			_dud_t = 1.0
+		"brew_ferment":
+			_set_banner("FERMENT  %d" % int(ev.get("amt", 0)), Palette.ROT_BREW.lerp(Palette.REACT, 0.5), 1.2)
+			_burst = {"t": STAMP_HOLD, "big": false}
+		"brew_catalyst":
+			_set_banner("CATALYST DROPPED", Palette.GOLD_BRIGHT, 1.0)
 
 func _push_gem(col: Color, hollow: bool, big: bool) -> void:
 	_history.append({"col": col, "hollow": hollow, "big": big})
@@ -217,6 +232,7 @@ func _draw() -> void:
 	_draw_chamber(w, h)
 	_draw_seesaw(w, h)
 	_draw_potency(w, h)
+	_draw_modules(w, h)
 	_draw_history(w, h)
 	_draw_banner(w, h)
 
@@ -495,6 +511,39 @@ func _draw_potency(w: float, h: float) -> void:
 	UiKit.text_shadowed(self, UiKit.display(800, 0), Vector2(x + bw + 8.0, y + bh * 0.5 - 8.0),
 		"×%.1f" % pot_mult, HORIZONTAL_ALIGNMENT_LEFT, 60, UiKit.SIZE["TITLE"] - 6,
 		Palette.REACT_HOT if hot else Palette.REACT)
+
+## The equipped MODULE's compact gauge, riding the clear strip below the vial + reservoirs
+## (slice B). Only one module is ever equipped, so only one bar draws. A labelled glass bar
+## reusing the potency-bar idiom — enough to PLAY; the flashy per-module treatment is polish.
+func _draw_modules(w: float, h: float) -> void:
+	if not (mod_third_reagent or mod_fermentation or mod_reaction_vessel):
+		return
+	var x := w * 0.075
+	var y := h * 0.855
+	var bw := w * 0.355
+	var bh := 11.0
+	var label := ""
+	var frac := 0.0
+	var col := Palette.REACT
+	if mod_third_reagent:
+		label = "CATALYST • LIVE" if mod_reagent_active else ("CATALYST • READY [4]" if mod_reagent >= 1.0 else "CATALYST")
+		frac = clampf(mod_reagent, 0.0, 1.0)
+		col = Palette.GOLD_BRIGHT if (mod_reagent >= 1.0 or mod_reagent_active) else Palette.GOLD
+	elif mod_fermentation:
+		label = "FERMENT"
+		frac = clampf(mod_ferment, 0.0, 1.0)
+		col = Palette.ROT_BREW.lerp(Palette.REACT, 0.5)
+	else:
+		label = "VESSEL — tap Rupture to dump"
+		frac = clampf(mod_vessel / VESSEL_FULL, 0.0, 1.0)
+		col = Palette.REACT_HOT
+	UiKit.glass_bar_draw(self, Rect2(x, y, bw, bh), 0.0, col)
+	if frac > 0.004:
+		draw_rect(Rect2(x + 1, y + 2, (bw - 2) * frac, bh - 4), col)
+		if mod_reagent_active and mod_third_reagent:
+			draw_rect(Rect2(x + 1, y + 2, bw - 2, bh - 4), Color(1, 1, 1, 0.06 + 0.06 * sin(_pulse * 6.0)))
+	UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(x, y - 9.0),
+		label, HORIZONTAL_ALIGNMENT_LEFT, int(bw), 9, col)
 
 ## Pour-history rail — the last 8 pours as gems (mint/gold = money, hollow = waste),
 ## riding the panel's top-right shoulder, clear of the chamber's halo.
