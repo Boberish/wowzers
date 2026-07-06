@@ -1,6 +1,20 @@
 # ALCHEMIST-PLAN — "The Brew" (the poison CLASS — split out of Twinfang 2026-07-06)
 
-**Status:** 🟢 **BASE MINIGAME BUILT & PLAYABLE 2026-07-06** (`alchemist-core` — Bill's direct order:
+**Status:** 🟢 **FULL CARD SLATE BUILT 2026-07-06** (`alch-cards` — all six slices coded on top of the base
+minigame: **4 Creeds · 3 Modules (incl. the ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons · 3 Spells**,
+the framework HUD generalized off the Twinfang-only gate, creed-aware offers wired). Every layer guarded →
+the undrafted brew is BYTE-IDENTICAL to the base (Crucible seed1 `4344960863911121821`); the raid DEFAULT
+comp is byte-identical to main (`4978452801628609439` — the Debilitator engine touch, following the sunder
+precedent, is byte-neutral). Gates: creed/module/rig/boon determinism all PASS · net_smoke ALL OK
+(lockstep) · gear/commander/raid/draft probes PASS · ui_smoke_raid + WSLg ALEMBIC render OK · draft offers
+21 cards, Purist hides the 4 rupture cards (verdict 6). Sim A/B blocks for all four layers live in
+`alchemist_sim`. **Card BALANCE is the first-cut, Bill's-playtest dial** (each card distinct + sane; skill
+moves outcomes; standouts flagged: Chain Rupture −12.6s per verdict 7, Catalyst −9.0s opus; HotPour/Emulsion
+rig beats + Practiced Hand/Reduction are human-skill/comfort cards the safe AI doesn't chase). **Still OWED
+(post-playtest):** the 2nd spec, a real class puppet (art = voidcaller filler), Commander AI-caster toggle,
+online spec-carry of creed/module/rig, name/art decision. Play: **`--autostart=raid:caster:brew`**.
+
+**Prior status (base):** 🟢 BASE MINIGAME BUILT & PLAYABLE 2026-07-06 (`alchemist-core` — Bill's direct order:
 "can't go farther without knowing live things; just do the base mini game, UI/bars… the rest after";
 this deliberately front-ran the "after the Tempo pilot proves" sequencing — the 🟡 opens get settled
 BY playtesting). **Live now:** the §1 CORE LOOP verbatim from the feel-test artifact (`data/alchemist/`
@@ -287,21 +301,26 @@ CUT at triage: Sealed Flask, Deep Draught, Emulsion, Equilibrium, Catalytic Bond
 2. ✅ **The Brew HUD** — THE ALEMBIC on `raid_hud` (hold-zones + tap-Rupture chamber + see-saw +
    Potency; pointer + keyboard). `ui_smoke_raid` covers the brew drive, gate exam and juice;
    `screenshot_alchemist_raid` is the WSLg visual probe.
-3. **NEXT — THE CARD BUILD (slate locked 2026-07-06, ⚖ PRE-BUILD VERDICTS above are the spec).**
-   Slice order, each gated on boonless-byte-identical + `alchemist_sim` A/B cells + `raid_sim`
-   alch-comp det + `ui_smoke_raid`, and the policy taught per layer (rule #3 — e.g. a Purist policy
-   must never tap Rupture):
-   a. **Framework generalization + Creeds (4)** — the HUD pick screens (`_show_creed_pick` /
-      `_show_module_pick` / `_show_rig_wire`) are Twinfang-HARDCODED (`_blade_tempo_human()` gate +
-      direct `TwinfangCreeds/Modules/Rig` refs + TwinfangKit push); generalize to a per-class
-      framework provider (`_run.creed/modules/rig` storage is already class-agnostic) + the
-      `hide_creeds` Draft/module/rig filter (verdict 6).
-   b. **Modules** — Third Reagent · Fermentation · ⭐ Reaction-Vessel (new ALEMBIC gauges each).
-   c. **Rig** — the locked slate (verdict 2), wired at the first draft like Tempo.
-   d. **Boon bread** — the numeric FUEL/VIAL/POTENCY cards (fixed rarities, verdict 3).
-   e. **Rule-changers** — Chain Rupture (+30pp, verdict 7) · Catalyst (F18 snapshot) · Last Call
-      (phase-cash, verdict 5) · Deepening Rot · Killing Draught · Perfect Emulsion · Volatile
-      Reaction · Debilitator (the SUPPORT debt).
-   f. **Spells** — Spitfire (future interrupt carrier, verdict 4) · Decant · Reduction (I6).
-   Also owed after the slices: a real class puppet, Commander AI-caster toggle exposure, name/art
-   decision (filler stands).
+3. ✅ **THE CARD BUILD — DONE 2026-07-06 (`alch-cards`, slices a–f), slate per the ⚖ PRE-BUILD VERDICTS.**
+   Each layer landed guarded (byte-identical base), sim-A/B'd, and policy-taught (rule #3):
+   a. ✅ **Framework generalization + Creeds (4)** — `_fw()` provider + `_fw_creed/module/rig*`
+      dispatch replaced the Twinfang-only `_blade_tempo_human()` gate across `_show_creed_pick` /
+      `_show_module_pick` / `_show_rig_wire` / `_inject_boons` / build-panel / rig-fire pop; the
+      Alchemist caster now swears a Creed. Creeds: Steady Hand (potency-CAPPED) / Volatile Mix
+      (glass) / Anchorite (frozen Rot + linear vial) / Purist (no Rupture, steep potency curve).
+   b. ✅ **Modules** — Third Reagent (catalyst bar, key 4) · Fermentation (auto-detonate) · ⭐
+      Reaction-Vessel (reaction banks → Rupture dumps). Compact ALEMBIC gauge + creed-aware offer
+      (Purist hides the two burst modules).
+   c. ✅ **Rig** — the locked 6×6 slate (verdict 2). Fire-points off the brew's own beats; fuel
+      applies raw-fractional; Purist board hides burst WHENs + Overfill.
+   d/e. ✅ **Boons (18)** — numeric bread + rule-changers: Chain Rupture (+30pp, verdict 7) · Catalyst
+      (F18 phantom snapshot) · Last Call (verdict-5 phase-transition auto-cash) · Deepening Rot ·
+      Killing Draught · Perfect Emulsion · Volatile Reaction · **Debilitator** (SUPPORT — raid-wide
+      `boss.debilitate` debuff, sunder-precedent engine touch, byte-neutral). Fixed rarities (verdict
+      3); rupture cards tagged `hide_creeds`.
+   f. ✅ **Spells (3)** — Spitfire (filler + designated interrupt carrier, verdict 4) · Decant
+      (snap-balance) · Reduction (I6 volume→power). Keys 5/6/7; drafted via the SHARED pool.
+   **Still owed (post-playtest):** the 2nd spec · a real class puppet (art = voidcaller filler) ·
+   Commander AI-caster toggle · ONLINE spec-carry of creed/module/rig (offline map+gate paths carry
+   them now via `_inject_boons`; RaidNet spec doesn't yet — a shared follow-up with Twinfang) ·
+   name/art decision. **Card balance = Bill's playtest dial** (first-cut bands in `alchemist_sim`).
