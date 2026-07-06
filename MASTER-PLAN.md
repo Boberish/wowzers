@@ -912,6 +912,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
 
+- 📋 2026-07-06 · main (docs only) · §CLASSES — **FERMATA: Twinfang's second spec — VERB LOCKED with
+  Bill via feel-testers, full deck DESIGNED (TEMPO-PLAN §13 rewritten as the hard-copy ledger; NOT
+  built).** The §13 hunt ran four candidates: MOTIF (aim-cuts→wounds→SEVER) rejected "no strategy,
+  too similar to the warrior" · OSTINATO (engrave-runes engine-builder) rejected "novel but strategies
+  aren't jumping out" · a rubber-band/pot/spring tri-tester rejected "too far from just the tempo
+  variation — but I liked the hold" → **LOCKED: Tempo with a HOLD instead of a TAP** (strike on
+  RELEASE; min-coil 0.35s kills the click-cheat; one-way sweep; charge ring + SHNK sharpen cue; base
+  has NO hold-length bonus). Fantasy = WoW Subtlety steal (coil INTO shadow, strike from the dark),
+  name FERMATA (the held musical note). Tester iterated live with Bill (slower sweep, min-coil,
+  one-way, charge-ring visual, ⚙ tweak sliders): `scratchpad/fermata-tester.html` → artifact
+  e920ea01… + local copy `~/fermata-tester.html` (claude.ai was down). Deck = 3 creeds (Patient
+  Knife / Fleeting Shade / Long Night) · 2 modules (⭐SHADOW DANCE bullet-time transformer · THE MARK
+  brand-and-cash) · 12 boons in 4 lanes keyed off the coil STATE (COIL/VEIL/RELEASE/AMBUSH, incl.
+  Bill's auto-dodge as Vanish + support Veil Over the Warband) · 3 rig WHENs · 1 elite keystone
+  (Unseen Blade). **NEXT:** Bill's deck verdict pass (interactive triage page shipped alongside) →
+  build per §13.7 order (engine note: `perform()` needs a press/release action pair). *(fermata
+  design session)*
+
 - ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
   was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out
   `2277d15`) and is on origin — the ⚠ "UNCOMMITTED on Bill's other computer" note in the split entry

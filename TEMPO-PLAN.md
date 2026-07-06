@@ -445,20 +445,93 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 
 ---
 
-## 13. THE SECOND SPEC — Twinfang's other half 🟡 (opened by the split, 2026-07-06 — DESIGN OWED)
+## 13. FERMATA — Twinfang's second spec 🟢 (VERB LOCKED via feel-tester 2026-07-06 — deck at verdict)
 
 The Brew left to become its own class (audit F10 → `ALCHEMIST-PLAN.md`), so Twinfang owes a second
-Aspect. **Bill's steer:** redo the poison/DoT slot *"with something that goes more RHYTHM based — not a
-copy of Tempo, but a variation — not a whole new thing"* (like the Brew was).
-- Same timing-family chassis as Tempo — the class keeps its complexity-budget spot: **deep minigame,
-  3-button kit** (CLASS DESIGN RULE #2). A VARIATION on the beat (different groove, different reward
-  shape), not a second foreign minigame bolted onto the class.
-- The **in-code poison-wheel Venom stays the FROZEN placeholder aspect** (playable in the raid) until
-  this is designed + built — same idiom as the frozen roster classes.
-- **Sequencing:** design AFTER the Tempo pilot's audit fixes land — don't design spec 2 against a moving
-  spec 1. Framework chassis applies in full (Creed slot · 1 Module · the rig · a support boon ·
-  AI-pilotable at 3 tiers).
-- Name/fantasy: open — filler-grade until the design pass (poison/DoT flavor optional, not required).
+Aspect. The hunt (2026-07-06): MOTIF rejected ("no strategy, too similar to the warrior") · OSTINATO
+rejected ("novel but strategies aren't jumping out; less complex") · Vol.2 rubber-band/pot/spring trio
+rejected ("too far from just the tempo variation — but I liked the hold"). **LOCKED: a TRUE small
+variation — Tempo with a HOLD instead of a TAP.** Bill played the Fermata tester and likes it.
+The in-code poison-wheel Venom stays the FROZEN placeholder aspect until this ships.
+
+**Fantasy = WoW Subtlety steal.** The hold IS stealth: press = coil into shadow (world dims), release
+in the window = the strike from the dark. Name **FERMATA** (musical: the held note) — alt UMBRA.
+Tempo attacks *on* the beat; Fermata attacks *out of the silence between beats*. Same bar, same music
+metaphor, opposite temperament. The design win: **a tap is an instant, a coil is a STATE** — the whole
+deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
+
+### 13.1 THE VERB (base kit — tester-verified feel)
+- Same bar, **one-way sweep left→right** (wraps), same graded window as Tempo (Bull 18%/×1.8 ·
+  Perfect 55%/×1.6 · Good ×1.0 · Miss = slip). **The strike happens on the RELEASE.**
+- **Min coil 0.35s**: hold until the blade SHARPENS (charge ring fills → SHNK flash + chime). Release
+  early = the shadow UNRAVELS: no strike, ~0.35s stagger, no Flow loss. Kills the click-cheat dead.
+- Base has **NO hold-length bonus** — coil-duration payoffs are build territory only (boons/creed).
+- **Dodge rule (base):** a dodge input mid-coil BREAKS the coil (you just lose the charge, no stagger).
+  Creeds/boons soften this — never the base.
+- Tester baseline knobs (Bill's ⚙ sliders may retune): sweep 0.55 bar/s · flow speed-up +3%/pt ·
+  window 0.17 · miss stagger 0.45s. Tester: `scratchpad/fermata-tester.html` (+ HOLD⇄TAP A/B toggle),
+  artifact e920ea01… Charge ring on the marker was "kinda distracting" — HUD pass should try the ring
+  OFF-marker (fixed gauge position) vs on-blade fill only.
+- Class chassis carries in full: Flow 0–6 +8%/pt · combo points → Eviscerate (Bullseye +1 CP) · base
+  energy refund on Perfect/Bull (F11) · **Opening = class base verb** (dumps ×1.9) · Whetted-Edge crit
+  package (A7) is CLASS-level and works unchanged (Edge builds from sharp Perfect/Bull releases).
+
+### 13.2 CREEDS (pick 1 — coil temperament)
+- **THE PATIENT KNIFE `patient`** — the coil keeps charging past sharp: +1.5%/0.1s, cap +20%. Cost:
+  an unravel = a FULL slip (Flow crash). Greed on the hold dimension; pairs with the keystone nuke.
+- **THE FLEETING SHADE `fleeting`** — min coil 0.20s, unravel painless, a Miss loses 2 Flow instead of
+  crashing. Cost: Flow cap 4. The fast, forgiving crossover creed for Tempo hands.
+- **THE LONG NIGHT `longnight`** — sweep ×0.75, windows ×0.75, releases ×1.20. The Largo mirror
+  (reuses largo knobs) — slow, small, heavy. Precision posture.
+
+### 13.3 MODULES (Floor-1 pick · one ⭐transformer, per class law)
+- ⭐ **SHADOW DANCE `shadowdance` (transformer)** — gauge fills from sharp Perfect/Bull releases at
+  Flow ≥ 4 (Overdrive's fill idiom); at 6 the next coil triggers THE DANCE: **3s of sweep ×0.5**
+  (bullet time — bullseyes become pickable, min coil instant), then crash to Flow 2. A skill
+  AMPLIFIER, not free damage — you choose when to enter it by coiling.
+- **THE MARK `mark`** — sharp Bullseye releases brand the boss, tier I→III (one small brand icon);
+  **Eviscerate consumes the brand: +12%/tier.** Active finisher decision (Evis at II or push for III?)
+  — Deathmark done right: a dial, not a passive.
+
+### 13.4 BOONS (address rule — categoried by the part of the coil they touch; ALL roll H/S/O per offer)
+**COIL** *(the hold itself)*
+- Patient Edge `patientEdge` — releases +2%/0.1s coiled beyond sharp · cap +18/26/35% (stacks with
+  Patient Knife's baked bonus by raising the cap, not the rate)
+- Restless Dark `restlessDark` — energy regen +30/45/60% while coiled
+- Quiet Fuse `quietFuse` — min coil −0.08/−0.12s / O: also removes the unravel stagger
+**VEIL** *(defense-in-shadow — the auto-dodge home)*
+- Vanish `vanish` — the first boss hit per coil: −50% dmg / fully dodged / fully dodged AND the coil
+  stays sharp (Bill's requested auto-dodge boon, living where the fantasy puts it)
+- Shadowmeld `shadowmeld` — a telegraph that resolves while you're coiled hits −25/40/55%
+- Veil Over the Warband `veilWarband` **[SUPPORT]** — while you're coiled the whole warband takes
+  −4/6/9% damage (the shadow stretches over allies; Fermata's Battle-Hymn counterpart)
+**RELEASE** *(the strike)*
+- Killing Whisper `killingWhisper` — Bullseye releases +15/22/30%
+- Twin Echo `twinEcho` — releases at max Flow echo a second strike at 30/45/60%
+- First Blood `firstBlood` — first release after any Miss/unravel: auto-Perfect / +1 CP / auto-Bullseye
+**AMBUSH** *(coil × Opening/dodge interplay)*
+- Ambush `ambush` — release into an Opening from a coil begun BEFORE it: +25/35/50%
+- Cheap Shot `cheapShot` — release ≤0.5s after a PERFECT dodge = auto-Bullseye / +1 CP / +1 CP +20%
+- Curtain Call `curtainCall` — Eviscerate released sharp inside an Opening: +30/45/60%
+**SHARED-POOL CARRIES** *(class-level cards both specs draft — verdict per card)*: the A7 crit package
+(Hone keystone · Heartseeker · Serrated · Assassin's Note) · Crescendo · Da Capo · Understudy ·
+Efficiency. Battle Hymn stays Tempo-flavored (Fermata's support = Veil Over the Warband).
+
+### 13.5 RIG (new WHENs — slot into the existing class THEN table)
+- WHEN I stay coiled ≥ 1.5s · WHEN I unravel · WHEN I release within 0.3s of the SHNK ("on the edge")
+
+### 13.6 KEYSTONE (A8 — elite-node drop, never in normal drafts)
+- **THE UNSEEN BLADE `unseenBlade`** — while coiled, gain a SHADE every 0.5s (max 5); each Shade = +6%
+  on your next release; Shades are a STANDING battery (persist until a release spends them). The
+  slow-nuke build-definer; pairs with Patient Knife + Patient Edge into the one-giant-release build.
+
+### 13.7 BUILD ORDER + ENGINE NOTES (after Bill's deck verdicts)
+1. Kit base: aspect `fermata` guarded on twinfang_kit (byte-identical unless picked — the Brew idiom);
+   **input surface gains press/release** — `perform()` needs a coil_press/coil_release action pair
+   (tick-stamped queue already supports it; AI policies emit both with tier-scaled coil timing).
+2. `twinfang_sim` fermata cells (verb determinism + creed A/Bs) → 3. creeds → 4. modules → 5. boons →
+   6. rig WHENs → 7. HUD (charge ring OFF-marker per Bill; shadow dim on THE HUD; brand icon).
+Owed same-as-Tempo wiring: HUD gauges · elite acquisition (A8) · online spec-carry in `(seed, spec)`.
 
 ---
 
