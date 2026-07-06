@@ -84,8 +84,15 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 		var k := String(e["key"])
 		aspects[k] = String(e["aspect"])
 		classes[k] = String(e.get("cls", SEAT_CLASS.get(k, "")))
-	var s := RaidContent.make_state(int(spec.get("seed", 1)),
-		RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw"))), aspects, my_seat, classes)
+	var carry: Dictionary = spec.get("carry", {})
+	var enc := RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw")))
+	# ESCORT/VOLATILE burden (WORLD-PLAN §MEWGENICS STEALS ①) rides the carry as pure data:
+	# append an enemy-side add to this FRESH encounter. Absent burden = the encounter is
+	# untouched, so every existing raid/zone pull stays byte-identical.
+	var burden := String(carry.get("burden", ""))
+	if burden != "":
+		RaidContent.apply_burden(enc, burden)
+	var s := RaidContent.make_state(int(spec.get("seed", 1)), enc, aspects, my_seat, classes)
 	var seed_v := int(spec.get("seed", 1))
 	for e in spec.get("seats", []):
 		var key := String(e["key"])
@@ -100,7 +107,7 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 			seat.kit.boons = sb
 	# MAP-3b: fold the carried campaign state in (wounds cut max HP, then integrity of
 	# what's left; the healer's mana carries too). Mirrors the offline _launch_map_fight.
-	var carry: Dictionary = spec.get("carry", {})
+	# (`carry` was hoisted above for the escort burden — same dict, reused here.)
 	if not carry.is_empty():
 		# INTEGRITY RETIRED: fights boot at FULL HP of the WOUND-reduced pool (a carried HP
 		# fraction is meaningless — a healer tops it off in seconds). WOUNDS (max-HP cuts a

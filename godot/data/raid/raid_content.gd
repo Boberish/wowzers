@@ -395,6 +395,28 @@ static func floor_fights(ring: int = 3) -> Array:
 			return [make_riftmaw(), make_skirmish("bard"), make_skirmish("sonnet"),
 				make_skirmish("opus"), make_mistral()]
 
+## ESCORT / VOLATILE burden (WORLD-PLAN §MEWGENICS STEALS ①): append an enemy-side add to
+## a FRESH per-fight encounter so the boss must WITHDRAW to face it — the carried payload
+## makes the fight harder without touching the player side (bare-kit / overworld-power law
+## holds; the modifier lives on the enemy side). Pure data on enc.adds via the existing
+## add-wave engine (combat_core spawns it once when boss HP crosses `at`). Only ever called
+## when a spec's carry.burden is set, so absent = byte-identical. `enc` must be a fresh
+## factory build (encounter_by_id returns one); we duplicate the adds array before appending.
+static func apply_burden(enc: EncounterRes, burden: String) -> void:
+	var a := AddRes.new()
+	match burden:
+		"grain_rot":
+			a.at = 0.9                                    # bites early — the rot is already on you
+			a.id = &"grain_rot"
+			a.name = "ROT-SWOLLEN HUSK"
+			a.hp = 900
+			a.melee = {"every": 2.0, "min": 8, "max": 12}
+			a.abilities = []
+		_:
+			return                                        # unknown burden = no-op (still safe)
+	enc.adds = (enc.adds as Array).duplicate()
+	enc.adds.append(a)
+
 static func encounter_by_id(id: String) -> EncounterRes:
 	match id:
 		"mistral": return make_mistral()
