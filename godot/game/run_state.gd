@@ -6,7 +6,7 @@
 class_name RunState
 extends RefCounted
 
-var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver" | "reckoner"
+var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver" | "reckoner" | "alchemist"
 var aspect: String = "warden"
 var loadout: Array = []           ## ability ids in key order (1..N)
 var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
@@ -69,6 +69,12 @@ static func start_voidcaller(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("voidcaller", aspect, seed_v)
 	r.loadout = VoidcallerConfig.new().loadout(aspect)
 	r.encounters = VoidcallerContent.run_encounters()
+	return r
+
+static func start_alchemist(aspect: String, seed_v: int = -1) -> RunState:
+	var r := _base("alchemist", aspect, seed_v)
+	r.loadout = AlchemistConfig.new().loadout(aspect)
+	r.encounters = AlchemistContent.run_encounters()
 	return r
 
 ## Shared init. seed_v < 0 -> wall-clock seed (normal play); tests pass explicit seeds

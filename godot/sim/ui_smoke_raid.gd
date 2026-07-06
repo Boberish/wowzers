@@ -82,7 +82,7 @@ func _process(_delta: float) -> bool:
 	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
 			["blade", "tempo"], ["blade", "colossus"], ["blade", "berserker"],
-			["caster", "disruptor"], ["caster", "silencer"],
+			["caster", "disruptor"], ["caster", "silencer"], ["caster", "brew"],
 			["healer", "tidecaller"], ["healer", "brinkwarden"],
 			["healer", "wildgrove"], ["healer", "thornveil"]]:
 		hud._launch(combo[0], combo[1])
@@ -291,6 +291,22 @@ func _process(_delta: float) -> bool:
 	print("gate exam blade/RECKONER ok  enc=%s boss='%s' kit=%s" % [
 		String(grk.encounter.id), String(grk.encounter.name), rkkit])
 	hud._blade_cls = "twinfang"
+	# the caster seat's OTHER class: the Alchemist's personal GATE = its Crucible exam
+	hud._seat_key = "caster"
+	hud._caster_cls = "alchemist"
+	hud._aspect = "brew"
+	hud._launch_gate_fight()
+	var gal: CombatState = hud._ctrl.state
+	for gi in 60:
+		hud._ctrl._process(1.0 / 30.0)
+		hud._process(1.0 / 30.0)
+	var alkit := "<none>"
+	if gal.seats[0].kit != null and gal.seats[0].kit.get_script() != null:
+		alkit = String(gal.seats[0].kit.get_script().get_global_name())
+	assert(alkit == "AlchemistKit", "alchemist gate didn't build an AlchemistKit (got %s)" % alkit)
+	print("gate exam caster/ALCHEMIST ok  enc=%s boss='%s' kit=%s" % [
+		String(gal.encounter.id), String(gal.encounter.name), alkit])
+	hud._caster_cls = "voidcaller"
 	# every other seat's exam builds its band + fights live for a moment
 	for gseat in ["blade", "caster", "healer"]:
 		hud._seat_key = gseat
@@ -351,6 +367,14 @@ func _process(_delta: float) -> bool:
 		{"t": "briarheart"},
 		{"t": "thorn_snap", "player": true, "charge": 3},
 		{"t": "thorn_break", "player": true},
+		# Alchemist (the Brew) events
+		{"t": "brew_pour", "player": true, "side": "venom", "grade": "potent", "dose": 8},
+		{"t": "brew_pour", "player": true, "side": "rot", "grade": "spoiled", "dose": 1},
+		{"t": "brew_pour", "player": true, "side": "venom", "grade": "hot", "dose": 9, "sat": true},
+		{"t": "brew_pour", "player": true, "side": "rot", "grade": "fizzle", "dose": 0},
+		{"t": "brew_rupture", "player": true, "amt": 320, "peak": true},
+		{"t": "brew_rupture", "player": false, "amt": 120, "peak": false},
+		{"t": "brew_dud", "player": true},
 	]:
 		hud._handle_event(ev)
 	print("juice handlers (all classes): ok")
@@ -436,7 +460,18 @@ func _drive(s: CombatState, seat_key: String) -> int:
 					elif int(obs.get("since_strike", 0)) >= int(obs.get("perfect_lo", 18)):
 						hud._ctrl.human({"type": "ability", "id": "strike"})
 				"caster":
-					if not tg.is_empty() and bool(tg.get("interruptible", false)) \
+					if hud._caster_cls == "alchemist":
+						# the Brew: hold → sweet-band pour, feed the lower side, rupture ripe
+						var chg := String(obs.get("charging", ""))
+						if chg != "":
+							if float(obs.get("charge", 0.0)) >= float(obs.get("sweet_lo", 0.7)):
+								hud._ctrl.human({"type": "ability", "id": "pour"})
+						elif float(obs.get("ripe_glow", 0.0)) >= 0.6:
+							hud._ctrl.human({"type": "ability", "id": "rupture"})
+						else:
+							hud._ctrl.human({"type": "ability",
+								"id": ("brew_venom" if float(obs.get("venom", 0.0)) <= float(obs.get("rot", 0.0)) else "brew_rot")})
+					elif not tg.is_empty() and bool(tg.get("interruptible", false)) \
 							and bool(obs.get("defense_ready", false)):
 						hud._ctrl.human({"type": "defense"})
 					elif (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):

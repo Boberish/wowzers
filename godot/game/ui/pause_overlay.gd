@@ -51,6 +51,9 @@ func _color(key: String) -> Color:
 		"thorn": return Palette.THORN
 		"crimson": return Palette.CRIMSON
 		"relic": return Palette.RELIC
+		"venombrew": return Palette.VENOM_BREW
+		"rotbrew": return Palette.ROT_BREW
+		"react": return Palette.REACT
 		_: return Palette.GOLD
 
 # ---- veil + entrance ----

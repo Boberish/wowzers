@@ -156,6 +156,44 @@ const DATA := {
 	],
 	"gear": "CURIOS add procs: Powder Vial makes Kick carry toxin (Venom: +2 lit lane / Tempo: +1 Flow), LE CHAT's Bell gives +30 starting energy, Riftmaw Tooth pays energy on a denied self-heal. Tokens mint off your Perfect-Strike count.",
 },
+# ============================================================ ALCHEMIST · CASTER DPS (the Brew)
+"alchemist": {
+	"name": "THE ALCHEMIST", "role": "CASTER DPS · BREW THE REACTION", "accent": "react",
+	"verb": "Hold to charge the VIAL — release in the sweet band, feed BOTH poisons, Rupture the ripe peak.",
+	"fantasy": "The patient, deliberate brewer (base build — creeds/modules/boons come later). Two OPPOSING poisons sit on a see-saw: VENOM burns hot and fades fast, ROT creeps cold and lingers. They only react where they MEET — min(Venom, Rot) × balance — so blindly stacking one side is bad by design. The vial fills slow at the bottom and ACCELERATES hard near the top: the greed is how high you dare ride it. Keep the reaction balanced and fed and POTENCY multiplies everything; then RUPTURE the whole brew at its ripe peak and rebuild — a wave every ~15–25s.",
+	"resources": [
+		{"name": "HEALTH", "tint": "blood", "body": "330 max. At 0 the run ends. Your hands are full — footwork (dodge) is your only defense."},
+		{"name": "VENOM · ROT", "tint": "venombrew", "body": "The two poisons, 0–12 each (soft cap 9 — pours above it mostly waste). Venom decays 2.0/s, Rot 0.5/s, and the reaction EATS both — no banking a stable pile. The reaction scales with the SMALLER side × balance."},
+		{"name": "POTENCY", "tint": "react", "body": "0–100%, ×1 → ×2.6 on EVERYTHING (reaction + Rupture). Fills while the reaction is balanced AND fed; drains fast when lopsided or dry. One bar = 'how well am I brewing' — and it IS your power."},
+	],
+	"defense": {"name": "DODGE", "key": "SPACE",
+		"body": "Standard footwork (0.55s window, 2.4s cd) — the brew keeps cooking through your dodge, and a held charge is NOT dropped. F = dodge string-combo BEATS. No kick: the seat trades the interrupt for the brew (interrupt-by-ability comes with the world rework)."},
+	"moves": [
+		{"name": "Brew Venom", "key": "1 (hold)", "cost": "free · release = pour", "tag": "",
+			"body": "Hold to charge the vial with VENOM, release to pour. Under 45% fizzles (no tap-spam); the green sweet band pays +8 POTENT; the last sliver before the red line pays +9 HOT; past it = SPOILED (+1)."},
+		{"name": "Brew Rot", "key": "2 (hold)", "cost": "free · release = pour", "tag": "",
+			"body": "The same vial, cold side. Rot lingers — anchor it, then tend the fast-fading Venom against it."},
+		{"name": "Rupture", "key": "3 / tap the chamber", "cost": "consumes ~65% of the brew", "tag": "",
+			"body": "Detonate the reaction: FUEL (balanced volume) × POWER (potency), multiplicative — the peak is both-high. The chamber glows RIPE when it's worth it. Cash the wave, rebuild from the seed."},
+	],
+	"aspects": [
+		{"id": "brew", "name": "THE BREW", "tint": "react", "tagline": "Build → PEAK → rebuild.",
+			"identity": "The whole class, for now — a second spec arrives with the full build. Deep minigame, narrow kit: the brew IS the class.",
+			"bar": "THE ALEMBIC: twin reservoirs (hold-zones), the vial with its sweet band + red line, the reaction chamber (its number = your live dps; tap it to Rupture), the balance beam, and the POTENCY strip.",
+			"rotation": [
+				"Open by anchoring ROT high (it lingers), then feed VENOM against it.",
+				"Ride each charge into the sweet band — release on the green.",
+				"Keep min(V,R) fed and the see-saw level → POTENCY climbs.",
+				"At the ripe peak (fuel high + potency hot) → RUPTURE.",
+				"Rebuild from the 35% seed — the wave is the loop.",
+			],
+			"branches": [
+				{"name": "(base build)", "via": "creeds / modules / boons land after live playtests",
+					"body": "The Steady Hand / Volatile Mix / Reckless Brewer / Anchorite / Purist creeds, the Still, Ferment, Catalyst, Last Call and the rest are designed (ALCHEMIST-PLAN.md) and arrive once the base brew proves out."},
+			]},
+	],
+	"gear": "CURIOS apply as usual (fortune + off-verb only — cross-class law). No class boon pool yet: REFORGE drafts skip this seat until the boon slate lands.",
+},
 # ============================================================ VOIDCALLER · CASTER DPS
 "voidcaller": {
 	"name": "THE VOIDCALLER", "role": "CASTER DPS · INTERRUPT", "accent": "void",
