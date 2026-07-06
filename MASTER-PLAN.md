@@ -937,6 +937,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
 
+- ☑ 2026-07-07 · `fermata` → main · §CLASSES — **FERMATA BUILT — Twinfang's second spec is real,
+  deterministic, byte-identical when unpicked.** Bill: "yeah go ahead and build this fully." The
+  hold-release aspect: Strike COILS (`coil`/`release` via `on_action`; release < the sharpen floor
+  UNRAVELS — no strike, ~0.35s stagger, no Flow loss; the AI presses early + releases on the
+  centre-aim, same latency gradient as Tempo split across two inputs). Shares Tempo's Flow/combo/
+  Coup/Opening/crit via a new `_tempo_family()` gate. **Coded:** 4 creeds (Patient Knife / Fleeting
+  Shade / Long Night / Tutti) · 2 modules (⭐Shadow Dance duration-gated bullet-time · The Mark
+  brand→Evis cash) · 11 boons (COIL/VEIL/RELEASE + On the Beat on the Tempo side) · 3 keystones
+  (Unseen Blade / Eclipse / Phantom) · 3 rig WHENs · fermata sim probe + `--blade=fermata` in
+  raid_sim + the lobby entry (Twinfang = Tempo + Fermata; venom → AI-only legacy since poison is
+  the Alchemist). **VERIFIED:** twinfang_sim base+fat fermata determinism PASS; @expert base =
+  25.7 bullseyes/run (coil lands dead-centre = Tempo's ~22), @good smears to Perfect (identical
+  gradient), 0 unravels from the clean AI; **Tempo `4932869838389671587` + Venom
+  `7876031242436484463` checksums MATCH main byte-for-byte**; raid_sim `--blade=fermata` Mistral
+  det PASS + 100% win/skill (distinct checksum + TTK from venom); ui_smoke_raid OK (only the
+  pre-existing raid_frames/col_std errors). **SIM SIMPLIFICATIONS (flagged for the HUD pass):**
+  Tutti's coiled-kick + Phantom's two-blade crossing + Veil-over-warband's ally application are
+  feel/wiring the instant-dump sim can't express — modelled as grade-mult / flat twin / published
+  flag respectively. **OWED (other layers):** HUD gauges (charge ring off-marker per Bill, shadow
+  dim, Shade/Mark/Dance meters) · elite acquisition for the 3 keystones · online spec-carry. See
+  [[tempo-second-spec-search]]. *(fermata build session)*
+
 - 📋 2026-07-06 · main (docs only) · §CLASSES — **FERMATA: Twinfang's second spec — VERB LOCKED with
   Bill via feel-testers, full deck DESIGNED (TEMPO-PLAN §13 rewritten as the hard-copy ledger; NOT
   built).** The §13 hunt ran four candidates: MOTIF (aim-cuts→wounds→SEVER) rejected "no strategy,

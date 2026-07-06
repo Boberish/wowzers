@@ -44,6 +44,45 @@ const CREEDS := {
 		"flow_value": 1.0,
 		"largo": true,
 	},
+	# --- FERMATA (§13.2) creeds — coil temperament. Only offered on the fermata aspect. ---
+	"patient": {
+		"name": "The Patient Knife", "kicker": "Greed",
+		"blurb": "The coil keeps charging PAST sharp for up to +20% — but release too early and it UNRAVELS into a full Flow crash. Greed on the hold. A sharp Miss only bleeds −2 Flow.",
+		"slip": "flow_loss",
+		"slip_amt": 2,
+		"lock_sec": 0.0,
+		"flow_value": 1.0,
+		"patient": true,          # coil-duration bonus (TwinfangKit._coil_release_bonus)
+		"unravel_slip": true,     # an unravel is a full crash
+	},
+	"fleeting": {
+		"name": "The Fleeting Shade", "kicker": "Forgiving",
+		"blurb": "A short coil (0.20s), a painless unravel, and a Miss only bleeds −2 Flow instead of crashing. The cost: your Flow ceiling is 4. The fast, forgiving crossover for Tempo hands.",
+		"slip": "flow_loss",
+		"slip_amt": 2,
+		"lock_sec": 0.0,
+		"flow_value": 1.0,
+		"coil_min": 0.20,         # TwinfangKit._coil_min reads this
+		"flow_cap": 4,            # TwinfangKit.max_flow reads this
+	},
+	"longnight": {
+		"name": "The Long Night", "kicker": "Slow & sharp",
+		"blurb": "The Largo mirror: the beat runs SLOW and the window TIGHTER, but releases hit harder. Slow, small, heavy — precision in the dark. A slip costs −2 Flow.",
+		"slip": "flow_loss",
+		"slip_amt": 2,
+		"lock_sec": 0.0,
+		"flow_value": 1.0,
+		"largo": true,            # reuses the Largo beat/window/hit knobs
+	},
+	"tutti": {
+		"name": "Tutti", "kicker": "Everyone plays",
+		"blurb": "EVERY button coils — Evis, utility, the kick. Sharp dumps take the window's grade multiplier (a Bullseye Evis ×1.8); an off-window dump is a shade weaker. The coil tax on everything, paid back in dump power.",
+		"slip": "flow_loss",
+		"slip_amt": 2,
+		"lock_sec": 0.0,
+		"flow_value": 1.0,
+		"tutti": true,            # TwinfangKit._tutti / _dump_beat_bonus
+	},
 }
 
 const DEFAULT := "drumline"
@@ -57,3 +96,7 @@ static func ids() -> Array:
 ## The v1 shipping set (Flourish + Drumline = the clean risk/safe pair; Held Breath later).
 static func v1_ids() -> Array:
 	return ["flourish", "drumline", "largo"]
+
+## The FERMATA creed pool (§13.2) — the coil temperaments, offered on the fermata aspect.
+static func fermata_ids() -> Array:
+	return ["patient", "fleeting", "longnight", "tutti"]

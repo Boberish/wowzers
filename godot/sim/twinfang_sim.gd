@@ -33,6 +33,8 @@ func _initialize() -> void:
 	print("")
 	if seed0 == 1: _prove_modules(seeds)
 	print("")
+	if seed0 == 1: _prove_fermata(seeds)
+	print("")
 	if seed0 == 1: _prove_cards(seeds)
 
 	var rows: Array = []
@@ -207,6 +209,43 @@ func _prove_modules(seeds: int) -> void:
 	var d1 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"overdrive": true})
 	var d2 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"overdrive": true})
 	print("  determinism (overdrive): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
+
+## FERMATA (§13) probe: the hold-release aspect engages (releases land, unravels stay rare),
+## the coil creeds/modules/boons move the fight, and every path stays deterministic. Base fermata
+## runs on the "drumline" creed (a neutral baseline — no coil-specific creed effects).
+func _prove_fermata(seeds: int) -> void:
+	var n := mini(seeds, 100)
+	print("FERMATA probe (Tempo-family / Executioner @good — the hold-release aspect, %d seeds):" % n)
+	var cells := [
+		{"l": "base",     "c": "drumline",  "m": {},                    "b": {}},
+		{"l": "patient",  "c": "patient",   "m": {},                    "b": {"patientEdge": true}},
+		{"l": "fleeting", "c": "fleeting",  "m": {},                    "b": {}},
+		{"l": "longnight","c": "longnight", "m": {},                    "b": {}},
+		{"l": "tutti",    "c": "tutti",     "m": {},                    "b": {}},
+		{"l": "dance",    "c": "drumline",  "m": {"shadowdance": true}, "b": {}},
+		{"l": "mark",     "c": "drumline",  "m": {"mark": true},        "b": {"eviPlus": true}},
+		{"l": "veil",     "c": "drumline",  "m": {},                    "b": {"vanish": true, "shadowstep": true, "restlessDark": true}},
+		{"l": "release",  "c": "drumline",  "m": {},                    "b": {"killingWhisper": true, "twinEcho": true, "firstPass": true, "feint": true}},
+		{"l": "unseen",   "c": "patient",   "m": {},                    "b": {"unseenBlade": true, "patientEdge": true}},
+		{"l": "crit",     "c": "drumline",  "m": {},                    "b": {"hone": true, "heartseeker": true, "serrated": true}},
+	]
+	print("  cell       skill    win     ttk     bull/run  perf/run  unravel/run")
+	for c in cells:
+		for sk in [{"l": "expert", "v": 0}, {"l": "good", "v": 6}]:
+			var w := 0; var ttk := 0.0; var wn := 0; var bull := 0.0; var perf := 0.0; var unr := 0.0
+			for seed in range(1, n + 1):
+				var r := _run_one(seed, "executioner", "fermata", int(sk["v"]), c["b"], true, String(c["c"]), c["m"])
+				if r["won"]: w += 1; ttk += float(r["ttk_sec"]); wn += 1
+				var rd: Dictionary = r.get("diag", {})
+				bull += float(rd.get("s_bull", 0)); perf += float(rd.get("s_perfect", 0)); unr += float(rd.get("unravel", 0))
+			print("  %-9s %-7s %5.1f%%  %5.1fs   %6.2f    %6.2f     %6.2f" % [
+				c["l"], sk["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), bull / n, perf / n, unr / n])
+	var d1 := _run_one(9, "executioner", "fermata", 6, {"unseenBlade": true, "patientEdge": true, "killingWhisper": true, "twinEcho": true}, true, "patient", {"mark": true})
+	var d2 := _run_one(9, "executioner", "fermata", 6, {"unseenBlade": true, "patientEdge": true, "killingWhisper": true, "twinEcho": true}, true, "patient", {"mark": true})
+	print("  determinism (fat fermata build): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
+	var b1 := _run_one(4, "executioner", "fermata", 6, {}, true, "drumline")
+	var b2 := _run_one(4, "executioner", "fermata", 6, {}, true, "drumline")
+	print("  determinism (base fermata):      %s" % ("PASS" if b1["checksum"] == b2["checksum"] else "FAIL"))
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)

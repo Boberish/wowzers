@@ -22,8 +22,8 @@ static var ASPECTS := {
 	"blade": [
 		{"id": "tempo", "name": "TEMPO", "accent": Palette.FLOW, "icon": "flurry",
 			"desc": "Chain Perfect Strikes — Flow tiers transform your kit, ending in Coup de Grâce at max Flow."},
-		{"id": "venomancer", "name": "VENOMANCER", "accent": Palette.POISON, "icon": "envenom",
-			"desc": "Keep three poisons alive, ramp Toxic Synergy, detonate the fat cocktail with Rupture."},
+		{"id": "fermata", "name": "FERMATA", "accent": Palette.VOID, "icon": "flurry",
+			"desc": "HOLD to coil into shadow — release in the window to strike from the dark. The held note; Tempo's patient half."},
 	],
 	"caster": [
 		{"id": "disruptor", "name": "DISRUPTOR", "accent": Palette.KICK, "icon": "overload",
@@ -121,13 +121,13 @@ func _sync_healer_cls() -> void:
 		_healer_cls = "mender"
 
 ## Keep _blade_cls consistent with the chosen aspect (the aspect uniquely identifies
-## the blade class: Reckoner = colossus/berserker · Twinfang = tempo/venomancer).
+## the blade class: Reckoner = colossus/berserker · Twinfang = tempo/fermata/venomancer).
 func _sync_blade_cls() -> void:
 	if _seat_key != "blade":
 		return
 	if _aspect == "colossus" or _aspect == "berserker":
 		_blade_cls = "reckoner"
-	elif _aspect == "tempo" or _aspect == "venomancer":
+	elif _aspect == "tempo" or _aspect == "fermata" or _aspect == "venomancer":
 		_blade_cls = "twinfang"
 
 ## Keep _caster_cls consistent with the chosen aspect (the aspect uniquely identifies

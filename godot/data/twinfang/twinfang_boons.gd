@@ -47,6 +47,37 @@ const TEMPO := [
 	{"id": "crescendo", "type": "upgrade", "rarity": "haiku", "tags": ["flow", "coupdegrace"], "title": "Crescendo", "desc": "Coup de Grâce hits 40% harder."},
 	{"id": "syncopation", "type": "relic", "rarity": "opus", "tags": ["flow", "energy"], "title": "Syncopation", "desc": "SIGNATURE: at max Flow your Strikes cost no energy, and a GOOD grades up to Perfect — ride the solo forever."},
 	{"id": "daCapo", "type": "relic", "rarity": "sonnet", "tags": ["flow", "coupdegrace"], "title": "Da Capo", "desc": "Coup leaves you +1 Flow seed — come back from the top, not from walking pace."},
+	# On the Beat (§13 verdict pass, Bill's idea) — the Tempo mirror of Fermata's TUTTI creed.
+	{"id": "onTheBeat", "type": "relic", "rarity": "sonnet", "tags": ["opening", "eviscerate", "coupdegrace"], "title": "On the Beat", "desc": "Dumps fired INSIDE your Strike window take the window's grade multiplier — a Bullseye-timed Eviscerate hits far harder. Time your finishers to the beat, not just the Opening."},
+]
+
+## FERMATA (§13) — the hold-release aspect's own slate, keyed off the coil STATE (COIL / VEIL /
+## RELEASE). Every card names the part of the coil it touches (the address rule). Numbers = the
+## Haiku rung (Slice-2 ladders scale per instance). The A7 crit package, Crescendo, Da Capo,
+## Understudy, Efficiency and the WINDOW bread (Wide Tempo / Fencer's Line / Rubato) CARRY from
+## TEMPO/SHARED and work unchanged (Fermata shares Tempo's Flow + window).
+const FERMATA := [
+	# --- COIL — the hold itself ---
+	{"id": "patientEdge", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Patient Edge", "desc": "Releases deal +2% per 0.1s coiled beyond sharp (cap +18%). Reward the deep hold."},
+	{"id": "restlessDark", "type": "upgrade", "rarity": "haiku", "tags": ["coil", "energy"], "title": "Restless Dark", "desc": "Energy regenerates +30% while you're coiled — the shadow is restless."},
+	{"id": "quietFuse", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Quiet Fuse", "desc": "Your blade sharpens 0.08s sooner — a shorter fuse on every coil."},
+	{"id": "feint", "type": "relic", "rarity": "sonnet", "tags": ["coil", "unravel"], "title": "Feint", "desc": "An unravel PRIMES your next coil to sharpen 50% faster. Turn a fumble into tempo."},
+	# --- VEIL — defense in shadow ---
+	{"id": "vanish", "type": "relic", "rarity": "sonnet", "tags": ["coil", "defense"], "title": "Vanish", "desc": "The first boss hit you take during a coil is softened by 50% — melt into the dark. Defence only."},
+	{"id": "shadowstep", "type": "upgrade", "rarity": "haiku", "tags": ["coil", "defense"], "title": "Shadowstep", "desc": "Dodging no longer costs you your whole coil — a dodge mid-coil keeps it at half progress instead of breaking it."},
+	{"id": "veilWarband", "type": "relic", "rarity": "opus", "tags": ["coil", "support"], "title": "Veil Over the Warband", "desc": "SUPPORT: while you're coiled the whole warband takes 4% less damage — the shadow stretches over your allies. Your coil uptime IS the raid mitigation."},
+	# --- RELEASE — the strike ---
+	{"id": "killingWhisper", "type": "upgrade", "rarity": "haiku", "tags": ["release", "bullseye"], "title": "Killing Whisper", "desc": "Bullseye releases deal +15% — the strike from the dark bites deeper."},
+	{"id": "twinEcho", "type": "relic", "rarity": "sonnet", "tags": ["release", "flow"], "title": "Twin Echo", "desc": "Releases at MAX Flow echo a second strike for 30%. Ride the top, strike twice."},
+	{"id": "firstBlood", "type": "relic", "rarity": "sonnet", "tags": ["release", "crash"], "title": "First Blood", "desc": "Your first release after any Miss or unravel lands an automatic Perfect — get back into the dark clean."},
+	{"id": "firstPass", "type": "upgrade", "rarity": "haiku", "tags": ["release", "window"], "title": "First Pass", "desc": "The first time the window comes around after your blade sharpens, it's +20% wider. Reward the decisive release."},
+]
+
+## FERMATA keystones (§13.6) — elite-node drops, NEVER in the normal draft pool.
+const FERMATA_KEYSTONES := [
+	{"id": "unseenBlade", "type": "relic", "rarity": "opus", "tags": ["coil", "keystone"], "title": "The Unseen Blade", "desc": "KEYSTONE: while coiled you gain a SHADE every 0.5s (max 5); each Shade adds +6% to your NEXT release and they persist until spent. The slow-nuke build — hold, bank, unleash one giant strike."},
+	{"id": "eclipse", "type": "relic", "rarity": "opus", "tags": ["release", "bullseye", "keystone"], "title": "Eclipse", "desc": "KEYSTONE: a sharp Bullseye release instantly RE-COILS you, already sharp — chain release after release in perpetual shadow until a miss ends the dance."},
+	{"id": "phantom", "type": "relic", "rarity": "opus", "tags": ["release", "bullseye", "keystone"], "title": "Phantom", "desc": "KEYSTONE: a Bullseye release fires a PHANTOM twin strike for full damage — the second blade from the dark."},
 ]
 const VENOM := [
 	{"id": "potent", "type": "upgrade", "rarity": "haiku", "tags": ["poison"], "title": "Potent Toxins", "desc": "All poison ticks 30% harder."},
@@ -61,13 +92,17 @@ const VENOM := [
 const SPELL_CAP := 5
 
 static func spec_pool(aspect: String) -> Array:
-	return TEMPO if aspect == "tempo" else VENOM
+	match aspect:
+		"tempo": return TEMPO
+		"fermata": return FERMATA          # Fermata's own coil-state slate (§13.4)
+		_: return VENOM
 
 ## The Aspect's mechanic vocabulary — feeds the synergy slot's build-tag set.
 static func aspect_tags(aspect: String) -> Array:
-	if aspect == "tempo":
-		return ["flow", "perfect", "combo", "crit", "bullseye", "window", "tempo"]
-	return ["poison", "combo", "perfect"]
+	match aspect:
+		"tempo": return ["flow", "perfect", "combo", "crit", "bullseye", "window", "tempo"]
+		"fermata": return ["coil", "release", "flow", "crit", "bullseye", "window", "opening"]
+		_: return ["poison", "combo", "perfect"]
 
 ## Apply a chosen boon to the run.
 static func apply(b: Dictionary, run) -> void:

@@ -445,7 +445,34 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 
 ---
 
-## 13. FERMATA — Twinfang's second spec 🟢 (VERB LOCKED via feel-tester 2026-07-06 — deck at verdict)
+## 13. FERMATA — Twinfang's second spec 🟢 (BUILT 2026-07-07 — worktree `fermata`)
+
+> ### ✅ CODED — the whole deck is real, deterministic, byte-identical when unpicked
+> Bill: "yeah go ahead and build this fully." Done in worktree `fermata` (kit-local, aspect-gated).
+> **The verb:** Strike COILS — `coil` (press) / `release` (resolve) routed through `on_action`; a
+> release < the sharpen floor UNRAVELS (no strike, ~0.35s stagger, no Flow loss); the AI policy
+> presses early and releases on the centre-aim (same latency gradient as Tempo, split across two
+> inputs). **Shared with Tempo** via `_tempo_family()` — Flow, combo, Coup, the Opening, the A7
+> crit package, Understudy, Efficiency, the WINDOW bread all carry unchanged. **Built:** 4 creeds
+> (Patient Knife / Fleeting Shade / Long Night / Tutti) · 2 modules (⭐Shadow Dance duration-gated
+> bullet-time + The Mark brand→Evis cash) · 11 boons in COIL/VEIL/RELEASE + On the Beat on the
+> Tempo side · 3 keystones (Unseen Blade / Eclipse / Phantom) · 3 rig WHENs (on-edge / deep-coil /
+> unravel). **VERIFY:** twinfang_sim base+fat fermata determinism PASS; @expert base fermata =
+> 25.7 bullseyes/run (coil lands dead-centre, = Tempo's ~22), @good smears to Perfect (same
+> gradient), 0 unravels from the clean AI; **Tempo `4932869838389671587` + Venom
+> `7876031242436484463` checksums MATCH main byte-for-byte**; raid_sim `--blade=fermata` Mistral
+> determinism PASS + 100% win/skill (distinct from venom's checksum & TTK); ui_smoke_raid OK.
+> **SIM SIMPLIFICATIONS (feel lives in the HUD, flagged for the render pass):** TUTTI's every-
+> button-coil + coiled-kick is modelled as "dumps take the live window grade mult" (the coil
+> delay/kick-tax is a control-feel thing the instant-dump AI can't express); PHANTOM is a flat
+> Bullseye twin-strike (no two-blades-crossing UI in sim); VEIL OVER THE WARBAND publishes
+> `veil_warband_active` but the ally application is OWED (same raid-buff channel as Battle Hymn).
+> **OWED (other layers, same as Tempo):** HUD gauges (charge ring OFF-marker per Bill · shadow dim ·
+> Shade/Mark/Dance meters) in raid_hud · elite acquisition for the 3 keystones (Topology elite
+> node) · online spec-carry in `(seed, spec)`. The frozen poison-wheel Venom stays as the AI-only
+> legacy aspect (poison is the Alchemist now); the blade lobby shows Tempo + Fermata.
+
+_Original design below (verb locked via feel-tester 2026-07-06 — the deck Bill verdicted)._
 
 The Brew left to become its own class (audit F10 → `ALCHEMIST-PLAN.md`), so Twinfang owes a second
 Aspect. The hunt (2026-07-06): MOTIF rejected ("no strategy, too similar to the warrior") · OSTINATO

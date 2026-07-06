@@ -133,6 +133,47 @@ extends Resource
 @export var press_advantage_mult: float = 0.30  ## Press the Advantage: a basic Strike inside the Opening deals +this
 @export var cold_open_mult: float = 0.25        ## Cold Open: a basic Strike while Flow <= cold_open_flow_max deals +this
 @export var cold_open_flow_max: int = 2         ## Cold Open: the low-Flow ceiling it pays under
+# --- FERMATA (§13): the hold-release aspect — Strike COILS (press→sharpen→release). Every
+#     knob here is fermata-only (aspect-gated in TwinfangKit); tempo/venom never read them, so
+#     the existing checksums are untouched. Ladders in TEMPO-PLAN §13; base = the Haiku rung. ---
+@export var coil_min_sec: float = 0.35          ## min hold before the blade SHARPENS; release early = UNRAVEL
+@export var coil_unravel_stagger: float = 0.35  ## strike-lock after an unravel (no strike, NO Flow loss)
+# creeds
+@export var patient_per_sec: float = 0.15       ## Patient Knife: +dmg/sec coiled past sharp (0.15 = +1.5%/0.1s)
+@export var patient_cap: float = 0.20           ## Patient Knife: cap on the baked coil bonus
+@export var fleeting_min_sec: float = 0.20      ## Fleeting Shade: shorter min coil
+@export var fleeting_flow_cap: int = 4          ## Fleeting Shade: Flow ceiling (the cost)
+@export var fleeting_slip_amt: int = 2          ## Fleeting Shade: a Miss loses this (not a crash)
+@export var tutti_off_mult: float = 0.85        ## Tutti: an off-window (un-sharp) dump lands at this fraction
+# modules
+@export var shadowdance_fill: int = 6           ## sharp Perf/Bull at Flow>=min to fill Shadow Dance
+@export var shadowdance_sec: float = 3.0        ## THE DANCE duration (release bullet-time)
+@export var shadowdance_flow_min: int = 4       ## the meter fills only at/above this Flow
+@export var shadowdance_seed: int = 2           ## Flow left after the Dance crashes
+@export var mark_open_bonus: float = 0.12       ## The Mark: Eviscerate +this per brand tier
+@export var mark_tier_cap: int = 3              ## The Mark: max brand tier
+# boons — COIL
+@export var patient_edge_per: float = 0.02      ## Patient Edge: +dmg per 0.1s coiled beyond sharp
+@export var patient_edge_cap: float = 0.18      ## Patient Edge: cap (raises the Patient bonus ceiling)
+@export var restless_dark_regen: float = 0.30   ## Restless Dark: +this fraction of energy regen while coiled
+@export var quiet_fuse_cut: float = 0.08        ## Quiet Fuse: min coil reduced by this
+@export var quiet_fuse_no_stagger: bool = false ## Quiet Fuse (Opus rung): unravel loses its stagger
+@export var feint_sharpen: float = 0.50         ## Feint: after an unravel the next coil sharpens this much faster
+# boons — VEIL
+@export var vanish_reduce: float = 0.50         ## Vanish: the first boss hit per coil takes -this
+@export var vanish_keep_sharp: bool = false     ## Vanish (Opus rung): the eaten hit doesn't break the coil
+@export var veil_warband_reduce: float = 0.04   ## Veil Over the Warband: allies take -this while you're coiled
+# boons — RELEASE
+@export var killing_whisper_mult: float = 0.15  ## Killing Whisper: Bullseye releases +this
+@export var twin_echo_mult: float = 0.30        ## Twin Echo: a max-Flow release echoes a strike at this
+@export var first_pass_widen: float = 0.20      ## First Pass: the first window after SHNK is +this wider
+# keystones (A8 — elite drops)
+@export var unseen_shade_per: float = 0.06      ## Unseen Blade: +dmg per Shade on the next release
+@export var unseen_shade_cap: int = 5           ## Unseen Blade: shade ceiling
+@export var unseen_shade_every: float = 0.5     ## Unseen Blade: gain a Shade per this long coiled
+@export var phantom_twin_mult: float = 1.0      ## Phantom: a Bullseye release fires a twin strike at this
+# On the Beat (a TEMPO-side card — dumps in the strike window gain the grade mult)
+@export var on_the_beat_frac: float = 0.60      ## fraction of the live window grade bonus a dump gains
 # DOUBLE TIME (signature): at max Flow, each further Perfect adds an "overdrive" stack.
 @export var doubletime_dmg: float = 0.04    ## +this damage per overdrive stack (flow-scaled hits)
 @export var doubletime_tighten: float = 0.06 ## window shrinks this fraction per stack…
@@ -164,7 +205,7 @@ extends Resource
 
 ## The four-slot bar for an Aspect (signature appended last). Draft spells fill 5+.
 func loadout(aspect: String) -> Array:
-	if aspect == "tempo":
+	if aspect == "tempo" or aspect == "fermata":   # Fermata IS Tempo's kit — the strike just COILS
 		return ["strike", "eviscerate", "kick", "coupdegrace"]
 	return ["strike", "envenom", "kick", "rupture"]
 

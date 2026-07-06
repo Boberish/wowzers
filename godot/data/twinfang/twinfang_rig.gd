@@ -20,6 +20,10 @@ const WHENS := {
 	"punish":   {"name": "Punish",   "mult": 6.5, "tier": "rare",     "blurb": "a dump landed in the Opening — read the boss."},
 	"peak":     {"name": "Peak",     "mult": 6.9, "tier": "rare",     "blurb": "reaching MAX Flow — you must ride the top."},
 	"coup":     {"name": "Coup",     "mult": 8.4, "tier": "rare",     "blurb": "casting Coup de Grâce — full greed."},
+	# --- FERMATA (§13.5) WHENs — the coil moments. Offered on the fermata aspect. ---
+	"onedge":   {"name": "On the Edge", "mult": 2.4, "tier": "medium", "blurb": "a release right on the SHNK — barely sharp, all precision.", "aspect": "fermata"},
+	"deepcoil": {"name": "Deep Coil",   "mult": 3.6, "tier": "rare",   "blurb": "a release after holding the coil 1.5s+ — the patient strike.", "aspect": "fermata"},
+	"unravel":  {"name": "Unravel",     "mult": 1.6, "tier": "medium", "blurb": "the shadow unravels — turn a fumble into a consolation.", "aspect": "fermata"},
 }
 
 ## THEN effects — `base` is the per-fire magnitude at Riff (mult 1.0); the WHEN's mult scales it.
