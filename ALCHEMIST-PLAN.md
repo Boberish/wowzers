@@ -16,7 +16,8 @@ can't play the kick exam) · codex entry. **Bands:** solo (300 seeds) crucible 1
 mythos 100/94/21 — expert parity w/ the voidcaller comp (Mistral TTK 47.5s vs 48.1s), sloppy pays for
 the missing kicker (F22, deliberate). Play: **`--autostart=raid:caster:brew`** (or class select →
 THE ALCHEMIST). **NOT built yet (post-playtest slices):** creeds · modules · boons/rig ·
-Spitfire/Decant/Reduction · second spec · a class puppet (art = voidcaller rig filler).
+Spitfire/Decant/Reduction · second spec · a class puppet (art = voidcaller rig filler) —
+**card slate LOCKED for build 2026-07-06, see ⚖ PRE-BUILD RUN-THROUGH VERDICTS below.**
 **THE ALCHEMIST is a WORKING NAME — filler** (Bill: "alchemist or
 something"; name/art are placeholder-grade until the class ships. Candidates: Venomancer / Plaguewright /
 keep Alchemist). The old poison-wheel **Twinfang·Venom stays IN CODE as the frozen second aspect** until
@@ -44,10 +45,9 @@ taps). Freed from the blade chassis, the puppet can BE the chemist (art = PoseRi
   the optimal cash-out that resets you into a fresh build — a wave every ~15–25s (no flat-plateau
   hoarding; Tempo gets its climax from max Flow → Coup, this is ours). Chain Rupture is the wave-shaper.
 - **F13 · the COMBO RIG pillar must be spec'd** — the class owes rig WHENs/THENs authored off its OWN
-  beats (inheriting "every 3rd Perfect" would be incoherent in a charge-pour class). ⚠ The I3 vocabulary
-  (Ripe / Emulsion / ~~Saturation~~ / Boil / ~~Distill~~; its Top-Off THEN pre-cut for easing balance) is
-  NOT locked — Bill hasn't decided if/thens yet, floated per-class WHENs, and Saturation/Distill are
-  now moot (mechanic cut 2026-07-06). 🟡
+  beats (inheriting "every 3rd Perfect" would be incoherent in a charge-pour class). **SETTLED
+  2026-07-06 — the slate is LOCKED, see ⚖ PRE-BUILD RUN-THROUGH VERDICTS** (reuses the I3 names that
+  survived: Ripe / Emulsion / Boil; Top-Off stays pre-cut for easing balance; Saturation/Distill moot).
 - ~~**F16 · The Still is a Floor-1 trap under two creeds**~~ — **DEAD (saturation CUT 2026-07-06).**
   The Still distilled saturation-waste and the Reckless Brewer creed removed saturation; with the
   mechanic gone (playtested off — "better off"), both cards are cut and F16 has nothing to guard.
@@ -90,9 +90,10 @@ taps). Freed from the blade chassis, the puppet can BE the chemist (art = PoseRi
 - **F20 · VIAL pool is thin — but don't just add minigame-modifiers:** Bill: "we have lots of modifiers
   on this one — branch out from changing the mini game to add other things." New VIAL/loop content
   should open NON-minigame axes, not another sweet-band dial.
-- **F22 · interrupt:** the kick button is being rethought globally — **INTERRUPT-BY-ABILITY**
-  (WORLD-PLAN pillar 3): flagged class abilities interrupt as a side effect, less frequent, tighter
-  window. Whether this class is a carrier (2/1/0 comp texture) = build-time call.
+- **F22 · interrupt — SETTLED 2026-07-06 (Bill): SPITFIRE is the DESIGNATED CARRIER, built LATER.**
+  When INTERRUPT-BY-ABILITY (WORLD-PLAN pillar 3) lands globally, Spitfire carries the flag — instant,
+  off-brew, the perfect interrupt tax. Zero engine work in the card slices; the alch comp keeps paying
+  for the missing kicker (sloppy bands) until the pillar ships. Not a zero-carrier class.
 - **F1 reconcile (the Opening):** F1 was accepted pre-split as "Opening = the CLASS verb for both
   specs." Post-split it resolves as: Opening = **Twinfang's** baseline verb; the §3 "Opening —
   CROSS-SPEC module" row below is **dead as written**. Whether this class keeps an Opening-window
@@ -100,6 +101,51 @@ taps). Freed from the blade chassis, the puppet can BE the chemist (art = PoseRi
   the boss-hookup need differently.
 
 ---
+
+## ⚖ PRE-BUILD RUN-THROUGH VERDICTS 2026-07-06 (Bill) — the card-slate lock
+
+The "last run-through before code" pass. Four calls locked + four holes found in the accepted cards
+and fixed here. **The slate below this section is now the build spec.**
+
+1. **⭐ TRANSFORMER = THE REACTION-VESSEL (locked — fills §3 slot 3).** Inverts the loop: the reaction
+   deals NOTHING and banks into a vessel; Rupture dumps the whole vessel at the potency multiplier.
+   Sustain/burst flipped — the brew becomes a pure charge-and-release cannon; stall/die with a full
+   vessel = damage never dealt (the risk). Purist never sees it (creed-aware module filter, verdict 6).
+   Rejected: Twin-Still (doubles minigame load against the F2 "already frantic" finding), Catalyst-forge
+   (overlaps Chain Rupture/Catalyst boons, dead under Purist).
+2. **RIG SLATE LOCKED (settles F13/I3)** — WHENs (mult ≈ inverse-freq × premium, Sweet Pour = 1.0
+   anchor; sim-tuned like Twinfang's): **Sweet Pour** 1.0 (a sweet-band release — the drumbeat) ·
+   **Hot Pour** ~2.3 (the last 2% before the red line) · **Emulsion** ~3.0 (hold balance ≥ 0.9 for 4s)
+   · **Ripe** ~4.5 (Rupture on a glowing sigil) · **Boil** ~6.5 (reach max Potency) · **Perfect Wave**
+   ~8 (Rupture within 2s of max Potency — the F4 wave cashed at the top). THENs (base at Sweet Pour):
+   **Splash** (damage burst) · **Backwash** (refill both poisons) · **Quicken** (instant Potency) ·
+   **Residue** (small lingering boss DoT) · **Fume** (boss deals −% for 2s) · **Overfill** (next
+   Rupture +%). Creed-aware board: Purist's board hides the Rupture WHENs (Ripe / Perfect Wave) and
+   Overfill. No easing THENs (Top-Off stays cut).
+3. **RARITY = FIXED PER CARD this slice (Tempo parity).** The plan's "every card rolls H/S/O per
+   offer" law needs the per-offer tier-roll engine that is DESIGNED NOT BUILT for Tempo too
+   (TEMPO-PLAN Appendix A). Ship fixed rarities + base numbers now; design the H/S/O ladders on paper
+   per card; both classes inherit the shared tier-roll slice when it lands.
+4. **F22 SETTLED — Spitfire = designated interrupt carrier, built when pillar 3 lands** (see the
+   audit block above).
+5. **LAST CALL REFRAMED — the trigger didn't exist.** The accepted card fired on "boss cleanses
+   poisons / phase change — the event that normally wipes the brew," but NO engine boss cleanses
+   anything and phase transitions don't wipe the brew (artifact-world premise). Reframed: **on a boss
+   PHASE TRANSITION, the brew auto-cashes at full value (small seed left)** — no wipe mechanic added
+   (boss-side changes belong to the Seal pillar pass). Still the on-phase payoff I4 wanted.
+6. **CREED-AWARE OFFERS — the mechanism + the module extension.** Build: a `hide_creeds` tag on cards
+   + one check in `Draft._ok()` reading `run.creed` — byte-identical for every untagged class (the
+   determinism gate holds). **The law EXTENDS to MODULE offers:** Purist never sees Fermentation or
+   the Reaction-Vessel (a no-detonation creed must not draw detonation modules).
+7. **CHAIN RUPTURE number was STALE — as written it was a nerf.** The card said "keeps 30% of the
+   brew" but the base kit already keeps 35% (`rupture_keep 0.35`, added after the card was drafted).
+   Now: **keeps +30pp more (≈0.65 total)**, sim-tuned.
+8. **Watch-items (not blockers):** the slate carries ~5 easing dials (Preservative / Clinging Rot /
+   Steady Pour / Practiced Hand / Distilled Focus) — exactly the F2 drift, accepted as "a choice they
+   made," reserve levers stay shelved; Purist is where F2 bites hardest (all-sustain + no wave = pure
+   upkeep loop) — watch in playtest. Build-time defaults I set in code: Volatile Mix "hard tip"
+   threshold, Killing Draught execute %, Anchorite filter list (Clinging Rot + Decant filtered;
+   Preservative stays offered at half value).
 
 ## 1. THE CORE LOOP 🔒
 
@@ -158,6 +204,9 @@ fine (asymmetric class content is explicitly allowed, see §5 CLASS DESIGN RULES
 
 **⚖ Creed-aware offers are LAW (audit 2026-07-06):** Purist never sees Rupture cards; Anchorite filters
 what it muffles. *(The old "Still never offered to Reckless Brewer" clause is dead — both cards cut.)*
+**Extended to MODULES + the RIG BOARD (pre-build verdict 6):** Purist never sees Fermentation / the
+Reaction-Vessel, and its rig board hides Ripe / Perfect Wave / Overfill. Mechanism: `hide_creeds` tags
++ one `Draft._ok()` check — byte-identical for untagged classes.
 
 ## 3. MODULES (a new UI gauge + dynamic; pick 1 at Floor 1) 🔒
 
@@ -165,12 +214,12 @@ what it muffles. *(The old "Still never offered to Reckless Brewer" clause is de
    reaction for a while. Dropping it on the reaction's beat = small bonus (nice, never required).
 2. **Fermentation** — a meter fills from sustained reaction; at full, a huge **FERMENT** detonation.
    Deliberately the **calm/chill** module (the class is busy — this is the low-intensity pick).
-3. ⚠ **THE ⭐ TRANSFORMER SLOT IS OPEN (owed 2026-07-06).** ~~The Still — overfill/waste distills into
-   a reserve tank~~ was the ⭐ transformer, but it was built ON saturation (distilling the waste); with
-   saturation cut, it's gone. **Design law still stands: every class gets exactly one ⭐ radical
-   change-up module — this class now owes a new one.** Candidates to explore (Bill's call): a
-   Reaction-Vessel that INVERTS the loop (sustain-vs-burst flipped), a Twin-Still that runs two
-   reactions, or a Catalyst-forge that turns Ruptures into a stacking engine. NOT saturation-based.
+3. ⭐ **THE REACTION-VESSEL (LOCKED 2026-07-06 — pre-build verdict 1; replaces the cut Still).** The
+   radical change-up: the reaction deals NOTHING and BANKS into a vessel gauge; Rupture DUMPS the
+   whole vessel at the potency multiplier. Sustain/burst inverted — a pure charge-and-release cannon;
+   stall or die with a full vessel and the damage was never dealt. Purist-filtered (creed-aware
+   modules). *(Rejected candidates: Twin-Still — doubles the minigame against F2; Catalyst-forge —
+   overlaps Chain Rupture/Catalyst, dead under Purist.)*
 4. ~~**The Opening** — CROSS-SPEC (shared with Tempo)~~ — **DEAD as written (split + audit F1):** the
    Opening is now Twinfang's baseline class verb, not a shareable module. Whether this class gets its
    own Opening-window interaction is open (see the F1 reconcile note up top). A replacement 4th module
@@ -193,15 +242,16 @@ CUT at triage: Contagion (no adds/multi-target yet), Corrosion (debuff-track lat
   Concentrate (ceiling up) · **KILLING DRAUGHT** [I9, accepted: below execute threshold Potency stops
   draining — locked at peak for the kill]
 - **REACTION / RUPTURE** *(split into reaction-DoT vs Rupture-burst buckets per the F7 fix)*:
-  Corrosive Blood (reaction +%) · Rupturing (burst +%) · Chain Rupture (Rupture keeps 30% of the brew —
-  the F4 wave-shaper) · Volatile Reaction (+% while potency >66%) · **Perfect Emulsion** (near-perfect
+  Corrosive Blood (reaction +%) · Rupturing (burst +%) · Chain Rupture (Rupture keeps +30pp MORE of the brew, ≈0.65 total —
+  the base already keeps 35%, stale "keeps 30%" fixed pre-build verdict 7; the F4 wave-shaper) · Volatile Reaction (+% while potency >66%) · **Perfect Emulsion** (near-perfect
   balance → reaction +% — the reward-not-ease Balance play) · **Catalyst** [rule-changer: Rupture
   detonates a phantom copy, brew intact; runes scale how much stays — **audit F18: the phantom is a
   value SNAPSHOT, not a free full Rupture; or exclusive with Chain Rupture at high tiers**] ·
   **Debilitator** [SUPPORT: the reaction weakens the boss for the whole raid — the class's raid-utility
   identity] · **DEEPENING ROT** [I5, accepted: fed-and-balanced reaction ramps Rot's tick; resets on
-  stall/spoil] · **LAST CALL** [I4, accepted: boss cleanse/phase-change auto-Ruptures for full value
-  first]
+  stall/spoil] · **LAST CALL** [I4, REFRAMED pre-build verdict 5: on a boss PHASE TRANSITION the brew
+  auto-cashes at full value, small seed left — no cleanse/wipe mechanic exists in the engine and none
+  is added; boss-side changes belong to the Seal pillar pass]
 - **SPELLS (new buttons):** Spitfire (instant off-brew dart — filler between pours) ·
   Decant (pour the fuller poison into the emptier — snap-to-balance recovery, cooldown-gated) ·
   **REDUCTION** [I6, accepted: CD-gated — boil VOLUME into POTENCY; sacrifice sustain for spike]
@@ -212,10 +262,12 @@ CUT at triage: Sealed Flask, Deep Draught, Emulsion, Equilibrium, Catalytic Bond
 
 - Creed = run-long POSTURE (1-of-3, creed-aware offers) · Module = new UI gauge + dynamic (1 at Floor 1)
   · Boon = incremental, categoried by what it touches · the COMBO RIG (one WHEN→THEN per run) is the
-  shared cross-class system — **this class's rig vocabulary is OWED (audit F13; I3's menu unlocked 🟡)**.
+  shared cross-class system — **this class's rig vocabulary is LOCKED (pre-build verdict 2 settles
+  F13/I3): Sweet Pour / Hot Pour / Emulsion / Ripe / Boil / Perfect Wave → Splash / Backwash /
+  Quicken / Residue / Fume / Overfill.**
 - Cross-class content = **curios only** (fortune + off-verb; never touch the signature mechanic).
-- Every class gets exactly one ⭐ transformer module (**ours is OWED — The Still was cut with
-  saturation 2026-07-06; §3 slot 3 lists candidates**).
+- Every class gets exactly one ⭐ transformer module (**ours: THE REACTION-VESSEL — locked
+  2026-07-06 pre-build verdict 1, see §3 slot 3**).
 - Every class ships one SUPPORT boon (ours: Debilitator; Tempo's debt is paid by BATTLE HYMN — accepted
   audit I2, see `TEMPO-PLAN.md`).
 - **AI-pilotable or it doesn't ship (rule #3):** a seeded policy must brew at 3 skill tiers with a real
@@ -235,6 +287,21 @@ CUT at triage: Sealed Flask, Deep Draught, Emulsion, Equilibrium, Catalytic Bond
 2. ✅ **The Brew HUD** — THE ALEMBIC on `raid_hud` (hold-zones + tap-Rupture chamber + see-saw +
    Potency; pointer + keyboard). `ui_smoke_raid` covers the brew drive, gate exam and juice;
    `screenshot_alchemist_raid` is the WSLg visual probe.
-3. **NEXT (post-playtest):** fold Bill's feel verdicts into the §1 dials → Creeds → Modules → rig
-   content → boons, verified per layer (the Tempo slice pattern). Also owed: the interrupt-carrier
-   call (F22), a real class puppet, Commander AI-caster toggle exposure, name/art decision.
+3. **NEXT — THE CARD BUILD (slate locked 2026-07-06, ⚖ PRE-BUILD VERDICTS above are the spec).**
+   Slice order, each gated on boonless-byte-identical + `alchemist_sim` A/B cells + `raid_sim`
+   alch-comp det + `ui_smoke_raid`, and the policy taught per layer (rule #3 — e.g. a Purist policy
+   must never tap Rupture):
+   a. **Framework generalization + Creeds (4)** — the HUD pick screens (`_show_creed_pick` /
+      `_show_module_pick` / `_show_rig_wire`) are Twinfang-HARDCODED (`_blade_tempo_human()` gate +
+      direct `TwinfangCreeds/Modules/Rig` refs + TwinfangKit push); generalize to a per-class
+      framework provider (`_run.creed/modules/rig` storage is already class-agnostic) + the
+      `hide_creeds` Draft/module/rig filter (verdict 6).
+   b. **Modules** — Third Reagent · Fermentation · ⭐ Reaction-Vessel (new ALEMBIC gauges each).
+   c. **Rig** — the locked slate (verdict 2), wired at the first draft like Tempo.
+   d. **Boon bread** — the numeric FUEL/VIAL/POTENCY cards (fixed rarities, verdict 3).
+   e. **Rule-changers** — Chain Rupture (+30pp, verdict 7) · Catalyst (F18 snapshot) · Last Call
+      (phase-cash, verdict 5) · Deepening Rot · Killing Draught · Perfect Emulsion · Volatile
+      Reaction · Debilitator (the SUPPORT debt).
+   f. **Spells** — Spitfire (future interrupt carrier, verdict 4) · Decant · Reduction (I6).
+   Also owed after the slices: a real class puppet, Commander AI-caster toggle exposure, name/art
+   decision (filler stands).
