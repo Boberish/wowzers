@@ -163,7 +163,7 @@ const DATA := {
 	"fantasy": "The patient, deliberate brewer (base build — creeds/modules/boons come later). Two OPPOSING poisons sit on a see-saw: VENOM burns hot and fades fast, ROT creeps cold and lingers. They only react where they MEET — min(Venom, Rot) × balance — so blindly stacking one side is bad by design. The vial fills slow at the bottom and ACCELERATES hard near the top: the greed is how high you dare ride it. Keep the reaction balanced and fed and POTENCY multiplies everything; then RUPTURE the whole brew at its ripe peak and rebuild — a wave every ~15–25s.",
 	"resources": [
 		{"name": "HEALTH", "tint": "blood", "body": "330 max. At 0 the run ends. Your hands are full — footwork (dodge) is your only defense."},
-		{"name": "VENOM · ROT", "tint": "venombrew", "body": "The two poisons, 0–12 each (soft cap 9 — pours above it mostly waste). Venom decays 2.0/s, Rot 0.5/s, and the reaction EATS both — no banking a stable pile. The reaction scales with the SMALLER side × balance."},
+		{"name": "VENOM · ROT", "tint": "venombrew", "body": "The two poisons, 0–12 each. Venom decays 2.0/s, Rot 0.5/s, and the reaction EATS both — no banking a stable pile. The reaction scales with the SMALLER side × balance, so keep them EVEN, not just high."},
 		{"name": "POTENCY", "tint": "react", "body": "0–100%, ×1 → ×2.6 on EVERYTHING (reaction + Rupture). Fills while the reaction is balanced AND fed; drains fast when lopsided or dry. One bar = 'how well am I brewing' — and it IS your power."},
 	],
 	"defense": {"name": "DODGE", "key": "SPACE",

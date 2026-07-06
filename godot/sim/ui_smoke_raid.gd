@@ -370,7 +370,7 @@ func _process(_delta: float) -> bool:
 		# Alchemist (the Brew) events
 		{"t": "brew_pour", "player": true, "side": "venom", "grade": "potent", "dose": 8},
 		{"t": "brew_pour", "player": true, "side": "rot", "grade": "spoiled", "dose": 1},
-		{"t": "brew_pour", "player": true, "side": "venom", "grade": "hot", "dose": 9, "sat": true},
+		{"t": "brew_pour", "player": true, "side": "venom", "grade": "hot", "dose": 9},
 		{"t": "brew_pour", "player": true, "side": "rot", "grade": "fizzle", "dose": 0},
 		{"t": "brew_rupture", "player": true, "amt": 320, "peak": true},
 		{"t": "brew_rupture", "player": false, "amt": 120, "peak": false},

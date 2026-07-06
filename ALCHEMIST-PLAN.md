@@ -45,11 +45,12 @@ taps). Freed from the blade chassis, the puppet can BE the chemist (art = PoseRi
   hoarding; Tempo gets its climax from max Flow → Coup, this is ours). Chain Rupture is the wave-shaper.
 - **F13 · the COMBO RIG pillar must be spec'd** — the class owes rig WHENs/THENs authored off its OWN
   beats (inheriting "every 3rd Perfect" would be incoherent in a charge-pour class). ⚠ The I3 vocabulary
-  (Ripe / Emulsion / Saturation / Boil / Distill; its Top-Off THEN pre-cut for easing balance) is NOT
-  locked — Bill hasn't decided if/thens for this class yet, and floated that WHENs may be per-class. 🟡
-- **F16 · The Still is a Floor-1 trap under two creeds:** module offers go **creed-aware** (never offer
-  The Still to Reckless Brewer — no saturation ⇒ the reserve never fills); under Volatile Mix the Still
-  catches OVERFLOW but NOT spoils (it must not silently delete the creed's downside).
+  (Ripe / Emulsion / ~~Saturation~~ / Boil / ~~Distill~~; its Top-Off THEN pre-cut for easing balance) is
+  NOT locked — Bill hasn't decided if/thens yet, floated per-class WHENs, and Saturation/Distill are
+  now moot (mechanic cut 2026-07-06). 🟡
+- ~~**F16 · The Still is a Floor-1 trap under two creeds**~~ — **DEAD (saturation CUT 2026-07-06).**
+  The Still distilled saturation-waste and the Reckless Brewer creed removed saturation; with the
+  mechanic gone (playtested off — "better off"), both cards are cut and F16 has nothing to guard.
 - **F18 · Catalyst + Chain Rupture = free repeatable Rupture:** Catalyst becomes a value SNAPSHOT
   (the phantom is a damage copy, not a free full Rupture), or the two go exclusive at high tiers.
 - **F21 · boons are nearly all dials — add loop-FORKS:** the accepted idea cards below are the forks.
@@ -115,13 +116,14 @@ taps). Freed from the blade chassis, the puppet can BE the chemist (art = PoseRi
 **THE REACTION (the core damage):** the two poisons react where they meet —
 - Reaction scales with **min(Venom, Rot) × balance** — the SMALLER side gates it. 10/2 barely reacts.
 - Raw single-poison DoT is deliberately weak; **blindly stacking one side is bad by design**.
-- **Saturation:** each poison has a soft cap — pouring into a full side is mostly wasted ("more isn't
-  better"). **⚗ PLAYTEST-FLAGGED (Bill 2026-07-06):** `AlchemistConfig.sat_enabled` + a live dev
-  toggle (⚗ SAT, top-left, offline) + `alchemist_sim --sat=off` A/B. The sim says the rule barely
-  binds for a disciplined brewer (±5pp win, same TTK/potency — the policy doesn't over-pour); its
-  teeth are anti-degenerate-spam for human hands, so Bill's live A/B is the verdict. ⚠ If it dies:
-  the Reckless Brewer creed (no saturation, double decay) and the Still's F16 rule (distills
-  overfill/waste) both lose their hook and need rethinks.
+- ~~**Saturation:** each poison has a soft cap — pouring into a full side is mostly wasted.~~
+  **CUT 2026-07-06 (Bill playtested it off — "better off").** It was flag-gated, A/B'd (the sim
+  showed it barely bound — ±5pp win, same TTK/potency; a disciplined brewer never over-pours), then
+  removed entirely. The HARD cap (12) is the only ceiling now; full pours always land. **⚠ knock-on:
+  the two cards defined BY saturation are cut with it — the Reckless Brewer creed (§2) and the ⭐
+  Still module (§3) — so the class now OWES a replacement ⭐ transformer** (design law: every class
+  gets exactly one). The reaction's `min(V,R) × balance` skill is untouched — keeping the bars EVEN
+  is still the whole game; you just can't waste a pour into a full side anymore.
 - The reaction slowly **consumes the brew** — keep feeding it; no banking a stable pile.
 
 **POTENCY (the earned power bar — this class's Flow):** fills while you sustain a **balanced, fed**
@@ -137,22 +139,25 @@ is a BUILD → PEAK → REBUILD wave (~15–25s), not a flat plateau with a hoar
 
 ---
 
-## 2. CREEDS (run posture, pick 1 of 3 offered from the pool) 🔒
+## 2. CREEDS (run posture, pick 1 of the pool) 🔒 — 4 now (Reckless Brewer cut with saturation)
 
 1. **The Steady Hand** — forgiving: wide balance window, gentle potency drain, overflow fizzles (no spoil).
    Lower potency ceiling. *(the learner)*
 2. **The Volatile Mix** — +50% potency ceiling & bigger Ruptures; a SPOILED pour or hard tip **crashes
    potency to 0**. *(the glass / greed pick)*
-3. **The Reckless Brewer** — **no saturation** (overfill freely, bank bigger) but decay is DOUBLED.
-   Pour constantly, never rest. *(high-APM frantic)*
-4. **The Anchorite** — **ROT IS FROZEN** (set once, never decays) + the Vial charges **linearly** with a
+3. **The Anchorite** — **ROT IS FROZEN** (set once, never decays) + the Vial charges **linearly** with a
    tighter sweet band: a one-poison PRECISION game against a fixed anchor. *(merged "Precise"+"Anchor";
    low-APM, high-control)*
-5. **The Purist** — **NO RUPTURE AT ALL**; the sustained reaction is +35%. Pure DoT, zero burst;
+4. **The Purist** — **NO RUPTURE AT ALL**; the sustained reaction is +35%. Pure DoT, zero burst;
    Rupture boons go dead (the trade). *(all-sustain identity)*
 
+~~**The Reckless Brewer** — no saturation, double decay~~ — **CUT 2026-07-06:** its whole upside was
+"no saturation," which is now the default for everyone. A frantic high-APM creed slot is open if a
+new hook is wanted (e.g. doubled decay + a raw-DoT or overflow reward — not saturation). 4 creeds is
+fine (asymmetric class content is explicitly allowed, see §5 CLASS DESIGN RULES).
+
 **⚖ Creed-aware offers are LAW (audit 2026-07-06):** Purist never sees Rupture cards; Anchorite filters
-what it muffles; The Still is never offered to Reckless Brewer (§3).
+what it muffles. *(The old "Still never offered to Reckless Brewer" clause is dead — both cards cut.)*
 
 ## 3. MODULES (a new UI gauge + dynamic; pick 1 at Floor 1) 🔒
 
@@ -160,10 +165,12 @@ what it muffles; The Still is never offered to Reckless Brewer (§3).
    reaction for a while. Dropping it on the reaction's beat = small bonus (nice, never required).
 2. **Fermentation** — a meter fills from sustained reaction; at full, a huge **FERMENT** detonation.
    Deliberately the **calm/chill** module (the class is busy — this is the low-intensity pick).
-3. **The Still ⭐** — the per-class **TRANSFORMER** (design law: every class gets one radical change-up
-   module): overfill/waste **distills into a reserve tank** you tap to auto-pour — flips saturation
-   from "waste" into a banking game. **Audit F16 (accepted):** never offered under Reckless Brewer;
-   under Volatile Mix it catches overflow but NOT spoils.
+3. ⚠ **THE ⭐ TRANSFORMER SLOT IS OPEN (owed 2026-07-06).** ~~The Still — overfill/waste distills into
+   a reserve tank~~ was the ⭐ transformer, but it was built ON saturation (distilling the waste); with
+   saturation cut, it's gone. **Design law still stands: every class gets exactly one ⭐ radical
+   change-up module — this class now owes a new one.** Candidates to explore (Bill's call): a
+   Reaction-Vessel that INVERTS the loop (sustain-vs-burst flipped), a Twin-Still that runs two
+   reactions, or a Catalyst-forge that turns Ruptures into a stacking engine. NOT saturation-based.
 4. ~~**The Opening** — CROSS-SPEC (shared with Tempo)~~ — **DEAD as written (split + audit F1):** the
    Opening is now Twinfang's baseline class verb, not a shareable module. Whether this class gets its
    own Opening-window interaction is open (see the F1 reconcile note up top). A replacement 4th module
@@ -207,7 +214,8 @@ CUT at triage: Sealed Flask, Deep Draught, Emulsion, Equilibrium, Catalytic Bond
   · Boon = incremental, categoried by what it touches · the COMBO RIG (one WHEN→THEN per run) is the
   shared cross-class system — **this class's rig vocabulary is OWED (audit F13; I3's menu unlocked 🟡)**.
 - Cross-class content = **curios only** (fortune + off-verb; never touch the signature mechanic).
-- Every class gets exactly one ⭐ transformer module (ours: The Still).
+- Every class gets exactly one ⭐ transformer module (**ours is OWED — The Still was cut with
+  saturation 2026-07-06; §3 slot 3 lists candidates**).
 - Every class ships one SUPPORT boon (ours: Debilitator; Tempo's debt is paid by BATTLE HYMN — accepted
   audit I2, see `TEMPO-PLAN.md`).
 - **AI-pilotable or it doesn't ship (rule #3):** a seeded policy must brew at 3 skill tiers with a real

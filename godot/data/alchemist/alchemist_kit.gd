@@ -122,7 +122,8 @@ func _start_charge(seat: Seat, side: String) -> bool:
 ##   [sweet_lo, sweet_hi]  → POTENT (the skill target)
 ##   (sweet_hi, overflow]  → HOT (the greed edge — biggest honest dose)
 ##   > overflow            → SPOILED (~nothing)
-## Pouring into a side already ≥ soft is mostly wasted (SATURATED).
+## SATURATION CUT (Bill 2026-07-06): a full side no longer wastes the pour — the dose
+## just lands (clamped at the hard cap). The vial grade is the only thing that matters.
 func _pour(s: CombatState, seat: Seat) -> bool:
 	var side := String(seat.vars.get("charging", ""))
 	if side == "":
@@ -146,16 +147,10 @@ func _pour(s: CombatState, seat: Seat) -> bool:
 	else:
 		dose = cfg.dose_ok; grade = "ok"
 	var cur := _venom(seat) if side == "venom" else _rot(seat)
-	# saturation is PLAYTEST-FLAGGED (cfg.sat_enabled) — off, a full side takes full pours
-	var saturated := cfg.sat_enabled and cur >= cfg.soft
-	if saturated:                          # more isn't better — a full poison wastes the pour
-		dose = maxf(1.0, roundf(dose * cfg.sat_frac))
 	seat.vars[side] = minf(cfg.cap, cur + dose)
 	CombatCore._bump_diag(s, seat, "pour_" + grade)
-	if saturated:
-		CombatCore._bump_diag(s, seat, "pour_sat")
 	CombatCore.emit_event(s, {"t": "brew_pour", "player": seat.is_player, "seat": seat,
-		"side": side, "grade": grade, "dose": int(dose), "sat": saturated})
+		"side": side, "grade": grade, "dose": int(dose)})
 	return true
 
 ## The cash-out: FUEL (balanced volume) × POWER (potency), multiplicative — the peak
@@ -189,8 +184,6 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"venom": _venom(seat),
 		"rot": _rot(seat),
 		"cap": cfg.cap,
-		"soft": cfg.soft,
-		"sat_on": cfg.sat_enabled,
 		"decay_venom": cfg.decay_venom,
 		"decay_rot": cfg.decay_rot,
 		"charging": String(seat.vars.get("charging", "")),
