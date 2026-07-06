@@ -531,6 +531,9 @@ recast through the Forge/casting-pool era). The only simmed, maintained bosses a
 (`raid_sim`): Vorathek · MISTRAL · GEMINI · MYTHOS — and they get the pass below.
 
 **SEAL PILLAR PASS v1 — nudge the 4 Seals toward the pillars (design 2026-07-06 with Bill; CLAIMABLE).**
+**➡ Full execution brief for the claiming agent: `SEAL-PILLAR-PLAN.md`** (beat-source map with
+today's numbers, Phase A byte-identical instrumentation spec, per-Seal starting knobs, band
+targets, gates, env notes). The summary below stays as the section-of-record.
 Goal: "update what we have a bit closer to the end goal" — cheap, reversible tuning, NOT a rework.
 The pillar that bites today is **DODGE RATION** (WORLD-PLAN pillar 2): less footwork for dps/heals,
 tanks keep the densest; marquee moments survive.
@@ -651,6 +654,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- 📋 2026-07-06 · main (docs only) · §BOSSES — **`SEAL-PILLAR-PLAN.md` written (execution brief,
+  NOT built — Bill is handing it to another agent).** Expands the §BOSSES SEAL PILLAR PASS block
+  into a self-contained brief: current beat-source map with static estimates (Vorathek `volley`
+  aoe×3@cd13 ≈ 9–12 beats/seat = the main offender · Mistral under budget · Gemini borderline via
+  `bard_sonnet` · Mythos ~10–17 via `fanout`+`sonnet_tools`, ULTRATHINK exempt), **Phase A
+  sim-side-only instrumentation** (per-seat budget table from existing `seat.diag` grades +
+  telegraph-transition cast counts — zero engine files, gated byte-identical), **Phase B knobs**
+  (cd-first levers, aoe→rand_target conversions, reverse-M7.2 compensation via melee/nova never
+  more beats), band targets (curve preserved, Mythos sloppy ≤50), full verify gate + wrap-up
+  protocol. The claiming agent should read THAT doc first. *(seal-pillar planning session)*
 
 - ☑ 2026-07-06 · `fresh-slate` → main · CLAUDE.md/§CLASSES/§BOSSES/§TOOLING — **FRESH SLATE:
   CLAUDE.md rewritten lean + `HISTORY.md` + old sims DELETED + SEAL PILLAR PASS planned.** (Bill:
