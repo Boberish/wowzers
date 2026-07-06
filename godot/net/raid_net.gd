@@ -22,6 +22,8 @@ static func default_aspect(key: String, cls: String) -> String:
 		return "wildgrove"
 	if key == "blade" and cls == "reckoner":
 		return "colossus"
+	if key == "caster" and cls == "alchemist":
+		return "brew"
 	return String(DEFAULT_ASPECT.get(key, ""))
 
 ## Which healer class a seat is running (read off its kit) — so a disconnect takeover
@@ -37,6 +39,8 @@ static func cls_of(seat: Seat) -> String:
 		return "bloomweaver"
 	if gn == "ReckonerKit":
 		return "reckoner"
+	if gn == "AlchemistKit":
+		return "alchemist"
 	return ""
 
 ## A fight spec (broadcast in the server's `start` message):
@@ -136,6 +140,11 @@ static func make_policy(key: String, seed_v: int, cls: String = "") -> Policy:
 			bp.rng = DetRng.new(seed_v * 2749 + 2338)
 			return bp
 		"caster":
+			if cls == "alchemist":
+				var ap := AlchemistPolicy.new()
+				ap.latency_ticks = ALLY_LATENCY
+				ap.rng = DetRng.new(seed_v * 2749 + 3339)
+				return ap
 			var cp := VoidcallerPolicy.new()
 			cp.latency_ticks = ALLY_LATENCY
 			cp.rng = DetRng.new(seed_v * 2749 + 3339)

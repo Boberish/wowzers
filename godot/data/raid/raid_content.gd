@@ -505,22 +505,49 @@ static func _blade_seat(cls: String, aspect: String) -> Seat:
 		return _reckoner(aspect if aspect != "" else "colossus")
 	return _blade(aspect if aspect != "" else "venomancer")
 
+## The SECOND caster-seat class in the raid: the Alchemist ("the Brew" — the patient
+## poison/DoT DPS, ALCHEMIST-PLAN.md base minigame). Same CASTER SEAT, different CLASS —
+## chosen via make_state's `classes` dict / the fight spec's per-seat `cls`. Mirrors the
+## solo factory (data/alchemist/alchemist_content.gd:_make_brewer), minus is_player.
+## ⚠ carries NO kick — the seat trades the interrupt for the brew until
+## interrupt-by-ability lands (WORLD-PLAN pillar 3 / audit F22).
+static func _alchemist(aspect: String) -> Seat:
+	var acfg := AlchemistConfig.new()
+	var u := Seat.new()
+	u.role = "dps"; u.unit_name = "The Alchemist"; u.fidelity = "full"
+	u.hp_max = acfg.hp_max; u.hp = acfg.hp_max; u.dps = 0.0
+	u.resource = 0.0; u.resource_max = 100.0     # mirrors POTENCY (0–100)
+	u.kit = AlchemistKit.new(aspect, acfg)
+	u.policy = AlchemistPolicy.new()
+	u.vars = {"venom": 0.0, "rot": 0.0, "charging": "", "charge": 0.0,
+		"potency": 0.0, "react_bank": 0.0}
+	return u
+
+## Build the caster seat for whichever caster CLASS the seat carries (default Voidcaller).
+## Aspect defaults per class: Voidcaller→disruptor (the verified comp), Alchemist→brew.
+## An empty cls/aspect reproduces `_caster("disruptor")` bit-for-bit (byte-identical).
+static func _caster_seat(cls: String, aspect: String) -> Seat:
+	if cls == "alchemist":
+		return _alchemist(aspect if aspect != "" else "brew")
+	return _caster(aspect if aspect != "" else "disruptor")
+
 ## Build a raid fight. `aspects` may override any seat's Aspect; `player` names the
 ## human seat ("tank"/"blade"/"caster"/"healer") for diag mirroring — every seat is
 ## policy-driven until a driver swaps a human adapter in (R1).
 ## Seat order puts the tank first among targetable seats, so the boss opens on it
 ## before anyone has threat (the pull).
-## `classes` overrides a seat's CLASS (only the healer seat is polymorphic today:
-## "mender" (default) or "bloomweaver"); `aspects` overrides its Aspect. Both default
-## to the verified comp — an empty `classes` builds the exact original 4-seat state,
-## byte-identical.
+## `classes` overrides a seat's CLASS (the blade, caster and healer seats are
+## polymorphic: twinfang/reckoner · voidcaller/alchemist · mender/bloomweaver);
+## `aspects` overrides its Aspect. Both default to the verified comp — an empty
+## `classes` builds the exact original 4-seat state, byte-identical.
 static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
 		player: String = "tank", classes: Dictionary = {}) -> CombatState:
 	var s := CombatCore.create_state(enc, make_config(), seed)
 	var seats := {
 		"tank": _tank(String(aspects.get("tank", "warden"))),
 		"blade": _blade_seat(String(classes.get("blade", "twinfang")), String(aspects.get("blade", ""))),
-		"caster": _caster(String(aspects.get("caster", "disruptor"))),
+		"caster": _caster_seat(String(classes.get("caster", "voidcaller")),
+			String(aspects.get("caster", ""))),
 		"healer": _healer_seat(String(classes.get("healer", "mender")),
 			String(aspects.get("healer", ""))),
 	}

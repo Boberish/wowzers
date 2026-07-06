@@ -16,6 +16,8 @@ var _healer_cls := "mender"
 var _haspect := ""
 var _baspect := ""    # --blade=tempo runs the reworked Tempo blade (default = the venomancer comp)
 var _brig := ""       # --rig=when:then wires the blade's Combo rig (e.g. --rig=coup:overcharge)
+var _caster_cls := "voidcaller"   # --caster=alchemist runs the Brew in the caster seat
+                                  # (⚠ no kicker in the comp then — the blade carries kicks)
 
 # --- FAST-ITERATION + LIVE TUNING knobs (for playtest tweaking — see ./tune.sh) ---
 # During tuning you don't need 200 seeds or the correctness gates; you need a fast
@@ -41,6 +43,7 @@ func _initialize() -> void:
 	_haspect = _arg("haspect", "")
 	_baspect = _arg("blade", "")
 	_brig = _arg("rig", "")
+	_caster_cls = _arg("caster", "voidcaller")
 	_probes = _arg("probes", "1") != "0"
 	_dmg = float(_arg("dmg", "1"))
 	_regen = float(_arg("regen", "-1"))
@@ -49,9 +52,10 @@ func _initialize() -> void:
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
 	var healer_desc := ("Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")) \
 		if _healer_cls == "bloomweaver" else ("Mender(%s)" % (_haspect if _haspect != "" else "tidecaller"))
+	var caster_desc := "Alchemist(brew)" if _caster_cls == "alchemist" else "Voidcaller(disruptor)"
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
-	print("party: Bulwark(warden) / Twinfang(venomancer) / Voidcaller(disruptor) / %s" % healer_desc)
+	print("party: Bulwark(warden) / Twinfang(venomancer) / %s / %s" % [caster_desc, healer_desc])
 	if _dmg != 1.0 or _regen >= 0.0 or _fortify >= 0.0:
 		print("OVERRIDES:  dmg ×%.2f   regen %s   fortify %s   (live tweaks, not saved to files)" % [
 			_dmg, ("%.2f" % _regen if _regen >= 0.0 else "—"),
@@ -143,7 +147,8 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	var _asp := {}
 	if _haspect != "": _asp["healer"] = _haspect
 	if _baspect != "": _asp["blade"] = _baspect
-	var s := RaidContent.make_state(seed, enc, _asp, "tank", {"healer": _healer_cls})
+	var s := RaidContent.make_state(seed, enc, _asp, "tank",
+		{"healer": _healer_cls, "caster": _caster_cls})
 	var tank := s.seats[0]
 	var blade := s.seats[1]
 	var caster := s.seats[2]
@@ -163,9 +168,15 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	var bp := blade.policy as TwinfangPolicy
 	bp.latency_ticks = int(sk["lat"])
 	bp.rng = DetRng.new(seed * 2749 + 2338)
-	var cp := caster.policy as VoidcallerPolicy
-	cp.latency_ticks = int(sk["lat"])
-	cp.rng = DetRng.new(seed * 2749 + 3339)
+	# both caster classes expose latency_ticks (extends Policy); pick the real type
+	if caster.policy is AlchemistPolicy:
+		var ap := caster.policy as AlchemistPolicy
+		ap.latency_ticks = int(sk["lat"])
+		ap.rng = DetRng.new(seed * 2749 + 3339)
+	else:
+		var cp := caster.policy as VoidcallerPolicy
+		cp.latency_ticks = int(sk["lat"])
+		cp.rng = DetRng.new(seed * 2749 + 3339)
 	# both healer classes expose latency_ticks (extends Policy); pick the real type
 	if healer.policy is BloomweaverPolicy:
 		(healer.policy as BloomweaverPolicy).latency_ticks = int(sk["hlat"])
