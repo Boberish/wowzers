@@ -479,8 +479,15 @@ rule-changers scale via authored RUNES; today's code ships fixed rarities + base
 Draft-2.0 engine. UPSELL→tier-bump + Market tier-up/fine-tune = same deferred slice.
 
 ### A1 · Boons (v2 pool · id · base numbers · designed H/S/O ladder)
-**STRIKE** *(crit cards moved to the A7 opt-in package — lane needs 1-2 non-crit bread cards, design owed)*
-- Through-Line `throughline` [NEW, design] — consecutive Perfects escalate +2%/stack, cap 5, reset on Miss · ladder +2%c5/+3%c5/+3%c8
+**STRIKE** *(crit cards moved to the A7 opt-in package; the lane's non-crit bread now = the 2 BUILT cards below + Through-Line owed)*
+- **Press the Advantage `pressAdvantage` [BUILT `c1071bd`]** — basic Strikes landed inside the Opening
+  deal +30% (`press_advantage_mult 0.30`; `_deal` gates kind perfect/strike on `_in_opening`). Keep
+  drumming the punish, don't just wait for the dump. · ladder 30/45/65%
+- **Cold Open `coldOpen` [BUILT `c1071bd`]** — Strikes at Flow ≤ 2 deal +25% (`cold_open_mult 0.25`,
+  `cold_open_flow_max 2`) — the low-Flow mirror of Tightrope; a post-crash rebuild bet. · ladder 25/35/50%
+- Through-Line `throughline` [design owed] — consecutive Perfects escalate +2%/stack, cap 5, reset on Miss · ladder +2%c5/+3%c5/+3%c8
+  · VERIFY (both built cards): twinfang_sim determinism PASS + boonless CSV byte-identical (guarded no-op);
+    strike A/B cell 90.0%/43.8s → 95.0%/41.7s; ui_smoke_raid ALL OK; raid_sim --blade=tempo 4 Seals det PASS.
 **WINDOW**
 - Wide Tempo `wideTempo` — window +15%/side (`wide_pad 0.15`) · ladder 15/22/34% · ⚠ F19: wideners TAPER with Flow
 - Fencer's Line `fencersLine` — a Bullseye widens the NEXT window (`fencer_pad`, one-shot) · **ladder 15/25/35% (Bill: was too big at 25/40/60)**
@@ -550,7 +557,8 @@ F1 Opening→class base 🔒 · Overdrive module (solo) · F8 Good-maintains + a
 refund 🔒 + Efficiency boost** · F12 cash-out tension · F15 Bullseye superset · F17 crash-event ·
 F19 taper · F26 rune floor · F24 combo colors loop · F14+I2 Battle Hymn · F25 rig EV proof · F23
 lane folds · Fencer's cap 35% · Held Note/spells removal · **A7 crit build** · LARGO creed ·
-Through-Line. Open DESIGN: I7 Swan-Song/auto-dodge · §13 second spec · STRIKE lane bread.
+Through-Line. **✓ BUILT `c1071bd`: Press the Advantage + Cold Open (STRIKE lane bread).** Open DESIGN:
+I7 Swan-Song/auto-dodge · §13 second spec · Through-Line + more STRIKE bread if drafts feel samey.
 
 ### A7 · THE WHETTED EDGE — crit as an OPT-IN BUILD (v2, Bill-steered 07-06 evening)
 **Law: base Tempo has NO crits.** Crit is a build you opt into — and the big unlock is EARNED, not drafted.

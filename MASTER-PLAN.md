@@ -702,6 +702,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · `tempo-strike-lane` → main (`c1071bd`) · §TEMPO — **STRIKE lane bread: Press the
+  Advantage + Cold Open.** Two non-crit STRIKE boons filling the gap the crit exodus (A7) left.
+  Press the Advantage: basic Strikes inside the Opening +30% (new `_in_opening` test). Cold Open:
+  Strikes at Flow ≤2 +25% (low-Flow mirror of Tightrope). Both guarded in `_deal` on kind
+  perfect/strike + `_b()` — byte-identical when undrafted. Verified: twinfang_sim determinism ALL
+  PASS + boonless CSV byte-identical; strike A/B 90.0%/43.8s→95.0%/41.7s; ui_smoke_raid ALL OK;
+  raid_sim --blade=tempo 4 Seals det PASS. TEMPO-PLAN Appendix A1/A6 marked built. *(strike-lane session)*
+
 - ☑ 2026-07-06 · `alchemist-core` → main · §CLASSES / `ALCHEMIST-PLAN.md` — **THE BREW BASE
   MINIGAME BUILT (Bill's direct order — playtest before boons).** Bill: "can't go farther without
   knowing live things — just do the base mini game, UI/bars, then the rest after; UI is the main
