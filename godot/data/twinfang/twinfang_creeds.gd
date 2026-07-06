@@ -35,6 +35,15 @@ const CREEDS := {
 		"lock_sec": 2.0,
 		"flow_value": 1.0,
 	},
+	"largo": {
+		"name": "The Largo", "kicker": "Slow & sharp",
+		"blurb": "The beat runs SLOW — strikes land farther apart and the accelerando is tamed — but the window is TIGHTER and Perfects hit harder. Fewer, weightier, more precise. A slip costs −2 Flow.",
+		"slip": "flow_loss",
+		"slip_amt": 2,
+		"lock_sec": 0.0,
+		"flow_value": 1.0,
+		"largo": true,
+	},
 }
 
 const DEFAULT := "drumline"
@@ -47,4 +56,4 @@ static func ids() -> Array:
 
 ## The v1 shipping set (Flourish + Drumline = the clean risk/safe pair; Held Breath later).
 static func v1_ids() -> Array:
-	return ["flourish", "drumline"]
+	return ["flourish", "drumline", "largo"]

@@ -218,6 +218,19 @@ var _map_ticket_total := 0         ## tickets placed on this floor (for the spri
 var _map_closed := 0               ## tickets closed this floor
 var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next map screen
 
+# THE WORLD (WORLD-PLAN W1, feature-flagged preview): the persistent overworld wrapping
+# the instances. Zone fights are BARE KIT (overworld power rule) and fully isolated —
+# no boons/gear/wounds/economy in or out; conquest is the only writeback. All state
+# below stays inert until THE WORLD is entered, so every existing path is untouched.
+const WORLD_PREVIEW := true        ## the home-menu door (front-door flip is W3)
+var _world: WorldSave = null       ## the permanence layer (null until the world is entered)
+var _world_pending := false        ## WORLD picked on home — the Atlas opens after the aspect ceremony
+var _zone_id := ""                 ## the zone the warband stands in ("" = not in a zone)
+var _zone_node := -1               ## the zone node being resolved right now
+var _zone_live := false            ## the current fight is a ZONE pull (isolated, bare kit)
+var _zone_toast := ""              ## one-shot zone banner (conquest / withdrawal / crest)
+var _party_ctx := ""               ## "" = raid flow (DESCEND) · "bastion" = the Warband Camp
+
 # The Inference Check meta (Topology deep events): ⚡ Entropy is the within-run luck
 # pool spent to bias a roll; 📁 Prior is the across-run luck loaded once at descent
 # start; _flags are cross-node ripple marks. All start inert (0/{}) — an event only
@@ -336,6 +349,28 @@ func _ready() -> void:
 			_seat_key = mspec[1] if mspec.size() > 1 and SEAT_IDX.has(mspec[1]) else "tank"
 			_aspect = mspec[2] if mspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
 			_start_map_run()
+		elif a.begins_with("--autostart=world") or a.begins_with("--autostart=atlas"):
+			# --autostart=world[:seat[:aspect]]  → THE WORLD preview, straight onto the Atlas
+			var wspec := a.substr("--autostart=".length()).split(":")
+			_seat_key = wspec[1] if wspec.size() > 1 and SEAT_IDX.has(wspec[1]) else "tank"
+			_aspect = wspec[2] if wspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
+			_sync_healer_cls()
+			_sync_blade_cls()
+			_sync_caster_cls()
+			_show_atlas()
+		elif a.begins_with("--autostart=zone"):
+			# --autostart=zone[:seat[:aspect]]  → straight into ZONE 1 (the Gildfields)
+			var zspec := a.substr("--autostart=".length()).split(":")
+			_seat_key = zspec[1] if zspec.size() > 1 and SEAT_IDX.has(zspec[1]) else "tank"
+			_aspect = zspec[2] if zspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
+			_sync_healer_cls()
+			_sync_blade_cls()
+			_sync_caster_cls()
+			_zone_id = WorldContent.ZONE1
+			if _world == null:
+				_world = WorldSave.load_save()
+			_ensure_party()
+			_show_zone()
 		elif a.begins_with("--autostart=raid"):
 			# --autostart=raid[:seat[:aspect[:boss]]]  e.g. raid:blade:tempo:mythos
 			var spec := a.substr("--autostart=".length()).split(":")
@@ -363,6 +398,10 @@ func _show_home() -> void:
 	_screen = "home"
 	_map = null
 	_map_pending = false
+	_world_pending = false
+	_zone_live = false
+	_zone_id = ""
+	_party_ctx = ""
 	_gate_live = false
 	_online_map = false
 	_run = null                       # no descent = no boon run (fresh one per descent)
@@ -381,6 +420,8 @@ func _show_home() -> void:
 	box.add_child(gap)
 	box.add_child(_menu_button("▶    PLAY", Palette.GOLD_BRIGHT, _show_class_select))
 	box.add_child(_menu_button("🌐    PLAY ONLINE", Palette.FLOW, _show_online))
+	if WORLD_PREVIEW:   # W1: the world door (PLAY → ATLAS becomes the front door at W3)
+		box.add_child(_menu_button("⟐    THE WORLD — preview", Palette.VERDANCE, _start_world_pick))
 	box.add_child(_menu_button("QUIT", Palette.TEXT_DIM, func(): get_tree().quit()))
 
 func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
@@ -437,9 +478,16 @@ func _show_class_select() -> void:
 
 ## SUB-CLASS chosen → pick your RAID (one for now: Realm 1). Future realms add cards here.
 func _show_raid_select(seat_id: String, aspect: String) -> void:
-	_screen = "raidpick"
 	_seat_key = seat_id
 	_aspect = aspect
+	if _world_pending:              # THE WORLD (W1): the aspect ceremony opens the Atlas
+		_world_pending = false
+		_sync_healer_cls()
+		_sync_blade_cls()
+		_sync_caster_cls()
+		_show_atlas()
+		return
+	_screen = "raidpick"
 	_map_pending = false
 	_clear()
 	var head := VBoxContainer.new()
@@ -551,11 +599,13 @@ func _show_party_setup() -> void:
 	gap.custom_minimum_size = Vector2(0, 12)
 	box.add_child(gap)
 	var go := Button.new()
-	go.text = "⚔    DESCEND"
+	# THE BASTION's Warband Camp reuses this screen as a PLACE — muster returns to the
+	# hearth instead of pulling a descent (the raid flow is untouched when _party_ctx == "").
+	go.text = "⚑    MUSTER — the warband stands ready" if _party_ctx == "bastion" else "⚔    DESCEND"
 	go.custom_minimum_size = Vector2(260, 52)
 	go.add_theme_font_size_override("font_size", 19)
 	go.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
-	go.pressed.connect(_start_map_run)
+	go.pressed.connect(_show_bastion if _party_ctx == "bastion" else _start_map_run)
 	var goc := CenterContainer.new()
 	goc.add_child(go)
 	box.add_child(goc)
@@ -563,7 +613,10 @@ func _show_party_setup() -> void:
 	back.text = "◂ back"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	back.pressed.connect(func(): _show_raid_select(_seat_key, _aspect))
+	if _party_ctx == "bastion":
+		back.pressed.connect(_show_bastion)
+	else:
+		back.pressed.connect(func(): _show_raid_select(_seat_key, _aspect))
 	_place(back, 0.5, 1, 0.5, 1, -80, -58, 80, -24)
 	_ui.add_child(back)
 
@@ -618,6 +671,246 @@ func _show_aspect_pick(seat_id: String) -> void:
 	_place(back, 0.5, 1, 0.5, 1, -110, -90, 110, -56)
 	back.pressed.connect(_show_class_select)
 	_ui.add_child(back)
+
+# ============================================================ THE WORLD (WORLD-PLAN W1)
+## The persistent overworld preview: HOME → seat/aspect ceremony → THE ATLAS → zones
+## (persistent conquest, bare-kit isolated fights) / THE BASTION (the meta as a place) /
+## the raid door (the existing descent, untouched). The world is PERMANENCE; the runs
+## behind doors keep the whole rolling economy — the Split, made playable.
+
+## HOME's world door: pick who YOU are first (the warband follows), then the Atlas.
+func _start_world_pick() -> void:
+	_world_pending = true
+	_show_class_select()
+
+func _show_atlas() -> void:
+	_screen = "atlas"
+	_zone_live = false
+	_party_ctx = ""
+	if _world == null:
+		_world = WorldSave.load_save()
+	_ensure_party()
+	_clear()
+	var at := AtlasScreen.new()
+	at.save = _world
+	at.at_pin = _zone_id if _zone_id != "" else "bastion"
+	at.pin_entered.connect(_enter_atlas_pin)
+	at.back_requested.connect(_show_home)
+	at.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(at)
+
+func _enter_atlas_pin(id: String) -> void:
+	match id:
+		"bastion":
+			_zone_id = ""
+			_show_bastion()
+		"rift_scar":
+			# the raid DOOR: the existing Realm-1 descent, verbatim (full run economy
+			# lives behind doors — the Split). Campaign end routes home as it always has.
+			_party_ctx = ""
+			_start_map_run()
+		_:
+			if not WorldContent.zone(id).is_empty():
+				_zone_id = id
+				_show_zone()
+
+## THE BASTION v1: the meta screens becoming a PLACE (WORLD-PLAN hometown). One hearth
+## screen with stations; the Warband Camp is real (Commander party setup re-doored),
+## the rest are foundations laid for W3.
+func _show_bastion() -> void:
+	_screen = "bastion"
+	_party_ctx = "bastion"
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	_place(head, 0.5, 0, 0.5, 0, -420, 110, 420, 210)
+	_ui.add_child(head)
+	var hl := _title(head, "THE BASTION", 40, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.title(900))
+	_title(head, "hearth & muster — the warband's home. The stations are rising.", 14, Palette.TEXT_DIM)
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 12)
+	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -220, 350, 260)
+	_ui.add_child(col)
+	var camp := AspectCard.new("THE WARBAND CAMP",
+		"The Commander's tent: every AI raider's class and aspect is YOUR muster call. (The party you set here rides every fight — zone, dungeon, raid.)",
+		Palette.GOLD_BRIGHT, "shockwave")
+	camp.chosen.connect(func():
+		_party_ctx = "bastion"
+		_show_party_setup())
+	col.add_child(camp)
+	var ledger := AspectCard.new("THE LEDGER HALL",
+		"Boss pages, oaths, standing — the save file made beautiful. The masons are still at work (arrives with W3's doors).",
+		Palette.RELIC, "")
+	ledger.chosen.connect(func(): _bastion_stop("THE LEDGER HALL",
+		"Scaffolds and gold leaf. A hall for every boss's page, every oath sworn, every crest earned — raised when the doors open (W3)."))
+	col.add_child(ledger)
+	var yard := AspectCard.new("THE PRACTICE YARD",
+		"Sparring against the casting pool, unlock-inert as the law demands. The dummies are being carved.",
+		Palette.STEEL, "guard")
+	yard.chosen.connect(func(): _bastion_stop("THE PRACTICE YARD",
+		"A roped square, straw men, chalk lines. Practice earns NOTHING here but skill — exactly as the law demands. Open with W3."))
+	col.add_child(yard)
+	var out := AspectCard.new("SET OUT  —  THE ATLAS",
+		"The world waits: the Gildfields' harvest died standing, and something under the Old Mill knows why.",
+		Palette.VERDANCE, "growth")
+	out.chosen.connect(_show_atlas)
+	col.add_child(out)
+
+## A one-line Bastion station stop (the tease panels while stations rise).
+func _bastion_stop(title: String, body: String) -> void:
+	_zone_stop(title, body, [{"label": "RETURN TO THE HEARTH", "fx": {"result": "The hearth holds."}}],
+		Palette.GOLD, _show_bastion)
+
+# ------------------------------------------------------------ zones
+
+func _show_zone() -> void:
+	_screen = "zone"
+	_zone_live = false
+	if _world == null:
+		_world = WorldSave.load_save()
+	_clear()
+	var zs := ZoneScreen.new()
+	zs.zone = WorldContent.zone(_zone_id)
+	zs.save = _world
+	zs.toast = _zone_toast
+	_zone_toast = ""                  # one-shot — clears once shown
+	zs.node_entered.connect(_enter_zone_node)
+	zs.back_requested.connect(_show_atlas)
+	zs.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(zs)
+
+func _enter_zone_node(id: int) -> void:
+	var z := WorldContent.zone(_zone_id)
+	_zone_node = id
+	_world.set_at(_zone_id, id)
+	if _world.is_cleared(_zone_id, id):
+		_world_autosave()             # free travel — the token moves, conquered ground never re-fights
+		_show_zone()
+		return
+	var n := WorldContent.resolved_node(z, id, _world.flags(_zone_id))
+	match String(n["kind"]):
+		"fight", "elite", "boss":
+			var body := WorldContent.BOSS_INTRO if String(n["kind"]) == "boss" else String(n["sub"])
+			_zone_stop(String(n["name"]), body,
+				[{"label": "MOVE IN", "fx": {"result": "The warband forms up."}}],
+				ZoneScreen.KIND_COL[String(n["kind"])], _launch_zone_fight.bind(n))
+		"gate":
+			var ex: Dictionary = GateContent.exam(_seat_key, _seat_cls_now())
+			_zone_stop(String(n["name"]), WorldContent.GATE_TEXT + "\n\n" + String(ex["body"]),
+				[{"label": "STEP THROUGH ALONE", "fx": {"result": String(ex["challenge"])}}],
+				Palette.GOLD_BRIGHT, _launch_zone_gate)
+		"event":
+			_zone_stop_event(n, WorldContent.event(String(n["event"])))
+		"choice":
+			_zone_stop_event(n, WorldContent.choice(String(n["choice"])))
+		"camp", "cache", "waystation", "door":
+			_zone_simple_stop(n)
+
+## A zone node panel. Deliberately NOT _map_stop: zone fx never touch the run economy
+## (no integrity/mana/charge/tokens exist out here — the overworld power rule). The only
+## effect a zone choice can carry is a PERMANENT flag: THE ZONE REMEMBERS.
+func _zone_stop(title: String, body: String, choices: Array, accent: Color, done: Callable) -> void:
+	_screen = "zonestop"
+	_clear()
+	var p := MapEventPanel.new()
+	p.title_text = title
+	p.body_text = body
+	p.choices = choices
+	p.accent = accent
+	p.finished.connect(func(fx: Dictionary):
+		var wf: Array = fx.get("world_flag", [])
+		if wf.size() == 2 and _world != null and _zone_id != "":
+			_world.set_flag(_zone_id, String(wf[0]), String(wf[1]))
+		done.call())
+	p.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(p)
+
+func _zone_stop_event(n: Dictionary, ev: Dictionary) -> void:
+	var accent: Color = ZoneScreen.KIND_COL[String(n["kind"])]
+	_zone_stop(String(ev["title"]), String(ev["body"]), ev["choices"], accent,
+		func(): _zone_clear_node(_zone_node))
+
+## Camps, caches, the waystation, the instance door — one beat of fiction, then conquest.
+func _zone_simple_stop(n: Dictionary) -> void:
+	var nn := String(n["name"])   # (not `name` — shadows the Node property)
+	match String(n["kind"]):
+		"camp":
+			_zone_stop(nn, String(WorldContent.CAMP_TEXT.get(nn, "The warband rests.")),
+				[{"label": "REST A WHILE", "fx": {"result": "The fields keep their quiet."}}],
+				Palette.FLOW, func(): _zone_clear_node(_zone_node))
+		"cache":
+			_zone_stop(nn, String(WorldContent.CACHE_TEXT.get(nn, "Spoils of the fields.")),
+				[{"label": "TAKE STOCK", "fx": {"result": "Marked, counted, carried."}}],
+				Palette.GOLD, func(): _zone_clear_node(_zone_node))
+		"waystation":
+			_zone_stop(nn, WorldContent.WAYSTATION_TEXT,
+				[{"label": "LIGHT THE BEACON", "fx": {"result": "The sky roads answer."}}],
+				Palette.WIN, func(): _zone_clear_node(_zone_node))
+		"door":
+			_zone_stop(nn, WorldContent.DOOR_TEXT,
+				[{"label": "MARK THE ATLAS", "fx": {"result": "The route is yours. The door will know you."}}],
+				Palette.RELIC, func(): _zone_clear_node(_zone_node))
+
+## Conquest writeback — the ONLY thing a zone hands the permanence layer. Cleared is
+## cleared forever; the waystation joins the flight web; the capstone crests the zone.
+func _zone_clear_node(nid: int) -> void:
+	var z := WorldContent.zone(_zone_id)
+	var first := not _world.is_cleared(_zone_id, nid)
+	_world.mark_cleared(_zone_id, nid)
+	if first:
+		var n := WorldContent.resolved_node(z, nid, _world.flags(_zone_id))
+		_zone_toast = "⚑  %s — YOURS, forever" % String(n["name"])
+		if String(n["kind"]) == "waystation":
+			_world.unlock_waystation(_zone_id)
+			_zone_toast = "^  FLIGHT PATH OPENED — Gildwatch joins the sky roads"
+		if nid == int(z["capstone_id"]):
+			_zone_toast = "★  THE OLD MILL FALLS — ZONE CLEARED. The Gildfields are yours."
+	_world_autosave()
+	_show_zone()
+
+func _world_autosave() -> void:
+	if _world != null:
+		_world.save_to_disk()
+
+# ------------------------------------------------------------ zone fights
+
+## A ZONE fight (overworld power rule): bare kit + your commanded warband, NO boons /
+## gear / wounds / carry — an isolated pull, full HP in, nothing out but conquest.
+## Built by the SAME shared factory as every raid pull, with NO overrides — so a zone
+## stand-in fight is byte-identical to its source encounter (the W1 acceptance bar).
+func _launch_zone_fight(n: Dictionary) -> void:
+	_gate_live = false
+	_screen = "combat"
+	_clear()
+	_ensure_party()
+	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]))
+	var s := RaidNet.build(spec, _seat_key)
+	_loadout = _make_loadout()
+	_build_combat(s)
+	_shake_amt = 0.0
+	_online = false
+	_zone_live = true
+	_ctrl = _local_ctrl
+	_ctrl.begin(s, SEAT_IDX[_seat_key])
+
+## THE THRESHOLD: the zone's personal gate — your class exam, alone, bare kit.
+## No wound stakes out here (zones carry nothing): lose and the stone simply waits.
+func _launch_zone_gate() -> void:
+	_screen = "combat"
+	_clear()
+	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var s := GateContent.make_state(seed, _seat_key, _aspect, _seat_cls_now())
+	_gate_live = true
+	_zone_live = true
+	_loadout = _make_loadout()
+	_build_combat(s)
+	_shake_amt = 0.0
+	_online = false
+	_ctrl = _local_ctrl
+	_ctrl.begin(s, 0)
 
 # ============================================================ ONLINE (R2)
 func _ensure_net() -> void:
@@ -4269,6 +4562,18 @@ func _on_end(won: bool) -> void:
 	if _online_map:
 		# a DESCENT fight ended — the server is already sending the next map/campaign;
 		# don't run the offline floor logic or pop a single-fight end screen.
+		return
+	if _zone_live and not _online:
+		# THE WORLD (W1): a zone pull resolves — conquest is the ONLY writeback (no
+		# wounds, no economy, no oaths out here). A loss just returns the frontier;
+		# pull again anytime. Handles zone gates too (this branch outranks _gate_live).
+		_zone_live = false
+		_gate_live = false
+		if won:
+			_show_fight_recap(func(): _zone_clear_node(_zone_node))
+		else:
+			_zone_toast = "the warband withdraws — the frontier holds. Pull again anytime."
+			_show_zone()
 		return
 	if _gate_live and not _online:
 		# Tier-1 GATE exam resolves: only YOUR raid slot carries in or out —

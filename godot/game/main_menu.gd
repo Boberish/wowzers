@@ -24,7 +24,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart="):
 			var asp := a.substr("--autostart=".length())
-			if asp.begins_with("raid"):
+			if asp.begins_with("raid") or asp.begins_with("world") or asp.begins_with("atlas") \
+					or asp.begins_with("zone") or asp.begins_with("gate"):
 				get_tree().change_scene_to_file.call_deferred("res://game/raid_main.tscn")
 				return
 			if asp.begins_with("warden") or asp.begins_with("juggernaut"):

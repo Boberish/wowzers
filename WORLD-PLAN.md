@@ -358,7 +358,8 @@ a designer soul on a Forge body — generator does the body, a human does the si
 ## CONTENT v1 — the vertical slice (names TBD with Bill)
 
 - **THE BASTION** (hometown hub).
-- **ZONE 1 — "our Westfall"** (working name: **THE MIREFEN**): teaching zone. **~20
+- **ZONE 1 — "our Westfall"** (working name: **THE GILDFIELDS** — renamed from "Mirefen"
+  2026-07-06 per Bill's Westfall steer; BUILT in W1): teaching zone. **~20
   nodes** (sizing formula in §ZONE QUESTS & DYNAMICS): a ~9-node spine (entry fight →
   Forge skirmishes → 1 ELITE mutator fight → event → quest camp → capstone named boss →
   waystation), cave side-chain w/ named miniboss ↔ direct-route fork, marsh side-chain
@@ -378,12 +379,15 @@ a designer soul on a Forge body — generator does the body, a human does the si
 - **W0 — FRESH SLATE (docs, this claim):** this plan + MASTER-PLAN §WORLD + pillar locks
   recorded. Companion cleanup claim: CLAUDE.md slims to laws/run-book (frozen milestone
   history → `HISTORY.md`), stale class notes marked pre-rework, Voidcaller-cut recorded.
-- **W1 — THE ATLAS + ZONE 1 (offline, feature-flagged):** world save (versioned cfg);
-  Atlas screen (fog, zone select, warband token); Zone 1 authored map on MapScreen
-  rendering with persistent semantics (cleared-state, free travel); zone fights =
-  existing content as stand-ins; waystation/flight stub; hometown v1 (stations = the
-  existing screens re-doored). Acceptance: save round-trip determinism; zone fights
-  byte-identical to their source encounters; ui smokes + a WSLg atlas/zone tour.
+- **W1 — THE ATLAS + ZONE 1 (offline, feature-flagged) — ✅ DONE, merged 2026-07-06
+  (`b9c26aa`; full record in MASTER-PLAN's Coordination Log).** Shipped as designed plus
+  Bill's steers: Zone 1 = **THE GILDFIELDS** (Westfall-inspired working name — the zone's
+  mystery funnels into the UNDERMILL dungeon door), 20 authored nodes on a NEW ZoneScreen
+  (not MapScreen — worn roads / fog / frontier, the earnest world look), THE SLUICE zone-
+  remembers teaser live, Bastion hub v1 (Warband Camp = Commander re-doored), Atlas with
+  the raid door as a place. Acceptance met: save round-trip determinism (`world_probe`),
+  bare-kit stand-in fights via the shared factory (sims byte-identical vs frozen main),
+  `ui_smoke_world` + WSLg tour. Deferred to W2: Forge fights, TICKETS v2 pass, real names.
 - **W2 — THE FORGE:** generator + `forge_sim` certification harness + Zone 1 content
   pass (replace stand-ins with Forge skirmishes + 1 authored capstone + gate + quests).
   Acceptance: the Forge bar (bands per tier, zero unwinnable, determinism).
