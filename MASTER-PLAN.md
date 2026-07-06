@@ -115,6 +115,18 @@ again and DECLINED. New tool this demands: the **ENCOUNTER FORGE** (seeded skirm
 **Phases W0–W5** (W0 docs done; W1 Atlas+Zone-1 offline is the first buildable claim; W3 flips the
 front door; W4 goes online). PROGRESSION laws untouched — the Atlas IS the World track's UI.
 
+**Zone quests + structure (locked with Bill, 2026-07-06 · spec: WORLD-PLAN §ZONE QUESTS &
+DYNAMICS):** **THE SPLIT confirmed** — the rolling run economy (drafts / ⏣ / rarity / Market)
+stays instance-only VERBATIM (behind a door the run still exists); zones get persistent
+**TICKETS v2** (route / deed / door tickets now, event tickets at W4) paying lane-law only —
+*"quests edit the COLLECTION, runs edit the DECK"* (zone rewards grow instance pools).
+**ELITE mutator fights** (enemy-side Forge affix, optional choose-your-poison 1-of-2) +
+**THE ZONE REMEMBERS** (permanent zone flags rewire later nodes; co-op replay = the
+**GUEST-WORLD rule** — a session plays the least-progressed member's world, pending choices
+write back only to saves that still had them). Zone sizing: spine ~8–12 nodes (attunement
+budget caps it), breadth scales — Zone 1 target ~20 nodes. PARKED: **RAID RITES** (mandatory
+re-done entry nodes to keep raids a big deal — Bill, later).
+
 ## CLASS FRAMEWORK v2 — the Tempo-piloted ROSTER REWORK (locked with Bill, 2026-07-04)
 
 **The bold move:** every class gets re-thought from the ground up onto ONE new framework. Full spec:
@@ -701,6 +713,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-06 · main (docs only) · §THE WORLD / `WORLD-PLAN.md` — **GAME STRUCTURE + ZONE QUESTS
+  design session (Bill, direct).** Bill's structure question ("one session used to be a zone; now
+  nodes launch instances — keep the mid-run deck economy or start fresh?") → **THE SPLIT locked:**
+  run economy stays instance-only VERBATIM (the run still exists behind doors — a dungeon IS the
+  old session compressed); zones get the new persistent **TICKETS v2** grammar (route / deed /
+  door tickets in Zone 1, event tickets at W4; lane-law rewards only; "quests edit the collection,
+  runs edit the deck"). **ELITE = Forge body + enemy-side MUTATOR** (Bill's module idea; optional
+  1-of-2 choose-your-poison). One-time spice pick = **THE ZONE REMEMBERS** (permanent zone flags
+  rewire later nodes; Zone Heat passed over → later-zone candidate). Bill's replay question
+  answered with the **GUEST-WORLD rule** (a zone session plays the least-progressed member's
+  world; pending choices write back only to saves that still had them; guests re-fighting the
+  host's uncleared nodes IS the replay). Node formula: spine 8–12 capped by the attunement
+  budget, breadth scales — Zone 1 ~20 nodes (was 14). **RAID RITES parked** (Bill: hard
+  mandatory every-entry raid nodes — "that's later"). WORLD-PLAN gained §ZONE QUESTS & DYNAMICS;
+  Zone-1 content line + PARKED updated. No code. *(world-structure session)*
 
 - ☑ 2026-07-06 · `tempo-strike-lane` → main (`c1071bd`) · §TEMPO — **STRIKE lane bread: Press the
   Advantage + Cold Open.** Two non-crit STRIKE boons filling the gap the crit exodus (A7) left.

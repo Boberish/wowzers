@@ -72,8 +72,9 @@ map/lobby/lockstep architecture we already have.
   entrances are hand-placed. *(Authored-vs-seeded is a soft call — recorded as an open
   decision, but authored is the strong recommendation: guides, directions, and memory
   are the point of a world.)*
-- **A NODE** — one screen of content: a fight (skirmish / named miniboss / personal
-  gate), an event (Inference-Check grammar reused verbatim), a cache, a camp (rest/lore),
+- **A NODE** — one screen of content: a fight (Forge skirmish / **ELITE mutator fight** /
+  named miniboss / personal gate), an event (Inference-Check grammar reused verbatim),
+  a **ZONE REMEMBERS choice** (§ZONE QUESTS & DYNAMICS), a cache, a camp (rest/lore),
   a WAYSTATION (flight path), a quest pickup/turn-in (the TICKETS system generalized to
   persistence), or an INSTANCE DOOR (dungeon / raid entrance).
 
@@ -95,9 +96,11 @@ map/lobby/lockstep architecture we already have.
   Repeatable combat lives in instances and world events, NOT in zone respawns (no farm
   loop in the permanence layer; if playtests want an overworld grind valve, PATROL nodes
   are the parked idea — see §OPEN).
-- Zone quests = persistent TICKETS (pickup → objective → turn-in across nodes). Rewards
-  obey the lane law: **access** (flight, doors, attunement), **pool** (Ledger/curio
-  unlocks), **standing** (crests/cosmetics). Never stats, never run-scoped currency.
+- Zone quests = persistent **TICKETS v2** — full grammar (route / deed / door / event
+  tickets), ELITE mutator fights, and THE ZONE REMEMBERS flags all live in **§ZONE
+  QUESTS & DYNAMICS** below. Rewards obey the lane law: **access** (flight, doors,
+  attunement), **pool** (Ledger/curio unlocks), **standing** (crests/cosmetics). Never
+  stats, never run-scoped currency.
 
 ### Travel & flight paths
 
@@ -133,6 +136,78 @@ a town, and that's fine — it can grow doors later.
 - The veteran's payoff for carrying: salvage Tokens are run-scoped so instead vets earn
   **standing + oath-gift economy** (E.5 — farm deeds, gift the drop-bend to the newbie:
   already designed, this is its stage) + their own side-content/Ledger gaps.
+
+---
+
+## ZONE QUESTS & DYNAMICS — TICKETS v2 (locked 2026-07-06, with Bill)
+
+**THE ECONOMY SPLIT (Bill's pick — "The Split"):** the in-run rolling economy (Draft 2.0,
+Tokens ⏣, rarity/pity rolls, Market, rerolls, wounds, run-tickets) is **KEPT VERBATIM as
+the instance-only layer** — behind a door the run still exists (a dungeon is a contiguous
+30–45 min Topology run), so mid-run build-editing moves indoors whole; zero rework of the
+built systems. Zones mint NOTHING. **The bridge: overworld quests edit the COLLECTION;
+runs edit the DECK** — zone quest rewards grow the pools instances roll from (Ledger rows,
+curio table deeds, event-pool entries, Forge variants), never mid-run numbers (Hades'
+Fated List pattern; Law #1 + Monotonic Pool Law intact). Zone quest inventory = tickets
+only — keys/shards stay Topology texture (zones are deliberately LIGHTER than the raid web).
+
+### The quest grammar (all persistent; Zone 1 builds the first three)
+- **ROUTE tickets** — pickup at node A, turn-in at node C: directed conquest (first-visit
+  traversal IS fights). The built TICKETS tech generalized to persistence.
+- **DEED tickets** — performance objectives in zone fights ("zero missed kicks at the
+  mill"), reusing the oath detector tech (`seat.diag`); one-shot persistent deeds,
+  distinct from re-swearable instance oaths.
+- **DOOR tickets** — the WoW dungeon-quest loop: the objective completes inside ANY run
+  of the zone's dungeon, turn-in back in the zone. Reads run RESULTS (seed-verified),
+  never injects state into a run.
+- **EVENT tickets** — recurring quests on world events (standing lane, no-FOMO). W4.
+- **Forge hook:** a ticket can flip a node's Forge variant ("the bandit leader appears
+  once you've read the note") — authored feel on generated content.
+
+### ELITE nodes = MUTATOR fights (Bill's "module" idea, 2026-07-06)
+Some zone fights are ELITE: a Forge body + **one visible MUTATOR** (an affix that changes
+the fight's shape — an added string verse, a chanter attendant, a hazard beat), never a
+player draft (bare-kit law intact: the modifier lives on the ENEMY side, so player-side
+sims stay clean). Where authored, the spicy variant is **choose your poison** — the node
+offers 1-of-2 mutators before the pull: in instances you shape your BUILD; in zones you
+shape the BATTLE. Mutators are Forge palette knobs → certified by `forge_sim` like
+everything else.
+
+### THE ZONE REMEMBERS (the one-time spice — Bill's pick over Zone Heat)
+Choices and fight outcomes set **permanent zone flags** that visibly rewire later nodes:
+burn the supply depot → the capstone loses its add wave but the cache node is gone; spare
+the deserter → a backdoor opens two nodes later. Geography stays FIXED (authored-map law):
+flags change node payloads / dressing / spawns / unlocked edges, never layout. Any flag
+that touches a fight enters as pure data in `(seed, spec)` (the aspects idiom — lockstep
+and sim safe). Your Mirefen ends up subtly different from your friend's — that IS the
+social texture ("wait, your mill is still standing?"). Zone Heat (a route-reactive alert
+dial) was weighed and passed over for Zone 1; it stays a candidate spice for a later zone.
+
+### Co-op replay — the GUEST-WORLD rule (Bill's replay question, answered)
+Extends the locked least-progressed-frontier credit rule; nothing new in netcode beyond
+flags riding the campaign broadcast:
+1. **A zone session plays ONE world:** the least-progressed member's save (tie → party
+   leader). Guests see THAT world's flags — including choices that went differently from
+   their own.
+2. **Pending choices belong to the saves that still have them:** the frontier owner picks
+   (others advise); the outcome writes back to every member whose save still had it
+   pending. A member whose flag is already set keeps their own value — saves never
+   regress, never overwrite.
+3. **Guests re-fight nodes uncleared in the host's save — that IS zone replay.** Your own
+   cleared zone never re-fights; "redo the quest with a friend" = play through HIS
+   Mirefen and watch his choices land differently.
+4. Personal full replay = a fresh character slot (world saves are per-slot already).
+
+### Zone sizing — the node-count formula (Bill: "we should be able to scale up")
+- **The spine is capped by the attunement budget law** (critical path ≤ 30–45 min), which
+  pins it at **~8–12 nodes forever. Scaling is BREADTH, not length** — side chains hang
+  off the spine freely (they don't tax the friend ritual; only the route to the door does).
+- **Mix ratio:** ~½ fights (¾ Forge basics, ¼ elite/miniboss — elite cadence ~1 per 4–5
+  basics), ~¼ events/choices, the rest utility (tickets / camps / caches / gate / doors).
+- **Zone 1 target: ~20 nodes** (up from the earlier 14-node sketch — the Forge makes
+  fights cheap; events/choices are the real authoring cost). Full-clear ≈ 45–70 min,
+  route-to-door well inside the budget. Later zones scale to ~25–35 by adding chains,
+  never spine.
 
 ---
 
@@ -283,10 +358,12 @@ a designer soul on a Forge body — generator does the body, a human does the si
 ## CONTENT v1 — the vertical slice (names TBD with Bill)
 
 - **THE BASTION** (hometown hub).
-- **ZONE 1 — "our Westfall"** (working name: **THE MIREFEN**): teaching zone. ~14 nodes:
-  entry → 3-node spine fork (cave side-chain w/ named miniboss ↔ direct route), quest
-  chain (3 tickets), 1 personal gate, capstone named boss, waystation, **DUNGEON DOOR**
-  on the east edge.
+- **ZONE 1 — "our Westfall"** (working name: **THE MIREFEN**): teaching zone. **~20
+  nodes** (sizing formula in §ZONE QUESTS & DYNAMICS): a ~9-node spine (entry fight →
+  Forge skirmishes → 1 ELITE mutator fight → event → quest camp → capstone named boss →
+  waystation), cave side-chain w/ named miniboss ↔ direct-route fork, marsh side-chain
+  (event + elite + cache), quest chain (3–4 tickets incl. 1 door ticket), 1 personal
+  gate, 2–3 ZONE REMEMBERS choice moments, **DUNGEON DOOR** on the east edge.
 - **DUNGEON 1 — "our Deadmines"**: 1-floor Topology, ~6–8 nodes, Forge skirmishes +
   1 recast mid-roster boss as its Seal, Versions dial at the door.
 - **THE RAID DOOR — Realm 1: The Takeover**, the existing 3-Ring descent verbatim,
@@ -344,6 +421,10 @@ determinism; UI smokes; WSLg visual probe for any new screen.
   playtests demand an overworld grind valve; risks polluting the permanence layer.
 - **Raid brackets >4** (5–8 seat raids with per-bracket Forge tuning) — after the
   4-seat world is proven.
+- **RAID RITES (Bill, 2026-07-06):** recurring mandatory entry nodes at the raid door —
+  something hard you re-do EVERY descent, upping the barrier so raids stay a big deal.
+  Design later (post-Zone-1, "this is 1st zone"); interacts with descent save/resume
+  (§OPEN #6).
 - **Seat-claim spectate / live gate spectate**, party-vote routing — existing parks, unchanged.
 
 ## OPEN DECISIONS (small, for Bill, none blocking W1)
