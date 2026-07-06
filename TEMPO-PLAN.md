@@ -3,9 +3,13 @@
 **Status:** DESIGN + BUILD IN FLIGHT (2026-07-04). **The Opening** merged (`4f071bd`); the **risk-core slice**
 (combo-fix + Flow-dial + Creeds/Modules scaffold) is building on branch `tempo-pilot`. The audit-iteration
 decisions (see the ✅ block below) are folded into this doc — reconcile them into the build when that slice merges.
+**⚡ 2026-07-06 — THE SPLIT + full spec-audit verdicts triaged (see the ⚖ block below):** Venom / the Brew
+LEAVES Twinfang to become its own class (**`ALCHEMIST-PLAN.md`**); Twinfang owes a rhythm-variant SECOND
+SPEC (§13, design owed).
 **Scope:** this reworks the **Twinfang · Tempo** aspect into a risk/reward "greed dial," AND introduces a
 class-framework (Creeds · Modules · WHEN/THEN clarity · per-class levels) that is meant to **generalize to
-every class** later — Tempo is the pilot. Companion docs: `PROGRESSION-PLAN.md` (meta), `GEAR-CATALOG.md`
+every class** later — Tempo is the pilot. Companion docs: `ALCHEMIST-PLAN.md` (the Brew — the poison class
+split out 2026-07-06), `PROGRESSION-PLAN.md` (meta), `GEAR-CATALOG.md`
 (curios). Design artifacts: **Tempo redesign** https://claude.ai/code/artifact/2cd281f6-552b-4746-9512-44925d369254
 · **Boon clarity (WHEN/THEN)** https://claude.ai/code/artifact/802aad53-6017-4455-b4e3-145cbc2930f8
 · **System codex** https://claude.ai/code/artifact/d89a2854-0101-4db5-ac60-5f73f7351bb1
@@ -46,6 +50,9 @@ Grounded in a full cross-spec + layer-fit audit (workflow `wf_1bdad49f`). Bill's
   we decide later whether any become shared, per-spec, or fold into cards. So the Floor-1 "pick 1 of 3
   modules" flow + the `specs` cross-spec filter are **shelved** until there's a real module roster. (Pull
   the Edge/Deathmark mechanics out of the *offered* module set; they can stay in the kit, gated off.)
+  **⚠ SUPERSEDED 2026-07-06 (audit F1/F6/I1, accepted):** the Opening is promoted OUT of the module slot
+  to Tempo's always-on baseline VERB; Edge + Deathmark UN-PARK into a real Floor-1 1-of-3 alongside the
+  new ⭐ OVERDRIVE transformer — see the ⚖ audit block + §4.
 - **⚠ Edge leak to fix if kept live:** the +25% Perfect-damage mult is NOT aspect-gated (only the window
   narrow is) — a Venom seat equipping Edge would get the damage free. Gate it, or leave Edge parked.
 - **MODULE ↔ CURIO lane rule = DECISION OF RECORD.** **Module** = transforms the class VERB (curated,
@@ -62,11 +69,73 @@ Grounded in a full cross-spec + layer-fit audit (workflow `wf_1bdad49f`). Bill's
     · ability-economy · big gambles/theme). Menu folds in here when it lands.
 - **VENOMANCER = a complete future clean-slate remake.** Ignore the current Venom entirely for now.
   **Creeds are Tempo-only** (Flow-based); Venom gets its own risk temperament (wheel/synergy) in its remake.
+  **→ 2026-07-06 went further: the remake is its OWN CLASS now** (audit F10 — `ALCHEMIST-PLAN.md`);
+  Twinfang's second spec becomes a rhythm variation instead (§13).
 - **⚠ BRANCH RECONCILIATION:** two parallel Tempo branches must merge — `tempo-pilot` (my Creed/Module/
   core + the verb_board GUI) and `tempo-boons` (the agent's graded window + address-organized card slate,
   UNCOMMITTED in `../wow-tempo-boons`). Note: the new card slate **removed the WHEN/THEN draft buckets**
   (they became the single §5 combo-rig), so the **verb_board GUI reads now-empty buckets** — it must be
   re-pointed at the rig, and the rig system itself confirmed/built.
+
+---
+
+## ⚖ SPEC AUDIT — BILL'S VERDICTS, 2026-07-06 (0 reject · 12 tweak · 24 accept of 36)
+
+Full-board audit of BOTH specs (8-agent panel, adversarially verified/deduped; board:
+https://claude.ai/code/artifact/168429ee-6039-40e0-a3aa-7d8658a30a9c). Venom-side verdicts are folded
+into `ALCHEMIST-PLAN.md`. **THE HEADLINE — F10, THE SPLIT:** the Brew reads as "a stationary chemist,
+not the melee BLADE," and Bill's call was not to re-skin it — **remove it from Twinfang and make it its
+own class** (working name THE ALCHEMIST — filler). Twinfang's second spec becomes a **rhythm VARIATION
+of Tempo** (§13). The in-code poison-wheel Venom stays the frozen placeholder aspect until §13 lands.
+
+**ACCEPTED (Tempo + framework — fold into the build):**
+- **F1 · The Opening → the class's BASELINE VERB** (always-on; dumps ride it; Punish stays the premium
+  rig WHEN; frees its module slot). Supersedes 2026-07-05's "Opening is Tempo's ONE module."
+- **F6 + I1 · a real module 1-of-3 + the owed ⭐ TRANSFORMER = THE OVERDRIVE:** un-park Edge + Deathmark
+  (already built, only the pick-UI gates them); Overdrive = at max Flow the multiplier stops and fills an
+  OVERDRIVE meter — tap for a short FEVER (window locks all-green, every Strike hits Coup-tier and
+  auto-chains) then crash to a seed and rebuild. Bank→blow→rebuild; the mirror of the Alchemist's Still.
+- **F8 · high-Flow is a double trap on mobile:** GOOD MAINTAINS (a Good pauses Flow decay that beat —
+  "held it") + the accelerando tightening ASYMPTOTES to a floor that stays thumb-hittable.
+- **F11 · energy starves the fantasy at its peak:** base Perfect (especially Bullseye) refunds some
+  energy — clean play self-fuels (Efficiency/Syncopation existing as boons was the smell).
+- **F12 · weak cash-out tension:** surface combo cap-waste (Overkill) as a soft pull to SPEND NOW;
+  Coup's Flow seed scales with how cleanly you've been striking — a hot run Coups confidently.
+- **F15 · Bullseye must punch:** strict superset of Perfect's rewards + its own signature juice
+  (sound/flash/refund) — dead-centre is the class's dopamine spike, no drafted boons needed.
+- **F17 · Held Breath dead-cards / Double Time runaway:** the 2s tight-window lockout counts as a CRASH
+  EVENT for crash-keyed cards (Shatterfall / Staccato Fury / Double Time), or those cards filter from
+  Held Breath offers (creed-aware drafts — same fix family as F7).
+- **F19 · Drumline + wideners = opt out of the bet:** window-wideners TAPER with Flow (help most at low
+  Flow, fade at the top) so comfort never replaces the climb.
+- **F26 · Syncopation:** the Opus rune stays the jackpot; the base rune only removes energy cost, never
+  grade risk.
+- **F24 · Flow and Combo never talk:** combo state lightly COLORS the loop (full combo primes a subtle
+  window cue) — reduce reads on the thumb HUD, don't add them.
+- **F14 + I2 · the owed SUPPORT boon = BATTLE HYMN:** while you hold high Flow the whole raid rides your
+  tempo — a party haste/CD aura scaling with your Flow tier, blinking OFF the instant you crash. Flow
+  uptime IS the raid buff; no extra button. (Pays the §5 framework debt.)
+- **F25 · the rig premium must be real:** verify rare WHENs are EV-POSITIVE vs the can't-miss Riff (the
+  §5.0 curve exists — prove it delivers) and the wiring board shows TOTALS, not just per-fire numbers.
+- **F23 · thin lanes:** fold COUP into FLOW; ENERGY gets a second card that does something visible, or
+  folds into STRIKE.
+
+**TWEAKED (Bill-steered, open):**
+- **F27 · crit needs a real think (→ §10):** STRIKE is mono-theme (all four cards are crit). Bill: "idk
+  what to do about crit — should crit be a 'build'? how do crits scale/work? should we add other crit
+  cards?" — a design pass, not a one-card patch.
+- **F22 · kick → INTERRUPT-BY-ABILITY:** the shared Kick button both redesigns silently dropped is being
+  rethought globally (WORLD-PLAN pillar 3): certain class spells carry "this interrupts" as a side
+  effect — LESS frequent, TIGHTER window than the old kick. Document carriers per class at rework time.
+- **I7 · SWAN SONG (→ §10):** liked — but either BAKE it into the class or GENERALIZE it: not
+  final-phase-only; Bill floated an overall auto-dodge boon as the more-fun version.
+- **I8 · ALL IN — PARKED:** Bill likes the double-or-nothing arm-tap, but "this is flowing too fast — I
+  don't think we can execute it." Recorded, don't build.
+
+**⚠ Card-slate verdicts need the other machine:** F23/F27 and the card names above (Da Capo, Shatterfall,
+Staccato Fury, Double Time, Wide Tempo/Fencer's Line…) live in the `tempo-boons` card slate —
+**UNCOMMITTED in `../wow-tempo-boons`** (see ⚠ BRANCH RECONCILIATION above; no remote branch exists).
+Commit/push that worktree before acting on card-level verdicts.
 
 ---
 
@@ -179,17 +248,18 @@ permanent wallpaper.
   Floor-1 pick always offers 3.
 - Curated picks, **not rarity-weighted** (§6).
 
-**The menu 🟡**
+**The menu 🟡 (re-cut 2026-07-06 per audit F1/F6/I1)**
 | Module | Role | What it adds | Status |
 |---|---|---|---|
-| **The Opening** | offense timing | boss swing overextends → punish window for dumps (×1.9) | ✅ BUILT |
-| **The Edge** | greed dial | **Commit** (hold/tap): window shrinks to Perfect-only, hits deal more + build Flow faster; a heat gauge shows the push. *(the "narrow the perfect for more dmg" lever)* | design |
-| **The Deathmark** | combo layer | Perfects stamp a Mark; a full mark → next dump **detonates** for a burst | design |
-| **The Metronome** | 2nd rhythm | an external steady beat; Strikes landed ON it bonus — polyrhythm (highest skill) | design |
-| **The Hemorrhage** | sustain | Perfects open a stacking bleed; a dump reopens it for a spike | design |
+| ~~**The Opening**~~ | — | **PROMOTED OUT (audit F1): now the class's always-on baseline VERB** — boss swing overextends → punish window for dumps (×1.9). No longer occupies a module slot | ✅ BUILT (as the verb) |
+| **The Edge** | greed dial | **Commit** (hold/tap): window shrinks to Perfect-only, hits deal more + build Flow faster; a heat gauge shows the push. *(the "narrow the perfect for more dmg" lever)* | built, UN-PARKED (F6) |
+| **The Deathmark** | combo layer | Perfects stamp a Mark; a full mark → next dump **detonates** for a burst | built, UN-PARKED (F6) |
+| **THE OVERDRIVE ⭐** | transformer | at max Flow the multiplier stops and fills an OVERDRIVE meter; tap → short FEVER (all-green window, Coup-tier auto-chaining Strikes) → crash to a seed, rebuild | accepted (I1), design |
+| **The Metronome** | 2nd rhythm | an external steady beat; Strikes landed ON it bonus — polyrhythm (highest skill) | parked |
+| **The Hemorrhage** | sustain | Perfects open a stacking bleed; a dump reopens it for a spike | parked |
 
-**v1 recommendation:** Opening (built) + **Edge + Deathmark** (Deathmark = the "cool trigger" Bill wanted;
-Edge = the greed dial). Metronome / Hemorrhage later.
+**v1 module pick = Edge + Deathmark + Overdrive ⭐** — the real Floor-1 1-of-3 (F6), with the transformer
+slot paid (I1). The Opening is everyone's, always (F1).
 
 **🟡 open:** is **The Edge** a Module (equip the greed) or baked into base Tempo for everyone? Leaning **Module**
 (keeps base Tempo clean; the greedy narrow-window play is a run choice).
@@ -337,7 +407,8 @@ then port. The same board serves all five verbs; only the card words change.
 
 1. ~~Rarity Model A vs B~~ → **A** (frequency-scaling now lives in the Combo's WHEN→THEN number table, §5b).
 2. ~~Which Creeds ship v1~~ → **Flourish + Drumline** (Drumline's reward = a wider window); Held Breath v1.1.
-3. ~~Which Modules ship v1~~ → **Opening + Edge + Deathmark**.
+3. ~~Which Modules ship v1~~ → ~~Opening + Edge + Deathmark~~ → **Edge + Deathmark + Overdrive ⭐**
+   (2026-07-06: the Opening promoted to the baseline verb — audit F1/F6/I1).
 4. **The Edge — Module or baked-in?** (still leaning Module — open).
 5. **Creed/Module rarity flavor?** (open — a wild legendary Creed, or all flavor-equal?).
 6. ~~The WHEN/THEN menu~~ → **redefined to the single Combo rig** (§5); offense-only WHENs, no +Flow THEN. Exact
@@ -346,6 +417,11 @@ then port. The same board serves all five verbs; only the card words change.
 8. **Graded-window numbers** (§2c) — Bullseye / Perfect / Good widths at base + max Flow, to sim.
 9. **Dancer's Grace's effect** (auto-Perfect next Strike) — cut as a *dodge* boon; re-home it on an offensive
    trigger (a Peak, or an Opus) or drop entirely? (parked — the effect is good, only its dodge trigger was cut.)
+10. **CRIT (audit F27, 2026-07-06):** the STRIKE lane is all-crit — needs a real design pass with Bill:
+    is crit a BUILD? how do crits scale/work? more crit cards, or non-crit STRIKE cards that engage the
+    graded window (consecutive-Perfect escalation, Goods banking)? *(blocked on the `wow-tempo-boons` slate.)*
+11. **SWAN SONG's home (audit I7, 2026-07-06):** bake the "Flow can't be crashed by swings" moment into
+    the class, or generalize it past final-phase — Bill floated an overall auto-dodge boon as the fun version.
 
 ---
 
@@ -366,3 +442,20 @@ pick at Floor-1 elevation, the WHEN/THEN board + HUD strip) · a new **unlock/le
 / progression) · reconcile with `PROGRESSION-PLAN.md` (Rank track). Keep the CombatCore reducer pure; Creeds /
 Modules express through `seat.vars` + ClassKit hooks like every other class mechanic. Regression bar as always:
 other classes byte-identical, determinism PASS, sims + smokes green.
+
+---
+
+## 13. THE SECOND SPEC — Twinfang's other half 🟡 (opened by the split, 2026-07-06 — DESIGN OWED)
+
+The Brew left to become its own class (audit F10 → `ALCHEMIST-PLAN.md`), so Twinfang owes a second
+Aspect. **Bill's steer:** redo the poison/DoT slot *"with something that goes more RHYTHM based — not a
+copy of Tempo, but a variation — not a whole new thing"* (like the Brew was).
+- Same timing-family chassis as Tempo — the class keeps its complexity-budget spot: **deep minigame,
+  3-button kit** (CLASS DESIGN RULE #2). A VARIATION on the beat (different groove, different reward
+  shape), not a second foreign minigame bolted onto the class.
+- The **in-code poison-wheel Venom stays the FROZEN placeholder aspect** (playable in the raid) until
+  this is designed + built — same idiom as the frozen roster classes.
+- **Sequencing:** design AFTER the Tempo pilot's audit fixes land — don't design spec 2 against a moving
+  spec 1. Framework chassis applies in full (Creed slot · 1 Module · the rig · a support boon ·
+  AI-pilotable at 3 tiers).
+- Name/fantasy: open — filler-grade until the design pass (poison/DoT flavor optional, not required).

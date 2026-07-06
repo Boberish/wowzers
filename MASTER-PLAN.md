@@ -131,6 +131,15 @@ not bigger numbers (Model A, frequency-scaled, Monotonic-Pool-safe).
 - **TWINFANG · TEMPO is the active pilot.** We rebuild it whole — core loop (combo becomes a wind-up you spend,
   not an always-full bar), Creeds (Flourish/Drumline/Held Breath), Modules (Opening[built]/Edge/Deathmark/…),
   triggers & effects — proving the framework's feel before porting.
+- **⚡ 2026-07-06 — SPEC AUDIT TRIAGED + THE SPLIT (Bill):** the 36-item Twinfang spec audit is verdicted
+  (0 reject · 12 tweak · 24 accept — board artifact `168429ee…`; verdicts folded into `TEMPO-PLAN.md`'s ⚖
+  block + `ALCHEMIST-PLAN.md`). **Headline (F10): Twinfang·Venom "The Brew" is promoted to its OWN
+  CLASS** — working name **THE ALCHEMIST** (name/art = filler until its build claim) — `VENOM-PLAN.md` →
+  **`ALCHEMIST-PLAN.md`**. Twinfang owes a **rhythm-variant SECOND SPEC** (TEMPO-PLAN §13, design owed);
+  the in-code poison-wheel Venom stays the frozen placeholder aspect until it lands. Tempo headline
+  accepts: Opening → the baseline verb (F1) · module 1-of-3 = Edge/Deathmark/⭐Overdrive (F6/I1) · Battle
+  Hymn support boon (F14/I2) · GOOD-maintains + window floor for mobile (F8). Alchemist builds AFTER the
+  pilot proves, with its 🟡 opens (active patience F2 · auto-evasion F3 · rig vocab F13/I3) settled first.
 - **The rest of the roster is RESET / FROZEN** (Bulwark, Voidcaller, Mender, Bloomweaver, Reckoner). They **stay
   in the code and remain playable in the raid** on their current versions (the comp still needs tank/blade/
   caster/healer — the game does NOT go offline), but they are **OUT OF DATE until their rework** and are
@@ -546,6 +555,9 @@ nodes, not node kinds.
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
 **Open ideas** (from Ascension research, parked until a 6th/7th class is wanted):
+- **THE ALCHEMIST ("The Brew") — no longer parked: the CONCRETE next new class (2026-07-06).** The patient
+  poison-brewer split OUT of Twinfang by the spec audit (verdict F10) — design-complete + audit-verdicted in
+  `ALCHEMIST-PLAN.md` (working name/art = filler); builds after the Tempo pilot proves the framework.
 - Self-brink DPS: gauge climbs = more damage, cap = self-destruct (Cultist Insanity / Stormbringer Static archetype). Verb: *ride the redline*. Strong fit.
 - Over-defend punishment tank layer (Mountain King self-stun) — could bolt onto Bulwark as a boon/mod instead.
 - Imposed-rhythm caster (Runemaster attunement auto-cycle) — kit rotates on a clock you don't control.
@@ -686,6 +698,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-06 · `venom-split` → main · §CLASS FRAMEWORK v2/§CLASSES — **THE SPLIT (docs only):
+  spec-audit verdicts triaged + Venom promoted to its own class.** Bill verdicted the full 36-item
+  Twinfang spec audit (0 reject · 12 tweak · 24 accept; board artifact `168429ee…` — full finding
+  bodies recovered from it). **Headline F10: the Brew leaves Twinfang** → `VENOM-PLAN.md` renamed
+  **`ALCHEMIST-PLAN.md`** (working name THE ALCHEMIST — name/art filler until build; DPS seat; the
+  in-code poison-wheel Venom stays the frozen placeholder aspect). Twinfang owes a **rhythm-variant
+  second spec** (new TEMPO-PLAN §13, design owed). All verdicts folded: TEMPO-PLAN gains the ⚖
+  audit block (Opening→baseline verb F1 · modules un-parked + ⭐Overdrive F6/I1 · Battle Hymn
+  support F14/I2 · mobile-proof high-Flow F8/F11 · crit + Swan Song opens →§10) and supersede
+  notes on the 2026-07-05 module-shelving; ALCHEMIST-PLAN gains its verdict block (F4 wave
+  accepted · creed-aware offers law · I4/I5/I6/I9 boons in · F2 active-patience + F3 auto-evasion
+  + rig vocab = 🟡 talk-with-Bill). CLAUDE.md index/roster updated. Zero code/sim files touched
+  (`git diff --stat` = 4 .md). ⚠ Card-slate verdicts (F23/F27) blocked on `../wow-tempo-boons` —
+  UNCOMMITTED on Bill's other computer, no remote branch; commit/push it there before card work.
+  *(split session)*
 
 - 📋 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **CLASS DESIGN RULES locked with Bill.**
   Bill's asks: (a) asymmetric classes as a THEME — "not every class will have x abilities and x

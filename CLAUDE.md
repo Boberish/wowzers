@@ -18,8 +18,9 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 4. **Update `MASTER-PLAN.md` after the work** — status, what changed, what's next.
 
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `WORLD-PLAN.md` (the world pivot +
-COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` + `VENOM-PLAN.md` (Class Framework v2,
-Twinfang pilot) · `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
+COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
+`ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
+`PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-era reference) ·
 `HISTORY.md` (frozen milestone build-up M0→R2.5 + PoC notes — the old CLAUDE.md status list) ·
 `PORT-PLAN.md` / `rift-godot-port-brief.md` / `poc/` (origins, historical).
@@ -34,7 +35,10 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-
   rest (Bulwark, Mender, Bloomweaver, Reckoner) are FROZEN — playable in the raid on current
   kits, balance not maintained. **Voidcaller is CUT from the roster plan** (stays in code as
   the frozen caster-seat placeholder until that seat's rework); its interrupt verb moves to
-  **interrupt-by-ability** (WORLD-PLAN pillar #3).
+  **interrupt-by-ability** (WORLD-PLAN pillar #3). **THE SPLIT (2026-07-06):** the Brew /
+  Venom spec is now its OWN future class (`ALCHEMIST-PLAN.md`, working name filler); Twinfang
+  owes a rhythm-variant second spec (TEMPO-PLAN §13) — the in-code poison-wheel Venom stays
+  the frozen placeholder aspect until then.
 - **BOSS REDO INCOMING:** the 15 solo bosses are the casting pool (recast, never rebuilt);
   the 4 Seals (Vorathek / Mistral / Gemini / Mythos) get a PILLAR PASS toward the new combat
   pillars, then deeper reworks later (see MASTER-PLAN §BOSSES).
