@@ -729,6 +729,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · main (docs only) · §SYSTEMS / `PROGRESSION-PLAN.md` §LEVELS + `WORLD-PLAN.md` —
+  **LEVELS: the paced unlock rollout (design session with Bill, direct).** Bill's ask: WoW-shaped
+  slow roll — level up for boons, zone milestones introduce Modules/Creeds, high-level areas tease
+  the future, oaths give XP, "once max level you've unlocked it all"; goal = spread the skill curve.
+  **Verdict: legal under Law #1** (levels = options/access, never stats; XP = non-spendable event
+  meter, not a meta-currency; StS front-load note AMENDED — stretched, not deleted). **Locked model
+  = HYBRID WAVES:** milestones unlock SYSTEMS account-wide (Zone 1 crest → Modules · first dungeon →
+  Creeds · Zone 2 → rig · first Seal → 2nd curio slot); event-XP levels (quests/oaths/firsts/
+  conquest/instance clears — NO kill-grind, the world can't farm anyway) pace each class's boon pool
+  in authored waves of ~2–3; Ledger/gear/curios untouched; endgame stays Depth/Versions. **Zone
+  gating (Bill's catch: options-not-power means difficulty alone can't wall the skilled): CREST-
+  GATED SPINE + OPEN BORDERLANDS** — Zone N+1 needs Zone N's crest (access-lane, a moment not a
+  number); 1–2 over-tier borderland pockets per zone stay open as the Duskwood tease (Forge TIER
+  wall, standing pay only). Skill-spread = two dials: buttons grow with account age, demands grow
+  with content tier; no scaling system needed (a low-level friend plays a simpler kit in the same
+  fight). DESIGN LOCKED, not built — builds with W2/W3 (XP ledger on the world save, wave tables,
+  crest gates, borderland nodes). *(world-structure session)*
+
 - 🔨 2026-07-06 · `escort-ticket` (`ca05269`, NOT merged) · §THE WORLD W2 — **ESCORT/VOLATILE
   TICKET — thinnest flagged slice BUILT (Bill: "keep building"; §MEWGENICS STEALS ①).** Carry a
   payload PICKUP→TURN-IN; while carrying, fight/elite nodes get an enemy-side BURDEN add (the boss

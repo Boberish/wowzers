@@ -208,7 +208,64 @@ First kills across the campaign roster = the StS front-loaded wave — 4 Seals +
 minibosses + the 15 exam bosses arriving as GATE nodes / owned adds (MASTER-PLAN §GAME SHAPE)
 — every early run ends in guaranteed unlocks, **no separate milestone system needed**. Oaths
 and versions carry the long tail. Nothing is timed, ever; the core loop must stand alone
-(Bill, locked).
+(Bill, locked). **⚠ AMENDED 2026-07-06 — the front-load is STRETCHED into the world's
+leveling journey: see §LEVELS below.** (First-kill signatures still fire; the pacing of
+system/pool rollout now follows the LEVELS model.)
+
+## LEVELS — the paced unlock rollout (locked with Bill, 2026-07-06)
+
+**The ask (Bill):** slow-roll the unlocks into a WoW-shaped journey — "you level up, each
+level a new boon; after a zone they introduce modules, after the next map creeds; steer off
+the path and a high-level area teases the future. Once you're max level you've unlocked it
+all — it's just the time in between." Underlying goal: **spread the skill curve** — more
+buttons for veterans without overwhelming new players.
+
+**Verdict: legal under Law #1** — levels grant OPTIONS and ACCESS, never stats (WORLD-PLAN
+Lock #2's "levels = options" made literal; per-class level = the paced pool, overall level =
+the sum, as the Framework already displays). Numbers still die with the run. XP is a
+non-spendable meter, not a meta-currency (Law #4 intact).
+
+### The model — HYBRID WAVES (Bill's pick over pure-ladder and front-load-plus-extras)
+- **MILESTONES unlock SYSTEMS, account-wide, once** (moments, never counters — the trainer
+  beat): Zone 1 crest → MODULES · first dungeon clear → CREEDS · Zone 2 crest → the Combo
+  RIG · first Seal → 2nd curio slot. (Exact mapping tunes with the final zone count.)
+- **XP LEVELS pace the boon POOL, per class**, in authored waves of ~2–3 boons per level
+  (synergy-aware order; the draft's pity + synergy slot smooth thin early pools). Rarity
+  stays printed on items, never unlocked.
+- **XP sources are EVENTS ONLY** (the cut-list's "no passive counters" survives): quest
+  turn-ins, OATH KEPT, first kills, zone conquest, gate proofs, instance clears. **No
+  kill-grind XP** — the world can't farm anyway (nodes never respawn). Repeatable instance
+  XP is fine: max level is a finite cap, rushing buys breadth sooner, never power ⇒
+  sandbagging and grinding are both non-strategies (Monotonic Pool Law extends to wave
+  boundaries — spot-check in sims).
+- **Ledger / gear / curios UNTOUCHED** — deed-driven ITEM unlocks stay exactly as built
+  (Bill: "you still get gear unlocks, the curios stay").
+- **Max level = the full pool** = "just the time in between"; the endgame stays
+  Depth / Versions / leaderboards — skill, not level. **Alts:** systems stay unlocked
+  account-wide; pools re-level per class (teaches the class; tune the pace faster).
+
+### Zone gating — CREST-GATED SPINE, OPEN BORDERLANDS (Bill's catch, 2026-07-06)
+Bill spotted the flaw in a pure soft gate: *because levels buy options, not power,
+mechanical difficulty alone won't wall the skilled* — "we'll have to hard cap it." The cap:
+- **The campaign spine hard-gates by CREST**, attunement-style: Zone N+1's Atlas entry
+  needs Zone N's ZONE CLEARED. Access-lane legal (Proofs already gate Seals/realms), a
+  MOMENT not a number — the XP level itself is never a wall, so mixed-level parties stay
+  legal everywhere they can stand. Co-op composes for free: the guest-world rule already
+  binds a party to the least-progressed member's frontier.
+- **Each zone keeps 1–2 open BORDERLAND nodes** — over-tier pockets off the path (the
+  Duskwood-border tease Bill wants): open to anyone, brutally over-tier via Forge TIER
+  (windows/cadence, never stats), paying standing/cosmetics only — never required. The
+  sequence-break heroes get their legend; the journey's pacing stays protected.
+
+### Skill-spread — the actual goal, as two independent dials
+Buttons grow with ACCOUNT AGE (the rollout above); demands grow with CONTENT TIER
+(Versions/Depth compress windows + add beats). Neither touches stats ⇒ a level-3 friend
+plays their simpler kit inside a veteran's fight and it just works — no scaling system
+exists or is needed (Warband Law).
+
+**Status: DESIGN LOCKED, not built.** Builds with the world track (earliest W2/W3): XP
+ledger + level on the world save, level-up moments, per-class wave tables, crest gates on
+the Atlas, borderland nodes in zone authoring. All of it rides `(seed, spec)` as pure data.
 
 ## Cut list (decided — do not resurrect casually)
 

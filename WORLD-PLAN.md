@@ -387,6 +387,12 @@ a designer soul on a Forge body — generator does the body, a human does the si
   unlocks, it never mints them.
 - **Law #1 fully intact:** zone/quest/event rewards are access / pool rows / standing.
   Numbers still die with the run; the run still lives behind instance doors.
+- **LEVELS (locked 2026-07-06 — full spec in PROGRESSION-PLAN §LEVELS):** the unlock
+  rollout becomes a WoW-shaped journey — milestones unlock SYSTEMS (zone crests → Modules/
+  Creeds/rig/curio slots), event-XP levels pace each class's boon pool in waves; levels =
+  options, never stats. **Zone gating: the campaign spine hard-gates by CREST**
+  (attunement-style, Zone N's crest opens Zone N+1); each zone keeps 1–2 open over-tier
+  **BORDERLAND** nodes as the high-level tease (Forge TIER wall, standing rewards only).
 - **The Ledger lives in the hometown.** Standing (crests, versions, depth records) gets
   its physical home; the lobby-crest social layer points there.
 - **Saves:** world state (fog/nodes/quests/flight/attunements) = a versioned local save
