@@ -3114,7 +3114,35 @@ func _build_band_alchemist() -> void:
 	row.add_child(_guard)
 	_runes = []
 	_rune_ids = []
-	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · 3 — RUPTURE · SPACE — DODGE · F — DODGE beats")
+	# The module's active button + any drafted spells get their own runes (only when owned —
+	# read from the campaign run, which _inject_boons folds into this fight's kit).
+	var extras := "3 — RUPTURE"
+	if _run != null and _run.modules.has("third_reagent"):
+		row.add_child(_alch_rune("catalyst", "CATALYST", "4", "flash", Palette.GOLD_BRIGHT,
+			"Drop the Third Reagent — amplify the reaction for a few seconds. Best while potency is high."))
+		extras += " · 4 — CATALYST"
+	var spell_runes := [
+		["spitfire", "SPITFIRE", "5", "bolt", "An instant off-brew acid dart — free filler between pours."],
+		["decant", "DECANT", "6", "cascade", "Pour the fuller poison into the emptier — a cd-gated snap toward balance."],
+		["reduction", "REDUCTION", "7", "surge", "Boil VOLUME into POWER — trade brew for a slug of Potency before a Rupture."],
+	]
+	for sp in spell_runes:
+		if _run != null and (String(sp[0]) in _run.loadout or _run.boons.has(String(sp[0]))):
+			row.add_child(_alch_rune(String(sp[0]), String(sp[1]), String(sp[2]), String(sp[3]),
+				Palette.REACT, String(sp[4])))
+			extras += " · %s — %s" % [String(sp[2]), String(sp[1])]
+	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · %s · SPACE — DODGE · F — DODGE beats" % extras)
+
+## One Alchemist ability rune (catalyst / a drafted spell) wired to send its action.
+func _alch_rune(id: String, label: String, key: String, icon: String, accent: Color, tip: String) -> AbilityRune:
+	var r := AbilityRune.new()
+	r.label = label
+	r.key_label = key
+	r.icon_id = icon
+	r.accent = accent
+	r.tooltip_text = tip
+	r.pressed.connect(func(): _ctrl.human({"type": "ability", "id": id}))
+	return r
 
 func _build_band_healer() -> void:
 	if _healer_cls == "bloomweaver":
