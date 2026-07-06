@@ -729,6 +729,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-06 · `escort-ticket` (`ca05269`, NOT merged) · §THE WORLD W2 — **ESCORT/VOLATILE
+  TICKET — thinnest flagged slice BUILT (Bill: "keep building"; §MEWGENICS STEALS ①).** Carry a
+  payload PICKUP→TURN-IN; while carrying, fight/elite nodes get an enemy-side BURDEN add (the boss
+  withdraws to face it) — a burden not a buff (OVERWORLD POWER + mutator-on-enemy laws hold),
+  PERSISTENT via the world save's per-zone flags. **NEW `data/world/escort.gd`** = pure logic
+  (WorldSave + node → transitions + burden id, like WorldContent) so it's headless-testable and
+  the HUD is a thin caller behind `ESCORT_PREVIEW`. Burden = `RaidContent.apply_burden` appends a
+  fixed AddRes to a FRESH encounter via the existing add-wave engine (**CombatCore untouched**);
+  rides `RaidNet.build`'s `carry` as pure data → **absent = byte-identical**. Gildfields route:
+  WARDEN'S REST(4) → GRANARY STEPS(5) burdened → UNDERMILL GATE(19). **Verified:** `world_probe`
+  ALL OK (state machine + gate + persistence + deterministic burden that provably changes the
+  fight) · `ui_smoke_world` ALL PASS (HUD drive + escort-inert-on-rush guard) · `raid_sim`
+  **byte-identical** to main baseline (`raid_results.csv` same md5, 2401 rows). **Owed before
+  merge:** richer burdens (kickable cast / hazard beat) · lane-law turn-in reward (a pool row, not
+  today's standing flag+toast) · route→authored node fields · cleared-door turn-in edge. **Awaiting
+  Bill's feel pass** (`--autostart=zone`, or run from the `wow-escort-ticket` worktree). *(escort slice session)*
+
 - ☑ 2026-07-06 · `alch-cards` → main · §CLASSES / `ALCHEMIST-PLAN.md` — **THE ALCHEMIST CARD SLATE,
   CODED (all six slices).** Bill: "go ahead and code it" (the locked pre-build slate). On top of the
   base minigame: **4 Creeds · 3 Modules (incl. the ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons ·

@@ -229,7 +229,15 @@ TICKETS v2), the next unbuilt piece.
    BURDEN, never player power, so OVERWORLD POWER + "mutator on the enemy side" both hold. Turns a
    fetch quest into a MECHANIC. **GILDFIELDS fit:** escort the cracked GRAIN-VIAL toward the
    UNDERMILL door — the harvest-rot spreads an extra add into every fight en route until you turn
-   it in (the dying-harvest arc made playable, not just backdrop).
+   it in (the dying-harvest arc made playable, not just backdrop). **SLICE BUILT (2026-07-06,
+   branch `escort-ticket` `ca05269`, flagged `ESCORT_PREVIEW`):** pure `Escort` state machine on
+   the world save (pickup 4 → carry → turn-in 19), a `carry.burden` add via the existing add-wave
+   engine (**CombatCore untouched, pure data**); route WARDEN'S REST(4) → GRANARY STEPS(5)
+   burdened → UNDERMILL GATE(19). Verified: `world_probe` + `ui_smoke_world` green, `raid_sim`
+   **byte-identical** to baseline. Owed before merge-worthy breadth: richer burdens (kickable
+   cast / hazard beat, not just a melee add), a lane-law turn-in **reward** (a pool row — the
+   slice pays a standing flag + toast), route data lifted into authored node fields, and the
+   cleared-door turn-in edge. **Awaiting Bill's feel pass** (`--autostart=zone`).
 2. **THE QUEST BOARD (②)** — Mewgenics splits quests into *Progression* (story items from bosses)
    and *Invention* (optional, from an NPC — a steady faucet). We have the progression side
    (DOOR/ROUTE/ESCORT tickets); we lack the optional heartbeat. Add a **QUEST-BOARD station in THE
