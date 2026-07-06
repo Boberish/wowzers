@@ -1,14 +1,16 @@
 ## THE ALEMBIC — the Alchemist's brew instrument (ALCHEMIST-PLAN base minigame).
-## Twin poison RESERVOIRS (Venom ember / Rot glacial) flank a central REACTION
-## CHAMBER — a gilded ring whose acid bloom breathes with min(V,R)×balance and whose
-## live dps burns in the middle; the chamber IS the Rupture button and grows a
-## breathing RIPE halo as fuel × potency peak. Between them: the VIAL, a tall glass
+## Twin poison RESERVOIRS (Venom ember / Rot glacial) stand SHOULDER-TO-SHOULDER as
+## one comparator block — the balance read IS the skill, so the two levels are judged
+## in a single glance (Bill 2026-07-06) — with the balance BEAM see-sawing directly
+## beneath the pair: level bars = level beam. Left of them: the VIAL, a tall glass
 ## tube with the sweet band, red line and min-floor etched in — it fills with the held
 ## side's liquor (wobbling surface, rising bubbles, crimson urgency past the line) and
-## stamps its verdict where you released. A balance BEAM see-saws under the chamber,
-## the POTENCY strip runs the footer with a travelling shimmer at high boil, and the
-## last eight pours sit as gems on a history rail. Verdict banners scale-punch top
-## centre (the Forge idiom).
+## stamps its verdict where you released. Right: the REACTION CHAMBER — a gilded ring
+## whose acid bloom breathes with min(V,R)×balance and whose live dps burns in the
+## middle; the chamber IS the Rupture button and grows a breathing RIPE halo as fuel ×
+## potency peak, with the POTENCY strip (travelling shimmer at high boil) as its
+## footer and the last eight pours as gems on the top-right history rail. Verdict
+## banners scale-punch top centre (the Forge idiom).
 ##
 ## INPUT: the reservoirs are HOLD zones (press = brew, release = pour) and the chamber
 ## is a TAP zone (rupture) — pointer/touch native, mirrored on 1/2/3. Pure view layer:
@@ -103,16 +105,20 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 # ------------------------------------------------------------------ input zones
+## Layout (Bill 2026-07-06): the two poison bars sit SHOULDER-TO-SHOULDER as one
+## comparator block — the balance read IS the skill, so the levels must be judged
+## in a single glance. Vial far left · the twin pair centre-left with the balance
+## beam directly beneath · the reaction chamber right.
 func _venom_zone() -> Rect2:
-	return Rect2(size.x * 0.045, size.y * 0.14, size.x * 0.135, size.y * 0.66)
+	return Rect2(size.x * 0.225, size.y * 0.14, size.x * 0.095, size.y * 0.64)
 func _rot_zone() -> Rect2:
-	return Rect2(size.x * 0.82, size.y * 0.14, size.x * 0.135, size.y * 0.66)
+	return Rect2(size.x * 0.335, size.y * 0.14, size.x * 0.095, size.y * 0.64)
 func _chamber_c() -> Vector2:
-	return Vector2(size.x * 0.535, size.y * 0.42)
+	return Vector2(size.x * 0.635, size.y * 0.42)
 func _chamber_r() -> float:
 	return minf(size.y * 0.235, size.x * 0.105)
 func _vial_rect() -> Rect2:
-	return Rect2(size.x * 0.245, size.y * 0.13, size.x * 0.062, size.y * 0.64)
+	return Rect2(size.x * 0.075, size.y * 0.13, size.x * 0.062, size.y * 0.64)
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -210,9 +216,9 @@ func _draw() -> void:
 		return
 	_draw_panel(w, h)
 	_draw_reservoir(_venom_zone(), _venom_d, venom, Palette.VENOM_BREW, "VENOM",
-		"fades fast", charging == "venom", float(_col_flash["venom"]))
+		"fades fast", charging == "venom", float(_col_flash["venom"]), true)
 	_draw_reservoir(_rot_zone(), _rot_d, rot, Palette.ROT_BREW, "ROT",
-		"lingers", charging == "rot", float(_col_flash["rot"]))
+		"lingers", charging == "rot", float(_col_flash["rot"]), false)
 	_draw_vial(w, h)
 	_draw_pour_drops(w, h)
 	_draw_chamber(w, h)
@@ -241,8 +247,10 @@ func _draw_panel(w: float, h: float) -> void:
 
 ## One poison reservoir: recessed glass well, liquor with a wobbling lit surface,
 ## saturation etch-line, live numeral, HOLD affordance + engraved nameplate.
+## `sat_label`: the twin bars sit adjacent and share the same soft-cap height, so
+## only the left one carries the "SAT" caption (one label, one line, two bars).
 func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s: String,
-		temper: String, held: bool, flash: float) -> void:
+		temper: String, held: bool, flash: float, sat_label := true) -> void:
 	# hold affordance — the whole well is a button; it brightens under the thumb
 	var well := StyleBoxFlat.new()
 	well.bg_color = Color(col.r, col.g, col.b, 0.16 if held else 0.05)
@@ -275,9 +283,10 @@ func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s
 	draw_line(Vector2(z.position.x - 2, sat_y), Vector2(z.position.x + z.size.x + 2, sat_y),
 		Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.8), 1.2, true)
 	var over_soft := val_live >= soft
-	UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(z.position.x - 3, sat_y - 6),
-		"SAT", HORIZONTAL_ALIGNMENT_LEFT, 40, 8,
-		Palette.GOLD if over_soft else Palette.GOLD_DIM)
+	if sat_label:
+		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(z.position.x - 30, sat_y + 3),
+			"SAT", HORIZONTAL_ALIGNMENT_RIGHT, 26, 8,
+			Palette.GOLD if over_soft else Palette.GOLD_DIM)
 	# pour-landed flash: rim ring + splash ripple
 	if flash > 0.0:
 		draw_rect(z.grow(3.0), Color(col.r, col.g, col.b, 0.55 * flash), false, 2.5)
@@ -444,11 +453,14 @@ func _draw_chamber(w: float, h: float) -> void:
 			draw_line(c + dir * (r * 0.4), c + dir * (r * 0.4 + (34.0 if big else 22.0) * (1.0 - bf)),
 				Color(bcol.r, bcol.g, bcol.b, bf), 2.2, true)
 
-## The balance BEAM — a fine see-saw under the chamber: tilts toward the heavier
-## poison, carries a bubble that slides to the light side, goes mint when even.
+## The balance BEAM — a fine see-saw directly UNDER the twin bars: tilts toward the
+## heavier poison, carries a bubble that slides to the light side, goes mint when even.
+## Sitting beneath the pair, beam + bars read as ONE instrument: level bars = level beam.
 func _draw_seesaw(w: float, h: float) -> void:
-	var c := Vector2(_chamber_c().x, size.y * 0.80)
-	var half := w * 0.085
+	var vz := _venom_zone()
+	var rz := _rot_zone()
+	var c := Vector2((vz.position.x + rz.position.x + rz.size.x) * 0.5, h * 0.925)
+	var half := (rz.position.x + rz.size.x - vz.position.x) * 0.5 + 6.0
 	var ang := _tilt_d * 0.22
 	var dirv := Vector2(cos(ang), sin(ang))
 	var even := balance > 0.82 and brew_min > 1.0
@@ -470,11 +482,12 @@ func _draw_seesaw(w: float, h: float) -> void:
 		verdict, HORIZONTAL_ALIGNMENT_CENTER, 220, 9,
 		Palette.REACT if even else Palette.TEXT_DIM)
 
-## POTENCY — the footer strip: cool → acid → white-hot, shimmer past 66%, ×mult plate.
+## POTENCY — the chamber's own footer strip (right half; the left footer belongs to
+## the balance beam): cool → acid → white-hot, shimmer past 66%, ×mult plate.
 func _draw_potency(w: float, h: float) -> void:
-	var x := w * 0.20
-	var bw := w * 0.56
-	var y := h * 0.895
+	var x := w * 0.52
+	var bw := w * 0.34
+	var y := h * 0.885
 	var bh := 13.0
 	UiKit.glass_bar_draw(self, Rect2(x, y, bw, bh), 0.0, Palette.REACT)
 	var frac := clampf(_pot_d, 0.0, 1.0)
@@ -492,17 +505,19 @@ func _draw_potency(w: float, h: float) -> void:
 			var sh := x + fmod(_pulse * 60.0, maxf(1.0, fw))
 			draw_rect(Rect2(sh, y + 2, 6.0, bh - 4), Color(1, 1, 1, 0.22))
 			draw_rect(Rect2(x, y + 2, fw, bh - 4), Color(1, 1, 1, 0.05 + 0.06 * sin(_pulse * 5.0)))
-	UiKit.engraved_plaque(self, Vector2(x - 42.0, y + bh * 0.5), "POTENCY", frac > 0.66, 9)
 	var hot := frac > 0.66
+	UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(x, y - 8.0),
+		"POTENCY", HORIZONTAL_ALIGNMENT_LEFT, 90, 9,
+		Palette.REACT if hot else Palette.TEXT_DIM)
 	UiKit.text_shadowed(self, UiKit.display(800, 0), Vector2(x + bw + 8.0, y + bh * 0.5 - 8.0),
 		"×%.1f" % pot_mult, HORIZONTAL_ALIGNMENT_LEFT, 60, UiKit.SIZE["TITLE"] - 6,
 		Palette.REACT_HOT if hot else Palette.REACT)
 
 ## Pour-history rail — the last 8 pours as gems (mint/gold = money, hollow = waste),
-## sitting in the calm gap between the chamber and the Rot reservoir.
+## riding the panel's top-right shoulder, clear of the chamber's halo.
 func _draw_history(w: float, h: float) -> void:
-	var rx := w * 0.76
-	var y := h * 0.20
+	var rx := w * 0.945
+	var y := h * 0.10
 	for i in range(_history.size() - 1, -1, -1):
 		var e: Dictionary = _history[i]
 		var age := _history.size() - 1 - i
