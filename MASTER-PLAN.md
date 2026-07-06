@@ -722,7 +722,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   alch-comp riftmaw 100/100/68 · mistral 100/100/100 · gemini 100/99/47 · mythos 100/94/21 —
   expert parity with the voidcaller comp, sloppy pays for the missing kicker (F22 stays open).
   **Next:** Bill plays it (`--autostart=raid:caster:brew`), feel verdicts → creeds/modules/boons
-  slices per ALCHEMIST-PLAN §6.3. *(alchemist-core session)*
+  slices per ALCHEMIST-PLAN §6.3. **Feel-pass 1 (Bill, same day, merged `aa7e809`):** the twin
+  poison bars now sit SHOULDER-TO-SHOULDER as one comparator block ("the bars should be next to
+  each other so you can see them and balance them well") — beam directly beneath the pair, vial
+  far left, chamber right w/ its own POTENCY footer. *(alchemist-core session)*
 
 - ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
   was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out
