@@ -116,7 +116,8 @@ The hub zone, unlocked from the start, no combat. It **physicalizes the meta scr
 (and answers PROGRESSION-PLAN's open "hub screen" question): the **LEDGER HALL** (per-boss
 pages, oaths, tables), the **CHARACTER SHEET** (proof crests, deepest ring, versions,
 per-class levels), the **WARBAND CAMP** (Commander party setup lives here as a place),
-a **PRACTICE yard** (the unlock-inert practice surface), and later the social lobby.
+a **PRACTICE yard** (the unlock-inert practice surface), the **QUEST BOARD** (optional zone
+tickets — the Invention-Quest faucet, §MEWGENICS STEALS ②), and later the social lobby.
 v1 = one gorgeous screen with stations, Gilded Reliquary language; it's a menu wearing
 a town, and that's fine — it can grow doors later.
 
@@ -161,6 +162,14 @@ only — keys/shards stay Topology texture (zones are deliberately LIGHTER than 
   of the zone's dungeon, turn-in back in the zone. Reads run RESULTS (seed-verified),
   never injects state into a run.
 - **EVENT tickets** — recurring quests on world events (standing lane, no-FOMO). W4.
+- **ESCORT / VOLATILE tickets (Mewgenics steal, 2026-07-06)** — pick up a payload at node A,
+  carry it to a turn-in: while you hold it, intervening fights gain an enemy-side MUTATOR
+  (extra add / hazard beat — a BURDEN, never a buff, so the OVERWORLD POWER rule and the
+  "mutator lives on the enemy side" rule both hold). The quest IS a run of harder fights, not a
+  fetch errand — this turns TICKETS from an errand into a mechanic. Reuses the ELITE-mutator
+  palette on a carried object instead of a node; enemy-side data rides `(seed, spec)` →
+  sim-clean, lockstep-safe. Drop/timeout = payload lost (route as a failed ticket; no run-state
+  injection). Rationale in §MEWGENICS STEALS ①.
 - **Forge hook:** a ticket can flip a node's Forge variant ("the bandit leader appears
   once you've read the note") — authored feel on generated content.
 
@@ -208,6 +217,39 @@ flags riding the campaign broadcast:
   fights cheap; events/choices are the real authoring cost). Full-clear ≈ 45–70 min,
   route-to-door well inside the budget. Later zones scale to ~25–35 by adding chains,
   never spine.
+
+### MEWGENICS STEALS — escort payloads · quest board · the risk fork (folded 2026-07-06, Bill: "123")
+Three refinements lifted from Mewgenics' overworld (deep-research pass, 2026-07-06). Its skeleton
+already matches ours (node maps · pickup→turn-in quests · attrition · persistent unlocks), so the
+value is these specific parts, each adapted to our locked laws. **Land target: W2** (Forge +
+TICKETS v2), the next unbuilt piece.
+1. **ESCORT / VOLATILE tickets (①)** — the headline steal. Mewgenics quests carry a *run-altering
+   modifier item* to a destination; ours were inert. New ticket verb (full spec in the grammar
+   list above): holding the payload applies an enemy-side mutator to intervening fights — a
+   BURDEN, never player power, so OVERWORLD POWER + "mutator on the enemy side" both hold. Turns a
+   fetch quest into a MECHANIC. **GILDFIELDS fit:** escort the cracked GRAIN-VIAL toward the
+   UNDERMILL door — the harvest-rot spreads an extra add into every fight en route until you turn
+   it in (the dying-harvest arc made playable, not just backdrop).
+2. **THE QUEST BOARD (②)** — Mewgenics splits quests into *Progression* (story items from bosses)
+   and *Invention* (optional, from an NPC — a steady faucet). We have the progression side
+   (DOOR/ROUTE/ESCORT tickets); we lack the optional heartbeat. Add a **QUEST-BOARD station in THE
+   BASTION** minting optional DEED/route tickets for standing + pool rows only (lane law) — a
+   persistent "reason to go back into the Gildfields" that isn't the authored spine, and a real
+   *function* for the hometown. (Station added to §THE BASTION.)
+3. **THE RISK FORK (③)** — sharpen the "cave vs rush" fork (§First visit) into a legible, recurring
+   2-way beat: EASY branch (1 fight, reconverges fast) vs HARD branch (Champion/ELITE fight + extra
+   node + fatter cache), stakes signposted BEFORE the commit, both reconverging at the capstone.
+   Steal the legibility + cadence; **swap the reward axis** — Mewgenics pays the hard path in
+   level-ups/loot (in-run power, illegal here) → ours pays in **pool rows / standing / a fatter
+   cache**, never stats. "Choose your poison" given a repeatable shape.
+
+**Explicitly NOT stolen:** roster retirement/churn (it's the breeding engine Bill cut, and it
+fights the fixed-warband fantasy) · the mana combat system (wrong genre) · their headline flaw,
+route *predictability* — ZONE REMEMBERS + branching already beat it, so don't over-linearize
+chasing their readability. **Where we're already ahead:** choice-persistence (they have none) and
+verified procedural generation (they hand-author). **Parked for the RUN layer, not zones:** their
+post-boss "bank now or push deeper" push-your-luck decision fits TOPOLOGY/raids (run economy dies
+on failure), not persistent-conquest zones — revisit at the raid retune.
 
 ---
 

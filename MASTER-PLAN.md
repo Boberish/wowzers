@@ -124,8 +124,13 @@ stays instance-only VERBATIM (behind a door the run still exists); zones get per
 **THE ZONE REMEMBERS** (permanent zone flags rewire later nodes; co-op replay = the
 **GUEST-WORLD rule** — a session plays the least-progressed member's world, pending choices
 write back only to saves that still had them). Zone sizing: spine ~8–12 nodes (attunement
-budget caps it), breadth scales — Zone 1 target ~20 nodes. PARKED: **RAID RITES** (mandatory
-re-done entry nodes to keep raids a big deal — Bill, later).
+budget caps it), breadth scales — Zone 1 target ~20 nodes. **MEWGENICS STEALS folded
+(2026-07-06, W2 target):** **ESCORT/VOLATILE tickets** (carry a payload that spreads an
+enemy-side mutator to fights en route — a burden, not a buff), a **BASTION QUEST BOARD**
+(optional-ticket faucet), and a legible easy/hard **RISK FORK** (reward = pool/standing, never
+stats) — spec in WORLD-PLAN §MEWGENICS STEALS. PARKED: **RAID RITES** (mandatory
+re-done entry nodes to keep raids a big deal — Bill, later); their post-boss "bank now or push
+deeper" push-your-luck decision (RUN layer only, not zones).
 
 **W1 ✅ BUILT & MERGED 2026-07-06 (`b9c26aa` — full record in the Coordination Log):** the
 Atlas + **ZONE 1 "THE GILDFIELDS"** (20-node Westfall-arc conquest map, ZONE REMEMBERS sluice
@@ -744,6 +749,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   Reduction are human-skill/comfort cards the safe AI doesn't chase). **Owed:** 2nd spec · class puppet ·
   ONLINE spec-carry of creed/module/rig (offline map+gate carry them via `_inject_boons`; RaidNet spec
   doesn't — a shared Twinfang follow-up) · Commander AI-caster toggle · name/art. *(alch-cards session)*
+
+- ☑ 2026-07-06 · main (docs only) · §THE WORLD / `WORLD-PLAN.md` — **MEWGENICS RESEARCH → 3 STEALS
+  FOLDED (Bill: "fold ideas, 123").** Deep-research pass on Mewgenics' overworld/quest loop
+  (verify stage cut per Bill — Opus + trusted sources; 19 sources, reviews + wiki.gg). Finding:
+  its skeleton already matches ours (node maps · pickup→turn-in quests · attrition · persistent
+  linear unlocks), so only three parts were worth taking, each adapted to our laws and targeting
+  **W2** (Forge + TICKETS v2): **① ESCORT/VOLATILE tickets** (new grammar verb — carried payload
+  applies an enemy-side mutator to fights en route; a BURDEN not a buff → OVERWORLD POWER +
+  mutator-on-enemy laws hold; turns TICKETS into a mechanic; GILDFIELDS grain-vial fit) · **② THE
+  QUEST BOARD** (BASTION station = optional-ticket faucet, their Invention-Quest split; lane-law
+  rewards only) · **③ the legible RISK FORK** (sharpen "cave vs rush" into a signposted
+  reconverging easy/hard beat; reward axis swapped to pool/standing, never Mewgenics' level-ups).
+  **NOT stolen:** roster retirement/churn (breeding engine Bill cut; fights fixed-warband) · mana
+  combat (wrong genre) · route predictability (ZONE REMEMBERS already beats it). **Parked (run
+  layer, not zones):** their post-boss "bank now or push deeper" push-your-luck. WORLD-PLAN gained
+  §MEWGENICS STEALS + an ESCORT entry in the quest grammar + a QUEST BOARD station. *(mewgenics
+  research session)*
 
 - ☑ 2026-07-06 · `tempo-real` → main (`67f5efc`) · §TEMPO — **THE WHOLE TEMPO PLAN, CODED.** Bill:
   "code everything, make it real." All kit-local + deterministic across 6 files (boons/config/creeds/
