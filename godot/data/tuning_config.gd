@@ -27,6 +27,9 @@ extends Resource
 @export var sunder_max: float = 5.0            ## pip ceiling
 @export var sunder_k: float = 0.06             ## boss takes +6% MORE per pip (×1.30 at full)
 @export var sunder_decay: float = 1.1          ## pips bled per second when not fed (aggressive)
+# --- DEBILITATE (Alchemist Debilitator boon feeds boss.debilitate; inert/0 for everyone else) ---
+@export var debilitate_k: float = 0.03         ## boss takes +3% MORE per stack (×1.09 at 3 stacks)
+@export var debilitate_decay: float = 0.5      ## stacks bled per second when not fed (gentle corrosion)
 
 # --- M7 strike strings + the universal dodge ---
 # Grade windows: seconds BEFORE a beat's impact that a dodge press still answers

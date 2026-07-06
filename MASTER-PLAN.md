@@ -573,12 +573,16 @@ nodes, not node kinds.
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
 **Open ideas** (from Ascension research, parked until a 6th/7th class is wanted):
-- **THE ALCHEMIST ("The Brew") — 🟢 BASE MINIGAME BUILT & PLAYABLE 2026-07-06** (Bill's direct order —
-  playtest before boons). The 7th class, the CASTER seat's second option (voidcaller stays default —
-  byte-identical unless picked): Vial/Venom+Rot/Reaction/Potency/Rupture per the feel-test artifact,
-  THE ALEMBIC instrument on the one HUD, 3-tier policy + `alchemist_sim` (in `psim.sh`), its own gate
-  exam, `raid_sim --caster=alchemist`. Full state + bands + next slices: **`ALCHEMIST-PLAN.md`**.
-  Play: `--autostart=raid:caster:brew`. Awaiting Bill's live feel verdicts → then creeds/modules/boons.
+- **THE ALCHEMIST ("The Brew") — 🟢 FULL CARD SLATE BUILT 2026-07-06** (`alch-cards`). The 7th class,
+  the CASTER seat's second option (voidcaller stays default — byte-identical unless picked): the base
+  minigame (Vial/Venom+Rot/Reaction/Potency/Rupture + THE ALEMBIC) PLUS the whole framework —
+  **4 Creeds · 3 Modules (incl. ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons · 3 Spells**, the
+  shared HUD ceremony generalized off the Twinfang-only gate (`_fw()` provider), creed-aware offers +
+  a raid-wide Debilitator SUPPORT debuff (sunder-precedent engine touch, byte-neutral). All guarded →
+  undrafted brew byte-identical (`4344960863911121821`); raid default comp byte-identical to main
+  (`4978452801628609439`). Full state + per-layer sim A/B + next slices: **`ALCHEMIST-PLAN.md`**.
+  Play: `--autostart=raid:caster:brew`. Card BALANCE is Bill's playtest dial; STILL OWED: 2nd spec,
+  class puppet, online spec-carry of creed/module/rig, name/art.
 - Self-brink DPS: gauge climbs = more damage, cap = self-destruct (Cultist Insanity / Stormbringer Static archetype). Verb: *ride the redline*. Strong fit.
 - Over-defend punishment tank layer (Mountain King self-stun) — could bolt onto Bulwark as a boon/mod instead.
 - Imposed-rhythm caster (Runemaster attunement auto-cycle) — kit rotates on a clock you don't control.
@@ -720,6 +724,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · `alch-cards` → main · §CLASSES / `ALCHEMIST-PLAN.md` — **THE ALCHEMIST CARD SLATE,
+  CODED (all six slices).** Bill: "go ahead and code it" (the locked pre-build slate). On top of the
+  base minigame: **4 Creeds · 3 Modules (incl. the ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons ·
+  3 Spells**, each landed guarded + sim-A/B'd + policy-taught per layer. (a) Framework generalized —
+  `_fw()` provider + `_fw_creed/module/rig*` dispatch replaced the Twinfang-only `_blade_tempo_human()`
+  gate everywhere (creed pick / module pick / rig wire / `_inject_boons` / build panel / rig-fire pop);
+  the Alchemist caster swears a Creed. (b) Modules w/ a compact ALEMBIC gauge + catalyst key 4. (c) Rig
+  off the brew's own beats (fuel raw-fractional). (d/e) Boons incl. **Debilitator** — the SUPPORT debt,
+  a raid-wide `boss.debilitate` debuff via a **sunder-precedent engine touch** (BossState/TuningConfig/
+  CombatCore, guarded byte-neutral). (f) Spells keys 5/6/7. **Creed-aware offers** (verdict 6):
+  `hide_creeds` tag + `Draft._ok()` check + module/rig-board filters — draft offers 21 cards, Purist
+  hides the 4 rupture cards (21→17). **GATES:** undrafted brew BYTE-IDENTICAL (Crucible seed1
+  `4344960863911121821`); raid DEFAULT comp byte-identical to pure main (`4978452801628609439`, freeze-
+  snapshot A/B — the Debilitate touch is byte-neutral); creed/module/rig/boon determinism ALL PASS;
+  **net_smoke ALL OK** (lockstep) · gear/commander/raid/draft probes PASS · ui_smoke_raid + ui_smoke_world
+  PASS · WSLg ALEMBIC render OK. Card BALANCE = Bill's playtest dial (each distinct+sane, skill moves
+  outcomes; Chain Rupture −12.6s/Catalyst −9.0s are the standouts; HotPour/Emulsion/Practiced Hand/
+  Reduction are human-skill/comfort cards the safe AI doesn't chase). **Owed:** 2nd spec · class puppet ·
+  ONLINE spec-carry of creed/module/rig (offline map+gate carry them via `_inject_boons`; RaidNet spec
+  doesn't — a shared Twinfang follow-up) · Commander AI-caster toggle · name/art. *(alch-cards session)*
+
 - ☑ 2026-07-06 · `tempo-real` → main (`67f5efc`) · §TEMPO — **THE WHOLE TEMPO PLAN, CODED.** Bill:
   "code everything, make it real." All kit-local + deterministic across 6 files (boons/config/creeds/
   modules/kit + sim). Cuts (Opportunist·Held Note·spells·Killer's Eye; Edge→Largo creed·Deathmark cut;
@@ -745,7 +770,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   offers get a mechanism** (`hide_creeds` tag + `Draft._ok()` check, byte-identical untagged) **and
   extend to modules** (Purist never sees Fermentation/Reaction-Vessel) · HUD framework plumbing
   noted Twinfang-hardcoded (generalization = slice a). Build order = ALCHEMIST-PLAN §6.3 slices
-  a–f; next session codes it. *(alchemist run-through session)*
+  a–f; next session codes it. **→ CODED in `alch-cards` (entry above).** *(alchemist run-through session)*
 
 - ☑ 2026-07-06 · `world-w1` → main (`b9c26aa`) · §THE WORLD W1 — **THE ATLAS + ZONE 1 + THE
   BASTION BUILT (Bill: "go ahead and build this... 1st zone is big impressions"), flagged

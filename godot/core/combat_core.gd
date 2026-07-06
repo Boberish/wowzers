@@ -54,6 +54,8 @@ static func update(s: CombatState) -> void:
 	_apply_seat_effects(s)                 # 2b. HoTs heal, DoTs tick, wards expire
 	if s.boss.sunder > 0.0:                # 2c. SUNDER bleeds toward 0 (guarded — only the tank feeds it)
 		s.boss.sunder = maxf(0.0, s.boss.sunder - s.config.sunder_decay * s.dt)
+	if s.boss.debilitate > 0.0:            # DEBILITATE bleeds toward 0 (guarded — only the Alchemist feeds it)
+		s.boss.debilitate = maxf(0.0, s.boss.debilitate - s.config.debilitate_decay * s.dt)
 	var ph := current_phase(s)             # 3. boss phase
 	_boss_think(s, ph)                     # 4. melee + advance/resolve telegraph, else pick next
 	_apply_group_damage(s, s.dt)           # 5. stat-block allies chip the boss
@@ -671,6 +673,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 		mult = seat.kit.outgoing_mult(seat)
 	if s.boss.sunder > 0.0:                     # SUNDER: the cracked wall takes MORE from everyone
 		mult *= 1.0 + s.boss.sunder * s.config.sunder_k
+	if s.boss.debilitate > 0.0:                 # DEBILITATE: the corroded boss takes MORE from the whole raid
+		mult *= 1.0 + s.boss.debilitate * s.config.debilitate_k
 	if s.party_out_mult != 1.0:                 # OVERCLOCK DMG-amp prime (default 1.0 → byte-neutral)
 		mult *= s.party_out_mult
 	var d := roundf(raw * mult)

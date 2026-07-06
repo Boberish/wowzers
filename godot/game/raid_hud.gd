@@ -1529,14 +1529,21 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
-		# TEMPO REWORK (offline plumbing): fold the run's Creed + Modules into the blade
-		# kit. Guarded to TwinfangKit — other classes carry neither, so this is a no-op there.
+		# CLASS FRAMEWORK (offline plumbing): fold the run's Creed + Modules + Rig into a
+		# reworked kit. Both Twinfang and Alchemist carry the same three fields; every other
+		# class carries none, so this is skipped there (byte-identical no-op).
 		if seat.kit is TwinfangKit:
 			var tk := seat.kit as TwinfangKit
 			if _run.creed != "":
 				tk.creed_id = _run.creed
 			tk.modules = _run.modules.duplicate()
 			tk.rig = _run.rig.duplicate()      # TEMPO §5: the wired Combo rig
+		elif seat.kit is AlchemistKit:
+			var ak := seat.kit as AlchemistKit
+			if _run.creed != "":
+				ak.creed_id = _run.creed
+			ak.modules = _run.modules.duplicate()
+			ak.rig = _run.rig.duplicate()      # ALCHEMIST-PLAN §3/rig: the wired Combo rig
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -2325,8 +2332,8 @@ func _show_boon_draft(done: Callable) -> void:
 	if _run == null:
 		done.call()
 		return
-	# TEMPO §5: the FIRST draft is where you wire your Combo (blade/Tempo only), then the boons.
-	if _blade_tempo_human() and _run.rig.is_empty():
+	# FRAMEWORK: the FIRST draft is where you wire your Combo rig (any reworked class), then boons.
+	if _fw() != "" and _run.rig.is_empty():
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
@@ -2421,12 +2428,78 @@ func _close_armor_modal() -> void:
 func _blade_tempo_human() -> bool:
 	return _seat_key == "blade" and _seat_cls_now() == "twinfang"
 
+## The CLASS-FRAMEWORK provider for the HUMAN seat: which reworked class's Creed/Module/Rig
+## content drives the pick screens, or "" if this seat's class has no framework yet. Twinfang
+## on the blade, the Brew (Alchemist) on the caster; every other seat/class skips the screens
+## (empty pages — per Bill, non-conforming classes leave them blank). Generalizes the old
+## _blade_tempo_human() gate so a second reworked class snaps onto the same ceremony.
+func _fw() -> String:
+	if _seat_key == "blade" and _seat_cls_now() == "twinfang":
+		return "twinfang"
+	if _seat_key == "caster" and _seat_cls_now() == "alchemist":
+		return "alchemist"
+	return ""
+
+## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
+func _fw_creed_ids(fw: String) -> Array:
+	return AlchemistCreeds.v1_ids() if fw == "alchemist" else TwinfangCreeds.v1_ids()
+
+func _fw_creed(fw: String, id: String) -> Dictionary:
+	return AlchemistCreeds.get_creed(id) if fw == "alchemist" else TwinfangCreeds.get_creed(id)
+
+## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
+## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
+func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+	if fw != "alchemist":
+		return TwinfangModules.built_ids()
+	var out: Array = []
+	for id in AlchemistModules.built_ids():
+		if creed != "" and AlchemistModules.has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		out.append(id)
+	return out
+
+func _fw_module(fw: String, id: String) -> Dictionary:
+	return AlchemistModules.get_module(id) if fw == "alchemist" else TwinfangModules.get_module(id)
+
+## Rig data dispatch (both classes mirror the TwinfangRig static API).
+func _fw_rig_when_table(fw: String) -> Dictionary:
+	return AlchemistRig.WHENS if fw == "alchemist" else TwinfangRig.WHENS
+
+func _fw_rig_then_table(fw: String) -> Dictionary:
+	return AlchemistRig.THENS if fw == "alchemist" else TwinfangRig.THENS
+
+func _fw_rig_describe(fw: String, w: String, t: String) -> String:
+	return AlchemistRig.describe(w, t) if fw == "alchemist" else TwinfangRig.describe(w, t)
+
+## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
+## board hides the burst WHENs Ripe/Perfect Wave and the Overfill THEN). Twinfang: unfiltered.
+func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
+	if fw != "alchemist":
+		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
+			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
+	var wpool: Array = []
+	for id in AlchemistRig.when_ids():
+		if creed != "" and AlchemistRig.when_has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		wpool.append(id)
+	var tpool: Array = []
+	for id in AlchemistRig.then_ids():
+		if creed != "" and AlchemistRig.then_has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		tpool.append(id)
+	return {"whens": AlchemistRig.offer(wpool, rng, 3), "thens": AlchemistRig.offer(tpool, rng, 3)}
+
 ## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
 func _show_creed_pick(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human() or _run.creed != "":
+	var fw := _fw()
+	if _run == null or fw == "" or _run.creed != "":
 		done.call()
 		return
-	var ids: Array = TwinfangCreeds.v1_ids().duplicate()   # the shipping pool (grows with unlocks)
+	var ids: Array = _fw_creed_ids(fw).duplicate()         # the shipping pool (grows with unlocks)
 	if ids.size() > 3 and _run.draft_rng != null:          # sample 3 deterministically when it's bigger
 		for i in range(ids.size() - 1, 0, -1):
 			var j := int(_run.draft_rng.next_u32() % (i + 1))
@@ -2440,14 +2513,16 @@ func _show_creed_pick(done: Callable) -> void:
 	_ui.add_child(head)
 	var hl := _title(head, "SWEAR A CREED", 34, Palette.CRIMSON)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run", 15, Palette.TEXT_DIM)
+	var sub := "H O W   Y O U   B R E W  —  one posture, the whole run" if fw == "alchemist" \
+		else "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run"
+	_title(head, sub, 15, Palette.TEXT_DIM)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in ids:
-		var c: Dictionary = TwinfangCreeds.get_creed(String(id))
+		var c: Dictionary = _fw_creed(fw, String(id))
 		var card := AspectCard.new(String(c.get("name", id)) + "  ·  " + String(c.get("kicker", "")),
 			String(c.get("blurb", "")), Palette.CRIMSON, "flurry")
 		card.chosen.connect(_pick_creed.bind(String(id), done))
@@ -2456,16 +2531,17 @@ func _show_creed_pick(done: Callable) -> void:
 func _pick_creed(id: String, done: Callable) -> void:
 	if _run != null:
 		_run.creed = id
-	_toast_add("⚔  Creed sworn — %s" % String(TwinfangCreeds.get_creed(id).get("name", id)))
+	_toast_add("⚔  Creed sworn — %s" % String(_fw_creed(_fw(), id).get("name", id)))
 	done.call()
 
 ## End of Floor 1: INSTALL A MODULE — a new HUD gauge + way to play (§4). Forced pick.
 func _show_module_pick(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human():
+	var fw := _fw()
+	if _run == null or fw == "":
 		done.call()
 		return
 	var avail: Array = []
-	for id in TwinfangModules.built_ids():                 # only the implemented modules are offerable
+	for id in _fw_module_offer_ids(fw, _run.creed):        # implemented + creed-allowed modules
 		if not _run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
@@ -2486,7 +2562,7 @@ func _show_module_pick(done: Callable) -> void:
 	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in avail:
-		var m: Dictionary = TwinfangModules.get_module(String(id))
+		var m: Dictionary = _fw_module(fw, String(id))
 		var card := AspectCard.new(String(m.get("name", id)) + "  ·  " + String(m.get("kicker", "")),
 			String(m.get("blurb", "")), Palette.FLOW, "flurry")
 		card.chosen.connect(_pick_module.bind(String(id), done))
@@ -2495,7 +2571,7 @@ func _show_module_pick(done: Callable) -> void:
 func _pick_module(id: String, done: Callable) -> void:
 	if _run != null:
 		_run.modules[id] = true
-	_toast_add("⬡  Module installed — %s" % String(TwinfangModules.get_module(id).get("name", id)))
+	_toast_add("⬡  Module installed — %s" % String(_fw_module(_fw(), id).get("name", id)))
 	done.call()
 
 # ---- TEMPO §5: the ONE Combo rig — wire a WHEN → THEN (first draft; re-wire at Floor 2) ----
@@ -2507,11 +2583,13 @@ var _rig_confirm: Button = null
 ## WIRE YOUR COMBO — pick 1 of 3 WHENs + 1 of 3 THENs; the readout shows the computed number
 ## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
 func _show_rig_wire(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human():
+	var fw := _fw()
+	if _run == null or fw == "":
 		done.call()
 		return
-	var whens := TwinfangRig.offer(TwinfangRig.when_ids(), _run.draft_rng, 3)
-	var thens := TwinfangRig.offer(TwinfangRig.then_ids(), _run.draft_rng, 3)
+	var offered := _fw_rig_offered(fw, _run.creed, _run.draft_rng)
+	var whens: Array = offered["whens"]
+	var thens: Array = offered["thens"]
 	_rig_w = ""
 	_rig_t = ""
 	_screen = "rig"
@@ -2528,8 +2606,8 @@ func _show_rig_wire(done: Callable) -> void:
 	cols.add_theme_constant_override("separation", 54)
 	_place(cols, 0.5, 0.5, 0.5, 0.5, -440, -180, 440, 150)
 	_ui.add_child(cols)
-	cols.add_child(_rig_col("WHEN — the moment", whens, TwinfangRig.WHENS, true))
-	cols.add_child(_rig_col("THEN — the payoff", thens, TwinfangRig.THENS, false))
+	cols.add_child(_rig_col("WHEN — the moment", whens, _fw_rig_when_table(fw), true))
+	cols.add_child(_rig_col("THEN — the payoff", thens, _fw_rig_then_table(fw), false))
 	var foot := VBoxContainer.new()
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
 	foot.add_theme_constant_override("separation", 12)
@@ -2542,7 +2620,7 @@ func _show_rig_wire(done: Callable) -> void:
 	_rig_confirm.disabled = true
 	_rig_confirm.pressed.connect(func():
 		_run.rig = {"when": _rig_w, "then": _rig_t}
-		_toast_add("⚡  Combo wired — " + TwinfangRig.describe(_rig_w, _rig_t))
+		_toast_add("⚡  Combo wired — " + _fw_rig_describe(fw, _rig_w, _rig_t))
 		done.call())
 	foot.add_child(_rig_confirm)
 
@@ -2578,7 +2656,7 @@ func _rig_refresh() -> void:
 	if _rig_readout == null:
 		return
 	if _rig_w != "" and _rig_t != "":
-		_rig_readout.text = TwinfangRig.describe(_rig_w, _rig_t)
+		_rig_readout.text = _fw_rig_describe(_fw(), _rig_w, _rig_t)
 		_rig_readout.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
 		if _rig_confirm != null:
 			_rig_confirm.disabled = false
@@ -3128,8 +3206,14 @@ func _verb_summary_lines() -> Array:
 				return ["⚡ Combo — " + TwinfangRig.describe(
 					String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
 			return TwinfangBoons.verb_summary(_run.boons, _aspect)
-		"caster": return ([] if _caster_cls == "alchemist" \
-			else VoidcallerBoons.verb_summary(_run.boons, _aspect))
+		"caster":
+			if _caster_cls == "alchemist":
+				# show the wired Combo rig in the build panel (the Brew's rig)
+				if not _run.rig.is_empty():
+					return ["⚡ Combo — " + AlchemistRig.describe(
+						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
+				return []
+			return VoidcallerBoons.verb_summary(_run.boons, _aspect)
 		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
 
@@ -3248,7 +3332,7 @@ func _owned_boon_labels() -> Array:
 	var pools: Array = []
 	match _seat_key:
 		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
-		"caster": pools = ([] if _caster_cls == "alchemist" \
+		"caster": pools = ([AlchemistBoons.SHARED, AlchemistBoons.BREW] if _caster_cls == "alchemist" \
 			else [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER])
 		"healer": pools = ([BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN] if _healer_cls == "bloomweaver" else [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK])
 		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
@@ -3477,6 +3561,14 @@ func _alchemist_key(code: int) -> void:
 				_ctrl.human({"type": "ability", "id": "brew_rot"})
 		KEY_3, KEY_R:
 			_ctrl.human({"type": "ability", "id": "rupture"})
+		KEY_4:
+			_ctrl.human({"type": "ability", "id": "catalyst"})   # MODULE (Third Reagent): drop it in
+		KEY_5:
+			_ctrl.human({"type": "ability", "id": "spitfire"})   # SPELL (drafted): filler dart
+		KEY_6:
+			_ctrl.human({"type": "ability", "id": "decant"})     # SPELL (drafted): snap-to-balance
+		KEY_7:
+			_ctrl.human({"type": "ability", "id": "reduction"})  # SPELL (drafted): volume→power
 
 ## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
 ## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.
@@ -4070,6 +4162,14 @@ func _render_band_alchemist(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.react_dps = float(obs.get("react_dps", 0.0))
 	g.ripe_glow = float(obs.get("ripe_glow", 0.0))
 	g.brew_min = float(obs.get("brew_min", 0.0))
+	# MODULES (slice B): the equipped one lights a compact gauge on the instrument.
+	g.mod_third_reagent = bool(obs.get("mod_third_reagent", false))
+	g.mod_fermentation = bool(obs.get("mod_fermentation", false))
+	g.mod_reaction_vessel = bool(obs.get("mod_reaction_vessel", false))
+	g.mod_reagent = float(obs.get("reagent", 0.0))
+	g.mod_reagent_active = bool(obs.get("reagent_active", false))
+	g.mod_ferment = float(obs.get("ferment", 0.0))
+	g.mod_vessel = float(obs.get("vessel", 0.0))
 	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
@@ -4318,6 +4418,11 @@ func _handle_event(ev: Dictionary) -> void:
 			if mine:
 				var tn := String((TwinfangRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
 				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.FLOW, 22, 0.5)
+		"brew_rig":
+			# ALCHEMIST rig fired — same pop, off the Brew's rig vocabulary.
+			if mine:
+				var tn := String((AlchemistRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
+				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.REACT, 22, 0.5)
 		"opening":
 			# THE OPENING — a dump landed in the boss's vulnerability window
 			if mine and _opening != null:
