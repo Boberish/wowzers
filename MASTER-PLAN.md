@@ -699,6 +699,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-06 · `alchemist-core` (worktree `../wow-alchemist`) · §CLASSES / `ALCHEMIST-PLAN.md` —
+  **CLAIM: the Brew BASE MINIGAME build (Bill's direct order — playtest before boons).** Bill:
+  "can't go farther without knowing live things — just do the base mini game, UI/bars, then the
+  rest after; UI is the main focus, very nice and full and flashy with animations." This
+  deliberately front-runs the "after the Tempo pilot proves" sequencing and the 🟡 opens (F2
+  active-patience / F3 auto-evasion) — those get settled BY live playtesting the base. Scope:
+  timing/tuning ported faithfully from the feel-test artifact (`003f6832…`) · new class kit
+  `data/alchemist/` (Vial/Venom+Rot/Reaction/Potency/Rupture) · caster-seat class option
+  (voidcaller stays default — byte-identical unless picked) · THE HUD Brew band (flagship
+  instrument, hold-zones + keyboard) · AlchemistPolicy 3-tier + `alchemist_sim` harness ·
+  NO creeds/modules/boons/rig yet. *(alchemist-core session)*
+
 - ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
   was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out
   `2277d15`) and is on origin — the ⚠ "UNCOMMITTED on Bill's other computer" note in the split entry
