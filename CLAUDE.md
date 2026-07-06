@@ -36,9 +36,11 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-
   kits, balance not maintained. **Voidcaller is CUT from the roster plan** (stays in code as
   the frozen caster-seat placeholder until that seat's rework); its interrupt verb moves to
   **interrupt-by-ability** (WORLD-PLAN pillar #3). **THE SPLIT (2026-07-06):** the Brew /
-  Venom spec is now its OWN future class (`ALCHEMIST-PLAN.md`, working name filler); Twinfang
-  owes a rhythm-variant second spec (TEMPO-PLAN §13) — the in-code poison-wheel Venom stays
-  the frozen placeholder aspect until then.
+  Venom spec is now its OWN class (`ALCHEMIST-PLAN.md`, working name filler) — **base minigame
+  BUILT & playable same day** as the caster seat's second option (`--autostart=raid:caster:brew`;
+  voidcaller stays the default — byte-identical unless picked); creeds/modules/boons follow
+  Bill's live playtest. Twinfang owes a rhythm-variant second spec (TEMPO-PLAN §13) — the
+  in-code poison-wheel Venom stays the frozen placeholder aspect until then.
 - **BOSS REDO INCOMING:** the 15 solo bosses are the casting pool (recast, never rebuilt);
   the 4 Seals (Vorathek / Mistral / Gemini / Mythos) get a PILLAR PASS toward the new combat
   pillars, then deeper reworks later (see MASTER-PLAN §BOSSES).
@@ -74,8 +76,9 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-
   redeploy the server together with clients (old versions rejected at handshake by design).
 
 ## ACTIVE VERIFICATION (the merge-back bar)
-- **Balance sims (the only two):** `sim/twinfang_sim.gd` (Tempo pilot loop) and
-  `sim/raid_sim.gd` (the 4 Seals; `--boss=mythos` etc). Shard across cores with
+- **Balance sims (the only three):** `sim/twinfang_sim.gd` (Tempo pilot loop),
+  `sim/raid_sim.gd` (the 4 Seals; `--boss=mythos`, `--caster=alchemist` etc) and
+  `sim/alchemist_sim.gd` (the Brew base loop). Shard across cores with
   **`scripts/psim.sh <sim> [seeds] [jobs] [-- --boss=…]`** (~5×). Fast raid tuning knobs:
   **`./tune.sh`** (`--dmg= --regen= --fortify=`, `--probes=0`).
 - **System probes (keep green when you touch their system):** `draft_sim` · `gear_probe` ·

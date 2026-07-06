@@ -1,8 +1,24 @@
 # ALCHEMIST-PLAN — "The Brew" (the poison CLASS — split out of Twinfang 2026-07-06)
 
-**Status:** DESIGN (core locked 2026-07-05; audited + **PROMOTED TO ITS OWN CLASS by Bill 2026-07-06**,
-spec-audit verdict F10) — NOT BUILT. **THE ALCHEMIST is a WORKING NAME — filler** (Bill: "alchemist or
-something"; name/art are placeholder-grade until the build claim. Candidates: Venomancer / Plaguewright /
+**Status:** 🟢 **BASE MINIGAME BUILT & PLAYABLE 2026-07-06** (`alchemist-core` — Bill's direct order:
+"can't go farther without knowing live things; just do the base mini game, UI/bars… the rest after";
+this deliberately front-ran the "after the Tempo pilot proves" sequencing — the 🟡 opens get settled
+BY playtesting). **Live now:** the §1 CORE LOOP verbatim from the feel-test artifact (`data/alchemist/`
+AlchemistConfig/Kit/Content — all artifact constants as tunables + a `dmg_scale` raid dial, 0.55) ·
+a CASTER-SEAT class option on THE HUD (voidcaller stays default; default comp proven byte-identical,
+4 Seals × 100 seeds per-seed checksums) · **THE ALEMBIC** flagship instrument (hold-zone reservoirs,
+the vial w/ breathing sweet band + verdict stamps, tap-to-Rupture reaction chamber w/ RIPE halo,
+balance see-saw, potency shimmer strip, pour-history gems, droplet arcs, scale-punch banners) ·
+hold-release input (HOLD 1/2, release = pour, 3/R = Rupture; pointer zones for touch) ·
+AlchemistPolicy 3 tiers + `alchemist_sim` in `psim.sh` · its own GATE exam (THE SANDBOX — the Brew
+can't play the kick exam) · codex entry. **Bands:** solo (300 seeds) crucible 100/99.7/50 · leech
+96/78/0.7; raid (100 seeds, alch comp) riftmaw 100/100/68 · mistral 100/100/100 · gemini 100/99/47 ·
+mythos 100/94/21 — expert parity w/ the voidcaller comp (Mistral TTK 47.5s vs 48.1s), sloppy pays for
+the missing kicker (F22, deliberate). Play: **`--autostart=raid:caster:brew`** (or class select →
+THE ALCHEMIST). **NOT built yet (post-playtest slices):** creeds · modules · boons/rig ·
+Spitfire/Decant/Reduction · second spec · a class puppet (art = voidcaller rig filler).
+**THE ALCHEMIST is a WORKING NAME — filler** (Bill: "alchemist or
+something"; name/art are placeholder-grade until the class ships. Candidates: Venomancer / Plaguewright /
 keep Alchemist). The old poison-wheel **Twinfang·Venom stays IN CODE as the frozen second aspect** until
 Twinfang's replacement spec lands (`TEMPO-PLAN.md` §13) — do not delete it in this split.
 Feel-test artifact (thumb-playable): https://claude.ai/code/artifact/003f6832-5c3b-4d0f-bf28-8ea07534d313
@@ -192,13 +208,19 @@ CUT at triage: Sealed Flask, Deep Draught, Emulsion, Equilibrium, Catalytic Bond
   gradient before this class ships — the hold-release minigame needs a policy answer, same bar as Tempo.
 - RAID-ONLY game; combat serious, wrapper silly; deterministic engine; thumb-playable.
 
-## 6. Build order (when claimed — mirrors the Tempo pilot; AFTER the pilot proves the framework)
+## 6. Build order (steps 1–2 DONE 2026-07-06 — Bill's order inverted step 0 into "settle by playtest")
 
-0. **Settle the 🟡 opens above with Bill first** — F2 (active patience), F3 (auto-evasion), the rig
-   vocabulary (F13/I3). Name/art stay filler until here.
-1. **Brew core** as a NEW CLASS KIT + headless sim: Vial charge/pour, two asymmetric poisons, Reaction
-   (min × balance), Potency, Rupture + the F4 wave. Seat model as usual (`ClassKit` hooks + `seat.vars`,
-   guarded no-ops for everyone else). Determinism + bands vs the Seals in `raid_sim` (a new DPS-seat
-   class option) + its own solo sim harness added to `psim.sh`.
-2. **The Brew HUD** on `raid_hud` (hold-zones + Rupture + see-saw + Potency bar; thumb-first).
-3. Creeds → Modules → rig content → boons, verified per layer (the Tempo slice pattern).
+0. ~~Settle the 🟡 opens above with Bill first~~ → **now settled BY LIVE PLAYTEST of the base build**
+   — F2 (active patience: the base ships the artifact's exact pacing), F3 (auto-evasion: base ships
+   the STANDARD dodge — a held charge survives a dodge, footwork is manual), the rig vocabulary
+   (F13/I3: still owed before the boon slice). Name/art stay filler.
+1. ✅ **Brew core** (`data/alchemist/`) — Vial charge/pour, two asymmetric poisons, Reaction
+   (min × balance), Potency, Rupture. `ClassKit` hooks + `seat.vars`, zero rng, guarded — default
+   comp byte-identical (twinfang_sim 150 seeds + raid_sim 4×100 seeds CSV-diffed vs main).
+   `alchemist_sim` (crucible/leech harness) in `psim.sh`; `raid_sim --caster=alchemist`.
+2. ✅ **The Brew HUD** — THE ALEMBIC on `raid_hud` (hold-zones + tap-Rupture chamber + see-saw +
+   Potency; pointer + keyboard). `ui_smoke_raid` covers the brew drive, gate exam and juice;
+   `screenshot_alchemist_raid` is the WSLg visual probe.
+3. **NEXT (post-playtest):** fold Bill's feel verdicts into the §1 dials → Creeds → Modules → rig
+   content → boons, verified per layer (the Tempo slice pattern). Also owed: the interrupt-carrier
+   call (F22), a real class puppet, Commander AI-caster toggle exposure, name/art decision.

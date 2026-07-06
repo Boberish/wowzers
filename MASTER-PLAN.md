@@ -555,14 +555,17 @@ nodes, not node kinds.
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
 **Open ideas** (from Ascension research, parked until a 6th/7th class is wanted):
-- **THE ALCHEMIST ("The Brew") — no longer parked: the CONCRETE next new class (2026-07-06).** The patient
-  poison-brewer split OUT of Twinfang by the spec audit (verdict F10) — design-complete + audit-verdicted in
-  `ALCHEMIST-PLAN.md` (working name/art = filler); builds after the Tempo pilot proves the framework.
+- **THE ALCHEMIST ("The Brew") — 🟢 BASE MINIGAME BUILT & PLAYABLE 2026-07-06** (Bill's direct order —
+  playtest before boons). The 7th class, the CASTER seat's second option (voidcaller stays default —
+  byte-identical unless picked): Vial/Venom+Rot/Reaction/Potency/Rupture per the feel-test artifact,
+  THE ALEMBIC instrument on the one HUD, 3-tier policy + `alchemist_sim` (in `psim.sh`), its own gate
+  exam, `raid_sim --caster=alchemist`. Full state + bands + next slices: **`ALCHEMIST-PLAN.md`**.
+  Play: `--autostart=raid:caster:brew`. Awaiting Bill's live feel verdicts → then creeds/modules/boons.
 - Self-brink DPS: gauge climbs = more damage, cap = self-destruct (Cultist Insanity / Stormbringer Static archetype). Verb: *ride the redline*. Strong fit.
 - Over-defend punishment tank layer (Mountain King self-stun) — could bolt onto Bulwark as a boon/mod instead.
 - Imposed-rhythm caster (Runemaster attunement auto-cycle) — kit rotates on a clock you don't control.
 - ~~Rewind/Chronomancer verb~~ — PARKED (unintuitive in a reaction game; revisit as a rare relic at most).
-**Acceptance (fresh-slate era):** active sims (`twinfang_sim` + `raid_sim`) determinism PASS + bands sane; `ui_smoke_raid` green.
+**Acceptance (fresh-slate era):** active sims (`twinfang_sim` + `raid_sim` + `alchemist_sim`) determinism PASS + bands sane; `ui_smoke_raid` green.
 
 ## BOSSES & ENCOUNTERS
 
@@ -699,17 +702,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-06 · `alchemist-core` (worktree `../wow-alchemist`) · §CLASSES / `ALCHEMIST-PLAN.md` —
-  **CLAIM: the Brew BASE MINIGAME build (Bill's direct order — playtest before boons).** Bill:
-  "can't go farther without knowing live things — just do the base mini game, UI/bars, then the
-  rest after; UI is the main focus, very nice and full and flashy with animations." This
-  deliberately front-runs the "after the Tempo pilot proves" sequencing and the 🟡 opens (F2
-  active-patience / F3 auto-evasion) — those get settled BY live playtesting the base. Scope:
-  timing/tuning ported faithfully from the feel-test artifact (`003f6832…`) · new class kit
-  `data/alchemist/` (Vial/Venom+Rot/Reaction/Potency/Rupture) · caster-seat class option
-  (voidcaller stays default — byte-identical unless picked) · THE HUD Brew band (flagship
-  instrument, hold-zones + keyboard) · AlchemistPolicy 3-tier + `alchemist_sim` harness ·
-  NO creeds/modules/boons/rig yet. *(alchemist-core session)*
+- ☑ 2026-07-06 · `alchemist-core` → main · §CLASSES / `ALCHEMIST-PLAN.md` — **THE BREW BASE
+  MINIGAME BUILT (Bill's direct order — playtest before boons).** Bill: "can't go farther without
+  knowing live things — just do the base mini game, UI/bars, then the rest after; UI is the main
+  focus, very nice and full and flashy." Shipped: `data/alchemist/` kit (artifact timing verbatim,
+  all constants tunable + `dmg_scale` 0.55 raid dial, zero rng, state in `seat.vars`) · caster seat
+  goes POLYMORPHIC (voidcaller default | alchemist) through raid_content/raid_net/raid_sim/HUD
+  ceremony/party/lobby · **THE ALEMBIC** (game/ui/brew_gauge.gd — hold-zone reservoirs, breathing
+  sweet-band vial w/ verdict stamps + droplet pour arcs, tap-to-Rupture chamber w/ acid bloom +
+  RIPE halo, balance see-saw, shimmering potency strip, pour-history gems, scale-punch banners;
+  the game's first hold-release verb: HOLD 1/2 → release pours, 3/R ruptures) · AlchemistPolicy
+  (3 tiers: release-aim + rupture-peak noise) · `alchemist_sim` in `psim.sh` · gate exam THE
+  SANDBOX (kickless class can't play the Prompter) · codex entry · Draft null-guards (boonless
+  class skips REFORGE) · `screenshot_alchemist_raid` visual probe. **Gates:** default comp
+  BYTE-IDENTICAL vs main (twinfang_sim 150 seeds + raid_sim 4 Seals × 100 seeds, per-seed CSV
+  checksums) · alch determinism PASS (solo + raid) · ui_smoke_raid (+brew coverage) / ui_smoke_map /
+  net_smoke / raid+commander+draft+gear+menu probes / raid_map_sim / fight_seed_probe ALL OK ·
+  WSLg shots verified. **Bands:** solo crucible 100/99.7/50 · leech 96/78/0.7 (300 seeds); raid
+  alch-comp riftmaw 100/100/68 · mistral 100/100/100 · gemini 100/99/47 · mythos 100/94/21 —
+  expert parity with the voidcaller comp, sloppy pays for the missing kicker (F22 stays open).
+  **Next:** Bill plays it (`--autostart=raid:caster:brew`), feel verdicts → creeds/modules/boons
+  slices per ALCHEMIST-PLAN §6.3. *(alchemist-core session)*
 
 - ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
   was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out
