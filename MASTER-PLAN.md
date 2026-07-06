@@ -38,6 +38,7 @@
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
 | **Maps ("The Topology" — AtO-style node runs)** | ✅ MAP-1/2/3 + **INFERENCE CHECK** + **THE KILL SWITCH P1** (⏻ shared meter · OVERCLOCK arming offline+online · integrity RETIRED · 5 charge events; protocol v11). Phase 2/3 (biting blessings + Forge + live UNPLUG) open.  ~~INFERENCE CHECK COMPLETE~~ (P0–P6 + seat-picker + branches + wager/mulligan + online-Prior + fight-marks) — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events + wager kind + post-fail mulligan, offline AND online co-op (protocol v9, server resolves + traverses stages; client==server). protocol v10; FEATURE-COMPLETE (all follow-ups merged) |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
+| **THE WORLD (persistent overworld: Atlas/zones/fog/flight/world events/hometown, wrapping the instances)** | 🔴 NEW — design LOCKED with Bill 2026-07-06, **`WORLD-PLAN.md`** (see §THE WORLD). Zones = persistent conquest · warband law (always 4 seats, no enemy-scaling system) · overworld = bare kit · interrupt-by-ability replaces the cut Voidcaller verb · single-target + dodge-ration pillars. Phases W0–W5; nothing built yet |
 
 ---
 
@@ -73,7 +74,9 @@ table) · the six class sims (regression spine — infra, not product) · boss-s
 (Play *is* the raid — it's the only mode) → **pick your CLASS** (which seat you take) → **pick your
 SUB-CLASS** (Aspect) → **pick the RAID** (one for now: Realm 1 · The Takeover) → play. No mode
 select, no "solo vs co-op" fork (AI fills empty seats; PLAY ONLINE is a lobby toggle *inside* the
-raid, not a separate mode). The old `main_menu` / per-class `*_main.tscn` solo entries + the
+raid, not a separate mode). **⚠ 2026-07-06 amendment (see §THE WORLD / `WORLD-PLAN.md`):** at
+WORLD phase W3 the front door becomes **PLAY → THE ATLAS** (the persistent world map — zones wrap
+the instance doors). Still ONE game, one HUD, AI-filled seats; the Atlas is the menu, not a mode. The old `main_menu` / per-class `*_main.tscn` solo entries + the
 PROVING GROUNDS card are being REMOVED (see the menu-refresh claim in the Coordination Log).
 
 **⚖ ONE GAME · ONE HUD LAW (non-negotiable — reaffirmed 2026-07-03. This is the norm; do NOT
@@ -92,6 +95,25 @@ re-introduce a solo/raid split. Read this before building any player-facing syst
   dev jump-in behind a flag — never a player-facing front door. Practice/PROVING-GROUNDS surface: cut.
 
 ---
+
+## THE WORLD — persistent overworld (design LOCKED 2026-07-06 · spec: `WORLD-PLAN.md`)
+
+**The pivot (Bill, 2026-07-06):** a WoW-shaped persistent world WRAPS the roguelike instances —
+"the world is the menu." Zones (authored node maps, fog of war, **persistent conquest** — cleared
+is cleared forever) → flight paths between waystations → instance DOORS: **dungeons** = 1-floor
+Topology runs (repeatable, from scratch, the Versions dial at the door) · **raids** = the Ring
+descents (Depth dial) · **world events** = server-announced bosses with open lobbies (parallel
+4-seat rooms; offline cadence parity so the world is alive alone) · a **hometown hub** housing the
+Ledger/character sheet/Commander camp. **Read `WORLD-PLAN.md` before world work** — it holds the
+locked decisions (zones persistent · overworld = bare kit + unlocks · **WARBAND LAW**: always 4
+seats, AI backfill, NO enemy-scaling system · mid-fight join PARKED) and the **COMBAT PILLARS**
+(single-target law · dodge ration ~3–8 beats/fight non-tank · **interrupt-by-ability** — the kick
+lives on flagged existing abilities with a tight window, replacing the cut Voidcaller; lands with
+the Framework-v2 reworks). One game / one HUD unchanged; the two-game solo/MMO split was weighed
+again and DECLINED. New tool this demands: the **ENCOUNTER FORGE** (seeded skirmish generator +
+`forge_sim` certification — batch-sim every generated fight, auto-reject out-of-band).
+**Phases W0–W5** (W0 docs done; W1 Atlas+Zone-1 offline is the first buildable claim; W3 flips the
+front door; W4 goes online). PROGRESSION laws untouched — the Atlas IS the World track's UI.
 
 ## CLASS FRAMEWORK v2 — the Tempo-piloted ROSTER REWORK (locked with Bill, 2026-07-04)
 
@@ -596,6 +618,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- 📋 2026-07-06 · main (docs only) · §THE WORLD — **THE WORLD pivot: design LOCKED with Bill, `WORLD-PLAN.md` written (NOT built).**
+  Bill's pitch: a WoW-like persistent world (Westfall-style zones, fog, first-visit fight-through with
+  branching routes, world-boss events anyone nearby can join, repeatable dungeon at the zone edge,
+  flight paths, hometown) wrapping the roguelike instances — "the world is kinda the menu." Worked
+  through with Bill and locked: **one game reaffirmed** (the solo/MMO two-game split weighed again,
+  DECLINED — AI warband + Commander IS the solo mode) · **zones = persistent conquest** (no drafts;
+  the permanence/variance line = world/instance) · **overworld power = bare kit + persistent unlocks**
+  · **WARBAND LAW** (every fight tuned for exactly 4 seats; AI backfill ⇒ NO 1-to-x enemy-scaling
+  system) · **mid-fight join PARKED** (v1 events = open lobby pre-pull; seat-claim + replay-catchup
+  sketch preserved in the plan) · **COMBAT PILLARS**: single-target law · dodge RATIONED (universal
+  dodge stays, ~3–8 authored beats/fight for non-tanks) · **interrupt-by-ability** (Bill's design —
+  no kick button/class; flagged existing abilities [ideally dumps = the interrupt tax] kick inside a
+  TIGHT window; accidental-vs-deliberate kick rates become sim diagnostics; distribution across
+  classes = comp texture; Voidcaller cut from the roster plan, stays as frozen caster placeholder).
+  New tool specced: the **ENCOUNTER FORGE** (seeded skirmish generator + `forge_sim` certification —
+  the determinism dividend: batch-verified procedural difficulty). Phases **W0–W5** (W1 = Atlas +
+  Zone 1 offline, claimable; W3 = front-door flip to PLAY→ATLAS; W4 = presence + world events).
+  MASTER-PLAN updated (Overall Progress row · §THE WORLD section · GAME SHAPE front-door amendment).
+  **NEXT:** W0 companion = CLAUDE.md fresh-slate cleanup (history → HISTORY.md) — separate claim;
+  then W1. *(world design session)*
 
 - ☑ 2026-07-05 · `curio-content` → main (`77ebc85`, ff) · §SYSTEMS GEAR — **CURIO CONTENT PASS v1 — the equip refocus, MERGED.** Curios = UNIVERSAL cross-spec fortune/run-shapers, always-on rule-changes ONLY (never touch a verb, no one-shots, no per-floor budgets — the lane rule Bill locked). **CUT the 10 verb-welded/class offenders** from `gear_catalog.gd` ITEMS+TABLES (verify_stamp · powder_vial · spark_plug · salt_vial · grace_period · sticky_note · debt_collector · encore_bell · echo_chamber · overflow_sluice); their gear-gated kit code is dead-but-harmless (never rolls → never fires). **SHIPPED 3 working universal curios**, all wired this slice: **Expansion Bus** (boon draft 1-of-4 not 1-of-3 — `Draft.roll_offers(run, extra)`, default 0 = byte-identical rng), **Hashgrinder Rig** (all Token income ×2 — routed through the `_gain_tokens` chokepoint + mint), **Hot Reload** (rerolls are FREE — `Draft.reroll(_kept)(…, free)` + `DraftScreen.free_reroll`, human-seat gated). New TABLES unlock them off UNIVERSAL deeds (curses/zero_deaths/no_dips). **Panopticon (map reveal) dropped** — the raid map already draws every node, no fog to lift; parked until a fog system exists. **Verified:** draft_sim ALL OK (rng stream unchanged), ui_smoke_raid ALL OK, gear_probe green (its 3 opus-roll tests — which leaned on the removed echo_chamber(opus) fixture — reframed onto pure `rarity_weights`/pity math + a live clamp assertion; the interim pool has NO opus curio yet, noted for restore; retired the stale twinfang Flow+grace sub-test, red at baseline from the Tempo rework). **NEXT (the "build the rest later" bucket):** opus-tier curios; the rest of GEAR-CATALOG's ~18 v2 pool (Root Access needs Module-pick UI · Bootleg 3rd slot needs variable slots · set-bonuses need a set system · map-routing curios need §MAPS work); the MARKET economy (buy curios from the unlocked pool + banked reroll charges, primary path per CURIO ECONOMY v2). *(curio content session)*
 - 📋 2026-07-04 · main (docs only) · §MODES & ENDGAME + §SYSTEMS E.5 — **ENDGAME = infinite raid DEPTH + oath-dedication curation (design captured with Bill, NOT built).** Bill's pitch: "make the endgame cool — raid scales infinitely like Mythic+, keep your gear between runs so you can be a little broken, and higher tiers drop better." Worked through it: (1) two-thirds already designed — **Versions** (per-boss authored mechanic-adds) + **raid DEPTH** (unbounded scalar) = the RANK track's "Mythic+"; "richer drops at higher tier" is already the drop spec. Added the design refinement: **scaling = cheap numeric spine (HP/dmg/enrage) + affix TIERS at Depth breakpoints**, and because combat is *timing* the affixes COMPRESS WINDOWS / add beats (reusing the strings/feints/interrupt/add engine), so gear never papers over a window you can't hit. (2) **"Keep your gear / be a little broken" = a persistent-power treadmill → weighed and DECLINED with Bill, Law #1 reaffirmed** (breaks the co-op scaling contract; makes sims gear-conditional). Reconciled: **Depth scales CURATION CAPACITY, not hitting power**; the broken-build fantasy stays run-scoped + re-earned. (3) **Drop-curation lever = OATH DEDICATION only** (Bill's call — no attune/fine-tune toggle, no meta-currency): swear an oath on **yourself or a teammate**; KEPT bends that seat's drop roll (rarity/consistency, not the item). **Locked knobs:** swearer keeps Tokens / gifts the luck; beneficiary swear-time locked; Realm-1 skin = cross-team SLA. Buildable as a small GEAR-2 extension (`beneficiary_seat_i`, byte-identical when self). No code touched. **NEXT:** Bill is running core concepts with another agent in parallel; this stays design-only until claimed. *(endgame design session)*
