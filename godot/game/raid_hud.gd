@@ -223,6 +223,10 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 # no boons/gear/wounds/economy in or out; conquest is the only writeback. All state
 # below stays inert until THE WORLD is entered, so every existing path is untouched.
 const WORLD_PREVIEW := true        ## the home-menu door (front-door flip is W3)
+## FIGHTLEN (dev feel-scalar, WORLD-PLAN §FIGHT LENGTH): `--fightlen=2.5` multiplies boss
+## HP + enrage on OFFLINE pulls so the length bands can be FELT before the W2 grammar
+## builds. 1.0 (absent) = untouched, byte-identical everywhere; online never reads it.
+var _fightlen := 1.0
 var _world: WorldSave = null       ## the permanence layer (null until the world is entered)
 var _world_pending := false        ## WORLD picked on home — the Atlas opens after the aspect ceremony
 var _zone_id := ""                 ## the zone the warband stands in ("" = not in a zone)
@@ -335,6 +339,11 @@ func _ready() -> void:
 	_net_ctrl.encounter_ended.connect(_on_end_moment)
 	_ctrl = _local_ctrl
 	_show_home()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--fightlen="):   # dev feel-scalar — parse BEFORE any autostart pull
+			_fightlen = maxf(1.0, float(a.substr("--fightlen=".length())))
+			if _fightlen > 1.001:
+				print("FIGHTLEN ×%.2f — offline boss HP + enrage scaled (dev feel toggle)" % _fightlen)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart=gate"):
 			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
@@ -888,6 +897,7 @@ func _launch_zone_fight(n: Dictionary) -> void:
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]))
 	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -903,10 +913,23 @@ func _launch_zone_gate() -> void:
 	_clear()
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect, _seat_cls_now())
+	_apply_fightlen(s)
 	_gate_live = true
 	_zone_live = true
 	_loadout = _make_loadout()
 	_build_combat(s)
+
+## FIGHTLEN: scale THIS pull's boss pool + enrage clock (the dev feel toggle, offline
+## only). Mutates the built state exactly like RaidMarks does (post-build, pre-begin);
+## phases key off HP fractions so they stay proportional; INF enrage (enrage-less
+## fights) is guarded. _fightlen == 1.0 (flag absent) touches nothing.
+func _apply_fightlen(s: CombatState) -> void:
+	if _fightlen <= 1.001 or s == null or s.boss == null:
+		return
+	s.boss.hp = roundf(s.boss.hp * _fightlen)
+	s.boss.hp_max = roundf(s.boss.hp_max * _fightlen)
+	if s.encounter != null and is_finite(s.encounter.enrage_at) and s.encounter.enrage_at > 0.0:
+		s.encounter.enrage_at *= _fightlen
 	_shake_amt = 0.0
 	_online = false
 	_ctrl = _local_ctrl
@@ -1447,6 +1470,7 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1837,6 +1861,7 @@ func _launch_map_fight(fi: int) -> void:
 	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
 	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(enc.id), {}, _seat_boons_now())
 	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
 	for i in s.seats.size():
@@ -1909,6 +1934,7 @@ func _launch_gate_fight() -> void:
 	_clear()
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect, _seat_cls_now())
+	_apply_fightlen(s)
 	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
 	_inject_boons(s.seats[0])   # Draft 2.0: boons on for the exam too
 	if _map != null:
