@@ -2403,7 +2403,7 @@ func _build_combat(s: CombatState) -> void:
 			aspects[key] = String(kit.get("aspect")) if kit != null and kit.get("aspect") != null else ""
 		_stage2d.setup(s, aspects)
 	_stage2d.bind_seats(s.seats)
-	_add_dev_tools()
+	_add_dev_tools(s)
 	_add_build_panel()
 
 	_shake_root = Control.new()
@@ -2794,7 +2794,7 @@ func _build_band_bloomweaver() -> void:
 ## ring elevation, campaign clear) without grinding each fight. Debug/source builds
 ## only, and OFFLINE only — killing the boss locally in an online lockstep fight would
 ## desync every replica. Auto-hidden in headless (sims/smokes) and release exports.
-func _add_dev_tools() -> void:
+func _add_dev_tools(s: CombatState) -> void:
 	if _online or DisplayServer.get_name() == "headless" or not OS.is_debug_build():
 		return
 	var win := Button.new()
@@ -2806,21 +2806,21 @@ func _add_dev_tools() -> void:
 	_ui.add_child(win)
 	# PLAYTEST A/B (Bill 2026-07-06): live saturation toggle for the Brew — flip it
 	# mid-fight and feel whether "more isn't better" earns its keep. Offline dev only.
-	if _seat_key == "caster" and _caster_cls == "alchemist":
+	# NB: read the kit from `s` (the fight state) — `_ctrl` isn't begun yet when
+	# _build_combat runs, so `_ctrl.player()` is null here (the old deref crashed).
+	var my_kit := s.seats[SEAT_IDX[_seat_key]].kit if SEAT_IDX.has(_seat_key) else null
+	if my_kit is AlchemistKit:
+		var akit := my_kit as AlchemistKit
 		var sat := Button.new()
-		var kit := _ctrl.player().kit as AlchemistKit
-		sat.text = "⚗ SAT %s" % ("ON" if kit != null and kit.cfg.sat_enabled else "OFF")
+		sat.text = "⚗ SAT %s" % ("ON" if akit.cfg.sat_enabled else "OFF")
 		sat.add_theme_font_size_override("font_size", 12)
 		sat.modulate = Color(1.0, 1.0, 1.0, 0.5)
 		sat.pressed.connect(func():
-			var k := _ctrl.player().kit as AlchemistKit
-			if k == null:
-				return
-			k.cfg.sat_enabled = not k.cfg.sat_enabled
-			sat.text = "⚗ SAT %s" % ("ON" if k.cfg.sat_enabled else "OFF")
+			akit.cfg.sat_enabled = not akit.cfg.sat_enabled
+			sat.text = "⚗ SAT %s" % ("ON" if akit.cfg.sat_enabled else "OFF")
 			_toast_add("⚗  SATURATION %s — %s" % [
-				"ON" if k.cfg.sat_enabled else "OFF",
-				"pours past the line waste again" if k.cfg.sat_enabled
+				"ON" if akit.cfg.sat_enabled else "OFF",
+				"pours past the line waste again" if akit.cfg.sat_enabled
 					else "full pours land everywhere (bank to cap)"]))
 		_place(sat, 0, 0, 0, 0, 14, 48, 116, 78)
 		_ui.add_child(sat)
