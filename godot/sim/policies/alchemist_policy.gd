@@ -89,13 +89,12 @@ func act(obs: Dictionary) -> Dictionary:
 		return {"type": "ability", "id": "rupture"}
 
 	# 4) feed the starving side — judged at PROJECTED pour time (a charge rides ~1.2s
-	#    and Venom fades 4× faster in flight). Saturated both sides = wait a beat; the
+	#    and Venom fades 4× faster in flight). Both sides at the cap = wait a beat; the
 	#    reaction is eating, it'll be hungry again shortly.
 	var venom := float(obs.get("venom", 0.0))
 	var rot := float(obs.get("rot", 0.0))
-	var soft := float(obs.get("soft", 9.0))
-	# saturation off (playtest flag): full pours land past soft, so bank toward the cap
-	var feed_to := soft if bool(obs.get("sat_on", true)) else float(obs.get("cap", 12.0))
+	# no saturation (cut): full pours always land, so keep feeding the lower side to the cap
+	var feed_to := float(obs.get("cap", 12.0))
 	var venom_p := venom - float(obs.get("decay_venom", 2.0)) * CHARGE_FLIGHT_SEC
 	var rot_p := rot - float(obs.get("decay_rot", 0.5)) * CHARGE_FLIGHT_SEC
 	if minf(venom_p, rot_p) < feed_to:

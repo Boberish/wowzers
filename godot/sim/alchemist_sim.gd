@@ -7,26 +7,18 @@
 ##
 ##   godot --headless --path godot --script res://sim/alchemist_sim.gd -- --seeds=300
 ##   sharded: scripts/psim.sh alchemist_sim 300
-##   saturation A/B (Bill playtest flag): --sat=off runs the sweep saturation-less
 extends SceneTree
 
 const TICK_CAP_SEC := 180.0
 
-var _sat := true   # --sat=off — the "more isn't better" rule suspended (cfg.sat_enabled)
-
 func _initialize() -> void:
 	var seeds := int(_arg("seeds", "300"))
 	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
-	_sat = _arg("sat", "on") != "off"
 	print("=== Project Rift — ALCHEMIST base-minigame sim (the Brew) ===")
-	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell",
-		"" if _sat else "  | SATURATION OFF (--sat=off)")
+	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("")
 	if seed0 == 1:
 		_prove_determinism()
-		print("")
-	if seed0 == 1 and _sat:
-		_prove_saturation(seeds)
 		print("")
 
 	var rows: Array = []
@@ -49,7 +41,7 @@ func _initialize() -> void:
 			var causes := {}
 			var dsum := {}
 			for seed in range(seed0, seed0 + seeds):
-				var r := _run_one(seed, String(m["enc"]), int(sk["lat"]), _sat)
+				var r := _run_one(seed, String(m["enc"]), int(sk["lat"]))
 				r["enc"] = m["enc"]; r["skill"] = sk["label"]; r["seed"] = seed
 				rows.append(r)
 				var rd: Dictionary = r.get("diag", {})
@@ -78,10 +70,9 @@ func _initialize() -> void:
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int, sat := true) -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int) -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
-	acfg.sat_enabled = sat   # PLAYTEST A/B: on = the shipped default (byte-identical)
 	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
 	var pol := s.seats[0].policy as AlchemistPolicy
 	pol.latency_ticks = latency
@@ -116,33 +107,6 @@ func _run(s: CombatState) -> Dictionary:
 		"checksum": s.checksum,
 	}
 
-## SATURATION A/B (the "does it make a real difference" probe): paired seeds, the
-## same policy plays with the soft cap on vs OFF. Off, full pours land past soft and
-## the brewer banks to cap — read the win/TTK/potency drift to judge the rule's teeth.
-func _prove_saturation(seeds: int) -> void:
-	var n := mini(seeds, 120)
-	print("SATURATION probe (%d paired seeds — the 'more isn't better' rule on vs off):" % n)
-	print("  cell             sat-ON win   OFF win    ON-TTK   OFF-TTK   ON-pot  OFF-pot")
-	for cell in [{"e": "crucible", "l": 6}, {"e": "leech", "l": 6}, {"e": "leech", "l": 0}]:
-		var enc := String(cell["e"])
-		var lat := int(cell["l"])
-		var onw := 0; var offw := 0
-		var onttk := 0.0; var offttk := 0.0; var onn := 0; var offn := 0
-		var onpot := 0.0; var offpot := 0.0
-		for seed in range(1, n + 1):
-			var a := _run_one(seed, enc, lat, true)
-			var b := _run_one(seed, enc, lat, false)
-			onpot += float(a["avg_potency"]); offpot += float(b["avg_potency"])
-			if a["won"]: onw += 1; onttk += float(a["ttk_sec"]); onn += 1
-			if b["won"]: offw += 1; offttk += float(b["ttk_sec"]); offn += 1
-		print("  %-9s lat%-2d   %5.1f%%    %5.1f%%    %6.1fs   %6.1fs    %4.2f    %4.2f" % [
-			enc, lat, 100.0 * onw / n, 100.0 * offw / n,
-			(onttk / onn if onn > 0 else 0.0), (offttk / offn if offn > 0 else 0.0),
-			onpot / n, offpot / n])
-	var d1 := _run_one(11, "leech", 6, false)
-	var d2 := _run_one(11, "leech", 6, false)
-	print("  determinism (sat off): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
-
 func _prove_determinism() -> void:
 	var a := _run_one(1, "crucible", 0)
 	var b := _run_one(1, "crucible", 0)
@@ -166,7 +130,7 @@ func _prove_determinism() -> void:
 ## fizzle/spoiled should climb as the tier gets sloppy).
 func _fmt_pours(d: Dictionary, seeds: int) -> String:
 	var parts: Array = []
-	for k in ["pour_potent", "pour_hot", "pour_ok", "pour_fizzle", "pour_spoiled", "pour_sat"]:
+	for k in ["pour_potent", "pour_hot", "pour_ok", "pour_fizzle", "pour_spoiled"]:
 		if d.has(k):
 			parts.append("%s %.1f" % [k.substr(5), float(d[k]) / float(seeds)])
 	return " · ".join(parts)

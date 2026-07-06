@@ -12,14 +12,12 @@ extends Resource
 
 @export var hp_max: float = 330.0
 
-# --- the two poisons (artifact: CAP=12, SOFT=9, DECAY_V=2.0, DECAY_R=0.5) ---
+# --- the two poisons (artifact: CAP=12, DECAY_V=2.0, DECAY_R=0.5) ---
+# SATURATION CUT (Bill 2026-07-06 — playtested off, "better off"): a full side no
+# longer wastes pours. The HARD cap is the only ceiling; `soft` survives ONLY as the
+# potency-fed reference (below), not a saturation line.
 @export var cap: float = 12.0            ## hard cap per poison
-@export var soft: float = 9.0            ## saturation soft cap — pours above waste (dose ×sat_frac)
-@export var sat_enabled: bool = true     ## PLAYTEST FLAG (Bill 2026-07-06): off = pours never
-                                         ## saturate ("more isn't better" suspended — bank to cap).
-                                         ## A/B it live (dev ⚗ SAT toggle) + in alchemist_sim
-                                         ## (--sat=off). ⚠ if OFF wins, the Reckless Brewer creed
-                                         ## (defined by removing saturation) needs a new hook.
+@export var soft: float = 9.0            ## potency-fed reference: min(V,R) ≥ soft·pot_feed_frac counts as "fed"
 @export var decay_venom: float = 2.0     ## per second — hot, fades FAST (demands attention)
 @export var decay_rot: float = 0.5       ## per second — cold, LINGERS (set it and it holds)
 
@@ -35,7 +33,6 @@ extends Resource
 @export var dose_sweet: float = 8.0      ## a sweet-band POTENT pour
 @export var dose_hot: float = 9.0        ## the last 2% before the red line — the greed edge
 @export var dose_spoiled: float = 1.0    ## overflow — nearly nothing
-@export var sat_frac: float = 0.3        ## dose multiplier pouring into a side already ≥ soft (min 1)
 
 # --- the REACTION (artifact: REACT_MULT=5.5, RAW_MULT=0.4, RCONSUME=0.08) ---
 @export var react_mult: float = 5.5      ## reaction dps per point of min(V,R), before balance/potency

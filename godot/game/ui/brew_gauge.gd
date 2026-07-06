@@ -27,8 +27,6 @@ signal rupture_tapped()             ## chamber tapped — detonate
 var venom := 0.0
 var rot := 0.0
 var cap := 12.0
-var soft := 9.0
-var sat_on := true                  ## playtest flag mirror — hides the SAT line when off
 var charging := ""                  ## "" | "venom" | "rot"
 var charge := 0.0
 var charge_max := 1.30
@@ -156,7 +154,6 @@ func on_event(ev: Dictionary) -> void:
 			var side := String(ev.get("side", "venom"))
 			var grade := String(ev.get("grade", "ok"))
 			var dose := int(ev.get("dose", 0))
-			var sat := bool(ev.get("sat", false))
 			var scol := Palette.VENOM_BREW if side == "venom" else Palette.ROT_BREW
 			var lvl := charge                       # release level (obs still holds it this frame)
 			match grade:
@@ -169,12 +166,10 @@ func on_event(ev: Dictionary) -> void:
 					_set_banner("HOT +%d" % dose, Palette.GOLD_BRIGHT, 1.05)
 					_vial_stamp = {"lvl": lvl, "col": Palette.GOLD_BRIGHT, "t": STAMP_HOLD}
 				"potent":
-					_set_banner(("SATURATED +%d" % dose) if sat else ("POTENT +%d" % dose),
-						Palette.TEXT_DIM if sat else Palette.PERFECT, 1.0)
+					_set_banner("POTENT +%d" % dose, Palette.PERFECT, 1.0)
 					_vial_stamp = {"lvl": lvl, "col": Palette.PERFECT, "t": STAMP_HOLD}
 				_:
-					_set_banner(("SATURATED +%d" % dose) if sat else ("+%d" % dose),
-						Palette.TEXT_DIM if sat else scol, 0.75)
+					_set_banner("+%d" % dose, scol, 0.75)
 					_vial_stamp = {"lvl": lvl, "col": scol, "t": STAMP_HOLD}
 			if grade != "fizzle":
 				_col_flash[side] = 1.0
@@ -188,9 +183,6 @@ func on_event(ev: Dictionary) -> void:
 				"hot": gcol = Palette.GOLD_BRIGHT; big = true
 				"spoiled": gcol = Palette.SPOIL; hollow = true
 				"fizzle": gcol = Palette.TEXT_DIM; hollow = true
-			if sat:
-				gcol = Palette.TEXT_DIM
-				big = false
 			_push_gem(gcol, hollow, big)
 		"brew_rupture":
 			var amt := int(ev.get("amt", 0))
@@ -217,9 +209,9 @@ func _draw() -> void:
 		return
 	_draw_panel(w, h)
 	_draw_reservoir(_venom_zone(), _venom_d, venom, Palette.VENOM_BREW, "VENOM",
-		"fades fast", charging == "venom", float(_col_flash["venom"]), true)
+		"fades fast", charging == "venom", float(_col_flash["venom"]))
 	_draw_reservoir(_rot_zone(), _rot_d, rot, Palette.ROT_BREW, "ROT",
-		"lingers", charging == "rot", float(_col_flash["rot"]), false)
+		"lingers", charging == "rot", float(_col_flash["rot"]))
 	_draw_vial(w, h)
 	_draw_pour_drops(w, h)
 	_draw_chamber(w, h)
@@ -247,11 +239,10 @@ func _draw_panel(w: float, h: float) -> void:
 	UiKit.filigree_corner(self, Vector2(w, h), Vector2(-1, -1))
 
 ## One poison reservoir: recessed glass well, liquor with a wobbling lit surface,
-## saturation etch-line, live numeral, HOLD affordance + engraved nameplate.
-## `sat_label`: the twin bars sit adjacent and share the same soft-cap height, so
-## only the left one carries the "SAT" caption (one label, one line, two bars).
+## live numeral, HOLD affordance + engraved nameplate. The two bars sit adjacent so
+## their levels read as one balance comparison (no cap line — saturation was cut).
 func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s: String,
-		temper: String, held: bool, flash: float, sat_label := true) -> void:
+		temper: String, held: bool, flash: float) -> void:
 	# hold affordance — the whole well is a button; it brightens under the thumb
 	var well := StyleBoxFlat.new()
 	well.bg_color = Color(col.r, col.g, col.b, 0.16 if held else 0.05)
@@ -279,16 +270,6 @@ func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s
 			Color(1, 1, 1, 0.18))
 		# side gloss
 		draw_rect(Rect2(z.position.x + 2, top_y, 2.5, fh), Color(1, 1, 1, 0.10))
-	# saturation etch-line — above it, pours waste
-	if sat_on:                              # the soft cap only exists when the flag says so
-		var sat_y := z.position.y + z.size.y * (1.0 - soft / cap)
-		draw_line(Vector2(z.position.x - 2, sat_y), Vector2(z.position.x + z.size.x + 2, sat_y),
-			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.8), 1.2, true)
-		var over_soft := val_live >= soft
-		if sat_label:
-			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(z.position.x - 30, sat_y + 3),
-				"SAT", HORIZONTAL_ALIGNMENT_RIGHT, 26, 8,
-				Palette.GOLD if over_soft else Palette.GOLD_DIM)
 	# pour-landed flash: rim ring + splash ripple
 	if flash > 0.0:
 		draw_rect(z.grow(3.0), Color(col.r, col.g, col.b, 0.55 * flash), false, 2.5)

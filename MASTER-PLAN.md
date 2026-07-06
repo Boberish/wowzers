@@ -733,7 +733,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   slices per ALCHEMIST-PLAN §6.3. **Feel-pass 1 (Bill, same day, merged `aa7e809`):** the twin
   poison bars now sit SHOULDER-TO-SHOULDER as one comparator block ("the bars should be next to
   each other so you can see them and balance them well") — beam directly beneath the pair, vial
-  far left, chamber right w/ its own POTENCY footer. *(alchemist-core session)*
+  far left, chamber right w/ its own POTENCY footer. **Feel-pass 2 — SATURATION CUT (Bill, same
+  day):** first flagged live (⚗ SAT toggle + sim A/B, merged `ed50476`), Bill's verdict "better
+  off" → mechanic removed entirely (config/kit/gauge/policy/sim/codex). The HARD cap (12) is the
+  only ceiling; full pours always land; `min(V,R)×balance` skill untouched. ⚠ Knock-on: the two
+  cards built ON saturation are cut too — the **Reckless Brewer** creed and the **⭐ Still** module —
+  so **the class OWES a new ⭐ transformer** (ALCHEMIST-PLAN §3 lists candidates). Bands basically
+  unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
+  *(alchemist-core session)*
 
 - ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
   was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out
