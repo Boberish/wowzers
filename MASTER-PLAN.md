@@ -743,7 +743,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   raid Seal 8–12m ("10-min boss" = raid tier) · world boss 5–10m; the zone spine stays
   skirmish-weight (attunement budget holds). Healer mana/regen rebalances WITH the bands — the
   logged inert-healer finding is largely a fight-length symptom. Lands with W2 Forge (SHAPE
-  axis) + the boss PILLAR PASS. Docs only. *(world-structure session)*
+  axis) + the boss PILLAR PASS. **VERDICT PASS (Bill, same day):** PACK kept (primary) · CHASE
+  kept · WAVES kept-lukewarm · verse/chorus CUT (illegible) · REPRIEVE+DENY CUT (a pause with
+  jobs is MORE stress; no flow-preserving hard-stop exists → new law: **NO HARD STOPS, valleys
+  are diegetic** — walk-ins/withdrawals/transits, the clock never freezes) · side-duel/aura-add
+  CUT ("very anti fun"). **`--fightlen=N` dev feel-scalar BUILT & MERGED (`c0ccffd`,
+  branch `fightlen`):** all five offline launch paths scale boss HP+enrage post-build
+  (RaidMarks idiom, INF-guarded, flag absent = untouched); `sim/fightlen_probe.gd` proves ×1
+  byte-equal + ×2.5 exact (riftmaw 15500/90s → 38750/225s; bard 3400/60s → 8500/150s);
+  raid/world smokes + menu probe green. Bill feel-tests with `--fightlen=2.5` next.
+  *(world-structure session)*
 
 - ☑ 2026-07-06 · main (docs only) · §SYSTEMS / `PROGRESSION-PLAN.md` §LEVELS + `WORLD-PLAN.md` —
   **LEVELS: the paced unlock rollout (design session with Bill, direct).** Bill's ask: WoW-shaped
