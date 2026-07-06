@@ -687,6 +687,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-06 · `seal-pillars` · §BOSSES — **SEAL PILLAR PASS v1 — IN PROGRESS.** Executing
+  `SEAL-PILLAR-PLAN.md`: Phase A instruments per-seat beat budgets in `raid_sim.gd` (sim-side
+  only, byte-identical — aggregates existing `seat.diag` grades + telegraph-transition cast
+  counts), then Phase B retunes the 4 Seals toward the dodge-ration budget (~3–8 non-tank
+  beats/fight) via cd/victim levers, compensating pressure with melee/nova/dot only (reverse-M7.2).
+  ULTRATHINK / tank strings / kick chains untouched. Content checksums WILL re-baseline on purpose.
+  *(seal-pillar execution session)*
+
 - 📋 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **CLASS DESIGN RULES locked with Bill.**
   Bill's asks: (a) asymmetric classes as a THEME — "not every class will have x abilities and x
   creeds… don't be afraid to make classes very unique"; (b) durable rules so class-making sessions

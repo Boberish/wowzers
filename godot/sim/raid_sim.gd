@@ -79,11 +79,15 @@ func _initialize() -> void:
 			var ttk_sum := 0.0
 			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
 				"miss": 0.0, "adds": 0.0, "hmana": 0.0, "hover": 0.0, "hidle": 0.0, "rez": 0.0}
+			var agg_beats := {"tank": {}, "blade": {}, "caster": {}, "healer": {}}
+			var agg_casts := {}
 			var causes := {}
 			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(String(b), seed, sk, true)
 				r["skill"] = sk["label"]; r["seed"] = seed; r["boss"] = b; r["probe"] = "taunt"
 				rows.append(r)
+				_acc_beats(agg_beats, r["beats"])
+				_acc_casts(agg_casts, r["casts"])
 				agg["taunts"] += float(int(r["taunts"]))
 				agg["kicks"] += float(int(r["kicks"]))
 				agg["healed"] += float(r["boss_healed"])
@@ -106,6 +110,7 @@ func _initialize() -> void:
 				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
 				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, _fmt(causes)])
+			_print_beats(String(sk["label"]), agg_beats, agg_casts, n)
 		print("")
 	if seed0 == 1 and _probes and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
@@ -182,6 +187,14 @@ func _run(s: CombatState) -> Dictionary:
 	var mana_min := (healer.resource if healer != null else 0.0)
 	var h_idle := 0
 	var h_acts := 0
+	# Beat-budget instrumentation (SEAL-PILLAR-PLAN Phase A — read-only, byte-identical):
+	# count how many times each telegraphed ability FIRES by watching s.telegraph flip
+	# to a fresh instance. Safe because the scheduler starts at most one telegraph per
+	# tick (combat_core `return`s after advancing a live one) and every wind-up spans
+	# many ticks, so per-tick sampling never misses a cast; holding `last_tg` keeps the
+	# old ref alive so a freed-address reuse can't false-match a new telegraph.
+	var casts := {}
+	var last_tg: Telegraph = null
 	while not s.over and s.tick < cap:
 		for seat in s.seats:
 			if seat.policy != null and seat.alive():
@@ -195,6 +208,10 @@ func _run(s: CombatState) -> Dictionary:
 				if not a.is_empty():
 					s.enqueue(s.tick + 1, seat, a)
 		CombatCore.update(s)
+		if s.telegraph != null and s.telegraph != last_tg:
+			var aid := String(s.telegraph.ability.id)
+			casts[aid] = int(casts.get(aid, 0)) + 1
+		last_tg = s.telegraph
 		if healer != null:
 			mana_min = minf(mana_min, healer.resource)
 	if not s.over:
@@ -211,6 +228,20 @@ func _run(s: CombatState) -> Dictionary:
 	var h_eff := float(hrow.get("heal_total", 0.0))
 	var h_over := float(hrow.get("over_total", 0.0))
 	var h_total := h_eff + h_over
+	# Per-seat answerable-beat budget from the existing grade counters (seat.diag,
+	# never checksummed): presented = beats actually resolved against this seat
+	# (perfect+good+graze+miss — a whiff also lands a miss, so it's counted once);
+	# feints = baited+read (a feint beat is a hold-or-bait choice, not a dodge beat).
+	var beats := {}
+	var labels := ["tank", "blade", "caster", "healer"]
+	for i in mini(labels.size(), s.seats.size()):
+		var d: Dictionary = s.seats[i].diag
+		var p := int(d.get("perfect", 0)); var g := int(d.get("good", 0))
+		var z := int(d.get("graze", 0)); var m := int(d.get("miss", 0))
+		beats[labels[i]] = {
+			"presented": p + g + z + m, "perfect": p, "good": g, "graze": z, "miss": m,
+			"feints": int(d.get("baited", 0)) + int(d.get("read", 0)),
+		}
 	return {
 		"won": s.won,
 		"ttk_sec": s.time(),
@@ -229,6 +260,8 @@ func _run(s: CombatState) -> Dictionary:
 		"revives": int(healer.vars.get("revives", 0)) if healer != null else 0,
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
+		"beats": beats,          # per-seat answerable-beat budget (Phase A)
+		"casts": casts,          # ability id -> telegraph fires this fight (Phase A)
 	}
 
 ## --skills filter: "" = all three; "good" or "good,sloppy" = just those tiers (faster).
@@ -297,6 +330,43 @@ func _write_csv(path: String, rows: Array) -> void:
 			r["hl_mana_pct"], r["hl_over_pct"], r["hl_idle_pct"], r["hl_eff"],
 			r["loss_cause"], r["checksum"]])
 	f.close()
+
+## --- Beat-budget aggregation + readout (SEAL-PILLAR-PLAN Phase A) ---
+
+## Fold one run's per-seat beat dict into the tier aggregate.
+func _acc_beats(agg: Dictionary, beats: Dictionary) -> void:
+	for lbl in beats:
+		var src: Dictionary = beats[lbl]
+		var dst: Dictionary = agg[lbl]
+		for k in src:
+			dst[k] = float(dst.get(k, 0.0)) + float(src[k])
+
+## Fold one run's per-source cast counts (ability id -> fires) into the aggregate.
+func _acc_casts(agg: Dictionary, casts: Dictionary) -> void:
+	for aid in casts:
+		agg[aid] = float(agg.get(aid, 0.0)) + float(casts[aid])
+
+## The DODGE-RATION readout: average ANSWERABLE beats presented to each seat per
+## fight at this skill tier. Budget = ~3–8 for non-tank seats (the tank keeps the
+## densest footwork by design; documented exceptions like ULTRATHINK's aoe×3 read
+## off the cast line — subtract myth_ultra×3 before judging Mythos vs 8). `casts` =
+## avg telegraph fires/fight per ability, the denominator for backing beats out.
+func _print_beats(tier: String, agg_beats: Dictionary, agg_casts: Dictionary, n: float) -> void:
+	print("   beat-budget @%s  (avg answerable beats per seat per fight)" % tier)
+	print("     %-8s %7s %6s %6s %6s %6s %6s" % [
+		"seat", "present", "perf", "good", "graze", "miss", "feint"])
+	for lbl in ["tank", "blade", "caster", "healer"]:
+		var d: Dictionary = agg_beats[lbl]
+		print("     %-8s %7.1f %6.1f %6.1f %6.1f %6.1f %6.1f" % [
+			lbl, float(d.get("presented", 0.0)) / n, float(d.get("perfect", 0.0)) / n,
+			float(d.get("good", 0.0)) / n, float(d.get("graze", 0.0)) / n,
+			float(d.get("miss", 0.0)) / n, float(d.get("feints", 0.0)) / n])
+	var keys := agg_casts.keys()
+	keys.sort()
+	var parts: Array = []
+	for aid in keys:
+		parts.append("%s %.1f" % [aid, float(agg_casts[aid]) / n])
+	print("     casts/fight: %s" % ((" · ".join(parts)) if not parts.is_empty() else "-"))
 
 func _fmt(causes: Dictionary) -> String:
 	if causes.is_empty():
