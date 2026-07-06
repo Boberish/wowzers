@@ -71,11 +71,11 @@ Grounded in a full cross-spec + layer-fit audit (workflow `wf_1bdad49f`). Bill's
   **Creeds are Tempo-only** (Flow-based); Venom gets its own risk temperament (wheel/synergy) in its remake.
   **→ 2026-07-06 went further: the remake is its OWN CLASS now** (audit F10 — `ALCHEMIST-PLAN.md`);
   Twinfang's second spec becomes a rhythm variation instead (§13).
-- **⚠ BRANCH RECONCILIATION:** two parallel Tempo branches must merge — `tempo-pilot` (my Creed/Module/
-  core + the verb_board GUI) and `tempo-boons` (the agent's graded window + address-organized card slate,
-  UNCOMMITTED in `../wow-tempo-boons`). Note: the new card slate **removed the WHEN/THEN draft buckets**
-  (they became the single §5 combo-rig), so the **verb_board GUI reads now-empty buckets** — it must be
-  re-pointed at the rig, and the rig system itself confirmed/built.
+- **~~⚠ BRANCH RECONCILIATION~~ — RESOLVED 2026-07-05 (stale; kept for history):** `tempo-boons` was
+  committed and MERGED TO MAIN the same day (`fe4d109` → merge `8c845ca`), the §5 combo-rig was BUILT +
+  merged (`d1515e7`/`ecfbb75`, build-out `2277d15`), and the dead verb_board GUI was RETIRED/deleted
+  (`42575b5`). Everything is on origin/main — see `godot/data/twinfang/twinfang_boons.gd` (the
+  address-organized slate) + `twinfang_rig.gd`.
 
 ---
 
@@ -132,10 +132,10 @@ of Tempo** (§13). The in-code poison-wheel Venom stays the frozen placeholder a
 - **I8 · ALL IN — PARKED:** Bill likes the double-or-nothing arm-tap, but "this is flowing too fast — I
   don't think we can execute it." Recorded, don't build.
 
-**⚠ Card-slate verdicts need the other machine:** F23/F27 and the card names above (Da Capo, Shatterfall,
-Staccato Fury, Double Time, Wide Tempo/Fencer's Line…) live in the `tempo-boons` card slate —
-**UNCOMMITTED in `../wow-tempo-boons`** (see ⚠ BRANCH RECONCILIATION above; no remote branch exists).
-Commit/push that worktree before acting on card-level verdicts.
+**~~⚠ Card-slate verdicts need the other machine~~ — FALSE ALARM (corrected 2026-07-06):** the
+`tempo-boons` slate was merged to main 2026-07-05 (`fe4d109`/`8c845ca`) and is on origin — every card
+named above lives in `godot/data/twinfang/twinfang_boons.gd`, the rig in `twinfang_rig.gd`, the
+creed/module/rig plumbing in `raid_hud.gd`. **Card-level verdicts are actionable NOW, on main.**
 
 ---
 
