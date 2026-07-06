@@ -56,12 +56,21 @@ static var RECKONER_ASPECTS := [
 		"desc": "Build MOMENTUM and hyperarmor THROUGH the hits — a Rage snowball that carries a sloppy rhythm. Forgiving; just keep swinging."},
 ]
 
+## The caster seat's SECOND class — the Alchemist ("the Brew", ALCHEMIST-PLAN base).
+## One aspect for now: the Brew IS the class (a second spec comes with the full build).
+static var ALCHEMIST_ASPECTS := [
+	{"id": "brew", "name": "THE BREW", "accent": Palette.REACT, "icon": "envenom",
+		"desc": "Hold to charge the VIAL, release in the sweet band; feed two opposing poisons — Venom fades, Rot lingers — and RUPTURE the reaction at its ripe peak."},
+]
+
 ## The Aspect pair for a seat, honouring the seat's chosen CLASS.
 func _aspects_for(seat_key: String) -> Array:
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return BLOOM_ASPECTS
 	if seat_key == "blade" and _blade_cls == "reckoner":
 		return RECKONER_ASPECTS
+	if seat_key == "caster" and _caster_cls == "alchemist":
+		return ALCHEMIST_ASPECTS
 	return ASPECTS[seat_key]
 
 ## The Aspect pair for a lobby seat given an explicit class (online — the healer
@@ -71,6 +80,8 @@ func _lobby_aspects(seat_key: String, cls: String) -> Array:
 		return BLOOM_ASPECTS
 	if seat_key == "blade" and cls == "reckoner":
 		return RECKONER_ASPECTS
+	if seat_key == "caster" and cls == "alchemist":
+		return ALCHEMIST_ASPECTS
 	return ASPECTS[seat_key]
 
 ## The seat's display name, honouring the seat class.
@@ -79,19 +90,23 @@ func _seat_display_name(seat_key: String) -> String:
 		return "THE BLOOMWEAVER"
 	if seat_key == "blade" and _blade_cls == "reckoner":
 		return "THE RECKONER"
+	if seat_key == "caster" and _caster_cls == "alchemist":
+		return "THE ALCHEMIST"
 	return String(SEAT_NAMES.get(seat_key, "RAIDER"))
 
-## The class currently filling a seat (the healer and blade seats are polymorphic).
+## The class currently filling a seat (the blade/caster/healer seats are polymorphic).
 func _seat_cls_now() -> String:
 	if _seat_key == "healer": return _healer_cls
 	if _seat_key == "blade": return _blade_cls
+	if _seat_key == "caster": return _caster_cls
 	return String(SEAT_CLASS.get(_seat_key, "bulwark"))
 
 ## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
-## right kit + the lobby/sim/net all agree). Non-healer seats keep their native class.
+## right kit + the lobby/sim/net all agree). Non-polymorphic seats keep their native class.
 func _human_seat_cfg() -> Dictionary:
 	_sync_healer_cls()
 	_sync_blade_cls()
+	_sync_caster_cls()
 	return {_seat_key: {"aspect": _aspect, "ai": false, "cls": _seat_cls_now()}}
 
 ## Keep _healer_cls consistent with the chosen aspect (the aspect uniquely identifies
@@ -114,6 +129,16 @@ func _sync_blade_cls() -> void:
 		_blade_cls = "reckoner"
 	elif _aspect == "tempo" or _aspect == "venomancer":
 		_blade_cls = "twinfang"
+
+## Keep _caster_cls consistent with the chosen aspect (the aspect uniquely identifies
+## the caster class: Alchemist = brew · Voidcaller = disruptor/silencer).
+func _sync_caster_cls() -> void:
+	if _seat_key != "caster":
+		return
+	if _aspect == "brew":
+		_caster_cls = "alchemist"
+	elif _aspect == "disruptor" or _aspect == "silencer":
+		_caster_cls = "voidcaller"
 
 ## COMMANDER: make _party cover exactly the three seats the human doesn't occupy.
 ## Defaults = the verified comp RaidNet.make_spec would fill in anyway; prior picks
@@ -270,11 +295,15 @@ var _bcfg: BloomweaverConfig       ## healer (Bloomweaver)
 var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
 var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver
 var _blade_cls: String = "twinfang" ## which class fills the blade seat: twinfang | reckoner
+var _caster_cls: String = "voidcaller" ## which class fills the caster seat: voidcaller | alchemist
 var _rcfg: ReckonerConfig             ## the Reckoner's config (set in _make_loadout when the blade is a Reckoner)
 var _rk_gauge: ReckonerGauge          ## the Reckoner's WIND/APEX swing instrument
+var _acfg: AlchemistConfig            ## the Alchemist's config (set in _make_loadout when the caster brews)
+var _brew_gauge: BrewGauge            ## the Alchemist's ALEMBIC instrument (vial/reservoirs/chamber)
 var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
+var _brew_hold_key: int = -1       ## Alchemist: which key (1/2) owns the live brew hold
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -383,6 +412,7 @@ func _show_class_select() -> void:
 		["blade", "twinfang", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
 		["blade", "reckoner", "THE RECKONER", "rampage", Palette.RAGE, "MELEE · COMMIT — an auto-swing you shape with two timed taps (wind × strike): huge hits, hyperarmor, and STAGGER.  (Colossus / Berserker)"],
 		["caster", "voidcaller", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
+		["caster", "alchemist", "THE ALCHEMIST", "envenom", Palette.REACT, "CASTER · BREW THE REACTION — charge the vial, feed two opposing poisons, RUPTURE the peak.  (The Brew · NEW)"],
 		["healer", "mender", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — react to the storm, click-cast big heals + shields.  (Tidecaller / Brinkwarden)"],
 		["healer", "bloomweaver", "THE BLOOMWEAVER", "wildbloom", Palette.VERDANCE, "HEALER · ANTICIPATE — no mana; plant HoTs & wards AHEAD, bloom them on the spike.  (Wildgrove / Thornveil)"],
 	]
@@ -469,8 +499,11 @@ func _show_party_setup() -> void:
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_theme_constant_override("separation", 10)
 		box.add_child(row)
-		var disp := "THE BLOOMWEAVER" if (key == "healer" and cls == "bloomweaver") \
-			else String(SEAT_NAMES[key])
+		var disp := String(SEAT_NAMES[key])
+		if key == "healer" and cls == "bloomweaver":
+			disp = "THE BLOOMWEAVER"
+		elif key == "caster" and cls == "alchemist":
+			disp = "THE ALCHEMIST"
 		var lab := Label.new()
 		lab.text = "%-15s %s  ·  %s" % [disp, ("YOU" if mine else "AI"), aspect.capitalize()]
 		lab.custom_minimum_size = Vector2(420, 32)
@@ -478,7 +511,7 @@ func _show_party_setup() -> void:
 		lab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if mine else Palette.TEXT)
 		row.add_child(lab)
 		if not mine:
-			if key == "healer":     # the healer seat is the only polymorphic CLASS
+			if key == "healer":     # polymorphic CLASS toggle (Mender ⇄ Bloomweaver)
 				var clsb := Button.new()
 				clsb.text = "◈ " + ("BLOOMWEAVER" if cls == "bloomweaver" else "MENDER")
 				clsb.custom_minimum_size = Vector2(150, 32)
@@ -487,14 +520,25 @@ func _show_party_setup() -> void:
 					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
 					_show_party_setup())
 				row.add_child(clsb)
+			if key == "caster":     # polymorphic CLASS toggle (Voidcaller ⇄ Alchemist)
+				var cclsb := Button.new()
+				cclsb.text = "◈ " + ("ALCHEMIST" if cls == "alchemist" else "VOIDCALLER")
+				cclsb.custom_minimum_size = Vector2(150, 32)
+				cclsb.pressed.connect(func():
+					var nc := "voidcaller" if cls == "alchemist" else "alchemist"
+					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
+					_show_party_setup())
+				row.add_child(cclsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 32)
 			ab.pressed.connect(func():
 				var pool: Array = _lobby_aspects(String(key), cls)
-				var nxt := String(pool[0]["id"]) if aspect == String(pool[1]["id"]) \
-					else String(pool[1]["id"])
-				_party[key]["aspect"] = nxt
+				var idx := 0
+				for i in pool.size():
+					if String(pool[i]["id"]) == aspect:
+						idx = i
+				_party[key]["aspect"] = String(pool[(idx + 1) % pool.size()]["id"])
 				_show_party_setup())
 			row.add_child(ab)
 		# the chosen aspect's one-line identity, dim, under each row
@@ -542,6 +586,8 @@ func _pick_class(seat_id: String, cls: String) -> void:
 		_healer_cls = cls
 	elif seat_id == "blade":
 		_blade_cls = cls
+	elif seat_id == "caster":
+		_caster_cls = cls
 	_show_aspect_pick(seat_id)
 
 func _show_aspect_pick(seat_id: String) -> void:
@@ -742,14 +788,27 @@ func _show_lobby() -> void:
 				bclsb.pressed.connect(func():
 					_net.send({"t": "class", "cls": "twinfang" if bcls == "reckoner" else "reckoner"}))
 				row.add_child(bclsb)
+			if key == "caster":     # toggle the caster CLASS (Voidcaller ⇄ Alchemist)
+				var ccls := String(me.get("cls", "voidcaller"))
+				if ccls == "":
+					ccls = "voidcaller"
+				var cclsb := Button.new()
+				cclsb.text = "◈ " + ("ALCHEMIST" if ccls == "alchemist" else "VOIDCALLER")
+				cclsb.custom_minimum_size = Vector2(150, 34)
+				cclsb.pressed.connect(func():
+					_net.send({"t": "class", "cls": "voidcaller" if ccls == "alchemist" else "alchemist"}))
+				row.add_child(cclsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 34)
 			ab.pressed.connect(func():
 				var pool: Array = _lobby_aspects(key, String(me.get("cls", "")))
 				var cur := String(me.get("aspect", ""))
-				var nxt := String(pool[0]["id"]) if cur == String(pool[1]["id"]) else String(pool[1]["id"])
-				_net.send({"t": "aspect", "aspect": nxt}))
+				var idx := 0
+				for i in pool.size():
+					if String(pool[i]["id"]) == cur:
+						idx = i
+				_net.send({"t": "aspect", "aspect": String(pool[(idx + 1) % pool.size()]["id"])}))
 			row.add_child(ab)
 
 	# The Seal for the next pull — everyone sees it; the host cycles it.
@@ -824,6 +883,8 @@ func _launch_online(spec: Dictionary, you: String) -> void:
 			_aspect = String(e["aspect"])
 			if you == "healer":
 				_healer_cls = String(e.get("cls", "mender"))
+			elif you == "caster":
+				_caster_cls = String(e.get("cls", "voidcaller"))
 	_loadout = _make_loadout()
 	_screen = "combat"
 	_clear()
@@ -1055,6 +1116,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	if seat_id == "reckoner":              # debug alias: the blade seat as a Reckoner
 		seat_id = "blade"
 		_blade_cls = "reckoner"
+	if seat_id == "alchemist" or seat_id == "brew":   # debug alias: the caster seat as the Brew
+		seat_id = "caster"
+		_caster_cls = "alchemist"
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	# a healer aspect id disambiguates the class (must resolve BEFORE the pool lookup)
 	if _seat_key == "healer":
@@ -1067,6 +1131,11 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 			_blade_cls = "reckoner"
 		elif aspect == "tempo" or aspect == "venomancer":
 			_blade_cls = "twinfang"
+	if _seat_key == "caster":
+		if aspect == "brew":
+			_caster_cls = "alchemist"
+		elif aspect == "disruptor" or aspect == "silencer":
+			_caster_cls = "voidcaller"
 	var pool: Array = _aspects_for(_seat_key)
 	_aspect = String(pool[0]["id"])
 	for a in pool:
@@ -1146,6 +1215,7 @@ func _start_map_run() -> void:
 func _make_run() -> RunState:
 	_sync_healer_cls()
 	_sync_blade_cls()
+	_sync_caster_cls()
 	return _make_seat_run(_seat_cls_now(), _aspect, -1)
 
 ## COMMANDER: a boon RunState for ANY seat (class starter by cls) — the commander
@@ -1155,6 +1225,7 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 		"reckoner": return RunState.start_reckoner(aspect, seed_v)
 		"twinfang": return RunState.start_twinfang(aspect, seed_v)
 		"voidcaller": return RunState.start_voidcaller(aspect, seed_v)
+		"alchemist": return RunState.start_alchemist(aspect, seed_v)
 		"mender": return RunState.start_mender(aspect, seed_v)
 		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
 		_: return RunState.start(aspect, seed_v)
@@ -1317,7 +1388,7 @@ func _resolve_node(n: Dictionary) -> void:
 				proceed.call()
 		RunMap.KIND_GATE:
 			# Tier-1 PERSONAL GATE (§GAME SHAPE): YOUR seat steps through alone
-			var ex: Dictionary = GateContent.exam(_seat_key)
+			var ex: Dictionary = GateContent.exam(_seat_key, _seat_cls_now())
 			_map_stop(String(n["name"]), String(ex["body"]),
 				[{"label": "STEP THROUGH ALONE", "fx": {"result": String(ex["challenge"])}}],
 				Palette.GOLD_BRIGHT,
@@ -2281,6 +2352,7 @@ func _show_campaign_cleared() -> void:
 func _make_loadout() -> Array:
 	_sync_healer_cls()
 	_sync_blade_cls()
+	_sync_caster_cls()
 	match _seat_key:
 		"blade":
 			if _blade_cls == "reckoner":
@@ -2288,6 +2360,9 @@ func _make_loadout() -> Array:
 				return _rcfg.loadout(_aspect)
 			return TwinfangConfig.new().loadout(_aspect)
 		"caster":
+			if _caster_cls == "alchemist":
+				_acfg = AlchemistConfig.new()
+				return _acfg.loadout(_aspect)
 			return VoidcallerConfig.new().loadout(_aspect)
 		"healer":
 			if _healer_cls == "bloomweaver":
@@ -2298,13 +2373,14 @@ func _make_loadout() -> Array:
 		_:
 			return ["cleave", "rampage", "fortify", ("vindicate" if _aspect == "warden" else "avalanche")]
 
-## The seat's defensive-verb label (the tank's depends on its Aspect).
+## The seat's defensive-verb label (the tank's depends on its Aspect; the caster's
+## on its class — the Alchemist has no kick, it dodges like everyone else).
 func _verb() -> String:
 	match _seat_key:
 		"tank":
 			return "PARRY" if _aspect == "warden" else "DODGE"
 		"caster":
-			return "KICK"
+			return "DODGE" if _caster_cls == "alchemist" else "KICK"
 		_:
 			return "DODGE"
 
@@ -2316,7 +2392,7 @@ func _build_combat(s: CombatState) -> void:
 	_ui.add_child(_stage2d)
 	if _gate_live:
 		# the exam: your puppet (plus any sandboxed phantoms) vs the recast checkpoint
-		var ex: Dictionary = GateContent.exam(_seat_key)
+		var ex: Dictionary = GateContent.exam(_seat_key, _seat_cls_now())
 		_stage2d.setup(s, {}, GateContent.stage_cast(_seat_key, _aspect),
 			String(ex.get("actor", "")), String(ex.get("variant", "")))
 	else:
@@ -2588,6 +2664,9 @@ func _build_band_reckoner() -> void:
 	_hint_line("SPACE — the SWING: tap to WIND (weight), tap again for the STRIKE apex (power)    ·    1/2/3/4 — Overswing · Ultraswing · Onslaught · Signature    ·    F — DODGE")
 
 func _build_band_caster() -> void:
+	if _caster_cls == "alchemist":
+		_build_band_alchemist()
+		return
 	_pcast = PlayerCastBar.new()
 	# YOUR cast bar sits in your own column — the boss's casts (and the clean-kick
 	# band) live on the Judgment Channel under the reticle
@@ -2613,6 +2692,37 @@ func _build_band_caster() -> void:
 	row.add_child(sep)
 	_add_runes(row, _loadout, Palette.VOID)
 	_hint_line("SPACE — KICK the Devouring Chant (clean = last slice)    ·    F — DODGE beats")
+
+## The Alchemist's band: HP + POTENCY orbs and THE ALEMBIC — the brew instrument
+## (hold-zones + vial + reaction chamber + potency strip). The brew itself is the
+## whole bar: HOLD 1/2 (or the reservoirs) to charge, release to pour, 3 (or tap
+## the chamber) to Rupture. No rune rail — the instrument IS the kit.
+func _build_band_alchemist() -> void:
+	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
+	_res_orb = _orb(Palette.REACT, "POTENCY", true)
+	_brew_gauge = BrewGauge.new()
+	# THE ALEMBIC: 780×316, shifted into the player's column (the Forge idiom) so the
+	# boss's Judgment Channel + telegraph rail under the reticle stay clear of it.
+	_place(_brew_gauge, 0.5, 1, 0.5, 1, -550, -486, 230, -170)
+	_shake_root.add_child(_brew_gauge)
+	_brew_gauge.brew_pressed.connect(func(side: String):
+		_ctrl.human({"type": "ability", "id": "brew_" + side}))
+	_brew_gauge.brew_released.connect(func():
+		_ctrl.human({"type": "ability", "id": "pour"}))
+	_brew_gauge.rupture_tapped.connect(func():
+		_ctrl.human({"type": "ability", "id": "rupture"}))
+	var row := _rune_row(-360.0, 360.0)
+	_guard = AbilityRune.new()
+	_guard.label = "DODGE"
+	_guard.key_label = "SPC"
+	_guard.icon_id = "dodge"
+	_guard.accent = Palette.REACT
+	_guard.tooltip_text = "Dodge the swing aimed at YOU — the brew keeps cooking through your footwork."
+	_guard.pressed.connect(func(): _ctrl.human({"type": "defense"}))
+	row.add_child(_guard)
+	_runes = []
+	_rune_ids = []
+	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · 3 — RUPTURE · SPACE — DODGE · F — DODGE beats")
 
 func _build_band_healer() -> void:
 	if _healer_cls == "bloomweaver":
@@ -2706,10 +2816,13 @@ func _dev_win() -> void:
 ## The player's assembled verb, in the class's own words (build-your-verb boons).
 const VERB_LABEL := {"tank": "GUARD", "blade": "RHYTHM", "caster": "KICK", "healer": "TRIAGE"}
 
-## The verb label shown on the build panel (Bloomweaver's verb is the GARDEN).
+## The verb label shown on the build panel (Bloomweaver's verb is the GARDEN;
+## the Alchemist's is the BREW).
 func _verb_label() -> String:
 	if _seat_key == "healer" and _healer_cls == "bloomweaver":
 		return "GARDEN"
+	if _seat_key == "caster" and _caster_cls == "alchemist":
+		return "BREW"
 	return String(VERB_LABEL.get(_seat_key, "BUILD"))
 
 func _verb_summary_lines() -> Array:
@@ -2722,7 +2835,8 @@ func _verb_summary_lines() -> Array:
 				return ["⚡ Combo — " + TwinfangRig.describe(
 					String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
 			return TwinfangBoons.verb_summary(_run.boons, _aspect)
-		"caster": return VoidcallerBoons.verb_summary(_run.boons, _aspect)
+		"caster": return ([] if _caster_cls == "alchemist" \
+			else VoidcallerBoons.verb_summary(_run.boons, _aspect))
 		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
 
@@ -2841,7 +2955,8 @@ func _owned_boon_labels() -> Array:
 	var pools: Array = []
 	match _seat_key:
 		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
-		"caster": pools = [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER]
+		"caster": pools = ([] if _caster_cls == "alchemist" \
+			else [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER])
 		"healer": pools = ([BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN] if _healer_cls == "bloomweaver" else [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK])
 		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
 	var out: Array = []
@@ -2970,8 +3085,21 @@ func _input(event: InputEvent) -> void:
 					_reckoner_key(event.keycode)
 				else:
 					_martial_key(event.keycode)
+			"caster":
+				if _caster_cls == "alchemist":
+					_alchemist_key(event.keycode)
+				else:
+					_martial_key(event.keycode)
 			_:
 				_martial_key(event.keycode)
+		return
+	# the Alchemist's hold-release verb: releasing the held brew key POURS the vial.
+	# (Key releases are otherwise unused — every other kit is tap-driven.)
+	if event is InputEventKey and not event.pressed and _pause == null \
+			and _screen == "combat" and _seat_key == "caster" and _caster_cls == "alchemist":
+		if event.keycode == _brew_hold_key:
+			_brew_hold_key = -1
+			_ctrl.human({"type": "ability", "id": "pour"})
 		return
 	# Mender click-cast: hover a frame, click a chord
 	if _pause == null and _seat_key == "healer" and _screen == "combat" \
@@ -3037,6 +3165,25 @@ func _bloomweaver_key(code: int) -> void:
 		KEY_Q: _cast("saprot")
 		KEY_E: _cast("lifesurge")
 		KEY_7: _cast(_signature())
+
+## The Alchemist's keys: HOLD 1 = brew Venom · HOLD 2 = brew Rot (the RELEASE pours —
+## see the release branch in _input) · 3/R = Rupture · SPACE = dodge · F = dodge beats.
+func _alchemist_key(code: int) -> void:
+	match code:
+		KEY_SPACE:
+			_ctrl.human({"type": "defense"})
+		KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1:
+			if _brew_hold_key == -1:
+				_brew_hold_key = KEY_1
+				_ctrl.human({"type": "ability", "id": "brew_venom"})
+		KEY_2:
+			if _brew_hold_key == -1:
+				_brew_hold_key = KEY_2
+				_ctrl.human({"type": "ability", "id": "brew_rot"})
+		KEY_3, KEY_R:
+			_ctrl.human({"type": "ability", "id": "rupture"})
 
 ## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
 ## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.
@@ -3557,6 +3704,9 @@ func _render_band_reckoner(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_guard.cd_frac = 0.0
 
 func _render_band_caster(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	if _caster_cls == "alchemist":
+		_render_band_alchemist(s, p, obs)
+		return
 	_hp_orb.set_values(p.hp, p.hp_max)
 	_res_orb.set_values(float(obs.get("focus", 0.0)), float(obs.get("focus_max", 100.0)))
 	var casting: Dictionary = obs.get("casting", {})
@@ -3605,6 +3755,32 @@ func _render_band_caster(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var icd := maxf(1.0, float(CombatCore.to_ticks(5.0, s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / icd, 0.0, 1.0)
+
+## THE ALEMBIC eats the whole observe() surface — the instrument renders everything.
+func _render_band_alchemist(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	_hp_orb.set_values(p.hp, p.hp_max)
+	_res_orb.set_values(float(obs.get("potency", 0.0)) * 100.0, 100.0)
+	var g := _brew_gauge
+	g.venom = float(obs.get("venom", 0.0))
+	g.rot = float(obs.get("rot", 0.0))
+	g.cap = float(obs.get("cap", 12.0))
+	g.soft = float(obs.get("soft", 9.0))
+	g.charging = String(obs.get("charging", ""))
+	g.charge = float(obs.get("charge", 0.0))
+	g.charge_max = float(obs.get("charge_max", 1.30))
+	g.fizzle_below = float(obs.get("fizzle_below", 0.45))
+	g.sweet_lo = float(obs.get("sweet_lo", 0.70))
+	g.sweet_hi = float(obs.get("sweet_hi", 0.98))
+	g.overflow_at = float(obs.get("overflow_at", 1.0))
+	g.balance = float(obs.get("balance", 0.0))
+	g.potency = float(obs.get("potency", 0.0))
+	g.pot_mult = float(obs.get("pot_mult", 1.0))
+	g.react_dps = float(obs.get("react_dps", 0.0))
+	g.ripe_glow = float(obs.get("ripe_glow", 0.0))
+	g.brew_min = float(obs.get("brew_min", 0.0))
+	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
+	_guard.usable = bool(obs.get("defense_ready", false))
+	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
 
 func _render_band_healer(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	if _healer_cls == "bloomweaver":
@@ -3706,6 +3882,8 @@ func _handle_event(ev: Dictionary) -> void:
 		_rk_gauge.on_event(ev)     # THE FORGE: wind/apex stamps + verdict banner + history
 		if mine and _blade_cls == "reckoner":
 			_reckoner_juice(ev)
+	if _brew_gauge != null and mine:
+		_brew_gauge.on_event(ev)   # THE ALEMBIC: pour verdicts / rupture burst / history
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"negate":
@@ -3829,6 +4007,20 @@ func _handle_event(ev: Dictionary) -> void:
 		"coup":
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_add_shake(7.0)
+		# ---- the Brew (Alchemist) — the ALEMBIC owns the banners; the HUD adds body ----
+		"brew_rupture":
+			if mine:
+				_add_shake(9.0 if bool(ev.get("peak", false)) else 6.0)
+				_dial.react("impact", float(ev.get("amt", 40)))
+			else:
+				_big_text("the brew RUPTURES", Palette.REACT, 24, 0.5)
+		"brew_pour":
+			if mine:
+				match String(ev.get("grade", "")):
+					"spoiled":
+						_add_shake(5.0)          # the flinch — you cooked it
+					"hot":
+						_add_shake(3.0)
 		"rig_fire":
 			# TEMPO §5 — the Combo rig fired: a small pop so you SEE your build work.
 			if mine:
@@ -3913,7 +4105,7 @@ func _seat_accent() -> Color:
 	match _seat_key:
 		"tank": return Palette.STEEL
 		"blade": return Palette.FLOW
-		"caster": return Palette.KICK
+		"caster": return Palette.REACT if _caster_cls == "alchemist" else Palette.KICK
 		"healer": return Palette.WIN
 	return Palette.GOLD
 
@@ -3990,7 +4182,7 @@ func _on_end(won: bool) -> void:
 			_map_wounds[ri] = minf(0.4, float(_map_wounds[ri]) + 0.2)
 		if u.role == "healer":
 			_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
-		var ex: Dictionary = GateContent.exam(_seat_key)
+		var ex: Dictionary = GateContent.exam(_seat_key, _seat_cls_now())
 		# GEAR-2: the sworn oath resolves on the exam's final state (win OR loss)
 		_resolve_oath(_ctrl.state, _ctrl.player(), won)
 		if not won and not _oath_result.is_empty():

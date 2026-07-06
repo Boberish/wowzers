@@ -54,6 +54,13 @@ static var SAP := Color("a8d060")           # Sap orb (spring green)
 static var VERDANCE := Color("5fd6a3")      # Verdance gauge (living jade)
 static var THORN := Color("c98a5a")         # Thornveil / thorn damage (bark amber)
 
+# Alchemist ("the Brew" — caster seat #2) accents, lifted from the feel-test artifact
+static var VENOM_BREW := Color("ff7a33")    # Venom — hot, fades fast (ember orange)
+static var ROT_BREW := Color("33c2d8")      # Rot — cold, lingers (glacial cyan)
+static var REACT := Color("a9f022")         # the Reaction (acid green)
+static var REACT_HOT := Color("eaffb0")     # reaction at full boil / Rupture flash
+static var SPOIL := Color("e8463a")         # overflow / a spoiled pour
+
 # draft card tints by boon type
 static var SPELL := Color("6fb2c9")
 static var UPGRADE := Color("d0a94f")

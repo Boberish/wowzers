@@ -52,20 +52,35 @@ const EXAMS := {
 	},
 }
 
+## The Alchemist's caster-seat exam — the Voidcaller's Prompter is a KICK exam and
+## the Brew carries no kick, so the chemist gets its own checkpoint (the Crucible
+## recast). Keyed separately: exam() picks it when the caster seat brews.
+const EXAM_ALCHEMIST := {
+	"boss": "THE SANDBOX, Quarantine Vat",
+	"variant": "priest",
+	"actor": "",
+	"body": "A sealed glass cell blocks the row, running something corrosive in isolation: \"UNTRUSTED CODE DETECTED. EXECUTE IN SANDBOX.\" The Alchemist steps through alone — it wants to see what you're brewing.",
+	"challenge": "\"OBSERVING PROCESS BEHAVIOR—\" It grinds forward on a timer. Keep the reaction fed THROUGH its swings and cash your Ruptures — a stalled brew fails quarantine.",
+	"win": "PROCESS CLEARED: BEHAVIOR NOMINAL(?). The cell drains itself and opens, mildly impressed by the smell.",
+	"lose": "QUARANTINE ENFORCED. You are force-rebooted past the cell — flagged, fumigated, and one sector corrupted.",
+}
+
 ## Post-fight capper (the result page under the win/lose copy).
 const CAPPER := {
 	true: "The raid pretends it wasn't worried.",
 	false: "Nobody mentions the smell of burnt sectors. A Cooling Station can repair them.",
 }
 
-static func exam(seat_key: String) -> Dictionary:
+static func exam(seat_key: String, cls: String = "") -> Dictionary:
+	if seat_key == "caster" and cls == "alchemist":
+		return EXAM_ALCHEMIST
 	return EXAMS.get(seat_key, EXAMS["tank"])
 
 ## The class's exam fight, exactly as the solo game builds it (party-of-one for the
 ## martial seats; the healer brings its sandboxed stat-block party) — display name
 ## and intro recast to the Realm-1 identity.
 static func make_state(seed: int, seat_key: String, aspect: String, cls: String = "") -> CombatState:
-	var ex: Dictionary = exam(seat_key)
+	var ex: Dictionary = exam(seat_key, cls)
 	match seat_key:
 		"blade":
 			# the blade seat has two classes — the Reckoner's exam is its own solo boss
@@ -80,6 +95,13 @@ static func make_state(seed: int, seat_key: String, aspect: String, cls: String 
 			return TwinfangContent.make_state(seed, aspect, TwinfangContent.make_config(),
 				TwinfangContent.make_twinfang_config(), e)   # THE OPENING live in the FIREWALL gate too
 		"caster":
+			# the caster seat has two classes — the Alchemist's exam is its own solo
+			# brew fight (the Crucible), not the Voidcaller's kick exam (the Priest).
+			if cls == "alchemist":
+				var ea := AlchemistContent.make_crucible()
+				_recast(ea, ex)
+				return AlchemistContent.make_state(seed, aspect, AlchemistContent.make_config(),
+					AlchemistContent.make_alchemist_config(), ea)
 			var e2 := VoidcallerContent.make_priest()
 			_recast(e2, ex)
 			return VoidcallerContent.make_state(seed, aspect, VoidcallerContent.make_config(),

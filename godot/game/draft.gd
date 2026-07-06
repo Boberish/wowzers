@@ -17,7 +17,8 @@ const UPSELL_COST := 2
 const LOCK_COST := 1
 ## The class-signature skill counter each kit bumps into diag (see Draft.mint).
 const SIG_KEY := {"bulwark": "negate", "twinfang": "perfect_strike",
-	"voidcaller": "clean_kick", "mender": "dispel", "bloomweaver": "perfect_ward"}
+	"voidcaller": "clean_kick", "mender": "dispel", "bloomweaver": "perfect_ward",
+	"alchemist": "pour_potent"}
 
 static func catalog(run) -> Variant:
 	match String(run.char_class):
@@ -45,8 +46,12 @@ static func _ok(b: Dictionary, run) -> bool:
 	return not run.boons.has(b["id"])
 
 ## Aspect pool first, then shared — deduped by id (deterministic const-array order).
+## A class with no boon catalog yet (the Alchemist base build) offers nothing —
+## every caller already handles an empty roll (the draft is skipped).
 static func offerable(run) -> Array:
 	var cat = catalog(run)
+	if cat == null:
+		return []
 	var seen := {}
 	var out: Array = []
 	for b in cat.spec_pool(run.aspect) + cat.SHARED:
@@ -68,8 +73,9 @@ static func build_tags(run) -> Dictionary:
 		t[String(id)] = true
 	t[String(run.aspect)] = true
 	var cat = catalog(run)
-	for tag in cat.aspect_tags(run.aspect):
-		t[String(tag)] = true
+	if cat != null:
+		for tag in cat.aspect_tags(run.aspect):
+			t[String(tag)] = true
 	return t
 
 static func matches(b: Dictionary, run) -> bool:
