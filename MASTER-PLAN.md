@@ -38,7 +38,7 @@
 | **Persistent progression (loot tables / OATHS / Ledger / standing)** | 🟡 **GEAR-1 MERGED 2026-07-03** (`866592f` — Curio drops/equip/scrap/unlock store live on the raid campaign, byte-identical gearless). Design: `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md`. GEAR-2 (oaths/Ledger UI) claimable |
 | **Maps ("The Topology" — AtO-style node runs)** | ✅ MAP-1/2/3 + **INFERENCE CHECK** + **THE KILL SWITCH P1** (⏻ shared meter · OVERCLOCK arming offline+online · integrity RETIRED · 5 charge events; protocol v11). Phase 2/3 (biting blessings + Forge + live UNPLUG) open.  ~~INFERENCE CHECK COMPLETE~~ (P0–P6 + seat-picker + branches + wager/mulligan + online-Prior + fight-marks) — build-read dice + ⚡Entropy/📁Prior luck meta + multi-stage branches + cross-node flags + 14 events + wager kind + post-fail mulligan, offline AND online co-op (protocol v9, server resolves + traverses stages; client==server). protocol v10; FEATURE-COMPLETE (all follow-ups merged) |
 | **GAME SHAPE — RAID-ONLY** | 🔒 LOCKED 2026-07-03 (see §GAME SHAPE) — one game; solo campaign retired to a PRACTICE card; raid-first law |
-| **THE WORLD (persistent overworld: Atlas/zones/fog/flight/world events/hometown, wrapping the instances)** | 🔴 NEW — design LOCKED with Bill 2026-07-06, **`WORLD-PLAN.md`** (see §THE WORLD). Zones = persistent conquest · warband law (always 4 seats, no enemy-scaling system) · overworld = bare kit · interrupt-by-ability replaces the cut Voidcaller verb · single-target + dodge-ration pillars. Phases W0–W5; nothing built yet |
+| **THE WORLD (persistent overworld: Atlas/zones/fog/flight/world events/hometown, wrapping the instances)** | 🟢 **W1 BUILT & MERGED 2026-07-06** (`b9c26aa`): the Atlas + ZONE 1 "THE GILDFIELDS" (20-node conquest map, ZONE REMEMBERS teaser, rushable door) + Bastion hub, flagged preview (`--autostart=world`). Design locked in **`WORLD-PLAN.md`** (see §THE WORLD): zones = persistent conquest · warband law · overworld = bare kit · interrupt-by-ability · single-target + dodge-ration pillars. Next: Bill's feel pass → W2 (Forge + TICKETS v2) |
 
 ---
 
@@ -126,6 +126,12 @@ stays instance-only VERBATIM (behind a door the run still exists); zones get per
 write back only to saves that still had them). Zone sizing: spine ~8–12 nodes (attunement
 budget caps it), breadth scales — Zone 1 target ~20 nodes. PARKED: **RAID RITES** (mandatory
 re-done entry nodes to keep raids a big deal — Bill, later).
+
+**W1 ✅ BUILT & MERGED 2026-07-06 (`b9c26aa` — full record in the Coordination Log):** the
+Atlas + **ZONE 1 "THE GILDFIELDS"** (20-node Westfall-arc conquest map, ZONE REMEMBERS sluice
+teaser, rushable UNDERMILL door) + the Bastion hub, behind a `WORLD_PREVIEW` home-menu door +
+`--autostart=world` / `zone`. Bare-kit zone pulls, sims byte-identical, world-save round-trip
+proven. **Awaiting Bill's feel verdicts → W2 (Encounter Forge + TICKETS v2 content pass).**
 
 ## CLASS FRAMEWORK v2 — the Tempo-piloted ROSTER REWORK (locked with Bill, 2026-07-04)
 
@@ -730,14 +736,32 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   noted Twinfang-hardcoded (generalization = slice a). Build order = ALCHEMIST-PLAN §6.3 slices
   a–f; next session codes it. *(alchemist run-through session)*
 
-- ⏳ 2026-07-06 · `world-w1` · §THE WORLD W1 — **CLAIMED (Bill: "go ahead and build this"):**
-  THE ATLAS + ZONE 1 offline, feature-flagged per WORLD-PLAN W1. World save (versioned cfg,
-  round-trip determinism) · Atlas screen (fog, zone select, warband token) · Zone 1 authored
-  ~20-node persistent-conquest map (Westfall-inspired: the zone's story funnels into the
-  dungeon door) · bare-kit stand-in fights (byte-identical to source encounters) · waystation/
-  flight stub · Bastion hub v1 · classic front door untouched (flip is W3). Stretch: one
-  ZONE REMEMBERS choice teaser. Deferred: Forge (W2), full TICKETS v2 (W2), online (W4).
-  *(world-structure session)*
+- ☑ 2026-07-06 · `world-w1` → main (`b9c26aa`) · §THE WORLD W1 — **THE ATLAS + ZONE 1 + THE
+  BASTION BUILT (Bill: "go ahead and build this... 1st zone is big impressions"), flagged
+  preview** (`WORLD_PREVIEW` home button + `--autostart=world[:seat[:aspect]]` / `zone`;
+  front-door flip stays W3). **ZONE 1 = THE GILDFIELDS** (working name; was "Mirefen" — Bill
+  asked for Westfall inspiration): authored 20-node conquest map, dying-harvest arc that
+  funnels into the UNDERMILL dungeon door (the Westfall steal: the zone's mystery IS the
+  dungeon's setup); spine 9 inside the attunement budget; cave chain (Pale Tiller miniboss) ↔
+  marsh smugglers' path (the door RUSHABLE without the capstone, BFS-proven); THE SLUICE =
+  the ZONE REMEMBERS teaser (permanent flag floods the Drowned Acre fight into a cache);
+  personal gate; waystation → Atlas flight web. New: `game/world_save.gd` (versioned
+  `user://rift_world.cfg`, canonical sorted-key JSON, headless disk-inert) ·
+  `data/world/world_content.gd` (earnest world fiction — tone law holds; W1 fights are
+  canonical stand-ins bard/sonnet/opus/riftmaw, the W2 Forge recasts them) ·
+  `ui/atlas_screen.gd` + `ui/zone_screen.gd` (fog/frontier/silhouette render, worn-road
+  curves, warband token) · Bastion hub v1 (Commander party setup re-doored as THE WARBAND
+  CAMP via `_party_ctx`). Zone pulls are BARE KIT through the shared RaidNet factory, no
+  overrides — isolated, full HP, conquest is the only writeback. **Gates:** `world_probe`
+  (structure / conquest semantics / variants / save round-trip / fight determinism) ALL OK ·
+  `ui_smoke_world` full-loop ALL PASS (bare-kit asserted on every pull) · psim twinfang(120)
+  + raid(60) per-seed CSVs **byte-identical** vs frozen main · ui_smoke_raid/map +
+  menu/commander/gear probes green · WSLg 6-shot tour eyeballed + sent to Bill. **Notes:**
+  main_menu now routes `gate`/`world`/`zone` autostarts to the raid scene (was raid-only);
+  the `raid_frames/col_std` ConfigFile noise in headless smokes is PRE-EXISTING (27 hits on
+  frozen main). **NEXT:** Bill plays it (`--autostart=world`), feel verdicts → W2 (the
+  Encounter Forge + the TICKETS v2 content pass); door-exit polish (descent end → Atlas,
+  not home). *(world-structure session)*
 
 - ☑ 2026-07-06 · main (docs only) · §THE WORLD / `WORLD-PLAN.md` — **GAME STRUCTURE + ZONE QUESTS
   design session (Bill, direct).** Bill's structure question ("one session used to be a zone; now
