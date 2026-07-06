@@ -2804,6 +2804,26 @@ func _add_dev_tools() -> void:
 	win.pressed.connect(_dev_win)
 	_place(win, 0, 0, 0, 0, 14, 14, 116, 44)     # top-left corner, out of the way
 	_ui.add_child(win)
+	# PLAYTEST A/B (Bill 2026-07-06): live saturation toggle for the Brew — flip it
+	# mid-fight and feel whether "more isn't better" earns its keep. Offline dev only.
+	if _seat_key == "caster" and _caster_cls == "alchemist":
+		var sat := Button.new()
+		var kit := _ctrl.player().kit as AlchemistKit
+		sat.text = "⚗ SAT %s" % ("ON" if kit != null and kit.cfg.sat_enabled else "OFF")
+		sat.add_theme_font_size_override("font_size", 12)
+		sat.modulate = Color(1.0, 1.0, 1.0, 0.5)
+		sat.pressed.connect(func():
+			var k := _ctrl.player().kit as AlchemistKit
+			if k == null:
+				return
+			k.cfg.sat_enabled = not k.cfg.sat_enabled
+			sat.text = "⚗ SAT %s" % ("ON" if k.cfg.sat_enabled else "OFF")
+			_toast_add("⚗  SATURATION %s — %s" % [
+				"ON" if k.cfg.sat_enabled else "OFF",
+				"pours past the line waste again" if k.cfg.sat_enabled
+					else "full pours land everywhere (bank to cap)"]))
+		_place(sat, 0, 0, 0, 0, 14, 48, 116, 78)
+		_ui.add_child(sat)
 
 func _dev_win() -> void:
 	if _ctrl == null or _ctrl.state == null or _ctrl.state.over:
@@ -3765,6 +3785,7 @@ func _render_band_alchemist(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.rot = float(obs.get("rot", 0.0))
 	g.cap = float(obs.get("cap", 12.0))
 	g.soft = float(obs.get("soft", 9.0))
+	g.sat_on = bool(obs.get("sat_on", true))
 	g.charging = String(obs.get("charging", ""))
 	g.charge = float(obs.get("charge", 0.0))
 	g.charge_max = float(obs.get("charge_max", 1.30))

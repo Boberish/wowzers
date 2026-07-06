@@ -115,7 +115,13 @@ taps). Freed from the blade chassis, the puppet can BE the chemist (art = PoseRi
 **THE REACTION (the core damage):** the two poisons react where they meet —
 - Reaction scales with **min(Venom, Rot) × balance** — the SMALLER side gates it. 10/2 barely reacts.
 - Raw single-poison DoT is deliberately weak; **blindly stacking one side is bad by design**.
-- **Saturation:** each poison has a soft cap — pouring into a full side is mostly wasted ("more isn't better").
+- **Saturation:** each poison has a soft cap — pouring into a full side is mostly wasted ("more isn't
+  better"). **⚗ PLAYTEST-FLAGGED (Bill 2026-07-06):** `AlchemistConfig.sat_enabled` + a live dev
+  toggle (⚗ SAT, top-left, offline) + `alchemist_sim --sat=off` A/B. The sim says the rule barely
+  binds for a disciplined brewer (±5pp win, same TTK/potency — the policy doesn't over-pour); its
+  teeth are anti-degenerate-spam for human hands, so Bill's live A/B is the verdict. ⚠ If it dies:
+  the Reckless Brewer creed (no saturation, double decay) and the Still's F16 rule (distills
+  overfill/waste) both lose their hook and need rethinks.
 - The reaction slowly **consumes the brew** — keep feeding it; no banking a stable pile.
 
 **POTENCY (the earned power bar — this class's Flow):** fills while you sustain a **balanced, fed**

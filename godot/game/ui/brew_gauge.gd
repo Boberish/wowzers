@@ -28,6 +28,7 @@ var venom := 0.0
 var rot := 0.0
 var cap := 12.0
 var soft := 9.0
+var sat_on := true                  ## playtest flag mirror — hides the SAT line when off
 var charging := ""                  ## "" | "venom" | "rot"
 var charge := 0.0
 var charge_max := 1.30
@@ -279,14 +280,15 @@ func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s
 		# side gloss
 		draw_rect(Rect2(z.position.x + 2, top_y, 2.5, fh), Color(1, 1, 1, 0.10))
 	# saturation etch-line — above it, pours waste
-	var sat_y := z.position.y + z.size.y * (1.0 - soft / cap)
-	draw_line(Vector2(z.position.x - 2, sat_y), Vector2(z.position.x + z.size.x + 2, sat_y),
-		Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.8), 1.2, true)
-	var over_soft := val_live >= soft
-	if sat_label:
-		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(z.position.x - 30, sat_y + 3),
-			"SAT", HORIZONTAL_ALIGNMENT_RIGHT, 26, 8,
-			Palette.GOLD if over_soft else Palette.GOLD_DIM)
+	if sat_on:                              # the soft cap only exists when the flag says so
+		var sat_y := z.position.y + z.size.y * (1.0 - soft / cap)
+		draw_line(Vector2(z.position.x - 2, sat_y), Vector2(z.position.x + z.size.x + 2, sat_y),
+			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.8), 1.2, true)
+		var over_soft := val_live >= soft
+		if sat_label:
+			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(z.position.x - 30, sat_y + 3),
+				"SAT", HORIZONTAL_ALIGNMENT_RIGHT, 26, 8,
+				Palette.GOLD if over_soft else Palette.GOLD_DIM)
 	# pour-landed flash: rim ring + splash ripple
 	if flash > 0.0:
 		draw_rect(z.grow(3.0), Color(col.r, col.g, col.b, 0.55 * flash), false, 2.5)

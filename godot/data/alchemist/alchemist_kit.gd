@@ -146,7 +146,8 @@ func _pour(s: CombatState, seat: Seat) -> bool:
 	else:
 		dose = cfg.dose_ok; grade = "ok"
 	var cur := _venom(seat) if side == "venom" else _rot(seat)
-	var saturated := cur >= cfg.soft
+	# saturation is PLAYTEST-FLAGGED (cfg.sat_enabled) — off, a full side takes full pours
+	var saturated := cfg.sat_enabled and cur >= cfg.soft
 	if saturated:                          # more isn't better — a full poison wastes the pour
 		dose = maxf(1.0, roundf(dose * cfg.sat_frac))
 	seat.vars[side] = minf(cfg.cap, cur + dose)
@@ -189,6 +190,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"rot": _rot(seat),
 		"cap": cfg.cap,
 		"soft": cfg.soft,
+		"sat_on": cfg.sat_enabled,
 		"decay_venom": cfg.decay_venom,
 		"decay_rot": cfg.decay_rot,
 		"charging": String(seat.vars.get("charging", "")),

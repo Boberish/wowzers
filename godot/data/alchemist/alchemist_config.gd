@@ -15,6 +15,11 @@ extends Resource
 # --- the two poisons (artifact: CAP=12, SOFT=9, DECAY_V=2.0, DECAY_R=0.5) ---
 @export var cap: float = 12.0            ## hard cap per poison
 @export var soft: float = 9.0            ## saturation soft cap — pours above waste (dose ×sat_frac)
+@export var sat_enabled: bool = true     ## PLAYTEST FLAG (Bill 2026-07-06): off = pours never
+                                         ## saturate ("more isn't better" suspended — bank to cap).
+                                         ## A/B it live (dev ⚗ SAT toggle) + in alchemist_sim
+                                         ## (--sat=off). ⚠ if OFF wins, the Reckless Brewer creed
+                                         ## (defined by removing saturation) needs a new hook.
 @export var decay_venom: float = 2.0     ## per second — hot, fades FAST (demands attention)
 @export var decay_rot: float = 0.5       ## per second — cold, LINGERS (set it and it holds)
 
