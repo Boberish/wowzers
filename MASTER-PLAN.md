@@ -714,6 +714,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · main (docs only) · §CLASSES / `ALCHEMIST-PLAN.md` — **ALCHEMIST PRE-BUILD
+  RUN-THROUGH (Bill, direct): the card slate is LOCKED for build.** Four Bill calls:
+  **⭐ transformer = THE REACTION-VESSEL** (reaction banks instead of dealing; Rupture dumps the
+  vessel — sustain/burst inverted; Twin-Still and Catalyst-forge rejected) · **rig slate locked**
+  (settles F13/I3: Sweet Pour/Hot Pour/Emulsion/Ripe/Boil/Perfect Wave → Splash/Backwash/Quicken/
+  Residue/Fume/Overfill; Purist board hides the Rupture WHENs) · **fixed rarities this slice**
+  (the per-offer H/S/O roll is DESIGNED-NOT-BUILT for Tempo too — shared engine slice later) ·
+  **F22 settled: Spitfire = designated interrupt carrier when pillar 3 lands** (no engine work now).
+  Four holes found in the accepted cards + fixed in the plan: **Last Call reframed** (no cleanse
+  mechanic exists and phases don't wipe the brew → phase-transition auto-cash, no wipe added) ·
+  **Chain Rupture was stale** (base already keeps 35% → card is now +30pp, ≈0.65) · **creed-aware
+  offers get a mechanism** (`hide_creeds` tag + `Draft._ok()` check, byte-identical untagged) **and
+  extend to modules** (Purist never sees Fermentation/Reaction-Vessel) · HUD framework plumbing
+  noted Twinfang-hardcoded (generalization = slice a). Build order = ALCHEMIST-PLAN §6.3 slices
+  a–f; next session codes it. *(alchemist run-through session)*
+
 - ⏳ 2026-07-06 · `world-w1` · §THE WORLD W1 — **CLAIMED (Bill: "go ahead and build this"):**
   THE ATLAS + ZONE 1 offline, feature-flagged per WORLD-PLAN W1. World save (versioned cfg,
   round-trip determinism) · Atlas screen (fog, zone select, warband token) · Zone 1 authored
