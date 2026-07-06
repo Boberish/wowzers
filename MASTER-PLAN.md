@@ -150,6 +150,38 @@ not bigger numbers (Model A, frequency-scaled, Monotonic-Pool-safe).
 + Edge/Deathmark) → the WHEN/THEN board + tutorial → the level/unlock ledger → then the next class. **FUTURE
 (parked):** titles · cosmetic transmog · social lobbies. Open content picks: `TEMPO-PLAN.md` §10.
 
+**⚖ CLASS DESIGN RULES (locked with Bill, 2026-07-06 — read before designing ANY class or rework):**
+1. **Uniform interfaces, asymmetric content — no cookie cutter.** What every class MUST share is the CHASSIS:
+   ClassKit hooks + the seat model (`perform()`), the framework meta-shape (a Creed slot · one Module pick ·
+   WHEN/THEN boons · level = unlock count), the universal dodge, telegraph answers. EVERYTHING else is free and
+   SHOULD differ — ability count, GCD or none, resource model, minigame shape, creed-pool size, dodge payoff,
+   interrupt carriers. (Bill: "it's an MMO roguelike, not old-school where every class follows the cookie
+   cutter.") Twinfang (3 buttons, deep rhythm) and Mender (10 spells, click-cast triage) are BOTH correct shapes.
+2. **One complexity budget, spent where the fantasy is.** Every class picks its spot on the
+   **minigame-depth ↔ kit-breadth** spectrum and commits — deep AND broad is a design smell. State the spot in
+   the class plan's opening lines.
+3. **AI-pilotable or it doesn't ship.** A seeded policy must play the kit at 3 skill tiers with a real gradient
+   (expert ≈100, sloppy loses meaningfully). Warband + Commander make every class an AI class sometimes — if a
+   deterministic policy can't express the kit, redesign the KIT, not the policy. Policy complexity is the honest
+   meter of kit complexity.
+4. **Skill must move outcomes.** The minigame is load-bearing (bands separate by tier in sims), never
+   decorative. Sloppy ≈ expert ⇒ the verb isn't a verb.
+5. **Roles are HARD; off-role utility is SOFT spice.** The seat's job never changes and no boon path converts a
+   role — role conversion is pollution (comp-conditional sims + trinity retune) and its original motivation is
+   VOID: AI raiders already solve "nobody wants to tank" (Commander makes the AI tank — Bill's own call,
+   2026-07-06). Off-role utility is welcome as CLUTCH tools with a hard cap: **it may SAVE a fight, never RUN
+   one** — cooldown/charge-gated moments (a blade's once-a-fight survival wall, a caster's single emergency
+   shield, a healer's damage dump), never sustained off-role throughput. Same idiom as interrupt-carrier
+   distribution (2/1/0): utility spread = comp texture, documented per class plan.
+6. **Kits must be fun BARE — mechanics density is GEOGRAPHY, not class design.** Zone fights run boonless
+   (WORLD-PLAN overworld power rule): the rotation IS the content there, so a kit that only comes alive after
+   three drafts is broken. Boss-mechanics intensity climbs the world ladder (zone: rotation + 0–2 beats →
+   event/dungeon: some strings/chains → raid: the full exam) — "you pick what you feel like doing" by picking
+   WHERE you fight, not a difficulty slider. The Forge's tier knob implements this.
+7. **Parked, NOT now:** comp-variant content (tankless/healerless fights). If it ever ships it arrives as
+   deliberately-certified Depth affixes / realm gimmicks tuned+simmed for those comps — never as emergent boon
+   stacking.
+
 ---
 
 ## REALMS & THEMES — every raid is a themed realm
@@ -654,6 +686,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- 📋 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **CLASS DESIGN RULES locked with Bill.**
+  Bill's asks: (a) asymmetric classes as a THEME — "not every class will have x abilities and x
+  creeds… don't be afraid to make classes very unique"; (b) durable rules so class-making sessions
+  remember them; (c) role-flex weighed — Bill's own realization mid-design: the "nobody wants to
+  tank" motivation is VOID because AI raiders + Commander already solve it, so role CONVERSION via
+  boons is rejected (pollution / comp-conditional sims) while off-role utility survives as capped
+  spice ("may SAVE a fight, never RUN one" — the interrupt-carrier 2/1/0 idiom generalized);
+  (d) mechanics density = GEOGRAPHY (zone rotation-showcase → dungeon → raid full-exam; kits must
+  be fun BARE). Recorded as the 7-rule **⚖ CLASS DESIGN RULES** block in §CLASS FRAMEWORK v2
+  (uniform interfaces/asymmetric content · one complexity budget · AI-pilotable-or-no-ship ·
+  skill-moves-outcomes · hard roles/soft utility · fun-bare/geography · comp-variants parked).
+  *(class-rules design session)*
 
 - 📋 2026-07-06 · main (docs only) · §BOSSES — **`SEAL-PILLAR-PLAN.md` written (execution brief,
   NOT built — Bill is handing it to another agent).** Expands the §BOSSES SEAL PILLAR PASS block
