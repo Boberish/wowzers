@@ -720,6 +720,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · `tempo-real` → main (`67f5efc`) · §TEMPO — **THE WHOLE TEMPO PLAN, CODED.** Bill:
+  "code everything, make it real." All kit-local + deterministic across 6 files (boons/config/creeds/
+  modules/kit + sim). Cuts (Opportunist·Held Note·spells·Killer's Eye; Edge→Largo creed·Deathmark cut;
+  Opening=class base) · base-kit fixes (F8/F11/F15/F17/F19/F26) · crit rework A7 (Heartseeker always-crit
+  + HONE standing Edge meter + Serrated + Assassin's Note, no base crits) · Largo creed · Through-Line ·
+  Understudy · Overdrive module (FEVER, verified firing @expert) · Battle Hymn signal. VERIFY:
+  twinfang_sim ALL determinism PASS; crit build 90→100%/41.6→29.1s; Overdrive fevers/run 1.00;
+  ui_smoke_raid ALL OK; raid_sim --blade=tempo 4 Seals det PASS. TEMPO-PLAN Appendix A banner added.
+  **Owed follow-ups (other layers):** HUD gauges (raid_hud render), Battle Hymn party-aura (raid buff
+  channel), A8 keystone/elite acquisition (Topology elite node). *(tempo-real session)*
+
 - ☑ 2026-07-06 · main (docs only) · §CLASSES / `ALCHEMIST-PLAN.md` — **ALCHEMIST PRE-BUILD
   RUN-THROUGH (Bill, direct): the card slate is LOCKED for build.** Four Bill calls:
   **⭐ transformer = THE REACTION-VESSEL** (reaction banks instead of dealing; Rupture dumps the

@@ -464,6 +464,19 @@ copy of Tempo, but a variation — not a whole new thing"* (like the Brew was).
 
 ## APPENDIX A — THE TEMPO CARD LEDGER (v2 · Bill's ledger verdicts 2026-07-06 folded)
 
+> ### ✅ THE WHOLE PLAN IS NOW CODED — merged to main `67f5efc` (2026-07-06)
+> Bill: "code everything, make it real, the whole tempo plan." Done, kit-local + deterministic:
+> **cuts/folds** (Opportunist·Held Note·spells·Killer's Eye gone; Edge→Largo, Deathmark cut;
+> Opening = class base) · **base-kit** (F11 base energy · F15 Bullseye superset · F8 Good-maintains ·
+> F19 wideners taper · F26 Syncopation cost-only · F17 Held-Breath crash-event) · **crit rework A7**
+> (no base crits; Heartseeker always-crit + HONE's standing Edge meter + Serrated + Assassin's Note) ·
+> **Largo creed** · **Through-Line** · **Understudy** · **Overdrive module** (fever verified firing) ·
+> **Battle Hymn** signal. VERIFY: twinfang_sim ALL determinism PASS · crit build 90→100% / 41.6→29.1s ·
+> Overdrive fevers/run 1.00 @expert · ui_smoke_raid ALL OK · raid_sim --blade=tempo 4 Seals det PASS.
+> **STILL owed (need other layers):** HUD gauges (Edge meter / Overdrive / Understudy pips) = raid_hud
+> render work · Battle Hymn's party-aura *application* = raid buff channel · A8 keystone/elite
+> *acquisition* = Topology elite-node type. Mechanics are real & simmed; these three are wiring.
+
 **Why this exists:** the complete card state so no session loses it. Source of truth for behavior =
 `godot/data/twinfang/` (boons/config/kit/rig/creeds/modules) — this ledger adds the DESIGN intent
 (ladders, addresses, verdicts) the code doesn't carry. **v2 (Bill, 2026-07-06 evening):** Opportunist /
