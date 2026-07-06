@@ -714,6 +714,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ⏳ 2026-07-06 · `world-w1` · §THE WORLD W1 — **CLAIMED (Bill: "go ahead and build this"):**
+  THE ATLAS + ZONE 1 offline, feature-flagged per WORLD-PLAN W1. World save (versioned cfg,
+  round-trip determinism) · Atlas screen (fog, zone select, warband token) · Zone 1 authored
+  ~20-node persistent-conquest map (Westfall-inspired: the zone's story funnels into the
+  dungeon door) · bare-kit stand-in fights (byte-identical to source encounters) · waystation/
+  flight stub · Bastion hub v1 · classic front door untouched (flip is W3). Stretch: one
+  ZONE REMEMBERS choice teaser. Deferred: Forge (W2), full TICKETS v2 (W2), online (W4).
+  *(world-structure session)*
+
 - ☑ 2026-07-06 · main (docs only) · §THE WORLD / `WORLD-PLAN.md` — **GAME STRUCTURE + ZONE QUESTS
   design session (Bill, direct).** Bill's structure question ("one session used to be a zone; now
   nodes launch instances — keep the mid-run deck economy or start fresh?") → **THE SPLIT locked:**
