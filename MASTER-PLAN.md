@@ -729,6 +729,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · main (docs only) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH — **THE PACING
+  GRAMMAR locked (Bill: fights much too short, "rarely get a combo off").** Current truth: Seals
+  enrage 90–142s, skirmishes 60–70s — the Framework-v2 kits out-arc the fights. Locked: length
+  from STRUCTURE, never sponges/screens — two laws (**NO FLAT SPONGES**: every added minute
+  arrives with a structure beat · **DEMAND ROTATION**: long fights rotate the loaded skill;
+  dodge ration budgets per SEGMENT) + six shapes to mix (Bill: "mix all those"): **PACK**
+  (1–4 sequential enemies, one battle, HEAT CARRIES across members — a per-class pack-carry rule
+  joins each rework's spec) · **VERSE/CHORUS** (default long boss) · **REPRIEVE** phase-pause
+  with a job (+THE DENY: kickable boss recovery — pillar-3 showcase) · **THE CHASE** (multi-
+  arena running battle) · **INTERLUDE WAVES** (proven) · **SIDE-DUEL/AURA-ADD** (Manastorm
+  steal). Bands: zone skirmish 60–90s · pack/elite 2–4m · capstone 4–6m · dungeon Seal 5–8m ·
+  raid Seal 8–12m ("10-min boss" = raid tier) · world boss 5–10m; the zone spine stays
+  skirmish-weight (attunement budget holds). Healer mana/regen rebalances WITH the bands — the
+  logged inert-healer finding is largely a fight-length symptom. Lands with W2 Forge (SHAPE
+  axis) + the boss PILLAR PASS. Docs only. *(world-structure session)*
+
 - ☑ 2026-07-06 · main (docs only) · §SYSTEMS / `PROGRESSION-PLAN.md` §LEVELS + `WORLD-PLAN.md` —
   **LEVELS: the paced unlock rollout (design session with Bill, direct).** Bill's ask: WoW-shaped
   slow roll — level up for boons, zone milestones introduce Modules/Creeds, high-level areas tease

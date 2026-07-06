@@ -379,6 +379,62 @@ a designer soul on a Forge body — generator does the body, a human does the si
 
 ---
 
+## FIGHT LENGTH & THE PACING GRAMMAR (locked with Bill, 2026-07-06)
+
+**The finding (Bill, playtest):** fights are much too short — "I rarely get a combo off
+before stuff dies" (Seals enrage at 90–142s; skirmishes at 60–70s; the Framework-v2 kits
+have build arcs longer than the fights). Target: medium fights 3–5 min, late bosses ~10
+min, overall boosted HP — BUT long fights tax focus, and menu/out-of-game time between
+fights is lame. So length comes from STRUCTURE inside one battle, never from sponges or
+screens. **Side dividend:** longer fights are the lever that finally makes the healer
+economy bite (the logged inert-mana finding — mana ≥93%, idle 93–98% — was a fight-length
+symptom as much as a tuning one).
+
+### The two LAWS
+1. **NO FLAT SPONGES.** Every added minute of fight length arrives with a *structure
+   beat* (a new pack member, a phase, a verse, an arena, an add) — never the same
+   intensity stretched. HP boosts ride structure.
+2. **DEMAND ROTATION.** A long fight rotates which skill is loaded (defense-heavy verse →
+   offense window → movement beat → setup pause) instead of sustaining everything —
+   scheduled focus peaks with real valleys. The dodge ration budgets its ~3–8 beats
+   **per segment**, placed at moments (pillar #2 unchanged, applied per-segment).
+
+### The GRAMMAR (fight shapes — Bill: "mix all those to keep it fresh")
+All shapes are INTRA-battle (zero menu time) and Single-Target-Law-clean (one telegraph
+stream, always — packs are strictly sequential):
+1. **PACK** (Bill's) — 1–4 enemies fought sequentially in ONE battle: two smalls + a
+   captain = a medium fight; 3–4 smalls = a gauntlet; one long duel. 2–3s walk-in
+   breathers between members. **Heat carries:** per-class combo state (Flow / vials / rig
+   charge) persists across the pack — the payoff Bill's missing ("combo comes online" and
+   STAYS online); each rework defines its pack-carry rule like it defines its PERFECT
+   payoff. Forge assembles packs from BODY archetypes (SWARM smalls → BRUTE captain).
+2. **VERSE / CHORUS boss** (the default long-boss shape) — alternating authored pressure
+   VERSES and punish CHORUSES (the OPENING verb generalized into a phase grammar), verses
+   escalating (v2 adds a beat, v3 compresses). Length via repetition-with-escalation.
+3. **REPRIEVE (phase-pause)** (Bill's) — scripted no-threat windows at phase breaks with
+   a JOB: triage / plant / pre-brew / bank — a setup window, not dead air. Set-piece
+   variant: **THE DENY** — the boss channels a long recovery (heals N% unless kicked):
+   the party holds dumps for the window (interrupt-by-ability's showcase moment).
+4. **THE CHASE** — a running battle: the enemy flees at HP thresholds, the stage shifts
+   (2–3 arenas, same HP pool), transit carries one authored dodge-string. The fight that
+   moves — zone-fiction gold (the Huskman captain fleeing deeper).
+5. **INTERLUDE WAVES** — the boss withdraws, light adds cycle through (proven Seal tech):
+   an intensity valley that stays active.
+6. **SIDE-DUEL / AURA-ADD** — mid-fight, one seat's personal add (gate-tech in-fight) or
+   a boss-buffing elite (the Manastorm steal): one seat's spotlight inside a long fight.
+
+### Length bands (starting targets — tune.sh; enrage + regen retune with them)
+Zone skirmish 60–90s (the commute stays snappy) · zone elite/PACK 2–4 min · zone capstone
+4–6 min · dungeon Seal 5–8 min · raid Seal 8–12 min (the "10-min boss" = raid tier) ·
+world boss 5–10 min. Zone spine stays mostly skirmish-weight so route-to-door holds the
+30–45 min attunement budget; packs live on side chains + capstones first.
+
+**Sequencing:** the grammar lands with W2 (the Forge gets a SHAPE axis: pack/duel/gauntlet)
++ the boss PILLAR PASS (Seals retuned onto verse/chorus + reprieve + bands). Healer regen /
+mana curves rebalance WITH the bands, not before (the inert-mana fix rides this).
+
+---
+
 ## PROGRESSION RECONCILIATION (what the world changes — and deliberately doesn't)
 
 - **The WORLD track becomes literal.** PROGRESSION-PLAN track #1 gets its UI: the Atlas
