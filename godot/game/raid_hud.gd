@@ -1236,14 +1236,21 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
-		# TEMPO REWORK (offline plumbing): fold the run's Creed + Modules into the blade
-		# kit. Guarded to TwinfangKit — other classes carry neither, so this is a no-op there.
+		# CLASS FRAMEWORK (offline plumbing): fold the run's Creed + Modules + Rig into a
+		# reworked kit. Both Twinfang and Alchemist carry the same three fields; every other
+		# class carries none, so this is skipped there (byte-identical no-op).
 		if seat.kit is TwinfangKit:
 			var tk := seat.kit as TwinfangKit
 			if _run.creed != "":
 				tk.creed_id = _run.creed
 			tk.modules = _run.modules.duplicate()
 			tk.rig = _run.rig.duplicate()      # TEMPO §5: the wired Combo rig
+		elif seat.kit is AlchemistKit:
+			var ak := seat.kit as AlchemistKit
+			if _run.creed != "":
+				ak.creed_id = _run.creed
+			ak.modules = _run.modules.duplicate()
+			ak.rig = _run.rig.duplicate()      # ALCHEMIST-PLAN §3/rig: the wired Combo rig
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -2128,12 +2135,32 @@ func _close_armor_modal() -> void:
 func _blade_tempo_human() -> bool:
 	return _seat_key == "blade" and _seat_cls_now() == "twinfang"
 
+## The CLASS-FRAMEWORK provider for the HUMAN seat: which reworked class's Creed/Module/Rig
+## content drives the pick screens, or "" if this seat's class has no framework yet. Twinfang
+## on the blade, the Brew (Alchemist) on the caster; every other seat/class skips the screens
+## (empty pages — per Bill, non-conforming classes leave them blank). Generalizes the old
+## _blade_tempo_human() gate so a second reworked class snaps onto the same ceremony.
+func _fw() -> String:
+	if _seat_key == "blade" and _seat_cls_now() == "twinfang":
+		return "twinfang"
+	if _seat_key == "caster" and _seat_cls_now() == "alchemist":
+		return "alchemist"
+	return ""
+
+## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
+func _fw_creed_ids(fw: String) -> Array:
+	return AlchemistCreeds.v1_ids() if fw == "alchemist" else TwinfangCreeds.v1_ids()
+
+func _fw_creed(fw: String, id: String) -> Dictionary:
+	return AlchemistCreeds.get_creed(id) if fw == "alchemist" else TwinfangCreeds.get_creed(id)
+
 ## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
 func _show_creed_pick(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human() or _run.creed != "":
+	var fw := _fw()
+	if _run == null or fw == "" or _run.creed != "":
 		done.call()
 		return
-	var ids: Array = TwinfangCreeds.v1_ids().duplicate()   # the shipping pool (grows with unlocks)
+	var ids: Array = _fw_creed_ids(fw).duplicate()         # the shipping pool (grows with unlocks)
 	if ids.size() > 3 and _run.draft_rng != null:          # sample 3 deterministically when it's bigger
 		for i in range(ids.size() - 1, 0, -1):
 			var j := int(_run.draft_rng.next_u32() % (i + 1))
@@ -2147,14 +2174,16 @@ func _show_creed_pick(done: Callable) -> void:
 	_ui.add_child(head)
 	var hl := _title(head, "SWEAR A CREED", 34, Palette.CRIMSON)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run", 15, Palette.TEXT_DIM)
+	var sub := "H O W   Y O U   B R E W  —  one posture, the whole run" if fw == "alchemist" \
+		else "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run"
+	_title(head, sub, 15, Palette.TEXT_DIM)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in ids:
-		var c: Dictionary = TwinfangCreeds.get_creed(String(id))
+		var c: Dictionary = _fw_creed(fw, String(id))
 		var card := AspectCard.new(String(c.get("name", id)) + "  ·  " + String(c.get("kicker", "")),
 			String(c.get("blurb", "")), Palette.CRIMSON, "flurry")
 		card.chosen.connect(_pick_creed.bind(String(id), done))
@@ -2163,7 +2192,7 @@ func _show_creed_pick(done: Callable) -> void:
 func _pick_creed(id: String, done: Callable) -> void:
 	if _run != null:
 		_run.creed = id
-	_toast_add("⚔  Creed sworn — %s" % String(TwinfangCreeds.get_creed(id).get("name", id)))
+	_toast_add("⚔  Creed sworn — %s" % String(_fw_creed(_fw(), id).get("name", id)))
 	done.call()
 
 ## End of Floor 1: INSTALL A MODULE — a new HUD gauge + way to play (§4). Forced pick.

@@ -62,18 +62,57 @@ func _initialize() -> void:
 			print("              pours/run: %s" % _fmt_pours(dsum, seeds))
 		print("")
 
+	_creed_ab(seeds, seed0)
+
 	_write_csv(_arg("out", "res://out/alchemist_results.csv"), rows)
 	print("wrote %d rows -> %s" % [rows.size(),
 		ProjectSettings.globalize_path(_arg("out", "res://out/alchemist_results.csv"))])
 	quit()
 
+## SLICE A gate — each Creed must produce a DISTINCT, sane profile AND keep the skill
+## gradient (rule #4). Crucible @ expert (lat 0) AND sloppy (lat 14); "" = the byte-identical
+## base for reference. Forgiving creeds should help the sloppy tier without gifting the expert.
+func _creed_ab(seeds: int, seed0: int) -> void:
+	print("CREED A/B — Crucible, %d seeds/cell (expert lat0 · sloppy lat14):" % seeds)
+	print("creed          skill    win-rate  avg TTK   avg potency  ruptures(peak)  pours(potent/ok/hot/spoil/fizzle)")
+	print("-----------------------------------------------------------------------------------------------------------")
+	for cr in ["", "steady_hand", "volatile_mix", "anchorite", "purist"]:
+		for sk in [{"lbl": "expert", "lat": 0}, {"lbl": "sloppy", "lat": 14}]:
+			var wins := 0
+			var ttk_sum := 0.0
+			var pot_sum := 0.0
+			var dsum := {}
+			for seed in range(seed0, seed0 + seeds):
+				var r := _run_one(seed, "crucible", int(sk["lat"]), cr)
+				var rd: Dictionary = r.get("diag", {})
+				for k in rd:
+					dsum[k] = int(dsum.get(k, 0)) + int(rd[k])
+				pot_sum += float(r["avg_potency"])
+				if r["won"]:
+					wins += 1; ttk_sum += float(r["ttk_sec"])
+			var wr := 100.0 * float(wins) / float(seeds)
+			var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+			var lbl: String = "(base)" if String(cr) == "" else String(cr)
+			print("%-14s %-7s %6.1f%%   %7.1fs    %5.2f       %4.1f (%4.1f)     %.1f/%.1f/%.1f/%.1f/%.1f" % [
+				lbl, String(sk["lbl"]), wr, avg, pot_sum / float(seeds),
+				float(dsum.get("ruptures", 0)) / float(seeds),
+				float(dsum.get("rupture_peak", 0)) / float(seeds),
+				float(dsum.get("pour_potent", 0)) / float(seeds),
+				float(dsum.get("pour_ok", 0)) / float(seeds),
+				float(dsum.get("pour_hot", 0)) / float(seeds),
+				float(dsum.get("pour_spoiled", 0)) / float(seeds),
+				float(dsum.get("pour_fizzle", 0)) / float(seeds)])
+	print("")
+
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int) -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int, creed := "") -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
 	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
+	if creed != "":
+		(s.seats[0].kit as AlchemistKit).creed_id = creed   # SLICE A: swear the posture
 	var pol := s.seats[0].policy as AlchemistPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 4441)   # separate reproducible brew-aim stream
@@ -125,6 +164,12 @@ func _prove_determinism() -> void:
 	print("  Leech@good    seed 3 == seed 3  -> %s   (checksum %d, %s)" % [
 		("PASS" if d["checksum"] == e["checksum"] else "FAIL"), d["checksum"],
 		("win" if d["won"] else d["loss_cause"])])
+	# a CREED run must also be deterministic (the posture modifiers are pure — no rng).
+	var g := _run_one(5, "crucible", 6, "volatile_mix")
+	var h := _run_one(5, "crucible", 6, "volatile_mix")
+	print("  Volatile@good seed 5 == seed 5  -> %s   (checksum %d, %s)" % [
+		("PASS" if g["checksum"] == h["checksum"] else "FAIL"), g["checksum"],
+		("win" if g["won"] else g["loss_cause"])])
 
 ## Pour-grade averages per run (the vial gradient: potent/hot should dominate expert,
 ## fizzle/spoiled should climb as the tier gets sloppy).

@@ -81,12 +81,21 @@ func act(obs: Dictionary) -> Dictionary:
 		return {}
 
 	# 3) the ripe peak — cash the wave. Fuel + potency high, or potency pinned at the
-	#    plateau with real fuel banked (no hoarding — the F4 wave law).
-	var ripe := float(obs.get("ripe_glow", 0.0))
-	var fuel := float(obs.get("brew_min", 0.0))
-	var ripe_at := maxf(0.4, RIPE_BASE - float(latency_ticks) * RIPE_LOSS_PER_LAT)
-	if fuel >= 4.0 and (ripe >= ripe_at or (float(obs.get("potency", 0.0)) >= 0.98 and fuel >= 6.0)):
-		return {"type": "ability", "id": "rupture"}
+	#    plateau with real fuel banked (no hoarding — the F4 wave law). CREED (Purist): no
+	#    Rupture exists — skip entirely and let the reaction plateau (pure sustain).
+	if not bool(obs.get("no_rupture", false)):
+		var fuel := float(obs.get("brew_min", 0.0))
+		var cap := float(obs.get("pot_cap", 1.0))
+		if cap < 1.0:
+			# CREED (Steady): potency is capped low, so ripe/0.98 never trip — cash near YOUR
+			# own ceiling instead (weaker ruptures, but the wave still fires).
+			if fuel >= 4.0 and float(obs.get("potency", 0.0)) >= 0.88 * cap:
+				return {"type": "ability", "id": "rupture"}
+		else:
+			var ripe := float(obs.get("ripe_glow", 0.0))
+			var ripe_at := maxf(0.4, RIPE_BASE - float(latency_ticks) * RIPE_LOSS_PER_LAT)
+			if fuel >= 4.0 and (ripe >= ripe_at or (float(obs.get("potency", 0.0)) >= 0.98 and fuel >= 6.0)):
+				return {"type": "ability", "id": "rupture"}
 
 	# 4) feed the starving side — judged at PROJECTED pour time (a charge rides ~1.2s
 	#    and Venom fades 4× faster in flight). Both sides at the cap = wait a beat; the
@@ -99,6 +108,11 @@ func act(obs: Dictionary) -> Dictionary:
 	var rot_p := rot - float(obs.get("decay_rot", 0.5)) * CHARGE_FLIGHT_SEC
 	if minf(venom_p, rot_p) < feed_to:
 		_release_aim = RELEASE_BASE               # roll THIS pour's aim once, at the hold
+		# CREED (Anchorite): a raised/tighter sweet band — aim its centre, not the base low
+		# edge, or every pour grades merely "ok". Base band sits below RELEASE_BASE → no-op.
+		var slo := float(obs.get("sweet_lo", 0.70))
+		if slo > _release_aim:
+			_release_aim = slo + 0.5 * (float(obs.get("sweet_hi", 0.98)) - slo)
 		if rng != null and latency_ticks > 0:
 			_release_aim += (rng.next_float() * 2.0 - 1.0) * float(latency_ticks) * RELEASE_NOISE_PER_LAT
 		return {"type": "ability", "id": "brew_venom" if venom_p <= rot_p else "brew_rot"}
