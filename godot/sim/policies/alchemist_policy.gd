@@ -94,9 +94,11 @@ func act(obs: Dictionary) -> Dictionary:
 	var venom := float(obs.get("venom", 0.0))
 	var rot := float(obs.get("rot", 0.0))
 	var soft := float(obs.get("soft", 9.0))
+	# saturation off (playtest flag): full pours land past soft, so bank toward the cap
+	var feed_to := soft if bool(obs.get("sat_on", true)) else float(obs.get("cap", 12.0))
 	var venom_p := venom - float(obs.get("decay_venom", 2.0)) * CHARGE_FLIGHT_SEC
 	var rot_p := rot - float(obs.get("decay_rot", 0.5)) * CHARGE_FLIGHT_SEC
-	if minf(venom_p, rot_p) < soft:
+	if minf(venom_p, rot_p) < feed_to:
 		_release_aim = RELEASE_BASE               # roll THIS pour's aim once, at the hold
 		if rng != null and latency_ticks > 0:
 			_release_aim += (rng.next_float() * 2.0 - 1.0) * float(latency_ticks) * RELEASE_NOISE_PER_LAT
