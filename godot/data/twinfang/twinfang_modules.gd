@@ -12,16 +12,21 @@ const MODULES := {
 	"opening": {
 		"name": "The Opening", "kicker": "Offense timing", "gauge": "wound",
 		"blurb": "A boss swing overextends it — slam your dumps into the vulnerability window for a spike.",
-		"built": true,
+		"built": false,
 	},
 	"edge": {
 		"name": "The Edge", "kicker": "Greed dial", "gauge": "heat",
 		"blurb": "Your window runs TIGHTER (Perfect-only, no graze) and Perfects hit harder. Narrow for damage.",
-		"built": true,
+		"built": false,
 	},
 	"deathmark": {
 		"name": "The Deathmark", "kicker": "Combo layer", "gauge": "marks",
 		"blurb": "Perfects stamp a Mark on the boss; your next dump DETONATES them for a burst.",
+		"built": false,
+	},
+	"overdrive": {
+		"name": "The Overdrive", "kicker": "Transformer", "gauge": "overdrive",
+		"blurb": "At max Flow the multiplier stops and fills an OVERDRIVE meter — unleash a FEVER (window all-green, Strikes auto-chain at Coup tier), then crash to a seed and rebuild.",
 		"built": true,
 	},
 	"metronome": {

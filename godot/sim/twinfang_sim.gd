@@ -186,25 +186,27 @@ func _prove_creed(seeds: int) -> void:
 	var a := _run_one(17, "executioner", "tempo", 6, {}, true, "flourish")
 	var b := _run_one(17, "executioner", "tempo", 6, {}, true, "flourish")
 	print("  determinism (flourish): %s" % ("PASS" if a["checksum"] == b["checksum"] else "FAIL"))
+	var lg1 := _run_one(17, "executioner", "tempo", 6, {}, true, "largo")
+	var lg2 := _run_one(17, "executioner", "tempo", 6, {}, true, "largo")
+	print("  LARGO (slow & sharp): won %s  ttk %.1fs  determinism %s" % [str(lg1["won"]), float(lg1["ttk_sec"]), ("PASS" if lg1["checksum"] == lg2["checksum"] else "FAIL")])
 
 ## TEMPO REWORK probe: the MODULES engage + stay deterministic (Tempo / Executioner @good).
 ## None (base) vs The Edge (tighter window, bigger Perfects) vs The Deathmark (mark → detonate).
 func _prove_modules(seeds: int) -> void:
 	var n := mini(seeds, 100)
-	print("MODULE probe (Tempo / Executioner @good, %d seeds):" % n)
-	var cells := [{"l": "none", "m": {}}, {"l": "edge", "m": {"edge": true}},
-		{"l": "deathmark", "m": {"deathmark": true}}]
+	print("MODULE probe (Tempo / Executioner @EXPERT — Overdrive needs sustained max Flow, %d seeds):" % n)
+	var cells := [{"l": "none", "m": {}}, {"l": "overdrive", "m": {"overdrive": true}}]
 	for c in cells:
-		var w := 0; var ttk := 0.0; var wn := 0; var det := 0.0
+		var w := 0; var ttk := 0.0; var wn := 0; var fv := 0.0
 		for seed in range(1, n + 1):
-			var r := _run_one(seed, "executioner", "tempo", 6, {}, true, "drumline", c["m"])
+			var r := _run_one(seed, "executioner", "tempo", 0, {}, true, "drumline", c["m"])
 			if r["won"]: w += 1; ttk += float(r["ttk_sec"]); wn += 1
-			det += float((r.get("diag", {}) as Dictionary).get("detonate", 0))
-		print("  %-10s win %5.1f%%  ttk %5.1fs  detonates/run %.2f" % [
-			c["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), det / n])
-	var d1 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"edge": true, "deathmark": true})
-	var d2 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"edge": true, "deathmark": true})
-	print("  determinism (edge+deathmark): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
+			fv += float((r.get("diag", {}) as Dictionary).get("fever", 0))
+		print("  %-10s win %5.1f%%  ttk %5.1fs  fevers/run %.2f" % [
+			c["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), fv / n])
+	var d1 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"overdrive": true})
+	var d2 := _run_one(9, "executioner", "tempo", 6, {}, true, "drumline", {"overdrive": true})
+	print("  determinism (overdrive): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
 
 func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)
@@ -264,11 +266,12 @@ func _prove_cards(seeds: int) -> void:
 	print("NEW-SLATE probe (Tempo / Executioner @good, %d seeds — the reworked draft):" % n)
 	var cells := [
 		{"l": "bare", "b": {}},
-		{"l": "crit", "b": {"heartseeker": true, "serrated": true, "opportunist": true, "ambush": true}},
+		{"l": "crit", "b": {"hone": true, "heartseeker": true, "serrated": true, "assassinsNote": true}},
 		{"l": "greed", "b": {"tightrope": true, "shatterfall": true, "doubleTime": true, "flowCap": true}},
 		{"l": "window", "b": {"wideTempo": true, "fencersLine": true, "rubato": true}},
 		{"l": "evisc", "b": {"eviPlus": true, "overkill": true, "staccato": true, "execute": true}},
-		{"l": "strike", "b": {"pressAdvantage": true, "coldOpen": true}},
+		{"l": "strike", "b": {"pressAdvantage": true, "coldOpen": true, "throughline": true}},
+		{"l": "guard", "b": {"understudy": true, "battleHymn": true}},
 	]
 	for c in cells:
 		var w := 0; var ttk := 0.0; var wn := 0; var bull := 0.0
@@ -278,8 +281,9 @@ func _prove_cards(seeds: int) -> void:
 			bull += float((r.get("diag", {}) as Dictionary).get("s_bull", 0))
 		print("  %-8s win %5.1f%%  ttk %5.1fs  bullseyes/run %.2f" % [
 			c["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), bull / n])
-	var mix := {"heartseeker": true, "serrated": true, "tightrope": true, "doubleTime": true,
-		"wideTempo": true, "overkill": true, "staccato": true, "execute": true, "rubato": true}
+	var mix := {"hone": true, "heartseeker": true, "serrated": true, "assassinsNote": true,
+		"tightrope": true, "doubleTime": true, "wideTempo": true, "overkill": true, "staccato": true,
+		"execute": true, "rubato": true, "throughline": true, "understudy": true}
 	var d1 := _run_one(9, "executioner", "tempo", 6, mix)
 	var d2 := _run_one(9, "executioner", "tempo", 6, mix)
 	print("  determinism (fat mixed build): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))

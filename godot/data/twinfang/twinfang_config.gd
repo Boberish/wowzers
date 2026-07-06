@@ -104,6 +104,32 @@ extends Resource
 @export var fencer_pad: float = 0.25        ## Fencer's Line: the strike AFTER a Bullseye is this much wider
 @export var da_capo_seed: int = 1           ## Da Capo: Coup's Flow seed +this
 @export var rude_cd_cut: float = 2.0        ## Rude Interruption: Kick cooldown −this seconds
+# --- FULL BUILD (2026-07-06): base-kit fixes + the crit build + Largo + Overdrive + support ---
+@export var strike_perfect_refund: float = 4.0 ## F11: BASE energy a Perfect refunds (clean play self-fuels)
+@export var strike_bull_refund: float = 6.0    ## F11/F15: a Bullseye refunds more (superset of Perfect)
+@export var efficiency_refund: float = 6.0      ## Efficiency boon: energy ON TOP of the base refund
+@export var bull_bonus_cp: int = 1              ## F15: a Bullseye grants this many EXTRA combo points
+@export var widener_taper: bool = true          ## F19: window wideners fade as Flow climbs (help low, not high)
+# crit build (A7 — the Whetted Edge): no base crits; Hone unlocks the standing Edge meter
+@export var edge_max: int = 10                  ## Edge meter ceiling
+@export var edge_perfect_gain: int = 1          ## Perfect hones +this
+@export var edge_bull_gain: int = 2             ## Bullseye hones +this
+@export var edge_slip_dull: int = 3             ## a slip dulls Edge by this
+@export var hone_crit_per_pt: float = 0.045     ## crit chance per Edge point while Hone is up
+@export var assassin_open_mult: float = 0.50    ## Assassin\u2019s Note: crits in the Opening deal +this
+@export var throughline_per: float = 0.02       ## Through-Line: +dmg per consecutive Perfect
+@export var throughline_cap: int = 5            ## Through-Line: stack cap
+# Largo creed — slow & sharp
+@export var largo_beat_mult: float = 1.35       ## beats land this much farther apart
+@export var largo_window_mult: float = 0.7      ## the green runs this much tighter
+@export var largo_hit_mult: float = 1.25        ## Perfects/Bullseyes hit this much harder
+# Understudy (guard) + Overdrive (transformer) + Battle Hymn (support)
+@export var understudy_charges: int = 1         ## groove-saves per fight
+@export var understudy_recharge: float = 25.0   ## seconds to recharge a save
+@export var overdrive_fill: int = 6             ## max-Flow Perfects to fill the Overdrive meter
+@export var overdrive_fever_sec: float = 3.0    ## FEVER duration
+@export var overdrive_seed: int = 2             ## Flow left after a FEVER crash
+@export var battle_hymn_flow_min: int = 4       ## the raid aura is live at/above this Flow
 @export var press_advantage_mult: float = 0.30  ## Press the Advantage: a basic Strike inside the Opening deals +this
 @export var cold_open_mult: float = 0.25        ## Cold Open: a basic Strike while Flow <= cold_open_flow_max deals +this
 @export var cold_open_flow_max: int = 2         ## Cold Open: the low-Flow ceiling it pays under
