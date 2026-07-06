@@ -23,6 +23,10 @@ var rig: Dictionary = {}               ## the ONE Combo rig — {"when": id, "th
 ## Reaction damage lands in discrete chunks on this cadence (ticks): threat/meter get
 ## honest whole hits and the HUD gets readable DoT numbers, not 30 Hz spam.
 const REACT_LAND_EVERY := 15
+## Rig THEN tuning: Residue spreads its total over this many landings; Fume/amp lasts this long.
+const RESIDUE_LANDINGS := 6
+const FUME_SEC := 2.0
+const EMULSION_SEC := 4.0     ## Emulsion WHEN fires per this many seconds of unbroken ≥0.9 balance
 
 func _init(_aspect: String, _cfg: AlchemistConfig) -> void:
 	aspect = _aspect
@@ -111,6 +115,28 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	seat.vars["potency"] = clampf(
 		_potency(seat) + (cfg.pot_fill if good else -drain) * dt, 0.0, _cr_f("pot_cap"))
 	seat.resource = _potency(seat) * seat.resource_max   # mirror for generic UI/policy reads
+	# 3b) RIG bookkeeping (guarded — the base build with no rig never writes these vars).
+	if not rig.is_empty():
+		# EMULSION WHEN: reward an EVEN hand — accumulate time at near-perfect balance and
+		# fire every EMULSION_SEC of it. A real imbalance (bal < 0.70) breaks the streak.
+		if bal >= 0.85 and m > 0.0:
+			var et := int(seat.vars.get("emul_ticks", 0)) + 1
+			seat.vars["emul_ticks"] = et
+			if et % maxi(1, _tt(s, EMULSION_SEC)) == 0:
+				_rig_fire(s, seat, "emulsion")
+		elif bal < 0.70 or m <= 0.0:
+			seat.vars["emul_ticks"] = 0
+		# BOIL WHEN: potency driven to a full boil (0.9 of your ceiling; re-armable after it
+		# drops back down). The boil_tick timestamp also gates PERFECT WAVE (a Rupture within
+		# 2s of the boil — see _rupture).
+		var capp := _cr_f("pot_cap")
+		if _potency(seat) >= 0.9 * capp:
+			if not bool(seat.vars.get("boiled", false)):
+				seat.vars["boiled"] = true
+				seat.vars["boil_tick"] = s.tick
+				_rig_fire(s, seat, "boil")
+		elif _potency(seat) < 0.7 * capp:
+			seat.vars["boiled"] = false
 	# 4) the reaction EATS the brew — no banking a stable pile
 	if m > 0.0:
 		var burn := m * cfg.react_consume * dt
@@ -123,6 +149,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		if int(seat.vars.get("reagent_until", 0)) >= s.tick:
 			react *= (1.0 + cfg.reagent_amp)
 		seat.vars["reagent"] = minf(1.0, float(seat.vars.get("reagent", 0.0)) + cfg.reagent_fill * dt)
+	# RIG (Fume THEN): an active fume window amps your outgoing reaction. Base: no-op.
+	if int(seat.vars.get("fume_until", 0)) >= s.tick:
+		react *= (1.0 + float(seat.vars.get("fume_amt", 0.0)))
 	# FERMENTATION: a meter fills while the reaction is good; at full it auto-detonates.
 	if _m("fermentation"):
 		if good:
@@ -149,6 +178,12 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 			var d := floorf(bank)
 			seat.vars["react_bank"] = bank - d
 			CombatCore.damage_boss(s, seat, d, &"reaction")
+		# RIG (Residue THEN): a short lingering bleed lands with the reaction. Base: no-op.
+		if int(seat.vars.get("residue_left", 0)) > 0:
+			var rp := roundf(float(seat.vars.get("residue_per", 0.0)))
+			if rp >= 1.0:
+				CombatCore.damage_boss(s, seat, rp, &"reaction")
+			seat.vars["residue_left"] = int(seat.vars["residue_left"]) - 1
 
 # --------------------------------------------------------------------------
 # Actions: brew (start a charge) / pour (release) / rupture (the cash-out)
@@ -167,6 +202,44 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 		&"catalyst":
 			return _catalyst(s, seat)
 	return false
+
+## COMBO RIG (ALCHEMIST-PLAN verdict 2): a WHEN moment fired. If the run's wired WHEN matches,
+## apply the wired THEN at its computed magnitude (a modest side-boost). Deterministic; a
+## view-only pop shows it. Early-returns when no rig is wired → the base build never touches it.
+func _rig_fire(s: CombatState, seat: Seat, when_id: String) -> void:
+	if rig.is_empty() or String(rig.get("when", "")) != when_id:
+		return
+	var then_id := String(rig.get("then", ""))
+	var mag := AlchemistRig.magnitude(when_id, then_id)
+	if mag <= 0:
+		return
+	match AlchemistRig.then_kind(then_id):
+		"damage":
+			CombatCore.damage_boss(s, seat, float(mag), &"reaction")   # SPLASH — instant spatter
+		"fuel":
+			var fu := AlchemistRig.raw_amount(when_id, then_id)                # BACKWASH — fractional fuel
+			seat.vars["venom"] = minf(cfg.cap, _venom(seat) + fu)
+			seat.vars["rot"] = minf(cfg.cap, _rot(seat) + fu)
+		"potency":
+			seat.vars["potency"] = clampf(_potency(seat) + float(mag) / 100.0, 0.0, _cr_f("pot_cap"))  # QUICKEN
+		"dot":
+			seat.vars["residue_left"] = RESIDUE_LANDINGS                    # RESIDUE — a short bleed
+			seat.vars["residue_per"] = maxf(1.0, float(mag) / float(RESIDUE_LANDINGS))
+		"amp":
+			seat.vars["fume_until"] = s.tick + _tt(s, FUME_SEC)             # FUME — your damage +% for 2s
+			seat.vars["fume_amt"] = float(mag) / 100.0
+		"empower":
+			seat.vars["rig_overfill"] = maxi(int(seat.vars.get("rig_overfill", 0)), mag)  # OVERFILL — next Rupture +%
+	CombatCore._bump_diag(s, seat, "rig_fire")
+	CombatCore.emit_event(s, {"t": "brew_rig", "player": seat.is_player, "seat": seat,
+		"when": when_id, "then": then_id, "mag": mag})
+
+## The outgoing-damage multiplier from an active FUME window (rig THEN). 1.0 unless live —
+## reads a default-0 var, so the base build (no rig) always returns 1.0 (byte-identical).
+func _fume_mult(s: CombatState, seat: Seat) -> float:
+	if int(seat.vars.get("fume_until", 0)) >= s.tick:
+		return 1.0 + float(seat.vars.get("fume_amt", 0.0))
+	return 1.0
 
 ## THIRD REAGENT (module): spend a FULL catalyst bar → amp the reaction for reagent_dur.
 ## A partial bar can't drop (the gauge must fill). Guarded — a no-op without the module.
@@ -235,6 +308,11 @@ func _pour(s: CombatState, seat: Seat) -> bool:
 	CombatCore._bump_diag(s, seat, "pour_" + grade)
 	CombatCore.emit_event(s, {"t": "brew_pour", "player": seat.is_player, "seat": seat,
 		"side": side, "grade": grade, "dose": int(dose)})
+	# RIG: a potent/hot release is a WHEN moment (Sweet Pour / Hot Pour). Base: no-op.
+	if grade == "potent":
+		_rig_fire(s, seat, "sweet_pour")
+	elif grade == "hot":
+		_rig_fire(s, seat, "hot_pour")
 	return true
 
 ## The cash-out: FUEL (balanced volume) × POWER (potency), multiplicative — the peak
@@ -257,6 +335,14 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 		vessel = float(seat.vars.get("vessel", 0.0))
 		burst += roundf(vessel * cfg.vessel_release)
 		seat.vars["vessel"] = 0.0
+	# RIG: Overfill empowers THIS Rupture (then clears); an active Fume window amps it too.
+	# Both read default-0 vars → the base build (no rig) leaves burst untouched.
+	var overfill := int(seat.vars.get("rig_overfill", 0))
+	if overfill > 0:
+		burst = roundf(burst * (1.0 + float(overfill) / 100.0))
+		seat.vars["rig_overfill"] = 0
+	if int(seat.vars.get("fume_until", 0)) >= s.tick:
+		burst = roundf(burst * (1.0 + float(seat.vars.get("fume_amt", 0.0))))
 	seat.vars["venom"] = _venom(seat) * cfg.rupture_keep
 	seat.vars["rot"] = _rot(seat) * cfg.rupture_keep
 	CombatCore.damage_boss(s, seat, burst, &"rupture")
@@ -265,6 +351,14 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 		CombatCore._bump_diag(s, seat, "rupture_peak")
 	CombatCore.emit_event(s, {"t": "brew_rupture", "player": seat.is_player, "seat": seat,
 		"amt": int(burst), "peak": peak, "vessel": int(vessel)})
+	# RIG WHEN moments on the cash-out: Ripe (rupture at peak) + Perfect Wave (within 2s of
+	# hitting max Potency). Fired AFTER the burst so Overfill lands on the NEXT one. Base: no-op.
+	if peak:
+		_rig_fire(s, seat, "ripe")
+	if not rig.is_empty():
+		var bt := int(seat.vars.get("boil_tick", 0))
+		if bt > 0 and s.tick - bt <= _tt(s, 2.0):
+			_rig_fire(s, seat, "perfect_wave")
 	return true
 
 # --------------------------------------------------------------------------

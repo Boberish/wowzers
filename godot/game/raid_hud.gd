@@ -2039,8 +2039,8 @@ func _show_boon_draft(done: Callable) -> void:
 	if _run == null:
 		done.call()
 		return
-	# TEMPO §5: the FIRST draft is where you wire your Combo (blade/Tempo only), then the boons.
-	if _blade_tempo_human() and _run.rig.is_empty():
+	# FRAMEWORK: the FIRST draft is where you wire your Combo rig (any reworked class), then boons.
+	if _fw() != "" and _run.rig.is_empty():
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
@@ -2170,6 +2170,36 @@ func _fw_module_offer_ids(fw: String, creed: String) -> Array:
 func _fw_module(fw: String, id: String) -> Dictionary:
 	return AlchemistModules.get_module(id) if fw == "alchemist" else TwinfangModules.get_module(id)
 
+## Rig data dispatch (both classes mirror the TwinfangRig static API).
+func _fw_rig_when_table(fw: String) -> Dictionary:
+	return AlchemistRig.WHENS if fw == "alchemist" else TwinfangRig.WHENS
+
+func _fw_rig_then_table(fw: String) -> Dictionary:
+	return AlchemistRig.THENS if fw == "alchemist" else TwinfangRig.THENS
+
+func _fw_rig_describe(fw: String, w: String, t: String) -> String:
+	return AlchemistRig.describe(w, t) if fw == "alchemist" else TwinfangRig.describe(w, t)
+
+## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
+## board hides the burst WHENs Ripe/Perfect Wave and the Overfill THEN). Twinfang: unfiltered.
+func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
+	if fw != "alchemist":
+		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
+			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
+	var wpool: Array = []
+	for id in AlchemistRig.when_ids():
+		if creed != "" and AlchemistRig.when_has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		wpool.append(id)
+	var tpool: Array = []
+	for id in AlchemistRig.then_ids():
+		if creed != "" and AlchemistRig.then_has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		tpool.append(id)
+	return {"whens": AlchemistRig.offer(wpool, rng, 3), "thens": AlchemistRig.offer(tpool, rng, 3)}
+
 ## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
 func _show_creed_pick(done: Callable) -> void:
 	var fw := _fw()
@@ -2260,11 +2290,13 @@ var _rig_confirm: Button = null
 ## WIRE YOUR COMBO — pick 1 of 3 WHENs + 1 of 3 THENs; the readout shows the computed number
 ## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
 func _show_rig_wire(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human():
+	var fw := _fw()
+	if _run == null or fw == "":
 		done.call()
 		return
-	var whens := TwinfangRig.offer(TwinfangRig.when_ids(), _run.draft_rng, 3)
-	var thens := TwinfangRig.offer(TwinfangRig.then_ids(), _run.draft_rng, 3)
+	var offered := _fw_rig_offered(fw, _run.creed, _run.draft_rng)
+	var whens: Array = offered["whens"]
+	var thens: Array = offered["thens"]
 	_rig_w = ""
 	_rig_t = ""
 	_screen = "rig"
@@ -2281,8 +2313,8 @@ func _show_rig_wire(done: Callable) -> void:
 	cols.add_theme_constant_override("separation", 54)
 	_place(cols, 0.5, 0.5, 0.5, 0.5, -440, -180, 440, 150)
 	_ui.add_child(cols)
-	cols.add_child(_rig_col("WHEN — the moment", whens, TwinfangRig.WHENS, true))
-	cols.add_child(_rig_col("THEN — the payoff", thens, TwinfangRig.THENS, false))
+	cols.add_child(_rig_col("WHEN — the moment", whens, _fw_rig_when_table(fw), true))
+	cols.add_child(_rig_col("THEN — the payoff", thens, _fw_rig_then_table(fw), false))
 	var foot := VBoxContainer.new()
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
 	foot.add_theme_constant_override("separation", 12)
@@ -2295,7 +2327,7 @@ func _show_rig_wire(done: Callable) -> void:
 	_rig_confirm.disabled = true
 	_rig_confirm.pressed.connect(func():
 		_run.rig = {"when": _rig_w, "then": _rig_t}
-		_toast_add("⚡  Combo wired — " + TwinfangRig.describe(_rig_w, _rig_t))
+		_toast_add("⚡  Combo wired — " + _fw_rig_describe(fw, _rig_w, _rig_t))
 		done.call())
 	foot.add_child(_rig_confirm)
 
@@ -2331,7 +2363,7 @@ func _rig_refresh() -> void:
 	if _rig_readout == null:
 		return
 	if _rig_w != "" and _rig_t != "":
-		_rig_readout.text = TwinfangRig.describe(_rig_w, _rig_t)
+		_rig_readout.text = _fw_rig_describe(_fw(), _rig_w, _rig_t)
 		_rig_readout.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
 		if _rig_confirm != null:
 			_rig_confirm.disabled = false
@@ -2881,8 +2913,14 @@ func _verb_summary_lines() -> Array:
 				return ["⚡ Combo — " + TwinfangRig.describe(
 					String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
 			return TwinfangBoons.verb_summary(_run.boons, _aspect)
-		"caster": return ([] if _caster_cls == "alchemist" \
-			else VoidcallerBoons.verb_summary(_run.boons, _aspect))
+		"caster":
+			if _caster_cls == "alchemist":
+				# show the wired Combo rig in the build panel (the Brew's rig)
+				if not _run.rig.is_empty():
+					return ["⚡ Combo — " + AlchemistRig.describe(
+						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
+				return []
+			return VoidcallerBoons.verb_summary(_run.boons, _aspect)
 		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
 
@@ -4081,6 +4119,11 @@ func _handle_event(ev: Dictionary) -> void:
 			if mine:
 				var tn := String((TwinfangRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
 				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.FLOW, 22, 0.5)
+		"brew_rig":
+			# ALCHEMIST rig fired — same pop, off the Brew's rig vocabulary.
+			if mine:
+				var tn := String((AlchemistRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
+				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.REACT, 22, 0.5)
 		"opening":
 			# THE OPENING — a dump landed in the boss's vulnerability window
 			if mine and _opening != null:

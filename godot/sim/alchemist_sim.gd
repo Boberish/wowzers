@@ -64,6 +64,7 @@ func _initialize() -> void:
 
 	_creed_ab(seeds, seed0)
 	_module_ab(seeds, seed0)
+	_rig_ab(seeds, seed0)
 
 	_write_csv(_arg("out", "res://out/alchemist_results.csv"), rows)
 	print("wrote %d rows -> %s" % [rows.size(),
@@ -108,7 +109,7 @@ func _creed_ab(seeds: int, seed0: int) -> void:
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "") -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "", rig := {}) -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
 	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
@@ -117,6 +118,8 @@ func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := 
 		kit.creed_id = creed                    # SLICE A: swear the posture
 	if module != "":
 		kit.modules = {module: true}            # SLICE B: install the module
+	if not rig.is_empty():
+		kit.rig = rig                           # SLICE C: wire the Combo rig
 	var pol := s.seats[0].policy as AlchemistPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 4441)   # separate reproducible brew-aim stream
@@ -183,6 +186,12 @@ func _prove_determinism() -> void:
 	print("  Vessel@good   seed 7 == seed 7  -> %s   (checksum %d, %s)" % [
 		("PASS" if i["checksum"] == j["checksum"] else "FAIL"), i["checksum"],
 		("win" if i["won"] else i["loss_cause"])])
+	# a RIG run too (fire points + THEN payloads thread the state — assert reproducible).
+	var k := _run_one(9, "crucible", 6, "", "", {"when": "boil", "then": "quicken"})
+	var l := _run_one(9, "crucible", 6, "", "", {"when": "boil", "then": "quicken"})
+	print("  Rig@good      seed 9 == seed 9  -> %s   (checksum %d, %s)" % [
+		("PASS" if k["checksum"] == l["checksum"] else "FAIL"), k["checksum"],
+		("win" if k["won"] else k["loss_cause"])])
 
 ## SLICE B gate — each Module must produce a DISTINCT, sane profile and keep determinism.
 ## "" is the byte-identical base. Third Reagent = a small amp; Fermentation = auto-detonations;
@@ -214,6 +223,43 @@ func _module_ab(seeds: int, seed0: int) -> void:
 			float(dsum.get("ferments", 0)) / float(seeds),
 			float(dsum.get("catalysts", 0)) / float(seeds),
 			vessel_sum / float(seeds)])
+	print("")
+
+## SLICE C gate — the Combo rig. "" = the byte-identical base; each wired WHEN→THEN must
+## FIRE (rig_fire count > 0) and move damage a little (the ~10% flavour layer). Crucible @ good.
+func _rig_ab(seeds: int, seed0: int) -> void:
+	# Rows 1–6 cover every THEN KIND via a WHEN the safe AI actually fires (damage/fuel/
+	# potency/dot/amp/empower). Rows 7–8 are the HUMAN beats: the reactive AI never greeds
+	# into a HOT pour nor holds near-perfect balance, so HotPour/Emulsion fire ~0 for it —
+	# correct greed-dial design (they pay a premium a human earns), not dead code.
+	var wires := [
+		{"lbl": "SweetPour→Splash",   "rig": {"when": "sweet_pour", "then": "splash"}},    # damage
+		{"lbl": "SweetPour→Backwash", "rig": {"when": "sweet_pour", "then": "backwash"}},  # fuel
+		{"lbl": "Boil→Quicken",       "rig": {"when": "boil", "then": "quicken"}},          # potency
+		{"lbl": "PerfectWave→Residue","rig": {"when": "perfect_wave", "then": "residue"}},  # dot
+		{"lbl": "Ripe→Fume",          "rig": {"when": "ripe", "then": "fume"}},             # amp
+		{"lbl": "Ripe→Overfill",      "rig": {"when": "ripe", "then": "overfill"}},         # empower
+		{"lbl": "HotPour→Splash*",    "rig": {"when": "hot_pour", "then": "splash"}},       # human greed beat
+		{"lbl": "Emulsion→Splash*",   "rig": {"when": "emulsion", "then": "splash"}},       # human precision beat
+	]
+	print("RIG A/B — Crucible @ EXPERT lat0 (%d seeds/wire; *=human-only beat, AI fires ~0):" % seeds)
+	print("wire                    win-rate  avg TTK   rig-fires/run")
+	print("-----------------------------------------------------------")
+	# base row (no rig)
+	var wires_all: Array = [{"lbl": "(base — no rig)", "rig": {}}]
+	wires_all.append_array(wires)
+	for wr in wires_all:
+		var wins := 0
+		var ttk_sum := 0.0
+		var fires := 0
+		for seed in range(seed0, seed0 + seeds):
+			var r := _run_one(seed, "crucible", 0, "", "", wr["rig"])
+			fires += int((r.get("diag", {}) as Dictionary).get("rig_fire", 0))
+			if r["won"]:
+				wins += 1; ttk_sum += float(r["ttk_sec"])
+		var pct := 100.0 * float(wins) / float(seeds)
+		var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+		print("%-23s %6.1f%%   %7.1fs    %6.1f" % [String(wr["lbl"]), pct, avg, float(fires) / float(seeds)])
 	print("")
 
 ## Pour-grade averages per run (the vial gradient: potent/hot should dominate expert,
