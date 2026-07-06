@@ -475,6 +475,13 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
 - Class chassis carries in full: Flow 0–6 +8%/pt · combo points → Eviscerate (Bullseye +1 CP) · base
   energy refund on Perfect/Bull (F11) · **Opening = class base verb** (dumps ×1.9) · Whetted-Edge crit
   package (A7) is CLASS-level and works unchanged (Edge builds from sharp Perfect/Bull releases).
+- **EVERY BUTTON IS A COIL (2nd-pass base law):** the verb applies KIT-WIDE — strikes, Eviscerate, and
+  utility slots all hold→sharpen→release; which button you're holding decides what fires. One verb,
+  everywhere (this is what makes The Mark / Curtain Call coherent — a "sharp Evis" is a real thing).
+- **THE COILED KICK (2nd-pass base law — pillar #3 answer):** Fermata can't react-kick with a 0.35s
+  wind-up, and shouldn't — being coiled IS being ready. The interrupt-flagged ability kicks only when
+  released from a SHARP coil inside the tight window: the assassin waiting out the caster. The
+  interrupt tax = you spent a whole coil on it. Sims measure whether pre-coiling for kicks reads.
 
 ### 13.2 CREEDS (pick 1 — coil temperament)
 - **THE PATIENT KNIFE `patient`** — the coil keeps charging past sharp: +1.5%/0.1s, cap +20%. Cost:
@@ -499,6 +506,8 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
   Patient Knife's baked bonus by raising the cap, not the rate)
 - Restless Dark `restlessDark` — energy regen +30/45/60% while coiled
 - Quiet Fuse `quietFuse` — min coil −0.08/−0.12s / O: also removes the unravel stagger
+- Feint `feint` [2nd pass] — an unravel PRIMES your next coil: it sharpens 50/75/100% faster. Failure
+  becomes tempo — and opens deliberate-unravel play with the rig's unravel WHEN
 **VEIL** *(defense-in-shadow — the auto-dodge home)*
 - Vanish `vanish` — the first boss hit per coil: −50% dmg / fully dodged / fully dodged AND the coil
   stays sharp (Bill's requested auto-dodge boon, living where the fantasy puts it)
@@ -509,21 +518,31 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
 - Killing Whisper `killingWhisper` — Bullseye releases +15/22/30%
 - Twin Echo `twinEcho` — releases at max Flow echo a second strike at 30/45/60%
 - First Blood `firstBlood` — first release after any Miss/unravel: auto-Perfect / +1 CP / auto-Bullseye
+- First Pass `firstPass` [2nd pass] — the FIRST time the marker crosses the window after your SHNK,
+  the window is +20/30/40% wider. Rewards decisive releases — the explicit counter-axis to Patient
+  builds (fast-release vs slow-release is now a real build choice, not a solved answer)
 **AMBUSH** *(coil × Opening/dodge interplay)*
 - Ambush `ambush` — release into an Opening from a coil begun BEFORE it: +25/35/50%
 - Cheap Shot `cheapShot` — release ≤0.5s after a PERFECT dodge = auto-Bullseye / +1 CP / +1 CP +20%
 - Curtain Call `curtainCall` — Eviscerate released sharp inside an Opening: +30/45/60%
 **SHARED-POOL CARRIES** *(class-level cards both specs draft — verdict per card)*: the A7 crit package
 (Hone keystone · Heartseeker · Serrated · Assassin's Note) · Crescendo · Da Capo · Understudy ·
-Efficiency. Battle Hymn stays Tempo-flavored (Fermata's support = Veil Over the Warband).
+Efficiency · **[2nd pass] the WINDOW lane bread carries too** — Wide Tempo / Fencer's Line / Rubato
+address the window itself, and Fermata uses the SAME window, so they work unchanged (this was
+Fermata's missing wideners lane; no new cards needed). Battle Hymn stays Tempo-flavored (Fermata's
+support = Veil Over the Warband).
 
 ### 13.5 RIG (new WHENs — slot into the existing class THEN table)
 - WHEN I stay coiled ≥ 1.5s · WHEN I unravel · WHEN I release within 0.3s of the SHNK ("on the edge")
 
-### 13.6 KEYSTONE (A8 — elite-node drop, never in normal drafts)
+### 13.6 KEYSTONES (A8 — elite-node drops, never in normal drafts; pool = these 2 + shared Hone)
 - **THE UNSEEN BLADE `unseenBlade`** — while coiled, gain a SHADE every 0.5s (max 5); each Shade = +6%
   on your next release; Shades are a STANDING battery (persist until a release spends them). The
   slow-nuke build-definer; pairs with Patient Knife + Patient Edge into the one-giant-release build.
+- **NIGHTFALL `nightfall`** [2nd pass] — while you're coiled, the boss's cast/telegraph WIND-UPS tick
+  12% slower. You slow the fight from inside the shadow — the warband-utility build-definer (the tank
+  feels it, kicks get easier for everyone). Engine: scalar on boss timer advance while the fermata
+  seat is coiled — deterministic, flag-guarded, byte-identical when absent.
 
 ### 13.7 BUILD ORDER + ENGINE NOTES (after Bill's deck verdicts)
 1. Kit base: aspect `fermata` guarded on twinfang_kit (byte-identical unless picked — the Brew idiom);
