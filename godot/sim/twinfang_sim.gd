@@ -268,6 +268,7 @@ func _prove_cards(seeds: int) -> void:
 		{"l": "greed", "b": {"tightrope": true, "shatterfall": true, "doubleTime": true, "flowCap": true}},
 		{"l": "window", "b": {"wideTempo": true, "fencersLine": true, "rubato": true}},
 		{"l": "evisc", "b": {"eviPlus": true, "overkill": true, "staccato": true, "execute": true}},
+		{"l": "strike", "b": {"pressAdvantage": true, "coldOpen": true}},
 	]
 	for c in cells:
 		var w := 0; var ttk := 0.0; var wn := 0; var bull := 0.0
