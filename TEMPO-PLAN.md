@@ -462,11 +462,15 @@ copy of Tempo, but a variation — not a whole new thing"* (like the Brew was).
 
 ---
 
-## APPENDIX A — THE TEMPO CARD LEDGER (hard copy 2026-07-06 · everything as BUILT on main + designed-not-built)
+## APPENDIX A — THE TEMPO CARD LEDGER (v2 · Bill's ledger verdicts 2026-07-06 folded)
 
 **Why this exists:** the complete card state so no session loses it. Source of truth for behavior =
 `godot/data/twinfang/` (boons/config/kit/rig/creeds/modules) — this ledger adds the DESIGN intent
-(ladders, addresses, verdicts) the code doesn't carry.
+(ladders, addresses, verdicts) the code doesn't carry. **v2 (Bill, 2026-07-06 evening):** Opportunist /
+Held Note / Flurry / Grace Note / Coda CUT · Fencer's Line capped ~+35% · energy refund goes BASE +
+Efficiency boosted · Opening = class BASE (never a module) · Edge module → folded into the new LARGO
+creed · Deathmark CUT ("a passive, not extra UI") · modules = OVERDRIVE ONLY for now · **crit = opt-in
+build (A7), no crits at base.**
 
 **Design laws recap:** every card must bend MANY attacks (one-time bonuses are invisible → cut) ·
 cards are CATEGORIED by the button/dial they touch (the address rule) · **rarity architecture (Slice 2,
@@ -474,80 +478,90 @@ DESIGNED NOT BUILT):** every card ROLLS Haiku/Sonnet/Opus per offer — numeric 
 rule-changers scale via authored RUNES; today's code ships fixed rarities + base numbers on the old
 Draft-2.0 engine. UPSELL→tier-bump + Market tier-up/fine-tune = same deferred slice.
 
-### A1 · Boons as BUILT (id · base numbers in code · designed H/S/O ladder)
-**STRIKE** *(⚠ F27: mono-crit — design pass open)*
-- Killer's Eye `fifthCrit` — every 5th Perfect crits · ladder 5th/4th/3rd
-- Heartseeker `heartseeker` — Bullseyes are guaranteed crits · ladder ×1.5/×1.75/×2.1 crit-mult flavor
-- Serrated Fate `serrated` — crits +40% dmg (`serrated_bonus 0.40`) · ladder +40/60/90%
-- Opportunist `opportunist` — +25% crit chance during a boss wind-up (`opportunist_crit 0.25`, uses s.rng) · ladder 20/30/45%
+### A1 · Boons (v2 pool · id · base numbers · designed H/S/O ladder)
+**STRIKE** *(crit cards moved to the A7 opt-in package — lane needs 1-2 non-crit bread cards, design owed)*
+- Through-Line `throughline` [NEW, design] — consecutive Perfects escalate +2%/stack, cap 5, reset on Miss · ladder +2%c5/+3%c5/+3%c8
 **WINDOW**
-- Wide Tempo `wideTempo` — window +15%/side (`wide_pad 0.15`) · ladder 15/22/34% · ⚠ F19 accepted: wideners TAPER with Flow
-- Fencer's Line `fencersLine` — a Bullseye widens the NEXT window +25% (`fencer_pad`, one-shot) · ladder 25/40/60%
+- Wide Tempo `wideTempo` — window +15%/side (`wide_pad 0.15`) · ladder 15/22/34% · ⚠ F19: wideners TAPER with Flow
+- Fencer's Line `fencersLine` — a Bullseye widens the NEXT window (`fencer_pad`, one-shot) · **ladder 15/25/35% (Bill: was too big at 25/40/60)**
 - Rubato `rubato` — window sits 0.05s EARLIER (`rubato_shift`, floor-clamped) · ladder 0.04/0.06/0.09
-**FLOW**
-- Momentum `flowCap` — Flow cap +2 · ladder +1/+2/+3 (cap raise also raises max-Flow unlock bar — real trade)
+**FLOW** *(Held Note CUT — Bill 07-06)*
+- Momentum `flowCap` — Flow cap +2 · ladder +1/+2/+3
 - Tightrope `tightrope` — +15% dmg at max Flow (`tightrope_mult`) · ladder 15/22/34%
-- Held Note `heldNote` — Flow decay paused while boss winds up · ladder: wind-ups / + strings / + 2s after resolve
-- Encore `encore` — double-hit tier at Flow 2 (was 3) · ladder T1@2 / +T2@4 / +Coup@5 ⚠sim
-- Shatterfall `shatterfall` — a 4+ crash detonates 25/pt lost (`shatterfall_per`) · ladder 25/38/56 · pay-AFTER-the-slap law
-- Double Time `doubleTime` [RULE-CHANGER] — at max Flow each Perfect tightens further + stacks +4% until crash
-  (`doubletime_dmg .04 · tighten .06 · min_frac .35 · cap 12`) · runes: +3% cap4 no-tighten / +4% cap6 / +4% uncapped floor .08s
+- Encore `encore` — double-hit tier at Flow 2 · ladder T1@2 / +T2@4 / +Coup@5 ⚠sim
+- Shatterfall `shatterfall` — a 4+ crash detonates 25/pt lost · ladder 25/38/56 · pay-AFTER-the-slap law
+- Double Time `doubleTime` [RULE-CHANGER] — at max Flow each Perfect tightens + stacks +4% until crash · runes: +3%c4 no-tighten / +4%c6 / +4% uncapped floor .08s
+- Battle Hymn `battleHymn` [SUPPORT, designed/owed F14+I2] — hold high Flow → raid haste/CD aura by Flow tier, OFF on crash · ladder aura/+tier/+Coup-pulse
 **EVISCERATE**
 - Deep Cuts `eviPlus` — Evisc +8/cp · ladder 8/12/18
-- Finish It `execute` — Evisc +35% below 35% boss HP (`execute_mult 0.35`; retargeted from all-damage) · ladder 30/45/67%
-- Overkill `overkill` — over-cap combo banks into next Evisc, +6 each max 3 (`overkill_per/cap`) · ladder 6/9/13
-- Staccato Fury `staccato` — post-crash (≥3 Flow lost) next Evisc FREE +50% (`staccato_mult/flow_min`) · ladder free/+40/+80%
-**COUP** *(⚠ F23 accepted: fold COUP into FLOW)*
+- Finish It `execute` — Evisc +35% below 35% boss HP · ladder 30/45/67%
+- Overkill `overkill` — over-cap combo banks into next Evisc, +6 each max 3 · ladder 6/9/13
+- Staccato Fury `staccato` — post-crash next Evisc FREE +50% · ladder free/+40/+80%
+**COUP** *(F23: folding into FLOW)*
 - Crescendo `crescendo` — Coup +40% · ladder 40/60/90%
-- Da Capo `daCapo` — Coup Flow-seed +1 (`da_capo_seed`) · ladder +1/+2/+2&+20 energy ⚠sim
-**ENERGY** *(⚠ F23: thin — 2nd visible card or fold into STRIKE)*
-- Efficiency `strikeEnergy` — Perfect refunds 6 energy · ladder 4/6/9 · ⚠ F11 accepted: BASE Perfect self-refunds, revisit this card
-- Syncopation `syncopation` [RULE-CHANGER] — max-Flow Strikes cost 0 · runes: half-cost / free / free + Goods grade up at top
-  ⚠ F26 accepted: base rune never removes grade risk
-**SPELLS (new buttons; bar 5+)**
-- Flurry `flurry` — 28en · 3 hits ×13 · +2cp · ladder 3/4/5 hits
-- Grace Note `gracenote` — 18en cd2 · 14 dmg · does NOT touch the rhythm clock, no combo · ladder 14/21/31
-- Coda `coda` — 25en cd10 · next beat ALL-GREEN (one guaranteed Perfect) · ladder cd12/cd8/cd8+counts-as-Bullseye
+- Da Capo `daCapo` — Coup Flow-seed +1 · ladder +1/+2/+2&+20en ⚠sim
+**ENERGY** *(v2: refund is BASE now — F11 locked by Bill: "energy refund as a base")*
+- BASE KIT: Perfect refunds ~4 energy, Bullseye ~6 (knobs TBD in build) — clean play self-fuels.
+- Efficiency `strikeEnergy` [BOOSTED] — Perfect refunds MORE on top of base · ladder +6/+9/+13
+- Syncopation `syncopation` [RULE-CHANGER] — max-Flow Strikes cost 0 · runes: half/free/free+Goods-grade-up · ⚠ F26: base rune never removes grade risk
+**SPELLS — LANE REMOVED (Bill 07-06: Flurry / Grace Note / Coda all CUT).** New buttons only return if a design earns one.
 
 ### A2 · The graded window + core knobs (BUILT)
-Bullseye = centre 18% of the green (×1.8) · Perfect = centre 55% (×1.6, +1 Flow, +1 extra cp) ·
-Good = flanks (×1.0, lands, NO Flow, NO slip) · Miss = base + Creed slip. `grade_bull_frac .18 ·
-grade_perfect_frac .55 · bull_mult 1.8 · good_mult 1.0`. Policy aims centre (`STRIKE_LAT_SCALE 0.30`,
-−1 tick enqueue comp). ⚠ F8 accepted: GOOD-maintains (pause decay that beat) + tighten-asymptote to a
-thumb floor. ⚠ F15 accepted: Bullseye = strict superset of Perfect + signature juice.
+Bullseye = centre 18% (×1.8) · Perfect = centre 55% (×1.6, +1 Flow, +1 cp) · Good = flanks (×1.0, NO
+Flow, no slip) · Miss = base + Creed slip. `grade_bull_frac .18 · grade_perfect_frac .55 · bull_mult
+1.8 · good_mult 1.0`. ⚠ F8: GOOD-maintains + tighten-asymptote to a thumb floor. ⚠ F15: Bullseye =
+strict superset + signature juice. **v2 BASE additions:** energy refund on Perfect/Bullseye (above) ·
+THE OPENING is part of the base class (see A3).
 
-### A3 · Creeds / Modules / Rig (BUILT state)
-- **Creeds in code** (`twinfang_creeds.gd`): drumline (slip −2) · flourish (slip→0, flow_value 1.5) ·
-  heldbreath (freeze + 2s lock; v1_ids = flourish+drumline). ⚠ DESIGNED NOT BUILT: Drumline's
-  wider-window reward. ⚠ F17 accepted: lockout counts as CRASH EVENT (or creed-aware filtering).
-- **Modules in code** (`twinfang_modules.gd` + kit): opening (always-on verb `open_*` knobs — F1
-  promotes it out of the module slot) · edge (window ×0.7, Perfects ×1.25 — ⚠ un-gated dmg leak if a
-  Venom seat equips) · deathmark (marks cap 5, detonate 16/mark). Floor-1 pick UI EXISTS
-  (`_show_module_pick`, offers built_ids). ⚠ Accepted: + ⭐OVERDRIVE transformer (bank max-Flow into a
-  FEVER tap: all-green window, Coup-tier auto-chains, crash to seed).
-- **Combo Rig** (`twinfang_rig.gd`, BUILT + wired: first-draft wire, Floor-2 re-wire, build-panel
-  readout, "THEN +N" pops, `raid_sim --rig=when:then`): WHENs riff 1.0 · bullseye 1.9 · finale 4.4 ·
-  punish 6.5 · peak 6.9 · coup 8.4; THENs echo 12dmg · secondwind 5en · edge 0.5→crit charges cap3 ·
-  bloodletter 8 bleed (1/s ticker) · overcharge 6% next-dump · expose 3% 2s. magnitude = base×mult.
-  ⚠ F25 accepted: prove rare WHENs EV-POSITIVE; board shows TOTALS.
+### A3 · Creeds / Modules / Rig (v2)
+- **THE OPENING = CLASS BASE 🔒 (Bill: "a standard base of the class, not a module"):** boss swings
+  open a vulnerability window; dumps ride it up to ×1.9 Punish. Always on, tutorialized as core verb.
+- **Creeds:** drumline (slip −2; designed wider-window reward still owed) · flourish (slip→0,
+  +50%/Flow pt) · heldbreath (slip freezes Flow + 2s window lock; ⚠ F17 lockout counts as crash event)
+  · **LARGO [NEW, design — Bill's ask: "slows things down, smaller windows, not so twitchy" + absorbs
+  the Edge module]: the rhythm runs SLOW — beats land ~30-40% farther apart and the accelerando is
+  tamed — but the window is ~×0.7 TIGHTER and Perfects/Bullseyes hit ~×1.25 harder. Fewer, weightier,
+  more precise strikes — the deliberate seat. Slip = −2 (Drumline-grade).** ⚠ Altitude note: Largo is
+  a pace-posture, not a slip-temperament — sanctioned by the asymmetric-classes rule.
+- **Modules = THE OVERDRIVE ONLY (v2):** Edge module CUT (folded into Largo) · Deathmark CUT ("meh, a
+  passive, not extra UI") · supersedes F6's "un-park into a 1-of-3." **⭐ OVERDRIVE** stays: at max
+  Flow the multiplier stops and fills a meter — tap for FEVER (all-green window, Coup-tier auto-chain
+  strikes), then crash to a seed. Bank → blow → rebuild. Floor-1 flow: offer Overdrive vs "no module"
+  until more modules earn their way in (design more later, incl. a possible crit module — see A7).
+- **Combo Rig** (BUILT + wired): WHENs riff 1.0 · bullseye 1.9 · finale 4.4 · punish 6.5 · peak 6.9 ·
+  coup 8.4; THENs echo 12 · secondwind 5en · **killingEdge → REWORK (dead under no-base-crits: make it
+  grant EDGE points if Hone is drafted, else a flat next-strike bonus)** · bloodletter 8 · overcharge
+  6% · expose 3%. ⚠ F25: prove rare WHENs EV-positive; board shows TOTALS.
 
-### A4 · Curio verdicts (Twinfang-relevant; gear = fixed rarity, cross-class lane)
-KEPT: Encore Bell (⚠ 07-05: re-flavor — window-wide anti-Edge violation) · Grace Period (⚠ creed-aware
-— must not save Flow on Flourish) · Second Opinion (⚠ must NOT double rig procs) · Le Chat's Bell
-(ENERGY warm-start — the "start with Flow" idea was REVERTED per lane rule).
-CUT: Powder Vial · Riftmaw's Hunger.
-PARKED DESIGNS (never built): Marked Deck (free rerolls) · Tuning Fork (first-10s window+25%) ·
-The Set List (shows next boss ability) · Curtain Call (kill at max Flow → +2⏣).
+### A4 · Curio verdicts (unchanged)
+KEPT/WATCH: Encore Bell (re-flavor) · Grace Period (creed-aware) · Second Opinion (no rig-doubling) ·
+Le Chat's Bell (energy warm-start). CUT: Powder Vial · Riftmaw's Hunger. PARKED: Marked Deck · Tuning
+Fork · The Set List · Curtain Call.
 
 ### A5 · Cut ledger (do not resurrect without cause)
-Audit-cut 07-04: Riposte · Dancer's Grace (effect "next strike auto-Perfect" was salvaged→cut again
-with Rude Interruption) · Ghost Step · Beat Dancer · Quickblood · Red Harvest · Twin Step · Virtuoso.
-Playtest-cut 07-05: Ambush (one-time = invisible) · Rude Interruption (flat cd). Parked 07-06: All In
-(I8 — liked, "flowing too fast"). Dead plumbing still in kit (inert, sweep later): `_tf_trigger`/
-`_rhythm_proc`/`tfTrig*`/`tfPay*` hooks + `mod_*` knobs.
+07-04 audit: Riposte · Dancer's Grace · Ghost Step · Beat Dancer · Quickblood · Red Harvest · Twin
+Step · Virtuoso. 07-05 playtest: Ambush · Rude Interruption. **07-06 ledger pass (Bill): Opportunist
+("wind-ups is meh") · Held Note · Flurry · Grace Note · Coda · The Edge module (→Largo creed) · The
+Deathmark module.** Parked: All In (I8). Dead plumbing in kit (inert): `_tf_trigger`/`_rhythm_proc`/
+`tfTrig*`/`mod_*` — sweep later.
 
-### A6 · Open build-slice (the 24 ACCEPTS not yet coded)
-F1 Opening→verb (drop from module offers) · F6+I1 module 1-of-3 + Overdrive · F8 Good-maintains +
-asymptote · F11 base refund · F12 Overkill-surfaced + clean-run Coup seed · F15 Bullseye superset ·
-F17 crash-event · F19 taper · F26 rune floor · F24 combo colors loop · F14+I2 Battle Hymn · F25 rig
-EV proof · F23 lane folds. Open DESIGN: F27 crit pass · I7 Swan-Song/auto-dodge · §13 second spec.
+### A6 · Open build-slice (v2)
+F1 Opening→class base 🔒 · Overdrive module (solo) · F8 Good-maintains + asymptote · **F11 base
+refund 🔒 + Efficiency boost** · F12 cash-out tension · F15 Bullseye superset · F17 crash-event ·
+F19 taper · F26 rune floor · F24 combo colors loop · F14+I2 Battle Hymn · F25 rig EV proof · F23
+lane folds · Fencer's cap 35% · Held Note/spells removal · **A7 crit build** · LARGO creed ·
+Through-Line. Open DESIGN: I7 Swan-Song/auto-dodge · §13 second spec · STRIKE lane bread.
+
+### A7 · THE WHETTED EDGE — crit as an OPT-IN BUILD (design v1, Bill-steered 07-06)
+**Law: base Tempo has NO crits.** Crit is a build variation you draft into.
+- **HONE [keystone rule-changer boon]** — unlocks the **EDGE meter (0–10)**: Perfect +1 · Bullseye +2
+  · a slip dulls −3. Your next **DUMP (Evisc/Coup) consumes ALL Edge**: crit chance ≈ 9%/pt (seeded
+  `s.rng` — near-certain at full), crit = ×2. Runes: 7%/pt · 9%/pt · 9%/pt + keep 2 Edge after cash.
+  The fantasy: hone with clean rhythm → cash the razor on a Finale inside the Opening (Punish × crit).
+- **Package (offer-gated on Hone — the F7 filtering machinery, no dead cards):**
+  Serrated Fate — crit dmg +40/60/90% · Heartseeker — Bullseyes hone +2/+3/+4 · Killer's Eye
+  [REWORK] — at 6+ Edge, STRIKES gain half-rate crit (the spray variant) · Assassin's Note [NEW
+  capstone] — crits inside the Opening +50/75/110%.
+- **Synergies:** Overdrive FEVER auto-chain hones fast · rig killingEdge THEN → grants Edge pts.
+- **🟡 Choice points for Bill:** (a) dumps-only crits at keystone (rec) vs strikes always eligible;
+  (b) keystone stays a BOON (rec) vs becoming a future crit MODULE with the meter as its gauge.
