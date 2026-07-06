@@ -552,16 +552,39 @@ F19 taper · F26 rune floor · F24 combo colors loop · F14+I2 Battle Hymn · F2
 lane folds · Fencer's cap 35% · Held Note/spells removal · **A7 crit build** · LARGO creed ·
 Through-Line. Open DESIGN: I7 Swan-Song/auto-dodge · §13 second spec · STRIKE lane bread.
 
-### A7 · THE WHETTED EDGE — crit as an OPT-IN BUILD (design v1, Bill-steered 07-06)
-**Law: base Tempo has NO crits.** Crit is a build variation you draft into.
-- **HONE [keystone rule-changer boon]** — unlocks the **EDGE meter (0–10)**: Perfect +1 · Bullseye +2
-  · a slip dulls −3. Your next **DUMP (Evisc/Coup) consumes ALL Edge**: crit chance ≈ 9%/pt (seeded
-  `s.rng` — near-certain at full), crit = ×2. Runes: 7%/pt · 9%/pt · 9%/pt + keep 2 Edge after cash.
-  The fantasy: hone with clean rhythm → cash the razor on a Finale inside the Opening (Punish × crit).
-- **Package (offer-gated on Hone — the F7 filtering machinery, no dead cards):**
-  Serrated Fate — crit dmg +40/60/90% · Heartseeker — Bullseyes hone +2/+3/+4 · Killer's Eye
-  [REWORK] — at 6+ Edge, STRIKES gain half-rate crit (the spray variant) · Assassin's Note [NEW
-  capstone] — crits inside the Opening +50/75/110%.
-- **Synergies:** Overdrive FEVER auto-chain hones fast · rig killingEdge THEN → grants Edge pts.
-- **🟡 Choice points for Bill:** (a) dumps-only crits at keystone (rec) vs strikes always eligible;
-  (b) keystone stays a BOON (rec) vs becoming a future crit MODULE with the meter as its gauge.
+### A7 · THE WHETTED EDGE — crit as an OPT-IN BUILD (v2, Bill-steered 07-06 evening)
+**Law: base Tempo has NO crits.** Crit is a build you opt into — and the big unlock is EARNED, not drafted.
+- **HONE [KEYSTONE — elite drop, see A8]** — unlocks the **EDGE meter (0–10)**: Perfect +1 · Bullseye
+  +2 · a slip dulls −3. **Standing meter, nothing consumed** (v2 — Bill: a missed Evisc must not
+  waste the build): while Edge is up, ALL attacks (strikes AND dumps) carry crit chance ≈ 4–5%/pt
+  (seeded `s.rng`), crit = ×2. Dumps double-dip naturally (big base × crit); the aimed jackpot =
+  dump into the Opening at high Edge. Runes: 4%/pt · 5%/pt · 5%/pt + slips dull only −2.
+- **Package (offer-gated on ANY crit source):**
+  Heartseeker v2 [STANDALONE entry, normal pool] — Bullseyes ALWAYS crit · +Perfects 50% · +Perfects
+  always (Goods never crit — treading water stays treading water) ·
+  Serrated Fate — crit dmg +40/60/90% ·
+  Assassin's Note [capstone] — crits inside the Opening +50/75/110%.
+- **Killer's Eye CUT (folded):** strikes critting IS base Hone now. Rig killingEdge THEN → grants
+  +2 Edge per fire (if any crit source) else flat next-strike bonus.
+- **Synergies:** Overdrive FEVER auto-chain hones fast · Largo's fewer-but-Perfect strikes hone
+  reliably (slow assassin build = Largo + Hone + Assassin's Note).
+
+### A8 · KEYSTONES & ELITES — the acquisition layer (NEW, Bill 07-06: "it shouldn't just be in there")
+**Problem:** build-defining rule-changers sitting in normal 1-of-3 drafts crowd out bread ("why would
+you pick something else"). **Fix — the layer cake gets a 5th tier:**
+- **KEYSTONE class** = the build-definers: **Hone · Double Time · Syncopation** (graduated OUT of the
+  normal boon pool). One keystone per run (v1).
+- **Acquired from ELITE encounters** — a new risk node type on the Topology: harder fight, reward =
+  a 1-of-2 KEYSTONE pick. Take the dangerous road, earn the build. (Map-side dependency: elite node
+  type + reward hook — design owed to the Topology/map system.)
+- Layers: run-start = CREED · Floor 1 = MODULE · normal drafts = bread + hammers · **elites =
+  KEYSTONES** · boss = rig wire/re-wire.
+- **BALANCE GATE (Bill): build-parity EV check** — when built, `twinfang_sim` compares crit build vs
+  Flow-stack vs rig variants at expert AND sloppy policies. Acceptance: no build >~15% EV-dominant at
+  equal skill; keystone-less runs stay viable. (F25's EV-proof, generalized.)
+
+### A9 · UNDERSTUDY — the auto-dodge boon (I7 resolved, Bill 07-06)
+New GUARD (utility) lane: **Understudy** — auto-perfect-dodges the next authored dodge beat;
+recharges ~25s · ladder 1/2/3 charges. Defense-QoL only — never feeds offense (dodge law intact).
+Replaces Swan Song (cut from the idea list). Fits the DODGE RATION pillar (3–8 beats/fight) and gives
+non-tank seats a "less defense juggling" draft option.
