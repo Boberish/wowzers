@@ -11,7 +11,7 @@
 2. **Claim your work**: add a line to the Coordination Log (`date · branch · section · what`) *before* starting.
 3. **Always work in a git worktree** — never directly on `main`:
    `git worktree add ../wow-<task> -b <task>` → work there → commit early and often.
-4. **Sync often**: merge `main` into your branch regularly (at least before merging back) so parallel work never drifts far apart. **⚡ If your worktree predates 2026-07-03, `git merge main` NOW** — it brings **`scripts/psim.sh`** (runs any of the 5 class sims + `raid_sim` sharded across cores, **~5×** faster: `scripts/psim.sh <sim> [seeds] [jobs] [-- --boss=…]`). Prefer it over a single-threaded `godot --headless … --script res://sim/<sim>.gd -- --seeds=N`. It sims **your** worktree's code (self-locating root), so you still need to be synced. A missing/old `psim.sh` fails safe (no wrong results); output is byte-identical to a single run.
+4. **Sync often**: merge `main` into your branch regularly (at least before merging back) so parallel work never drifts far apart. **⚡ If your worktree predates 2026-07-03, `git merge main` NOW** — it brings **`scripts/psim.sh`** (runs the ACTIVE sims — `twinfang_sim` + `raid_sim` since the 2026-07-06 fresh slate — sharded across cores, **~5×** faster: `scripts/psim.sh <sim> [seeds] [jobs] [-- --boss=…]`). Prefer it over a single-threaded `godot --headless … --script res://sim/<sim>.gd -- --seeds=N`. It sims **your** worktree's code (self-locating root), so you still need to be synced. A missing/old `psim.sh` fails safe (no wrong results); output is byte-identical to a single run.
 5. **Verify before merging back**: run the acceptance bar for your section (listed per-section below; default = the class sims + UI smokes you touched, determinism PASS, and byte-identical checksums for any engine change).
 6. **Merge to `main`, then UPDATE THIS FILE** — status, what changed, what's next, tick the Coordination Log entry. A task isn't done until the master plan says so.
 7. Engine law is unchanged and non-negotiable: `CombatCore` stays a pure, deterministic, Node-free reducer (see CLAUDE.md).
@@ -139,10 +139,12 @@ not bigger numbers (Model A, frequency-scaled, Monotonic-Pool-safe).
 - **They are EXCLUDED FROM SIMS for now** (Bill, 2026-07-04): don't run or gate on the other class sims — they'd
   only measure out-of-date kits. The Tempo rework loop is **`twinfang_sim.gd` (Twinfang solo)**. The "keep every
   other class byte-identical" regression gate is therefore **DROPPED for the reworked roster** — the Tempo rework
-  may freely touch the draft system / shared UI / guarded engine hooks. Sims are **frozen, not deleted** — they
-  stay in the tree as the spine we re-green class by class. *Still hold:* CombatCore stays a pure deterministic
-  reducer, and determinism PASS on whatever IS active (Twinfang). The raid sim keeps running only as a
-  crash/integration smoke while its blade seat is in flux.
+  may freely touch the draft system / shared UI / guarded engine hooks. ~~Sims are frozen, not deleted~~ —
+  **superseded 2026-07-06 (Bill, fresh-slate): the old class/boss sims + dead-HUD smokes are DELETED** (git
+  history is the attic — recover a harness and re-add it to `psim.sh` when its class/boss rework lands). The
+  active sim surface is **`twinfang_sim` (Tempo pilot) + `raid_sim` (the 4 Seals)** + the system probes.
+  *Still hold:* CombatCore stays a pure deterministic reducer, and determinism PASS on whatever IS active
+  (Twinfang). The raid sim keeps running only as a crash/integration smoke while its blade seat is in flux.
 
 **Build order:** risk core (combo-fix + Flow-as-greed-dial + Flourish/Drumline, simmed) → Modules (Floor-1 pick
 + Edge/Deathmark) → the WHEN/THEN board + tutorial → the level/unlock ledger → then the next class. **FUTURE
@@ -507,7 +509,7 @@ nodes, not node kinds.
 > describe the *pre-rework* state — kept for reference until each class is redone.
 
 **Pre-rework state:** 6 classes built & verified (Bulwark, Twinfang, Voidcaller, Mender, Bloomweaver, Reckoner). Aspect pairs everywhere. Raid seats for all 4 roles.
-**Game-shape note (2026-07-03):** the per-class solo gauntlets are PRACTICE surfaces now (§GAME SHAPE) — class work targets the raid seats first; kit changes still gate on the class sims as always.
+**Game-shape note (2026-07-03):** the per-class solo gauntlets are PRACTICE surfaces now (§GAME SHAPE) — class work targets the raid seats first. ~~kit changes still gate on the class sims~~ — sims deleted 2026-07-06 (fresh slate); rework-era gates = `twinfang_sim` + `raid_sim` + determinism on whatever's active.
 **Next up (any agent can claim):**
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
@@ -516,18 +518,49 @@ nodes, not node kinds.
 - Over-defend punishment tank layer (Mountain King self-stun) — could bolt onto Bulwark as a boon/mod instead.
 - Imposed-rhythm caster (Runemaster attunement auto-cycle) — kit rotates on a clock you don't control.
 - ~~Rewind/Chronomancer verb~~ — PARKED (unintuitive in a reaction game; revisit as a rare relic at most).
-**Acceptance:** class sims determinism PASS + bands sane; UI smoke green.
+**Acceptance (fresh-slate era):** active sims (`twinfang_sim` + `raid_sim`) determinism PASS + bands sane; `ui_smoke_raid` green.
 
 ## BOSSES & ENCOUNTERS
 
 **Now:** 15 solo bosses + Vorathek raid + Seals II–IV, all with M7.2 strings, tuned skill bands.
 **Game-shape note (2026-07-03):** the 15 solo bosses are the **personal-content casting pool** — promote on demand as Tier-1 GATE duels / Tier-2 owned adds / Tier-3 split-phase exams (§GAME SHAPE + the §REALMS identity table). No new solo-only bosses.
+**⚠ BOSS-REDO ERA (Bill, 2026-07-06):** the whole boss roster will be redone against the WORLD-PLAN
+combat pillars eventually — Bill isn't sure of the end state yet, so we do NOT redesign now. The
+15 solo bosses sit unsimmed (their sims were deleted in the fresh slate; they get re-verified when
+recast through the Forge/casting-pool era). The only simmed, maintained bosses are **the 4 Seals**
+(`raid_sim`): Vorathek · MISTRAL · GEMINI · MYTHOS — and they get the pass below.
+
+**SEAL PILLAR PASS v1 — nudge the 4 Seals toward the pillars (design 2026-07-06 with Bill; CLAIMABLE).**
+Goal: "update what we have a bit closer to the end goal" — cheap, reversible tuning, NOT a rework.
+The pillar that bites today is **DODGE RATION** (WORLD-PLAN pillar 2): less footwork for dps/heals,
+tanks keep the densest; marquee moments survive.
+1. **Instrument BEFORE touching content:** add a per-seat **beat-budget diagnostic** to `raid_sim`
+   (answerable beats/run per seat per Seal, from the existing grade counters in `seat.diag`/events).
+   Print today's table first — the suspects are the rand-beat casts (Mixture of Fists · A/B Test ·
+   Agentic Fan-Out) and aoe string counts; **ULTRATHINK stays whole** (3 beats, the raid's best
+   moment — marquee, not weather).
+2. **Retune to budget (~3–8 answerable beats/fight for non-tank seats):** prefer lowering rand-beat
+   cast FREQUENCY (cooldowns) and victims-per-cast over deleting moments; tank strings
+   (Double-Check etc.) untouched. ⚠ M7.2's lesson runs in REVERSE here: removing beats un-freezes
+   scheduler time and SOFTENS the boss — retune each Seal's other cadence to keep the pressure
+   (don't let MYTHOS sloppy drift up from 43 to "free").
+3. **Interrupt content: HANDS OFF for now.** Kick chains stay tuned for the current kick verb (the
+   frozen Voidcaller still plays the caster seat); they retune when **interrupt-by-ability** lands
+   with the Framework-v2 reworks (WORLD-PLAN pillar 3 / W5) and "who carries kicks" actually exists.
+4. **Deliberate re-baseline:** bands WILL shift — that's the point, not a regression. Fresh
+   300-seed bands per Seal recorded here; keep expert ≈100 and the MISTRAL→GEMINI→MYTHOS curve;
+   loose tiers must still lose. Blade seat is mid-rework (Tempo), so treat exact percentages as
+   indicative — gate hard on determinism + the beat-budget table, not on ±a few pp.
+**Acceptance:** `raid_sim` determinism PASS ×4 Seals; per-seat beat budgets within 3–8 non-tank
+(documented exceptions allowed, e.g. ULTRATHINK); difficulty curve preserved; `ui_smoke_raid` +
+`net_smoke` green; new bands + beat table recorded in this section.
+
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
 - **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — design against `RAID-PLAN.md` R3.
 - **OPUS phase design** (Helpful/Harmless/Honest) — the raid finale deserves authored phases, not just the curse.
 **Open ideas:** boss "patch notes" as Trial-Ladder flavor; a Stable-Diffusion illusion miniboss (all feints, low HP).
-**Acceptance:** boss sims determinism PASS, bands within intent, byte-identical for untouched bosses.
+**Acceptance (fresh-slate era):** `raid_sim` determinism PASS, bands within intent, byte-identical for untouched Seals (solo-boss content is unsimmed until recast — see BOSS-REDO ERA note).
 
 ## SYSTEMS — Draft 2.0, slot-verbs, token economy (design doc: `ASCENSION-STEAL-PLAN.md`)
 
@@ -618,6 +651,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-06 · `fresh-slate` → main · CLAUDE.md/§CLASSES/§BOSSES/§TOOLING — **FRESH SLATE:
+  CLAUDE.md rewritten lean + `HISTORY.md` + old sims DELETED + SEAL PILLAR PASS planned.** (Bill:
+  "keep this fresh… remove old boss sims as well… only tempo and the 4 bosses simmed, so it doesn't
+  waste time simming bad stuff.") (1) **CLAUDE.md** → stable laws + run-book only: era summary
+  (one-HUD law · roster rework · Voidcaller cut · boss-redo era), the WORLD-PLAN combat pillars,
+  ACTIVE VERIFICATION surface, distilled gotchas, plan-doc index; the frozen milestone history +
+  PoC source notes moved WHOLE to **`HISTORY.md`**. (2) **Deleted** (git history is the attic):
+  `bulwark_sim` · `mender_sim` · `voidcaller_sim` · `bloomweaver_sim` · `reckoner_sim` ·
+  `sim_runner` (M0 relic) · dead-HUD smokes (`ui_smoke`, `ui_smoke_mender/twinfang/voidcaller/
+  bloomweaver`) · frozen-kit probes (`bulwark_expose_probe`, `mender_overflow_probe`). **Kept:**
+  `twinfang_sim` (Tempo pilot) + `raid_sim` (4 Seals) + ALL system probes (draft/gear/commander/
+  map*/net*/raid*/menu/meter/fight_seed) + `ui_smoke_raid`/`ui_smoke_map` + `map_sim` (solo-map
+  fossil kept as the shared-RunMap byte-identity instrument) + **all `sim/policies/`** (the raid's
+  AI seats need them) + visual probes. `psim.sh` supported list → `twinfang_sim|raid_sim`; stale
+  "class sims" acceptance lines amended in §CLASSES/§BOSSES/§HOW-TO-WORK. (3) **SEAL PILLAR PASS
+  v1 planned** (§BOSSES, claimable): instrument per-seat beat budgets in `raid_sim` FIRST → retune
+  the 4 Seals toward the dodge-ration pillar (~3–8 non-tank beats; ULTRATHINK stays whole; reverse-
+  M7.2 warning: removing beats softens — retune cadence back), kick chains untouched until
+  interrupt-by-ability lands, deliberate band re-baseline. **Verified post-deletion:** fresh
+  `--import` + `twinfang_sim` + `raid_sim` + `ui_smoke_raid` green in the worktree. *(fresh-slate session)*
 
 - 📋 2026-07-06 · main (docs only) · §THE WORLD — **THE WORLD pivot: design LOCKED with Bill, `WORLD-PLAN.md` written (NOT built).**
   Bill's pitch: a WoW-like persistent world (Westfall-style zones, fog, first-visit fight-through with

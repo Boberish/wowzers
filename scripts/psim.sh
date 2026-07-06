@@ -5,16 +5,17 @@
 # box (the sims are otherwise single-threaded). Uses the sims' --seed0 offset.
 #
 #   scripts/psim.sh <sim> [total_seeds] [jobs] [-- extra sim args]
-#   e.g.  scripts/psim.sh bloomweaver_sim 300
-#         scripts/psim.sh bulwark_sim 200 6
+#   e.g.  scripts/psim.sh twinfang_sim 300
 #         scripts/psim.sh raid_sim 300 8 --boss=mythos      # one Seal, sharded
-# Supported: the five class sims + raid_sim (they carry --seed0 and a per-seed CSV).
+# Supported: the ACTIVE sim surface (2026-07-06 fresh slate) — twinfang_sim (Tempo pilot)
+# + raid_sim (the 4 Seals). The old class/boss sims were deleted; recover one from git
+# history and re-add it to the case below if a rework wants its harness back.
 set -euo pipefail
 SIM="${1:?usage: psim.sh <sim_name> [seeds] [jobs] [-- extra args]}"
 case "$SIM" in
-  bulwark_sim|twinfang_sim|voidcaller_sim|mender_sim|bloomweaver_sim|reckoner_sim|raid_sim) ;;
-  *) echo "psim.sh supports: bulwark_sim twinfang_sim voidcaller_sim mender_sim"
-     echo "bloomweaver_sim reckoner_sim raid_sim (they carry --seed0 + a per-seed CSV).  Got: '$SIM'"
+  twinfang_sim|raid_sim) ;;
+  *) echo "psim.sh supports: twinfang_sim raid_sim (they carry --seed0 + a per-seed CSV)."
+     echo "Old class sims were deleted 2026-07-06 (git history has them).  Got: '$SIM'"
      exit 2 ;;
 esac
 TOTAL="${2:-200}"
