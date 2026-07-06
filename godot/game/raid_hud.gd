@@ -3039,7 +3039,7 @@ func _owned_boon_labels() -> Array:
 	var pools: Array = []
 	match _seat_key:
 		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
-		"caster": pools = ([] if _caster_cls == "alchemist" \
+		"caster": pools = ([AlchemistBoons.SHARED, AlchemistBoons.BREW] if _caster_cls == "alchemist" \
 			else [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER])
 		"healer": pools = ([BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN] if _healer_cls == "bloomweaver" else [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK])
 		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
@@ -3270,6 +3270,12 @@ func _alchemist_key(code: int) -> void:
 			_ctrl.human({"type": "ability", "id": "rupture"})
 		KEY_4:
 			_ctrl.human({"type": "ability", "id": "catalyst"})   # MODULE (Third Reagent): drop it in
+		KEY_5:
+			_ctrl.human({"type": "ability", "id": "spitfire"})   # SPELL (drafted): filler dart
+		KEY_6:
+			_ctrl.human({"type": "ability", "id": "decant"})     # SPELL (drafted): snap-to-balance
+		KEY_7:
+			_ctrl.human({"type": "ability", "id": "reduction"})  # SPELL (drafted): volume→power
 
 ## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
 ## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.

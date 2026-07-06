@@ -55,6 +55,23 @@ func _cr_f(key: String) -> float:
 func _cr_b(key: String) -> bool:
 	return bool(AlchemistCreeds.field(creed_id, key))
 
+## BOONS — the effective poison cap (Deep Cauldron raises it). Base = cfg.cap exactly.
+func _cap() -> float:
+	return cfg.cap + (cfg.deep_cauldron_cap if _b("deepCauldron") else 0.0)
+
+## BOONS — the additive reaction bonus from drafted cards (all stack). Base = 0.0.
+func _boon_react_bonus(seat: Seat) -> float:
+	var bonus := 0.0
+	if _b("corrosiveBlood"):
+		bonus += cfg.corrosive_blood_mult
+	if _b("volatileReaction") and _potency(seat) > 0.66:
+		bonus += cfg.volatile_reaction_mult
+	if _b("perfectEmulsion") and _balance(seat) >= 0.9:
+		bonus += cfg.perfect_emulsion_mult
+	if _b("deepeningRot"):
+		bonus += float(seat.vars.get("deep_rot_ramp", 0.0))
+	return bonus
+
 # --------------------------------------------------------------------------
 # Brew state helpers (all state in seat.vars — Seat stays class-agnostic)
 # --------------------------------------------------------------------------
@@ -69,8 +86,11 @@ func _potency(seat: Seat) -> float:
 	return float(seat.vars.get("potency", 0.0))
 
 func _pot_mult(seat: Seat) -> float:
-	# CREED: Volatile lifts the ceiling (+50%), Steady lowers it (×0.85). Base ×1.0.
-	return 1.0 + _potency(seat) * cfg.pot_amp * _cr_f("pot_amp_mult")
+	# CREED: Volatile lifts the ceiling (+50%), Steady lowers it. BOON: Concentrate ×1.2. Base ×1.0.
+	var amp := cfg.pot_amp * _cr_f("pot_amp_mult")
+	if _b("concentrate"):
+		amp *= cfg.concentrate_mult
+	return 1.0 + _potency(seat) * amp
 
 ## Balance ∈ [0,1]: 1 = perfectly even, 0 = one-sided (or empty).
 func _balance(seat: Seat) -> float:
@@ -80,10 +100,12 @@ func _balance(seat: Seat) -> float:
 	return 1.0 - absf(_venom(seat) - _rot(seat)) / sum
 
 ## The live reaction dps (before dmg_scale) — min × balance × potency, the core law.
-## CREED: Purist trades away Rupture for a fatter sustained reaction (+35%). Base +0.0.
+## CREED: Purist trades Rupture for a fatter reaction. BOONS: Corrosive/Volatile/Perfect
+## Emulsion/Deepening Rot add here. Base bonus +0.0 → the product collapses to the original.
 func _react_dps(seat: Seat) -> float:
 	var m := minf(_venom(seat), _rot(seat))
-	return m * cfg.react_mult * (0.5 + 0.5 * _balance(seat)) * _pot_mult(seat) * (1.0 + _cr_f("react_bonus"))
+	return m * cfg.react_mult * (0.5 + 0.5 * _balance(seat)) * _pot_mult(seat) \
+		* (1.0 + _cr_f("react_bonus") + _boon_react_bonus(seat))
 
 # --------------------------------------------------------------------------
 # Per-tick upkeep: vial fill, asymmetric decay, potency, the reaction burn
@@ -97,24 +119,49 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if side != "":
 		var c := float(seat.vars.get("charge", 0.0))
 		var rate := cfg.charge_rate * _cr_f("charge_rate_mult")
+		if _b("practicedHand"):                    # BOON: a calmer, slower climb (sidegrade)
+			rate *= cfg.practiced_hand_mult
 		var quad := 0.0 if _cr_b("linear_charge") else cfg.charge_quad
 		seat.vars["charge"] = minf(cfg.charge_max, c + (rate + quad * c * c) * dt)
-	# 2) asymmetric decay: hot fades fast, cold lingers. CREED: Anchorite FREEZES Rot;
-	#    Volatile fades both faster (×1.3). Base decay_mult ×1.0 → identical.
+	# 2) asymmetric decay: hot fades fast, cold lingers. CREED: Anchorite FREEZES Rot; Volatile
+	#    fades both faster. BOONS: Preservative slows both, Clinging Rot slows Rot. Base ×1.0.
 	var dmul := _cr_f("decay_mult")
-	var drot := (0.0 if _cr_b("freeze_rot") else cfg.decay_rot) * dmul
-	seat.vars["venom"] = maxf(0.0, _venom(seat) - cfg.decay_venom * dmul * dt)
-	seat.vars["rot"] = maxf(0.0, _rot(seat) - drot * dt)
+	var pres := cfg.preservative_mult if _b("preservative") else 1.0
+	var rotb := cfg.clinging_rot_mult if _b("clingingRot") else 1.0
+	var dv := cfg.decay_venom * dmul * pres
+	var dr := (0.0 if _cr_b("freeze_rot") else cfg.decay_rot) * dmul * pres * rotb
+	seat.vars["venom"] = maxf(0.0, _venom(seat) - dv * dt)
+	seat.vars["rot"] = maxf(0.0, _rot(seat) - dr * dt)
 	# 3) potency — fills while balanced AND fed; drains fast when sloppy. CREED: Steady widens
-	#    the balanced gate (×0.9) and softens the drain (×0.6); Purist tightens + leaks; the
-	#    ceiling (pot_cap) caps the bar itself (Steady ×0.6). Base ×1.0 / cap 1.0 → identical.
+	#    the gate + softens drain; Purist tightens + leaks; pot_cap caps the bar. BOONS: Quick
+	#    Study fills faster, Distilled Focus drains slower, Killing Draught freezes drain in
+	#    execute range. Base ×1.0 / cap 1.0 → identical.
 	var m := minf(_venom(seat), _rot(seat))
 	var bal := _balance(seat)
 	var good := m >= cfg.soft * cfg.pot_feed_frac and bal > cfg.pot_bal_min * _cr_f("bal_min_mult")
+	var fill := cfg.pot_fill
+	if _b("quickStudy"):
+		fill *= cfg.quick_study_mult
 	var drain := cfg.pot_drain * _cr_f("pot_drain_mult")
+	if _b("distilledFocus"):
+		drain *= cfg.distilled_focus_mult
+	if _b("killingDraught") and s.boss.hp_max > 0.0 and s.boss.hp / s.boss.hp_max < cfg.killing_draught_hp:
+		drain = 0.0
 	seat.vars["potency"] = clampf(
-		_potency(seat) + (cfg.pot_fill if good else -drain) * dt, 0.0, _cr_f("pot_cap"))
+		_potency(seat) + (fill if good else -drain) * dt, 0.0, _cr_f("pot_cap"))
 	seat.resource = _potency(seat) * seat.resource_max   # mirror for generic UI/policy reads
+	# 3a) BOONS that track per-tick state (guarded — no boon = no var writes = byte-identical).
+	if _b("deepeningRot"):                          # DEEPENING ROT: fed+balanced ramps the reaction
+		if good:
+			seat.vars["deep_rot_ramp"] = minf(cfg.deepening_rot_max,
+				float(seat.vars.get("deep_rot_ramp", 0.0)) + cfg.deepening_rot_rate * dt)
+		else:
+			seat.vars["deep_rot_ramp"] = 0.0
+	if _b("lastCall") and not _cr_b("no_rupture"):  # LAST CALL: a phase change auto-cashes the brew
+		var pa := CombatCore.current_phase(s).at
+		if pa != float(seat.vars.get("last_phase_at", pa)):
+			_rupture(s, seat)
+		seat.vars["last_phase_at"] = pa
 	# 3b) RIG bookkeeping (guarded — the base build with no rig never writes these vars).
 	if not rig.is_empty():
 		# EMULSION WHEN: reward an EVEN hand — accumulate time at near-perfect balance and
@@ -172,6 +219,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		react = 0.0
 	var dps := react + raw
 	seat.vars["react_bank"] = float(seat.vars.get("react_bank", 0.0)) + dps * dt * cfg.dmg_scale
+	# BOON (Debilitator): a live reaction corrodes the boss — feed the raid-wide debuff. Guarded.
+	if _b("debilitator") and m > 0.0:
+		s.boss.debilitate = minf(cfg.debilitate_max, s.boss.debilitate + cfg.debilitate_per * dt)
 	if s.tick % REACT_LAND_EVERY == 0:
 		var bank := float(seat.vars.get("react_bank", 0.0))
 		if bank >= 1.0:
@@ -201,7 +251,49 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 			return _rupture(s, seat)
 		&"catalyst":
 			return _catalyst(s, seat)
+		&"spitfire":
+			return _spitfire(s, seat)
+		&"decant":
+			return _decant(s, seat)
+		&"reduction":
+			return _reduction(s, seat)
 	return false
+
+## SPELL (Spitfire): an instant off-brew acid dart — cheap filler between pours, short cd.
+func _spitfire(s: CombatState, seat: Seat) -> bool:
+	if not _b("spitfire") or int(seat.vars.get("spitfire_rdy", 0)) > s.tick:
+		return false
+	seat.vars["spitfire_rdy"] = s.tick + _tt(s, cfg.spitfire_cd)
+	CombatCore.damage_boss(s, seat, roundf(cfg.spitfire_dmg * cfg.dmg_scale), &"spitfire")
+	CombatCore.emit_event(s, {"t": "brew_spitfire", "player": seat.is_player, "seat": seat})
+	return true
+
+## SPELL (Decant): pour the fuller poison into the emptier — a cd-gated snap toward balance.
+func _decant(s: CombatState, seat: Seat) -> bool:
+	if not _b("decant") or int(seat.vars.get("decant_rdy", 0)) > s.tick:
+		return false
+	var v := _venom(seat)
+	var r := _rot(seat)
+	var move := absf(v - r) * 0.5 * cfg.decant_frac
+	if v > r:
+		seat.vars["venom"] = v - move; seat.vars["rot"] = minf(_cap(), r + move)
+	else:
+		seat.vars["rot"] = r - move; seat.vars["venom"] = minf(_cap(), v + move)
+	seat.vars["decant_rdy"] = s.tick + _tt(s, cfg.decant_cd)
+	CombatCore.emit_event(s, {"t": "brew_decant", "player": seat.is_player, "seat": seat})
+	return true
+
+## SPELL (Reduction): boil VOLUME into POWER — sacrifice a fraction of the brew for an
+## instant slug of Potency, right before a Rupture (the two-axis mastery, I6).
+func _reduction(s: CombatState, seat: Seat) -> bool:
+	if not _b("reduction") or int(seat.vars.get("reduction_rdy", 0)) > s.tick:
+		return false
+	seat.vars["venom"] = _venom(seat) * (1.0 - cfg.reduction_take)
+	seat.vars["rot"] = _rot(seat) * (1.0 - cfg.reduction_take)
+	seat.vars["potency"] = clampf(_potency(seat) + cfg.reduction_pot, 0.0, _cr_f("pot_cap"))
+	seat.vars["reduction_rdy"] = s.tick + _tt(s, cfg.reduction_cd)
+	CombatCore.emit_event(s, {"t": "brew_reduction", "player": seat.is_player, "seat": seat})
+	return true
 
 ## COMBO RIG (ALCHEMIST-PLAN verdict 2): a WHEN moment fired. If the run's wired WHEN matches,
 ## apply the wired THEN at its computed magnitude (a modest side-boost). Deterministic; a
@@ -282,8 +374,11 @@ func _pour(s: CombatState, seat: Seat) -> bool:
 			"side": side, "grade": "fizzle", "dose": 0})
 		return true
 	# CREED (Anchorite): a tighter sweet band, anchored at the red line (harder potent).
+	# BOON (Steady Pour): a WIDER band — pull sweet_lo down. Both fold into one sweet_lo.
 	var sweet_lo := cfg.sweet_lo
 	var band_mult := _cr_f("sweet_band_mult")
+	if _b("steadyPour"):
+		band_mult *= (1.0 + cfg.steady_pour_widen)
 	if band_mult != 1.0:
 		sweet_lo = cfg.sweet_hi - (cfg.sweet_hi - cfg.sweet_lo) * band_mult
 	var dose: float
@@ -302,9 +397,12 @@ func _pour(s: CombatState, seat: Seat) -> bool:
 	# CREED (Volatile): a SPOILED pour crashes your hard-won potency to zero (the glass).
 	if grade == "spoiled" and _cr_b("spoil_crashes"):
 		seat.vars["potency"] = 0.0
+	# BOON (Deepening Rot): a spoil breaks the patient ramp.
+	if grade == "spoiled" and _b("deepeningRot"):
+		seat.vars["deep_rot_ramp"] = 0.0
 	if dose > 0.0:
 		var cur := _venom(seat) if side == "venom" else _rot(seat)
-		seat.vars[side] = minf(cfg.cap, cur + dose)
+		seat.vars[side] = minf(_cap(), cur + dose)   # BOON (Deep Cauldron): a bigger ceiling
 	CombatCore._bump_diag(s, seat, "pour_" + grade)
 	CombatCore.emit_event(s, {"t": "brew_pour", "player": seat.is_player, "seat": seat,
 		"side": side, "grade": grade, "dose": int(dose)})
@@ -343,12 +441,23 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 		seat.vars["rig_overfill"] = 0
 	if int(seat.vars.get("fume_until", 0)) >= s.tick:
 		burst = roundf(burst * (1.0 + float(seat.vars.get("fume_amt", 0.0))))
-	seat.vars["venom"] = _venom(seat) * cfg.rupture_keep
-	seat.vars["rot"] = _rot(seat) * cfg.rupture_keep
+	# BOON (Rupturing): a bigger detonation. Base: no-op.
+	if _b("rupturing"):
+		burst = roundf(burst * (1.0 + cfg.rupturing_mult))
+	# BOON (Chain Rupture): keep MORE of the brew — a smaller crater, a faster rebuild.
+	var keep := cfg.rupture_keep + (cfg.chain_rupture_keep if _b("chainRupture") else 0.0)
+	seat.vars["venom"] = _venom(seat) * keep
+	seat.vars["rot"] = _rot(seat) * keep
 	CombatCore.damage_boss(s, seat, burst, &"rupture")
 	CombatCore._bump_diag(s, seat, "ruptures")
 	if peak:
 		CombatCore._bump_diag(s, seat, "rupture_peak")
+	# BOON (Catalyst): a PHANTOM copy — a snapshot of the burst's value, brew already intact.
+	if _b("catalyst"):
+		var phantom := roundf(burst * cfg.catalyst_phantom)
+		if phantom >= 1.0:
+			CombatCore.damage_boss(s, seat, phantom, &"rupture")
+			CombatCore.emit_event(s, {"t": "brew_catalyst_phantom", "player": seat.is_player, "seat": seat, "amt": int(phantom)})
 	CombatCore.emit_event(s, {"t": "brew_rupture", "player": seat.is_player, "seat": seat,
 		"amt": int(burst), "peak": peak, "vessel": int(vessel)})
 	# RIG WHEN moments on the cash-out: Ripe (rupture at peak) + Perfect Wave (within 2s of
@@ -367,13 +476,17 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 
 func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var m := minf(_venom(seat), _rot(seat))
-	# CREED-effective values the policy needs to play the posture (frozen Rot, tight band,
-	# faster fade, capped potency) — projection + rupture timing read these.
+	# CREED- and BOON-effective values the policy needs (frozen/slowed Rot, wider/tighter band,
+	# bigger cap, faster fade, capped potency) — projection + feed target + rupture timing read these.
 	var dmul := _cr_f("decay_mult")
-	var eff_decay_venom := cfg.decay_venom * dmul
-	var eff_decay_rot := (0.0 if _cr_b("freeze_rot") else cfg.decay_rot) * dmul
+	var pres := cfg.preservative_mult if _b("preservative") else 1.0
+	var rotb := cfg.clinging_rot_mult if _b("clingingRot") else 1.0
+	var eff_decay_venom := cfg.decay_venom * dmul * pres
+	var eff_decay_rot := (0.0 if _cr_b("freeze_rot") else cfg.decay_rot) * dmul * pres * rotb
 	var sweet_lo := cfg.sweet_lo
 	var band_mult := _cr_f("sweet_band_mult")
+	if _b("steadyPour"):
+		band_mult *= (1.0 + cfg.steady_pour_widen)
 	if band_mult != 1.0:
 		sweet_lo = cfg.sweet_hi - (cfg.sweet_hi - cfg.sweet_lo) * band_mult
 	return {
@@ -381,7 +494,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"aspect": aspect,
 		"venom": _venom(seat),
 		"rot": _rot(seat),
-		"cap": cfg.cap,
+		"cap": _cap(),
 		"decay_venom": eff_decay_venom,
 		"decay_rot": eff_decay_rot,
 		"charging": String(seat.vars.get("charging", "")),
@@ -410,6 +523,13 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"reagent_active": int(seat.vars.get("reagent_until", 0)) >= s.tick,
 		"ferment": float(seat.vars.get("ferment", 0.0)),
 		"vessel": float(seat.vars.get("vessel", 0.0)),
+		# SPELLS (drafted) — availability + cooldown readiness for the policy/HUD.
+		"has_spitfire": _b("spitfire"),
+		"spitfire_ready": int(seat.vars.get("spitfire_rdy", 0)) <= s.tick,
+		"has_decant": _b("decant"),
+		"decant_ready": int(seat.vars.get("decant_rdy", 0)) <= s.tick,
+		"has_reduction": _b("reduction"),
+		"reduction_ready": int(seat.vars.get("reduction_rdy", 0)) <= s.tick,
 		# the "ripe" cue: fuel × power, the artifact's rupGlow — the HUD sigil + policy read it
 		"ripe_glow": minf(1.0, m / cfg.ripe_fuel) * (cfg.ripe_glow_min + (1.0 - cfg.ripe_glow_min) * _potency(seat)),
 		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,

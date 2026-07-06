@@ -66,6 +66,36 @@ extends Resource
 # Reaction-Vessel (⭐): the reaction banks here instead of dealing; Rupture dumps it.
 @export var vessel_release: float = 1.0  ## multiplier on the Vessel dump at Rupture
 
+# --- BOONS (drafted; all guarded in the kit — no boon = byte-identical base) ---
+@export var deep_cauldron_cap: float = 4.0    ## Deep Cauldron: both poison caps +this
+@export var preservative_mult: float = 0.75   ## Preservative: both decays ×this
+@export var clinging_rot_mult: float = 0.2    ## Clinging Rot: Rot decay ×this
+@export var steady_pour_widen: float = 0.4    ## Steady Pour: sweet band WIDER by this fraction
+@export var practiced_hand_mult: float = 0.92 ## Practiced Hand: charge rate ×this (a CALMER climb — a human-comfort sidegrade, so a light AI cost)
+@export var quick_study_mult: float = 1.3     ## Quick Study: potency fill ×this
+@export var distilled_focus_mult: float = 0.7 ## Distilled Focus: potency drain ×this
+@export var concentrate_mult: float = 1.2     ## Concentrate: potency ceiling (pot_amp) ×this
+@export var killing_draught_hp: float = 0.3   ## Killing Draught: below this boss HP frac, potency won't drain
+@export var corrosive_blood_mult: float = 0.18   ## Corrosive Blood: reaction +this
+@export var volatile_reaction_mult: float = 0.25 ## Volatile Reaction: reaction +this while potency > 0.66
+@export var perfect_emulsion_mult: float = 0.30  ## Perfect Emulsion: reaction +this while balance ≥ 0.9
+@export var deepening_rot_max: float = 0.40   ## Deepening Rot: reaction ramps up to +this
+@export var deepening_rot_rate: float = 0.08  ## Deepening Rot: ramp gained per second fed+balanced
+@export var rupturing_mult: float = 0.35      ## Rupturing: Rupture burst +this
+@export var chain_rupture_keep: float = 0.30  ## Chain Rupture: rupture_keep +this (base 0.35 → ~0.65)
+@export var catalyst_phantom: float = 0.5     ## Catalyst: phantom copy = burst ×this (value snapshot)
+@export var debilitate_per: float = 1.5       ## Debilitator: stacks/sec fed by a live reaction (net +1.0/s vs 0.5 decay)
+@export var debilitate_max: float = 3.0       ## Debilitator: stack cap (× TuningConfig.debilitate_k in damage_boss)
+
+# --- SPELLS (drafted; keys 5/6/7) ---
+@export var spitfire_dmg: float = 22.0        ## Spitfire: instant off-brew dart (×dmg_scale)
+@export var spitfire_cd: float = 1.2          ## Spitfire: short cd so it's filler, not spam
+@export var decant_cd: float = 8.0            ## Decant: snap-to-balance cooldown
+@export var decant_frac: float = 0.5          ## Decant: move this fraction of the gap into the low side
+@export var reduction_cd: float = 12.0        ## Reduction: volume→potency cooldown
+@export var reduction_take: float = 0.35      ## Reduction: consume this fraction of the brew (less fuel lost)
+@export var reduction_pot: float = 0.45       ## Reduction: instant Potency gained (a solid slug; persists across ruptures)
+
 # --- dodge (the defensive verb — standard footwork numbers for the base build;
 #     the F3 auto-evasion identity is an OPEN call settled by playtest) ---
 @export var dodge_active: float = 0.55

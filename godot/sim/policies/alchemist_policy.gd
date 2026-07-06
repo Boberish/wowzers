@@ -78,6 +78,9 @@ func act(obs: Dictionary) -> Dictionary:
 	if charging != "":
 		if float(obs.get("charge", 0.0)) >= _release_aim:
 			return {"type": "ability", "id": "pour"}
+		# SPELL (Spitfire): the vial's still climbing — throw a free dart in the gap.
+		if bool(obs.get("has_spitfire", false)) and bool(obs.get("spitfire_ready", false)):
+			return {"type": "ability", "id": "spitfire"}
 		return {}
 
 	# 2b) MODULE (Third Reagent): drop the catalyst when the bar is full AND the reaction is
@@ -85,6 +88,18 @@ func act(obs: Dictionary) -> Dictionary:
 	if bool(obs.get("reagent_ready", false)) and not bool(obs.get("reagent_active", false)):
 		if float(obs.get("brew_min", 0.0)) >= 4.0 and float(obs.get("potency", 0.0)) >= 0.45:
 			return {"type": "ability", "id": "catalyst"}
+
+	# 2c) SPELL (Decant): snap the see-saw back when it's badly tipped and there's poison to move.
+	if bool(obs.get("has_decant", false)) and bool(obs.get("decant_ready", false)):
+		if float(obs.get("balance", 0.0)) < 0.62 and float(obs.get("brew_min", 0.0)) >= 1.0:
+			return {"type": "ability", "id": "decant"}
+
+	# 2d) SPELL (Reduction): the burst rotation rarely wants it — trading fuel for potency HURTS
+	#     a single rupture (potency is sublinear), so it pays only a SUSTAIN/Purist hand banking
+	#     power across ruptures. This safe AI casts it only when deeply potency-starved + fuel-rich.
+	if bool(obs.get("has_reduction", false)) and bool(obs.get("reduction_ready", false)):
+		if float(obs.get("brew_min", 0.0)) >= 10.0 and float(obs.get("potency", 0.0)) < 0.15:
+			return {"type": "ability", "id": "reduction"}
 
 	# 3) the ripe peak — cash the wave. Fuel + potency high, or potency pinned at the
 	#    plateau with real fuel banked (no hoarding — the F4 wave law). CREED (Purist): no
@@ -122,6 +137,9 @@ func act(obs: Dictionary) -> Dictionary:
 		if rng != null and latency_ticks > 0:
 			_release_aim += (rng.next_float() * 2.0 - 1.0) * float(latency_ticks) * RELEASE_NOISE_PER_LAT
 		return {"type": "ability", "id": "brew_venom" if venom_p <= rot_p else "brew_rot"}
+	# 5) SPELL (Spitfire): nothing else to do this beat — throw a free filler dart.
+	if bool(obs.get("has_spitfire", false)) and bool(obs.get("spitfire_ready", false)):
+		return {"type": "ability", "id": "spitfire"}
 	return {}
 
 # --- M7 beat rolls (cached per string; latency_ticks doubles as the noise knob) ---

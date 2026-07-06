@@ -65,6 +65,7 @@ func _initialize() -> void:
 	_creed_ab(seeds, seed0)
 	_module_ab(seeds, seed0)
 	_rig_ab(seeds, seed0)
+	_boon_ab(seeds, seed0)
 
 	_write_csv(_arg("out", "res://out/alchemist_results.csv"), rows)
 	print("wrote %d rows -> %s" % [rows.size(),
@@ -109,7 +110,7 @@ func _creed_ab(seeds: int, seed0: int) -> void:
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "", rig := {}) -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "", rig := {}, boons := {}) -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
 	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
@@ -120,6 +121,8 @@ func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := 
 		kit.modules = {module: true}            # SLICE B: install the module
 	if not rig.is_empty():
 		kit.rig = rig                           # SLICE C: wire the Combo rig
+	if not boons.is_empty():
+		kit.boons = boons                       # SLICE D/E/F: drafted boons + spells
 	var pol := s.seats[0].policy as AlchemistPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 4441)   # separate reproducible brew-aim stream
@@ -192,6 +195,13 @@ func _prove_determinism() -> void:
 	print("  Rig@good      seed 9 == seed 9  -> %s   (checksum %d, %s)" % [
 		("PASS" if k["checksum"] == l["checksum"] else "FAIL"), k["checksum"],
 		("win" if k["won"] else k["loss_cause"])])
+	# a BOON+SPELL run too (rule-changers + spell cooldowns thread the state).
+	var bset := {"catalyst": true, "chainRupture": true, "deepeningRot": true, "spitfire": true, "reduction": true}
+	var p := _run_one(11, "crucible", 6, "", "", {}, bset)
+	var q := _run_one(11, "crucible", 6, "", "", {}, bset)
+	print("  Boons@good    seed 11 == seed 11 -> %s   (checksum %d, %s)" % [
+		("PASS" if p["checksum"] == q["checksum"] else "FAIL"), p["checksum"],
+		("win" if p["won"] else p["loss_cause"])])
 
 ## SLICE B gate — each Module must produce a DISTINCT, sane profile and keep determinism.
 ## "" is the byte-identical base. Third Reagent = a small amp; Fermentation = auto-detonations;
@@ -261,6 +271,41 @@ func _rig_ab(seeds: int, seed0: int) -> void:
 		var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
 		print("%-23s %6.1f%%   %7.1fs    %6.1f" % [String(wr["lbl"]), pct, avg, float(fires) / float(seeds)])
 	print("")
+
+## SLICE D/E/F gate — each boon/spell must produce a DISTINCT, sane profile and keep
+## determinism. "" = the byte-identical base. Crucible @ good lat6 (leech would be similar);
+## most raise DPS a little (a boon SHOULD earn its slot); Debilitator is best seen in the raid.
+func _boon_ab(seeds: int, seed0: int) -> void:
+	var cards := [
+		"deepCauldron", "preservative", "clingingRot", "steadyPour", "practicedHand",
+		"quickStudy", "distilledFocus", "concentrate", "killingDraught", "corrosiveBlood",
+		"volatileReaction", "perfectEmulsion", "deepeningRot", "debilitator", "rupturing",
+		"chainRupture", "catalyst", "lastCall", "spitfire", "decant", "reduction",
+	]
+	print("BOON A/B — Crucible @ good lat6 (%d seeds/card; Δ vs base TTK):" % seeds)
+	print("card               win-rate  avg TTK   ΔTTK    avg potency")
+	print("-------------------------------------------------------------")
+	var base_cell := _boon_cell(seeds, seed0, {})
+	var base_ttk := float(base_cell["ttk"])
+	print("%-18s %6.1f%%   %7.1fs   %+5.1f    %5.2f" % ["(base)", 100.0, base_ttk, 0.0, float(base_cell["pot"])])
+	for id in cards:
+		var c := _boon_cell(seeds, seed0, {String(id): true})
+		print("%-18s %6.1f%%   %7.1fs   %+5.1f    %5.2f" % [
+			String(id), float(c["wr"]), float(c["ttk"]), float(c["ttk"]) - base_ttk, float(c["pot"])])
+	print("")
+
+func _boon_cell(seeds: int, seed0: int, boons: Dictionary) -> Dictionary:
+	var wins := 0
+	var ttk_sum := 0.0
+	var pot_sum := 0.0
+	for seed in range(seed0, seed0 + seeds):
+		var r := _run_one(seed, "crucible", 6, "", "", {}, boons)
+		pot_sum += float(r["avg_potency"])
+		if r["won"]:
+			wins += 1; ttk_sum += float(r["ttk_sec"])
+	return {"wr": 100.0 * float(wins) / float(seeds),
+		"ttk": (ttk_sum / float(wins)) if wins > 0 else 0.0,
+		"pot": pot_sum / float(seeds)}
 
 ## Pour-grade averages per run (the vial gradient: potent/hot should dominate expert,
 ## fizzle/spoiled should climb as the tier gets sloppy).
