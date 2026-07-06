@@ -248,6 +248,13 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 		var ob := _opening_bonus(s, seat)
 		if ob > 0.0:
 			d *= (1.0 + ob)
+	# STRIKE-lane boons on the basic tap (not dumps): Press the Advantage rewards a Strike landed
+	# inside the Opening; Cold Open rewards a Strike while Flow is low (a post-crash rebuild bet).
+	if kind == "perfect" or kind == "strike":
+		if _b("pressAdvantage") and _in_opening(s, seat):
+			d *= (1.0 + cfg.press_advantage_mult)
+		if _b("coldOpen") and _flow(seat) <= cfg.cold_open_flow_max:
+			d *= (1.0 + cfg.cold_open_mult)
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
@@ -295,6 +302,13 @@ func _stamp_opening(s: CombatState, seat: Seat) -> void:
 	seat.vars["open_to"] = impact + _tt(s, cfg.open_post_sec)
 	seat.vars["open_peak"] = impact + _tt(s, cfg.open_peak_sec)
 	seat.vars["open_size"] = int(ab.size)
+
+## True while the boss's Opening vulnerability window is live at s.tick (kit-local, deterministic).
+func _in_opening(s: CombatState, seat: Seat) -> bool:
+	if not cfg.open_enabled:
+		return false
+	var to := int(seat.vars.get("open_to", -1))
+	return to >= 0 and s.tick >= int(seat.vars.get("open_from", 0)) and s.tick <= to
 
 ## The graded damage bonus for a dump landing at s.tick: full open_bonus inside the core
 ## (sweet spot), tapering to open_min_bonus at the window edges, 0.0 outside the window.

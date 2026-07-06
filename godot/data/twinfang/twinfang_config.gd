@@ -104,6 +104,9 @@ extends Resource
 @export var fencer_pad: float = 0.25        ## Fencer's Line: the strike AFTER a Bullseye is this much wider
 @export var da_capo_seed: int = 1           ## Da Capo: Coup's Flow seed +this
 @export var rude_cd_cut: float = 2.0        ## Rude Interruption: Kick cooldown −this seconds
+@export var press_advantage_mult: float = 0.30  ## Press the Advantage: a basic Strike inside the Opening deals +this
+@export var cold_open_mult: float = 0.25        ## Cold Open: a basic Strike while Flow <= cold_open_flow_max deals +this
+@export var cold_open_flow_max: int = 2         ## Cold Open: the low-Flow ceiling it pays under
 # DOUBLE TIME (signature): at max Flow, each further Perfect adds an "overdrive" stack.
 @export var doubletime_dmg: float = 0.04    ## +this damage per overdrive stack (flow-scaled hits)
 @export var doubletime_tighten: float = 0.06 ## window shrinks this fraction per stack…
