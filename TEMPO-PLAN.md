@@ -475,13 +475,11 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
 - Class chassis carries in full: Flow 0–6 +8%/pt · combo points → Eviscerate (Bullseye +1 CP) · base
   energy refund on Perfect/Bull (F11) · **Opening = class base verb** (dumps ×1.9) · Whetted-Edge crit
   package (A7) is CLASS-level and works unchanged (Edge builds from sharp Perfect/Bull releases).
-- **EVERY BUTTON IS A COIL (2nd-pass base law):** the verb applies KIT-WIDE — strikes, Eviscerate, and
-  utility slots all hold→sharpen→release; which button you're holding decides what fires. One verb,
-  everywhere (this is what makes The Mark / Curtain Call coherent — a "sharp Evis" is a real thing).
-- **THE COILED KICK (2nd-pass base law — pillar #3 answer):** Fermata can't react-kick with a 0.35s
-  wind-up, and shouldn't — being coiled IS being ready. The interrupt-flagged ability kicks only when
-  released from a SHARP coil inside the tight window: the assassin waiting out the caster. The
-  interrupt tax = you spent a whole coil on it. Sims measure whether pre-coiling for kicks reads.
+- **DUMPS ARE INSTANT AT BASE (verdict pass 1, Bill 2026-07-06):** only STRIKES coil; Eviscerate +
+  utility stay instant-press (the Tempo idiom) — base Fermata is the true small variation. The
+  kit-wide coil was KEPT but demoted to the **TUTTI creed** (Bill: "i like it but it changes a bunch,
+  maybe creed"). Kick at base = the class standard (instant flagged dump inside the tight window);
+  the COILED KICK lives inside Tutti.
 
 ### 13.2 CREEDS (pick 1 — coil temperament)
 - **THE PATIENT KNIFE `patient`** — the coil keeps charging past sharp: +1.5%/0.1s, cap +20%. Cost:
@@ -490,6 +488,12 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
   crashing. Cost: Flow cap 4. The fast, forgiving crossover creed for Tempo hands.
 - **THE LONG NIGHT `longnight`** — sweep ×0.75, windows ×0.75, releases ×1.20. The Largo mirror
   (reuses largo knobs) — slow, small, heavy. Precision posture.
+- **TUTTI `tutti`** [verdict pass 1 — Bill's creed-demotion of every-button-is-a-coil] — EVERY button
+  coils: Evis, utility, the kick, all hold→sharpen→release. Payoff: **sharp dumps get the window
+  grade multiplier** (a Bullseye Evis ×1.8). Cost is inherent (min-coil delay + grade risk on dumps;
+  un-sharp release = unravel, no fire). The COILED KICK rule applies here: the flagged ability kicks
+  only when released sharp inside the kick window — being coiled is being ready. Balance lever = the
+  dump grade mults; sims A/B dump uptime vs the other creeds. (Creed pool is now 4, like Alchemist.)
 
 ### 13.3 MODULES (Floor-1 pick · one ⭐transformer, per class law)
 - ⭐ **SHADOW DANCE `shadowdance` (transformer)** — gauge fills from sharp Perfect/Bull releases at
@@ -511,7 +515,9 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
 **VEIL** *(defense-in-shadow — the auto-dodge home)*
 - Vanish `vanish` — the first boss hit per coil: −50% dmg / fully dodged / fully dodged AND the coil
   stays sharp (Bill's requested auto-dodge boon, living where the fantasy puts it)
-- Shadowmeld `shadowmeld` — a telegraph that resolves while you're coiled hits −25/40/55%
+- Shadowstep `shadowstep` [reworked from Shadowmeld — Bill: "i dont get it"] — **dodging no longer
+  costs you your coil**: H keeps the coil at half progress / S keeps it fully / O keeps it AND it
+  sharpens instantly. The clean softener for the dodge-breaks-coil base law
 - Veil Over the Warband `veilWarband` **[SUPPORT]** — while you're coiled the whole warband takes
   −4/6/9% damage (the shadow stretches over allies; Fermata's Battle-Hymn counterpart)
 **RELEASE** *(the strike)*
@@ -521,10 +527,10 @@ deck keys off "while coiled", a condition dimension Tempo's boons can't touch.
 - First Pass `firstPass` [2nd pass] — the FIRST time the marker crosses the window after your SHNK,
   the window is +20/30/40% wider. Rewards decisive releases — the explicit counter-axis to Patient
   builds (fast-release vs slow-release is now a real build choice, not a solved answer)
-**AMBUSH** *(coil × Opening/dodge interplay)*
-- Ambush `ambush` — release into an Opening from a coil begun BEFORE it: +25/35/50%
-- Cheap Shot `cheapShot` — release ≤0.5s after a PERFECT dodge = auto-Bullseye / +1 CP / +1 CP +20%
-- Curtain Call `curtainCall` — Eviscerate released sharp inside an Opening: +30/45/60%
+**AMBUSH lane CUT (verdict pass 1, Bill 2026-07-06)** — Ambush / Cheap Shot / Curtain Call all cut:
+no Opening/dodge-interplay boons for now. (Design preserved here if the lane ever reopens: release
+into an Opening from a pre-Opening coil +25/35/50% · post-PERFECT-dodge release auto-Bulls · sharp
+Evis inside an Opening +30/45/60%.)
 **SHARED-POOL CARRIES** *(class-level cards both specs draft — verdict per card)*: the A7 crit package
 (Hone keystone · Heartseeker · Serrated · Assassin's Note) · Crescendo · Da Capo · Understudy ·
 Efficiency · **[2nd pass] the WINDOW lane bread carries too** — Wide Tempo / Fencer's Line / Rubato
@@ -539,10 +545,14 @@ support = Veil Over the Warband).
 - **THE UNSEEN BLADE `unseenBlade`** — while coiled, gain a SHADE every 0.5s (max 5); each Shade = +6%
   on your next release; Shades are a STANDING battery (persist until a release spends them). The
   slow-nuke build-definer; pairs with Patient Knife + Patient Edge into the one-giant-release build.
-- **NIGHTFALL `nightfall`** [2nd pass] — while you're coiled, the boss's cast/telegraph WIND-UPS tick
-  12% slower. You slow the fight from inside the shadow — the warband-utility build-definer (the tank
-  feels it, kicks get easier for everyone). Engine: scalar on boss timer advance while the fermata
-  seat is coiled — deterministic, flag-guarded, byte-identical when absent.
+- ~~NIGHTFALL~~ **CUT (verdict pass 1)** — Bill: "keystones need to be way more fun than open kick
+  window." **The fun bar for keystones is now explicit: spectacle-grade build-definers, never a
+  stat.** 2nd keystone OWED; candidates for Bill's react:
+  - **ECLIPSE `eclipse`** — a sharp Bullseye release instantly RE-COILS you, already sharp. Chain the
+    dance: release-release-release, perpetual shadow, until a miss ends it.
+  - **PHANTOM `phantom`** — while coiled, a phantom blade sweeps in from the RIGHT; the window is
+    wherever the two blades CROSS — release on the crossing for a twin strike ×2. Rewrites the bar's
+    timing read entirely; elite-drop spectacle.
 
 ### 13.7 BUILD ORDER + ENGINE NOTES (after Bill's deck verdicts)
 1. Kit base: aspect `fermata` guarded on twinfang_kit (byte-identical unless picked — the Brew idiom);
@@ -591,6 +601,10 @@ Draft-2.0 engine. UPSELL→tier-bump + Market tier-up/fine-tune = same deferred 
 - **Cold Open `coldOpen` [BUILT `c1071bd`]** — Strikes at Flow ≤ 2 deal +25% (`cold_open_mult 0.25`,
   `cold_open_flow_max 2`) — the low-Flow mirror of Tightrope; a post-crash rebuild bet. · ladder 25/35/50%
 - Through-Line `throughline` [design owed] — consecutive Perfects escalate +2%/stack, cap 5, reset on Miss · ladder +2%c5/+3%c5/+3%c8
+- On the Beat `onTheBeat` [CANDIDATE — Bill's idea from the Fermata verdict pass, verdict owed] —
+  dumps fired INSIDE the strike window gain the window's grade multiplier (a Bullseye Evis ×1.8).
+  Bar-side timing for dumps — the Tempo mirror of Fermata's TUTTI creed, at the boon layer (opt-in
+  greed; deliberately harder than dumping into the Opening) · ladder ×grade at 60%/80%/100% effect
   · VERIFY (both built cards): twinfang_sim determinism PASS + boonless CSV byte-identical (guarded no-op);
     strike A/B cell 90.0%/43.8s → 95.0%/41.7s; ui_smoke_raid ALL OK; raid_sim --blade=tempo 4 Seals det PASS.
 **WINDOW**
