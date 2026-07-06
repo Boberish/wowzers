@@ -2629,14 +2629,35 @@ func _rig_col(label: String, ids: Array, table: Dictionary, is_when: bool) -> VB
 	col.add_theme_constant_override("separation", 10)
 	_title(col, label, 13, Palette.CRIMSON if is_when else Palette.FLOW)
 	var group := ButtonGroup.new()
+	var accent: Color = Palette.CRIMSON if is_when else Palette.FLOW
 	for id in ids:
 		var d: Dictionary = table.get(String(id), {})
 		var b := Button.new()
 		b.toggle_mode = true
 		b.button_group = group
-		b.custom_minimum_size = Vector2(330, 62)
-		b.clip_text = true
-		b.text = "%s — %s" % [String(d.get("name", id)), String(d.get("blurb", ""))]
+		b.custom_minimum_size = Vector2(330, 84)
+		b.clip_text = false
+		# The blurb is too long for one clipped line — render name + WRAPPED blurb as child
+		# labels (mouse passes through to the button, so the whole card stays clickable).
+		var box := VBoxContainer.new()
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_theme_constant_override("separation", 3)
+		box.set_anchors_preset(Control.PRESET_FULL_RECT)
+		box.offset_left = 12; box.offset_top = 8; box.offset_right = -12; box.offset_bottom = -8
+		var name_l := Label.new()
+		name_l.text = String(d.get("name", id))
+		name_l.add_theme_font_size_override("font_size", 15)
+		name_l.add_theme_color_override("font_color", accent)
+		name_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(name_l)
+		var blurb_l := Label.new()
+		blurb_l.text = String(d.get("blurb", ""))
+		blurb_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		blurb_l.add_theme_font_size_override("font_size", 11)
+		blurb_l.add_theme_color_override("font_color", Palette.TEXT_DIM)
+		blurb_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(blurb_l)
+		b.add_child(box)
 		if is_when:
 			b.toggled.connect(_rig_on_when.bind(String(id)))
 		else:
