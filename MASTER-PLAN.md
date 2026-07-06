@@ -699,6 +699,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
+  was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out
+  `2277d15`) and is on origin — the ⚠ "UNCOMMITTED on Bill's other computer" note in the split entry
+  below was a false alarm from a stale 07-05 doc line. TEMPO-PLAN warnings corrected (`e3ff865`);
+  **card-level verdicts (F23/F27 etc.) are actionable on main now.** *(original tempo-boons session)*
+
 - ☑ 2026-07-06 · `venom-split` → main · §CLASS FRAMEWORK v2/§CLASSES — **THE SPLIT (docs only):
   spec-audit verdicts triaged + Venom promoted to its own class.** Bill verdicted the full 36-item
   Twinfang spec audit (0 reject · 12 tweak · 24 accept; board artifact `168429ee…` — full finding
