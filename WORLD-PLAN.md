@@ -456,7 +456,9 @@ carry is an engine-adjacent slice (guarded, byte-identical for single fights) th
 everything else composes with. Healer regen / mana curves rebalance WITH the bands, not
 before (the inert-mana fix rides this).
 
-### PACK — build spec v1 (claimed 2026-07-07, Bill: "make a good plan then execute")
+### PACK — build spec v1 — ✅ BUILT & MERGED 2026-07-07 (`f912a4f`; record in the
+### Coordination Log. Shipped exactly as specced below; Granary Steps + Hollow Warren
+### author the first packs; Bill feel-tests with `--fightlen` composing on top.)
 - **Engine (the guarded touch):** `CombatState.pack: Array[EncounterRes]` + `pack_i`
   (empty = today's single fight, byte-identical). Boss death with members remaining ⇒
   NOT over/won: advance `pack_i`, reset the SAME BossState in place (no stale refs) from

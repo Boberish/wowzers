@@ -729,6 +729,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `pack` → main (`f912a4f`) · §THE WORLD / ENGINE / `WORLD-PLAN.md` §FIGHT
+  LENGTH — **PACK v1 BUILT (Bill: "make a good plan for the pack generator, then execute"):
+  sequential encounters in ONE battle, heat carries.** Engine (guarded — every classic fight
+  byte-identical): `CombatState.pack/pack_i` (empty = single), `BossState.entered_tick` (0
+  default), `_pack_advance` on member death (in-place BossState reset — no stale refs;
+  telegraph cleared; fresh threat = re-establish the pull; seeded ability stagger),
+  **walk-in grace** `pack_walkin_ticks` (TuningConfig, 75 = 2.5s — no enemy actions, players
+  may open: the diegetic valley), **per-member enrage** (entry-relative clock). Spec: pack ids
+  ride `(seed, spec)` (make_spec/make_state/build; size<2 normalizes away; online untouched,
+  no protocol bump). HUD: `pack_next` name-card ("NAME · 2/3"), plate/dial rebind free (they
+  read s.encounter live); `--fightlen` scales waiting members + their enrage. Content: THE
+  GRANARY STEPS = bard→sonnet→opus (smalls→captain), THE HOLLOW WARREN = bard→sonnet→bard
+  (gauntlet); node `pack:[]` payload. **Gates:** `sim/pack_probe.gd` ALL OK (size-1 pack ==
+  plain pull checksum-identical · 3-member win via policies 44.5s · walk-in silence · entry-
+  relative enrage · determinism) · frozen-main A/B psim twinfang(120) + raid(60) merged CSVs
+  **BYTE-IDENTICAL** · net_smoke checksums clean · world/raid/map smokes + menu/world/fightlen
+  probes green (world smoke now drives the Granary pack). **NEXT:** Bill feel-test (packs ×
+  fightlen — the total pool runs Seal-sized: author fewer members OR wait for Forge SWARM
+  bodies); then THE CHASE shape; Topology pack quotas (dungeon floors); Seal pillar pass.
+  *(world-structure session)*
+
 - ☑ 2026-07-06 · main (docs only) · §CLASSES — **HEALER REWORK FIRST PASS — design board AT VERDICT**
   (artifact https://claude.ai/code/artifact/68b0c28c-cc3a-4655-b9d5-fdc67e929e24). Bill's ask: heal-low +
   overheal read as boons not specs; weigh merging Mender+Bloomweaver into one 2-spec class. Findings:
