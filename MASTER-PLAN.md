@@ -832,9 +832,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   fight). DESIGN LOCKED, not built — builds with W2/W3 (XP ledger on the world save, wave tables,
   crest gates, borderland nodes). *(world-structure session)*
 
-- 🔨 2026-07-06 · `escort-ticket` (`ca05269`→`eaf628e`, NOT merged) · §THE WORLD W2 — **ESCORT/VOLATILE
-  TICKET — thinnest flagged slice BUILT + deepened (Bill: "keep building"/"keep going"; §MEWGENICS
-  STEALS ①).** *Deepened `eaf628e`:* sustained two-wave burden + pre-pull warning (pressure↔vial) +
+- ☑ 2026-07-07 · `escort-ticket` → main (`44c727e`) · §THE WORLD W2 — **ESCORT/VOLATILE
+  TICKET — thinnest flagged slice BUILT + deepened + MERGED (Bill: "keep building"/"keep going"/"merge
+  ① to main"; §MEWGENICS STEALS ①).** Reconciled with the concurrent PACK system on merge (burden
+  applies to the on-field encounter = pack lead / single fight); post-merge world_probe + ui_smoke_world
+  green, raid_sim byte-identical to main (a83e7cbd). *Deepened `eaf628e`:* sustained two-wave burden + pre-pull warning (pressure↔vial) +
   cleared-door turn-in soft-lock fix — still byte-identical + green. Carry a
   payload PICKUP→TURN-IN; while carrying, fight/elite nodes get an enemy-side BURDEN add (the boss
   withdraws to face it) — a burden not a buff (OVERWORLD POWER + mutator-on-enemy laws hold),
