@@ -54,15 +54,15 @@ func _process(_d: float) -> bool:
 		hud._seat_key = "tank"
 		hud._aspect = "warden"
 		hud._start_map_run()
-		hud._taken_boons = SET_BOONS.duplicate()
-		hud._map_gear = ["riftmaw_tooth", "cooling_paste"]
-		hud._map_gear_charges = {"cooling_paste": 2}
+		hud._d.taken_boons = SET_BOONS.duplicate()
+		hud._d.gear = ["riftmaw_tooth", "cooling_paste"]
+		hud._d.gear_charges = {"cooling_paste": 2}
 	match String(steps[idx]):
 		"map_set":        # the YOUR SET doll bottom-left of the descent map
 			hud._show_map()
 		"draft_forge":    # forge chips on the cards + the set beside the forge
-			if hud._run != null:
-				hud._run.tokens = 5
+			if hud._d.run != null:
+				hud._d.run.tokens = 5
 			hud._show_boon_draft(hud._show_map)
 		"drop_trinket":   # "a TRINKET for your set" framing on the ceremony
 			hud._show_drop("lechat_bell", true, hud._show_map)

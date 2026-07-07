@@ -207,10 +207,16 @@ Each its own worktree/claim, in this order:
    main's 3 stale probes REVIVED as deliberate updates (`map_advance_probe` now drives
    ledger/recap/rig/module ceremonies; `raid_boon_probe` presses through the recap) —
    `fightlen_probe` remains the open expectations claim.
-   **P3.1b ☐ NEXT — the state move:** raid_hud's ~30 campaign members (`_map_*`, run/
-   party/gear/oath state) onto a `RunDirector` object both the HUD and the shell hold;
-   probes/smokes that poke `hud._map_*` update with it. Then the server's campaign dict
-   becomes the same object (`_broadcast_map` reads it).
+   **P3.1b ✅ BUILT 2026-07-07 — the state move:** `game/run_director.gd` owns the
+   descent's 31 members (Topology floor/fracs/wounds/mana/tickets · ⚡/📁/flags/⏻ meta ·
+   GEAR curios/purse/unlocks/drop-rng · boon runs + COMMANDER party · oaths) +
+   `cp_view()/cp_sync()` (the bridge moved off the HUD). raid_hud holds ONE `_d` and
+   renders it — word-boundary rewrite across the HUD + 11 probes/smokes (`hud._d.…`).
+   **Design decision vs the original sketch:** the SERVER keeps its campaign dict — it
+   natively IS the cp-view shape (the rulebook can't tell the sides apart), and a
+   serializable dict is what the persistence/rejoin era wants server-side; forcing the
+   RefCounted object there would be churn against that future. RunDirector is the
+   CLIENT-side descent state the WorldShell (P3.2) will hold.
 2. **WorldShell** — a persistent shell scene that OWNS atlas/zone/bastion (AtlasScreen/
    ZoneScreen adopt as-is; give Bastion a real screen class) + the screen router, and
    *launches* the combat HUD as an instance surface. Autostart becomes "drive the shell"

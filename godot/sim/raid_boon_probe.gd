@@ -34,20 +34,20 @@ func _process(_d: float) -> bool:
 		hud._aspect = "warden"
 		hud._start_map_run()
 		# TEST A — wiring: a run exists, a boon can be drafted, and it injects into the kit
-		var run_ok := hud._run != null and String(hud._run.char_class) == "bulwark"
-		var picks: Array = Draft.roll_offers(hud._run)
-		var pre := (hud._run.boons as Dictionary).size()
+		var run_ok := hud._d.run != null and String(hud._d.run.char_class) == "bulwark"
+		var picks: Array = Draft.roll_offers(hud._d.run)
+		var pre := (hud._d.run.boons as Dictionary).size()
 		if not picks.is_empty():
-			Draft.take(hud._run, picks[0])
-		var grew := (hud._run.boons as Dictionary).size() > pre
-		hud._enter_node(hud._map.entry_id)                 # launch the entry fight
+			Draft.take(hud._d.run, picks[0])
+		var grew := (hud._d.run.boons as Dictionary).size() > pre
+		hud._enter_node(hud._d.map.entry_id)                 # launch the entry fight
 		if String(hud._screen) == "ledger":               # GEAR-2: the oath offer interposes
 			_press("FIGHT UNSWORN")
 		var kit = hud._ctrl.state.seats[0].kit
 		var injected: bool = kit != null and (kit.boons as Dictionary).size() > 0 \
-			and (kit.boons as Dictionary).size() == (hud._run.boons as Dictionary).size()
+			and (kit.boons as Dictionary).size() == (hud._d.run.boons as Dictionary).size()
 		print("[A wiring] run=%s (class=%s) offers=%d boon_taken=%s kit_injected=%s (%d boons)" % [
-			str(run_ok), String(hud._run.char_class), picks.size(), str(grew), str(injected),
+			str(run_ok), String(hud._d.run.char_class), picks.size(), str(grew), str(injected),
 			(kit.boons as Dictionary).size() if kit != null else -1])
 		if not (run_ok and grew and injected):
 			fails += 1

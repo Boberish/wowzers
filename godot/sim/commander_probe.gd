@@ -43,17 +43,17 @@ func _process(_d: float) -> bool:
 	# ---- A. byte-identity: full default party cfg == the old single-seat cfg's spec
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
-	hud._party = {}
+	hud._d.party = {}
 	var sa: Dictionary = RaidNet.make_spec(4242, hud._party_seat_cfg(), "riftmaw")
 	var sb: Dictionary = RaidNet.make_spec(4242, hud._human_seat_cfg(), "riftmaw")
 	_ck(JSON.stringify(sa) == JSON.stringify(sb),
 		"A: default party cfg -> spec identical to pre-commander")
 
 	# ---- B. commanded aspects/classes/boons ride the built fight
-	hud._party = {}
+	hud._d.party = {}
 	hud._ensure_party()
-	hud._party["blade"]["aspect"] = "tempo"
-	hud._party["healer"] = {"cls": "bloomweaver", "aspect": "thornveil"}
+	hud._d.party["blade"]["aspect"] = "tempo"
+	hud._d.party["healer"] = {"cls": "bloomweaver", "aspect": "thornveil"}
 	var br := RunState.start_twinfang("tempo", 77)
 	var offers := Draft.roll_offers(br)
 	Draft.take(br, offers[0])
@@ -82,15 +82,15 @@ func _process(_d: float) -> bool:
 		"C: commanded fight deterministic over 600 ticks (cs %d)" % s1.checksum)
 
 	# ---- D. the REFORGE chain: you first, then each AI raider, shared bank
-	hud._party = {}
+	hud._d.party = {}
 	hud._ensure_party()
-	hud._party["blade"]["aspect"] = "tempo"
+	hud._d.party["blade"]["aspect"] = "tempo"
 	hud._start_map_run()
-	_ck(hud._ai_runs.size() == 3, "D: descent spawned 3 AI boon runs")
-	var rb: RunState = hud._ai_runs["blade"]
+	_ck(hud._d.ai_runs.size() == 3, "D: descent spawned 3 AI boon runs")
+	var rb: RunState = hud._d.ai_runs["blade"]
 	_ck(String(rb.char_class) == "twinfang" and String(rb.aspect) == "tempo",
 		"D: the AI run matches the command (twinfang/tempo)")
-	hud._run.tokens = 5   # a banked pool to prove the mirror in/out
+	hud._d.run.tokens = 5   # a banked pool to prove the mirror in/out
 	var seen: Array = []
 	hud._show_boon_draft(func(): seen.append("done"))
 	var guard := 0
@@ -108,11 +108,11 @@ func _process(_d: float) -> bool:
 	_ck(seen.size() == 5 and String(seen[4]) == "done" and String(seen[0]) == "bulwark",
 		"D: chain = your REFORGE then 3 AI drafts then done (%s)" % str(seen))
 	var ai_boons := 0
-	for k in hud._ai_runs:
-		ai_boons += (hud._ai_runs[k] as RunState).boons.size()
+	for k in hud._d.ai_runs:
+		ai_boons += (hud._d.ai_runs[k] as RunState).boons.size()
 	_ck(ai_boons == 3, "D: each AI raider took exactly one boon (n=%d)" % ai_boons)
-	_ck(hud._run.boons.size() == 1, "D: your own pick landed too")
-	_ck(hud._run.tokens == 5, "D: shared bank intact when nothing was spent (5)")
+	_ck(hud._d.run.boons.size() == 1, "D: your own pick landed too")
+	_ck(hud._d.run.tokens == 5, "D: shared bank intact when nothing was spent (5)")
 	_ck(hud._seat_boons_now().size() == 4,
 		"D: all four seats' boons ride the next pull's spec")
 

@@ -33,11 +33,11 @@ func _process(_d: float) -> bool:
 		hud._aspect = "warden"
 		hud._start_map_run()
 		for i in 5:                                # draft a handful of boons
-			var picks: Array = Draft.roll_offers(hud._run)
+			var picks: Array = Draft.roll_offers(hud._d.run)
 			if picks.is_empty():
 				break
-			Draft.take(hud._run, picks[0])
-			hud._taken_boons.append(picks[0])
-		hud._enter_node(hud._map.seal_id)          # the MISTRAL fight (builds the panel)
+			Draft.take(hud._d.run, picks[0])
+			hud._d.taken_boons.append(picks[0])
+		hud._enter_node(hud._d.map.seal_id)          # the MISTRAL fight (builds the panel)
 		frames = 16
 	return false

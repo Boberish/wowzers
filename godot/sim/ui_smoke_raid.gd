@@ -27,17 +27,17 @@ func _process(_delta: float) -> bool:
 	hud._seat_key = "blade"
 	hud._aspect = "tempo"
 	hud._sync_blade_cls()
-	hud._run = hud._make_run()
-	assert(hud._run.char_class == "twinfang", "blade run should be twinfang")
+	hud._d.run = hud._make_run()
+	assert(hud._d.run.char_class == "twinfang", "blade run should be twinfang")
 	var flags := {"creed": false, "mod": false, "skip": false}   # dict = by-ref so lambdas can mutate it
 	hud._show_creed_pick(func(): flags.creed = true)
 	assert(hud._screen == "creed" and not flags.creed, "creed pick should SHOW and wait for a choice")
 	hud._pick_creed("flourish", func(): flags.creed = true)
-	assert(hud._run.creed == "flourish" and flags.creed, "picking a creed sets run.creed + continues")
+	assert(hud._d.run.creed == "flourish" and flags.creed, "picking a creed sets run.creed + continues")
 	hud._show_module_pick(func(): flags.mod = true)
 	assert(hud._screen == "module" and not flags.mod, "module pick should SHOW and wait")
 	hud._pick_module("edge", func(): flags.mod = true)
-	assert(hud._run.modules.has("edge") and flags.mod, "picking a module sets run.modules + continues")
+	assert(hud._d.run.modules.has("edge") and flags.mod, "picking a module sets run.modules + continues")
 	# the blade kit actually CARRIES the sworn creed + installed module after injection
 	var bseat: Seat = RaidContent._blade_seat("twinfang", "tempo")
 	hud._inject_boons(bseat)
@@ -45,7 +45,7 @@ func _process(_delta: float) -> bool:
 	assert(bk.creed_id == "flourish" and bk.modules.has("edge"), "creed+module fold into the blade kit")
 	# non-conforming seat is EMPTY: a tank skips both picks (done fires immediately, no screen)
 	hud._seat_key = "tank"
-	hud._run.creed = ""
+	hud._d.run.creed = ""
 	hud._show_creed_pick(func(): flags.skip = true)
 	assert(flags.skip, "a non-blade seat skips the creed pick (empty page, per design)")
 	hud._seat_key = "blade"
@@ -57,18 +57,18 @@ func _process(_delta: float) -> bool:
 	hud._aspect = "brim"
 	hud._sync_healer_cls()
 	assert(hud._healer_cls == "well", "brim aspect selects the well healer class")
-	hud._run = hud._make_run()
-	assert(hud._run.char_class == "well", "healer run should be well")
+	hud._d.run = hud._make_run()
+	assert(hud._d.run.char_class == "well", "healer run should be well")
 	var wflags := {"creed": false, "mod": false}
 	hud._show_creed_pick(func(): wflags.creed = true)
 	assert(hud._screen == "creed" and not wflags.creed, "well creed pick should SHOW and wait")
 	hud._pick_creed("brink", func(): wflags.creed = true)
-	assert(hud._run.creed == "brink" and wflags.creed, "picking a well creed sets run.creed + continues")
+	assert(hud._d.run.creed == "brink" and wflags.creed, "picking a well creed sets run.creed + continues")
 	hud._show_module_pick(func(): wflags.mod = true)
 	assert(hud._screen == "module" and not wflags.mod, "well module pick should SHOW and wait")
 	hud._pick_module("reservoir", func(): wflags.mod = true)
-	assert(hud._run.modules.has("reservoir") and wflags.mod, "picking a well module sets run.modules + continues")
-	hud._run.rig = {"when": "sweet_pour", "then": "gleam"}
+	assert(hud._d.run.modules.has("reservoir") and wflags.mod, "picking a well module sets run.modules + continues")
+	hud._d.run.rig = {"when": "sweet_pour", "then": "gleam"}
 	var wseat: Seat = RaidContent._healer_seat("well", "brim")
 	hud._inject_boons(wseat)
 	var wk := wseat.kit as WellKit
@@ -78,7 +78,7 @@ func _process(_delta: float) -> bool:
 	print("WELL framework: per-spec creed + module + rig fold into the well kit ok")
 
 	# TEMPO §5 — the Combo rig: the wire board builds, a WHEN+THEN pick enables it, it folds in.
-	hud._run.rig = {}
+	hud._d.run.rig = {}
 	flags.skip = false
 	hud._show_rig_wire(func(): flags.skip = true)
 	assert(hud._screen == "rig" and not flags.skip and hud._rig_confirm != null and hud._rig_confirm.disabled,
@@ -87,7 +87,7 @@ func _process(_delta: float) -> bool:
 	hud._rig_on_then(true, "overcharge")
 	assert(not hud._rig_confirm.disabled and hud._rig_w == "coup" and hud._rig_t == "overcharge",
 		"picking a WHEN + THEN enables WIRE IT")
-	hud._run.rig = {"when": "coup", "then": "overcharge"}   # simulate the confirm
+	hud._d.run.rig = {"when": "coup", "then": "overcharge"}   # simulate the confirm
 	var bseat2: Seat = RaidContent._blade_seat("twinfang", "tempo")
 	hud._inject_boons(bseat2)
 	assert((bseat2.kit as TwinfangKit).rig.get("when", "") == "coup", "the rig folds into the blade kit")
@@ -156,25 +156,25 @@ func _process(_delta: float) -> bool:
 	# REFORGE chains one draft per seat (yours first) on the shared ⏣ bank.
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
-	hud._party = {}
+	hud._d.party = {}
 	hud._show_party_setup()
 	assert(String(hud._screen) == "party", "party screen didn't build")
 	var cpa := _press(hud, "ASPECT")          # SOME AI row's toggle (row order is a UI detail)
 	var cpc := _press(hud, "◈")               # healer class toggle cycles Mender -> Well -> Bloomweaver
 	assert(cpa and cpc, "party toggle buttons missing")
-	assert(String(hud._party["healer"]["cls"]) == "well",
-		"healer class toggle (1st) should reach Well: %s" % str(hud._party))
+	assert(String(hud._d.party["healer"]["cls"]) == "well",
+		"healer class toggle (1st) should reach Well: %s" % str(hud._d.party))
 	_press(hud, "◈")                          # second press -> Bloomweaver (full 3-way cycle)
-	assert(String(hud._party["healer"]["cls"]) == "bloomweaver",
-		"healer class toggle (2nd) should reach Bloomweaver: %s" % str(hud._party))
-	hud._party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
-	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._party)])
+	assert(String(hud._d.party["healer"]["cls"]) == "bloomweaver",
+		"healer class toggle (2nd) should reach Bloomweaver: %s" % str(hud._d.party))
+	hud._d.party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
+	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._d.party)])
 	var cpd := _press(hud, "⚔")               # DESCEND
-	assert(cpd and String(hud._screen) == "map" and hud._ai_runs.size() == 3,
+	assert(cpd and String(hud._screen) == "map" and hud._d.ai_runs.size() == 3,
 		"DESCEND didn't start the commanded descent")
 	print("commander descent: ok blade=%s healer=%s" % [
-		String((hud._ai_runs["blade"] as RunState).aspect),
-		String((hud._ai_runs["healer"] as RunState).char_class)])
+		String((hud._d.ai_runs["blade"] as RunState).aspect),
+		String((hud._d.ai_runs["healer"] as RunState).char_class)])
 	hud._show_boon_draft(hud._show_map)       # the chain: you, then each AI raider
 	var ctakes := 0
 	while String(hud._screen) == "draft" and ctakes < 8:
@@ -185,23 +185,23 @@ func _process(_delta: float) -> bool:
 		ctakes += 1
 	assert(String(hud._screen) == "map", "draft chain didn't hand back to the map")
 	print("commander REFORGE chain: ok drafts=%d ai_boons=%d/%d/%d" % [ctakes,
-		(hud._ai_runs["blade"] as RunState).boons.size(),
-		(hud._ai_runs["caster"] as RunState).boons.size(),
-		(hud._ai_runs["healer"] as RunState).boons.size()])
-	hud._party = {}                            # back to the verified default comp
+		(hud._d.ai_runs["blade"] as RunState).boons.size(),
+		(hud._d.ai_runs["caster"] as RunState).boons.size(),
+		(hud._d.ai_runs["healer"] as RunState).boons.size()])
+	hud._d.party = {}                            # back to the verified default comp
 
 	# Topology raid floor (MAP-3a): map screen -> gate fight -> back on the map,
 	# node fx (raid patch, refuel, wound repair), the privilege-elevated screen
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
 	hud._start_map_run()
-	print("raid map screen: ok (nodes=%d screen=%s)" % [hud._map.nodes.size(), hud._screen])
-	hud._enter_node(hud._map.entry_id)
+	print("raid map screen: ok (nodes=%d screen=%s)" % [hud._d.map.nodes.size(), hud._screen])
+	hud._enter_node(hud._d.map.entry_id)
 	# GEAR-2: the boss's Ledger page interposes — swear the first oath, then pull
 	print("ledger offer: screen=%s" % hud._screen)
 	var psw := _press(hud, "SWEAR")
 	print("oath sworn: ok=%s -> screen=%s sworn=%s" % [
-		str(psw), hud._screen, str(not hud._sworn.is_empty())])
+		str(psw), hud._screen, str(not hud._d.sworn.is_empty())])
 	var sgate: CombatState = hud._ctrl.state
 	print("gate fight: enc=%s screen=%s" % [String(sgate.encounter.id), hud._screen])
 	CombatCore.damage_boss(sgate, sgate.seats[0], sgate.boss.hp)   # burst-win the gate
@@ -215,30 +215,30 @@ func _process(_delta: float) -> bool:
 	if hud._screen == "drop":
 		var pe := _press(hud, "EQUIP")
 		print("drop EQUIP: ok=%s -> screen=%s gear=%s unlocks=%s" % [
-			str(pe), hud._screen, str(hud._map_gear), str(hud._gear_unlocks)])
-	print("back on map: fracs=%s mana=%.2f" % [str(hud._map_fracs), hud._map_mana])
-	hud._map_wounds[0] = 0.2
+			str(pe), hud._screen, str(hud._d.gear), str(hud._d.gear_unlocks)])
+	print("back on map: fracs=%s mana=%.2f" % [str(hud._d.fracs), hud._d.mana])
+	hud._d.wounds[0] = 0.2
 	hud._apply_map_fx({"heal": 0.1, "mana": 1.0, "repair": true, "patch": true})
-	print("map fx (heal/patch/refuel/repair): ok wounds=%s" % str(hud._map_wounds))
+	print("map fx (heal/patch/refuel/repair): ok wounds=%s" % str(hud._d.wounds))
 
 	# GEAR-1 (Curios): ceremony paths — EQUIP an active, SCRAP pays ⏣, the paste
 	# button repairs wounds from the map, and curios ride the next pull's seat
 	hud._show_drop("cooling_paste", true, hud._show_map)
 	var p1 := _press(hud, "EQUIP")
 	print("ceremony EQUIP active: ok=%s gear=%s charges=%s" % [
-		str(p1), str(hud._map_gear), str(hud._map_gear_charges)])
+		str(p1), str(hud._d.gear), str(hud._d.gear_charges)])
 	hud._show_drop("swan_song", false, hud._show_map)
 	var p2 := _press(hud, "SCRAP")
 	print("ceremony SCRAP: ok=%s tokens=%d screen=%s" % [str(p2), hud._tokens_now(), hud._screen])
-	hud._map_wounds[0] = 0.2
+	hud._d.wounds[0] = 0.2
 	hud._show_map()
 	var p3 := _press(hud, "USE COOLING PASTE")
 	print("cooling paste: ok=%s wounds=%s charges=%s" % [
-		str(p3), str(hud._map_wounds), str(hud._map_gear_charges)])
+		str(p3), str(hud._d.wounds), str(hud._d.gear_charges)])
 
 	# ARMORY-UI: the YOUR SET modal opens off the doll, swallows Esc, and closes;
 	# the drop ceremony builds its EQUIPPED-comparison cards alongside the drop
-	hud._taken_boons = [{"id": "propSwift", "title": "Swiftguard", "rarity": "haiku",
+	hud._d.taken_boons = [{"id": "propSwift", "title": "Swiftguard", "rarity": "haiku",
 		"tags": ["guard"], "desc": "Guard cooldown -20%."}]
 	hud._show_map()
 	hud._open_armor_modal()
@@ -261,13 +261,13 @@ func _process(_delta: float) -> bool:
 
 	# GEAR-2: a KEPT oath — resolved on the last fight's final state; the purse and
 	# the fresh row unlock ride THIS kill's roll (sonnet floor -> the new row drops)
-	hud._sworn = {"row": "oath", "item": "grace_period", "sev": 2,
+	hud._d.sworn = {"row": "oath", "item": "grace_period", "sev": 2,
 		"deed": {"kind": "zero_deaths"}, "deed_text": "zero raider deaths", "boss": "riftmaw"}
 	hud._resolve_oath(hud._ctrl.state, hud._ctrl.player(), true)
 	var tok0: int = hud._tokens_now()
 	hud._after_drop("riftmaw", hud._show_map)
 	print("oath KEPT: tokens %d->%d row_unlocked=%s screen=%s" % [tok0, hud._tokens_now(),
-		str((hud._gear_unlocks.get("riftmaw", []) as Array).has("grace_period")), hud._screen])
+		str((hud._d.gear_unlocks.get("riftmaw", []) as Array).has("grace_period")), hud._screen])
 	if hud._screen == "drop":
 		var pk := _press(hud, "SCRAP")
 		print("kept-oath drop scrapped: ok=%s tokens=%d" % [str(pk), hud._tokens_now()])
@@ -275,7 +275,7 @@ func _process(_delta: float) -> bool:
 	# Tier-1 PERSONAL GATE (§GAME SHAPE): intro panel -> exam fight -> result ->
 	# map; a LOST gate = force-reboot (wound) and the run CONTINUES
 	var gid := -1
-	for nd in hud._map.nodes:
+	for nd in hud._d.map.nodes:
 		if String(nd["kind"]) == RunMap.KIND_GATE:
 			gid = int(nd["id"])
 	print("gate node present: %s (id=%d)" % [str(gid >= 0), gid])
@@ -294,7 +294,7 @@ func _process(_delta: float) -> bool:
 		if hud._screen != "combat":
 			break
 	print("gate won -> result panel: screen=%s frac[tank]=%.2f" % [
-		hud._screen, hud._map_fracs[0]])
+		hud._screen, hud._d.fracs[0]])
 	hud._launch_gate_fight()                       # loss path: the exam kills you
 	var sl: CombatState = hud._ctrl.state
 	sl.seats[0].hp = 0.0
@@ -304,7 +304,7 @@ func _process(_delta: float) -> bool:
 		if hud._screen != "combat":
 			break
 	print("gate LOST -> rebooted through: screen=%s frac=%.2f wound=%.2f map_alive=%s" % [
-		hud._screen, hud._map_fracs[0], hud._map_wounds[0], str(hud._map != null)])
+		hud._screen, hud._d.fracs[0], hud._d.wounds[0], str(hud._d.map != null)])
 	# the blade seat's OTHER class: the Reckoner's personal GATE = its Sentinel exam
 	hud._seat_key = "blade"
 	hud._blade_cls = "reckoner"
@@ -351,7 +351,7 @@ func _process(_delta: float) -> bool:
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
 	# MAP-3c floor progression screens (replaces the old single _show_map_cleared):
-	hud._floor = 0
+	hud._d.floor_i = 0
 	hud._show_floor_cleared()          # inter-floor elevation (Ring 3 -> descend to Ring 2)
 	print("floor-cleared (privilege-elevated) screen: ok")
 	hud._show_campaign_cleared()       # last Seal down -> Realm 1 cleared

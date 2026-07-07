@@ -32,11 +32,11 @@ func _process(_delta: float) -> bool:
 		hud._start_map_run()          # tank: creed pick skips straight to the floor
 		# re-deal Floor 1 onto a fixed seed so the smoke's walk is reproducible
 		var fl: Dictionary = RaidContent.FLOORS[0]
-		hud._map = RunMap.generate(MAP_SEED, hud._map_fights.size(),
+		hud._d.map = RunMap.generate(MAP_SEED, hud._d.fights.size(),
 			MapContent.raid_event_ids(),
 			{RunMap.KIND_GATE: 1, RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
 			int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
-		hud._map_node = -1
+		hud._d.node = -1
 		hud._show_map()
 		_check(hud._screen == "map", "raid map screen up")
 		last_screen = "map"
@@ -56,7 +56,7 @@ func _process(_delta: float) -> bool:
 
 	match scr:
 		"map":
-			var opts: Array = hud._map.reachable(hud._map_node, hud._map_inv)
+			var opts: Array = hud._d.map.reachable(hud._d.node, hud._d.inv)
 			_check(not opts.is_empty(), "reachable nodes exist")
 			if opts.is_empty():
 				quit(1)
@@ -64,7 +64,7 @@ func _process(_delta: float) -> bool:
 			# prefer utility nodes so panels/events/tickets get exercised; combat otherwise
 			var pick: int = opts[0]
 			for id in opts:
-				var k := String(hud._map.node(id)["kind"])
+				var k := String(hud._d.map.node(id)["kind"])
 				if k != RunMap.KIND_COMBAT and k != RunMap.KIND_SEAL:
 					pick = id
 					break
@@ -82,7 +82,7 @@ func _process(_delta: float) -> bool:
 			var fx: Dictionary = panel.choices[0].get("fx", {})
 			panel._on_press(panel.choices[0], 0)   # builds the result view (real UI path)
 			panel.finished.emit(fx)                # CONTINUE: apply fx → route onward
-			for f in hud._map_fracs:
+			for f in hud._d.fracs:
 				_check(float(f) >= 0.0 and float(f) <= 1.0, "integrity frac bounded")
 		"ledger":
 			# the boss's Ledger page: swear the first oath if one's offered, else pull
@@ -136,9 +136,9 @@ func _process(_delta: float) -> bool:
 
 func _visited() -> int:
 	var v := 0
-	if hud._map == null:
+	if hud._d.map == null:
 		return v
-	for n in hud._map.nodes:
+	for n in hud._d.map.nodes:
 		if bool(n.get("visited", false)):
 			v += 1
 	return v
