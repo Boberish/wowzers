@@ -693,6 +693,18 @@ tanks keep the densest; marquee moments survive.
 
 ## CODE AUDIT — open findings that NEED A DECISION (2026-07-03)
 
+**⚠ AUDIT v2 (2026-07-07) — see `REFIT-PLAN.md`.** A 5-agent STRUCTURAL audit ran against
+the post-pivot era (world preview = the real shell, hosted central server, raid = dev
+harness). Verdict: the engine laws hold (CombatCore purity / (seed,spec) entry / seeded
+content chain all verified clean); the debt is the shell — raid_hud god file (4 programs in
+one), net_server's duplicated campaign engine + zero persistence/identity, ~6.5k lines of
+dead solo code held live by ONE line (raid_hud.gd:3757), 8 ad-hoc save files, no scripted
+byte-identical gate (and `ui_smoke_map` — an ACTIVE gate — boots the DEAD bulwark_main solo
+path). Fix plan = REFIT-PLAN §3 (P0 paper cuts → P1 BIG DELETE → P2 gates-in-a-box → P3 the
+three extractions: RunDirector / WorldShell / online split → P4 scale rails); target MMO
+architecture = §4; claim table = §5. The parked items below have their disposition mapped
+in REFIT-PLAN §5. Phases are AT BILL'S VERDICT before build claims.
+
 A fan-out audit (11 scoped agents + adversarial verify) ran 2026-07-03. The **24 non-controversial
 fixes are DONE + merged** (`fd512f8`: dead code, per-frame perf, DRY — all byte-identical, see
 Coordination Log). These **13 are confirmed real but change gameplay/checksums or are architectural**
@@ -748,6 +760,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☐ 2026-07-07 · main (docs only) · §CLASSES — **TANK REWORK — design pass (high-level concepts
+  → Bill's filter chain).** Fresh-start rework of the tank seat's class (old Bulwark = frozen
+  placeholder, NOT the base): raid-only rules (no self-heal — mitigation/avoidance only), two
+  specs = the DODGE tank + the SHIELD tank, minigame-deep/kit-narrow, damage explicitly NOT the
+  focus. Design only this session; no code. *(tank design session)*
+
+- ☑ 2026-07-07 · main (docs only) · §CODE AUDIT — **STRUCTURAL AUDIT v2 (post-pivot) — DONE,
+  `REFIT-PLAN.md` WRITTEN.** 5-agent fan-out (engine/net/UI-HUD/world-meta/tooling) vs the
+  new era (world preview = the real shell, hosted central server, raid = dev harness).
+  Engine laws verified HOLDING; debt = the shell (raid_hud god file · net_server campaign
+  mirror + no persistence/identity · ~6.5k dead solo lines behind raid_hud.gd:3757 · 8
+  ad-hoc saves · gate folklore + ui_smoke_map booting a DEAD scene). Plan: P0–P4 phases +
+  MMO target architecture + claim table (REFIT-PLAN §3–5) — **phases at Bill's verdict**.
+  Doc-drift fixed with the audit: CLAUDE.md "only three"→five sims + plan-doc index,
+  psim.sh help string. No code changes. *(audit session)*
 
 - ☑ 2026-07-07 · `fermata-edge` → main (`f5d5397`) · §CLASSES — **FERMATA v5 EDGE BUILT — the
   Ramp & the Snap + the full v5 slate, per `FERMATA-V5-BRIEF.md`.** Bill verdicted v5 (all KEEP
