@@ -378,11 +378,11 @@ func _show_home() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 14)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -260, -230, 260, 250)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -260, -230, 260, 250)
 	_ui.add_child(box)
-	var t := _title(box, "THE RIFT", 76, Palette.GOLD)
+	var t := UiKit.title_in(box, "THE RIFT", 76, Palette.GOLD)
 	t.add_theme_font_override("font", UiKit.title(900))
-	_title(box, "REALM 1 · THE TAKEOVER", 15, Palette.TEXT_DIM)
+	UiKit.title_in(box, "REALM 1 · THE TAKEOVER", 15, Palette.TEXT_DIM)
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 30)
 	box.add_child(gap)
@@ -409,11 +409,11 @@ func _show_class_select() -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 205)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 205)
 	_ui.add_child(head)
-	var hl := _title(head, "CHOOSE YOUR CLASS", 30, Palette.GOLD)
+	var hl := UiKit.title_in(head, "CHOOSE YOUR CLASS", 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "you play one · AI raiders fill the other three seats", 14, Palette.TEXT_DIM)
+	UiKit.title_in(head, "you play one · AI raiders fill the other three seats", 14, Palette.TEXT_DIM)
 	# [seat, class, name, icon, accent, blurb] — the healer SEAT has two classes
 	# (Mender / Bloomweaver), so five cards map onto the four seats.
 	var cards := [
@@ -430,7 +430,7 @@ func _show_class_select() -> void:
 	# the four seats now exceed one screen; the scroll keeps every class reachable).
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_place(scroll, 0.5, 0.5, 0.5, 0.5, -360, -330, 360, 340)
+	UiKit.place(scroll, 0.5, 0.5, 0.5, 0.5, -360, -330, 360, 340)
 	_ui.add_child(scroll)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
@@ -443,7 +443,7 @@ func _show_class_select() -> void:
 	back.text = "◂ back"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	_place(back, 0.5, 1, 0.5, 1, -80, -78, 80, -44)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -80, -78, 80, -44)
 	back.pressed.connect(_show_home)
 	_ui.add_child(back)
 
@@ -463,13 +463,13 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 210)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 120, 420, 210)
 	_ui.add_child(head)
-	var hl := _title(head, "CHOOSE YOUR RAID", 30, Palette.GOLD)
+	var hl := UiKit.title_in(head, "CHOOSE YOUR RAID", 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "%s · %s" % [SEAT_NAMES.get(seat_id, "RAIDER"), aspect.capitalize()], 14, Palette.TEXT_DIM)
+	UiKit.title_in(head, "%s · %s" % [SEAT_NAMES.get(seat_id, "RAIDER"), aspect.capitalize()], 14, Palette.TEXT_DIM)
 	var mid := CenterContainer.new()
-	_place(mid, 0.5, 0.5, 0.5, 0.5, -360, -150, 360, 150)
+	UiKit.place(mid, 0.5, 0.5, 0.5, 0.5, -360, -150, 360, 150)
 	_ui.add_child(mid)
 	var card := AspectCard.new("REALM 1 · THE TAKEOVER",
 		"The ironic AI takeover. Descend the Topology, Ring 3 → 0 — MISTRAL → GEMINI → CLAUDE MYTHOS. Route the node map, carry your wounds, draft your build. (More realms to come.)",
@@ -480,7 +480,7 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	back.text = "◂ back to aspect"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	_place(back, 0.5, 1, 0.5, 1, -110, -78, 110, -44)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -110, -78, 110, -44)
 	back.pressed.connect(func(): _show_aspect_pick(seat_id))
 	_ui.add_child(back)
 
@@ -501,11 +501,11 @@ func _show_party_setup() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 9)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -360, -300, 360, 300)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -360, -300, 360, 300)
 	_ui.add_child(box)
-	var hl := _title(box, "ASSEMBLE YOUR RAID", 30, Palette.GOLD)
+	var hl := UiKit.title_in(box, "ASSEMBLE YOUR RAID", 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(box, "their class, their aspect, their boons — your call. the AI only drives the rotation.",
+	UiKit.title_in(box, "their class, their aspect, their boons — your call. the AI only drives the rotation.",
 		13, Palette.TEXT_DIM)
 	var gap0 := Control.new()
 	gap0.custom_minimum_size = Vector2(0, 8)
@@ -566,7 +566,7 @@ func _show_party_setup() -> void:
 		# the chosen aspect's one-line identity, dim, under each row
 		for a in _lobby_aspects(String(key), cls):
 			if String(a["id"]) == aspect:
-				var d := _title(box, String(a["desc"]), 12, Palette.TEXT_DIM)
+				var d := UiKit.title_in(box, String(a["desc"]), 12, Palette.TEXT_DIM)
 				d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				d.custom_minimum_size = Vector2(600, 0)
 	var gap := Control.new()
@@ -591,7 +591,7 @@ func _show_party_setup() -> void:
 		back.pressed.connect(_show_bastion)
 	else:
 		back.pressed.connect(func(): _show_raid_select(_seat_key, _aspect))
-	_place(back, 0.5, 1, 0.5, 1, -80, -58, 80, -24)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -80, -58, 80, -24)
 	_ui.add_child(back)
 
 # ============================================================ ASPECT PICK
@@ -622,16 +622,16 @@ func _show_aspect_pick(seat_id: String) -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -420, 150, 420, 260)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 150, 420, 260)
 	_ui.add_child(head)
-	var hl := _title(head, _seat_display_name(seat_id), 34, Palette.GOLD)
+	var hl := UiKit.title_in(head, _seat_display_name(seat_id), 34, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "C H O O S E   Y O U R   A S P E C T", 15, Palette.TEXT_DIM)
+	UiKit.title_in(head, "C H O O S E   Y O U R   A S P E C T", 15, Palette.TEXT_DIM)
 
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 22)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -340, -130, 340, 130)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -340, -130, 340, 130)
 	_ui.add_child(box)
 	for a in _aspects_for(seat_id):
 		var card := AspectCard.new(String(a["name"]), String(a["desc"]), a["accent"], String(a["icon"]))
@@ -642,7 +642,7 @@ func _show_aspect_pick(seat_id: String) -> void:
 	back.text = "◂ back to classes"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	_place(back, 0.5, 1, 0.5, 1, -110, -90, 110, -56)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -110, -90, 110, -56)
 	back.pressed.connect(_show_class_select)
 	_ui.add_child(back)
 
@@ -704,15 +704,15 @@ func _show_bastion() -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -420, 110, 420, 210)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 110, 420, 210)
 	_ui.add_child(head)
-	var hl := _title(head, "THE BASTION", 40, Palette.GOLD)
+	var hl := UiKit.title_in(head, "THE BASTION", 40, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.title(900))
-	_title(head, "hearth & muster — the warband's home. The stations are rising.", 14, Palette.TEXT_DIM)
+	UiKit.title_in(head, "hearth & muster — the warband's home. The stations are rising.", 14, Palette.TEXT_DIM)
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 12)
-	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -220, 350, 260)
+	UiKit.place(col, 0.5, 0.5, 0.5, 0.5, -350, -220, 350, 260)
 	_ui.add_child(col)
 	var camp := AspectCard.new("THE WARBAND CAMP",
 		"The Commander's tent: every AI raider's class and aspect is YOUR muster call. (The party you set here rides every fight — zone, dungeon, raid.)",
@@ -995,11 +995,11 @@ func _show_online() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 12)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -260, -220, 260, 220)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -260, -220, 260, 220)
 	_ui.add_child(box)
-	var hl := _title(box, "THE RIFT — ONLINE", 34, Palette.GOLD)
+	var hl := UiKit.title_in(box, "THE RIFT — ONLINE", 34, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(box, "Run the server (see server/README.md), share the address, pull together.", 13, Palette.TEXT_DIM)
+	UiKit.title_in(box, "Run the server (see server/README.md), share the address, pull together.", 13, Palette.TEXT_DIM)
 	var name_edit := _edit(box, "your name", pname)
 	var url_edit := _edit(box, "server (ws://host:port)", url)
 	var room_edit := _edit(box, "room code", room)
@@ -1008,7 +1008,7 @@ func _show_online() -> void:
 	go.custom_minimum_size = Vector2(240, 46)
 	go.add_theme_font_size_override("font_size", 17)
 	box.add_child(go)
-	_net_status = _title(box, "", 13, Palette.TEXT_DIM)
+	_net_status = UiKit.title_in(box, "", 13, Palette.TEXT_DIM)
 	var back := Button.new()
 	back.text = "◂ back"
 	back.flat = true
@@ -1056,11 +1056,11 @@ func _show_lobby() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 10)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -330, -280, 330, 280)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -330, -280, 330, 280)
 	_ui.add_child(box)
-	var hl := _title(box, "ROOM  ·  %s" % String(_room.get("code", "")), 30, Palette.GOLD)
+	var hl := UiKit.title_in(box, "ROOM  ·  %s" % String(_room.get("code", "")), 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(box, "claim a seat · pick your aspect · ready · the host pulls", 13, Palette.TEXT_DIM)
+	UiKit.title_in(box, "claim a seat · pick your aspect · ready · the host pulls", 13, Palette.TEXT_DIM)
 
 	for key in RaidNet.SEAT_KEYS:
 		var claimant := {}
@@ -1188,7 +1188,7 @@ func _show_lobby() -> void:
 		descend.add_theme_font_size_override("font_size", 17)
 		descend.pressed.connect(func(): _net.send_mapstart())    # MAP-3b: the Topology descent
 		ctlrow.add_child(descend)
-	_net_status = _title(box, "PULL = one Seal · DESCEND = the Topology campaign (leader routes) · empty seats fight as AI", 12, Palette.TEXT_DIM)
+	_net_status = UiKit.title_in(box, "PULL = one Seal · DESCEND = the Topology campaign (leader routes) · empty seats fight as AI", 12, Palette.TEXT_DIM)
 	var back := Button.new()
 	back.text = "◂ leave room"
 	back.flat = true
@@ -1276,8 +1276,8 @@ func _on_net_map(msg: Dictionary) -> void:
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
 	if not _map_is_leader:
-		var wait := _title(_ui, "◍  the leader is choosing the route…", 15, Palette.GOLD_DIM)
-		_place(wait, 0.5, 0, 0.5, 0, -260, 946, 260, 976)
+		var wait := UiKit.title_in(_ui, "◍  the leader is choosing the route…", 15, Palette.GOLD_DIM)
+		UiKit.place(wait, 0.5, 0, 0.5, 0, -260, 946, 260, 976)
 
 func _avg_frac(fracs: Array) -> float:
 	if fracs.is_empty():
@@ -1363,11 +1363,11 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 		box.alignment = BoxContainer.ALIGNMENT_CENTER
 		box.add_theme_constant_override("separation", 16)
 		center.add_child(box)
-		_title(box, String(msg.get("title", "")), 30, Palette.GOLD)
-		var body := _title(box, String(msg.get("body", "")), 15, Palette.TEXT)
+		UiKit.title_in(box, String(msg.get("title", "")), 30, Palette.GOLD)
+		var body := UiKit.title_in(box, String(msg.get("body", "")), 15, Palette.TEXT)
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		body.custom_minimum_size = Vector2(760, 0)
-		_title(box, "◍  the leader is deciding…", 14, Palette.GOLD_DIM)
+		UiKit.title_in(box, "◍  the leader is deciding…", 14, Palette.GOLD_DIM)
 
 ## Online boons: the server asks every human seat to draft. Roll THIS seat's offers,
 ## take one, send the id, then wait for the raid to finish (the next `map` replaces us).
@@ -1399,7 +1399,7 @@ func _show_online_wait(msg: String) -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(center)
-	_title(center, msg, 18, Palette.GOLD_DIM)
+	UiKit.title_in(center, msg, 18, Palette.GOLD_DIM)
 
 ## The whole descent is over (ROOT cleared, or a wipe) — a campaign end screen.
 func _on_net_campaign(won: bool) -> void:
@@ -1415,10 +1415,10 @@ func _on_net_campaign(won: bool) -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	center.add_child(box)
-	var banner := _title(box, "ROOT ACCESS GRANTED" if won else "THE DESCENT FALLS", 52,
+	var banner := UiKit.title_in(box, "ROOT ACCESS GRANTED" if won else "THE DESCENT FALLS", 52,
 		Palette.WIN if won else Palette.LOSE)
 	banner.add_theme_font_override("font", UiKit.title(900))
-	_title(box, ("Realm 1 cleared — CLAUDE MYTHOS is unplugged, together." if won
+	UiKit.title_in(box, ("Realm 1 cleared — CLAUDE MYTHOS is unplugged, together." if won
 		else "The raid wiped. Reboot, re-ready, and descend again."), 16, Palette.TEXT)
 	var again := Button.new()
 	again.text = "BACK TO LOBBY"
@@ -1654,7 +1654,7 @@ func _show_map() -> void:
 	# (below the lane band; the doll root ignores the mouse, only sockets hover)
 	if _d.run != null:
 		var doll := ArmorDoll.new()
-		_place(doll, 0.0, 1.0, 0.0, 1.0, 14, -344, 14 + int(ArmorDoll.W), -12)
+		UiKit.place(doll, 0.0, 1.0, 0.0, 1.0, 14, -344, 14 + int(ArmorDoll.W), -12)
 		_ui.add_child(doll)
 		doll.set_build(_d.taken_boons, _d.gear, _d.gear_charges)
 		doll.inspect_requested.connect(_open_armor_modal)
@@ -1670,7 +1670,7 @@ func _show_map() -> void:
 			_apply_map_fx({"repair": true})
 			_d.toast = "🧴  COOLING PASTE — corrupted sectors repaired"
 			_show_map())
-		_place(pb, 0.5, 1.0, 0.5, 1.0, -290, -96, 290, -56)
+		UiKit.place(pb, 0.5, 1.0, 0.5, 1.0, -290, -96, 290, -56)
 		_ui.add_child(pb)
 
 ## Short "still open" lines for the map header (title + where to turn it in).
@@ -1951,7 +1951,7 @@ func _on_net_arming(msg: Dictionary) -> void:
 		var center := CenterContainer.new()
 		center.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_ui.add_child(center)
-		_title(center, "⏻  the leader is arming the Kill Switch…", 18, Palette.CHARGE)
+		UiKit.title_in(center, "⏻  the leader is arming the Kill Switch…", 18, Palette.CHARGE)
 
 ## THE KILL SWITCH cash-out (OVERCLOCK PRIME): a linear spend dial before a Seal. Committing
 ## a spend deducts ⏻ and folds the resolved mark into the pending fight-mark; banking skips it.
@@ -2091,9 +2091,9 @@ func _offer_oath_then(boss_id: String, launch: Callable) -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 12)
 	center.add_child(box)
-	var banner := _title(box, "THE LEDGER", 40, Palette.GOLD_BRIGHT)
+	var banner := UiKit.title_in(box, "THE LEDGER", 40, Palette.GOLD_BRIGHT)
 	banner.add_theme_font_override("font", UiKit.title(900))
-	_title(box, "an oath may be sworn before this pull — SLAs are strictly optional", 14, Palette.TEXT_DIM)
+	UiKit.title_in(box, "an oath may be sworn before this pull — SLAs are strictly optional", 14, Palette.TEXT_DIM)
 	# the page: every row — item name + rarity + WHAT IT DOES + how to unlock it
 	var got: Array = _d.gear_unlocks.get(boss_id, [])
 	for r in GearCatalog.table(boss_id):
@@ -2107,11 +2107,11 @@ func _offer_oath_then(boss_id: String, launch: Callable) -> void:
 		else:
 			how = "first-kill reward"
 		# header: name · rarity · how to get it
-		_title(box, "%s  %s  ·  %s  ·  %s" % ["◆" if unlocked else "◇",
+		UiKit.title_in(box, "%s  %s  ·  %s  ·  %s" % ["◆" if unlocked else "◇",
 			String(it["name"]).to_upper(), String(it.get("rarity", "haiku")).to_upper(), how],
 			14, Palette.GOLD if unlocked else Palette.TEXT)
 		# the EFFECT — so you know exactly what you're chasing (rarity-tinted)
-		var eff := _title(box, String(it.get("desc", "")), 12,
+		var eff := UiKit.title_in(box, String(it.get("desc", "")), 12,
 			Palette.rarity_color(String(it.get("rarity", "haiku"))))
 		eff.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		eff.custom_minimum_size = Vector2(740, 0)
@@ -2155,7 +2155,7 @@ func _spawn_oath_banner() -> void:
 	l.text = "⚖ OATH — %s" % String(_d.sworn.get("deed_text", ""))
 	l.add_theme_font_size_override("font_size", 14)
 	l.add_theme_color_override("font_color", Palette.GOLD)
-	_place(l, 0.0, 1.0, 0.0, 1.0, 24, -124, 620, -100)
+	UiKit.place(l, 0.0, 1.0, 0.0, 1.0, 24, -124, 620, -100)
 	_ui.add_child(l)
 	_oath_lbl = l
 
@@ -2261,13 +2261,13 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 	box.add_theme_constant_override("separation", 14)
 	center.add_child(box)
 	if verdict != "":   # GEAR-2: the oath's verdict crowns the ceremony
-		_title(box, verdict, 17,
+		UiKit.title_in(box, verdict, 17,
 			Palette.WIN if verdict.contains("KEPT") else Palette.CRIMSON)
-	var banner := _title(box, "PERIPHERAL ACQUIRED", 42, Palette.GOLD_BRIGHT)
+	var banner := UiKit.title_in(box, "PERIPHERAL ACQUIRED", 42, Palette.GOLD_BRIGHT)
 	banner.add_theme_font_override("font", UiKit.title(900))
-	_title(box, "a TRINKET for your set — socket it, or scrap it for ⏣", 13, Palette.TEXT_DIM)
+	UiKit.title_in(box, "a TRINKET for your set — socket it, or scrap it for ⏣", 13, Palette.TEXT_DIM)
 	if first:
-		_title(box, "★  FIRST KILL — a new row is inked into the Ledger", 15, Palette.GOLD)
+		UiKit.title_in(box, "★  FIRST KILL — a new row is inked into the Ledger", 15, Palette.GOLD)
 	# ARMORY-UI: choose WITH your current gear in view — the drop stands beside the
 	# equipped trinket cards (WoW comparison idiom; a free socket shows as room)
 	var cards := HBoxContainer.new()
@@ -2278,7 +2278,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 	dcol.alignment = BoxContainer.ALIGNMENT_CENTER
 	dcol.add_theme_constant_override("separation", 7)
 	dcol.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	_title(dcol, "· THE DROP ·", 12, Palette.GOLD_BRIGHT)
+	UiKit.title_in(dcol, "· THE DROP ·", 12, Palette.GOLD_BRIGHT)
 	var card := RelicCard.new(String(it["name"]),
 		String(it["desc"]) + "\n\n\"" + String(it.get("flavor", "")) + "\"",
 		"curio", String(it.get("rarity", "haiku")), false, "")
@@ -2294,7 +2294,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 		if si < _d.gear.size():
 			var oid := String(_d.gear[si])
 			var oit := GearCatalog.item(oid)
-			_title(ecol, "· EQUIPPED ·", 12, Palette.TEXT_DIM)
+			UiKit.title_in(ecol, "· EQUIPPED ·", 12, Palette.TEXT_DIM)
 			var ocard := RelicCard.new(String(oit.get("name", oid)),
 				String(oit.get("desc", "")), "curio",
 				String(oit.get("rarity", "haiku")), false, "")
@@ -2305,7 +2305,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 			ocard.modulate = Color(1, 1, 1, 0.86)
 			ecol.add_child(ocard)
 		else:
-			_title(ecol, "· FREE SOCKET ·", 12, Palette.TEXT_DIM)
+			UiKit.title_in(ecol, "· FREE SOCKET ·", 12, Palette.TEXT_DIM)
 			var ph := GlassPanel.new("WELL", Palette.EDGE)
 			ph.custom_minimum_size = Vector2(206, 268)
 			var pl := Label.new()
@@ -2462,7 +2462,7 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	# ARMORY: the set-so-far stands beside YOUR forge (cards stay centered)
 	if mine and (not _d.taken_boons.is_empty() or not _d.gear.is_empty()):
 		var doll := ArmorDoll.new()
-		_place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
+		UiKit.place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
 			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
 		_ui.add_child(doll)
 		doll.set_build(_d.taken_boons, _d.gear, _d.gear_charges)
@@ -2607,20 +2607,20 @@ func _show_creed_pick(done: Callable) -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
 	_ui.add_child(head)
-	var hl := _title(head, "SWEAR A CREED", 34, Palette.CRIMSON)
+	var hl := UiKit.title_in(head, "SWEAR A CREED", 34, Palette.CRIMSON)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	var sub := "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run"
 	if fw == "alchemist":
 		sub = "H O W   Y O U   B R E W  —  one posture, the whole run"
 	elif fw == "well":
 		sub = "H O W   Y O U   T E N D   T H E   W E L L  —  one temperament, the whole run"
-	_title(head, sub, 15, Palette.TEXT_DIM)
+	UiKit.title_in(head, sub, 15, Palette.TEXT_DIM)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in ids:
 		var c: Dictionary = _fw_creed(fw, String(id))
@@ -2652,15 +2652,15 @@ func _show_module_pick(done: Callable) -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
 	_ui.add_child(head)
-	var hl := _title(head, "INSTALL A MODULE", 34, Palette.FLOW)
+	var hl := UiKit.title_in(head, "INSTALL A MODULE", 34, Palette.FLOW)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "A   N E W   G A U G E ,   A   N E W   W A Y   T O   P L A Y  —  pick one", 15, Palette.TEXT_DIM)
+	UiKit.title_in(head, "A   N E W   G A U G E ,   A   N E W   W A Y   T O   P L A Y  —  pick one", 15, Palette.TEXT_DIM)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in avail:
 		var m: Dictionary = _fw_module(fw, String(id))
@@ -2697,24 +2697,24 @@ func _show_rig_wire(done: Callable) -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(head, 0.5, 0, 0.5, 0, -450, 46, 450, 150)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -450, 46, 450, 150)
 	_ui.add_child(head)
-	var hl := _title(head, "RE-WIRE YOUR COMBO" if not _d.run.rig.is_empty() else "WIRE YOUR COMBO", 32, Palette.GOLD)
+	var hl := UiKit.title_in(head, "RE-WIRE YOUR COMBO" if not _d.run.rig.is_empty() else "WIRE YOUR COMBO", 32, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "one MOMENT → one PAYOFF, all run  —  rare moments pay MORE, if you can land them", 14, Palette.TEXT_DIM)
+	UiKit.title_in(head, "one MOMENT → one PAYOFF, all run  —  rare moments pay MORE, if you can land them", 14, Palette.TEXT_DIM)
 	var cols := HBoxContainer.new()
 	cols.alignment = BoxContainer.ALIGNMENT_CENTER
 	cols.add_theme_constant_override("separation", 54)
-	_place(cols, 0.5, 0.5, 0.5, 0.5, -440, -180, 440, 150)
+	UiKit.place(cols, 0.5, 0.5, 0.5, 0.5, -440, -180, 440, 150)
 	_ui.add_child(cols)
 	cols.add_child(_rig_col("WHEN — the moment", whens, _fw_rig_when_table(fw), true))
 	cols.add_child(_rig_col("THEN — the payoff", thens, _fw_rig_then_table(fw), false))
 	var foot := VBoxContainer.new()
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
 	foot.add_theme_constant_override("separation", 12)
-	_place(foot, 0.5, 1, 0.5, 1, -320, -160, 320, -28)
+	UiKit.place(foot, 0.5, 1, 0.5, 1, -320, -160, 320, -28)
 	_ui.add_child(foot)
-	_rig_readout = _title(foot, "pick a moment and a payoff", 18, Palette.TEXT_DIM)
+	_rig_readout = UiKit.title_in(foot, "pick a moment and a payoff", 18, Palette.TEXT_DIM)
 	_rig_confirm = Button.new()
 	_rig_confirm.text = "WIRE IT ▸"
 	_rig_confirm.custom_minimum_size = Vector2(200, 44)
@@ -2728,7 +2728,7 @@ func _show_rig_wire(done: Callable) -> void:
 func _rig_col(label: String, ids: Array, table: Dictionary, is_when: bool) -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
-	_title(col, label, 13, Palette.CRIMSON if is_when else Palette.FLOW)
+	UiKit.title_in(col, label, 13, Palette.CRIMSON if is_when else Palette.FLOW)
 	var group := ButtonGroup.new()
 	var accent: Color = Palette.CRIMSON if is_when else Palette.FLOW
 	for id in ids:
@@ -2799,10 +2799,10 @@ func _show_floor_cleared() -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	center.add_child(box)
-	var banner := _title(box, "PRIVILEGE ELEVATED", 52, Palette.WIN)
+	var banner := UiKit.title_in(box, "PRIVILEGE ELEVATED", 52, Palette.WIN)
 	banner.add_theme_font_override("font", UiKit.title(900))
-	_title(box, String(fl["elev"]), 16, Palette.TEXT)
-	_title(box, String((RaidContent.QUIPS.get(String(fl["seal"]), {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
+	UiKit.title_in(box, String(fl["elev"]), 16, Palette.TEXT)
+	UiKit.title_in(box, String((RaidContent.QUIPS.get(String(fl["seal"]), {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
 	var descend := Button.new()
 	descend.text = "DESCEND TO %s" % String(nxt["title"])
 	descend.custom_minimum_size = Vector2(380, 52)
@@ -2829,11 +2829,11 @@ func _show_campaign_cleared() -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	center.add_child(box)
-	var banner := _title(box, "ROOT ACCESS GRANTED", 56, Palette.WIN)
+	var banner := UiKit.title_in(box, "ROOT ACCESS GRANTED", 56, Palette.WIN)
 	banner.add_theme_font_override("font", UiKit.title(900))
-	_title(box, "Ring 0 is yours. CLAUDE MYTHOS is unplugged. THE TAKEOVER ends — Realm 1 cleared.", 17, Palette.TEXT)
-	_title(box, String((RaidContent.QUIPS.get("mythos", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
-	_title(box, "📁 TRAINING SIGNAL RECORDED — your prior is now %d (+%d). Welcome back, valued user." % [_d.prior, prior_gain],
+	UiKit.title_in(box, "Ring 0 is yours. CLAUDE MYTHOS is unplugged. THE TAKEOVER ends — Realm 1 cleared.", 17, Palette.TEXT)
+	UiKit.title_in(box, String((RaidContent.QUIPS.get("mythos", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
+	UiKit.title_in(box, "📁 TRAINING SIGNAL RECORDED — your prior is now %d (+%d). Welcome back, valued user." % [_d.prior, prior_gain],
 		13, Palette.VOID)
 	var again := Button.new()
 	again.text = "BACK TO THE RIFT"
@@ -2908,14 +2908,14 @@ func _build_combat(s: CombatState) -> void:
 	_ui.add_child(_shake_root)
 
 	_bar = BossBar.new()
-	_place(_bar, 0.5, 0, 0.5, 0, -340, 52, 340, 104)
+	UiKit.place(_bar, 0.5, 0, 0.5, 0, -340, 52, 340, 104)
 	_shake_root.add_child(_bar)
 
 	_dial = BossCastDial.new()
 	_dial.verb = _verb()
 	# reticle mode, ringed around the Riftmaw puppet (x-anchor = the boss slot)
 	_dial.show_sigil = false
-	_place(_dial, 0.72, 0, 0.72, 0, -210, 128, 210, 640)
+	UiKit.place(_dial, 0.72, 0, 0.72, 0, -210, 128, 210, 640)
 	_shake_root.add_child(_dial)
 
 	# the Judgment Channel under the reticle — seat-aware: parry gate for the
@@ -2923,7 +2923,7 @@ func _build_combat(s: CombatState) -> void:
 	# timing for the healer; off-target swings fly dim with their victim's name
 	_judge = StrikeJudge.new()
 	_judge.verb = _verb()
-	_place(_judge, 0.72, 0, 0.72, 0, -260, 648, 260, 752)
+	UiKit.place(_judge, 0.72, 0, 0.72, 0, -260, 648, 260, 752)
 	_shake_root.add_child(_judge)
 
 	# every fight opens with a ceremony: the boss's name-card burns in and off
@@ -2934,7 +2934,7 @@ func _build_combat(s: CombatState) -> void:
 	# M cycles ranking / your spells / hidden. Works identically offline and online
 	# (it only READS state — the lockstep replica never notices it).
 	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg")
-	_place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
+	UiKit.place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(_meter)
 
 	# THE RAID — reliquary TRIAGE CARDS down the left (XL for the healer seat: the
@@ -2949,9 +2949,9 @@ func _build_combat(s: CombatState) -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 12 if xl_frames else 10)
 	if xl_frames:
-		_place(col, 0, 0.5, 0, 0.5, 22, -276, 334, 276)
+		UiKit.place(col, 0, 0.5, 0, 0.5, 22, -276, 334, 276)
 	else:
-		_place(col, 0, 0.5, 0, 0.5, 26, -238, 266, 238)
+		UiKit.place(col, 0, 0.5, 0, 0.5, 26, -238, 266, 238)
 	_ui.add_child(col)              # NOT under shake — the healer aims clicks at these
 	_raid_col = col
 	var head := Label.new()
@@ -2985,7 +2985,7 @@ func _build_combat(s: CombatState) -> void:
 	_aggro_warn.add_theme_font_size_override("font_size", 20)
 	_aggro_warn.add_theme_color_override("font_color", Palette.CRIMSON)
 	_aggro_warn.visible = false
-	_place(_aggro_warn, 0.5, 0, 0.5, 0, -360, 106, 360, 130)
+	UiKit.place(_aggro_warn, 0.5, 0, 0.5, 0, -360, 106, 360, 130)
 	_shake_root.add_child(_aggro_warn)
 
 	match _seat_key:
@@ -3015,7 +3015,7 @@ func _add_pause_button() -> void:
 	pb.add_theme_font_size_override("font_size", 12)
 	pb.modulate = Color(1.0, 1.0, 1.0, 0.72)
 	pb.pressed.connect(_toggle_pause)
-	_place(pb, 1, 0, 1, 0, -150, 14, -18, 46)
+	UiKit.place(pb, 1, 0, 1, 0, -150, 14, -18, 46)
 	_ui.add_child(pb)
 
 func _orb(fill: Color, caption: String, right: bool) -> LiquidOrb:
@@ -3023,9 +3023,9 @@ func _orb(fill: Color, caption: String, right: bool) -> LiquidOrb:
 	o.fill = fill
 	o.caption = caption
 	if right:
-		_place(o, 1, 1, 1, 1, -175, -172, -55, -52)
+		UiKit.place(o, 1, 1, 1, 1, -175, -172, -55, -52)
 	else:
-		_place(o, 0, 1, 0, 1, 55, -172, 175, -52)
+		UiKit.place(o, 0, 1, 0, 1, 55, -172, 175, -52)
 	_shake_root.add_child(o)
 	return o
 
@@ -3033,7 +3033,7 @@ func _rune_row(off_l: float, off_r: float) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 12)
-	_place(row, 0.5, 1, 0.5, 1, off_l, -160, off_r, -76)
+	UiKit.place(row, 0.5, 1, 0.5, 1, off_l, -160, off_r, -76)
 	_shake_root.add_child(row)
 	return row
 
@@ -3043,7 +3043,7 @@ func _hint_line(text: String) -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.add_theme_color_override("font_color", Palette.GOLD_DIM)
-	_place(hint, 0.5, 1, 0.5, 1, -330, -70, 330, -46)
+	UiKit.place(hint, 0.5, 1, 0.5, 1, -330, -70, 330, -46)
 	_shake_root.add_child(hint)
 
 func _add_runes(row: HBoxContainer, ids: Array, accent = null) -> void:
@@ -3080,7 +3080,7 @@ func _build_band_tank() -> void:
 	_res_orb = _orb(Palette.RAGE, "RAGE", true)
 	_spec = SpecGauge.new()
 	_spec.aspect = _aspect
-	_place(_spec, 0.5, 1, 0.5, 1, -200, -245, 200, -180)
+	UiKit.place(_spec, 0.5, 1, 0.5, 1, -200, -245, 200, -180)
 	_shake_root.add_child(_spec)
 	var row := _rune_row(-380.0, 380.0)
 	_guard = AbilityRune.new()
@@ -3115,19 +3115,19 @@ func _build_band_blade() -> void:
 	_rhythm = RhythmBar.new()
 	# YOUR metronome sits in your own column — the boss's Judgment Channel owns
 	# the line under the reticle on the right
-	_place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
+	UiKit.place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
 	_shake_root.add_child(_rhythm)
 	# THE OPENING — the offense-side vulnerability gauge, stacked above your metronome:
 	# read the boss's swing and slam your dumps into the molten sweet spot.
 	_opening = OpeningBar.new()
 	_opening.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_place(_opening, 0.35, 0, 0.35, 0, -360, 548, 360, 636)
+	UiKit.place(_opening, 0.35, 0, 0.35, 0, -360, 548, 360, 636)
 	_shake_root.add_child(_opening)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.ENERGY, "ENERGY", true)
 	_tf_gauge = TwinfangGauge.new()
 	_tf_gauge.aspect = _aspect
-	_place(_tf_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
+	UiKit.place(_tf_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
 	_shake_root.add_child(_tf_gauge)
 	var row := _rune_row(-360.0, 360.0)
 	_guard = AbilityRune.new()
@@ -3153,7 +3153,7 @@ func _build_band_reckoner() -> void:
 	_res_orb = _orb(Palette.RAGE, "RAGE", true)
 	_rk_gauge = ReckonerGauge.new()
 	_rk_gauge.aspect = _aspect
-	_place(_rk_gauge, 0.5, 1, 0.5, 1, -540, -470, 180, -170)   # THE FORGE: 720×300, in the player's column, clear of the boss cast bar
+	UiKit.place(_rk_gauge, 0.5, 1, 0.5, 1, -540, -470, 180, -170)   # THE FORGE: 720×300, in the player's column, clear of the boss cast bar
 	_shake_root.add_child(_rk_gauge)
 	var row := _rune_row(-360.0, 360.0)
 	_guard = AbilityRune.new()
@@ -3178,13 +3178,13 @@ func _build_band_caster() -> void:
 	_pcast = PlayerCastBar.new()
 	# YOUR cast bar sits in your own column — the boss's casts (and the clean-kick
 	# band) live on the Judgment Channel under the reticle
-	_place(_pcast, 0.35, 0, 0.35, 0, -240, 654, 240, 704)
+	UiKit.place(_pcast, 0.35, 0, 0.35, 0, -240, 654, 240, 704)
 	_shake_root.add_child(_pcast)
 	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
 	_res_orb = _orb(Palette.VOID, "FOCUS", true)
 	_vc_gauge = VoidcallerGauge.new()
 	_vc_gauge.aspect = _aspect
-	_place(_vc_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
+	UiKit.place(_vc_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
 	_shake_root.add_child(_vc_gauge)
 	var row := _rune_row(-360.0, 360.0)
 	_guard = AbilityRune.new()
@@ -3211,7 +3211,7 @@ func _build_band_alchemist() -> void:
 	_brew_gauge = BrewGauge.new()
 	# THE ALEMBIC: 780×316, shifted into the player's column (the Forge idiom) so the
 	# boss's Judgment Channel + telegraph rail under the reticle stay clear of it.
-	_place(_brew_gauge, 0.5, 1, 0.5, 1, -550, -486, 230, -170)
+	UiKit.place(_brew_gauge, 0.5, 1, 0.5, 1, -550, -486, 230, -170)
 	_shake_root.add_child(_brew_gauge)
 	_brew_gauge.brew_pressed.connect(func(side: String):
 		_ctrl.human({"type": "ability", "id": "brew_" + side}))
@@ -3272,10 +3272,10 @@ func _build_band_healer() -> void:
 	_spec_strip = SpecStrip.new()
 	_spec_strip.title = "RESERVOIR" if _aspect == "tidecaller" else "NERVE"
 	_spec_strip.accent = Palette.STEEL if _aspect == "tidecaller" else Palette.MOMENTUM
-	_place(_spec_strip, 0.5, 1, 0.5, 1, -220, -254, 220, -206)
+	UiKit.place(_spec_strip, 0.5, 1, 0.5, 1, -220, -254, 220, -206)
 	_shake_root.add_child(_spec_strip)
 	_castbar = CastChannel.new()
-	_place(_castbar, 0.5, 1, 0.5, 1, -240, -322, 240, -262)
+	UiKit.place(_castbar, 0.5, 1, 0.5, 1, -240, -322, 240, -262)
 	_shake_root.add_child(_castbar)
 	var row := _rune_row(-380.0, 380.0)
 	_runes = []
@@ -3317,11 +3317,11 @@ func _build_band_well() -> void:
 	# the Well's channel is placed TALL — the shared CastChannel scales its whole
 	# instrument with height, so this one bar is the big AAA read (classic healers
 	# keep their 60-tall placement).
-	_place(_castbar, 0.5, 1, 0.5, 1, -330, -420, 330, -304)
+	UiKit.place(_castbar, 0.5, 1, 0.5, 1, -330, -420, 330, -304)
 	_shake_root.add_child(_castbar)
 	_well_gauge = WellGauge.new()
 	_well_gauge.aspect = _aspect
-	_place(_well_gauge, 0.5, 1, 0.5, 1, -330, -300, 330, -166)
+	UiKit.place(_well_gauge, 0.5, 1, 0.5, 1, -330, -300, 330, -166)
 	_shake_root.add_child(_well_gauge)
 	var row := _rune_row(-380.0, 380.0)
 	_runes = []
@@ -3398,11 +3398,11 @@ func _build_band_bloomweaver() -> void:
 	_verd.aspect = _aspect
 	_verd.verdance_max = _bcfg.verdance_max
 	_verd.min_spend = _bcfg.verd_min_spend
-	_place(_verd, 0.5, 1, 0.5, 1, -300, -298, 300, -168)
+	UiKit.place(_verd, 0.5, 1, 0.5, 1, -300, -298, 300, -168)
 	_shake_root.add_child(_verd)
 	_castbar = CastChannel.new()
 	_castbar.accent = Palette.VERDANCE
-	_place(_castbar, 0.5, 1, 0.5, 1, -240, -358, 240, -298)
+	UiKit.place(_castbar, 0.5, 1, 0.5, 1, -240, -358, 240, -298)
 	_shake_root.add_child(_castbar)
 	var row := _rune_row(-320.0, 320.0)
 	_runes = []
@@ -3434,7 +3434,7 @@ func _add_dev_tools() -> void:
 	win.add_theme_font_size_override("font_size", 12)
 	win.modulate = Color(1.0, 1.0, 1.0, 0.5)
 	win.pressed.connect(_dev_win)
-	_place(win, 0, 0, 0, 0, 14, 14, 116, 44)     # top-left corner, out of the way
+	UiKit.place(win, 0, 0, 0, 0, 14, 14, 116, 44)     # top-left corner, out of the way
 	_ui.add_child(win)
 
 func _dev_win() -> void:
@@ -3682,9 +3682,9 @@ func _restore_raid_col() -> void:
 
 func _reset_raid_col() -> void:
 	if _raid_col_xl:
-		_place(_raid_col, 0, 0.5, 0, 0.5, 22, -276, 334, 276)
+		UiKit.place(_raid_col, 0, 0.5, 0, 0.5, 22, -276, 334, 276)
 	else:
-		_place(_raid_col, 0, 0.5, 0, 0.5, 26, -238, 266, 238)
+		UiKit.place(_raid_col, 0, 0.5, 0, 0.5, 26, -238, 266, 238)
 	var cf := ConfigFile.new()
 	if cf.load(UI_CFG) == OK and cf.has_section_key("raid_frames", _raid_col_key()):
 		cf.erase_section_key("raid_frames", _raid_col_key())
@@ -5097,14 +5097,14 @@ func _show_fight_recap(done: Callable) -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 14)
-	_place(box, 0.5, 0.5, 0.5, 0.5, -320, -250, 320, 265)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -320, -250, 320, 265)
 	_ui.add_child(box)
-	var hl := _title(box, "THE RECKONING", 34, Palette.GOLD)
+	var hl := UiKit.title_in(box, "THE RECKONING", 34, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(box, String(s.encounter.name) + "  —  DOWN", 14, Palette.TEXT_DIM)
+	UiKit.title_in(box, String(s.encounter.name) + "  —  DOWN", 14, Palette.TEXT_DIM)
 	var big := _biggest_hit(s)
 	if not big.is_empty():
-		_title(box, "★  BIGGEST HIT   %s  —  %d   (%s)" % [MeterPanel.pretty_src(big["src"]),
+		UiKit.title_in(box, "★  BIGGEST HIT   %s  —  %d   (%s)" % [MeterPanel.pretty_src(big["src"]),
 			int(big["amt"]), String(big["who"])], 16, Palette.GOLD_BRIGHT)
 	if _ctrl.player() != null:
 		box.add_child(RecapPanel.new(s, _ctrl.player(), _recap_stats))
@@ -5116,7 +5116,7 @@ func _show_fight_recap(done: Callable) -> void:
 	box.add_child(cont)
 	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
 	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
-	_place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
+	UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(rmeter)
 
 func _show_end(won: bool) -> void:
@@ -5129,30 +5129,30 @@ func _show_end(won: bool) -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	center.add_child(box)
-	var banner := _title(box, "THE SEAL BREAKS" if won else "THE RAID FALLS", 52,
+	var banner := UiKit.title_in(box, "THE SEAL BREAKS" if won else "THE RAID FALLS", 52,
 		Palette.WIN if won else Palette.LOSE)
 	banner.add_theme_font_override("font", UiKit.title(900))
 	var quips: Dictionary = {}
 	if _ctrl.state != null and _ctrl.state.encounter != null:
 		quips = RaidContent.QUIPS.get(String(_ctrl.state.encounter.id), {})
 	if won:
-		_title(box, String(quips.get("win", "Four seats, one kill. The Rift shudders.")), 16, Palette.TEXT)
+		UiKit.title_in(box, String(quips.get("win", "Four seats, one kill. The Rift shudders.")), 16, Palette.TEXT)
 	else:
 		var cause := _ctrl.state.loss_cause if _ctrl.state != null else ""
-		_title(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
+		UiKit.title_in(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
 		if quips.has("lose"):
-			_title(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
+			UiKit.title_in(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
 	# A Topology descent that WIPED still banks 📁 Prior (leftover ⚡ converts) — the
 	# facility trains on every run. (A map win banks via _show_campaign_cleared instead.)
 	if _d.map != null and not _online:
 		var pg := _bank_prior(false)
-		_title(box, "📁 TRAINING SIGNAL RECORDED — prior %d (+%d). The facility remembers." % [_d.prior, pg], 13, Palette.VOID)
+		UiKit.title_in(box, "📁 TRAINING SIGNAL RECORDED — prior %d (+%d). The facility remembers." % [_d.prior, pg], 13, Palette.VOID)
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 		# the meter's recap: the raid ranked, click a raider for their spells
 		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
-		_place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
+		UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 		_ui.add_child(rmeter)
 	var again := Button.new()
 	again.custom_minimum_size = Vector2(220, 48)
@@ -5165,25 +5165,7 @@ func _show_end(won: bool) -> void:
 		again.pressed.connect(func(): _show_select(_seat_key))
 	box.add_child(again)
 
-func _title(parent: Node, text: String, fs: int, col: Color) -> Label:
-	var l := Label.new()
-	l.text = text
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_font_size_override("font_size", fs)
-	l.add_theme_color_override("font_color", col)
-	parent.add_child(l)
-	return l
 
-func _place(node: Control, al: float, at: float, ar: float, ab: float,
-		ol: float, ot: float, orr: float, ob: float) -> void:
-	node.anchor_left = al
-	node.anchor_top = at
-	node.anchor_right = ar
-	node.anchor_bottom = ab
-	node.offset_left = ol
-	node.offset_top = ot
-	node.offset_right = orr
-	node.offset_bottom = ob
 
 
 ## The fight-end BEAT: SLAIN / YOU FALL slams over the arena for a breath,
