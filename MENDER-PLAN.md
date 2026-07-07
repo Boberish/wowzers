@@ -40,20 +40,27 @@ under pressure. One book, one Well, two specs = **the same grade in two places**
 - **THE WELL (base, both specs):** mana is a visible vessel — casts draw from it, it refills in
   **pulses** (never a flat trickle), overheal **SPILLS** (wasted; banking spill is module
   territory), Meditate is the battery decision, and DRY is a visible state. The Well is the class
-  instrument on THE HUD. **🟡 FLOW vs LADLES (Bill's fork, 2026-07-07):** continuous points (900,
-  % refunds) vs **discrete ladles** (~12 scoops: Mend 1 · Flash 2 · Cascade 3 · Meditate +4; a
-  graded cast hands its ladle back → a poured Mend is FREE; pulse = +1 ◍). There is NO separate
-  mana either way — the Well IS the mana. Tester has the A/B toggle; verdict = board card C-10.
+  instrument on THE HUD. **🔒 DISCRETE (Bill, 2026-07-07 — "i like the ladles, but hate the name"):**
+  the Well holds **~12 discrete draughts** (working name **DRAMS**, name hunt open — alternates
+  DROPS/SCOOPS/CHARGES, board card C-10): Mend 1 ◍ · Flash 2 ◍ · Renew 1 ◍ · Cascade 3 ◍ ·
+  Meditate +4 ◍; the pulse drops in 1 ◍. There is NO separate mana — the Well IS the mana,
+  quantized. Boon ladders must speak in drams ("every 3rd pour returns 2").
 - **SPEC 1 · BRIM — grade the LANDING.** Casts stay completely normal; every direct heal is graded
   by where the target's HP lands. In the brim band (default ≥90%) with zero spill = **PERFECT
   POUR** (mana refund + the class proc moment) · overshoot = **SPILL** (counted waste) · land low =
   safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs Mend vs
   Cascade against incoming damage. Landing preview = the ghost segment (🟡 baked-in vs earned).
-- **SPEC 2 · DRAW — grade the RELEASE.** Casts complete **manually**: release inside the end band =
-  **CLEAN DRAW** (full heal + refund) · early = **UNDERCOOKED** (heal × p^1.5) · overrun =
-  auto-completes plain. The window lives on **your cast bar**; spill still costs (economy) but is
-  ungraded. Attention inverts — Brim reads the party, Draw reads your own hands. This is the
-  Tempo/Fermata symmetry (on the beat vs out of the silence) on the healing side.
+- **SPEC 2 · DRAW — grade the RELEASE, ride THE CURRENT.** Casts complete **manually**: release
+  inside the end band = **CLEAN DRAW** (full heal) · early = **UNDERCOOKED** (heal × p^1.5) ·
+  overrun = auto-completes plain. **🔒 REWORKED 2026-07-07 (Bill: "too easy, shouldn't be a
+  refund"):** clean draws do NOT refund — they raise **THE CURRENT** (max 5): each stack casts
+  **+6% faster**. An undercook BREAKS it; running the Well **DRY** breaks it; it ebbs after ~4s
+  idle. Faster casting burns drams faster with no refund valve, so the rush throttles itself —
+  ride it, ease off, ride again. **Payoff split of record: Brim pays in WATER (the dram comes
+  back), Draw pays in TEMPO (the Current).** Bill's alternate payoffs (shield / HoT / stronger
+  heal on clean draws) live in the boon slate (STILL WATER / AFTERFLOW / THE CREST, board D-B11–13).
+  The window lives on **your cast bar**; attention inverts — Brim reads the party, Draw reads your
+  own hands. The Tempo/Fermata symmetry on the healing side.
 - **Shared by both specs:** the book (Flash / Mend / Renew / Ward / Cascade / Wellspring / Dispel /
   Meditate / signature / Rekindle), the Well, the GCD, and **cast-vs-dodge discipline** (a dodge
   cancels the cast; the healer's dodge-ration beats stay its test).
@@ -139,7 +146,8 @@ medit +160/25s (tester-shortened; the kit's is 160/55s) · GCD 1.2s · pressure 
 6. **Module pool** — shared vs per-spec wording.
 7. **Ward in a spill economy** — shields can never spill, making Ward the "safe" cast; does it need
    a brim-adjacent rule (e.g. ward on a full-HP ally = graded pour) or is safe-but-unpaid correct?
-8. **FLOW vs LADLES** (§1 Well fork) — continuous pool vs discrete scoops. Ladles: countable at a
-   glance, crisp "ladle back" refunds, chunky costs (Flash 2 vs Mend 1 reads better than 33 vs 24);
-   cost = coarse boon tuning (H/S/O ladders must speak in ladles, e.g. "every 3rd pour returns 2").
-   Tester A/B live; board card C-10 is the verdict of record.
+8. ~~FLOW vs LADLES~~ — **RESOLVED 2026-07-07: DISCRETE locked** (Bill likes it; see §1). Open
+   remainder = **the NAME**: "ladles" is dead; working name DRAMS (alternates DROPS / SCOOPS /
+   CHARGES) — board card C-10 collects the verdict.
+9. **The Current's numbers** — +6%/stack (max 5 → +30%)? Undercook = full crash vs −2 stacks
+   (creed territory)? Idle ebb 4s? All ⚙ feel-tester calls at build time.
