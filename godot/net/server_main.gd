@@ -6,6 +6,9 @@ extends SceneTree
 var _server: NetServer
 
 func _initialize() -> void:
+	# An always-on headless server must not spin a core at 100%: cap the frame loop.
+	# 60 fps keeps the 30 Hz fight clock comfortably fed (rooms drain on real delta).
+	Engine.max_fps = 60
 	_server = NetServer.new()
 	_server.port = int(_arg("port", str(NetProtocol.DEFAULT_PORT)))
 	_server.time_scale = float(_arg("timescale", "1.0"))

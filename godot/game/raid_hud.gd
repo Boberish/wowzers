@@ -3818,7 +3818,7 @@ func _input(event: InputEvent) -> void:
 				return
 			if _net != null:
 				_net.close()
-			get_tree().change_scene_to_file("res://game/main.tscn")
+			_show_home()   # ONE HUD: home IS the front door (main.tscn is retired)
 			return
 		if _screen != "combat":
 			return

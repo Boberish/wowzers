@@ -24,10 +24,10 @@ static func _boons_for(aspect: String) -> Dictionary:
 		"lowCatch": true, "stillWater": true, "shiningHour": true, "deepWell": true}
 
 func _initialize() -> void:
-	var seeds := _arg_int("seeds", 200)
-	var seed0 := _arg_int("seed0", 1)
-	var out := _arg("out", "")
-	var load := _arg("load", "0") != "0"   # --load=1 : run the cells with a representative deck
+	var seeds := SimUtil.arg_int("seeds", 200)
+	var seed0 := SimUtil.arg_int("seed0", 1)
+	var out := SimUtil.arg("out", "")
+	var load := SimUtil.arg("load", "0") != "0"   # --load=1 : run the cells with a representative deck
 
 	if seed0 == 1:
 		_prove_determinism()
@@ -173,11 +173,3 @@ func _write_csv(path: String, rows: Array) -> void:
 		f.store_line(String(r))
 	f.close()
 
-func _arg(key: String, def: String) -> String:
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--%s=" % key):
-			return a.substr(("--%s=" % key).length())
-	return def
-
-func _arg_int(key: String, def: int) -> int:
-	return int(_arg(key, str(def)))

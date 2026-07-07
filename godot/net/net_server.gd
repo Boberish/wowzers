@@ -10,6 +10,11 @@ signal log_line(msg: String)
 
 const MAX_INPUTS_PER_TICK := 3     ## per seat per tick (parity with local key bursts)
 const CS_EVERY := 30               ## checksum cadence, in ticks
+## Resource floor for a public always-on box (REFIT-PLAN P0): every bound is far above
+## legitimate traffic (4 players × 30 Hz × 3 inputs ≈ 90 msg/s worst case per peer).
+const MAX_PEERS := 64              ## connection cap: excess connects are refused at welcome
+const MAX_ROOMS := 64              ## a join may not MINT a room past this (joins to live rooms still work)
+const MSG_BUDGET_PER_SEC := 240    ## per-peer message budget; over = dropped, 4× over = disconnected
 
 var port: int = NetProtocol.DEFAULT_PORT
 var time_scale: float = 1.0        ## >1 = fast headless soak (clients are frame-driven)
@@ -34,7 +39,7 @@ func _log(m: String) -> void:
 func _make_room(code: String) -> Dictionary:
 	return {
 		"code": code,
-		"phase": "lobby",              # "lobby" | "fight"
+		"phase": "lobby",              # "lobby" | "fight" | "draft" | "map" (campaign screens)
 		"players": {},                 # peer_id -> {name, seat(""), aspect(""), ready}
 		"host": 0,
 		"enc": "riftmaw",              # the Seal the host picked (see RaidContent Seals)
@@ -50,7 +55,12 @@ func _make_room(code: String) -> Dictionary:
 
 # ------------------------------------------------------------ connection events
 func _on_peer_connected(id: int) -> void:
-	_peers[id] = {"name": "", "room": ""}
+	if _peers.size() >= MAX_PEERS:               # P0 resource floor: refuse, don't queue
+		_send(id, {"t": "err", "msg": "server is full — try again soon"})
+		_peer.disconnect_peer(id)
+		_log("refused peer %d (server full: %d)" % [id, _peers.size()])
+		return
+	_peers[id] = {"name": "", "room": "", "mw": Time.get_ticks_msec(), "mn": 0}
 	_send(id, {"t": "welcome", "id": id, "ver": NetProtocol.VERSION})
 
 func _on_peer_disconnected(id: int) -> void:
@@ -230,7 +240,27 @@ func _reset_lobby(room: Dictionary) -> void:
 	_broadcast_room(room)
 
 # ------------------------------------------------------------ messages
+## P0 resource floor: a per-peer message budget over a rolling 1 s window. Over budget
+## = the message is dropped; grossly over (4×) = the peer is cut. Wall-clock is fine
+## here — this is transport policing, nowhere near the deterministic sim.
+func _rate_ok(id: int) -> bool:
+	var info: Dictionary = _peers.get(id, {})
+	if info.is_empty():
+		return false
+	var now := Time.get_ticks_msec()
+	if now - int(info.get("mw", 0)) >= 1000:
+		info["mw"] = now
+		info["mn"] = 0
+	info["mn"] = int(info.get("mn", 0)) + 1
+	if int(info["mn"]) > MSG_BUDGET_PER_SEC * 4:
+		_log("peer %d flooding (%d msg/s) — disconnected" % [id, int(info["mn"])])
+		_peer.disconnect_peer(id)
+		return false
+	return int(info["mn"]) <= MSG_BUDGET_PER_SEC
+
 func _handle(id: int, msg: Dictionary) -> void:
+	if not _rate_ok(id):
+		return
 	match String(msg.get("t", "")):
 		"join":
 			_join(id, msg)
@@ -354,6 +384,9 @@ func _join(id: int, msg: Dictionary) -> void:
 	if pname == "":
 		pname = "Raider%d" % id
 	if not _rooms.has(code):
+		if _rooms.size() >= MAX_ROOMS:           # P0 resource floor: don't mint past the cap
+			_send(id, {"t": "err", "msg": "server is full — try again soon"})
+			return
 		_rooms[code] = _make_room(code)
 	var room: Dictionary = _rooms[code]
 	if room["phase"] != "lobby":
@@ -769,7 +802,6 @@ func _launch_map_fight_srv(room: Dictionary, fi: int) -> void:
 		cp["marks"] = {}
 	var spec := RaidNet.make_spec(randi() & 0x7FFFFFFF, room["seat_cfg"], String(enc.id),
 		carry, cp["boons"])                         # online boons ride the spec, per seat
-	room["spec"] = spec
 	room["spec"] = spec
 	room["state"] = RaidNet.build(spec, "")
 	room["phase"] = "fight"

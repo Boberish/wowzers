@@ -762,6 +762,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `refit-p012` → main · §CODE AUDIT / `REFIT-PLAN.md` — **REFIT P0+P1+P2
+  BUILT & MERGED (Bill's go).** P0: server `max_fps=60` + `MAX_PEERS`/`MAX_ROOMS`/msg-rate
+  floor + net hygiene. P1 THE BIG DELETE: Esc→`_show_home` (dead-menu doorway severed),
+  `ui_smoke_map` RE-HOSTED as the raid-descent walker (map→stops→ledger→arming→pulls→
+  drops→draft chains→ELEVATED, ALL PASS = its new baseline), **50 files / net −6,854
+  lines deleted** (solo HUDs+scenes, stage3d/, orphan sims, tank_policy+m0_content).
+  P2: `sim/sim_util.gd` (7 sims migrated) + `scripts/verify-all.sh` (the bar, one
+  command) + `scripts/ab-gate.sh` (byte-identical vs pinned worktree; hardened to refuse
+  matching-garbage passes) + `server/preflight.sh`. **GATES:** 5 balance sims
+  BYTE-IDENTICAL vs pre-branch baseline (identical seeds; raid CSV md5 `fc5351e2…` both
+  sides) · net_smoke + net_map_smoke ALL OK · ui smokes raid/map/world PASS ·
+  verify-all 30/34 green. **⚠ FOUND PRE-EXISTING RED (on pristine main, NOT this
+  branch): `fightlen_probe` (expects zone hp 8500/enrage 150, gets 9600/190 — zone
+  tuning moved under it, probably the ×2.5 bake/pack merge) + `raid_boon_probe`
+  (after-win flow lands on `recap`, probe expects drop/draft — the recap insertion).
+  Their expectations need a deliberate update — OPEN CLAIM.** REFIT-PLAN §3 P0–P2
+  as-built; next up the plan: P3 extractions (RunDirector / WorldShell / online split).
+  *(refit build session)*
+
 - ☑ 2026-07-07 · `well-deck` → main · §CLASSES — **THE WELL — THE DECK BUILT (healer rework
   FINISHED).** The owed deck per `MENDER-PLAN.md` §2–5 + the ⚖ board verdicts is CODED + wired,
   ALL guarded (empty creed + no modules/boons/rig = byte-identical base, proven). Shipped: per-spec
@@ -779,14 +798,6 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   ALL OK. New files `godot/data/well/well_{creeds,modules,boons,rig}.gd`. OWED follow-ups (not
   blockers): WellGauge module METERS (event flashes ship now) · AI use of the 2 drafted spells ·
   balance playtest (Bill) · name lock · online deck carry (shared Twinfang debt). *(healer deck session)*
-
-- ☐ 2026-07-07 · `refit-p012` (worktree ../wow-refit) · §CODE AUDIT / `REFIT-PLAN.md` —
-  **REFIT PHASES P0+P1+P2 BUILD (Bill's go):** P0 paper cuts (server loop cap, room/conn/rate
-  caps, net hygiene) · P1 THE BIG DELETE (Esc repoint, ui_smoke_map re-host onto raid, ~6.5k
-  dead solo lines out) · P2 gates-in-a-box (sim_util.gd, verify-all.sh, ab-gate.sh,
-  preflight.sh). Gate: det PASS + balance sims byte-identical vs pre-branch baseline
-  (deletes + tooling are neutral; ui_smoke_map gets a documented new baseline; net caps
-  guarded high above smoke traffic). *(refit build session)*
 
 - ☑ 2026-07-07 · `cask-spec` → main · §CLASSES / `ALCHEMIST-PLAN.md` §7.7 — **THE CASK — SLICE 1
   (verb base) BUILT & VERIFIED.** aspect `cask` guarded on the Alchemist kit (Fermata idiom:
