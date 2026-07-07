@@ -1092,6 +1092,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
 
+- 📋 2026-07-07 · main (docs+skill) · §CLASSES / §TOOLING — **FERMATA EDGE VERB LOCKED + DECK v5 +
+  THE DECK-CREATOR SKILL.** Bill's edge-bullseye idea A/B'd in the tester → verdict "edge is way
+  better, this feels great": the verb is now **THE RAMP & THE SNAP** (damage ramps entry→lip,
+  bullseye against the cliff, crossing it auto-SNAPS; wideners add entry runway only). **Code
+  OWED** — the kit still grades centre; recode verb + v5 slate together after Bill's verdicts.
+  Deck v5 shipped (artifact 3c01d3ed): Deep Edge + On-the-Edge WHEN cut (absorbed/obsoleted by
+  the verb), Patient Knife = THE LONG RAMP, Shadow Dance = 3s NO-SNAP fever, NEW Cold Cut / The
+  Brink / The Razor, four named archetypes, offer-trio audit clean. **NEW SKILL**
+  `.claude/skills/deck-creator/SKILL.md` (per Bill: "make a deck creator skill") — the reusable
+  slate playbook for every class: the pick-tension law, the fun hierarchy (greed > payoff >
+  control > pacing > bread > insurance — never raw), the anti-pattern list from Bill's real cut
+  history, quotas (one WILD creed · one ⭐transformer · elite-only spectacle keystones), coherence
+  rules + the BROKE/FADED/DEAD/OPENED sweep, and the design→verdict→build process. Full spec =
+  TEMPO-PLAN §13. *(fermata edge-lock session)*
+
 - 📋 2026-07-07 · main (docs only) · §CLASSES — **FERMATA v4 DECK RE-AUDIT (design, at Bill's
   verdict).** After the HUD wiring + ROAMING WINDOW + THE DRAW passes landed, Bill flagged the
   structural cost: "you can no longer choose how long to charge the coil — rerun your ideas,

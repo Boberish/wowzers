@@ -532,6 +532,35 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 > wideners must add ENTRY runway only (never move the lip). Band widths unchanged (good 45 /
 > perfect 37 / bull 18) so a bull is the same-size target — overshooting one just costs a miss
 > now. A/B live in the tester (⚙ CENTER ⇄ EDGE, default EDGE): artifact e920ea01…
+>
+> **EDGE LOCKED + V5 REDESIGN + THE DECK-CREATOR SKILL (2026-07-07 — Bill: "edge is way better,
+> this feels great, lets do a redesign, and you should make a deck creator skill").**
+> - **The verb is now THE RAMP & THE SNAP:** inside the window damage ramps entry→lip (GOOD 45% /
+>   PERFECT 37% / BULLSEYE last 18% against the cliff); crossing the lip auto-SNAPS (miss + Flow
+>   crash, no dead-note state); release before the window = plain miss. Widener law: forgiveness
+>   adds ENTRY runway only — the lip and bull band never move. **CODE OWED:** the kit still grades
+>   centre — recode `_strike_grade` (fermata branch), the snap state, policy depth-aim, HUD ramp
+>   bands (thin slice; after the v5 deck verdicts, recode verb + slate together).
+> - **THE SKILL:** `.claude/skills/deck-creator/SKILL.md` — the reusable card-design playbook for
+>   EVERY class slate: the Framework slots + quotas (one WILD creed, one ⭐transformer, elite-only
+>   spectacle keystones, ≥1 greed / ≤1 insurance per lane), THE PICK-TENSION LAW (design the
+>   offer-trio dilemma, not the card), the fun hierarchy (greed > payoff > control > pacing >
+>   bread > insurance — never ship insurance raw, dress it as a play), the anti-pattern list from
+>   Bill's real cut history, coherence rules (dials→lanes, polarity pairs, 2–4 named archetypes,
+>   the BROKE/FADED/DEAD/OPENED sweep on verb changes), numbers/rarity rules, and the
+>   design→verdict→build process.
+> - **DECK v5 (artifact 3c01d3ed — first slate authored under the skill):** CUT Deep Edge
+>   (absorbed by the base verb) + the On-the-Edge WHEN (near-SHNK releases are now the safe play —
+>   rewarding them pays spam). REWORKED: Patient Knife = THE LONG RAMP (+40% ramp past the lip,
+>   deep lip +20%, snap = crash + 0.5s stagger, far windows) · Shadow Dance = 3s of NO SNAP
+>   (fearless lip-riding fever) · Fleeting Shade = snap/miss −2 Flow (its net now covers the
+>   cliff). NEW: **Cold Cut** (GOOD-band releases +1 CP, S refund 4 energy — the shallow-safe
+>   release made productive; the insurance rule applied) · **The Brink** (nerve-streak meter:
+>   +3% per PERFECT-or-deeper release, cap 5, a snap zeroes it) · **The Razor** rig WHEN (a
+>   release in the last ~0.05s before the lip — the jackpot moment). Named archetypes: the Speed
+>   Knife (Stretto·Fleeting·Quiet Fuse·Eclipse) / the Slow Nuke (Patient·Unseen Blade·First
+>   Note·Rested Draw) / the Safe Butcher (Cold Cut·Composure·Mark) / the Fearless Dance (Shadow
+>   Dance·Brink·Killing Whisper). Offer-trio audit ran: no auto-picks, no auto-skips.
 > **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
