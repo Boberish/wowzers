@@ -37,21 +37,21 @@ func _process(_d: float) -> bool:
 		hud._start_map_run()
 	match String(steps[idx]):
 		"drop_first":
-			hud._map_gear = []
+			hud._d.gear = []
 			hud._show_drop("riftmaw_tooth", true, hud._show_map)
 		"drop_full_slots":
-			hud._map_gear = ["riftmaw_tooth", "cooling_paste"]
-			hud._map_gear_charges = {"cooling_paste": 2}
-			hud._map_tokens = 3
+			hud._d.gear = ["riftmaw_tooth", "cooling_paste"]
+			hud._d.gear_charges = {"cooling_paste": 2}
+			hud._d.tokens = 3
 			hud._show_drop("swan_song", false, hud._show_map)
 		"map_curios":
-			hud._map_wounds[0] = 0.2
+			hud._d.wounds[0] = 0.2
 			hud._show_map()
 		"ledger_offer":   # GEAR-2: the pre-pull Ledger page (rows + swearable oaths)
-			hud._gear_unlocks = {"riftmaw": ["riftmaw_tooth", "sticky_note"]}
+			hud._d.gear_unlocks = {"riftmaw": ["riftmaw_tooth", "sticky_note"]}
 			hud._offer_oath_then("riftmaw", hud._show_map)
 		"drop_verdict":   # GEAR-2: a KEPT oath crowns the ceremony
-			hud._map_gear = []
+			hud._d.gear = []
 			hud._show_drop("grace_period", true, hud._show_map,
 				"⚖  OATH KEPT — SLA MET: +2⏣  ·  a new row is inked into the Ledger")
 	frames = 14

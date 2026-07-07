@@ -61,7 +61,7 @@ func _process(_delta: float) -> bool:
 		hud._seat_key = seat
 		hud._aspect = String(aspects[seat])
 		hud._start_map_run()
-		hud._enter_node(hud._map.seal_id)          # jump to the Seal fight
+		hud._enter_node(hud._d.map.seal_id)          # jump to the Seal fight
 		return false
 	if step == 2 and String(hud._screen) == "ledger":
 		# GEAR-2: the boss's Ledger page interposes before a Seal pull — swear the
@@ -117,7 +117,7 @@ func _process(_delta: float) -> bool:
 		# install before the next map — drive it like ui_smoke_raid does.
 		if String(hud._screen) == "module":
 			hud._pick_module("edge", hud._build_floor)
-		var floor_after := int(hud._floor)
+		var floor_after := int(hud._d.floor_i)
 		var ok := has_descend and floor_after == 1 and String(hud._screen) == "map"
 		if not ok:
 			fails += 1

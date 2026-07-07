@@ -30,15 +30,15 @@ func _process(_d: float) -> bool:
 			"aspect -> raid pick (seat=%s aspect=%s)" % [hud._seat_key, hud._aspect])
 		# COMMANDER: the realm card now leads to PARTY setup (assemble the AI raiders)
 		hud._show_party_setup()
-		_ck(String(hud._screen) == "party" and hud._party.size() == 3 and not hud._party.has("healer"),
-			"raid -> PARTY setup (3 AI seats, yours excluded: %s)" % str(hud._party.keys()))
-		hud._party["blade"]["aspect"] = "tempo"     # command a non-default aspect
+		_ck(String(hud._screen) == "party" and hud._d.party.size() == 3 and not hud._d.party.has("healer"),
+			"raid -> PARTY setup (3 AI seats, yours excluded: %s)" % str(hud._d.party.keys()))
+		hud._d.party["blade"]["aspect"] = "tempo"     # command a non-default aspect
 		hud._start_map_run()
-		_ck(String(hud._screen) == "map" and hud._map != null and hud._run != null,
-			"party -> live descent (screen=%s run=%s)" % [hud._screen, str(hud._run != null)])
-		_ck(hud._ai_runs.size() == 3 and String((hud._ai_runs["blade"] as RunState).aspect) == "tempo"
-			and String((hud._ai_runs["blade"] as RunState).char_class) == "twinfang",
-			"descent carries commanded AI boon runs (blade=tempo, n=%d)" % hud._ai_runs.size())
+		_ck(String(hud._screen) == "map" and hud._d.map != null and hud._d.run != null,
+			"party -> live descent (screen=%s run=%s)" % [hud._screen, str(hud._d.run != null)])
+		_ck(hud._d.ai_runs.size() == 3 and String((hud._d.ai_runs["blade"] as RunState).aspect) == "tempo"
+			and String((hud._d.ai_runs["blade"] as RunState).char_class) == "twinfang",
+			"descent carries commanded AI boon runs (blade=tempo, n=%d)" % hud._d.ai_runs.size())
 		hud._show_home()
 		_ck(String(hud._screen) == "home", "return to HOME (screen=%s)" % hud._screen)
 		print("MENU PROBE: %s (fails=%d)" % [("ALL OK" if fails == 0 else "FAIL"), fails])

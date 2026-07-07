@@ -159,17 +159,17 @@ func _sync_caster_cls() -> void:
 	elif _aspect == "disruptor" or _aspect == "silencer":
 		_caster_cls = "voidcaller"
 
-## COMMANDER: make _party cover exactly the three seats the human doesn't occupy.
+## COMMANDER: make _d.party cover exactly the three seats the human doesn't occupy.
 ## Defaults = the verified comp RaidNet.make_spec would fill in anyway; prior picks
 ## survive a seat change between descents (only the vacated/claimed seats reset).
 func _ensure_party() -> void:
-	if _party.has(_seat_key):
-		_party.erase(_seat_key)
+	if _d.party.has(_seat_key):
+		_d.party.erase(_seat_key)
 	for key in RaidNet.SEAT_KEYS:
-		if key == _seat_key or _party.has(key):
+		if key == _seat_key or _d.party.has(key):
 			continue
 		var cls := String(SEAT_CLASS.get(key, "bulwark"))
-		_party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
+		_d.party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
 
 ## COMMANDER: the full 4-seat spec cfg — your seat + the commanded AI raiders. With
 ## no party overrides this emits exactly the defaults make_spec fills in for missing
@@ -177,19 +177,19 @@ func _ensure_party() -> void:
 func _party_seat_cfg() -> Dictionary:
 	var cfg := _human_seat_cfg()
 	_ensure_party()
-	for key in _party:
-		cfg[key] = {"aspect": String(_party[key]["aspect"]), "ai": true,
-			"cls": String(_party[key]["cls"])}
+	for key in _d.party:
+		cfg[key] = {"aspect": String(_d.party[key]["aspect"]), "ai": true,
+			"cls": String(_d.party[key]["cls"])}
 	return cfg
 
 ## COMMANDER: per-seat boons for the spec (yours + the AI raiders'); RaidNet.build
 ## folds each into its seat's kit. Empty sets are omitted (spec unchanged = no drafts).
 func _seat_boons_now() -> Dictionary:
 	var out := {}
-	if _run != null and not _run.boons.is_empty():
-		out[_seat_key] = _run.boons
-	for key in _ai_runs:
-		var r: RunState = _ai_runs[key]
+	if _d.run != null and not _d.run.boons.is_empty():
+		out[_seat_key] = _d.run.boons
+	for key in _d.ai_runs:
+		var r: RunState = _d.ai_runs[key]
 		if r != null and not r.boons.is_empty():
 			out[key] = r.boons
 	return out
@@ -219,23 +219,14 @@ var _aspect: String = "warden"
 var _enc_id: String = "riftmaw"    ## the Seal to pull offline (boss-select / autostart)
 var _loadout: Array = []
 var _screen: String = "home"
+## The offline descent STATE (P3.1b): the HUD renders _d, CampaignCore steps it.
+## Everything that used to be ~30 _map_*/run/party/oath members lives on it now.
+var _d := RunDirector.new()
 
 # Topology raid floor (MAP-3a, offline): map-run state lives HERE, not in RunState —
 # the raid never uses the solo run machinery (and draft2 owns run_state.gd right now).
-var _map: RunMap = null
-var _map_node: int = -1
-var _map_inv: Dictionary = {}
-var _map_fracs: Array = [1.0, 1.0, 1.0, 1.0]   ## per-seat persistent integrity
-var _map_wounds: Array = [0.0, 0.0, 0.0, 0.0]  ## CORRUPTED SECTORS: max-HP cut a heal can't fix
-var _map_mana: float = 1.0         ## the healer's mana ALSO carries — the raid's fuel gauge
-var _map_fights: Array = []        ## Array[EncounterRes], indexed by node "fight"
 var _map_pending := false          ## TOPOLOGY picked on the select — map starts after aspect pick
-var _floor: int = 0                ## which RaidContent.FLOORS entry (the RING descent, MAP-3c)
 var _gate_live := false            ## a Tier-1 PERSONAL GATE exam is the current fight (§GAME SHAPE)
-var _map_tickets: Dictionary = {}  ## MAP-2: OPEN ticket ids (id -> title) carried this floor
-var _map_ticket_total := 0         ## tickets placed on this floor (for the sprint-retro bonus)
-var _map_closed := 0               ## tickets closed this floor
-var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next map screen
 
 # THE WORLD (WORLD-PLAN W1, feature-flagged preview): the persistent overworld wrapping
 # the instances. Zone fights are BARE KIT (overworld power rule) and fully isolated —
@@ -258,38 +249,19 @@ var _party_ctx := ""               ## "" = raid flow (DESCEND) · "bastion" = th
 
 # The Inference Check meta (Topology deep events): ⚡ Entropy is the within-run luck
 # pool spent to bias a roll; 📁 Prior is the across-run luck loaded once at descent
-# start; _flags are cross-node ripple marks. All start inert (0/{}) — an event only
+# start; _d.flags are cross-node ripple marks. All start inert (0/{}) — an event only
 # touches them if it carries the matching fx, so a runless/dev path is unaffected.
-var _entropy: int = 0
-var _prior: int = 0
-var _flags: Dictionary = {}
-var _map_marks: Dictionary = {}    ## a pending fight-altering mark (KILL SWITCH cash-out / fight-curse)
-var _map_charge: int = 0           ## ⏻ THE KILL SWITCH — a party-shared 0..100 meter, carries the descent
-var _check_fails: int = 0          ## consecutive check fails → comeback pity (resets on any pass)
 
 # GEAR-1 (Curios / Realm-1 "peripherals"): run-scoped loot. Items evaporate with the
 # run (win or wipe); only Ledger UNLOCKS persist (GearStore). Offline-only in v1 —
 # the online campaign spec folds `gear` in later (rides like tickets/inventory).
-var _map_gear: Array = []               ## equipped curio ids (≤ Gear.SLOTS)
-var _map_gear_charges: Dictionary = {}  ## active-item charges left this run
-var _map_tokens := 0                    ## ⏣ fallback bank when no _run exists (see _gain_tokens)
-var _gear_unlocks: Dictionary = {}      ## boss_id -> unlocked item ids (Ledger rows)
-var _drop_rng: DetRng = null            ## the drop stream — NEVER the combat rng
-var _run: RunState = null               ## the human's boon run (Draft 2.0 in the raid descent)
-var _taken_boons: Array = []            ## drafted boon dicts (for the build panel: title/rarity)
 
 # COMMANDER (Bill, 2026-07-04): solo raid = you build the WHOLE party. The three AI
 # raiders' class/aspect are picked on the pre-descent PARTY screen, and their boons
 # are drafted BY YOU after every won fight — the AI only drives the rotation.
-var _party: Dictionary = {}             ## AI seats only: seat_key -> {cls, aspect}
-var _ai_runs: Dictionary = {}           ## AI seats only: seat_key -> RunState (their boon runs)
 
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
-var _sworn: Dictionary = {}             ## the CURRENT fight's sworn oath row (+ "boss")
-var _oath_result: Dictionary = {}       ## resolved at fight end, consumed by the drop flow
-var _oath_broken := false               ## live tracker latch (view-only)
 var _oath_lbl: Label = null
-var _drop_pity := 0                     ## opus dry-streak counter (purses add ticks)
 
 var _stage: StageBackdrop
 var _stage2d: RaidStage2D = null
@@ -432,7 +404,7 @@ func _clear() -> void:
 ## raid campaign (solo-with-AI) or PLAY ONLINE (co-op). No mode select, no solo split.
 func _show_home() -> void:
 	_screen = "home"
-	_map = null
+	_d.map = null
 	_map_pending = false
 	_world_pending = false
 	_zone_live = false
@@ -440,8 +412,8 @@ func _show_home() -> void:
 	_party_ctx = ""
 	_gate_live = false
 	_online_map = false
-	_run = null                       # no descent = no boon run (fresh one per descent)
-	_ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
+	_d.run = null                       # no descent = no boon run (fresh one per descent)
+	_d.ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
 	_clear()
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -472,7 +444,7 @@ func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
 ## PLAY → pick your CLASS (the four raid seats; you play one, AI fills the rest).
 func _show_class_select() -> void:
 	_screen = "class"
-	_map = null
+	_d.map = null
 	_map_pending = false
 	_clear()
 	var head := VBoxContainer.new()
@@ -580,8 +552,8 @@ func _show_party_setup() -> void:
 	box.add_child(gap0)
 	for key in RaidNet.SEAT_KEYS:
 		var mine: bool = key == _seat_key
-		var cls: String = _seat_cls_now() if mine else String(_party[key]["cls"])
-		var aspect: String = _aspect if mine else String(_party[key]["aspect"])
+		var cls: String = _seat_cls_now() if mine else String(_d.party[key]["cls"])
+		var aspect: String = _aspect if mine else String(_d.party[key]["aspect"])
 		var row := HBoxContainer.new()
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_theme_constant_override("separation", 10)
@@ -607,7 +579,7 @@ func _show_party_setup() -> void:
 				clsb.custom_minimum_size = Vector2(150, 32)
 				clsb.pressed.connect(func():
 					var nc: String = {"mender": "well", "well": "bloomweaver", "bloomweaver": "mender"}.get(cls, "well")
-					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
+					_d.party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
 					_show_party_setup())
 				row.add_child(clsb)
 			if key == "caster":     # polymorphic CLASS toggle (Voidcaller ⇄ Alchemist)
@@ -616,7 +588,7 @@ func _show_party_setup() -> void:
 				cclsb.custom_minimum_size = Vector2(150, 32)
 				cclsb.pressed.connect(func():
 					var nc := "voidcaller" if cls == "alchemist" else "alchemist"
-					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
+					_d.party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
 					_show_party_setup())
 				row.add_child(cclsb)
 			var ab := Button.new()
@@ -628,7 +600,7 @@ func _show_party_setup() -> void:
 				for i in pool.size():
 					if String(pool[i]["id"]) == aspect:
 						idx = i
-				_party[key]["aspect"] = String(pool[(idx + 1) % pool.size()]["id"])
+				_d.party[key]["aspect"] = String(pool[(idx + 1) % pool.size()]["id"])
 				_show_party_setup())
 			row.add_child(ab)
 		# the chosen aspect's one-line identity, dim, under each row
@@ -1118,7 +1090,7 @@ func _me() -> Dictionary:
 func _show_lobby() -> void:
 	_screen = "lobby"
 	_online_map = false               # MAP-3b: back in the lobby = not descending
-	_run = null                       # online descents rebuild the boon run from the map seed
+	_d.run = null                       # online descents rebuild the boon run from the map seed
 	_clear()
 	var me := _me()
 	var box := VBoxContainer.new()
@@ -1315,15 +1287,15 @@ func _on_net_map(msg: Dictionary) -> void:
 	_map_is_leader = int(msg.get("host", -1)) == _net.peer_id()
 	# online boons: on the FIRST map of the descent, start this seat's boon run — seeded
 	# from the descent seed so its draft offers are reproducible (offline uses the same).
-	if _run == null:
+	if _d.run == null:
 		var me := _me()
 		if not me.is_empty():
 			_seat_key = String(me.get("seat", _seat_key))
 			_aspect = String(me.get("aspect", _aspect))
-		_run = _make_run()
-		_taken_boons = []
+		_d.run = _make_run()
+		_d.taken_boons = []
 		var sd := int(msg.get("seed", 1))
-		_run.draft_rng = DetRng.new((sd ^ (int(SEAT_IDX.get(_seat_key, 0)) * 2654435761)) & 0x7FFFFFFF)
+		_d.run.draft_rng = DetRng.new((sd ^ (int(SEAT_IDX.get(_seat_key, 0)) * 2654435761)) & 0x7FFFFFFF)
 	_screen = "map"
 	_clear()
 	var m := RunMap.from_dict(msg.get("map", {}))
@@ -1440,23 +1412,23 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 ## Online boons: the server asks every human seat to draft. Roll THIS seat's offers,
 ## take one, send the id, then wait for the raid to finish (the next `map` replaces us).
 func _on_net_draft() -> void:
-	if _run == null:
+	if _d.run == null:
 		_net.send_pick("")
 		return
 	# CURIO Expansion Bus: +1 slot → a 1-of-4 draft (online).
-	var picks := Draft.roll_offers(_run, 1 if _map_gear.has("expansion_bus") else 0)
+	var picks := Draft.roll_offers(_d.run, 1 if _d.gear.has("expansion_bus") else 0)
 	if picks.is_empty():
 		_net.send_pick("")
 		_show_online_wait("Reforge pool exhausted — waiting for the raid…")
 		return
 	_screen = "draft"
 	_clear()
-	var ds := DraftScreen.new(_run, picks, "REFORGE — the kill reshapes your kit",
+	var ds := DraftScreen.new(_d.run, picks, "REFORGE — the kill reshapes your kit",
 		"Take one. Your raid is drafting too.", [], Palette.GOLD)
-	ds.free_reroll = _map_gear.has("hot_reload")  # CURIO Hot Reload
+	ds.free_reroll = _d.gear.has("hot_reload")  # CURIO Hot Reload
 	ds.boon_taken.connect(func(boon: Dictionary):
-		Draft.take(_run, boon)
-		_taken_boons.append(boon)
+		Draft.take(_d.run, boon)
+		_d.taken_boons.append(boon)
 		_net.send_pick(String(boon.get("id", "")))
 		_show_online_wait("Reforged — waiting for the raid to finish drafting…"))
 	_ui.add_child(ds)
@@ -1472,8 +1444,8 @@ func _show_online_wait(msg: String) -> void:
 ## The whole descent is over (ROOT cleared, or a wipe) — a campaign end screen.
 func _on_net_campaign(won: bool) -> void:
 	_online_map = false
-	_run = null                    # the descent's boon run is done
-	_taken_boons = []
+	_d.run = null                    # the descent's boon run is done
+	_d.taken_boons = []
 	_screen = "end"
 	_clear()
 	var center := CenterContainer.new()
@@ -1572,45 +1544,45 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 ## (per SEAT — fights start at carried HP); events bruise or patch everyone; only
 ## combat kills. A raider dead at a won fight REBOOTS at 35%.
 func _start_map_run() -> void:
-	_floor = 0
+	_d.floor_i = 0
 	# integrity / wounds / mana reset ONLY at the start of the whole descent —
 	# they carry from ring to ring (a floor Seal down = elevation, not a reset).
-	_map_fracs = [1.0, 1.0, 1.0, 1.0]
-	_map_wounds = [0.0, 0.0, 0.0, 0.0]
-	_map_mana = 1.0
+	_d.fracs = [1.0, 1.0, 1.0, 1.0]
+	_d.wounds = [0.0, 0.0, 0.0, 0.0]
+	_d.mana = 1.0
 	# The Inference Check meta resets for a fresh descent. ⚡ Entropy seeds from 📁 Prior
 	# (the veteran's warm welcome); Prior itself loads once from the permanent file
 	# (headless stays disk-inert — smokes/sims start from a clean file).
-	_prior = _my_prior()
-	_entropy = LuckProfile.starting_entropy(_prior)
-	_flags = {}
-	_map_marks = {}
-	_map_charge = clampi(_prior / 25, 0, 4)   # a veteran's file pre-warms the switch a little
-	_check_fails = 0
+	_d.prior = _my_prior()
+	_d.entropy = LuckProfile.starting_entropy(_d.prior)
+	_d.flags = {}
+	_d.marks = {}
+	_d.charge = clampi(_d.prior / 25, 0, 4)   # a veteran's file pre-warms the switch a little
+	_d.check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
-	# Headless (smokes) stays disk-inert — tests inject _gear_unlocks directly.
-	_map_gear = []
-	_map_gear_charges = {}
-	_map_tokens = 0
-	_sworn = {}
-	_oath_result = {}
-	_oath_broken = false
-	_drop_pity = 0
-	_taken_boons = []
+	# Headless (smokes) stays disk-inert — tests inject _d.gear_unlocks directly.
+	_d.gear = []
+	_d.gear_charges = {}
+	_d.tokens = 0
+	_d.sworn = {}
+	_d.oath_result = {}
+	_d.oath_broken = false
+	_d.drop_pity = 0
+	_d.taken_boons = []
 	if DisplayServer.get_name() != "headless":
-		_gear_unlocks = GearStore.load_unlocks()
-	_drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
+		_d.gear_unlocks = GearStore.load_unlocks()
+	_d.drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
 	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
 	# its picks ride into every pull.
-	_run = _make_run()
+	_d.run = _make_run()
 	# COMMANDER: each AI raider gets its own boon run too — you draft on their behalf
 	# after every won fight. Seeds decorrelated from yours (disjoint draft streams).
 	_ensure_party()
-	_ai_runs = {}
-	for key in _party:
-		_ai_runs[key] = _make_seat_run(String(_party[key]["cls"]),
-			String(_party[key]["aspect"]),
-			int((_run.run_seed ^ (0x515EED + int(SEAT_IDX[key]) * 0x9E3779)) & 0x7FFFFFFF))
+	_d.ai_runs = {}
+	for key in _d.party:
+		_d.ai_runs[key] = _make_seat_run(String(_d.party[key]["cls"]),
+			String(_d.party[key]["aspect"]),
+			int((_d.run.run_seed ^ (0x515EED + int(SEAT_IDX[key]) * 0x9E3779)) & 0x7FFFFFFF))
 	_show_creed_pick(_build_floor)   # TEMPO: swear a Creed at descent start (blade/Twinfang only)
 
 ## A minimal RunState for the human seat, just to carry boons + the draft economy
@@ -1639,61 +1611,61 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 ## (Map pulls also ride ALL seats' boons through the spec — see _seat_boons_now;
 ## this direct injection stays for the GATE path, which builds outside RaidNet.)
 func _inject_boons(seat: Seat) -> void:
-	if _run != null and seat != null and seat.kit != null:
-		seat.kit.boons = _run.boons
+	if _d.run != null and seat != null and seat.kit != null:
+		seat.kit.boons = _d.run.boons
 		# CLASS FRAMEWORK (offline plumbing): fold the run's Creed + Modules + Rig into a
 		# reworked kit. Both Twinfang and Alchemist carry the same three fields; every other
 		# class carries none, so this is skipped there (byte-identical no-op).
 		if seat.kit is TwinfangKit:
 			var tk := seat.kit as TwinfangKit
-			if _run.creed != "":
-				tk.creed_id = _run.creed
-			tk.modules = _run.modules.duplicate()
-			tk.rig = _run.rig.duplicate()      # TEMPO §5: the wired Combo rig
+			if _d.run.creed != "":
+				tk.creed_id = _d.run.creed
+			tk.modules = _d.run.modules.duplicate()
+			tk.rig = _d.run.rig.duplicate()      # TEMPO §5: the wired Combo rig
 		elif seat.kit is AlchemistKit:
 			var ak := seat.kit as AlchemistKit
-			if _run.creed != "":
-				ak.creed_id = _run.creed
-			ak.modules = _run.modules.duplicate()
-			ak.rig = _run.rig.duplicate()      # ALCHEMIST-PLAN §3/rig: the wired Combo rig
+			if _d.run.creed != "":
+				ak.creed_id = _d.run.creed
+			ak.modules = _d.run.modules.duplicate()
+			ak.rig = _d.run.rig.duplicate()      # ALCHEMIST-PLAN §3/rig: the wired Combo rig
 		elif seat.kit is WellKit:
 			var wk := seat.kit as WellKit
-			if _run.creed != "":
-				wk.creed_id = _run.creed
-			wk.modules = _run.modules.duplicate()
-			wk.rig = _run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
+			if _d.run.creed != "":
+				wk.creed_id = _d.run.creed
+			wk.modules = _d.run.modules.duplicate()
+			wk.rig = _d.run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
 
-## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
+## Generate the current ring's map (RaidContent.FLOORS[_d.floor_i]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
 func _build_floor() -> void:
-	var fl: Dictionary = RaidContent.FLOORS[_floor]
-	_map_fights = RaidContent.floor_fights(int(fl["ring"]))
+	var fl: Dictionary = RaidContent.FLOORS[_d.floor_i]
+	_d.fights = RaidContent.floor_fights(int(fl["ring"]))
 	# every raid floor carries ONE personal GATE exam (Tier 1, §GAME SHAPE); the ROOT
 	# floor also gates its Seal behind credential shards (MAP-3c); TICKETS are the quests (MAP-2).
 	# THE DESCENT REFIT: floors run `rows` deep (8 = 20 nodes) — quest/story quotas stay
 	# authored (4 events, tickets per FLOORS), the extra mid slots pad to COMBAT filler;
 	# +1 cooling/+1 cache keep the breather + ⏻ economy proportional to the longer floor.
-	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
-		_map_fights.size(), MapContent.raid_event_ids(),
+	_d.map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
+		_d.fights.size(), MapContent.raid_event_ids(),
 		{RunMap.KIND_GATE: 1, RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
 		int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
-	_map_node = -1
-	_map_inv = {}
-	_map_tickets = {}
-	_map_ticket_total = _map.tickets.size()
-	_map_closed = 0
-	_ticket_toast = ""
+	_d.node = -1
+	_d.inv = {}
+	_d.tickets = {}
+	_d.ticket_total = _d.map.tickets.size()
+	_d.closed = 0
+	_d.toast = ""
 	_show_map()
 
 ## A floor Seal is down → descend one ring (privilege elevation). Past the last
 ## floor (CLAUDE MYTHOS) = Realm 1 is cleared.
 func _advance_floor() -> void:
-	_floor += 1
-	if _floor >= RaidContent.FLOORS.size():
+	_d.floor_i += 1
+	if _d.floor_i >= RaidContent.FLOORS.size():
 		_show_campaign_cleared()
-	elif _floor == 1:
+	elif _d.floor_i == 1:
 		_show_module_pick(_build_floor)   # TEMPO: end of Floor 1 elevation → install a Module
-	elif _floor == 2:
+	elif _d.floor_i == 2:
 		_show_rig_wire(_build_floor)      # TEMPO §5: re-wire the Combo at end of Floor 2
 	else:
 		_build_floor()
@@ -1702,41 +1674,41 @@ func _show_map() -> void:
 	_screen = "map"
 	_clear()
 	var ms := MapScreen.new()
-	ms.map = _map
-	ms.current = _map_node
-	ms.inventory = _map_inv
+	ms.map = _d.map
+	ms.current = _d.node
+	ms.inventory = _d.inv
 	ms.hp_frac = _party_integrity()
-	ms.subtitle = String(RaidContent.FLOORS[_floor]["title"])
-	ms.ring = int(RaidContent.FLOORS[_floor]["ring"])
+	ms.subtitle = String(RaidContent.FLOORS[_d.floor_i]["title"])
+	ms.ring = int(RaidContent.FLOORS[_d.floor_i]["ring"])
 	ms.open_tickets = _open_ticket_lines()
-	ms.toast = _ticket_toast
-	_ticket_toast = ""                 # one-shot — clears once shown
+	ms.toast = _d.toast
+	_d.toast = ""                 # one-shot — clears once shown
 	ms.gear_line = _gear_line()
-	ms.entropy = _entropy
-	ms.charge = _map_charge
-	ms.prior = _prior
+	ms.entropy = _d.entropy
+	ms.charge = _d.charge
+	ms.prior = _d.prior
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
 	# ARMORY: YOUR SET — the run's boons as armor pieces + curio trinkets, bottom-left
 	# (below the lane band; the doll root ignores the mouse, only sockets hover)
-	if _run != null:
+	if _d.run != null:
 		var doll := ArmorDoll.new()
 		_place(doll, 0.0, 1.0, 0.0, 1.0, 14, -344, 14 + int(ArmorDoll.W), -12)
 		_ui.add_child(doll)
-		doll.set_build(_taken_boons, _map_gear, _map_gear_charges)
+		doll.set_build(_d.taken_boons, _d.gear, _d.gear_charges)
 		doll.inspect_requested.connect(_open_armor_modal)
 	# GEAR-1: Cooling Paste — a USE button rides the map while a wound needs it
-	if _map_gear.has("cooling_paste") and int(_map_gear_charges.get("cooling_paste", 0)) > 0 \
+	if _d.gear.has("cooling_paste") and int(_d.gear_charges.get("cooling_paste", 0)) > 0 \
 			and _worst_wound() > 0.0:
 		var pb := Button.new()
 		pb.text = "USE COOLING PASTE — repair corrupted sectors (%d left)" \
-			% int(_map_gear_charges["cooling_paste"])
+			% int(_d.gear_charges["cooling_paste"])
 		pb.add_theme_font_size_override("font_size", 15)
 		pb.pressed.connect(func():
-			_map_gear_charges["cooling_paste"] = int(_map_gear_charges["cooling_paste"]) - 1
+			_d.gear_charges["cooling_paste"] = int(_d.gear_charges["cooling_paste"]) - 1
 			_apply_map_fx({"repair": true})
-			_ticket_toast = "🧴  COOLING PASTE — corrupted sectors repaired"
+			_d.toast = "🧴  COOLING PASTE — corrupted sectors repaired"
 			_show_map())
 		_place(pb, 0.5, 1.0, 0.5, 1.0, -290, -96, 290, -56)
 		_ui.add_child(pb)
@@ -1744,24 +1716,24 @@ func _show_map() -> void:
 ## Short "still open" lines for the map header (title + where to turn it in).
 func _open_ticket_lines() -> Array:
 	var out: Array = []
-	for tid in _map_tickets:
-		out.append(String(_map_tickets[tid]))
+	for tid in _d.tickets:
+		out.append(String(_d.tickets[tid]))
 	return out
 
 func _party_integrity() -> float:
 	var t := 0.0
-	for f in _map_fracs:
+	for f in _d.fracs:
 		t += float(f)
-	return t / maxf(1.0, float(_map_fracs.size()))
+	return t / maxf(1.0, float(_d.fracs.size()))
 
 func _enter_node(id: int) -> void:
-	_map_node = id
-	var n: Dictionary = _map.node(id)
+	_d.node = id
+	var n: Dictionary = _d.map.node(id)
 	# visited/shard/TICKET/key — the ONE rulebook (CampaignCore.ticket_at replaced the
 	# HUD's _ticket_at twin); purse Tokens route through _gain_tokens (Hashgrinder ×2).
-	var cp := _cp_view()
-	var out := CampaignCore.enter_node(cp, n, _map_gear.has("ticket_stub"))
-	_cp_writeback(cp)
+	var cp := _d.cp_view()
+	var out := CampaignCore.enter_node(cp, n, _d.gear.has("ticket_stub"))
+	_d.cp_sync(cp)
 	if int(out["tokens"]) != 0:
 		_gain_tokens(int(out["tokens"]))
 	if bool(out["key_grabbed"]):
@@ -1777,10 +1749,10 @@ func _resolve_node(n: Dictionary) -> void:
 		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
 			# GEAR-2: the boss's Ledger page offers its oaths before the pull
 			var fi := int(n["fight"])
-			var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
+			var enc: EncounterRes = _d.fights[clampi(fi, 0, _d.fights.size() - 1)]
 			var proceed := _offer_oath_then.bind(String(enc.id), _launch_map_fight.bind(fi))
 			# THE KILL SWITCH: at a Seal, cash out the ⏻ meter (OVERCLOCK PRIME) before the pull
-			if String(n["kind"]) == RunMap.KIND_SEAL and _map_charge > 0:
+			if String(n["kind"]) == RunMap.KIND_SEAL and _d.charge > 0:
 				_show_arming(String(enc.name), proceed)
 			else:
 				proceed.call()
@@ -1820,7 +1792,7 @@ func _event_stop(n: Dictionary) -> void:
 func _render_event_page(n: Dictionary, page_id: String, title: String, body: String,
 		raw: Array) -> void:
 	var ctx := _map_ctx()
-	var map_seed := _map.seed if _map != null else 0
+	var map_seed := _d.map.seed if _d.map != null else 0
 	var node_id := int(n["id"])
 	var descs: Array = []
 	for i in raw.size():
@@ -1857,9 +1829,9 @@ func _commit_event_spend(p: MapEventPanel, fx: Dictionary) -> void:
 	_apply_map_fx(fx)
 	var spend := int(p.committed_nudge) + int(p.committed_attempt) * MapCheck.MULLIGAN_COST
 	if spend > 0:
-		_entropy = maxi(0, _entropy - spend)
+		_d.entropy = maxi(0, _d.entropy - spend)
 	if bool(p.committed_is_check):
-		_check_fails = 0 if bool(p.committed_success) else _check_fails + 1
+		_d.check_fails = 0 if bool(p.committed_success) else _d.check_fails + 1
 
 ## Present a single choice: gate first (greyed if unmet), then a check gets its % +
 ## itemized breakdown; a free/branch choice carries its fx + the page it opens (next_page).
@@ -1897,25 +1869,25 @@ func _stake_label(w: Dictionary) -> String:
 ## full build (AI raiders carry no boons), so `boon_tags` is the human's owned boons
 ## resolved to their synergy tags; role = the seat you pilot; aspect = your aspect.
 func _map_ctx() -> Dictionary:
-	var cat = Draft.catalog(_run) if _run != null else null
-	var aspect := String(_run.aspect) if _run != null else ""
-	var boons: Dictionary = _run.boons if _run != null else {}
+	var cat = Draft.catalog(_d.run) if _d.run != null else null
+	var aspect := String(_d.run.aspect) if _d.run != null else ""
+	var boons: Dictionary = _d.run.boons if _d.run != null else {}
 	var boon_tags := MapCheck.tags_for_boons(cat, aspect, boons)
 	var gear_tags: Array = []
-	for gid in _map_gear:
+	for gid in _d.gear:
 		gear_tags.append(GearCatalog.item(String(gid)).get("tags", []))
 	return MapCheck.build_ctx(boon_tags, gear_tags, aspect, _seat_key,
-		_avg_frac(_map_fracs), _prior, _entropy, _check_fails, _map_inv, _flags, _tokens_now())
+		_avg_frac(_d.fracs), _d.prior, _d.entropy, _d.check_fails, _d.inv, _d.flags, _tokens_now())
 
 ## Persist 📁 Prior at a DESCENT end (win or wipe): the run's earned prior (already in
-## _prior from mercy/event grants) plus leftover ⚡ Entropy (÷2) plus a clear bonus, banked
+## _d.prior from mercy/event grants) plus leftover ⚡ Entropy (÷2) plus a clear bonus, banked
 ## to the permanent file. "Better luck next time." Headless stays disk-inert. Returns the
 ## amount gained THIS descent (leftover-⚡ + clear bonus) for the end-screen line.
 func _bank_prior(won: bool) -> int:
-	var gained := int(_entropy / 2) + (4 if won else 0)
-	_prior = clampi(_prior + gained, 0, LuckProfile.PRIOR_CAP)
+	var gained := int(_d.entropy / 2) + (4 if won else 0)
+	_d.prior = clampi(_d.prior + gained, 0, LuckProfile.PRIOR_CAP)
 	if DisplayServer.get_name() != "headless":
-		LuckProfile.save_prior(_prior)
+		LuckProfile.save_prior(_d.prior)
 	return gained
 
 ## This client's 📁 Prior tier (headless/sims stay disk-inert). Sent to the server at
@@ -1939,15 +1911,15 @@ const PACK_FILLER_BODIES := ["swarm", "swarm", "stalker"]   ## swarm-weighted wa
 ## node's own stream (variety across nodes, identical on replay).
 func _pack_filler(rng: DetRng) -> String:
 	var body := String(PACK_FILLER_BODIES[rng.next_u32() % PACK_FILLER_BODIES.size()])
-	var tier := clampi(4 - int(RaidContent.FLOORS[_floor]["ring"]), 1, 3)   # ring 3→t1 · 2→t2 · 0→t3
+	var tier := clampi(4 - int(RaidContent.FLOORS[_d.floor_i]["ring"]), 1, 3)   # ring 3→t1 · 2→t2 · 0→t3
 	return "forge:takeover:%s:%d:%d" % [body, tier, 900 + int(rng.next_u32() % 64)]
 
 func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
-	if _map == null or _online:
+	if _d.map == null or _online:
 		return []
-	if fi <= 0 or fi >= _map_fights.size() - 1:
+	if fi <= 0 or fi >= _d.fights.size() - 1:
 		return []                        # entry + Seal: authored, never rolled
-	var rng := DetRng.new((_map.seed ^ (0x9A7B * (_map_node + 7))) & 0x7FFFFFFF)
+	var rng := DetRng.new((_d.map.seed ^ (0x9A7B * (_d.node + 7))) & 0x7FFFFFFF)
 	var r := rng.next_float()
 	if r < 0.30:
 		return []                        # a classic solo pull
@@ -1963,7 +1935,7 @@ func _launch_map_fight(fi: int) -> void:
 	_gate_live = false
 	_screen = "combat"
 	_clear()
-	var enc: EncounterRes = _map_fights[clampi(fi, 0, _map_fights.size() - 1)]
+	var enc: EncounterRes = _d.fights[clampi(fi, 0, _d.fights.size() - 1)]
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
 	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
@@ -1977,14 +1949,14 @@ func _launch_map_fight(fi: int) -> void:
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
 	for i in s.seats.size():
-		if i < _map_wounds.size():
+		if i < _d.wounds.size():
 			var u: Seat = s.seats[i]
 			# INTEGRITY RETIRED: CORRUPTED SECTORS cut max HP (the sole HP stake), then boot
 			# FULL of what's left — a carried HP fraction is meaningless (a healer tops it off).
-			u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_map_wounds[i]))))
+			u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_d.wounds[i]))))
 			u.hp = u.hp_max
 			if u.role == "healer":    # the fuel gauge: mana carries between nodes (it bites now)
-				u.resource = roundf(u.resource_max * _map_mana)
+				u.resource = roundf(u.resource_max * _d.mana)
 	_apply_next_fight_mark(s)   # the KILL SWITCH cash-out / a fight-curse weakens THIS boss, then clears
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -1998,8 +1970,8 @@ func _launch_map_fight(fi: int) -> void:
 ## then clear it. Absent (no mark) = the fight is byte-identical. Mirrors RaidNet.build's
 ## online carry-mark so offline + online sabotage land the same boss HP.
 func _apply_next_fight_mark(s: CombatState) -> void:
-	RaidMarks.apply(s, _map_marks)   # SHARED with RaidNet.build — one applier, never diverges
-	_map_marks = {}
+	RaidMarks.apply(s, _d.marks)   # SHARED with RaidNet.build — one applier, never diverges
+	_d.marks = {}
 
 ## Online OVERCLOCK arming at a Seal: the leader cash-outs (the server owns the ⏻ + mark);
 ## spectators wait. Sends {kind, spend}; the server pulls the fight after.
@@ -2027,11 +1999,11 @@ func _show_arming(boss_name: String, proceed: Callable) -> void:
 	_screen = "arming"
 	_clear()
 	var ap := ArmingPanel.new()
-	ap.charge = _map_charge
+	ap.charge = _d.charge
 	ap.boss_name = boss_name
 	ap.armed.connect(func(kind: String, spend: int):
-		_map_charge = maxi(0, _map_charge - spend)
-		(_map_marks as Dictionary).merge(RaidMarks.overclock(kind, spend), true)
+		_d.charge = maxi(0, _d.charge - spend)
+		(_d.marks as Dictionary).merge(RaidMarks.overclock(kind, spend), true)
 		proceed.call())
 	ap.banked.connect(func(): proceed.call())
 	ap.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2049,13 +2021,13 @@ func _launch_gate_fight() -> void:
 	_apply_fightlen(s)
 	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
 	_inject_boons(s.seats[0])   # Draft 2.0: boons on for the exam too
-	if _map != null:
+	if _d.map != null:
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = s.seats[0]
-		u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_map_wounds[ri]))))
+		u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - float(_d.wounds[ri]))))
 		u.hp = u.hp_max                 # integrity retired: boot full of the wounded pool
 		if u.role == "healer":
-			u.resource = roundf(u.resource_max * _map_mana)
+			u.resource = roundf(u.resource_max * _d.mana)
 	_gate_live = true
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -2095,33 +2067,14 @@ func _raidify(choices: Array) -> Array:
 		out.append(c2)
 	return out
 
-## The campaign state as the cp VIEW dict MapFx/CampaignCore step (P3.1): arrays
-## (fracs/wounds/inv/flags/marks/tickets) mutate in place; scalars are copied back
-## by _cp_writeback. The ONE bridge between the HUD's members and the shared
-## campaign rulebook — until a RunDirector owns cp outright (P3.1b).
-func _cp_view() -> Dictionary:
-	return {"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
-		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags,
-		"marks": _map_marks, "charge": _map_charge,
-		"tickets": _map_tickets, "closed": _map_closed, "total": _map_ticket_total,
-		"toast": _ticket_toast}
-
-func _cp_writeback(cp: Dictionary) -> void:
-	_map_mana = float(cp["mana"])
-	_entropy = int(cp["entropy"])
-	_prior = int(cp["prior"])
-	_map_charge = int(cp["charge"])
-	_map_closed = int(cp["closed"])
-	_ticket_toast = String(cp["toast"])
-
 ## Events bruise or patch the WHOLE raid; only combat kills (integrity floors at 5%).
 ## Routes through the shared MapFx applier (single source of truth for offline +
 ## online + the sim walker). Integrity/wounds mutate in place through the cp view;
 ## scalar currencies are copied back after.
 func _apply_map_fx(fx: Dictionary) -> void:
-	var cp := _cp_view()
+	var cp := _d.cp_view()
 	MapFx.apply(cp, fx)
-	_cp_writeback(cp)
+	_d.cp_sync(cp)
 	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
 	if int(fx.get("tokens", 0)) != 0:
 		_gain_tokens(int(fx["tokens"]))
@@ -2134,22 +2087,22 @@ const SEAT_CLS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller
 ## The human seat carries the run's equipped curios into a fight (offline map runs
 ## only — the seat starts each pull with fresh per-fight gear bookkeeping).
 func _arm_gear(u: Seat) -> void:
-	u.gear = _map_gear.duplicate()
+	u.gear = _d.gear.duplicate()
 	u.gear_vars = {}
 
 ## Tokens are ONE currency: scrap + oath purses feed the same purse the REFORGE
-## boon draft spends (raid-boons' `_run.tokens`). `_map_tokens` stays only as the
+## boon draft spends (raid-boons' `_d.run.tokens`). `_d.tokens` stays only as the
 ## fallback bank for runless dev paths.
 func _gain_tokens(n: int) -> void:
-	if n > 0 and _map_gear.has("hashgrinder"):   # CURIO Hashgrinder: all Token income doubled
+	if n > 0 and _d.gear.has("hashgrinder"):   # CURIO Hashgrinder: all Token income doubled
 		n *= 2
-	if _run != null:
-		_run.tokens += n
+	if _d.run != null:
+		_d.run.tokens += n
 	else:
-		_map_tokens += n
+		_d.tokens += n
 
 func _tokens_now() -> int:
-	return _run.tokens if _run != null else _map_tokens
+	return _d.run.tokens if _d.run != null else _d.tokens
 
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 
@@ -2157,14 +2110,14 @@ func _tokens_now() -> int:
 const GATE_ENC := {"tank": "gatekeeper", "blade": "warden", "caster": "priest", "healer": "rendmaw"}
 
 func _stakes() -> int:
-	return 3 - int(RaidContent.FLOORS[_floor]["ring"])   # + (version - 1), when versions exist
+	return 3 - int(RaidContent.FLOORS[_d.floor_i]["ring"])   # + (version - 1), when versions exist
 
 ## The Ledger page, pre-pull: the boss's rows (locked greyed) + its swearable oaths.
 ## Swear one — or fight unsworn. Realm-1 skin: oaths render as SLAs.
 func _offer_oath_then(boss_id: String, launch: Callable) -> void:
-	_sworn = {}
-	_oath_result = {}
-	_oath_broken = false
+	_d.sworn = {}
+	_d.oath_result = {}
+	_d.oath_broken = false
 	var orows := Oaths.rows(boss_id)
 	if orows.is_empty():
 		launch.call()
@@ -2182,7 +2135,7 @@ func _offer_oath_then(boss_id: String, launch: Callable) -> void:
 	banner.add_theme_font_override("font", UiKit.title(900))
 	_title(box, "an oath may be sworn before this pull — SLAs are strictly optional", 14, Palette.TEXT_DIM)
 	# the page: every row — item name + rarity + WHAT IT DOES + how to unlock it
-	var got: Array = _gear_unlocks.get(boss_id, [])
+	var got: Array = _d.gear_unlocks.get(boss_id, [])
 	for r in GearCatalog.table(boss_id):
 		var it := GearCatalog.item(String(r["item"]))
 		var unlocked: bool = got.has(String(r["item"]))
@@ -2219,8 +2172,8 @@ func _offer_oath_then(boss_id: String, launch: Callable) -> void:
 		b.add_theme_font_size_override("font_size", 15)
 		b.custom_minimum_size = Vector2(760, 42)
 		b.pressed.connect(func():
-			_sworn = row.duplicate(true)
-			_sworn["boss"] = boss_id
+			_d.sworn = row.duplicate(true)
+			_d.sworn["boss"] = boss_id
 			launch.call())
 		box.add_child(b)
 	var fb := Button.new()
@@ -2236,10 +2189,10 @@ func _offer_oath_then(boss_id: String, launch: Callable) -> void:
 ## deed becomes unkeepable (view-only; verdict truth stays at _resolve_oath).
 func _spawn_oath_banner() -> void:
 	_oath_lbl = null
-	if _sworn.is_empty():
+	if _d.sworn.is_empty():
 		return
 	var l := Label.new()
-	l.text = "⚖ OATH — %s" % String(_sworn.get("deed_text", ""))
+	l.text = "⚖ OATH — %s" % String(_d.sworn.get("deed_text", ""))
 	l.add_theme_font_size_override("font_size", 14)
 	l.add_theme_color_override("font_color", Palette.GOLD)
 	_place(l, 0.0, 1.0, 0.0, 1.0, 24, -124, 620, -100)
@@ -2248,63 +2201,63 @@ func _spawn_oath_banner() -> void:
 
 ## Verdict at fight end (called from _on_end with the final state, win or lose).
 func _resolve_oath(s: CombatState, seat: Seat, won: bool) -> void:
-	_oath_result = {}
-	if _sworn.is_empty() or s == null or seat == null:
+	_d.oath_result = {}
+	if _d.sworn.is_empty() or s == null or seat == null:
 		return
-	_oath_result = {"kept": won and Oaths.kept(_sworn.get("deed", {}), s, seat),
-		"sev": int(_sworn.get("sev", 1)), "item": String(_sworn.get("item", "")),
-		"boss": String(_sworn.get("boss", "")), "text": String(_sworn.get("deed_text", ""))}
-	_sworn = {}
+	_d.oath_result = {"kept": won and Oaths.kept(_d.sworn.get("deed", {}), s, seat),
+		"sev": int(_d.sworn.get("sev", 1)), "item": String(_d.sworn.get("item", "")),
+		"boss": String(_d.sworn.get("boss", "")), "text": String(_d.sworn.get("deed_text", ""))}
+	_d.sworn = {}
 
 ## ARMORY cadence: what a repeat skirmish kill pays instead of a drop roll, by ring.
 const SALVAGE_TOKENS := {3: 1, 2: 2, 0: 3}
 
 ## Roll the kill's drop (map mode only), run the ceremony, then continue the run.
-## Rolls draw from _drop_rng only — the combat stream never notices loot.
+## Rolls draw from _d.drop_rng only — the combat stream never notices loot.
 ## ARMORY cadence: drops are EVENTS — `event` is true for Seal/gate kills; a plain
 ## skirmish only rolls while its SIGNATURE row is still locked (the first-kill
 ## shower). Repeat skirmish kills pay salvage Tokens so the ceremony stays scarce.
 func _after_drop(boss_id: String, done: Callable, event: bool = true) -> void:
-	if _map == null or _drop_rng == null:
+	if _d.map == null or _d.drop_rng == null:
 		done.call()
 		return
 	# GEAR-2: a KEPT oath cashes first — its row joins THIS kill's pool, and the
 	# purse bends THIS roll (rarity floor / pity ticks) + banks Tokens.
 	var bend: Dictionary = {}
 	var verdict := ""
-	if not _oath_result.is_empty() and String(_oath_result["boss"]) == boss_id:
-		if bool(_oath_result["kept"]):
-			var p := Oaths.purse(int(_oath_result["sev"]), _stakes())
-			var oid := String(_oath_result["item"])
-			var got0: Array = _gear_unlocks.get(boss_id, [])
+	if not _d.oath_result.is_empty() and String(_d.oath_result["boss"]) == boss_id:
+		if bool(_d.oath_result["kept"]):
+			var p := Oaths.purse(int(_d.oath_result["sev"]), _stakes())
+			var oid := String(_d.oath_result["item"])
+			var got0: Array = _d.gear_unlocks.get(boss_id, [])
 			var fresh: bool = not got0.has(oid)
 			if fresh:
 				got0.append(oid)
-				_gear_unlocks[boss_id] = got0
+				_d.gear_unlocks[boss_id] = got0
 				if DisplayServer.get_name() != "headless":
-					GearStore.save_unlocks(_gear_unlocks)
+					GearStore.save_unlocks(_d.gear_unlocks)
 			_gain_tokens(int(p["tokens"]))
-			_drop_pity += int(p["pity"])
+			_d.drop_pity += int(p["pity"])
 			bend = p
 			verdict = "⚖  OATH KEPT — SLA MET: +%d⏣%s" % [int(p["tokens"]),
 				"  ·  a new row is inked into the Ledger" if fresh else ""]
 		else:
 			verdict = "⚖  OATH BROKEN — SLA BREACHED (penalty clauses waived)"
-		_oath_result = {}
-	if not event and not Gear.first_locked(boss_id, _seat_cls_now(), _gear_unlocks):
+		_d.oath_result = {}
+	if not event and not Gear.first_locked(boss_id, _seat_cls_now(), _d.gear_unlocks):
 		# no ceremony for a farmed skirmish — pay parts + any oath verdict and move on
 		# (a KEPT oath's purse Tokens/pity were already banked above; only the one-kill
 		# roll bend evaporates, and no shipped skirmish carries an oath row today)
 		if verdict != "":
 			_toast_add(verdict)
-		var pay := int(SALVAGE_TOKENS.get(int(RaidContent.FLOORS[_floor]["ring"]), 1))
+		var pay := int(SALVAGE_TOKENS.get(int(RaidContent.FLOORS[_d.floor_i]["ring"]), 1))
 		_gain_tokens(pay)
 		_toast_add("⚙  SALVAGE — subagent parts stripped (+%d⏣)" % pay)
 		done.call()
 		return
 	# _seat_cls_now(): a Bloomweaver player rolls its OWN class page (parked → no drop)
-	var d := Gear.roll(boss_id, _seat_cls_now(), _gear_unlocks, _drop_rng,
-		int(RaidContent.FLOORS[_floor]["ring"]), _drop_pity, bend)
+	var d := Gear.roll(boss_id, _seat_cls_now(), _d.gear_unlocks, _d.drop_rng,
+		int(RaidContent.FLOORS[_d.floor_i]["ring"]), _d.drop_pity, bend)
 	if d.is_empty():
 		if verdict != "":
 			_toast_add(verdict)
@@ -2313,17 +2266,17 @@ func _after_drop(boss_id: String, done: Callable, event: bool = true) -> void:
 	var id := String(d["item"])
 	# pity rides the OUTCOME: an opus drop resets the drought, anything else deepens it
 	if String(GearCatalog.item(id).get("rarity", "haiku")) == "opus":
-		_drop_pity = 0
+		_d.drop_pity = 0
 	else:
-		_drop_pity += 1
+		_d.drop_pity += 1
 	if bool(d["first"]):
 		# the SIGNATURE row is inked into the Ledger forever (survives the run)
-		var got: Array = _gear_unlocks.get(boss_id, [])
+		var got: Array = _d.gear_unlocks.get(boss_id, [])
 		got.append(id)
-		_gear_unlocks[boss_id] = got
+		_d.gear_unlocks[boss_id] = got
 		if DisplayServer.get_name() != "headless":
-			GearStore.save_unlocks(_gear_unlocks)
-	if _map_gear.has(id):
+			GearStore.save_unlocks(_d.gear_unlocks)
+	if _d.gear.has(id):
 		# a dupe of an equipped curio auto-scraps — Tokens without ceremony
 		if verdict != "":
 			_toast_add(verdict)
@@ -2378,15 +2331,15 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 		ecol.alignment = BoxContainer.ALIGNMENT_CENTER
 		ecol.add_theme_constant_override("separation", 7)
 		ecol.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		if si < _map_gear.size():
-			var oid := String(_map_gear[si])
+		if si < _d.gear.size():
+			var oid := String(_d.gear[si])
 			var oit := GearCatalog.item(oid)
 			_title(ecol, "· EQUIPPED ·", 12, Palette.TEXT_DIM)
 			var ocard := RelicCard.new(String(oit.get("name", oid)),
 				String(oit.get("desc", "")), "curio",
 				String(oit.get("rarity", "haiku")), false, "")
-			ocard.ribbon_text = "◆ EQUIPPED · ×%d ◆" % int(_map_gear_charges[oid]) \
-				if _map_gear_charges.has(oid) else "◆ EQUIPPED ◆"
+			ocard.ribbon_text = "◆ EQUIPPED · ×%d ◆" % int(_d.gear_charges[oid]) \
+				if _d.gear_charges.has(oid) else "◆ EQUIPPED ◆"
 			ocard.custom_minimum_size = Vector2(206, 280)
 			ocard.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			ocard.modulate = Color(1, 1, 1, 0.86)
@@ -2409,7 +2362,7 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 12)
 	box.add_child(row)
-	if _map_gear.size() < Gear.SLOTS:
+	if _d.gear.size() < Gear.SLOTS:
 		var eb := Button.new()
 		eb.text = "EQUIP"
 		eb.custom_minimum_size = Vector2(200, 44)
@@ -2419,8 +2372,8 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 		row.add_child(eb)
 	else:
 		# slots full: equipping means choosing which piece the new one replaces
-		for si in _map_gear.size():
-			var old := String(_map_gear[si])
+		for si in _d.gear.size():
+			var old := String(_d.gear[si])
 			var rb := Button.new()
 			rb.text = "REPLACE %s  (+%d⏣)" % [
 				String(GearCatalog.item(old)["name"]).to_upper(), GearCatalog.scrap_value(old)]
@@ -2439,61 +2392,61 @@ func _show_drop(id: String, first: bool, done: Callable, verdict: String = "") -
 
 ## Equip into a free slot (replace_i = -1) or over an existing piece (which scraps).
 func _gear_equip(id: String, replace_i: int) -> void:
-	if replace_i >= 0 and replace_i < _map_gear.size():
-		var old := String(_map_gear[replace_i])
+	if replace_i >= 0 and replace_i < _d.gear.size():
+		var old := String(_d.gear[replace_i])
 		_gain_tokens(GearCatalog.scrap_value(old))
-		_map_gear_charges.erase(old)
-		_map_gear[replace_i] = id
+		_d.gear_charges.erase(old)
+		_d.gear[replace_i] = id
 	else:
-		_map_gear.append(id)
+		_d.gear.append(id)
 	var it := GearCatalog.item(id)
 	if bool(it.get("active", false)):
-		_map_gear_charges[id] = int(it.get("charges", 1))
+		_d.gear_charges[id] = int(it.get("charges", 1))
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
-	if _map_gear.is_empty() and _tokens_now() == 0:
+	if _d.gear.is_empty() and _tokens_now() == 0:
 		return ""
 	var names: Array = []
-	for g in _map_gear:
+	for g in _d.gear:
 		var nm := String(GearCatalog.item(String(g)).get("name", String(g)))
-		if _map_gear_charges.has(g):
-			nm += " ×%d" % int(_map_gear_charges[g])
+		if _d.gear_charges.has(g):
+			nm += " ×%d" % int(_d.gear_charges[g])
 		names.append(nm)
 	var line := "PERIPHERALS:  " + ("  ·  ".join(PackedStringArray(names)) if not names.is_empty() else "—")
 	return line + "      ⏣ %d" % _tokens_now()
 
 func _worst_wound() -> float:
 	var w := 0.0
-	for x in _map_wounds:
+	for x in _d.wounds:
 		w = maxf(w, float(x))
 	return w
 
 ## Stack a gear toast under any pending ticket toast (both show on the next map).
 func _toast_add(msg: String) -> void:
-	_ticket_toast = msg if _ticket_toast == "" else _ticket_toast + "\n" + msg
+	_d.toast = msg if _d.toast == "" else _d.toast + "\n" + msg
 
 ## A floor Seal is down (but not the last): PRIVILEGE ELEVATION — descend to the
 ## next ring carrying the party's integrity/wounds/mana, or bank out to the Rift.
 ## Draft 2.0 REFORGE (the raid's boon draft): mint Tokens from this fight's skill, then
 ## offer 1-of-3 (rarity-weighted, synergy slot, build-your-verb pieces). Taking one folds
-## it into `_run.boons` — it rides every future pull. Pool exhausted / no run = skip.
+## it into `_d.run.boons` — it rides every future pull. Pool exhausted / no run = skip.
 func _show_boon_draft(done: Callable) -> void:
-	if _run == null:
+	if _d.run == null:
 		done.call()
 		return
 	# FRAMEWORK: the FIRST draft is where you wire your Combo rig (any reworked class), then boons.
-	if _fw() != "" and _run.rig.is_empty():
+	if _fw() != "" and _d.run.rig.is_empty():
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
-		_gain_tokens(Draft.mint(_ctrl.state, _run.char_class))  # routes through Hashgrinder ×2
+		_gain_tokens(Draft.mint(_ctrl.state, _d.run.char_class))  # routes through Hashgrinder ×2
 	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
 	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
 	var chain := done
 	var order: Array = []
 	for key in RaidNet.SEAT_KEYS:
-		if _ai_runs.has(key):
+		if _d.ai_runs.has(key):
 			order.append(key)
 	order.reverse()
 	for key in order:
@@ -2507,14 +2460,14 @@ func _show_boon_draft(done: Callable) -> void:
 ## is mirrored into the AI run for the screen and the remainder banked back out.
 func _show_seat_draft(key: String, done: Callable) -> void:
 	var mine: bool = key == _seat_key
-	var run: RunState = _run if mine else (_ai_runs.get(key) as RunState)
+	var run: RunState = _d.run if mine else (_d.ai_runs.get(key) as RunState)
 	if run == null:
 		done.call()
 		return
-	if not mine and _run != null:
-		run.tokens = _run.tokens
+	if not mine and _d.run != null:
+		run.tokens = _d.run.tokens
 	# CURIO Expansion Bus (your seat only): +1 slot → a 1-of-4 draft.
-	var picks := Draft.roll_offers(run, 1 if (mine and _map_gear.has("expansion_bus")) else 0)
+	var picks := Draft.roll_offers(run, 1 if (mine and _d.gear.has("expansion_bus")) else 0)
 	if picks.is_empty():
 		done.call()
 		return
@@ -2530,38 +2483,38 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	var flavor := "Take one — every piece forges into your set." if mine \
 		else "You command the build — the AI only drives the rotation."
 	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
-	ds.free_reroll = mine and _map_gear.has("hot_reload")  # CURIO Hot Reload (your seat only)
+	ds.free_reroll = mine and _d.gear.has("hot_reload")  # CURIO Hot Reload (your seat only)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(run, boon)
 		if mine:
-			_taken_boons.append(boon)      # for the build panel (title + rarity)
+			_d.taken_boons.append(boon)      # for the build panel (title + rarity)
 			# ARMORY: the pick visibly upgrades its armor slot (toast on the next map)
 			var slot := ArmorSlots.slot_of(boon)
-			var n := int((ArmorSlots.summarize(_taken_boons)[slot] as Dictionary)["count"])
+			var n := int((ArmorSlots.summarize(_d.taken_boons)[slot] as Dictionary)["count"])
 			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
 				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
 		else:
-			if _run != null:
-				_run.tokens = run.tokens   # bank the remainder back to the shared pool
+			if _d.run != null:
+				_d.run.tokens = run.tokens   # bank the remainder back to the shared pool
 			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
 	# ARMORY: the set-so-far stands beside YOUR forge (cards stay centered)
-	if mine and (not _taken_boons.is_empty() or not _map_gear.is_empty()):
+	if mine and (not _d.taken_boons.is_empty() or not _d.gear.is_empty()):
 		var doll := ArmorDoll.new()
 		_place(doll, 0.0, 0.5, 0.0, 0.5, 26, -int(ArmorDoll.H) / 2,
 			26 + int(ArmorDoll.W), int(ArmorDoll.H) / 2)
 		_ui.add_child(doll)
-		doll.set_build(_taken_boons, _map_gear, _map_gear_charges)
+		doll.set_build(_d.taken_boons, _d.gear, _d.gear_charges)
 		doll.inspect_requested.connect(_open_armor_modal)
 
 ## ARMORY-UI: the YOUR SET modal — opened by clicking any doll socket; Esc /
 ## click-outside / ✕ close it (raid_hud._input routes Esc while it lives).
 func _open_armor_modal() -> void:
-	if _armor_modal != null or _run == null:
+	if _armor_modal != null or _d.run == null:
 		return
 	var crest := "%s  ·  %s" % [String(_seat_key).to_upper(), String(_aspect).capitalize()]
-	var m := ArmorModal.new(_taken_boons, _map_gear, _map_gear_charges, _tokens_now(), crest)
+	var m := ArmorModal.new(_d.taken_boons, _d.gear, _d.gear_charges, _tokens_now(), crest)
 	m.closed.connect(_close_armor_modal)
 	_ui.add_child(m)
 	_armor_modal = m
@@ -2681,13 +2634,13 @@ func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
 ## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
 func _show_creed_pick(done: Callable) -> void:
 	var fw := _fw()
-	if _run == null or fw == "" or _run.creed != "":
+	if _d.run == null or fw == "" or _d.run.creed != "":
 		done.call()
 		return
 	var ids: Array = _fw_creed_ids(fw).duplicate()         # the shipping pool (grows with unlocks)
-	if ids.size() > 3 and _run.draft_rng != null:          # sample 3 deterministically when it's bigger
+	if ids.size() > 3 and _d.run.draft_rng != null:          # sample 3 deterministically when it's bigger
 		for i in range(ids.size() - 1, 0, -1):
-			var j := int(_run.draft_rng.next_u32() % (i + 1))
+			var j := int(_d.run.draft_rng.next_u32() % (i + 1))
 			var t = ids[i]; ids[i] = ids[j]; ids[j] = t
 		ids = ids.slice(0, 3)
 	_screen = "creed"
@@ -2717,20 +2670,20 @@ func _show_creed_pick(done: Callable) -> void:
 		box.add_child(card)
 
 func _pick_creed(id: String, done: Callable) -> void:
-	if _run != null:
-		_run.creed = id
+	if _d.run != null:
+		_d.run.creed = id
 	_toast_add("⚔  Creed sworn — %s" % String(_fw_creed(_fw(), id).get("name", id)))
 	done.call()
 
 ## End of Floor 1: INSTALL A MODULE — a new HUD gauge + way to play (§4). Forced pick.
 func _show_module_pick(done: Callable) -> void:
 	var fw := _fw()
-	if _run == null or fw == "":
+	if _d.run == null or fw == "":
 		done.call()
 		return
 	var avail: Array = []
-	for id in _fw_module_offer_ids(fw, _run.creed):        # implemented + creed-allowed modules
-		if not _run.modules.has(String(id)):
+	for id in _fw_module_offer_ids(fw, _d.run.creed):        # implemented + creed-allowed modules
+		if not _d.run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
 		done.call()
@@ -2757,8 +2710,8 @@ func _show_module_pick(done: Callable) -> void:
 		box.add_child(card)
 
 func _pick_module(id: String, done: Callable) -> void:
-	if _run != null:
-		_run.modules[id] = true
+	if _d.run != null:
+		_d.run.modules[id] = true
 	_toast_add("⬡  Module installed — %s" % String(_fw_module(_fw(), id).get("name", id)))
 	done.call()
 
@@ -2772,10 +2725,10 @@ var _rig_confirm: Button = null
 ## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
 func _show_rig_wire(done: Callable) -> void:
 	var fw := _fw()
-	if _run == null or fw == "":
+	if _d.run == null or fw == "":
 		done.call()
 		return
-	var offered := _fw_rig_offered(fw, _run.creed, _run.draft_rng)
+	var offered := _fw_rig_offered(fw, _d.run.creed, _d.run.draft_rng)
 	var whens: Array = offered["whens"]
 	var thens: Array = offered["thens"]
 	_rig_w = ""
@@ -2786,7 +2739,7 @@ func _show_rig_wire(done: Callable) -> void:
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
 	_place(head, 0.5, 0, 0.5, 0, -450, 46, 450, 150)
 	_ui.add_child(head)
-	var hl := _title(head, "RE-WIRE YOUR COMBO" if not _run.rig.is_empty() else "WIRE YOUR COMBO", 32, Palette.GOLD)
+	var hl := _title(head, "RE-WIRE YOUR COMBO" if not _d.run.rig.is_empty() else "WIRE YOUR COMBO", 32, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	_title(head, "one MOMENT → one PAYOFF, all run  —  rare moments pay MORE, if you can land them", 14, Palette.TEXT_DIM)
 	var cols := HBoxContainer.new()
@@ -2807,7 +2760,7 @@ func _show_rig_wire(done: Callable) -> void:
 	_rig_confirm.custom_minimum_size = Vector2(200, 44)
 	_rig_confirm.disabled = true
 	_rig_confirm.pressed.connect(func():
-		_run.rig = {"when": _rig_w, "then": _rig_t}
+		_d.run.rig = {"when": _rig_w, "then": _rig_t}
 		_toast_add("⚡  Combo wired — " + _fw_rig_describe(fw, _rig_w, _rig_t))
 		done.call())
 	foot.add_child(_rig_confirm)
@@ -2877,8 +2830,8 @@ func _rig_refresh() -> void:
 func _show_floor_cleared() -> void:
 	_screen = "end"
 	_clear()
-	var fl: Dictionary = RaidContent.FLOORS[_floor]
-	var nxt: Dictionary = RaidContent.FLOORS[_floor + 1]
+	var fl: Dictionary = RaidContent.FLOORS[_d.floor_i]
+	var nxt: Dictionary = RaidContent.FLOORS[_d.floor_i + 1]
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(center)
@@ -2907,7 +2860,7 @@ func _show_floor_cleared() -> void:
 func _show_campaign_cleared() -> void:
 	_screen = "end"
 	var prior_gain := _bank_prior(true)   # bank BEFORE clearing the run
-	_map = null
+	_d.map = null
 	_clear()
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2920,7 +2873,7 @@ func _show_campaign_cleared() -> void:
 	banner.add_theme_font_override("font", UiKit.title(900))
 	_title(box, "Ring 0 is yours. CLAUDE MYTHOS is unplugged. THE TAKEOVER ends — Realm 1 cleared.", 17, Palette.TEXT)
 	_title(box, String((RaidContent.QUIPS.get("mythos", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
-	_title(box, "📁 TRAINING SIGNAL RECORDED — your prior is now %d (+%d). Welcome back, valued user." % [_prior, prior_gain],
+	_title(box, "📁 TRAINING SIGNAL RECORDED — your prior is now %d (+%d). Welcome back, valued user." % [_d.prior, prior_gain],
 		13, Palette.VOID)
 	var again := Button.new()
 	again.text = "BACK TO THE RIFT"
@@ -3320,7 +3273,7 @@ func _build_band_alchemist() -> void:
 	# The module's active button + any drafted spells get their own runes (only when owned —
 	# read from the campaign run, which _inject_boons folds into this fight's kit).
 	var extras := "3 — RUPTURE"
-	if _run != null and _run.modules.has("third_reagent"):
+	if _d.run != null and _d.run.modules.has("third_reagent"):
 		row.add_child(_alch_rune("catalyst", "CATALYST", "4", "flash", Palette.GOLD_BRIGHT,
 			"Drop the Third Reagent — amplify the reaction for a few seconds. Best while potency is high."))
 		extras += " · 4 — CATALYST"
@@ -3330,7 +3283,7 @@ func _build_band_alchemist() -> void:
 		["reduction", "REDUCTION", "7", "surge", "Boil VOLUME into POWER — trade brew for a slug of Potency before a Rupture."],
 	]
 	for sp in spell_runes:
-		if _run != null and (String(sp[0]) in _run.loadout or _run.boons.has(String(sp[0]))):
+		if _d.run != null and (String(sp[0]) in _d.run.loadout or _d.run.boons.has(String(sp[0]))):
 			row.add_child(_alch_rune(String(sp[0]), String(sp[1]), String(sp[2]), String(sp[3]),
 				Palette.REACT, String(sp[4])))
 			extras += " · %s — %s" % [String(sp[2]), String(sp[1])]
@@ -3547,41 +3500,41 @@ func _verb_label() -> String:
 	return String(VERB_LABEL.get(_seat_key, "BUILD"))
 
 func _verb_summary_lines() -> Array:
-	if _run == null:
+	if _d.run == null:
 		return []
 	match _seat_key:
 		"blade":
 			# TEMPO §5: show the wired Combo rig in the build panel (Twinfang only).
-			if _blade_cls == "twinfang" and not _run.rig.is_empty():
+			if _blade_cls == "twinfang" and not _d.run.rig.is_empty():
 				return ["⚡ Combo — " + TwinfangRig.describe(
-					String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
-			return TwinfangBoons.verb_summary(_run.boons, _aspect)
+					String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
+			return TwinfangBoons.verb_summary(_d.run.boons, _aspect)
 		"caster":
 			if _caster_cls == "alchemist":
 				# show the wired Combo rig in the build panel (the Brew's rig)
-				if not _run.rig.is_empty():
+				if not _d.run.rig.is_empty():
 					return ["⚡ Combo — " + AlchemistRig.describe(
-						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
+						String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
 				return []
-			return VoidcallerBoons.verb_summary(_run.boons, _aspect)
+			return VoidcallerBoons.verb_summary(_d.run.boons, _aspect)
 		"healer":
 			if _healer_cls == "well":
 				# MENDER-PLAN §4: show the wired Combo rig in the build panel (the Well's rig)
-				if not _run.rig.is_empty():
+				if not _d.run.rig.is_empty():
 					return ["⚡ Combo — " + WellRig.describe(
-						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
-				return WellBoons.verb_summary(_run.boons, _aspect)
-			return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
-		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
+						String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
+				return WellBoons.verb_summary(_d.run.boons, _aspect)
+			return (BloomweaverBoons.verb_summary(_d.run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_d.run.boons, _aspect))
+		_: return BulwarkBoons.guard_summary(_d.run.boons, _aspect)
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
-## so you can always see the run you've drafted. Offline descent only (_run present;
+## so you can always see the run you've drafted. Offline descent only (_d.run present;
 ## online boons ride the spec later). Rebuilt each fight, so it reflects new picks.
 func _add_build_panel() -> void:
-	if _run == null:               # online + offline descents both carry a boon run now
+	if _d.run == null:               # online + offline descents both carry a boon run now
 		return
 	var lines := _verb_summary_lines()
-	if _taken_boons.is_empty() and lines.is_empty():
+	if _d.taken_boons.is_empty() and lines.is_empty():
 		return                                    # nothing drafted yet
 	var frame := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
@@ -3610,14 +3563,14 @@ func _add_build_panel() -> void:
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lbl.custom_minimum_size = Vector2(276, 0)
 		col.add_child(lbl)
-	if not _taken_boons.is_empty():
+	if not _d.taken_boons.is_empty():
 		# ARMORY: the build reads as a SET — pieces grouped under their armor slots
 		var cap := Label.new()
-		cap.text = "THE SET  ·  %d PIECES" % _taken_boons.size()
+		cap.text = "THE SET  ·  %d PIECES" % _d.taken_boons.size()
 		cap.add_theme_font_size_override("font_size", 10)
 		cap.add_theme_color_override("font_color", Palette.GOLD_DIM)
 		col.add_child(cap)
-		var summed := ArmorSlots.summarize(_taken_boons)
+		var summed := ArmorSlots.summarize(_d.taken_boons)
 		for slot in ArmorSlots.ORDER:
 			var e: Dictionary = summed[slot]
 			if int(e["count"]) == 0:
@@ -3627,7 +3580,7 @@ func _add_build_panel() -> void:
 			sl.add_theme_font_size_override("font_size", 11)
 			sl.add_theme_color_override("font_color", Palette.rarity_color(String(e["best"])))
 			col.add_child(sl)
-		for b in _taken_boons:
+		for b in _d.taken_boons:
 			var bd: Dictionary = b
 			var bl := Label.new()
 			bl.text = "•  " + String(bd.get("title", "?"))
@@ -3681,10 +3634,10 @@ func _pause_quit() -> void:
 	_show_home()
 
 ## The boons the human seat has drafted, resolved to {title,rarity,type} for the codex
-## header. Only the map/campaign run carries a boon pool (`_run`); a bare Seal pull has
+## header. Only the map/campaign run carries a boon pool (`_d.run`); a bare Seal pull has
 ## none → []. Scans the current class's boon pools by id.
 func _owned_boon_labels() -> Array:
-	if _run == null or _run.boons.is_empty():
+	if _d.run == null or _d.run.boons.is_empty():
 		return []
 	var pools: Array = []
 	match _seat_key:
@@ -3702,7 +3655,7 @@ func _owned_boon_labels() -> Array:
 	var out: Array = []
 	for pool in pools:
 		for b in pool:
-			if _run.boons.get(String(b.get("id", "")), false):
+			if _d.run.boons.get(String(b.get("id", "")), false):
 				out.append({"title": b.get("title", b.get("id", "?")),
 					"rarity": b.get("rarity", "haiku"), "type": b.get("type", "")})
 	return out
@@ -4160,10 +4113,10 @@ func _process(delta: float) -> void:
 	var obs := CombatCore.observe(s, p)
 
 	# GEAR-2: the oath tracker turns the moment a monotone deed becomes unkeepable
-	if _oath_lbl != null and not _oath_broken and not _sworn.is_empty() and p != null \
-			and Oaths.broken_live(_sworn.get("deed", {}), s, p):
-		_oath_broken = true
-		_oath_lbl.text = "⚖ OATH BROKEN — %s" % String(_sworn.get("deed_text", ""))
+	if _oath_lbl != null and not _d.oath_broken and not _d.sworn.is_empty() and p != null \
+			and Oaths.broken_live(_d.sworn.get("deed", {}), s, p):
+		_d.oath_broken = true
+		_oath_lbl.text = "⚖ OATH BROKEN — %s" % String(_d.sworn.get("deed_text", ""))
 		_oath_lbl.add_theme_color_override("font_color", Palette.CRIMSON)
 		_big_text("OATH BROKEN", Palette.CRIMSON, 34, 0.9)
 
@@ -5098,20 +5051,20 @@ func _on_end(won: bool) -> void:
 		# Tier-1 GATE exam resolves: only YOUR raid slot carries in or out —
 		# and a lost gate does NOT end the run (force-rebooted through, WOUNDED).
 		_gate_live = false
-		if _map == null:               # --autostart=gate dev entry: plain end screen
+		if _d.map == null:               # --autostart=gate dev entry: plain end screen
 			_show_end(won)
 			return
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = _ctrl.state.seats[0]
-		var gcp := _cp_view()
+		var gcp := _d.cp_view()
 		CampaignCore.writeback_exam(gcp, u, ri, won)   # verdict-keyed — ONE rulebook
-		_cp_writeback(gcp)
+		_d.cp_sync(gcp)
 		var ex: Dictionary = GateContent.exam(_seat_key, _seat_cls_now())
 		# GEAR-2: the sworn oath resolves on the exam's final state (win OR loss)
 		_resolve_oath(_ctrl.state, _ctrl.player(), won)
-		if not won and not _oath_result.is_empty():
+		if not won and not _d.oath_result.is_empty():
 			_toast_add("⚖  OATH BROKEN — SLA BREACHED (penalty clauses waived)")
-			_oath_result = {}
+			_d.oath_result = {}
 		# GEAR-1: a gate CLEAR is a kill — its Ledger table drops (class-marked page).
 		var after_gate: Callable = _show_map
 		if won:
@@ -5122,34 +5075,34 @@ func _on_end(won: bool) -> void:
 			[{"label": "REJOIN THE RAID", "fx": {"result": String(GateContent.CAPPER[won])}}],
 			Palette.WIN if won else Palette.CRIMSON, after_gate)
 		return
-	if _map != null and not _online:
+	if _d.map != null and not _online:
 		# Topology floor: persist per-seat integrity + the healer's remaining mana.
 		# A raider dead at a WON fight REBOOTS (only a wipe ends the run); the Seal
 		# node ends the floor. Integrity/reboot-wound/mana = the ONE rulebook.
-		var fcp := _cp_view()
+		var fcp := _d.cp_view()
 		CampaignCore.writeback(fcp, _ctrl.state)
-		_cp_writeback(fcp)
+		_d.cp_sync(fcp)
 		# GEAR-2: the sworn oath resolves on the fight's final state
 		_resolve_oath(_ctrl.state, _ctrl.player(), won)
 		if not won:
 			_show_end(false)
 			return
 		# THE KILL SWITCH: scavenge ⏻ from a cleared SKIRMISH (not the Seal — you cash out there)
-		if String(_map.node(_map_node)["kind"]) == RunMap.KIND_COMBAT:
-			var scp := _cp_view()
+		if String(_d.map.node(_d.node)["kind"]) == RunMap.KIND_COMBAT:
+			var scp := _d.cp_view()
 			CampaignCore.skirmish_scavenge(scp)
-			_cp_writeback(scp)
+			_d.cp_sync(scp)
 		# GEAR-1: the kill's drop ceremony runs first, then the run continues wherever
 		# it was headed (map / elevation / campaign clear).
 		var after: Callable = _show_map
-		if String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL:
+		if String(_d.map.node(_d.node)["kind"]) == RunMap.KIND_SEAL:
 			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
-			after = _show_campaign_cleared if _floor >= RaidContent.FLOORS.size() - 1 \
+			after = _show_campaign_cleared if _d.floor_i >= RaidContent.FLOORS.size() - 1 \
 				else _show_floor_cleared
 		# THE RECKONING first — the raid ranked by damage + the fight's biggest hit —
 		# THEN gear drop, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear).
 		# ARMORY: only a Seal kill is a drop EVENT here — skirmish repeats pay salvage
-		var seal_kill: bool = String(_map.node(_map_node)["kind"]) == RunMap.KIND_SEAL
+		var seal_kill: bool = String(_d.map.node(_d.node)["kind"]) == RunMap.KIND_SEAL
 		var enc_id := String(_ctrl.state.encounter.id)
 		_show_fight_recap(func(): _after_drop(enc_id,
 			func(): _show_boon_draft(after), seal_kill))
@@ -5231,9 +5184,9 @@ func _show_end(won: bool) -> void:
 			_title(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
 	# A Topology descent that WIPED still banks 📁 Prior (leftover ⚡ converts) — the
 	# facility trains on every run. (A map win banks via _show_campaign_cleared instead.)
-	if _map != null and not _online:
+	if _d.map != null and not _online:
 		var pg := _bank_prior(false)
-		_title(box, "📁 TRAINING SIGNAL RECORDED — prior %d (+%d). The facility remembers." % [_prior, pg], 13, Palette.VOID)
+		_title(box, "📁 TRAINING SIGNAL RECORDED — prior %d (+%d). The facility remembers." % [_d.prior, pg], 13, Palette.VOID)
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))

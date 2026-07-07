@@ -21,15 +21,15 @@ func _process(_d: float) -> bool:
 	step += 1
 	if step < 2:
 		return false
-	hud._floor = 0                     # RING 3 — fillers must come out t1
-	hud._map = RunMap.generate(90210, 8, MapContent.raid_event_ids(), {}, 0, 0, 8)
-	hud._map_fights = RaidContent.floor_fights(3)
-	var enc: EncounterRes = hud._map_fights[2]
+	hud._d.floor_i = 0                     # RING 3 — fillers must come out t1
+	hud._d.map = RunMap.generate(90210, 8, MapContent.raid_event_ids(), {}, 0, 0, 8)
+	hud._d.fights = RaidContent.floor_fights(3)
+	var enc: EncounterRes = hud._d.fights[2]
 	# entry + Seal slots never roll
-	hud._map_node = 3
-	_ck((hud._roll_map_pack(0, hud._map_fights[0]) as Array).is_empty(), "entry never rolls")
-	_ck((hud._roll_map_pack(hud._map_fights.size() - 1,
-		hud._map_fights[hud._map_fights.size() - 1]) as Array).is_empty(), "the Seal never rolls")
+	hud._d.node = 3
+	_ck((hud._roll_map_pack(0, hud._d.fights[0]) as Array).is_empty(), "entry never rolls")
+	_ck((hud._roll_map_pack(hud._d.fights.size() - 1,
+		hud._d.fights[hud._d.fights.size() - 1]) as Array).is_empty(), "the Seal never rolls")
 	# determinism per (seed, node)
 	var a: Array = hud._roll_map_pack(2, enc)
 	var b: Array = hud._roll_map_pack(2, enc)
@@ -39,7 +39,7 @@ func _process(_d: float) -> bool:
 	var duo := 0
 	var trio := 0
 	for nid in range(400):
-		hud._map_node = nid
+		hud._d.node = nid
 		var p: Array = hud._roll_map_pack(2, enc)
 		if p.is_empty():
 			solo += 1
@@ -63,14 +63,14 @@ func _process(_d: float) -> bool:
 	_ck(absf(ft - 25.0) < 10.0, "trio share ≈25%% (got %.0f%%)" % ft)
 	print("quota over 400 nodes: solo %.0f%% · duo %.0f%% · trio %.0f%%" % [fs, fd, ft])
 	# tier rides the ring: the ROOT floor's walk-ins come out t3
-	hud._floor = 2
-	hud._map_node = _first_packed_node(enc)
+	hud._d.floor_i = 2
+	hud._d.node = _first_packed_node(enc)
 	var pr: Array = hud._roll_map_pack(2, enc)
 	_ck(":3:" in String(pr[0]), "Ring 0 walk-in is t3 (got %s)" % String(pr[0]))
-	hud._floor = 0
+	hud._d.floor_i = 0
 	# a rolled pack builds a real state whose LAST member is the captain — and the
 	# forge walk-in regenerates from its id alone through the shared spec path
-	hud._map_node = _first_packed_node(enc)
+	hud._d.node = _first_packed_node(enc)
 	var pk: Array = hud._roll_map_pack(2, enc)
 	var spec := RaidNet.make_spec(1234, {}, String(pk[0]), {}, {}, pk)
 	var s := RaidNet.build(spec, "")
@@ -85,7 +85,7 @@ func _process(_d: float) -> bool:
 
 func _first_packed_node(enc: EncounterRes) -> int:
 	for nid in range(200):
-		hud._map_node = nid
+		hud._d.node = nid
 		if not (hud._roll_map_pack(2, enc) as Array).is_empty():
 			return nid
 	return 0

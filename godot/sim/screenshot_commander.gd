@@ -36,11 +36,11 @@ func _process(_d: float) -> bool:
 		"party_default":
 			hud._seat_key = "tank"
 			hud._aspect = "warden"
-			hud._party = {}
+			hud._d.party = {}
 			hud._show_party_setup()
 		"party_commanded":
-			hud._party["blade"]["aspect"] = "tempo"
-			hud._party["healer"] = {"cls": "bloomweaver", "aspect": "thornveil"}
+			hud._d.party["blade"]["aspect"] = "tempo"
+			hud._d.party["healer"] = {"cls": "bloomweaver", "aspect": "thornveil"}
 			hud._show_party_setup()
 		"ai_draft":
 			hud._start_map_run()
