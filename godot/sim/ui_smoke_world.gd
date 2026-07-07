@@ -8,6 +8,7 @@
 ## Run: godot --headless --path godot --script res://sim/ui_smoke_world.gd
 extends SceneTree
 
+var shell: Control
 var hud: Control
 var step := 0
 var fails := 0
@@ -32,63 +33,72 @@ const PLAN := [
 ]
 
 func _initialize() -> void:
-	hud = (load("res://game/raid_main.tscn") as PackedScene).instantiate()
-	root.add_child(hud)
+	shell = (load("res://game/world_shell.tscn") as PackedScene).instantiate()
+	root.add_child(shell)
+
+## The walker crosses BOTH surfaces: shell screens (zone/zonestop/atlas) and the
+## instance's (combat/recap) — read whichever is live.
+func _scr() -> String:
+	return String(hud._screen) if String(shell._screen) == "instance" else String(shell._screen)
 
 func _process(_d: float) -> bool:
+	if hud == null:
+		hud = shell.hud   # shell._ready ran at frame 1 (the _initialize gotcha)
+		if hud == null:
+			return false
 	step += 1
 	if step > 400:
 		print("WORLD UI SMOKE: FAIL (no end after %d steps)" % step)
 		quit(1)
 		return true
 	if step == 1:
-		_check(hud._screen == "home", "home up")
-		hud._start_world_pick()
-		_check(hud._screen == "class", "world door → class select")
+		_check(shell._screen == "home", "home up")
+		shell._start_world_pick()
+		_check(shell._screen == "class", "world door → class select")
 		return false
 	if step == 2:
-		hud._pick_class("tank", "bulwark")
-		_check(hud._screen == "aspect", "class → aspect ceremony")
+		shell._pick_class("tank", "bulwark")
+		_check(shell._screen == "aspect", "class → aspect ceremony")
 		return false
 	if step == 3:
-		hud._show_raid_select("tank", "warden")   # the ceremony's chosen route
-		_check(hud._screen == "atlas", "world_pending: aspect → THE ATLAS")
+		shell._show_raid_select("tank", "warden")   # the ceremony's chosen route
+		_check(shell._screen == "atlas", "world_pending: aspect → THE ATLAS")
 		_check(hud._world != null, "world save loaded (in-memory, disk-inert)")
 		return false
 	if step == 4:
-		hud._enter_atlas_pin("bastion")
-		_check(hud._screen == "bastion", "atlas → the Bastion")
+		shell._enter_atlas_pin("bastion")
+		_check(shell._screen == "bastion", "atlas → the Bastion")
 		return false
 	if step == 5:
-		hud._show_party_setup()
-		_check(hud._screen == "party", "the Warband Camp opens the Commander tent")
+		shell._show_party_setup()
+		_check(shell._screen == "party", "the Warband Camp opens the Commander tent")
 		_check(hud._party_ctx == "bastion", "camp knows it's a place, not a descent")
 		return false
 	if step == 6:
-		hud._show_bastion()
-		hud._show_atlas()
-		_check(hud._screen == "atlas", "muster returns → set out to the Atlas")
+		shell._show_bastion()
+		shell._show_atlas()
+		_check(shell._screen == "atlas", "muster returns → set out to the Atlas")
 		return false
 	if step == 7:
-		hud._enter_atlas_pin(WorldContent.ZONE1)
-		_check(hud._screen == "zone", "atlas → ZONE 1 (the Gildfields)")
+		shell._enter_atlas_pin(WorldContent.ZONE1)
+		_check(shell._screen == "zone", "atlas → ZONE 1 (the Gildfields)")
 		var front := WorldContent.frontier(WorldContent.zone(WorldContent.ZONE1), hud._world)
 		_check(front == [0], "fresh zone: only the entry beckons")
 		return false
 
 	# ---- the conquest drive: one PLAN entry per screen-cycle
-	match String(hud._screen):
+	match _scr():
 		"zone":
 			if plan_i >= PLAN.size():
 				return _finish()
 			var nid := int(PLAN[plan_i][0])
 			var front := WorldContent.frontier(WorldContent.zone(WorldContent.ZONE1), hud._world)
 			_check(front.has(nid), "plan node %d is on the frontier" % nid)
-			hud._enter_zone_node(nid)
-			_check(hud._screen == "zonestop", "node %d stops for its fiction beat" % nid)
+			shell._enter_zone_node(nid)
+			_check(shell._screen == "zonestop", "node %d stops for its fiction beat" % nid)
 		"zonestop":
 			var panel: MapEventPanel = null
-			for c in hud._ui.get_children():
+			for c in shell._ui.get_children():
 				if c is MapEventPanel and not c.is_queued_for_deletion():
 					panel = c
 			_check(panel != null, "zone stop panel present")
@@ -101,7 +111,7 @@ func _process(_d: float) -> bool:
 			panel._on_press(panel.choices[pick], pick)
 			panel.finished.emit(fx)
 			# a non-combat node resolves straight back to the zone → advance the plan
-			if String(hud._screen) == "zone":
+			if String(shell._screen) == "zone":
 				_after_node(int(PLAN[plan_i][0]))
 				plan_i += 1
 		"combat":
@@ -117,11 +127,11 @@ func _process(_d: float) -> bool:
 			hud._on_end(true)
 			_check(hud._screen == "recap", "won pull → the Reckoning")
 		"recap":
-			var btn := _find_button(hud._ui, "CONTINUE ▸")
+			var btn := _find_button(shell, "CONTINUE ▸")
 			_check(btn != null, "recap continue present")
 			if btn != null:
 				btn.pressed.emit()
-			_check(String(hud._screen) == "zone", "recap → back on the zone map")
+			_check(String(shell._screen) == "zone", "recap → back on the zone map")
 			_after_node(int(PLAN[plan_i][0]))
 			plan_i += 1
 	return false
@@ -149,8 +159,8 @@ func _after_node(nid: int) -> void:
 		"save canonical round-trip at node %d" % nid)
 
 func _finish() -> bool:
-	hud._show_atlas()
-	_check(hud._screen == "atlas", "conquest done → the Atlas")
+	shell._show_atlas()
+	_check(shell._screen == "atlas", "conquest done → the Atlas")
 	var w: WorldSave = hud._world
 	# §MEWGENICS STEALS ① — the rush route never enters the pickup node (4), so the escort
 	# must have stayed inert through the whole HUD drive (flag guard didn't misfire).
@@ -162,8 +172,8 @@ func _finish() -> bool:
 		str(w.has_waystation(WorldContent.ZONE1)),
 		str(WorldContent.zone_conquered(WorldContent.zone(WorldContent.ZONE1), w))])
 	# DEV RESET: the Atlas button wipes the world — fresh fog, nothing conquered
-	hud._world_dev_reset()
-	_check(hud._screen == "atlas", "reset lands back on the Atlas")
+	shell._world_dev_reset()
+	_check(shell._screen == "atlas", "reset lands back on the Atlas")
 	_check((hud._world as WorldSave).cleared_count(WorldContent.ZONE1) == 0,
 		"dev reset: a fresh world (0 conquered)")
 	_check((hud._world as WorldSave).flags(WorldContent.ZONE1).is_empty(),

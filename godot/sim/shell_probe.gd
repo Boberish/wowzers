@@ -16,7 +16,7 @@ func _process(_d: float) -> bool:
 		return false
 	if step == 2:
 		_check(shell.hud != null, "shell raised the HUD")
-		_check(String(shell.hud._screen) == "home", "boot lands on HOME (got %s)" % shell.hud._screen)
+		_check(String(shell._screen) == "home", "boot lands on HOME (got %s)" % shell._screen)
 		shell.drive_autostart(["--autostart=raid:tank"])
 		_check(String(shell.hud._screen) == "combat", "raid idiom -> combat (got %s)" % shell.hud._screen)
 		shell.hud._show_home()
@@ -24,10 +24,10 @@ func _process(_d: float) -> bool:
 		_check(String(shell.hud._screen) == "map", "raidmap idiom -> map (got %s)" % shell.hud._screen)
 		shell.hud._show_home()
 		shell.drive_autostart(["--autostart=world"])
-		_check(String(shell.hud._screen) == "atlas", "world idiom -> atlas (got %s)" % shell.hud._screen)
+		_check(String(shell._screen) == "atlas", "world idiom -> atlas (got %s)" % shell._screen)
 		shell.hud._show_home()
 		shell.drive_autostart(["--autostart=zone"])
-		_check(String(shell.hud._screen) == "zone", "zone idiom -> zone (got %s)" % shell.hud._screen)
+		_check(String(shell._screen) == "zone", "zone idiom -> zone (got %s)" % shell._screen)
 		shell.hud._show_home()
 		shell.drive_autostart(["--autostart=gate:tank"])
 		_check(String(shell.hud._screen) == "combat", "gate idiom -> exam combat (got %s)" % shell.hud._screen)

@@ -5,6 +5,7 @@
 ##   godot --headless --path godot --script res://sim/ui_smoke_raid.gd
 extends SceneTree
 
+var shell: Control
 var hud: Control
 var done := false
 
@@ -12,15 +13,16 @@ func _process(_delta: float) -> bool:
 	if done:
 		return true
 	if hud == null:
-		hud = load("res://game/raid_main.tscn").instantiate()
-		root.add_child(hud)
+		shell = load("res://game/world_shell.tscn").instantiate()
+		root.add_child(shell)
+		hud = shell.hud
 		return false
 	done = true
 
 	print("select screen: ok (ui=", hud._ui != null, " ctrl=", hud._ctrl != null, ")")
 
 	for seat_key in ["tank", "blade", "caster", "healer"]:
-		hud._show_aspect_pick(seat_key)
+		shell._show_aspect_pick(seat_key)
 	print("aspect-pick screens (x4): ok")
 
 	# TEMPO REWORK framework plumbing: SWEAR A CREED → INSTALL A MODULE → fold into the blade kit.
@@ -157,8 +159,8 @@ func _process(_delta: float) -> bool:
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
 	hud._d.party = {}
-	hud._show_party_setup()
-	assert(String(hud._screen) == "party", "party screen didn't build")
+	shell._show_party_setup()
+	assert(String(shell._screen) == "party", "party screen didn't build (shell screen, P3.2b)")
 	var cpa := _press(hud, "ASPECT")          # SOME AI row's toggle (row order is a UI detail)
 	var cpc := _press(hud, "◈")               # healer class toggle cycles Mender -> Well -> Bloomweaver
 	assert(cpa and cpc, "party toggle buttons missing")
@@ -445,7 +447,8 @@ func _process(_delta: float) -> bool:
 	hud._show_end(true)
 	hud._show_end(false)
 	print("end screens (with Seal quips): ok")
-	hud._show_select("healer")
+	shell._show_home()
+	shell._show_class_select()
 	print("reselect: ok")
 
 	# online screens build (R2): connect form + a synthetic lobby (with the v2
@@ -533,8 +536,8 @@ func _drive(s: CombatState, seat_key: String) -> int:
 
 ## GEAR-1: find + press the first Button under the HUD whose text starts with
 ## `prefix` (drives the drop-ceremony / cooling-paste choices like a click).
-func _press(hud: Node, prefix: String) -> bool:
-	var stack: Array = [hud._ui]
+func _press(_h: Node, prefix: String) -> bool:
+	var stack: Array = [shell]   # shell-wide: buttons live on EITHER surface (P3.2b)
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
 		if n is Button and String((n as Button).text).begins_with(prefix):
@@ -546,8 +549,8 @@ func _press(hud: Node, prefix: String) -> bool:
 
 ## The one LIVE DraftScreen (skips screens _clear() queue-freed this frame — the
 ## COMMANDER chain builds the next seat's screen in the same frame).
-func _find_draft(hud: Node):
-	var stack: Array = [hud._ui]
+func _find_draft(_h: Node):
+	var stack: Array = [shell]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
 		if n is DraftScreen and not n.is_queued_for_deletion():

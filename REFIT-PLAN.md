@@ -237,15 +237,29 @@ Each its own worktree/claim, in this order:
    nodes; it now derives from `encounter_by_id(node.fight)`, testing the SCALAR not a
    content snapshot; ALL OK ×1.00 and ×2.50). **All three of the audit's stale probes
    are now revived — the open-claim item is CLOSED; verify-all runs 35/35.**
-   **P3.2b-2 ☐ NEXT (fresh-session-sized, ONE coherent cut):** home/`_show_class_select`/
-   `_show_raid_select`/aspect pick/party + atlas/zone/bastion builders move up to the
-   shell together — the aspect ceremony is SHARED by the raid and world paths
-   (`_world_pending` routes class→aspect→Atlas), so splitting them would cut a live
-   flow in half. The shell takes `_d` + WorldSave + the zone/world members with them;
-   every internal `_show_home()`-style call inverts to shell routing (Esc, end screens,
-   pause quit, zone leave, campaign cleared); `menu_probe`/`ui_smoke_world`/party
-   sections of `ui_smoke_raid`/`commander_probe` re-host onto `world_shell.tscn`;
-   raid_hud keeps ONLY descent ceremonies + combat + (until P3.3) online.
+   **P3.2b-2 ✅ BUILT 2026-07-07 — THE SCREENS MOVED UP:** all 23 world-layer functions
+   (home/`_menu_button`/class select/raid select/aspect pick/party + `_start_world_pick`/
+   atlas/dev-reset/pin-router/bastion(+stops)/zone(+enter/stops/simple-stops)/conquest
+   writeback/autosave) moved to `world_shell.gd` in ONE contiguous cut, instance state
+   reached via a TYPED `hud` (`const RaidHud := preload(...)` — raid_hud has no
+   class_name; typing keeps `:=` inference alive in the moved bodies). The shell owns
+   its own `_ui` overlay (mouse_filter IGNORE so an empty surface never eats instance
+   clicks) + `_clear()` with the two-surface discipline: shell builders stamp
+   `_screen` → `_clear()` snapshots/restores it around `hud._clear()`, whose leaf
+   callback `_clear_shell_ui()` stamps "instance" when the HUD takes the stage.
+   raid_hud keeps FOUR routing stubs (`_show_home`/`_show_select`/`_show_zone`/
+   `_zone_clear_node` — the only names its own flows still call; Esc, fight ends, zone
+   conquest route UP through them; standalone probe boots no-op). raid_hud is down to
+   ~4,700 lines (from 5,309 at P3 start). Probes re-hosted: `menu_probe` (shell
+   ceremony asserts) · `ui_smoke_world` (full flow through the shell + a two-surface
+   `_scr()` reader for its walker + the _initialize/_ready frame-1 gotcha fixed) ·
+   `ui_smoke_raid` (shell aspect/party drives, shell-wide `_press`) · `shell_probe`
+   (world/zone idioms assert `shell._screen`). GATES: shell/menu/world/raid/map smokes
+   + map_advance + commander + BOTH net smokes ALL OK + full verify-all.
+   **OWED (logged, not gating):** 7 `screenshot_*` WSLg scripts still load raid_main
+   for world-screen shots — they will error LOUDLY at the next visual pass (deliberate:
+   loud beats silently-blank PNGs); re-host them onto `world_shell.tscn` then. State
+   ownership (`_d`/WorldSave/zone members off the hud) lifts in a later tightening.
 3. **Online split** — the lobby/connect/netmap UX out of raid_hud into a shell-owned
    controller. "PLAY ONLINE" the screen dies here; connectivity becomes a shell property
    (presence), fights become instances you enter from the world.
