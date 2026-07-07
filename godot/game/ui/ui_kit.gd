@@ -60,8 +60,42 @@ static func body(weight: int = 500) -> Font:
 	return _F_BODY_REG
 
 static var _noise: NoiseTexture2D
+static var _glow: GradientTexture2D
 
 # ---------------------------------------------------------------- shared assets
+## Cached soft radial falloff (white → transparent). Tint it per draw via glow() —
+## this is how _draw code gets bloom-like light without shaders.
+static func glow_tex() -> GradientTexture2D:
+	if _glow == null:
+		var g := Gradient.new()
+		g.offsets = PackedFloat32Array([0.0, 0.30, 1.0])
+		g.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.32), Color(1, 1, 1, 0)])
+		_glow = GradientTexture2D.new()
+		_glow.gradient = g
+		_glow.fill = GradientTexture2D.FILL_RADIAL
+		_glow.fill_from = Vector2(0.5, 0.5)
+		_glow.fill_to = Vector2(0.5, 0.0)
+		_glow.width = 64
+		_glow.height = 64
+	return _glow
+
+## A soft light at `center` (radius = the glow's reach), tinted `col` (alpha included).
+static func glow(ci: CanvasItem, center: Vector2, radius: float, col: Color) -> void:
+	ci.draw_texture_rect(glow_tex(), Rect2(center - Vector2(radius, radius),
+		Vector2(radius * 2.0, radius * 2.0)), false, col)
+
+## Vertical two-stop gradient fill (per-vertex colors — smooth, no shader).
+static func grad_rect(ci: CanvasItem, rect: Rect2, top: Color, bot: Color) -> void:
+	ci.draw_polygon(PackedVector2Array([rect.position, Vector2(rect.end.x, rect.position.y),
+		rect.end, Vector2(rect.position.x, rect.end.y)]),
+		PackedColorArray([top, top, bot, bot]))
+
+## Horizontal two-stop gradient fill.
+static func grad_rect_h(ci: CanvasItem, rect: Rect2, left: Color, right: Color) -> void:
+	ci.draw_polygon(PackedVector2Array([rect.position, Vector2(rect.end.x, rect.position.y),
+		rect.end, Vector2(rect.position.x, rect.end.y)]),
+		PackedColorArray([left, right, right, left]))
+
 static func noise() -> NoiseTexture2D:
 	if _noise == null:
 		var fn := FastNoiseLite.new()

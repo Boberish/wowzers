@@ -62,22 +62,36 @@ func _draw() -> void:
 	var s := clampf(size.y / 60.0, 1.0, 2.4)
 	var bar := Rect2(54.0 * s, 26.0 * s, w - 70.0 * s, 22.0 * s)
 
+	# the seat: a glass pill under the whole instrument (medallion + plaque + channel),
+	# so the bar never floats bare over the scene. Quieter while idle.
+	var pill := StyleBoxFlat.new()
+	pill.bg_color = Color(Palette.FILL_TOP.r, Palette.FILL_TOP.g, Palette.FILL_TOP.b, 0.80 if active else 0.55)
+	pill.set_corner_radius_all(12)
+	pill.border_color = Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.55)
+	pill.set_border_width_all(1)
+	pill.shadow_color = Color(0, 0, 0, 0.45)
+	pill.shadow_size = 7
+	pill.shadow_offset = Vector2(0, 3)
+	draw_style_box(pill, Rect2(2, 2, w - 4, size.y - 4))
+	draw_line(Vector2(12, 4.5), Vector2(w - 12, 4.5),
+		Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.12), 1.0)
+
 	# idle track (the Well/DRAW): the empty channel + the release window, readable
 	# between casts — the window is learned before the cast is ever live.
 	if not active and _bloom <= 0.0:
-		draw_rect(bar, Color(0.06, 0.08, 0.10, 0.85))
-		draw_rect(Rect2(bar.position, Vector2(bar.size.x, bar.size.y * 0.45)), Color(0, 0, 0, 0.30))
+		draw_rect(bar.grow(1.0), Color(0, 0, 0, 0.45), false, 1.0)
+		draw_rect(bar, Color(0.05, 0.06, 0.09, 0.85))
+		UiKit.grad_rect(self, Rect2(bar.position, Vector2(bar.size.x, bar.size.y * 0.45)),
+			Color(0, 0, 0, 0.35), Color(0, 0, 0, 0.0))
 		_draw_window(bar, s, 0.55, false)
 		draw_rect(bar, Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.40), false, 1.0)
 		return
 
 	if active:
-		# spell medallion
+		# spell medallion — a soft accent light behind the gilded ring
 		var mc := Vector2(26.0 * s, 37.0 * s)
 		var mr := 17.0 * s
-		var halo := accent
-		halo.a = 0.16 + 0.10 * sin(_pulse * 2.0)
-		draw_circle(mc, mr * 1.35, halo)
+		UiKit.glow(self, mc, mr * 2.2, Color(accent.r, accent.g, accent.b, 0.24 + 0.10 * sin(_pulse * 2.0)))
 		draw_circle(mc, mr, Palette.FILL_BOT)
 		UiKit.gilded_ring(self, mc, mr, 2.0 * s, 32)
 		if _tex != null:
@@ -94,8 +108,31 @@ func _draw() -> void:
 				"→  " + target, HORIZONTAL_ALIGNMENT_LEFT, w - pr.end.x - 12.0 * s,
 				int(round(float(UiKit.SIZE["CAPTION"]) * s)), Palette.TEXT)
 
-		# the jeweled channel
-		UiKit.glass_bar_draw(self, bar, clampf(frac, 0.0, 1.0), accent)
+		# the jeweled channel: dark socket, gradient fill, gloss, a GLOWING leading edge
+		var fw := bar.size.x * clampf(frac, 0.0, 1.0)
+		draw_rect(bar.grow(1.0), Color(0, 0, 0, 0.5), false, 1.0)
+		draw_rect(bar, Color(0.035, 0.03, 0.055))
+		UiKit.grad_rect(self, Rect2(bar.position, Vector2(bar.size.x, bar.size.y * 0.45)),
+			Color(0, 0, 0, 0.40), Color(0, 0, 0, 0.0))
+		if fw > 1.0:
+			UiKit.grad_rect(self, Rect2(bar.position, Vector2(fw, bar.size.y)),
+				accent.lightened(0.14), accent.darkened(0.45))
+			draw_rect(Rect2(bar.position + Vector2(1, 1), Vector2(maxf(fw - 2.0, 0.0), bar.size.y * 0.30)),
+				Color(1, 1, 1, 0.13))
+			UiKit.glow(self, Vector2(bar.position.x + fw, bar.position.y + bar.size.y * 0.5),
+				bar.size.y * 1.0, Color(accent.lightened(0.4).r, accent.lightened(0.4).g,
+				accent.lightened(0.4).b, 0.45))
+			draw_rect(Rect2(bar.position.x + fw - 2.0, bar.position.y + 1.0, 2.0, bar.size.y - 2.0),
+				accent.lightened(0.55))
+		# bevel frame (lit top-left)
+		draw_line(bar.position, Vector2(bar.end.x, bar.position.y),
+			Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.85), 1.5, true)
+		draw_line(bar.position, Vector2(bar.position.x, bar.end.y),
+			Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.5), 1.5, true)
+		draw_line(Vector2(bar.position.x, bar.end.y), bar.end,
+			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.6), 1.5, true)
+		draw_line(Vector2(bar.end.x, bar.position.y), bar.end,
+			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.6), 1.5, true)
 		# quarter ticks engraved into the floor
 		for i in range(1, 4):
 			var tx := bar.position.x + bar.size.x * float(i) / 4.0
@@ -103,7 +140,6 @@ func _draw() -> void:
 		# the graded release window over the live channel
 		_draw_window(bar, s, 1.0, true)
 		# travelling shimmer over the filled portion
-		var fw := bar.size.x * clampf(frac, 0.0, 1.0)
 		if fw > 12.0:
 			var sx := bar.position.x + fmod(_pulse * 42.0, fw - 8.0)
 			var sh := accent.lightened(0.5)
@@ -137,9 +173,9 @@ func _draw() -> void:
 		draw_rect(Rect2(bar.position - Vector2((3.0 + 14.0 * b) * s, (3.0 + 10.0 * b) * s),
 			bar.size + Vector2((6.0 + 28.0 * b) * s, (6.0 + 20.0 * b) * s)), ring, false, 1.6)
 		var mouth := Vector2(bar.end.x + 8.0 * s, bar.position.y + bar.size.y * 0.5)
-		var mg := Palette.WIN
-		mg.a = 0.5 * _bloom
-		draw_circle(mouth, (7.0 + 20.0 * b) * s, mg)
+		UiKit.glow(self, mouth, (14.0 + 34.0 * b) * s, Color(Palette.WIN.r, Palette.WIN.g, Palette.WIN.b, 0.55 * _bloom))
+		UiKit.glow(self, mouth, (7.0 + 14.0 * b) * s,
+			Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.5 * _bloom))
 
 ## The graded release window: a steel glass zone at the channel's end (CLEAN) with an
 ## entry gate + brackets, and THE STILL POINT — a bright gold sliver crowned by a diamond
@@ -152,8 +188,12 @@ func _draw_window(bar: Rect2, s: float, a: float, live: bool) -> void:
 	var zone := Rect2(zx, bar.position.y + 1.0, bar.end.x - zx, bar.size.y - 2.0)
 	var hot := live and frac >= zone_lo
 	var st := Palette.STEEL
-	# the zone glass (flares while the needle is inside)
-	draw_rect(zone, Color(st.r, st.g, st.b, (0.42 + 0.10 * sin(_pulse * 5.0) if hot else 0.26) * a))
+	# the zone glass — a cool vertical gradient that flares while the needle is inside
+	var za := (0.46 + 0.10 * sin(_pulse * 5.0) if hot else 0.28) * a
+	UiKit.grad_rect(self, zone, Color(st.r, st.g, st.b, za), Color(st.r, st.g, st.b, za * 0.35))
+	if hot:
+		UiKit.glow(self, zone.get_center(), zone.size.x * 0.75,
+			Color(st.r, st.g, st.b, 0.30 * a))
 	if live:
 		# a slow shimmer breathing through the zone glass
 		var sx := zone.position.x + fmod(_pulse * 22.0, maxf(zone.size.x - 5.0, 1.0))
@@ -174,9 +214,7 @@ func _draw_window(bar: Rect2, s: float, a: float, live: bool) -> void:
 			Color(g.r, g.g, g.b, 0.16 * a))
 		draw_rect(Rect2(mx, bar.position.y, mw, bar.size.y), Color(g.r, g.g, g.b, (0.95 if hot else 0.80) * a))
 		var gem_c := Vector2(mx + mw * 0.5, bar.position.y - 8.0 * s)
-		var ha := g
-		ha.a = (0.30 + 0.18 * sin(_pulse * 2.2)) * a
-		draw_circle(gem_c, 6.5 * s * 0.9, ha)
+		UiKit.glow(self, gem_c, 9.0 * s, Color(g.r, g.g, g.b, (0.36 + 0.16 * sin(_pulse * 2.2)) * a))
 		_gold_gem(gem_c, 4.5 * s, a)
 	# captions — the big graded bar only (the Well); classic healers never see these
 	if s > 1.4:
