@@ -487,15 +487,18 @@ func _show_class_select() -> void:
 		["caster", "voidcaller", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
 		["caster", "alchemist", "THE ALCHEMIST", "envenom", Palette.REACT, "CASTER · BREW THE REACTION — charge the vial, feed two opposing poisons, RUPTURE the peak.  (The Brew · NEW)"],
 		["healer", "mender", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — react to the storm, click-cast big heals + shields.  (Tidecaller / Brinkwarden)"],
+		["healer", "well", "THE WELL-TENDER", "laststand", Palette.GOLD_BRIGHT, "HEALER · POUR — discrete CHARGES, no mana; GRADE every heal (TARGET the landing / SPEED the release), and a perfect one GLINTS the ally you healed.  (Brim / Draw · NEW)"],
 		["healer", "bloomweaver", "THE BLOOMWEAVER", "wildbloom", Palette.VERDANCE, "HEALER · ANTICIPATE — no mana; plant HoTs & wards AHEAD, bloom them on the spike.  (Wildgrove / Thornveil)"],
 	]
-	# AspectCard is a WIDE 680px card — STACK them vertically (a row runs off-screen).
-	# Matches the aspect ceremony's vertical layout; five fit the centered column.
+	# AspectCard is a WIDE 680px card — STACK them vertically in a SCROLL box (8 cards over
+	# the four seats now exceed one screen; the scroll keeps every class reachable).
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_place(scroll, 0.5, 0.5, 0.5, 0.5, -360, -330, 360, 340)
+	_ui.add_child(scroll)
 	var col := VBoxContainer.new()
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 10)
-	_place(col, 0.5, 0.5, 0.5, 0.5, -350, -320, 350, 320)
-	_ui.add_child(col)
+	scroll.add_child(col)
 	for c in cards:
 		var card := AspectCard.new(String(c[2]), String(c[5]), c[4], String(c[3]))
 		card.chosen.connect(_pick_class.bind(String(c[0]), String(c[1])))
@@ -582,6 +585,8 @@ func _show_party_setup() -> void:
 		var disp := String(SEAT_NAMES[key])
 		if key == "healer" and cls == "bloomweaver":
 			disp = "THE BLOOMWEAVER"
+		elif key == "healer" and cls == "well":
+			disp = "THE WELL-TENDER"
 		elif key == "caster" and cls == "alchemist":
 			disp = "THE ALCHEMIST"
 		var lab := Label.new()
@@ -591,12 +596,13 @@ func _show_party_setup() -> void:
 		lab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if mine else Palette.TEXT)
 		row.add_child(lab)
 		if not mine:
-			if key == "healer":     # polymorphic CLASS toggle (Mender ⇄ Bloomweaver)
+			if key == "healer":     # polymorphic CLASS toggle (Mender → Well → Bloomweaver)
 				var clsb := Button.new()
-				clsb.text = "◈ " + ("BLOOMWEAVER" if cls == "bloomweaver" else "MENDER")
+				var cn: String = {"bloomweaver": "BLOOMWEAVER", "well": "WELL"}.get(cls, "MENDER")
+				clsb.text = "◈ " + cn
 				clsb.custom_minimum_size = Vector2(150, 32)
 				clsb.pressed.connect(func():
-					var nc := "mender" if cls == "bloomweaver" else "bloomweaver"
+					var nc: String = {"mender": "well", "well": "bloomweaver", "bloomweaver": "mender"}.get(cls, "well")
 					_party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
 					_show_party_setup())
 				row.add_child(clsb)
@@ -1155,10 +1161,12 @@ func _show_lobby() -> void:
 			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
 				var mycls := String(me.get("cls", "mender"))
 				var clsb := Button.new()
-				clsb.text = "◈ " + ("BLOOMWEAVER" if mycls == "bloomweaver" else "MENDER")
+				var mcn: String = {"bloomweaver": "BLOOMWEAVER", "well": "WELL"}.get(mycls, "MENDER")
+				clsb.text = "◈ " + mcn
 				clsb.custom_minimum_size = Vector2(150, 34)
 				clsb.pressed.connect(func():
-					_net.send({"t": "class", "cls": "mender" if mycls == "bloomweaver" else "bloomweaver"}))
+					var nc: String = {"mender": "well", "well": "bloomweaver", "bloomweaver": "mender"}.get(mycls, "well")
+					_net.send({"t": "class", "cls": nc}))
 				row.add_child(clsb)
 			if key == "blade":      # toggle the blade CLASS (Twinfang ⇄ Reckoner)
 				var bcls := String(me.get("cls", "twinfang"))

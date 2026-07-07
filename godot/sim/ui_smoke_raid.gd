@@ -134,10 +134,13 @@ func _process(_delta: float) -> bool:
 	hud._show_party_setup()
 	assert(String(hud._screen) == "party", "party screen didn't build")
 	var cpa := _press(hud, "ASPECT")          # SOME AI row's toggle (row order is a UI detail)
-	var cpc := _press(hud, "◈")               # healer class toggle: Mender -> Bloomweaver
+	var cpc := _press(hud, "◈")               # healer class toggle cycles Mender -> Well -> Bloomweaver
 	assert(cpa and cpc, "party toggle buttons missing")
+	assert(String(hud._party["healer"]["cls"]) == "well",
+		"healer class toggle (1st) should reach Well: %s" % str(hud._party))
+	_press(hud, "◈")                          # second press -> Bloomweaver (full 3-way cycle)
 	assert(String(hud._party["healer"]["cls"]) == "bloomweaver",
-		"healer class toggle didn't stick: %s" % str(hud._party))
+		"healer class toggle (2nd) should reach Bloomweaver: %s" % str(hud._party))
 	hud._party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
 	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._party)])
 	var cpd := _press(hud, "⚔")               # DESCEND
