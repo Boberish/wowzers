@@ -567,6 +567,18 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 >   (accident-only consolation now).** Slate LOCKED → **build brief for the implementing agent:
 >   `FERMATA-V5-BRIEF.md`** (repo root — the verb spec, the full slate table with per-card code
 >   status, file-by-file code map, work order with checksum gates, verification matrix, gotchas).
+>
+> ### ✅ V5 EDGE BUILT — merged to main `f5d5397` (2026-07-07, worktree `fermata-edge`)
+> The whole EDGE verb + v5 slate is real, deterministic, byte-identical when unpicked. Releases
+> grade by DEPTH (`_ramp_grade`); the lip auto-SNAPS (`_snap`); wideners are entry-only. Patient =
+> THE LONG RAMP, Fleeting snap-net, Shadow Dance = 3s NO-SNAP fever; feint/shadowstep/patientEdge/
+> firstPass CUT; NEW Stretto/Refrain/Cold Cut/The Brink/Composure/First Note; rig Razor + Rested;
+> Unseen Blade rest-banks, Eclipse chains near. Policy = fractional depth-aim + latency jitter.
+> HUD = ramp bands + crimson lip cliff + snap flash. VERIFY: Tempo `4932869838389671587` / Venom
+> `7876031242436484463` byte-identical - det PASS (base/fat/mixed) - input_check 5/5 incl SNAP -
+> raid `--blade=fermata` det PASS - smoke 0 errors - nerve gradient (expert ~0 snaps/100%, sloppy
+> 10+/50-70%). OWED (other layers): Brink/Shade/Mark/Dance HUD meters - shadow-dim - keystone
+> elite acquisition - Veil warband application - online spec-carry. `FERMATA-V5-BRIEF.md` = as-built.
 > **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
