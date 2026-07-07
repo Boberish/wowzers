@@ -813,17 +813,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   WHENs · keystone per spec + shared Well/Shining-Hour/Boiling-Over/kick/Dry-Ward/names), stars +
   comments persist in-browser, EXPORT copies a paste-back summary. **⚡ 2026-07-07 — BILL'S FULL
   EXPORT LANDED (66/66 rated) + FOLDED → `MENDER-PLAN.md` ⚖ block is the record.** Headlines:
-  **THE CRIT MODEL** (precision mana-refunds ALL dead — Draw in-band = +Current + ~20% crit ·
-  Still Point = TRUE crit ×1.5 · Brim pour ARMS the next cast as a forecast crit shown in the
-  preview) · **BOOK REWORK** (all heals casted+direct: Ward/Renew CUT, Meditate → boon, Rekindle
-  no-CD long-cast) · resource = **CHARGES** · spec dev-labels **TARGET/SPEED** · healer = **0
-  kicks** · preview BASE + blindfold boon · Brimful on big-CD buttons only · creed reworks owed
-  (Quick Pull→THE NARROWS all-or-nothing · Dead Reckoning→THE EDDY drifting band, both
-  Bill-specced) · ⭐ Reservoir rework owed (3★ + Ward cut guts it) · cuts: Deep Refund/Runoff/
-  Steady Arm/Edge of the Lip/edge+held WHENs/Slow Water(parked). Tester **v5 = the verdicted
-  build** (charges default, 3-spell book, crit model live). **NEXT: Bill feels v5 (crit model =
-  my rec, needs his OK) → the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
-  unless picked). *(healer-rework session)*
+  ~~THE CRIT MODEL~~ **→ ✧ THE GLINT (crit TORN OUT same day — Bill: "kills the planning for the
+  brim; not mana not healing, already using it for the cascade"):** a perfect (Brim pour · Draw
+  Still Point) = **warband +~25% damage ~4s** — precision pays OUTWARD through kill speed, never
+  the Well; clean rhythm pays INWARD (the Current); refunds/crits/bigger-heals all dead ·
+  **BOOK REWORK** (all heals casted+direct: Ward/Renew CUT, Meditate → boon, Rekindle no-CD
+  long-cast) · resource = **CHARGES** · spec dev-labels **TARGET/SPEED** · healer = **0 kicks** ·
+  preview BASE + blindfold boon · Brimful on big-CD buttons only · creed reworks owed (Quick
+  Pull→THE NARROWS all-or-nothing · Dead Reckoning→THE EDDY drifting band, both Bill-specced) ·
+  ⭐ Reservoir rework owed (3★ + Ward cut guts it) · cuts: Deep Refund/Runoff/Steady Arm/Edge of
+  the Lip/edge+held WHENs/Slow Water(parked). Tester **v6 = the verdicted build** (charges
+  default, 3-spell book, Glint live + boss HP/kill-clock/best-time so the reward is FELT).
+  **NEXT: Bill feels v6 (Glint = my rec; runner-up THE GILD on file) → the build claim**
+  (guarded base `raid:healer:brim|draw`, byte-identical unless picked). *(healer-rework session)*
 - ☑ 2026-07-06 · main (docs only) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH — **THE PACING
   GRAMMAR locked (Bill: fights much too short, "rarely get a combo off").** Current truth: Seals
   enrage 90–142s, skirmishes 60–70s — the Framework-v2 kits out-arc the fights. Locked: length
