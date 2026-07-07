@@ -63,8 +63,19 @@ static var ALCHEMIST_ASPECTS := [
 		"desc": "Hold to charge the VIAL, release in the sweet band; feed two opposing poisons — Venom fades, Rot lingers — and RUPTURE the reaction at its ripe peak."},
 ]
 
+## The healer seat's THIRD class — the reworked direct-cast healer (codename "well",
+## MENDER-PLAN). Two specs (dev-labels TARGET / SPEED) that grade the SAME book of casts.
+static var WELL_ASPECTS := [
+	{"id": "brim", "name": "TARGET · BRIM", "accent": Palette.GOLD_BRIGHT, "icon": "surge",
+		"desc": "Grade the LANDING: pour each heal so the ally lands FULL with no spill — a PERFECT POUR GLINTS them (bonus damage). Read the party; size Flash vs Mend to the wound."},
+	{"id": "draw", "name": "SPEED · DRAW", "accent": Palette.STEEL, "icon": "laststand",
+		"desc": "Grade the RELEASE: let go at the last instant for a CLEAN draw that builds THE CURRENT (each stack casts faster); the dead-centre STILL POINT also GLINTS. Ride the streak; a slip or a dry Well breaks it."},
+]
+
 ## The Aspect pair for a seat, honouring the seat's chosen CLASS.
 func _aspects_for(seat_key: String) -> Array:
+	if seat_key == "healer" and _healer_cls == "well":
+		return WELL_ASPECTS
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return BLOOM_ASPECTS
 	if seat_key == "blade" and _blade_cls == "reckoner":
@@ -76,6 +87,8 @@ func _aspects_for(seat_key: String) -> Array:
 ## The Aspect pair for a lobby seat given an explicit class (online — the healer
 ## claimant may be a Mender or a Bloomweaver, independent of this client's _healer_cls).
 func _lobby_aspects(seat_key: String, cls: String) -> Array:
+	if seat_key == "healer" and cls == "well":
+		return WELL_ASPECTS
 	if seat_key == "healer" and cls == "bloomweaver":
 		return BLOOM_ASPECTS
 	if seat_key == "blade" and cls == "reckoner":
@@ -86,6 +99,8 @@ func _lobby_aspects(seat_key: String, cls: String) -> Array:
 
 ## The seat's display name, honouring the seat class.
 func _seat_display_name(seat_key: String) -> String:
+	if seat_key == "healer" and _healer_cls == "well":
+		return "THE WELL-TENDER"
 	if seat_key == "healer" and _healer_cls == "bloomweaver":
 		return "THE BLOOMWEAVER"
 	if seat_key == "blade" and _blade_cls == "reckoner":
@@ -117,6 +132,8 @@ func _sync_healer_cls() -> void:
 		return
 	if _aspect == "wildgrove" or _aspect == "thornveil":
 		_healer_cls = "bloomweaver"
+	elif _aspect == "brim" or _aspect == "draw":
+		_healer_cls = "well"
 	elif _aspect == "tidecaller" or _aspect == "brinkwarden":
 		_healer_cls = "mender"
 
@@ -312,7 +329,10 @@ var _castbar: CastChannel          ## healer
 var _mcfg: MenderConfig            ## healer (Mender)
 var _bcfg: BloomweaverConfig       ## healer (Bloomweaver)
 var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
-var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver
+var _wcfg: WellConfig              ## healer (the Well — reworked direct-cast)
+var _well_gauge: WellGauge         ## the Well's charge vessel + Current + graded window
+var _well_hold_key: int = -1       ## Well/DRAW: which heal key owns the live hold-release
+var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver | well
 var _blade_cls: String = "twinfang" ## which class fills the blade seat: twinfang | reckoner
 var _caster_cls: String = "voidcaller" ## which class fills the caster seat: voidcaller | alchemist
 var _rcfg: ReckonerConfig             ## the Reckoner's config (set in _make_loadout when the blade is a Reckoner)
@@ -1481,11 +1501,18 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	if seat_id == "alchemist" or seat_id == "brew":   # debug alias: the caster seat as the Brew
 		seat_id = "caster"
 		_caster_cls = "alchemist"
+	if seat_id == "well" or seat_id == "brim" or seat_id == "draw":   # debug alias: the reworked healer
+		if seat_id != "well":
+			aspect = seat_id
+		seat_id = "healer"
+		_healer_cls = "well"
 	_seat_key = seat_id if SEAT_IDX.has(seat_id) else "tank"
 	# a healer aspect id disambiguates the class (must resolve BEFORE the pool lookup)
 	if _seat_key == "healer":
 		if aspect == "wildgrove" or aspect == "thornveil":
 			_healer_cls = "bloomweaver"
+		elif aspect == "brim" or aspect == "draw":
+			_healer_cls = "well"
 		elif aspect == "tidecaller" or aspect == "brinkwarden":
 			_healer_cls = "mender"
 	if _seat_key == "blade":
@@ -2857,6 +2884,9 @@ func _make_loadout() -> Array:
 				return _acfg.loadout(_aspect)
 			return VoidcallerConfig.new().loadout(_aspect)
 		"healer":
+			if _healer_cls == "well":
+				_wcfg = WellConfig.new()
+				return _wcfg.loadout(_aspect)
 			if _healer_cls == "bloomweaver":
 				_bcfg = BloomweaverConfig.new()
 				return _bcfg.order(_aspect)
@@ -3257,6 +3287,9 @@ func _alch_rune(id: String, label: String, key: String, icon: String, accent: Co
 	return r
 
 func _build_band_healer() -> void:
+	if _healer_cls == "well":
+		_build_band_well()
+		return
 	if _healer_cls == "bloomweaver":
 		_build_band_bloomweaver()
 		return
@@ -3287,6 +3320,55 @@ func _build_band_healer() -> void:
 		_runes.append(rune)
 		_rune_ids.append(id)
 	_hint_line(_healer_hint())
+
+## The Well's band: the charge-vessel instrument (WellGauge — charges + Current + the
+## release band) + the book rune rail. No mana orb — the Well IS the resource, in the gauge.
+## Hover an ally frame to target; BRIM taps 1-4, DRAW holds 1-4 and releases to pour.
+func _build_band_well() -> void:
+	_well_gauge = WellGauge.new()
+	_well_gauge.aspect = _aspect
+	_place(_well_gauge, 0.5, 1, 0.5, 1, -320, -318, 320, -168)
+	_shake_root.add_child(_well_gauge)
+	var row := _rune_row(-380.0, 380.0)
+	_runes = []
+	_rune_ids = []
+	for id in _loadout:
+		var sp: Dictionary = _wcfg.book.get(id, {})
+		var rune := AbilityRune.new()
+		rune.label = String(sp.get("name", id)).split(" ")[0]
+		rune.key_label = String(sp.get("key", "")).to_upper()
+		rune.icon_id = id
+		rune.custom_minimum_size = Vector2(62, 62)
+		rune.pressed.connect(_cast.bind(String(id)))
+		row.add_child(rune)
+		_runes.append(rune)
+		_rune_ids.append(id)
+	_hint_line(_well_hint())
+
+func _well_hint() -> String:
+	var verb := "TAP 1-4 to heal (grade = where they LAND)" if _aspect == "brim" \
+		else "HOLD 1-2, release to POUR (grade = the RELEASE; ride THE CURRENT)"
+	return "Hover an ally to target · %s · Q dispel · R rekindle a fallen ally · SPACE/F dodge (cancels a cast)" % verb
+
+func _render_band_well(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	var g := _well_gauge
+	if g == null:
+		return
+	g.seat_ref = p
+	g.aspect = _aspect
+	g.charges = int(obs.get("charges", 0))
+	g.charges_max = int(obs.get("charges_max", 12))
+	g.current = int(obs.get("current", 0))
+	g.current_max = int(obs.get("current_max", 5))
+	g.brim_band = float(obs.get("brim_band", 0.90))
+	g.draw_band = float(obs.get("draw_band", 0.15))
+	g.still_point = float(obs.get("still_point", 0.04))
+	var casting: Dictionary = obs.get("casting", {})
+	g.cast_active = not casting.is_empty()
+	if g.cast_active:
+		g.cast_p = clampf(float(s.tick - int(casting.get("start_tick", 0)))
+			/ maxf(float(casting.get("dur_ticks", 1)), 1.0), 0.0, 1.0)
+		g.cast_name = String(_wcfg.book.get(String(casting.get("id", "")), {}).get("name", ""))
 
 ## The SECOND healer's band: Sap orb + Blooming Medallion (Verdance) + benediction cast
 ## channel + the Growth/ward rune rail. No mana, no Reservoir/Nerve strip — the whole
@@ -3648,6 +3730,13 @@ func _input(event: InputEvent) -> void:
 			_coil_held = false
 			_ctrl.human({"type": "ability", "id": "release"})
 		return
+	# the Well/DRAW hold-release: releasing the held heal key POURS (grades the release timing).
+	if event is InputEventKey and not event.pressed and _pause == null and _screen == "combat" \
+			and _seat_key == "healer" and _healer_cls == "well" and _aspect == "draw":
+		if event.keycode == _well_hold_key:
+			_well_hold_key = -1
+			_ctrl.human({"type": "ability", "id": "release"})
+		return
 	# Mender click-cast: hover a frame, click a chord
 	if _pause == null and _seat_key == "healer" and _screen == "combat" \
 			and event is InputEventMouseButton and event.pressed and _hover_seat != null:
@@ -3692,11 +3781,35 @@ func _fermata_key(code: int) -> void:
 
 ## The healer's spellbook for the current class (Mender mana spells / Bloomweaver Sap).
 func _hspells() -> Dictionary:
+	if _healer_cls == "well":
+		return _wcfg.book if _wcfg != null else {}
 	if _healer_cls == "bloomweaver":
 		return _bcfg.spells if _bcfg != null else {}
 	return _mcfg.spells if _mcfg != null else {}
 
+## The Well's keys. BRIM taps 1-4 (grades on landing). DRAW holds 1-4 to cast and
+## RELEASES the key to pour (the release branch in _input sends the "release" action).
+## Q dispel · R rekindle (hover a fallen ally) · SPACE/F dodge (cancels a cast).
+func _well_key(code: int) -> void:
+	match code:
+		KEY_SPACE, KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1, KEY_2, KEY_3, KEY_4:
+			var id: String = {KEY_1: "flash", KEY_2: "mend", KEY_3: "cascade", KEY_4: "spring"}[code]
+			if _aspect == "draw" and (id == "flash" or id == "mend"):
+				# hold-release: start the cast now; the key-up (in _input) pours it
+				if _well_hold_key == -1:
+					_well_hold_key = code
+					_cast(id)
+			else:
+				_cast(id)
+		KEY_Q: _cast("dispel")
+		KEY_R: _cast("rekindle")
+
 func _healer_key(code: int) -> void:
+	if _healer_cls == "well":
+		_well_key(code)
+		return
 	if _healer_cls == "bloomweaver":
 		_bloomweaver_key(code)
 		return
@@ -3811,6 +3924,9 @@ func _cast(id: String) -> void:
 
 ## Mirror the engine's gates so a click flashes gold (accepted) or dim (blocked).
 func _cast_on(seat: Seat, id: String) -> void:
+	if _healer_cls == "well":
+		_cast_on_well(seat, id)
+		return
 	if _healer_cls == "bloomweaver":
 		_cast_on_bloom(seat, id)
 		return
@@ -3826,6 +3942,26 @@ func _cast_on(seat: Seat, id: String) -> void:
 	if id == "dispel" and seat.debuff.is_empty(): ready = false
 	if id == "surge" and float(p.vars.get("reservoir", 0.0)) <= 1.0: ready = false
 	if id == "laststand" and float(p.vars.get("nerve", 0.0)) <= 1.0: ready = false
+	var fr := _frame_of(seat)
+	if fr != null:
+		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
+	if ready:
+		_ctrl.human({"type": "ability", "id": id, "target": seat if bool(sp.get("target", false)) else null})
+
+## Well click-cast: mirror the CHARGES/GCD/cast gates for the gold/dim frame flash.
+func _cast_on_well(seat: Seat, id: String) -> void:
+	var s := _ctrl.state
+	var p := _ctrl.player()
+	var sp: Dictionary = _wcfg.book.get(id, {})
+	if sp.is_empty():
+		return
+	var offgcd := bool(sp.get("offgcd", false))
+	var ready := true
+	if not offgcd and s.tick < p.gcd_until_tick: ready = false
+	if s.tick < int(p.cooldowns.get(id, 0)): ready = false
+	if not offgcd and not p.casting.is_empty(): ready = false
+	if int(p.vars.get("charges", 0)) < int(sp.get("charges", 0)): ready = false
+	if id == "dispel" and seat.debuff.is_empty(): ready = false
 	var fr := _frame_of(seat)
 	if fr != null:
 		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
@@ -4010,6 +4146,7 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		fr.incoming_dmg_frac = 0.0
 		fr.incoming_lethal = false
 		fr.ripe = false                      # Bloomweaver drives this per-frame below
+		fr.glint = s.tick < int(seat.vars.get("glint_until", -1))   # Well: this ally is glinting
 		if _seat_key == "healer":
 			fr.is_target = (seat == _hover_seat) or (_hover_seat == null and seat == _focus_seat)
 		else:
@@ -4106,6 +4243,19 @@ func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 			frp.ripe = bool(pe.get("cooked", false))       # gold chip when the bed is COOKED (full ramp)
 			if u == _hover_seat and u.hp_max > 0.0:
 				frp.incoming_frac = clampf(float(pe.get("growth_heal", 0.0)) / u.hp_max, 0.0, 1.0)
+		return
+	# THE WELL: BRIM's landing preview — ghost where the in-flight heal will land, so you
+	# can size it into the pour band (base feature per MENDER-PLAN B-V3).
+	if _healer_cls == "well":
+		var pw := _ctrl.player()
+		if pw != null and not pw.casting.is_empty() and _wcfg != null:
+			var wcid := String(pw.casting.get("id", ""))
+			var wsp: Dictionary = _wcfg.book.get(wcid, {})
+			if wsp.has("heal") and bool(wsp.get("target", false)) and pw.casting.get("target") != null:
+				var wt: Seat = pw.casting.get("target")
+				var wfr := _frame_of(wt)
+				if wfr != null:
+					wfr.incoming_frac = clampf(float(wsp.get("heal", 0.0)) / maxf(wt.hp_max, 1.0), 0.0, 1.0)
 		return
 	var p := _ctrl.player()
 	if p != null and not p.casting.is_empty():
@@ -4375,6 +4525,9 @@ func _render_band_alchemist(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
 
 func _render_band_healer(s: CombatState, p: Seat, obs: Dictionary) -> void:
+	if _healer_cls == "well":
+		_render_band_well(s, p, obs)
+		return
 	if _healer_cls == "bloomweaver":
 		_render_band_bloomweaver(s, p, obs)
 		return
@@ -4476,6 +4629,8 @@ func _handle_event(ev: Dictionary) -> void:
 			_reckoner_juice(ev)
 	if _brew_gauge != null and mine:
 		_brew_gauge.on_event(ev)   # THE ALEMBIC: pour verdicts / rupture burst / history
+	if _well_gauge != null:
+		_well_gauge.on_event(ev)   # THE WELL: pour/still/clean/under/spill verdicts + history
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"pack_next":

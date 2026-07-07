@@ -42,6 +42,7 @@ var is_target: bool = false
 var is_you: bool = false         ## the player's own card: gilded name
 var read_mode: String = ""       ## Mender aspect read overlay: "" | "tide" | "brink"
 var ripe: bool = false           ## Bloomweaver: this ally's Growth is in the harvest window
+var glint: bool = false          ## Well: this ally is GLINTING (a perfect heal — bonus damage)
 var read_a: float = 0.60         ## Tidecaller waterline (keep bars above it)
 var read_b: float = 0.40         ## Brinkwarden band top (catch bars inside 0.15..read_b)
 
@@ -314,6 +315,14 @@ func _draw() -> void:
 				draw_circle(Vector2(px, 13.0), 10.0, rh)     # "◆ RIPE" glow
 			draw_circle(Vector2(px, 13.0), 6.5, Color(gcol.r, gcol.g, gcol.b, 0.20))
 			UiKit.gilded_pip(self, Vector2(px, 13.0), 4.0, true, gcol)
+
+	# --- GLINT (Well): a gold spark on the ally you perfectly healed — their blade
+	# cuts deeper for a few seconds. A pulsing mark by the name.
+	if glint and not dead:
+		var gc := Palette.GOLD_BRIGHT
+		gc.a = 0.55 + 0.35 * sin(_pulse * 3.2)
+		draw_string(ThemeDB.fallback_font, Vector2(bx + 2.0, 12.0), "✦ GLINT",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, gc)
 
 	# dispellable debuff: a pulsing crimson wax seal with its own countdown ring.
 	# On the XL card it takes the first column of the chip row (timer beneath, in

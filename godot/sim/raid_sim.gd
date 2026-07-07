@@ -178,9 +178,13 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 		var cp := caster.policy as VoidcallerPolicy
 		cp.latency_ticks = int(sk["lat"])
 		cp.rng = DetRng.new(seed * 2749 + 3339)
-	# both healer classes expose latency_ticks (extends Policy); pick the real type
+	# every healer class exposes latency_ticks (extends Policy); pick the real type
 	if healer.policy is BloomweaverPolicy:
 		(healer.policy as BloomweaverPolicy).latency_ticks = int(sk["hlat"])
+	elif healer.policy is WellPolicy:
+		var lp := healer.policy as WellPolicy
+		lp.latency_ticks = int(sk["hlat"])
+		lp.rng = DetRng.new(seed * 2749 + 5531)
 	else:
 		(healer.policy as MenderPolicy).latency_ticks = int(sk["hlat"])
 	return _run(s)

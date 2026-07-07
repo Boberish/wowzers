@@ -84,7 +84,8 @@ func _process(_delta: float) -> bool:
 			["blade", "tempo"], ["blade", "colossus"], ["blade", "berserker"],
 			["caster", "disruptor"], ["caster", "silencer"], ["caster", "brew"],
 			["healer", "tidecaller"], ["healer", "brinkwarden"],
-			["healer", "wildgrove"], ["healer", "thornveil"]]:
+			["healer", "wildgrove"], ["healer", "thornveil"],
+			["healer", "brim"], ["healer", "draw"]]:
 		hud._launch(combo[0], combo[1])
 		var s: CombatState = hud._ctrl.state
 		var ticks := _drive(s, String(combo[0]))
