@@ -27,13 +27,17 @@ func _process(_d: float) -> bool:
 		_expect("single Seal", base.hp, base.enrage_at)
 		return false
 	if step == 2:
-		# a ZONE pull (bare kit; bard skirmish)
+		# a ZONE pull (bare kit). Expectations DERIVE from what the node actually
+		# resolves to — the old hardcoded bard-skirmish snapshot went stale when THE
+		# FORGE inherited the Gildfields nodes (stale-probe fix, REFIT P3: this probe
+		# tests the FIGHTLEN scalar, never a content snapshot).
 		hud._world = WorldSave.new()
 		hud._zone_id = WorldContent.ZONE1
-		var base := RaidContent.make_skirmish("bard")
 		var z := WorldContent.zone(WorldContent.ZONE1)
+		var nd := WorldContent.resolved_node(z, 0, {})
+		var base := RaidContent.encounter_by_id(String(nd["fight"]))
 		hud._zone_node = 0
-		hud._launch_zone_fight(WorldContent.resolved_node(z, 0, {}))
+		hud._launch_zone_fight(nd)
 		_expect("zone fight", base.hp, base.enrage_at)
 		return false
 	print("FIGHTLEN PROBE (×%.2f): %s" % [scale, "ALL OK" if fails == 0 else "%d FAILURES" % fails])

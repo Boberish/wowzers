@@ -360,3 +360,29 @@ static func glass_bar_draw(ci: CanvasItem, rect: Rect2, frac: float, accent: Col
 	ci.draw_line(p, Vector2(p.x, p.y + s.y), Palette.GOLD, 1.5, true)
 	ci.draw_line(Vector2(p.x, p.y + s.y), p + s, Palette.GOLD_DIM, 1.5, true)
 	ci.draw_line(Vector2(p.x + s.x, p.y), p + s, Palette.GOLD_DIM, 1.5, true)
+
+## ---- Screen-builder helpers (REFIT P3.2b hoist — were raid_hud._title/_place).
+## The WorldShell and the HUD share them; the other screens' local label/title/gap
+## dialects fold onto these at P4's DRY pass.
+
+## A centered label appended to `parent` (the screen-builder workhorse).
+static func title_in(parent: Node, text: String, fs: int, col: Color) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", fs)
+	l.add_theme_color_override("font_color", col)
+	parent.add_child(l)
+	return l
+
+## Anchor + offset placement in one call (set BEFORE add_child — place-then-add).
+static func place(node: Control, al: float, at: float, ar: float, ab: float,
+		ol: float, ot: float, orr: float, ob: float) -> void:
+	node.anchor_left = al
+	node.anchor_top = at
+	node.anchor_right = ar
+	node.anchor_bottom = ab
+	node.offset_left = ol
+	node.offset_top = ot
+	node.offset_right = orr
+	node.offset_bottom = ob
