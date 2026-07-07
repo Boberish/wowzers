@@ -47,12 +47,12 @@ const CREEDS := {
 	# --- FERMATA (§13.2) creeds — coil temperament. Only offered on the fermata aspect. ---
 	"patient": {
 		"name": "The Patient Knife", "kicker": "Greed",
-		"blurb": "The coil keeps charging PAST sharp for up to +20% — but release too early and it UNRAVELS into a full Flow crash. Greed on the hold. A sharp Miss only bleeds −2 Flow.",
+		"blurb": "The window never lands near — the knife WAITS, and the long stalk pays: far draws hit up to +20% harder. Release too early and the shadow UNRAVELS into a full Flow crash. A sharp Miss only bleeds −2 Flow.",
 		"slip": "flow_loss",
 		"slip_amt": 2,
 		"lock_sec": 0.0,
 		"flow_value": 1.0,
-		"patient": true,          # coil-duration bonus (TwinfangKit._coil_release_bonus)
+		"patient": true,          # far-window bonus + the far shift floor (TwinfangKit)
 		"unravel_slip": true,     # an unravel is a full crash
 	},
 	"fleeting": {

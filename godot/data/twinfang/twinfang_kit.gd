@@ -230,11 +230,15 @@ func _edge_window(seat: Seat) -> Array:
 	# resolve in _strike). Applied LAST so the width and every boon/creed effect above are
 	# preserved — only the CENTRE moves. Clamped reachable: the mouth can't sit before a fresh
 	# coil could sharpen (+ a read margin), and the far edge stays on the fixed fermata ruler.
+	# NEAR WINDOWS ARE EARNED (pacing pass): at low Flow the window keeps extra distance (the
+	# slack), fading to nothing at max Flow — the twitchy short draws only exist in a hot streak.
 	if _fermata():
 		var fmid := (lo + hi) * 0.5
 		var fhalf := (hi - lo) * 0.5
+		var floor_sec := _coil_min(seat) + fhalf + 0.10 \
+			+ cfg.fermata_near_slack * (1.0 - _tempo_t(seat))
 		fmid = clampf(fmid * float(seat.vars.get("window_shift", 1.0)),
-			_coil_min(seat) + fhalf + 0.10, cfg.fermata_ruler_sec - fhalf - 0.06)
+			floor_sec, cfg.fermata_ruler_sec - fhalf - 0.06)
 		lo = fmid - fhalf
 		hi = fmid + fhalf
 	return [lo, hi]
@@ -372,7 +376,14 @@ func _dump_beat_bonus(s: CombatState, seat: Seat) -> float:
 	var tutti := _tutti()
 	if not tutti and not _b("onTheBeat"):
 		return 0.0
-	var since := s.tick - int(seat.vars.get("last_strike_tick", -100000))
+	# Fermata (Tutti) reads the PRESS-relative clock — a dump fired mid-coil where the release
+	# would grade is "on the beat"; idle dumps are simply off-window. Tempo keeps strike-relative.
+	var since: int
+	if _fermata():
+		since = (s.tick - int(seat.vars.get("coil_press_tick", s.tick))) \
+			if bool(seat.vars.get("coiling", false)) else -1
+	else:
+		since = s.tick - int(seat.vars.get("last_strike_tick", -100000))
 	var lo := _tt(s, _perfect_lo_sec(seat))
 	var hi := _tt(s, _perfect_hi_sec(seat))
 	var grade := _strike_grade(since, lo, hi)
@@ -856,16 +867,18 @@ func _coil_release(s: CombatState, seat: Seat) -> bool:
 		return true
 	seat.vars["coil_primed"] = false
 	seat.vars["sharp"] = false
-	return _strike(s, seat, true, float(coil_ticks) * s.dt)
+	return _strike(s, seat, true, coil_ticks)
 
 ## The rhythm. Strike too early (< swing_min) and it's ignored (no cost). Inside the green
 ## window it's graded Bullseye/Perfect/Good (§2c); outside = a Miss (base hit + Creed slip).
-## FERMATA: `from_release` = the press already gated on the coil, so skip the swing_min drop and
-## layer the coil-duration bonus; `coil_sec` is how long the blade was held.
-func _strike(s: CombatState, seat: Seat, from_release := false, coil_sec := 0.0) -> bool:
+## FERMATA · THE DRAW (pacing pass): a release is graded on the PRESS-relative clock —
+## `coil_ticks` IS the sweep position. The needle only runs while you hold, so idle time is
+## genuinely calm and dumps/kicks get cast between draws. Tempo's strike-relative clock is
+## untouched (`from_release` is fermata-only).
+func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0) -> bool:
 	var a: Dictionary = cfg.abilities["strike"]
 	var last := int(seat.vars.get("last_strike_tick", -100000))
-	var since := s.tick - last
+	var since := coil_ticks if from_release else (s.tick - last)
 	var fever := _fever(s, seat)                       # OVERDRIVE FEVER bypasses the rhythm gate (auto-chain)
 	if not fever and not from_release and since < _tt(s, _swing_min_sec(seat)):
 		return false                                   # too early — the press is dropped
@@ -902,10 +915,10 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_sec := 0.0)
 
 	var base := float(a["dmg"])
 	var cp := int(a["cp"])
-	# FERMATA: the coil-duration build dials (Patient / Patient Edge / Unseen Blade Shades) and
+	# FERMATA: the draw-length build dials (Patient / Patient Edge / Unseen Blade Shades) and
 	# Killing Whisper multiply the release BEFORE grading branches; Shades + First Pass consume here.
 	if from_release:
-		base *= (1.0 + _coil_release_bonus(seat, coil_sec, bullseye))
+		base *= (1.0 + _coil_release_bonus(s, seat, coil_ticks, bullseye))
 		if _b("unseenBlade"):
 			seat.vars["shades"] = 0
 		seat.vars["first_pass_ready"] = false
@@ -976,14 +989,16 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_sec := 0.0)
 	# FERMATA · THE ROAMING WINDOW: every resolve rolls where the NEXT green lands. Drawn from
 	# s.rng so lockstep replicas agree; only the fermata aspect reaches this line, so the
 	# tempo/venom rng streams are untouched (their checksums stay byte-identical).
+	# PATIENT KNIFE raises the roll's floor — the window never lands near; the knife waits.
 	if _fermata():
-		seat.vars["window_shift"] = lerpf(cfg.fermata_shift_min, cfg.fermata_shift_max, s.rng.next_float())
+		var smin := cfg.patient_shift_min if bool(_creed().get("patient", false)) else cfg.fermata_shift_min
+		seat.vars["window_shift"] = lerpf(smin, cfg.fermata_shift_max, s.rng.next_float())
 	_gain_cp(seat, cp + (cfg.bull_bonus_cp if bullseye else 0))   # F15: a Bullseye grants extra combo (superset of Perfect)
 	if _b("strikeEnergy") and perfect:
 		_gain_energy(seat, cfg.efficiency_refund)                 # Efficiency: stacks ON TOP of the base refund
 	# FERMATA release after-effects (Twin Echo · Eclipse re-coil · Phantom twin · the on-edge rig).
 	if from_release:
-		_fermata_after_release(s, seat, grade, bullseye, perfect, base, coil_sec)
+		_fermata_after_release(s, seat, grade, bullseye, perfect, base, coil_ticks)
 	# Tell the view HOW this strike landed so the rhythm bar can flash a clear verdict.
 	var result := (("bullseye" if bullseye else "perfect") if perfect
 		else ("good" if grade == G_GOOD else ("early" if since < lo else "late")))
@@ -994,16 +1009,18 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_sec := 0.0)
 # FERMATA — the release-side helpers (bonuses, module fills, keystone effects).
 # --------------------------------------------------------------------------
 
-## The coil-duration damage fraction on a release: Patient Knife (creed) + Patient Edge (boon)
-## reward holding past sharp; Unseen Blade cashes its Shade battery; Killing Whisper pays a
-## Bullseye. Additive; base kit (no creed/boon) returns 0.0 — the true small variation.
-func _coil_release_bonus(seat: Seat, coil_sec: float, bullseye: bool) -> float:
+## The release damage fraction: with the press-relative clock, the draw's LENGTH is decided by
+## where the window landed — so Patient Knife (creed) + Patient Edge (boon) pay the FAR-WINDOW
+## fraction (0 at the pivot → 1 across the span): long stalks hit harder, quick near draws don't.
+## Unseen Blade cashes its time-banked Shade battery (far draws bank more — same instinct);
+## Killing Whisper pays a Bullseye. Additive; base kit returns 0.0 — the true small variation.
+func _coil_release_bonus(s: CombatState, seat: Seat, coil_ticks: int, bullseye: bool) -> float:
 	var b := 0.0
-	var extra := maxf(0.0, coil_sec - _coil_min(seat))         # seconds held past the SHNK
-	if bool(_creed().get("patient", false)):                   # PATIENT KNIFE: baked coil greed
-		b += minf(cfg.patient_cap, cfg.patient_per_sec * extra)
-	if _b("patientEdge"):                                       # PATIENT EDGE: +per 0.1s past sharp
-		b += minf(cfg.patient_edge_cap, cfg.patient_edge_per * (extra / 0.1))
+	var far := clampf((float(coil_ticks) * s.dt - cfg.fermata_far_pivot) / cfg.fermata_far_span, 0.0, 1.0)
+	if bool(_creed().get("patient", false)):                   # PATIENT KNIFE: the long stalk pays
+		b += cfg.patient_cap * far
+	if _b("patientEdge"):                                       # PATIENT EDGE: more of the same greed
+		b += cfg.patient_edge_cap * far
 	if _b("unseenBlade"):                                       # THE UNSEEN BLADE: the Shade battery
 		b += cfg.unseen_shade_per * float(seat.vars.get("shades", 0))
 	if bullseye and _b("killingWhisper"):                       # KILLING WHISPER: Bullseye releases bite
@@ -1028,7 +1045,7 @@ func _fermata_perfect(s: CombatState, seat: Seat, bullseye: bool, was_max: bool,
 ## Fired after a release resolves: Twin Echo (max-Flow echo), Phantom (Bullseye twin strike),
 ## Eclipse (a Bullseye instantly re-coils you, already sharp), and the coil rig WHENs.
 func _fermata_after_release(s: CombatState, seat: Seat, grade: int, bullseye: bool,
-		_perfect: bool, base: float, coil_sec: float) -> void:
+		_perfect: bool, base: float, coil_ticks: int) -> void:
 	if grade >= G_PERFECT and _b("twinEcho") and _flow(seat) >= max_flow():
 		_deal(s, seat, roundf(base * cfg.twin_echo_mult), true, false, "strike")
 	if bullseye and _b("phantom"):                            # PHANTOM (keystone): the crossing twin strike
@@ -1036,7 +1053,8 @@ func _fermata_after_release(s: CombatState, seat: Seat, grade: int, bullseye: bo
 	if bullseye and _b("eclipse"):                            # ECLIPSE (keystone): re-coil, already sharp
 		seat.vars["coil_instant"] = true
 		CombatCore.emit_event(s, {"t": "eclipse", "player": seat.is_player})
-	# the "on the edge" rig WHEN: a release right on the SHNK (barely sharp); and the deep-hold WHEN.
+	# rig WHENs: "on the edge" = released right on the SHNK (barely sharp); "deep coil" = a long stalk.
+	var coil_sec := float(coil_ticks) * s.dt
 	if coil_sec <= _coil_min(seat) + 0.10:
 		_rig_fire(s, seat, "onedge")
 	if coil_sec >= 1.5:
@@ -1230,6 +1248,15 @@ func _rhythm_proc(s: CombatState, seat: Seat, source: String) -> void:
 func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var last := int(seat.vars.get("last_strike_tick", -100000))
 	var v: Dictionary = seat.vars.get("venom", {})
+	# FERMATA · THE DRAW: the bar's clock is PRESS-relative — the needle only runs while
+	# coiling (parked at 0 when idle), and the "too early" region is the un-sharp coil floor
+	# (a release there unravels). Tempo/venom keep the strike-relative clock + swing_min.
+	var since_obs := s.tick - last
+	var early_obs := _tt(s, _swing_min_sec(seat))
+	if _fermata():
+		since_obs = (s.tick - int(seat.vars.get("coil_press_tick", s.tick))) \
+			if bool(seat.vars.get("coiling", false)) else 0
+		early_obs = _tt(s, _coil_min(seat))
 	var out := {
 		"tick": s.tick,
 		"aspect": aspect,
@@ -1241,10 +1268,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"flow_max": max_flow(),
 		"flow_mult": _flow_mult(seat),
 		"tier": flow_tier(seat),
-		"since_strike": s.tick - last,
+		"since_strike": since_obs,
 		# ACCELERANDO: the window the kit will judge THIS press against — flow-adjusted, so
 		# the RhythmBar visibly compresses and the policy re-aims as Flow climbs (Venom = base).
-		"swing_min_ticks": _tt(s, _swing_min_sec(seat)),
+		"swing_min_ticks": early_obs,
 		"perfect_lo": _tt(s, _perfect_lo_sec(seat)),
 		"perfect_hi": _tt(s, _perfect_hi_sec(seat)),
 		# FIXED ruler so the RhythmBar shows the accelerando (tempo) / the roaming window
