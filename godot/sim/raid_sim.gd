@@ -50,8 +50,11 @@ func _initialize() -> void:
 	_fortify = float(_arg("fortify", "-1"))
 	_skills = _pick_skills(_arg("skills", ""))
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
-	var healer_desc := ("Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")) \
-		if _healer_cls == "bloomweaver" else ("Mender(%s)" % (_haspect if _haspect != "" else "tidecaller"))
+	var healer_desc := "Mender(%s)" % (_haspect if _haspect != "" else "tidecaller")
+	if _healer_cls == "bloomweaver":
+		healer_desc = "Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")
+	elif _healer_cls == "well":
+		healer_desc = "Well(%s)" % (_haspect if _haspect != "" else "brim")
 	var caster_desc := "Alchemist(brew)" if _caster_cls == "alchemist" else "Voidcaller(disruptor)"
 	var blade_desc := "Twinfang(%s)" % (_baspect if _baspect != "" else "venomancer")
 	print("=== Project Rift — raid sim (the Seals) ===")

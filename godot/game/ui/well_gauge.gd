@@ -84,6 +84,15 @@ func on_event(ev: Dictionary) -> void:
 		"well_clean": _flash("CLEAN — the current rises", Palette.WATER)
 		"well_under": _flash("UNDERCOOKED", Palette.THORN)
 		"well_spill": _flash("SPILL — %d wasted" % int(ev.get("amt", 0)), Palette.BLOOD)
+		# --- THE DECK: modules / keystones / clutch fire moments (MENDER-PLAN §2-5) ---
+		"well_surge":     _flash("RESERVOIR SURGE — %d" % int(ev.get("amt", 0)), Palette.WATER)
+		"well_laststand": _flash("LAST STAND — the party braces", Palette.GOLD_BRIGHT)
+		"well_bene":      _flash("BENEDICTION — the warband drinks", Palette.WATER)
+		"well_millrace":  _flash("MILLRACE — a free cast", Palette.GOLD_BRIGHT)
+		"well_meditate":  _flash("MEDITATE — the Well refills", Palette.WATER)
+		"well_boil":      _flash("BOILING OVER — %d!" % int(ev.get("amt", 0)), Palette.BLOOD)
+		"well_held":      _flash("HELD — release on the spike", Palette.GOLD_BRIGHT)
+		"well_gutter":    _flash("GUTTERED — the hold slipped", Palette.THORN)
 
 func _flash(msg: String, col: Color) -> void:
 	_banner = msg

@@ -9,13 +9,29 @@ extends SceneTree
 
 const TICK_CAP_SEC := 260.0
 
+# Representative DECKs (creed + a module + a spread of boons + a wired rig) — exercised by
+# --load so the deck bands can be read + proven deterministic. Empty otherwise (base bands).
+static func _deck_for(aspect: String) -> Dictionary:
+	if aspect == "draw":
+		return {"creed": "longdraw", "modules": {"benediction": true}, "rig": {"when": "clean_draw", "then": "mend"}}
+	return {"creed": "brink", "modules": {"reservoir": true}, "rig": {"when": "sweet_pour", "then": "gleam"}}
+
+static func _boons_for(aspect: String) -> Dictionary:
+	if aspect == "draw":
+		return {"strongPull": true, "theMillrace": true, "doubleDraw": true, "shortPour": true,
+			"deepStill": true, "deepWell": true, "shiningHour": true}
+	return {"keptLight": true, "wideBrim": true, "secondRing": true, "highTide": true,
+		"lowCatch": true, "stillWater": true, "shiningHour": true, "deepWell": true}
+
 func _initialize() -> void:
 	var seeds := _arg_int("seeds", 200)
 	var seed0 := _arg_int("seed0", 1)
 	var out := _arg("out", "")
+	var load := _arg("load", "0") != "0"   # --load=1 : run the cells with a representative deck
 
 	if seed0 == 1:
 		_prove_determinism()
+		_prove_determinism_deck()
 
 	var encs := ["maw", "rot"]
 	var aspects := ["brim", "draw"]
@@ -25,11 +41,13 @@ func _initialize() -> void:
 		{"label": "sloppy", "lat": 14},
 	]
 
-	print("\n=== WELL — %d seeds/cell (seed0=%d) ===" % [seeds, seed0])
+	print("\n=== WELL — %d seeds/cell (seed0=%d)%s ===" % [seeds, seed0, ("  [LOADED DECK]" if load else "")])
 	print("%-8s %-7s %-7s  win%%   ttk    pours/min glint%%  chgFloor deaths" % ["boss", "aspect", "skill"])
 	var rows: Array = []
 	for enc_name in encs:
 		for aspect in aspects:
+			var bo: Dictionary = _boons_for(aspect) if load else {}
+			var dk: Dictionary = _deck_for(aspect) if load else {}
 			for sk in skills:
 				var wins := 0
 				var ttk_sum := 0.0
@@ -38,7 +56,7 @@ func _initialize() -> void:
 				var chg_sum := 0.0
 				var deaths := 0
 				for seed in range(seed0, seed0 + seeds):
-					var r := _run_one(seed, enc_name, aspect, int(sk["lat"]))
+					var r := _run_one(seed, enc_name, aspect, int(sk["lat"]), bo, dk)
 					if r["won"]:
 						wins += 1
 						ttk_sum += r["ttk_sec"]
@@ -61,7 +79,7 @@ func _initialize() -> void:
 	quit()
 
 func _prove_determinism() -> void:
-	print("--- determinism ---")
+	print("--- determinism (base, deckless) ---")
 	for aspect in ["brim", "draw"]:
 		var a := _run_one(1, "maw", aspect, 0)
 		var b := _run_one(1, "maw", aspect, 0)
@@ -72,10 +90,24 @@ func _prove_determinism() -> void:
 			aspect, ("PASS" if repro else "FAIL"), a["checksum"],
 			("differ (good)" if diverge else "IDENTICAL (suspect!)")])
 
-func _run_one(seed: int, enc_name: String, aspect: String, latency: int) -> Dictionary:
+## Prove a FULLY LOADED deck (creed + module + boons + rig) is still deterministic — the
+## guarded deck layers must not smuggle in any RNG/wall-clock (the CombatCore law).
+func _prove_determinism_deck() -> void:
+	print("--- determinism (loaded deck: creed + module + boons + rig) ---")
+	for aspect in ["brim", "draw"]:
+		var bo := _boons_for(aspect)
+		var dk := _deck_for(aspect)
+		var a := _run_one(1, "maw", aspect, 0, bo, dk)
+		var b := _run_one(1, "maw", aspect, 0, bo, dk)
+		var repro: bool = a["checksum"] == b["checksum"] and a["ttk_sec"] == b["ttk_sec"]
+		print("  %-5s  deck seed1==seed1 -> %s (checksum %d)" % [
+			aspect, ("PASS" if repro else "FAIL"), a["checksum"]])
+
+func _run_one(seed: int, enc_name: String, aspect: String, latency: int,
+		boons: Dictionary = {}, deck: Dictionary = {}) -> Dictionary:
 	var cfg := WellContent.make_config()
 	var wcfg := WellContent.make_well_config()
-	var s := WellContent.make_state(seed, aspect, cfg, wcfg, _encounter(enc_name))
+	var s := WellContent.make_state(seed, aspect, cfg, wcfg, _encounter(enc_name), boons, deck)
 	var pol := s.seats[0].policy as WellPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 4441)          # separate reproducible skill stream

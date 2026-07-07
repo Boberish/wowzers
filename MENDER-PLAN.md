@@ -9,12 +9,47 @@ pour/spill grade + landing preview · DRAW clean/still/undercook + THE CURRENT �
 the WellGauge HUD (charge vessel · Current pips · release band + Still Point · verdict rail) · per-ally
 ✦ Glint chip · `well_sim` + `raid_sim --healer=well` + net carry. **Gates:** determinism PASS both
 specs · default comp byte-identical to main across all 4 Seals (6880/8987/8338/4838) · well plays+wins
-the Seals · ui_smoke_raid ALL OK · WSLg shots verified. **OWED (next build claim): the DECK** —
-creeds/modules/boons/rig/keystones (§2-§5 below) + policy-depth (sharpen the BRIM win-gradient) +
-balance playtest + name lock + online creed/module/rig carry (shared Twinfang debt).
-Files: `godot/data/well/*` · `godot/sim/policies/well_policy.gd` · `godot/sim/well_sim.gd` ·
-`godot/game/ui/well_gauge.gd` · `godot/game/well_binds.gd` · raid_hud/raid_frame/raid_content/
-raid_net/raid_sim wiring.
+the Seals · ui_smoke_raid ALL OK · WSLg shots verified. **DECK: ✅ BUILT 2026-07-07 (see the DECK
+banner below).** Files: `godot/data/well/*` · `godot/sim/policies/well_policy.gd` ·
+`godot/sim/well_sim.gd` · `godot/game/ui/well_gauge.gd` · `godot/game/well_binds.gd` ·
+raid_hud/raid_frame/raid_content/raid_net/raid_sim wiring.
+
+**⚡ THE DECK BUILT & VERIFIED 2026-07-07** (branch `well-deck` → main). The owed deck (§2–§5) is
+CODED + wired into the framework ceremony/draft/run — ALL guarded (empty creed + no modules + no
+boons + no rig ⇒ byte-identical base, proven). **CREEDS** (per-spec pools, `well_creeds.gd`):
+_Brim_ = The Brink (heals scale on the bloodied + the pour band drops LOW — the flagship greed) ·
+Foresight (pours bank stacks while the party is topped; a dip crashes them) · The Levee (low band +
+a pour leaves an absorb, but a weaker Glint — the learner) · The Shallows (tight/high band, but a
+brighter Glint — glass). _Draw_ = The Patient Hand (an overrun becomes a HELD heal, released on the
+spike) · The Long Draw (slow/big/tight — the Largo mirror) · The Narrows (a release OUTSIDE the band
+heals ZERO, in-band much stronger) · The Eddy (the band's centre drifts each cast — deterministic
+from the cast's start tick, no RNG). **MODULES** (Floor-1 pick 1-of-3, all AUTO-FIRE, `well_modules.gd`):
+⭐ **The Reservoir** (SPILL banks → SURGE a burst heal at full + re-bank a share — the Tidecaller
+flywheel, re-homed) · **Triage Protocol** (bloodied allies build NERVE → auto LAST STAND: party heal
++ a raid-wide DR window) · **Benediction** (good grades light PIPS → the 5th cashes a party BLOOM).
+**BOONS** (24, fixed rarities + `ctype` card-type tags per [[card-type-tags]], `well_boons.gd`):
+_SHARED_ = Deep Well · Steady Pulse · **Meditate** (the drafted battery spell) · **The Kept Light**
+(Glint lasts longer + extends) · **Brink Bell** (emergency absorb when an ally drops low) · ✦ **The
+Shining Hour** (the TEAM aura — warband +dmg while everyone is topped; the ONE engine touch, guarded
+exactly like the Glint) · **Boiling Over** (the clutch damage-dump spell) · Warm Rekindle. _BRIM_ =
+Wide Brim · Second Ring · Overflowing Cup · Still Water · Low Catch · Cadence of Mend · The Blindfold ·
+**High Tide** (keystone — a pour glints the WHOLE party while topped). _DRAW_ = Loose Grip · Short Pour ·
+Cool Hand · Double Draw · Deep Still · Last Drops · **Strong Pull** (max-Current clean heals +30%) ·
+**The Millrace** (keystone — every 3rd cast free at full Current). **RIG** (`well_rig.gd`): per-spec
+WHENs (_Brim_: Sweet Pour / Spillover / Low Catch · _Draw_: Clean Draw / High Water / Still Point) →
+shared THENs (Mend / Ward / Bloom / Draught / Gleam), greed-dial magnitudes shown before you commit.
+**Framework wiring:** `_fw()` + all `_fw_*` dispatch (per-spec creed & rig offers by `_aspect`),
+`_inject_boons`, the build-panel rig line + REFORGE pools, `Draft.catalog` + `SIG_KEY`, and
+`RunState.start_well` all handle `"well"`. **Gates (all green):** determinism PASS **base AND a
+fully-loaded deck** (both specs) · **default comp byte-identical — 4-Seal checksums UNCHANGED
+(6880/8987/8338/4838)** · well plays+wins the Seals · `well_sim --load` reads the deck bands (the
+deck lifts survival AND shows a real skill gradient — draw maw 72/57/15 expert/good/sloppy) ·
+ui_smoke_raid ALL OK **+ a new WELL-framework ceremony assertion** · draft_sim ALL OK.
+**OWED (follow-ups, not blockers):** the module-gauge METERS on the WellGauge (reserve/nerve/bene/
+foresight fill — the fire-moment event flashes ship now; the anticipation meters need a WSLg pass) ·
+AI-policy use of the two drafted spells (Meditate / Boiling Over — passives + modules are AI-piloted
+today) · **balance playtest (Bill's lever)** · class NAME lock · online creed/module/rig carry
+(the shared Twinfang debt).
 **⚡ CONTROLS + SHARED HEALER UI (Bill's feel pass, 2026-07-07):** healers share ONE base healing
 UI — hover-a-frame click-cast chords (WellBinds: L flash · R mend · Mid cascade · Sh+L spring ·
 Sh+R dispel), the **shared CastChannel** (now carries an optional graded release window + idle
