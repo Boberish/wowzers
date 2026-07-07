@@ -47,23 +47,25 @@ const CREEDS := {
 	# --- FERMATA (§13.2) creeds — coil temperament. Only offered on the fermata aspect. ---
 	"patient": {
 		"name": "The Patient Knife", "kicker": "Greed",
-		"blurb": "The window never lands near — the knife WAITS, and the long stalk pays: far draws hit up to +20% harder. Release too early and the shadow UNRAVELS into a full Flow crash. A sharp Miss only bleeds −2 Flow.",
+		"blurb": "THE LONG RAMP: the window lands far and the ramp continues PAST the lip — ride into the extension for up to +20% more, a deeper cliff. But the SNAP is harsher (a full crash + a longer stagger), and an early unravel crashes too. Slow, heavy, unforgiving.",
 		"slip": "flow_loss",
 		"slip_amt": 2,
 		"lock_sec": 0.0,
 		"flow_value": 1.0,
-		"patient": true,          # far-window bonus + the far shift floor (TwinfangKit)
+		"patient": true,          # the long ramp + deep lip + far shift floor + harsh snap (TwinfangKit)
 		"unravel_slip": true,     # an unravel is a full crash
 	},
 	"fleeting": {
 		"name": "The Fleeting Shade", "kicker": "Forgiving",
-		"blurb": "A short coil (0.20s), a painless unravel, and a Miss only bleeds −2 Flow instead of crashing. The cost: your Flow ceiling is 4. The fast, forgiving crossover for Tempo hands.",
+		"blurb": "A short coil (0.20s), a painless unravel, and a Miss OR a SNAP only bleeds −2 Flow instead of crashing. The cost: your Flow ceiling is 4. Ride greedy, fall soft — the cliff with a net.",
 		"slip": "flow_loss",
 		"slip_amt": 2,
 		"lock_sec": 0.0,
 		"flow_value": 1.0,
 		"coil_min": 0.20,         # TwinfangKit._coil_min reads this
 		"flow_cap": 4,            # TwinfangKit.max_flow reads this
+		"snap": "flow_loss",      # EDGE: a SNAP bleeds Flow instead of crashing
+		"snap_amt": 2,
 	},
 	"longnight": {
 		"name": "The Long Night", "kicker": "Slow & sharp",

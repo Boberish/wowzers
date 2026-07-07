@@ -49,16 +49,56 @@ func _dance_active(s: CombatState, seat: Seat) -> bool:
 		and s.tick < int(seat.vars.get("dance_until", 0))
 
 ## The live minimum coil (seconds) before the blade sharpens — Fleeting Shade shortens the
-## floor, Quiet Fuse trims it, a Feint-primed coil sharpens faster, a Dance makes it instant.
+## floor, Quiet Fuse trims it, a Dance makes it instant.
 func _coil_min(seat: Seat) -> float:
 	if bool(seat.vars.get("coil_instant", false)):
 		return 0.0
 	var m := float(_creed().get("coil_min", cfg.coil_min_sec))
 	if _b("quietFuse"):
 		m -= cfg.quiet_fuse_cut
-	if bool(seat.vars.get("coil_primed", false)):        # FEINT: the last unravel primed a faster sharpen
-		m /= (1.0 + cfg.feint_sharpen)
 	return maxf(0.0, m)
+
+## FERMATA · THE LIP (seconds from press): the far edge a release must not cross — past it the
+## note SNAPS. Base = the window's `hi`; PATIENT KNIFE extends the ramp past it for a deeper max.
+func _fermata_lip_sec(seat: Seat) -> float:
+	var w := _edge_window(seat)
+	var ext: float = (float(w[1]) - float(w[0])) * cfg.patient_ramp_ext if bool(_creed().get("patient", false)) else 0.0
+	return float(w[1]) + ext
+
+## FERMATA · THE ROAMING WINDOW roll — where the NEXT green lands. Patient waits far; Stretto
+## biases near. Drawn from s.rng (fermata-only stream → tempo/venom checksums untouched).
+func _roll_window_shift(s: CombatState, seat: Seat) -> float:
+	var smin := cfg.patient_shift_min if bool(_creed().get("patient", false)) else cfg.fermata_shift_min
+	var roll := lerpf(smin, cfg.fermata_shift_max, s.rng.next_float())
+	if _b("stretto"):                                    # STRETTO: pull the roll toward the near edge
+		roll = lerpf(roll, cfg.fermata_shift_min, cfg.stretto_bias)
+	return roll
+
+## FERMATA · THE SNAP — the sweep crossed the lip (or a release landed past it). The note breaks:
+## no strike, Flow crashes (Fleeting bleeds 2 instead), a stagger (Patient's is harsher), the Brink
+## zeroes, First Blood arms, and the window re-rolls. There is no dead-note state to hold.
+func _snap(s: CombatState, seat: Seat) -> void:
+	seat.vars["coiling"] = false
+	seat.vars["sharp"] = false
+	seat.vars["veil_warband_active"] = false
+	seat.vars["coil_instant"] = false
+	var stagger := cfg.snap_lock
+	if String(_creed().get("snap", "crash")) == "flow_loss":
+		seat.vars["flow"] = maxi(0, _flow(seat) - int(_creed().get("snap_amt", cfg.fleeting_snap_amt)))
+	else:
+		seat.vars["flow"] = 0                            # a crash
+		if bool(_creed().get("patient", false)):
+			stagger = cfg.patient_snap_stagger
+	seat.vars["flow_decay_acc"] = 0
+	seat.vars["overdrive"] = 0
+	seat.vars["tl_stacks"] = 0
+	seat.vars["brink"] = 0                               # THE BRINK: a snap zeroes the nerve meter
+	if _b("firstBlood"):                                 # FIRST BLOOD: arm the comeback release
+		seat.vars["first_blood_ready"] = true
+	seat.vars["strike_lock_until"] = s.tick + _tt(s, stagger)
+	seat.vars["window_shift"] = _roll_window_shift(s, seat)
+	CombatCore._bump_diag(s, seat, "snap")
+	CombatCore.emit_event(s, {"t": "snap", "player": seat.is_player})
 
 # --- CREEDS (Tempo rework, TEMPO-PLAN §3): a slip's cost + Flow's reward value ---
 func _creed() -> Dictionary:
@@ -196,14 +236,19 @@ func _edge_window(seat: Seat) -> Array:
 		pad += cfg.wide_pad
 	if _b("fencersLine") and bool(seat.vars.get("fencer_next", false)):
 		pad += cfg.fencer_pad
-	# FIRST PASS (Fermata boon): the first window after the SHNK is wider — reward a decisive release.
-	if _fermata() and _b("firstPass") and bool(seat.vars.get("first_pass_ready", false)):
-		pad += cfg.first_pass_widen
+	# FIRST NOTE (Fermata boon): a draw begun after a 1.5s rest gets extra ENTRY runway.
+	if _fermata() and _b("firstNote") and bool(seat.vars.get("first_note_ready", false)):
+		pad += cfg.first_note_pad
 	if pad > 0.0:
 		# F19: wideners TAPER with Flow — full help at walking pace, nothing at max Flow.
 		var taper := (1.0 - t) if cfg.widener_taper else 1.0
 		var w := (hi - lo) * pad * taper
-		lo -= w; hi += w
+		# THE WIDENER LAW (EDGE): for Fermata a widener adds ENTRY runway only — the lip (hi,
+		# the cliff, the payoff) never moves; only the safe entry side opens up.
+		if _fermata():
+			lo -= w
+		else:
+			lo -= w; hi += w
 	# THE EDGE (module): narrows around the centre for a bigger Perfect payoff.
 	if aspect == "tempo" and _m("edge"):
 		var mid := (lo + hi) * 0.5
@@ -301,6 +346,10 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 		var od := int(seat.vars.get("overdrive", 0))          # DOUBLE TIME: overdrive damage
 		if od > 0:
 			d *= (1.0 + float(od) * cfg.doubletime_dmg)
+	# THE BRINK (Fermata boon): a nerve-streak meter multiplies ALL your outgoing damage -
+	# the fermata Through-Line, keyed to how deep you keep riding (a snap zeroes it in _snap).
+	if _fermata() and _b("theBrink"):
+		d *= (1.0 + cfg.brink_per * float(seat.vars.get("brink", 0)))
 	# COMBO RIG (§5) — Expose: the boss takes +% from ALL your damage for a beat.
 	if int(seat.vars.get("rig_expose_until", 0)) >= s.tick:
 		d *= (1.0 + float(seat.vars.get("rig_expose_amt", 0)) / 100.0)
@@ -386,7 +435,8 @@ func _dump_beat_bonus(s: CombatState, seat: Seat) -> float:
 		since = s.tick - int(seat.vars.get("last_strike_tick", -100000))
 	var lo := _tt(s, _perfect_lo_sec(seat))
 	var hi := _tt(s, _perfect_hi_sec(seat))
-	var grade := _strike_grade(since, lo, hi)
+	# Fermata (Tutti) reads the DEPTH ramp — a dump fired deep in the ride takes the depth grade.
+	var grade := _ramp_grade(since, lo, hi) if _fermata() else _strike_grade(since, lo, hi)
 	var g := 0.0
 	match grade:
 		G_BULL: g = 0.8
@@ -638,34 +688,35 @@ func _fermata_upkeep(s: CombatState, seat: Seat) -> void:
 
 	if not bool(seat.vars.get("coiling", false)):
 		seat.vars["veil_warband_active"] = false
+		# THE UNSEEN BLADE (keystone): bank a Shade per interval while RESTING — the rest-vs-chain
+		# dial (idle bleeds Flow but gathers Shades for one giant next release).
+		if _b("unseenBlade"):
+			var sacc := int(seat.vars.get("shade_acc", 0)) + 1
+			if sacc >= _tt(s, cfg.unseen_shade_every):
+				sacc = 0
+				seat.vars["shades"] = mini(int(seat.vars.get("shades", 0)) + 1, cfg.unseen_shade_cap)
+			seat.vars["shade_acc"] = sacc
 		return
 
 	var press := int(seat.vars.get("coil_press_tick", s.tick))
 	var coil_ticks := s.tick - press
 	var min_ticks := _tt(s, _coil_min(seat))
 
-	# the SHNK: the tick the blade crosses sharp — arm First Pass, mark it, emit once.
+	# THE SNAP: while coiling, the sweep crossing the lip breaks the note (no snap during a Dance).
+	if not _dance_active(s, seat) and float(coil_ticks) > float(_tt(s, _fermata_lip_sec(seat))):
+		_snap(s, seat)
+		return
+
+	# the SHNK: the tick the blade crosses sharp — emit once.
 	if coil_ticks >= min_ticks and not bool(seat.vars.get("sharp", false)):
 		seat.vars["sharp"] = true
-		if _b("firstPass"):
-			seat.vars["first_pass_ready"] = true
 		CombatCore.emit_event(s, {"t": "coil_sharp", "player": seat.is_player})
 
 	# RESTLESS DARK (boon): energy regens faster inside the shadow.
 	if _b("restlessDark"):
 		_gain_energy(seat, cfg.energy_regen * s.dt * cfg.restless_dark_regen)
 
-	# THE UNSEEN BLADE (keystone): bank a Shade per interval coiled, up to the cap.
-	if _b("unseenBlade"):
-		var sacc := int(seat.vars.get("shade_acc", 0)) + 1
-		var every := _tt(s, cfg.unseen_shade_every)
-		if sacc >= every:
-			sacc -= every
-			seat.vars["shades"] = mini(int(seat.vars.get("shades", 0)) + 1, cfg.unseen_shade_cap)
-		seat.vars["shade_acc"] = sacc
-
-	# VEIL OVER THE WARBAND (support): publish the shelter while coiled (raid applies it — owed,
-	# same channel as Battle Hymn; kit-local here so the checksum is honest).
+	# VEIL OVER THE WARBAND (support): publish the shelter while drawing (raid applies it — owed).
 	seat.vars["veil_warband_active"] = _b("veilWarband")
 
 # --------------------------------------------------------------------------
@@ -763,11 +814,7 @@ func on_dodge_press(s: CombatState, seat: Seat) -> void:
 	if not _fermata() or not bool(seat.vars.get("coiling", false)):
 		return
 	if _b("vanish") and cfg.vanish_keep_sharp:
-		return                                                     # VANISH (opus): the coil survives, still sharp
-	if _b("shadowstep"):
-		seat.vars["coil_press_tick"] = s.tick - int(_tt(s, _coil_min(seat)) / 2.0)   # kept at half progress
-		seat.vars["sharp"] = false
-		return
+		return                                                     # VANISH (opus): the draw survives, still sharp
 	seat.vars["coiling"] = false
 	seat.vars["sharp"] = false
 	CombatCore.emit_event(s, {"t": "coil_break", "player": seat.is_player})
@@ -805,6 +852,20 @@ func _strike_grade(since: int, lo: int, hi: int) -> int:
 		return G_PERFECT
 	return G_GOOD
 
+## FERMATA · THE RAMP grade (EDGE verb): graded by DEPTH into the window, not centredness.
+## Entry is a weak-but-safe GOOD; the ramp climbs to a BULLSEYE at the far lip, right against the
+## SNAP cliff (crossing the lip is caught separately). depth d = (since − lo) / (hi − lo); d > 1
+## is the Patient Knife extension (still BULLSEYE, with a deep bonus in _coil_release_bonus).
+func _ramp_grade(since: int, lo: int, hi: int) -> int:
+	if since < lo:
+		return G_MISS
+	var d := (float(since) - float(lo)) / maxf(1.0, float(hi - lo))
+	if d < cfg.fermata_good_frac:
+		return G_GOOD
+	if d < cfg.fermata_good_frac + cfg.fermata_perfect_frac:
+		return G_PERFECT
+	return G_BULL
+
 ## Consolidated crit roll. fifthCrit counts only true Perfects (is_perfect); Heartseeker
 ## fires on a Bullseye; Opportunist rolls a chance on ANY Strike during a boss wind-up.
 ## CRIT (A7 — the Whetted Edge): base Tempo has NO crits. Two opt-in sources:
@@ -836,7 +897,11 @@ func _coil_press(s: CombatState, seat: Seat) -> bool:
 	seat.vars["sharp"] = bool(seat.vars.get("coil_instant", false)) or _dance_active(s, seat)
 	seat.vars["coil_press_tick"] = s.tick
 	seat.vars["veil_used"] = false
-	seat.vars["shade_acc"] = 0
+	# THE REST: a draw begun after a 1.5s rest arms First Note (entry runway) and the Rested Draw WHEN.
+	var rested := (s.tick - int(seat.vars.get("last_strike_tick", -100000))) >= _tt(s, 1.5)
+	seat.vars["first_note_ready"] = _b("firstNote") and rested
+	if rested:
+		_rig_fire(s, seat, "rested")
 	CombatCore.emit_event(s, {"t": "coil_press", "player": seat.is_player})
 	return true
 
@@ -849,23 +914,27 @@ func _coil_release(s: CombatState, seat: Seat) -> bool:
 	seat.vars["coiling"] = false
 	seat.vars["veil_warband_active"] = false
 	var coil_ticks := s.tick - int(seat.vars.get("coil_press_tick", s.tick))
-	var instant := bool(seat.vars.get("coil_instant", false)) or _dance_active(s, seat)
+	var dance := _dance_active(s, seat)
+	var instant := bool(seat.vars.get("coil_instant", false)) or dance
 	seat.vars["coil_instant"] = false
 	if not instant and coil_ticks < _tt(s, _coil_min(seat)):
-		# UNRAVEL — the click-cheat killer. Feint primes the next coil to sharpen faster.
+		# UNRAVEL — the click-cheat killer: released before the SHNK, no strike, no Flow loss.
 		seat.vars["sharp"] = false
-		seat.vars["coil_primed"] = _b("feint")
 		if not (_b("quietFuse") and cfg.quiet_fuse_no_stagger):
 			seat.vars["strike_lock_until"] = s.tick + _tt(s, cfg.coil_unravel_stagger)
-		# PATIENT KNIFE: an unravel is a FULL crash (its greed cuts both ways) — even though a
-		# normal sharp Miss under Patient only bleeds Flow, releasing early shatters the tempo.
+		# PATIENT KNIFE: an unravel is a FULL crash (its greed cuts both ways).
 		if bool(_creed().get("unravel_slip", false)):
 			_creed_slip(s, seat, true)
+		if _b("firstBlood"):                            # FIRST BLOOD: a fumble arms the comeback release
+			seat.vars["first_blood_ready"] = true
 		_rig_fire(s, seat, "unravel")
 		CombatCore._bump_diag(s, seat, "unravel")
 		CombatCore.emit_event(s, {"t": "unravel", "player": seat.is_player})
 		return true
-	seat.vars["coil_primed"] = false
+	# THE SNAP: released PAST the lip — rode the ramp too deep, the note breaks (no snap in the Dance).
+	if not dance and float(coil_ticks) > float(_tt(s, _fermata_lip_sec(seat))):
+		_snap(s, seat)
+		return true
 	seat.vars["sharp"] = false
 	return _strike(s, seat, true, coil_ticks)
 
@@ -897,7 +966,7 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 	# ACCELERANDO + GRADED WINDOW (§2c): the live green [lo,hi] rides Flow (Venom pins Flow 0).
 	var lo := _tt(s, _perfect_lo_sec(seat))
 	var hi := _tt(s, _perfect_hi_sec(seat))
-	var grade := _strike_grade(since, lo, hi)
+	var grade := _ramp_grade(since, lo, hi) if from_release else _strike_grade(since, lo, hi)
 	if fever:
 		grade = G_BULL                                 # OVERDRIVE FEVER: every strike lands dead-centre
 	if bool(seat.vars.get("coda_ready", false)):
@@ -905,6 +974,9 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 		grade = maxi(grade, G_PERFECT)
 	if from_release and _dance_active(s, seat):
 		grade = maxi(grade, G_PERFECT)                 # SHADOW DANCE: bullet-time — releases grade up to Perfect
+	if from_release and _b("firstBlood") and bool(seat.vars.get("first_blood_ready", false)):
+		grade = maxi(grade, G_PERFECT)                 # FIRST BLOOD: the comeback release lands clean
+		seat.vars["first_blood_ready"] = false
 	# F26: base Syncopation is COST-ONLY now — the Good→Perfect grade-up moves to a future Opus rune.
 	var perfect := grade >= G_PERFECT
 	var bullseye := grade == G_BULL
@@ -915,13 +987,13 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 
 	var base := float(a["dmg"])
 	var cp := int(a["cp"])
-	# FERMATA: the draw-length build dials (Patient / Patient Edge / Unseen Blade Shades) and
-	# Killing Whisper multiply the release BEFORE grading branches; Shades + First Pass consume here.
+	# FERMATA: the ride-depth build dials (Patient deep-lip / Unseen Blade Shades / Killing Whisper)
+	# multiply the release BEFORE grading branches; Shades + First Note consume here.
 	if from_release:
 		base *= (1.0 + _coil_release_bonus(s, seat, coil_ticks, bullseye))
 		if _b("unseenBlade"):
 			seat.vars["shades"] = 0
-		seat.vars["first_pass_ready"] = false
+		seat.vars["first_note_ready"] = false
 	if perfect:
 		CombatCore._bump_diag(s, seat, "perfect_strike")   # class-signature skill signal (token mint)
 		CombatCore._bump_diag(s, seat, "s_bull" if bullseye else "s_perfect")
@@ -962,6 +1034,10 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 				seat.vars["marks"] = mini(int(seat.vars.get("marks", 0)) + 1, cfg.mark_cap)
 			if _fermata():
 				_fermata_perfect(s, seat, bullseye, was_max, fever)
+				if _b("theBrink"):                                          # THE BRINK: nerve-streak +1 on a deep release
+					seat.vars["brink"] = mini(int(seat.vars.get("brink", 0)) + 1, cfg.brink_cap)
+				if _b("composure"):                                         # COMPOSURE: rest without bleeding the streak
+					seat.vars["composure_until"] = s.tick + _tt(s, cfg.composure_sec)
 			var t := flow_tier(seat)
 			if t >= 1:
 				_deal(s, seat, roundf(float(a["dmg"]) * 0.6), true, false, "perfect")   # Tier 1: extra hit
@@ -976,6 +1052,10 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 		_deal(s, seat, roundf(base * cfg.good_mult), true, _roll_crit(s, seat, false, false), "strike")
 		if aspect == "venomancer":
 			_wheel_strike(s, seat, false)
+		if from_release and _b("coldCut"):                              # COLD CUT: the shallow-safe release pays combo
+			_gain_cp(seat, cfg.cold_cut_cp)
+			if cfg.cold_cut_refund > 0.0:
+				_gain_energy(seat, cfg.cold_cut_refund)
 		# a GOOD treads water — it lands, but no Flow gained and NO slip (the safety tier)
 	else:
 		CombatCore._bump_diag(s, seat, "s_miss")
@@ -984,6 +1064,8 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 			_wheel_strike(s, seat, false)                                    # ride the wheel (normal)
 		else:
 			_creed_slip(s, seat)                                             # REWORK: a missed beat is a SLIP (Creed pays it)
+			if _fermata() and _b("firstBlood"):                              # FIRST BLOOD: a miss arms the comeback
+				seat.vars["first_blood_ready"] = true
 	# FENCER'S LINE: a Bullseye widens the NEXT window (one-shot); any other grade clears it.
 	seat.vars["fencer_next"] = (bullseye and _b("fencersLine"))
 	# FERMATA · THE ROAMING WINDOW: every resolve rolls where the NEXT green lands. Drawn from
@@ -991,8 +1073,10 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 	# tempo/venom rng streams are untouched (their checksums stay byte-identical).
 	# PATIENT KNIFE raises the roll's floor — the window never lands near; the knife waits.
 	if _fermata():
-		var smin := cfg.patient_shift_min if bool(_creed().get("patient", false)) else cfg.fermata_shift_min
-		seat.vars["window_shift"] = lerpf(smin, cfg.fermata_shift_max, s.rng.next_float())
+		if bullseye and _b("refrain"):
+			seat.vars["refrain_repeat"] = true               # REFRAIN: a Bullseye HOLDS the window — keep the shift,
+		else:                                              # so the next draw replays the same note (the repeat pays more)
+			seat.vars["window_shift"] = _roll_window_shift(s, seat)
 	_gain_cp(seat, cp + (cfg.bull_bonus_cp if bullseye else 0))   # F15: a Bullseye grants extra combo (superset of Perfect)
 	if _b("strikeEnergy") and perfect:
 		_gain_energy(seat, cfg.efficiency_refund)                 # Efficiency: stacks ON TOP of the base refund
@@ -1016,15 +1100,21 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 ## Killing Whisper pays a Bullseye. Additive; base kit returns 0.0 — the true small variation.
 func _coil_release_bonus(s: CombatState, seat: Seat, coil_ticks: int, bullseye: bool) -> float:
 	var b := 0.0
-	var far := clampf((float(coil_ticks) * s.dt - cfg.fermata_far_pivot) / cfg.fermata_far_span, 0.0, 1.0)
-	if bool(_creed().get("patient", false)):                   # PATIENT KNIFE: the long stalk pays
-		b += cfg.patient_cap * far
-	if _b("patientEdge"):                                       # PATIENT EDGE: more of the same greed
-		b += cfg.patient_edge_cap * far
-	if _b("unseenBlade"):                                       # THE UNSEEN BLADE: the Shade battery
+	# PATIENT KNIFE (THE LONG RAMP): a release in the extension PAST the lip pays up to deep_mult,
+	# scaling with how far into that extension you dared ride.
+	if bool(_creed().get("patient", false)):
+		var w := _edge_window(seat)
+		var hi_t := _tt(s, w[1])
+		var ext_t := (float(_tt(s, w[1])) - float(_tt(s, w[0]))) * cfg.patient_ramp_ext
+		if coil_ticks > hi_t and ext_t > 0.0:
+			b += cfg.patient_deep_mult * clampf(float(coil_ticks - hi_t) / ext_t, 0.0, 1.0)
+	if _b("unseenBlade"):                                       # THE UNSEEN BLADE: the rest-banked Shade battery
 		b += cfg.unseen_shade_per * float(seat.vars.get("shades", 0))
 	if bullseye and _b("killingWhisper"):                       # KILLING WHISPER: Bullseye releases bite
 		b += cfg.killing_whisper_mult
+	if _b("refrain") and bool(seat.vars.get("refrain_repeat", false)):  # REFRAIN: the held-window repeat pays more
+		seat.vars["refrain_repeat"] = false
+		b += cfg.refrain_bonus
 	return b
 
 ## A sharp Perfect/Bull release feeds the module gauges: SHADOW DANCE fills toward the DANCE
@@ -1050,15 +1140,13 @@ func _fermata_after_release(s: CombatState, seat: Seat, grade: int, bullseye: bo
 		_deal(s, seat, roundf(base * cfg.twin_echo_mult), true, false, "strike")
 	if bullseye and _b("phantom"):                            # PHANTOM (keystone): the crossing twin strike
 		_deal(s, seat, roundf(base * cfg.phantom_twin_mult), true, false, "strike")
-	if bullseye and _b("eclipse"):                            # ECLIPSE (keystone): re-coil, already sharp
-		seat.vars["coil_instant"] = true
+	if bullseye and _b("eclipse"):                            # ECLIPSE (keystone): re-coil already sharp,
+		seat.vars["coil_instant"] = true                      # and the chained window lands NEAR (else the dance dies)
+		seat.vars["window_shift"] = cfg.fermata_shift_min
 		CombatCore.emit_event(s, {"t": "eclipse", "player": seat.is_player})
-	# rig WHENs: "on the edge" = released right on the SHNK (barely sharp); "deep coil" = a long stalk.
-	var coil_sec := float(coil_ticks) * s.dt
-	if coil_sec <= _coil_min(seat) + 0.10:
-		_rig_fire(s, seat, "onedge")
-	if coil_sec >= 1.5:
-		_rig_fire(s, seat, "deepcoil")
+	# THE RAZOR (rig WHEN): a release in the last sliver before the lip — a hair from the snap.
+	if float(coil_ticks) >= float(_tt(s, _fermata_lip_sec(seat)) - _tt(s, cfg.razor_sec)):
+		_rig_fire(s, seat, "razor")
 
 func _eviscerate(s: CombatState, seat: Seat) -> bool:
 	var a: Dictionary = cfg.abilities["eviscerate"]
@@ -1341,6 +1429,15 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		out["coil_min_ticks"] = _tt(s, _coil_min(seat))
 		out["coil_ticks"] = (s.tick - int(seat.vars.get("coil_press_tick", s.tick))) if coiling else 0
 		out["strike_locked"] = s.tick < int(seat.vars.get("strike_lock_until", 0))
+		# THE RAMP & THE SNAP (EDGE) — depth bands + the lip (the cliff) so the bar draws the ramp.
+		out["fermata_ramp"] = true
+		out["ramp_good_frac"] = cfg.fermata_good_frac
+		out["ramp_perfect_frac"] = cfg.fermata_perfect_frac
+		out["lip_ticks"] = _tt(s, _fermata_lip_sec(seat))
+		out["dance_no_snap"] = _dance_active(s, seat)
+		if _b("theBrink"):
+			out["brink"] = int(seat.vars.get("brink", 0))
+			out["brink_max"] = cfg.brink_cap
 		if _b("unseenBlade"):
 			out["shades"] = int(seat.vars.get("shades", 0))
 			out["shades_max"] = cfg.unseen_shade_cap

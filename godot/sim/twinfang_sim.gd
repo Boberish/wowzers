@@ -218,30 +218,33 @@ func _prove_fermata(seeds: int) -> void:
 	print("FERMATA probe (Tempo-family / Executioner @good — the hold-release aspect, %d seeds):" % n)
 	var cells := [
 		{"l": "base",     "c": "drumline",  "m": {},                    "b": {}},
-		{"l": "patient",  "c": "patient",   "m": {},                    "b": {"patientEdge": true}},
+		{"l": "patient",  "c": "patient",   "m": {},                    "b": {}},
 		{"l": "fleeting", "c": "fleeting",  "m": {},                    "b": {}},
 		{"l": "longnight","c": "longnight", "m": {},                    "b": {}},
 		{"l": "tutti",    "c": "tutti",     "m": {},                    "b": {}},
 		{"l": "dance",    "c": "drumline",  "m": {"shadowdance": true}, "b": {}},
 		{"l": "mark",     "c": "drumline",  "m": {"mark": true},        "b": {"eviPlus": true}},
-		{"l": "veil",     "c": "drumline",  "m": {},                    "b": {"vanish": true, "shadowstep": true, "restlessDark": true}},
-		{"l": "release",  "c": "drumline",  "m": {},                    "b": {"killingWhisper": true, "twinEcho": true, "firstPass": true, "feint": true}},
-		{"l": "unseen",   "c": "patient",   "m": {},                    "b": {"unseenBlade": true, "patientEdge": true}},
+		{"l": "roll",     "c": "drumline",  "m": {},                    "b": {"stretto": true, "refrain": true}},
+		{"l": "ride",     "c": "drumline",  "m": {},                    "b": {"coldCut": true, "theBrink": true, "killingWhisper": true}},
+		{"l": "rest",     "c": "drumline",  "m": {},                    "b": {"composure": true, "firstNote": true}},
+		{"l": "unseen",   "c": "patient",   "m": {},                    "b": {"unseenBlade": true}},
+		{"l": "veil",     "c": "drumline",  "m": {},                    "b": {"vanish": true, "restlessDark": true}},
 		{"l": "crit",     "c": "drumline",  "m": {},                    "b": {"hone": true, "heartseeker": true, "serrated": true}},
 	]
-	print("  cell       skill    win     ttk     bull/run  perf/run  unravel/run")
+	print("  cell       skill    win     ttk     bull/run  perf/run  snap/run")
 	for c in cells:
-		for sk in [{"l": "expert", "v": 0}, {"l": "good", "v": 6}]:
-			var w := 0; var ttk := 0.0; var wn := 0; var bull := 0.0; var perf := 0.0; var unr := 0.0
+		for sk in [{"l": "expert", "v": 0}, {"l": "good", "v": 6}, {"l": "sloppy", "v": 14}]:
+			var w := 0; var ttk := 0.0; var wn := 0; var bull := 0.0; var perf := 0.0; var snp := 0.0
 			for seed in range(1, n + 1):
 				var r := _run_one(seed, "executioner", "fermata", int(sk["v"]), c["b"], true, String(c["c"]), c["m"])
 				if r["won"]: w += 1; ttk += float(r["ttk_sec"]); wn += 1
 				var rd: Dictionary = r.get("diag", {})
-				bull += float(rd.get("s_bull", 0)); perf += float(rd.get("s_perfect", 0)); unr += float(rd.get("unravel", 0))
+				bull += float(rd.get("s_bull", 0)); perf += float(rd.get("s_perfect", 0)); snp += float(rd.get("snap", 0))
 			print("  %-9s %-7s %5.1f%%  %5.1fs   %6.2f    %6.2f     %6.2f" % [
-				c["l"], sk["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), bull / n, perf / n, unr / n])
-	var d1 := _run_one(9, "executioner", "fermata", 6, {"unseenBlade": true, "patientEdge": true, "killingWhisper": true, "twinEcho": true}, true, "patient", {"mark": true})
-	var d2 := _run_one(9, "executioner", "fermata", 6, {"unseenBlade": true, "patientEdge": true, "killingWhisper": true, "twinEcho": true}, true, "patient", {"mark": true})
+				c["l"], sk["l"], 100.0 * w / n, (ttk / wn if wn > 0 else 0.0), bull / n, perf / n, snp / n])
+	var fatb := {"unseenBlade": true, "theBrink": true, "coldCut": true, "killingWhisper": true, "twinEcho": true, "refrain": true}
+	var d1 := _run_one(9, "executioner", "fermata", 6, fatb, true, "patient", {"mark": true})
+	var d2 := _run_one(9, "executioner", "fermata", 6, fatb, true, "patient", {"mark": true})
 	print("  determinism (fat fermata build): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
 	var b1 := _run_one(4, "executioner", "fermata", 6, {}, true, "drumline")
 	var b2 := _run_one(4, "executioner", "fermata", 6, {}, true, "drumline")
