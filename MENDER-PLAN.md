@@ -36,7 +36,21 @@ travelling light (the current flows); **THE TARGET BAR is a jeweled glass health
 entry gate + crowning gem + plaque, breathing glint aura); the verdict banner lands centre-stage on a
 dark chip, history rail = fading diamonds. Palette gains WATER / WATER_DEEP. Verified: ui_smoke_raid
 ALL OK · WSLg shots both specs clean.
-~~VERB PAIR LOCKED via feel-tester 2026-07-07~~ (Bill: "i like both alot, the draw one is very nice").
+**⚡ AAA PASS #2 — MATERIAL RENDERING (Bill's feel pass #4, 2026-07-07, `9eeaa41`):** Bill: "better but
+far from AAA — basic line borders, squares, no different colors, the text flashing up is covering the
+mana, the bubbles look childish." Answer = rebuild the RENDERING, not the layout. **UiKit gains the
+material toolkit** (shared, additive): `glow_tex()`/`glow()` — a cached radial-falloff texture tinted
+per draw = bloom-like light inside `_draw` with no shaders — and `grad_rect`/`grad_rect_h` per-vertex
+gradient fills. **The gauge is ONE reliquary console:** glass slab (drop shadow, filigree corners,
+water-blue crown glow, engraved header divider) holding a recessed POOL (deep-water gradient, drifting
+surface light) — the orbs are **lit liquid spheres set into metal sockets** (layered depth toward the
+virtual light, refraction rim-light, soft+hard specular, one drifting light-mote; the cartoon bubble
+rings are GONE), the Current is a chevron stream the light visibly flows through, the target bar is a
+hero bar (gradient fill, glowing leading edge, bevel + diamond finials). **The CastChannel sits on a
+glass pill** (no bare floating rect), gradient fill + glowing leading edge, zone glass glows when hot;
+**DRAW's channel wears Palette.WATER** — spec color identity (BRIM gold / DRAW water). **The verdict
+banner rises ABOVE the whole channel** (glow + pop-in chip) — it can never cover the charges or the
+live window again. Verified: ui_smoke_raid ALL OK · WSLg both specs, zero draw errors.
 **Scope:** rebuilds the **Mender** — the healer seat's direct-cast class — onto Creeds / Modules /
 WHEN-THEN. The Bloomweaver is NOT part of this (its framework re-clothing is its own later pass);
 the **damage-healer is a 3rd healer-seat class, future**, with its own two specs.

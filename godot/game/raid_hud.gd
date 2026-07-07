@@ -3350,14 +3350,13 @@ func _build_band_healer() -> void:
 ## on). No mana orb — the Well IS the resource, in the gauge.
 func _build_band_well() -> void:
 	_binds = WellBinds.load_binds()
-	_well_gauge = WellGauge.new()
-	_well_gauge.aspect = _aspect
-	_place(_well_gauge, 0.5, 1, 0.5, 1, -330, -300, 330, -166)
-	_shake_root.add_child(_well_gauge)
-	# the shared healer cast bar; DRAW marks the release window on it and clicking the
-	# channel is a release press. The idle track keeps the window readable between casts.
+	# the shared healer cast bar; DRAW marks the release window on it (and wears the
+	# Well's water blue — spec color identity), clicking the channel is a release press.
+	# The idle track keeps the window readable between casts. Added BEFORE the gauge:
+	# the gauge's verdict banner rises over the channel, so it must draw on top.
 	_castbar = CastChannel.new()
 	if _aspect == "draw":
+		_castbar.accent = Palette.WATER
 		_castbar.zone_lo = 1.0 - _wcfg.draw_band
 		var sp_c := 1.0 - _wcfg.draw_band * 0.5
 		_castbar.mark_lo = sp_c - _wcfg.still_point * 0.5
@@ -3366,9 +3365,13 @@ func _build_band_well() -> void:
 		_castbar.tapped.connect(func(): _ctrl.human({"type": "ability", "id": "release"}))
 	# the Well's channel is placed TALL — the shared CastChannel scales its whole
 	# instrument with height, so this one bar is the big AAA read (classic healers
-	# keep their 60-tall placement pixel-for-pixel).
+	# keep their 60-tall placement).
 	_place(_castbar, 0.5, 1, 0.5, 1, -330, -420, 330, -304)
 	_shake_root.add_child(_castbar)
+	_well_gauge = WellGauge.new()
+	_well_gauge.aspect = _aspect
+	_place(_well_gauge, 0.5, 1, 0.5, 1, -330, -300, 330, -166)
+	_shake_root.add_child(_well_gauge)
 	var row := _rune_row(-380.0, 380.0)
 	_runes = []
 	_rune_ids = []
