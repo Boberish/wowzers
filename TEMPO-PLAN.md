@@ -561,6 +561,12 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 >   Knife (Stretto·Fleeting·Quiet Fuse·Eclipse) / the Slow Nuke (Patient·Unseen Blade·First
 >   Note·Rested Draw) / the Safe Butcher (Cold Cut·Composure·Mark) / the Fearless Dance (Shadow
 >   Dance·Brink·Killing Whisper). Offer-trio audit ran: no auto-picks, no auto-skips.
+> - **V5 VERDICTS IN (Bill, 2026-07-07): everything KEEP except `feint` CUT ("no time or reason
+>   to veto") and `shadowstep` CUT ("one block card only" — Vanish is the one defense card; the
+>   dodge-breaks-the-draw law now bites unsoftened, his call). The Unravel rig WHEN stays
+>   (accident-only consolation now).** Slate LOCKED → **build brief for the implementing agent:
+>   `FERMATA-V5-BRIEF.md`** (repo root — the verb spec, the full slate table with per-card code
+>   status, file-by-file code map, work order with checksum gates, verification matrix, gotchas).
 > **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);

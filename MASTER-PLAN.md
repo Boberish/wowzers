@@ -748,6 +748,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-07 · `well-aaa-ui` (worktree `../wow-well-aaa`) · §CLASSES / `MENDER-PLAN.md` — **THE
+  WELL — AAA UI sweep (Bill's feel pass #3).** Pure view code: CastChannel scaled up + fancy DRAW
+  release window (needle/gem/flare), WellGauge charge blocks → animated water orbs, target bar →
+  jeweled glass health bar. No combat/engine touches. *(healer-rework session)*
+
 - ☑ 2026-07-07 · main (docs only) · §MODES & ENDGAME / `WORLD-PLAN.md` §INSTANCES /
   `PROGRESSION-PLAN.md` §Laws — **RAID vs DUNGEON identity split (Bill, design session).**
   Bill's WoW-classic instinct (raid daily lockout + humans-only raids + aggro-only-in-raids +
@@ -1117,6 +1122,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   so **the class OWES a new ⭐ transformer** (ALCHEMIST-PLAN §3 lists candidates). Bands basically
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
+
+- 📋 2026-07-07 · main (docs only) · §CLASSES — **FERMATA v5 VERDICTS IN + BUILD BRIEF READY —
+  the EDGE build is CLAIMABLE.** Bill's pass on deck v5: everything KEEP except `feint` CUT
+  ("no time or reason to veto") and `shadowstep` CUT ("one block card only" — Vanish is the one
+  defense card; dodge-breaks-the-draw now bites unsoftened). Slate LOCKED (7 laws · 4 creeds ·
+  2 modules · 13 boons · 3 rig WHENs · 3 keystones + carries). **`FERMATA-V5-BRIEF.md` written
+  at repo root** — the self-contained execution brief for the implementing agent: the ramp/snap
+  verb spec, per-card code status (coded ✓ / rework / new / verify — `firstBlood` is listed but
+  likely unimplemented), file-by-file code map, sliced work order with the two byte-identical
+  checksum gates (Tempo `4932869838389671587` · Venom `7876031242436484463`), verification
+  matrix, gotchas. Next: an Opus agent claims the brief and builds in worktree `fermata-edge`.
+  *(fermata v5 verdict session)*
 
 - 📋 2026-07-07 · main (docs+skill) · §CLASSES / §TOOLING — **FERMATA EDGE VERB LOCKED + DECK v5 +
   THE DECK-CREATOR SKILL.** Bill's edge-bullseye idea A/B'd in the tester → verdict "edge is way
