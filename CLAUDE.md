@@ -22,7 +22,9 @@ COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Tw
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, verb pair locked 2026-07-07) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
-curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-era reference) ·
+curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (Seal pillar pass) ·
+`FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `REFIT-PLAN.md` (structural audit v2 →
+the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (netcode-era reference) ·
 `HISTORY.md` (frozen milestone build-up M0→R2.5 + PoC notes — the old CLAUDE.md status list) ·
 `PORT-PLAN.md` / `rift-godot-port-brief.md` / `poc/` (origins, historical).
 
@@ -77,9 +79,10 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-
   redeploy the server together with clients (old versions rejected at handshake by design).
 
 ## ACTIVE VERIFICATION (the merge-back bar)
-- **Balance sims (the only three):** `sim/twinfang_sim.gd` (Tempo pilot loop),
-  `sim/raid_sim.gd` (the 4 Seals; `--boss=mythos`, `--caster=alchemist` etc) and
-  `sim/alchemist_sim.gd` (the Brew base loop). Shard across cores with
+- **Balance sims (the live five):** `sim/twinfang_sim.gd` (Tempo pilot loop),
+  `sim/raid_sim.gd` (the 4 Seals; `--boss=mythos`, `--caster=alchemist` etc),
+  `sim/alchemist_sim.gd` (the Brew base loop), `sim/well_sim.gd` (the Well base loop)
+  and `sim/forge_sim.gd` (Forge id-is-recipe certification). Shard across cores with
   **`scripts/psim.sh <sim> [seeds] [jobs] [-- --boss=…]`** (~5×). Fast raid tuning knobs:
   **`./tune.sh`** (`--dmg= --regen= --fortify=`, `--probes=0`).
 - **System probes (keep green when you touch their system):** `draft_sim` · `gear_probe` ·

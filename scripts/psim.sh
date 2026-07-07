@@ -7,14 +7,15 @@
 #   scripts/psim.sh <sim> [total_seeds] [jobs] [-- extra sim args]
 #   e.g.  scripts/psim.sh twinfang_sim 300
 #         scripts/psim.sh raid_sim 300 8 --boss=mythos      # one Seal, sharded
-# Supported: the ACTIVE sim surface (2026-07-06 fresh slate) — twinfang_sim (Tempo pilot)
-# + raid_sim (the 4 Seals). The old class/boss sims were deleted; recover one from git
-# history and re-add it to the case below if a rework wants its harness back.
+# Supported: the ACTIVE sim surface — twinfang_sim (Tempo pilot) + raid_sim (the 4 Seals)
+# + alchemist_sim (the Brew) + well_sim (the Well) + forge_sim (Forge certification).
+# The old class/boss sims were deleted 2026-07-06; recover one from git history and
+# re-add it to the case below if a rework wants its harness back.
 set -euo pipefail
 SIM="${1:?usage: psim.sh <sim_name> [seeds] [jobs] [-- extra args]}"
 case "$SIM" in
   twinfang_sim|raid_sim|alchemist_sim|forge_sim|well_sim) ;;
-  *) echo "psim.sh supports: twinfang_sim raid_sim alchemist_sim well_sim (they carry --seed0 + a per-seed CSV)."
+  *) echo "psim.sh supports: twinfang_sim raid_sim alchemist_sim well_sim forge_sim (they carry --seed0 + a per-seed CSV)."
      echo "Old class sims were deleted 2026-07-06 (git history has them).  Got: '$SIM'"
      exit 2 ;;
 esac
