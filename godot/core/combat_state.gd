@@ -19,6 +19,13 @@ var loss_cause: String = ""
 var config: TuningConfig
 var encounter: EncounterRes
 
+## PACK (WORLD-PLAN §FIGHT LENGTH): a chain of encounters fought sequentially inside
+## THIS one battle — the win only fires on the last corpse, and heat carries because
+## nothing about the seats ever resets. Empty = a classic single fight (every existing
+## path, byte-identical). When set, pack[0] is the encounter already on the field.
+var pack: Array = []                ## Array[EncounterRes]
+var pack_i: int = 0                 ## which member currently holds the field
+
 ## Party-wide damage reduction {amt, until_tick} (Brinkwarden Last Stand).
 var raid_dr: Dictionary = {}
 

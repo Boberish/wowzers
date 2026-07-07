@@ -22,6 +22,12 @@ extends Resource
 # --- Enrage ramp ---
 @export var enrage_base: float = 6.0           ## raid dmg/sec added per second past enrage
 
+# --- PACK walk-in (WORLD-PLAN §FIGHT LENGTH: the diegetic valley) ---
+## Ticks after a pack member takes the field before it ACTS (no melee/telegraphs/forms).
+## Players may act — opening on the approaching enemy is the pull fantasy. Only pack
+## members 2+ ever have entered_tick > 0, so classic fights never read this.
+@export var pack_walkin_ticks: int = 75        ## 2.5s at 30 Hz
+
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
 @export var sunder_max: float = 5.0            ## pip ceiling

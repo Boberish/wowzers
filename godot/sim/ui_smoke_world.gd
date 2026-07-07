@@ -25,6 +25,7 @@ const PLAN := [
 	[15, "cache"],     # SALTWASH LANDING
 	[19, "door"],      # UNDERMILL GATE — the RUSH: door before the capstone
 	[6, "event"],      # MILLWATCH RISE
+	[5, "fight"],      # THE GRANARY STEPS — a PACK pull (smalls → captain, one battle)
 	[18, "gate"],      # THE THRESHOLD — the personal exam, alone
 	[7, "fight"],      # THE OLD MILL — the capstone (boss kind launches like a fight)
 	[8, "waystation"], # GILDWATCH BEACON — the flight path opens

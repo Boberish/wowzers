@@ -35,6 +35,12 @@ var debilitate: float = 0.0
 ## (Sticky Note, "answer every curse" oaths). Write-only otherwise; never checksummed.
 var last_curse_tick: int = -999999
 
+## PACK: the tick this member took the field. 0 = fight start (every classic fight —
+## the default keeps all single-fight math byte-identical). Drives the walk-in grace
+## (no actions until entered_tick + config.pack_walkin_ticks) and the per-member
+## enrage clock (enrage time = time since entry, so member 3 never arrives pre-enraged).
+var entered_tick: int = 0
+
 ## Countdown timers in TICKS (faithful to the prototypes: ability timers freeze
 ## while a telegraph is winding up; melee keeps ticking).
 var melee_timer: int = 1000000
