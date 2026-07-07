@@ -749,6 +749,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · main (docs only) · §CLASSES / `ALCHEMIST-PLAN.md` §8 — **THE BREW deck REVIEW
+  pass (deck-creator audit vs the Cask) — ⭐ PROPOSAL BOARD OUT, AT BILL'S VERDICT**
+  (`86ca7f68…`). The built slate STANDS; the pass found: ZERO keystones (playbook wants 2–3) ·
+  greed-light (5 EASE vs 3 GREED, FUEL/VIAL lanes zero greed) · Fermentation auto-fires (the
+  "passive wearing UI" anti-pattern) · the vial = the game's only ungraded pour verb. Produced:
+  type tags on all 21 cards + H/S/O PAPER ladders (closes the Brew's verdict-3 ladder debt;
+  engine stays the shared slice) + **11 proposals** — Bullseye pours (verb back-port) + Master's
+  Draught rider · 3 keystone candidates (Red Line / Quicksilver / Seething Vial, keep ≥2) ·
+  Fermentation hold-or-cash · Strike the Seam (settles F1 at deck level) · Steady Under Fire
+  (F3-contingent probe) · Brimming (fuel greed) · optional 5th creed THE FEVER · close the
+  "4th module owed" debt. Full spec in ALCHEMIST-PLAN §8; fold + build only after verdicts.
+  *(brew-review session)*
 - ☑ 2026-07-07 · main (docs only) · §CLASSES / `ALCHEMIST-PLAN.md` — **THE CASK — the Alchemist's
   2nd spec DESIGN LOCKED FOR BUILD (§7 written, the Opus handoff spec).** Designed live with Bill
   through 5 browser feel-tester iterations (artifact `72390dbd…`) + a plain-language card board

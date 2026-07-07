@@ -445,3 +445,43 @@ past 6 strain never relieves. The one-monstrous-cask build (Single Malt + Heavy 
   feel risk (F3): stack-sprinting vs boss swings/dodge beats is UNTESTED — first in-game playtest
   answers it; if the sprint dies under fire, the levers are dodge-holds-charge (already the Brew's
   rule) and/or this spec inheriting the auto-evasion identity candidate.**
+
+---
+
+## 8. BREW REVIEW PASS 2026-07-07 (deck-creator audit vs the Cask) — 🟡 AT BILL'S VERDICT
+
+The built §2–4 slate audited under the deck-creator playbook (born with the Cask, one day after the
+Brew shipped). **The live deck STANDS untouched**; this pass produced type tags (POWER/GREED/STRAT/
+EASE/RULE/TEAM on all 21 cards), H/S/O **paper ladders** for every card (closes verdict-3's design
+debt — engine stays the shared later slice), and **11 proposals** on an interactive board:
+https://claude.ai/code/artifact/86ca7f68-c8fe-41eb-a937-1a3fdfde9748
+
+**Audit headlines:** deck temperament 5 EASE vs 3 GREED (FUEL + VIAL lanes have zero greed) ·
+**ZERO keystones** (playbook wants 2–3; the Cask has Century Cask) · Fermentation auto-fires =
+"a passive wearing UI" anti-pattern · the vial is the only ungraded pour verb left in the game ·
+healthy: creed quota met with 4 (forgiving/greed/rhythm/wild-Purist), support + carries + 4 named
+archetypes clean.
+
+**The 11 (nothing built until verdicted; all numbers = config knobs):**
+- **P1 BULLSEYE POURS** [VERB/RULE] — inner ~30% of the sweet band = ×1.25 dose (Cask-grammar
+  back-port; nothing else moves, ceiling-only).
+- **P2 Master's Draught** [VIAL/POWER] — bullseye pours +10/15/22% volume (Cask's Master's
+  Measure rhyme; needs P1).
+- **P3–P5 KEYSTONES (elite-only lane, keep ≥2):** **The Red Line** [GREED] — past-red ignites:
+  ×2 dose but slams the see-saw; only the brim spoils · **Quicksilver** [RULE] — every 4th pour is
+  silver, feeds BOTH sides at once, can still spoil · **The Seething Vial** [GREED] — a held charge
+  hovering in the sweet band VENTS (~35% reaction dmg) while it hovers.
+- **P6 Fermentation hold-or-cash** [TWEAK/STRAT] — FERMENT stops auto-firing; gauge locks full and
+  your next Rupture drinks it (fill pauses while full). Fixes the zero-decision meter, stays calm.
+- **P7 Strike the Seam** [RUPTURE/STRAT] — Rupture in the boss Opening +20/28/38%; settles F1 at
+  deck level (needs the Opening window exposed to the caster seat). Purist-hidden.
+- **P8 Steady Under Fire** [VIAL/STRAT] — a PERFECT boss answer makes the next pour spoil-proof +
+  POTENT (8s). ⚠ F3-contingent (dead if auto-evasion lands) — doubles as a probe on that call.
+- **P9 Brimming** [FUEL/GREED] — either poison >9/12: reaction +14/20/28% but that side decays ×2
+  (returns the cut saturation's risk as a CHOSEN card).
+- **P10 Creed THE FEVER** [GREED, optional 5th] — decay ×2, sweet+ pours SPLASH (~40% of dose) —
+  the open frantic-APM slot's named hook.
+- **P11 Close the "4th module owed" debt** [DOCS] — quota is 2–3 and we have 3 incl. the ⭐.
+
+**On verdict:** fold KEEPs into §2–4 (hard-copy before build, per the playbook), then build as one
+guarded `brew-review` slice — byte-identical undrafted, sim A/B per layer, policy taught (rule #3).
