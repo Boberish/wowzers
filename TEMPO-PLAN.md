@@ -523,6 +523,15 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 >   would kill the dance). Tutti re-stated for the Draw: dumps fired mid-draw take the sweep's
 >   live grade; off-green −15%.
 > Boon lanes reorganized to teach the model: THE ROLL / THE DRAW / THE RELEASE / THE REST.
+> **OPEN — BILL'S EDGE-BULLSEYE IDEA (mid-verdict, 2026-07-07):** move the Bullseye to the
+> window's FAR LIP with damage ramping toward it (entry = weak-but-safe, lip = bull against the
+> miss cliff; crossing the lip = auto-SNAP). NOT visual variance — it splits greed from safety
+> (centre model: best aim = safest aim; edge model: best aim = zero late-margin), restores chosen
+> hold-depth AT BASE, and splits identity from Tempo (precision vs NERVE). If adopted: Deep Edge
+> is absorbed into base (cut), Patient Knife's Overtime = "the ramp continues past the lip",
+> wideners must add ENTRY runway only (never move the lip). Band widths unchanged (good 45 /
+> perfect 37 / bull 18) so a bull is the same-size target — overshooting one just costs a miss
+> now. A/B live in the tester (⚙ CENTER ⇄ EDGE, default EDGE): artifact e920ea01…
 > **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
