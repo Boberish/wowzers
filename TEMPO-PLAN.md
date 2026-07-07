@@ -467,10 +467,19 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 > delay/kick-tax is a control-feel thing the instant-dump AI can't express); PHANTOM is a flat
 > Bullseye twin-strike (no two-blades-crossing UI in sim); VEIL OVER THE WARBAND publishes
 > `veil_warband_active` but the ally application is OWED (same raid-buff channel as Battle Hymn).
-> **OWED (other layers, same as Tempo):** HUD gauges (charge ring OFF-marker per Bill · shadow dim ·
-> Shade/Mark/Dance meters) in raid_hud · elite acquisition for the 3 keystones (Topology elite
-> node) · online spec-carry in `(seed, spec)`. The frozen poison-wheel Venom stays as the AI-only
-> legacy aspect (poison is the Alchemist now); the blade lobby shows Tempo + Fermata.
+> **HUD INPUT WIRED (2026-07-07, `fermata-hud`):** the first playtest hit "picked Fermata, got
+> Tempo" — root cause: the HUD only sent an instant `strike` tap, and `_strike(from_release=false)`
+> IS the Tempo strike, so the coil verb was never invoked. Fixed: key 1 DOWN → `coil`, key 1 UP →
+> `release` (mirrors the Alchemist hold); AbilityRune gained `held`/`released` signals so the slot-0
+> rune coils on touch/mouse too; the RhythmBar draws the coil charge ring (violet fill → white-hot
+> SHNK) + coil cues; the TwinfangGauge shows Fermata's Flow tier-gems, not the poison wheel. Verified
+> by `fermata_input_check` (sharp=dmg / early=unravel / bare=no-op) + WSLg shots. Applies to the
+> world preview too (shared HUD).
+> **STILL OWED (other layers):** the charge ring is on the needle — Bill wanted it OFF-marker, so a
+> fixed-gauge-position pass is still open · shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
+> elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
+> The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
+> the blade lobby shows Tempo + Fermata.
 
 _Original design below (verb locked via feel-tester 2026-07-06 — the deck Bill verdicted)._
 
