@@ -10,17 +10,25 @@
 ## DRAW (aspect "draw"): the cast completes MANUALLY via a "release" action, graded by
 ##   timing — CLEAN (final draw_band) → +CURRENT · STILL POINT (dead-centre) → +CURRENT
 ##   + GLINT · UNDERCOOK (early) → weak heal + breaks Current · OVERRUN (never released)
-##   → plain full heal, Current untouched. THE CURRENT is a cast-haste streak (max
-##   current_max, +current_haste/stack) that breaks on an undercook or a DRY well and
-##   ebbs when idle.
+##   → plain full heal, Current untouched.
 ## GLINT is personal: the healed ally's seat.vars glint_mult/glint_until, read by the
 ##   engine's group-damage step (guarded → byte-identical when unset).
+##
+## THE DECK (MENDER-PLAN §2-5) layers on top, EACH GUARDED so an empty creed + no modules
+## + no rig + no boons reproduce the base numbers exactly (the sim's byte-identical gate):
+##   CREEDS  — run-long temperament, read via _cr() (WellCreeds; "" = IDENTITY = base).
+##   MODULES — a Floor-1 gauge that auto-fires (Reservoir / Triage / Benediction), _m().
+##   BOONS   — drafted upgrades keyed by id, _b() (WellBoons).
+##   RIG     — one wired WHEN→THEN, _rig_fire() (WellRig; empty = never touched).
 class_name WellKit
 extends ClassKit
 
 var aspect: String = "brim"
 var cfg: WellConfig
 var boons: Dictionary = {}
+var creed_id: String = ""              ## the run's healing temperament ("" = none, byte-identical base)
+var modules: Dictionary = {}           ## equipped Floor-1 module id -> true (reservoir / triage / benediction)
+var rig: Dictionary = {}               ## the ONE Combo rig — {"when": id, "then": id}
 
 # on_heal grading stash (heal_unit doesn't return overheal; capture it during a graded cast)
 var _grading: bool = false
@@ -36,9 +44,23 @@ func _tt(s: CombatState, sec: float) -> int:
 func _b(id: String) -> bool:
 	return bool(boons.get(id, false))
 
+func _m(id: String) -> bool:
+	return bool(modules.get(id, false))
+
+## A creed modifier, identity-defaulted. creed_id == "" returns the IDENTITY value, so every
+## _cr read collapses to the base number and the deckless build stays byte-identical.
+func _cr_f(key: String) -> float:
+	return float(WellCreeds.field(creed_id, key))
+
+func _cr_b(key: String) -> bool:
+	return bool(WellCreeds.field(creed_id, key))
+
 # --- charges -------------------------------------------------------------------
 func _charges(seat: Seat) -> int:
 	return int(seat.vars.get("charges", 0))
+
+func _charges_max() -> int:
+	return cfg.charges_max + (cfg.deep_well_bonus if _b("deepWell") else 0)
 
 func _spend_charge(seat: Seat, n: int) -> void:
 	var c := maxi(0, _charges(seat) - n)
@@ -48,7 +70,7 @@ func _spend_charge(seat: Seat, n: int) -> void:
 		seat.vars["current"] = 0
 
 func _gain_charge(seat: Seat, n: int) -> void:
-	seat.vars["charges"] = mini(cfg.charges_max, _charges(seat) + n)
+	seat.vars["charges"] = mini(_charges_max(), _charges(seat) + n)
 
 # --- THE CURRENT (draw) --------------------------------------------------------
 func _current_up(s: CombatState, seat: Seat) -> void:
@@ -58,23 +80,64 @@ func _current_up(s: CombatState, seat: Seat) -> void:
 func _current_break(seat: Seat) -> void:
 	seat.vars["current"] = 0
 
+# --- band / still / glint (deck-adjusted; empty deck = the config base, bit-identical) ---
+func _brim_band() -> float:
+	var b := cfg.brim_band * _cr_f("brim_band_mult")
+	if _b("wideBrim"):
+		b -= cfg.wide_brim_delta
+	return clampf(b, 0.05, 0.999)
+
+func _draw_band() -> float:
+	var d := cfg.draw_band * _cr_f("draw_band_mult")
+	if _b("looseGrip"):
+		d *= cfg.loose_grip_mult
+	return clampf(d, 0.02, 0.9)
+
+func _still_width() -> float:
+	var w := cfg.still_point
+	if _b("deepStill"):
+		w *= cfg.deep_still_mult
+	return w
+
+func _undercook_exp() -> float:
+	return cfg.short_pour_exp if _b("shortPour") else cfg.undercook_exp
+
+func _glint_mult() -> float:
+	var m := cfg.glint_mult + _cr_f("glint_bonus")
+	if _b("blindfold"):
+		m += cfg.blindfold_glint
+	return m
+
 # --- THE GLINT (personal — the healed ally) ------------------------------------
-func _glint(s: CombatState, target: Seat) -> void:
-	if target == null:
+func _glint(s: CombatState, target: Seat, extra_mult: float = 0.0, extra_secs: float = 0.0) -> void:
+	if target == null or not target.alive():
 		return
-	target.vars["glint_mult"] = cfg.glint_mult
-	target.vars["glint_until"] = s.tick + _tt(s, cfg.glint_dur)
+	var dur := cfg.glint_dur + (2.0 if _b("keptLight") else 0.0) + extra_secs
+	var until := s.tick + _tt(s, dur)
+	# KEPT LIGHT: pouring on an already-lit ally EXTENDS the light instead of resetting it.
+	if _b("keptLight") and s.tick < int(target.vars.get("glint_until", -1)):
+		until = int(target.vars["glint_until"]) + _tt(s, dur)
+	target.vars["glint_mult"] = _glint_mult() + extra_mult
+	target.vars["glint_until"] = until
 	CombatCore._emit(s, {"t": "well_glint", "seat": target})
 
-# --- per-tick: charge pulse, Current ebb, cast resolution ----------------------
+## The persistent (seat-state) heal multiplier — FORESIGHT stacks. Per-cast timing bonuses
+## ride the `mult` arg; the creed flat/bloodied scale rides heal_mult(). 1.0 when unset.
+func _state_heal_mult(seat: Seat) -> float:
+	if _cr_b("foresight"):
+		return 1.0 + 0.07 * float(int(seat.vars.get("foresight", 0)))
+	return 1.0
+
+# --- per-tick: charge pulse, Current ebb, modules, cast resolution --------------
 func upkeep(s: CombatState, seat: Seat) -> void:
-	# charge pulse (the only base income)
+	# charge pulse (the only base income) — Steady Pulse quickens it
+	var every := cfg.pulse_every * (cfg.steady_pulse_mult if _b("steadyPulse") else 1.0)
 	var np := int(seat.vars.get("pulse_next", 0))
 	if np <= 0:
-		seat.vars["pulse_next"] = s.tick + _tt(s, cfg.pulse_every)
+		seat.vars["pulse_next"] = s.tick + _tt(s, every)
 	elif s.tick >= np:
 		_gain_charge(seat, cfg.pulse_amount)
-		seat.vars["pulse_next"] = s.tick + _tt(s, cfg.pulse_every)
+		seat.vars["pulse_next"] = s.tick + _tt(s, every)
 
 	# THE CURRENT ebbs when you stop drawing
 	if aspect == "draw" and int(seat.vars.get("current", 0)) > 0:
@@ -82,19 +145,48 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		if s.tick >= eb:
 			seat.vars["current"] = int(seat.vars.get("current", 0)) - 1
 			seat.vars["current_ebb_next"] = s.tick + _tt(s, cfg.current_ebb)
+	# THE MILLRACE counts casts only while the Current runs full — reset the moment it drops
+	if aspect == "draw" and int(seat.vars.get("current", 0)) < cfg.current_max:
+		seat.vars["millrace_n"] = 0
+
+	# FORESIGHT (creed): a dip below half CRASHES the banked stacks
+	if _cr_b("foresight") and int(seat.vars.get("foresight", 0)) > 0:
+		if not _all_topped(s, seat, 0.5):
+			seat.vars["foresight"] = 0
+
+	# MODULES + reactive/passive boons (all guarded; no module/boon → skipped entirely)
+	_tick_modules(s, seat)
+	if _b("brinkBell"):
+		_tick_brink_bell(s, seat)
+	if _b("shiningHour"):
+		_tick_shining_hour(s, seat)
 
 	# resolve a finished cast
 	if not seat.casting.is_empty():
 		var c := seat.casting
 		var tgt: Seat = c.get("target")
-		if tgt != null and not tgt.alive() and String(c["id"]) != "rekindle":
+		var id0 := String(c["id"])
+		var needs_target := id0 != "rekindle" and id0 != "meditate" and id0 != "boil"
+		if needs_target and tgt != null and not tgt.alive():
 			seat.casting = {}
 			CombatCore._emit(s, {"t": "cast_cancelled"})
 		elif s.tick - int(c["start_tick"]) >= int(c["dur_ticks"]):
-			var id := String(c["id"])
-			seat.casting = {}
-			# BRIM grades the landing at resolve; DRAW auto-completes plain (OVERRUN).
-			_resolve(s, seat, id, tgt, ("land" if aspect == "brim" else "overrun"))
+			var holdable := id0 == "flash" or id0 == "mend"
+			# THE PATIENT HAND (creed, draw): a heal-cast that RUNS PAST its end doesn't fire —
+			# it becomes a HELD heal cocked in the hand, released on the spike (or it gutters).
+			if aspect == "draw" and _cr_b("patient_hold") and holdable and not bool(c.get("held", false)):
+				seat.casting["held"] = true
+				seat.casting["held_until"] = s.tick + _tt(s, 3.0)
+				CombatCore._emit(s, {"t": "well_held", "seat": seat, "player": seat.is_player})
+			elif bool(c.get("held", false)):
+				if s.tick >= int(c.get("held_until", 0)):    # gutters — charge + cast wasted
+					seat.casting = {}
+					_spend_charge(seat, int(cfg.book[id0].get("charges", 0)))
+					CombatCore._emit(s, {"t": "well_gutter", "seat": seat, "player": seat.is_player})
+			else:
+				seat.casting = {}
+				# BRIM grades the landing at resolve; DRAW auto-completes plain (OVERRUN).
+				_resolve(s, seat, id0, tgt, ("land" if aspect == "brim" else "overrun"))
 
 # --- input: cast start / release -----------------------------------------------
 func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) -> bool:
@@ -103,6 +195,8 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 		return _release(s, seat)
 	var sp: Dictionary = cfg.book.get(key, {})
 	if sp.is_empty():
+		return false
+	if bool(sp.get("boon", false)) and not _b(key):        # drafted spells: locked until owned
 		return false
 	var offgcd := bool(sp.get("offgcd", false))
 	if not offgcd and s.tick < seat.gcd_until_tick:
@@ -113,73 +207,137 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 		return false
 	# target validity
 	if key == "rekindle":
-		if target == null or target.alive():          # rekindle needs a DEAD ally
+		if target == null or target.alive():               # rekindle needs a DEAD ally
 			return false
 	elif bool(sp.get("target", false)):
 		if target == null or not target.alive():
 			return false
 		if key == "dispel" and target.debuff.is_empty():
 			return false
-	# affordability (checked at start; charges paid at resolve)
-	if _charges(seat) < int(sp.get("charges", 0)):
+	# affordability (checked at start; charges paid at resolve). THE MILLRACE can make the
+	# imminent cast free, so a full-Current dry Well can still fire its free third cast.
+	var need := int(sp.get("charges", 0))
+	if _millrace_free(seat):
+		need = 0
+	if _charges(seat) < need:
 		return false
 
 	var cast := float(sp.get("cast", 0.0))
 	if cast > 0.0:
-		var dur := cast
+		var dur := cast * _cr_f("cast_mult")               # Long Draw: slow & sharp
 		if aspect == "draw":
-			dur = cast * (1.0 - cfg.current_haste * float(int(seat.vars.get("current", 0))))
+			dur *= (1.0 - cfg.current_haste * float(int(seat.vars.get("current", 0))))
+		if _b("lastDrops") and _charges(seat) <= cfg.last_drops_at:
+			dur *= (1.0 - cfg.last_drops_haste)             # squeeze the dregs faster
 		var ct := maxi(1, _tt(s, dur))
 		seat.casting = {"id": key, "target": target, "start_tick": s.tick, "dur_ticks": ct}
 		if not offgcd:
-			seat.gcd_until_tick = s.tick + _tt(s, cfg.gcd)   # GCD runs from cast START
+			seat.gcd_until_tick = s.tick + _tt(s, cfg.gcd)  # GCD runs from cast START
 		CombatCore._emit(s, {"t": "cast_started", "id": key, "dur": dur})
 		return true
-	# instant (dispel)
+	# instant (dispel / Boiling Over)
 	_resolve(s, seat, key, target, "instant")
 	return true
 
-## DRAW's release: grade the timing and resolve early. No-op in BRIM or with no cast.
+## DRAW's release: grade the timing and resolve early. Also releases a HELD (Patient Hand)
+## heal instantly. No-op in BRIM with no held cast.
 func _release(s: CombatState, seat: Seat) -> bool:
-	if aspect != "draw" or seat.casting.is_empty():
+	if seat.casting.is_empty():
 		return false
 	var c := seat.casting
+	# a HELD heal (Patient Hand) releases full & instant, and does NOT feed the Current
+	if bool(c.get("held", false)):
+		var hid := String(c["id"])
+		var htgt: Seat = c.get("target")
+		seat.casting = {}
+		_resolve(s, seat, hid, htgt, "held")
+		return true
+	if aspect != "draw":
+		return false
 	var start := int(c["start_tick"])
 	var dur := int(c["dur_ticks"])
 	var elapsed := s.tick - start
 	if elapsed >= dur:
-		return false                                   # at/past the end — upkeep handles OVERRUN
+		return false                                        # at/past the end — upkeep handles it
 	var p := float(elapsed) / float(dur)
 	var id := String(c["id"])
 	var tgt: Seat = c.get("target")
+	var band := _draw_band()
+	var centre := 1.0 - band * 0.5
+	# THE EDDY (creed): the clean band's centre drifts a little each cast — derived from the
+	# cast's start tick (deterministic, no RNG), so you read it live but can't memorise it.
+	if _cr_b("eddy"):
+		var h := (start * 2654435761) & 0xFFFFFF
+		var drift := (float(h) / float(0xFFFFFF) - 0.5) * 0.16   # ±8%
+		centre = clampf(centre + drift, 0.5, 1.0 - band * 0.5)
 	seat.casting = {}
-	if p >= 1.0 - cfg.draw_band:
-		var centre := 1.0 - cfg.draw_band * 0.5
-		if absf(p - centre) <= cfg.still_point * 0.5:
-			_resolve(s, seat, id, tgt, "still")
+	if p >= centre - band * 0.5 and p <= centre + band * 0.5:
+		var bonus := _draw_clean_bonus(s, seat)
+		if absf(p - centre) <= _still_width() * 0.5:
+			_resolve(s, seat, id, tgt, "still", bonus)
 		else:
-			_resolve(s, seat, id, tgt, "clean")
+			_resolve(s, seat, id, tgt, "clean", bonus)
 	else:
-		_resolve(s, seat, id, tgt, "under", pow(maxf(0.05, p), cfg.undercook_exp))
+		# THE NARROWS (creed): a release OUTSIDE the band heals for NOTHING.
+		var uf := 0.0 if _cr_b("narrows") else pow(maxf(0.05, p), _undercook_exp())
+		_resolve(s, seat, id, tgt, "under", uf)
 	return true
 
+## Timing/state bonuses folded into a CLEAN/STILL draw's heal (guarded → 1.0 when unset).
+func _draw_clean_bonus(s: CombatState, seat: Seat) -> float:
+	var b := 1.0
+	if _cr_b("narrows"):
+		b *= 1.0 + _cr_f("narrows_bonus")
+	if _b("strongPull") and int(seat.vars.get("current", 0)) >= cfg.current_max:
+		b *= 1.0 + cfg.strong_pull_bonus
+	if _b("lastDrops") and _charges(seat) <= cfg.last_drops_at:
+		b *= 1.0 + cfg.last_drops_heal
+	if _b("doubleDraw"):
+		var lc := int(seat.vars.get("last_clean_tick", -999999))
+		if lc >= 0 and s.tick - lc <= _tt(s, cfg.double_draw_sec):
+			b *= 1.0 + cfg.double_draw_bonus                # the chain's second clean
+	return b
+
+func _millrace_free(seat: Seat) -> bool:
+	return _b("theMillrace") and aspect == "draw" \
+		and int(seat.vars.get("current", 0)) >= cfg.current_max \
+		and int(seat.vars.get("millrace_n", 0)) >= 2        # this would be the 3rd charged cast
+
 # --- resolution ----------------------------------------------------------------
-## mode ∈ {land, instant} (brim/dispel) | {clean, still, under, overrun} (draw).
+## mode ∈ {land, instant} (brim/dispel) | {clean, still, under, overrun, held} (draw).
 func _resolve(s: CombatState, seat: Seat, id: String, target: Seat, mode: String, mult: float = 1.0) -> void:
 	var sp: Dictionary = cfg.book[id]
-	_spend_charge(seat, int(sp.get("charges", 0)))
+	var cost := int(sp.get("charges", 0))
+	# CADENCE OF MEND (brim boon): a live pour-chain shaves a charge off the next single heal.
+	if _b("cadenceOfMend") and (id == "flash" or id == "mend") and int(seat.vars.get("pour_chain", 0)) > 0:
+		cost = maxi(cfg.cadence_min, cost - 1)
+	# THE MILLRACE: every 3rd charged cast at full Current is free.
+	if cost > 0 and _millrace_free(seat):
+		cost = 0
+		seat.vars["millrace_n"] = 0
+		CombatCore._emit(s, {"t": "well_millrace", "seat": seat, "player": seat.is_player})
+	elif cost > 0 and _b("theMillrace") and aspect == "draw" \
+			and int(seat.vars.get("current", 0)) >= cfg.current_max:
+		seat.vars["millrace_n"] = int(seat.vars.get("millrace_n", 0)) + 1
+	_spend_charge(seat, cost)
 
+	var shm := _state_heal_mult(seat)                       # FORESIGHT etc (persistent)
 	match id:
 		"flash", "mend":
-			_direct_heal(s, seat, target, float(sp["heal"]) * mult, id, mode)
+			_direct_heal(s, seat, target, float(sp["heal"]) * mult * shm, id, mode)
 		"cascade":
-			_heal_lowest(s, seat, int(sp.get("aoe", 3)), float(sp["heal"]) * mult, id)
-			_draw_feedback(s, seat, mode, null)        # AoE: Current only, no Glint (base)
+			_heal_lowest(s, seat, int(sp.get("aoe", 3)), float(sp["heal"]) * mult * shm, id)
+			_draw_feedback(s, seat, mode, null)             # AoE: Current only, no Glint (base)
 		"spring":
 			for u in s.seats:
 				if u.role != "healer" and u.alive():
-					CombatCore.heal_unit(s, u, float(sp["heal"]) * mult, seat, &"spring")
+					_do_heal(s, u, float(sp["heal"]) * mult * shm, seat, &"spring")
 			_draw_feedback(s, seat, mode, null)
+		"meditate":
+			_gain_charge(seat, cfg.meditate_charges)         # the drafted battery
+			CombatCore._emit(s, {"t": "well_meditate", "seat": seat, "player": seat.is_player})
+		"boil":
+			_boiling_over(s, seat)                           # the clutch damage dump
 		"dispel":
 			if target != null:
 				target.debuff = {}
@@ -199,29 +357,73 @@ func _resolve(s: CombatState, seat: Seat, id: String, target: Seat, mode: String
 		seat.cooldowns[id] = s.tick + _tt(s, cd)
 	CombatCore._emit(s, {"t": "cast_finished", "id": id})
 
-## A single-target heal (flash/mend) with the aspect grade.
+## A single-target heal (flash/mend) with the aspect grade + the deck's brim payoffs.
 func _direct_heal(s: CombatState, seat: Seat, target: Seat, amt: float, id: String, mode: String) -> void:
 	if target == null or not target.alive():
 		return
+	var frac_before := target.hp_frac()
 	_grading = true
 	_grading_over = 0.0
-	CombatCore.heal_unit(s, target, amt, seat, StringName(id))   # fires on_heal → stashes overheal
+	var eff := CombatCore.heal_unit(s, target, amt, seat, StringName(id))   # fires on_heal → over
 	_grading = false
 	var over := _grading_over
 
 	if aspect == "brim":
 		if over > cfg.spill_eps:
+			seat.vars["pour_chain"] = 0                      # a spill breaks the cadence chain
+			_on_spill(s, seat, over)
 			CombatCore._emit(s, {"t": "well_spill", "seat": seat, "player": seat.is_player, "amt": int(over)})
-		elif target.hp_frac() >= cfg.brim_band:
-			_glint(s, target)
-			CombatCore._bump_diag(s, seat, "well_pour")           # class-signature skill signal
+			_rig_fire(s, seat, "spill_catch")
+		elif target.hp_frac() >= _brim_band():
+			_on_pour(s, seat, target, eff, frac_before)
+			CombatCore._bump_diag(s, seat, "well_pour")       # class-signature skill signal
 			CombatCore._emit(s, {"t": "well_pour", "seat": seat, "player": seat.is_player})
+			_rig_fire(s, seat, "sweet_pour")
+			if frac_before < cfg.low_catch_frac:
+				_rig_fire(s, seat, "low_catch")
 		else:
+			seat.vars["pour_chain"] = 0
 			CombatCore._emit(s, {"t": "well_plain", "seat": seat, "player": seat.is_player})
 	else:
 		_draw_feedback(s, seat, mode, target)
 
-## The DRAW release payoff: Current (inward) + Glint on a Still Point (outward).
+## The BRIM pour payoff: the Glint + every brim boon/creed/module that keys off a pour.
+func _on_pour(s: CombatState, seat: Seat, target: Seat, eff: float, frac_before: float) -> void:
+	# LOW CATCH boon: a pour on a near-dead ally fires a stronger Glint.
+	var extra := cfg.low_catch_glint if (_b("lowCatch") and frac_before < cfg.low_catch_frac) else 0.0
+	_glint(s, target, extra)
+	# HIGH TIDE keystone: while EVERYONE is topped, the pour Glints the whole party.
+	if _b("highTide") and _all_topped(s, seat, _brim_band()):
+		for u in s.seats:
+			if u.role != "healer" and u.alive() and u != target:
+				_glint(s, u)
+	# LEVEE creed / STILL WATER boon: a pour leaves an absorb cushion on the ally.
+	var sh := _cr_f("pour_shield")
+	if _b("stillWater"):
+		sh = maxf(sh, cfg.still_water_frac)
+	if sh > 0.0 and eff > 0.0:
+		_add_absorb(s, target, eff * sh, seat)
+	# SECOND RING boon: the pour ripples to the second-most-hurt ally.
+	if _b("secondRing"):
+		var second := _second_lowest(s, target)
+		if second != null:
+			_do_heal(s, second, eff * cfg.second_ring_frac, seat, &"ring")
+	# FORESIGHT creed: bank a stack while the party is ahead.
+	if _cr_b("foresight") and _all_topped(s, seat, 0.5):
+		seat.vars["foresight"] = mini(5, int(seat.vars.get("foresight", 0)) + 1)
+	# CADENCE OF MEND: extend the pour chain.
+	seat.vars["pour_chain"] = int(seat.vars.get("pour_chain", 0)) + 1
+	# BENEDICTION module: a good grade lights a pip.
+	_bene_pip(s, seat)
+
+## OVERFLOWING CUP boon: a share of the spill isn't wasted — it heals the most-hurt ally.
+func _on_spill(s: CombatState, seat: Seat, over: float) -> void:
+	if _b("overflowingCup"):
+		var low := _lowest_living(s)
+		if low != null:
+			_do_heal(s, low, over * cfg.overflow_frac, seat, &"overflow")
+
+## The DRAW release payoff: Current (inward) + Glint on a Still Point (outward) + boons.
 func _draw_feedback(s: CombatState, seat: Seat, mode: String, target: Seat) -> void:
 	match mode:
 		"still":
@@ -230,14 +432,176 @@ func _draw_feedback(s: CombatState, seat: Seat, mode: String, target: Seat) -> v
 				_glint(s, target)
 			CombatCore._bump_diag(s, seat, "well_pour")
 			CombatCore._emit(s, {"t": "well_still", "seat": seat, "player": seat.is_player})
+			_after_clean(s, seat)
+			_rig_fire(s, seat, "still_point")
+			if int(seat.vars.get("current", 0)) >= cfg.current_max:
+				_rig_fire(s, seat, "high_water")
+			_bene_pip(s, seat)
 		"clean":
 			_current_up(s, seat)
 			CombatCore._emit(s, {"t": "well_clean", "seat": seat, "player": seat.is_player})
+			_after_clean(s, seat)
+			_rig_fire(s, seat, "clean_draw")
+			if int(seat.vars.get("current", 0)) >= cfg.current_max:
+				_rig_fire(s, seat, "high_water")
+			_bene_pip(s, seat)
 		"under":
-			_current_break(seat)
+			if not _b("shortPour"):                          # SHORT POUR: the quick-sip keeps the Current
+				_current_break(seat)
 			CombatCore._emit(s, {"t": "well_under", "seat": seat, "player": seat.is_player})
 		_:
-			pass                                        # overrun / instant: plain, Current untouched
+			pass                                             # overrun / instant / held: plain, Current untouched
+
+## Bookkeeping after a clean/still draw: Cool Hand's cd feed + Double Draw's chain stamp.
+func _after_clean(s: CombatState, seat: Seat) -> void:
+	if _b("coolHand"):
+		var cd := int(seat.cooldowns.get("cascade", 0))
+		if cd > s.tick:
+			seat.cooldowns["cascade"] = maxi(s.tick, cd - _tt(s, cfg.cool_hand_cd))
+	seat.vars["last_clean_tick"] = s.tick
+
+# --- MODULES (auto-fire off a gauge) -------------------------------------------
+func _tick_modules(s: CombatState, seat: Seat) -> void:
+	# THE RESERVOIR: banking happens in on_heal; SURGE when the chamber fills.
+	if _m("reservoir") and float(seat.vars.get("reserve", 0.0)) >= cfg.reserve_full:
+		var bank := float(seat.vars["reserve"])
+		var low := _lowest_living(s)
+		if low != null:
+			_do_heal(s, low, bank, seat, &"surge")
+		seat.vars["reserve"] = bank * cfg.reserve_rebank    # the flywheel re-banks a share
+		CombatCore._emit(s, {"t": "well_surge", "seat": seat, "player": seat.is_player, "amt": int(bank)})
+	# TRIAGE PROTOCOL: bloodied allies build Nerve → LAST STAND fires itself.
+	if _m("triage"):
+		var bleeding := 0
+		for u in s.seats:
+			if u.role != "healer" and u.alive() and u.hp_frac() < cfg.nerve_at:
+				bleeding += 1
+		if bleeding > 0:
+			seat.vars["nerve"] = float(seat.vars.get("nerve", 0.0)) + cfg.nerve_rate * float(bleeding) * s.dt
+		if float(seat.vars.get("nerve", 0.0)) >= cfg.nerve_full:
+			seat.vars["nerve"] = 0.0
+			for u in s.seats:
+				if u.role != "healer" and u.alive():
+					_do_heal(s, u, cfg.last_stand_heal, seat, &"laststand")
+			s.raid_dr = {"amt": cfg.last_stand_dr, "until_tick": s.tick + _tt(s, cfg.last_stand_dr_sec)}
+			CombatCore._emit(s, {"t": "well_laststand", "seat": seat, "player": seat.is_player})
+
+func _bene_pip(s: CombatState, seat: Seat) -> void:
+	if not _m("benediction"):
+		return
+	var pips := int(seat.vars.get("bene", 0)) + 1
+	if pips >= cfg.bene_pips:
+		pips = 0
+		for u in s.seats:
+			if u.role != "healer" and u.alive():
+				_do_heal(s, u, cfg.bene_heal, seat, &"benediction")
+		CombatCore._emit(s, {"t": "well_bene", "seat": seat, "player": seat.is_player})
+	seat.vars["bene"] = pips
+
+func _tick_brink_bell(s: CombatState, seat: Seat) -> void:
+	var used: Dictionary = seat.vars.get("bell_used", {})
+	for i in range(s.seats.size()):
+		var u := s.seats[i]
+		if u.role == "healer" or not u.alive():
+			continue
+		if u.hp_frac() < cfg.brink_bell_at and not bool(used.get(i, false)):
+			_add_absorb(s, u, cfg.brink_bell_absorb, seat)
+			used[i] = true
+			CombatCore._emit(s, {"t": "well_bell", "seat": u})
+	seat.vars["bell_used"] = used
+
+## THE SHINING HOUR (support boon): while EVERY ally is topped, the warband deals +damage.
+## Sets a guarded per-ally aura the engine's group-damage step multiplies in (mirrors GLINT);
+## refreshed each tick it holds, so it lapses within a couple ticks the moment the party dips.
+func _tick_shining_hour(s: CombatState, seat: Seat) -> void:
+	if not _all_topped(s, seat, cfg.shining_hour_floor):
+		return
+	var until := s.tick + 2
+	for u in s.seats:
+		if u.role != "healer" and u.alive():
+			u.vars["well_hour_mult"] = cfg.shining_hour_mult
+			u.vars["well_hour_until"] = until
+
+# --- BOILING OVER (clutch damage dump) -----------------------------------------
+func _boiling_over(s: CombatState, seat: Seat) -> void:
+	var charges := _charges(seat)
+	var dmg := cfg.boiling_base + cfg.boiling_per_charge * float(charges)
+	seat.vars["charges"] = 0                                 # dump the whole Well
+	if aspect == "draw":
+		seat.vars["current"] = 0
+	if s.boss.add_i >= 0:
+		s.boss.add_hp = maxf(0.0, s.boss.add_hp - dmg)
+	else:
+		s.boss.hp = maxf(0.0, s.boss.hp - dmg)
+	CombatCore.meter_dmg(s, seat, &"boil", dmg, false, false)
+	CombatCore._emit(s, {"t": "well_boil", "seat": seat, "player": seat.is_player, "amt": int(dmg)})
+
+# --- THE RIG (one wired WHEN→THEN; empty rig never touched → byte-identical base) ---
+func _rig_fire(s: CombatState, seat: Seat, when_id: String) -> void:
+	if rig.is_empty() or String(rig.get("when", "")) != when_id:
+		return
+	var then_id := String(rig.get("then", ""))
+	match WellRig.then_kind(then_id):
+		"heal":
+			var low := _lowest_living(s)
+			if low != null:
+				_do_heal(s, low, float(WellRig.magnitude(when_id, then_id)), seat, &"rig")
+		"shield":
+			var low2 := _lowest_living(s)
+			if low2 != null:
+				_add_absorb(s, low2, float(WellRig.magnitude(when_id, then_id)), seat)
+		"party":
+			var per := float(WellRig.magnitude(when_id, then_id))
+			for u in s.seats:
+				if u.role != "healer" and u.alive():
+					_do_heal(s, u, per, seat, &"rig")
+		"charge":
+			var acc := float(seat.vars.get("rig_charge_acc", 0.0)) + WellRig.raw_amount(when_id, then_id)
+			if acc >= 1.0:
+				_gain_charge(seat, int(acc))
+				acc -= float(int(acc))
+			seat.vars["rig_charge_acc"] = acc
+		"glint":
+			var low3 := _lowest_living(s)
+			if low3 != null:
+				_glint(s, low3, 0.0, WellRig.raw_amount(when_id, then_id))
+	CombatCore._emit(s, {"t": "well_rig", "player": seat.is_player, "seat": seat, "when": when_id, "then": then_id})
+
+# --- small helpers -------------------------------------------------------------
+func _do_heal(s: CombatState, target: Seat, amt: float, caster: Seat, src: StringName) -> void:
+	if target != null and target.alive() and amt > 0.0:
+		CombatCore.heal_unit(s, target, amt, caster, src)
+
+func _add_absorb(s: CombatState, target: Seat, amt: float, caster: Seat) -> void:
+	if target == null or not target.alive() or amt <= 0.0:
+		return
+	target.absorb = minf(target.absorb + roundf(amt), target.hp_max)
+	target.absorb_owner_i = s.seats.find(caster)            # co-op credit (index — cycle-safe)
+	target.ward_until_tick = maxi(target.ward_until_tick, s.tick + _tt(s, 12.0))
+
+func _all_topped(s: CombatState, _seat: Seat, frac: float) -> bool:
+	for u in s.seats:
+		if u.role == "healer":
+			continue
+		if u.alive() and u.hp_frac() < frac:
+			return false
+	return true
+
+func _lowest_living(s: CombatState) -> Seat:
+	var best: Seat = null
+	for u in s.seats:
+		if u.role != "healer" and u.alive():
+			if best == null or u.hp_frac() < best.hp_frac():
+				best = u
+	return best
+
+func _second_lowest(s: CombatState, exclude: Seat) -> Seat:
+	var best: Seat = null
+	for u in s.seats:
+		if u.role != "healer" and u.alive() and u != exclude:
+			if best == null or u.hp_frac() < best.hp_frac():
+				best = u
+	return best
 
 func _heal_lowest(s: CombatState, seat: Seat, n: int, amt: float, src: String) -> void:
 	var living: Array = []
@@ -249,17 +613,26 @@ func _heal_lowest(s: CombatState, seat: Seat, n: int, amt: float, src: String) -
 		CombatCore.heal_unit(s, living[i], amt, seat, StringName(src))
 
 # --- hooks ---------------------------------------------------------------------
-func heal_mult(_target: Seat) -> float:
-	return 1.0                                          # Brink creed overrides this later
+## Creed flat + bloodied scaling — applied by heal_unit to EVERY heal from the Well. Empty
+## creed → 1.0 (byte-identical base). Bloodied reads the target's pre-heal HP (Brink flywheel).
+func heal_mult(target: Seat) -> float:
+	var m := _cr_f("heal_mult")
+	var bl := _cr_f("heal_bloodied")
+	if bl > 0.0 and target != null:
+		m *= 1.0 + bl * (1.0 - target.hp_frac())
+	return m
 
 func on_heal(_s: CombatState, _caster: Seat, _target: Seat, _eff: float, over: float) -> void:
 	if _grading:
 		_grading_over = over
+	# THE RESERVOIR: every drop of overheal banks into the chamber.
+	if _m("reservoir") and over > 0.0 and _caster != null:
+		_caster.vars["reserve"] = float(_caster.vars.get("reserve", 0.0)) + over * cfg.reserve_bank
 
-## Dodging cancels the cast bar — the healer's discipline test. Charges unspent
-## (paid at resolve), Current untouched (only an undercook/DRY breaks it).
+## Dodging cancels the cast bar — the healer's discipline test. Charges unspent (paid at
+## resolve), Current untouched. A HELD (Patient Hand) heal survives — it's cocked, not casting.
 func on_dodge_press(s: CombatState, seat: Seat) -> void:
-	if not seat.casting.is_empty():
+	if not seat.casting.is_empty() and not bool(seat.casting.get("held", false)):
 		seat.casting = {}
 		CombatCore._emit(s, {"t": "cast_cancelled"})
 
@@ -279,13 +652,27 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"casting": seat.casting,
 		"raid": true,
 		"charges": _charges(seat),
-		"charges_max": cfg.charges_max,
+		"charges_max": _charges_max(),
 		"current": int(seat.vars.get("current", 0)),
 		"current_max": cfg.current_max,
-		"brim_band": cfg.brim_band,
-		"draw_band": cfg.draw_band,
-		"still_point": cfg.still_point,
+		"brim_band": _brim_band(),
+		"draw_band": _draw_band(),
+		"still_point": _still_width(),
+		"held": bool(seat.casting.get("held", false)),
+		"blindfold": _b("blindfold"),
 	}
+	# deck gauges (only meaningful when the module/creed is equipped — the HUD reads them then)
+	if _m("reservoir"):
+		o["reserve"] = float(seat.vars.get("reserve", 0.0))
+		o["reserve_full"] = cfg.reserve_full
+	if _m("triage"):
+		o["nerve"] = float(seat.vars.get("nerve", 0.0))
+		o["nerve_full"] = cfg.nerve_full
+	if _m("benediction"):
+		o["bene"] = int(seat.vars.get("bene", 0))
+		o["bene_pips"] = cfg.bene_pips
+	if _cr_b("foresight"):
+		o["foresight"] = int(seat.vars.get("foresight", 0))
 	if not seat.casting.is_empty():
 		var c := seat.casting
 		var dur := maxi(1, int(c["dur_ticks"]))

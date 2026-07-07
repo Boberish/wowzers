@@ -6,7 +6,7 @@
 class_name RunState
 extends RefCounted
 
-var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver" | "reckoner" | "alchemist"
+var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver" | "reckoner" | "alchemist" | "well"
 var aspect: String = "warden"
 var loadout: Array = []           ## ability ids in key order (1..N)
 var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
@@ -75,6 +75,12 @@ static func start_alchemist(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("alchemist", aspect, seed_v)
 	r.loadout = AlchemistConfig.new().loadout(aspect)
 	r.encounters = AlchemistContent.run_encounters()
+	return r
+
+static func start_well(aspect: String, seed_v: int = -1) -> RunState:
+	var r := _base("well", aspect, seed_v)
+	r.loadout = WellConfig.new().loadout(aspect)
+	r.encounters = WellContent.encounters()
 	return r
 
 ## Shared init. seed_v < 0 -> wall-clock seed (normal play); tests pass explicit seeds

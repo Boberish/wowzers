@@ -18,7 +18,7 @@ const LOCK_COST := 1
 ## The class-signature skill counter each kit bumps into diag (see Draft.mint).
 const SIG_KEY := {"bulwark": "negate", "twinfang": "perfect_strike",
 	"voidcaller": "clean_kick", "mender": "dispel", "bloomweaver": "perfect_ward",
-	"alchemist": "pour_potent"}
+	"alchemist": "pour_potent", "well": "well_pour"}
 
 static func catalog(run) -> Variant:
 	match String(run.char_class):
@@ -28,6 +28,7 @@ static func catalog(run) -> Variant:
 		"mender": return MenderBoons
 		"bloomweaver": return BloomweaverBoons
 		"alchemist": return AlchemistBoons
+		"well": return WellBoons
 	return null
 
 static func rarity(b: Dictionary) -> String:

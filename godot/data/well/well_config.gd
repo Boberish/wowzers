@@ -18,7 +18,7 @@ extends Resource
 @export var gcd: float = 1.2
 
 # --- BRIM (aspect "brim" / TARGET): grade the LANDING ---
-@export var brim_band: float = 0.90        ## land at/above this HP frac, no spill = PERFECT POUR
+@export var brim_band: float = 0.80        ## land at/above this HP frac, no spill = PERFECT POUR (Bill's playtest: 0.90→0.80)
 @export var spill_eps: float = 0.5         ## overheal above this many HP = SPILL (counted waste)
 
 # --- DRAW (aspect "draw" / SPEED): grade the RELEASE, ride THE CURRENT ---
@@ -33,6 +33,51 @@ extends Resource
 @export var glint_mult: float = 1.40       ## glinted ally deals ×this damage
 @export var glint_dur: float = 4.0         ## seconds
 
+# --- THE DECK (creeds/modules/boons/rig — MENDER-PLAN §2-5). ALL guarded: an empty creed
+#     + no modules + no boons + no rig reproduce the base numbers, so the base build stays
+#     byte-identical (the sim gate). Creed multipliers live on WellCreeds; these are the
+#     class anchors the deck layers scale. ---
+# MODULES (Floor-1 pick; each auto-fires off a gauge)
+@export var reserve_full: float = 130.0      ## Reservoir SURGES when banked overheal hits this
+@export var reserve_bank: float = 0.5        ## fraction of each overheal that banks into the Reservoir
+@export var reserve_rebank: float = 0.30     ## fraction of a surge that re-banks (the flywheel)
+@export var nerve_full: float = 100.0        ## Triage: LAST STAND fires at full Nerve
+@export var nerve_rate: float = 10.0         ## Nerve/sec gained per bloodied ally (below nerve_at)
+@export var nerve_at: float = 0.40           ## an ally below this HP frac feeds Nerve
+@export var last_stand_heal: float = 90.0    ## party heal when LAST STAND fires
+@export var last_stand_dr: float = 0.15      ## raid-wide damage cut on LAST STAND
+@export var last_stand_dr_sec: float = 4.0
+@export var bene_pips: int = 5               ## Benediction cashes a BLOOM at this many pips
+@export var bene_heal: float = 120.0         ## party bloom heal when Benediction cashes
+# BOONS (guarded by boon id — see WellBoons)
+@export var deep_well_bonus: int = 4         ## Deep Well: +charges to the cap
+@export var steady_pulse_mult: float = 0.80  ## Steady Pulse: pulse_every ×this
+@export var meditate_charges: int = 6        ## Meditate: charges restored over the channel
+@export var shining_hour_mult: float = 1.12  ## Shining Hour: warband damage ×this while topped
+@export var shining_hour_floor: float = 0.80 ## every ally at/above this = the Hour is lit
+@export var boiling_base: float = 140.0      ## Boiling Over: base boss damage
+@export var boiling_per_charge: float = 22.0 ## Boiling Over: +damage per unspent charge (all charges dumped)
+@export var brink_bell_absorb: float = 90.0  ## Brink Bell: emergency absorb (once per ally)
+@export var brink_bell_at: float = 0.35      ## the drop-below threshold that tolls the bell
+@export var still_water_frac: float = 0.25   ## Still Water: pour leaves this fraction of the heal as absorb
+@export var second_ring_frac: float = 0.30   ## Second Ring: a pour ripples this fraction to 2nd-most-hurt
+@export var overflow_frac: float = 0.33      ## Overflowing Cup: this fraction of spill heals the most-hurt
+@export var low_catch_frac: float = 0.25     ## Low Catch: an ally below this = a stronger Glint
+@export var low_catch_glint: float = 0.30    ## Low Catch: +glint_mult on the low catch
+@export var blindfold_glint: float = 0.40    ## Blindfold: +glint_mult (preview off — HUD reads the flag)
+@export var wide_brim_delta: float = 0.08    ## Wide Brim: pour band lowers by this (easier)
+@export var loose_grip_mult: float = 1.5     ## Loose Grip: draw clean band ×this (wider)
+@export var deep_still_mult: float = 1.6     ## Deep Still: Still Point sliver ×this (wider)
+@export var short_pour_exp: float = 0.6      ## Short Pour: undercook exponent (< base → heals more)
+@export var strong_pull_bonus: float = 0.30  ## Strong Pull: clean heal ×(1+this) at max Current
+@export var double_draw_bonus: float = 0.28  ## Double Draw: 2nd clean within window ×(1+this)
+@export var double_draw_sec: float = 3.0
+@export var last_drops_at: int = 2           ## Last Drops: charges ≤ this = the dregs bonus
+@export var last_drops_heal: float = 0.15    ## Last Drops: heal ×(1+this)
+@export var last_drops_haste: float = 0.20   ## Last Drops: cast ×(1-this)
+@export var cool_hand_cd: float = 1.0        ## Cool Hand: a clean draw shaves this off Cascade cd
+@export var cadence_min: int = 1             ## Cadence of Mend: min charge floor after the discount
+
 # --- THE BOOK: all heals are CAST, direct (Ward/Renew/Meditate cut from base). Costs in
 #     CHARGES. Single-target flash/mend carry the grade; cascade/spring are throughput;
 #     dispel is free utility; rekindle is the no-CD battle-rez commitment. ---
@@ -43,6 +88,9 @@ extends Resource
 	"spring":   {"name": "Wellspring", "key": "4", "charges": 4, "cast": 2.5, "heal": 55.0,  "target": false, "aoe": 99, "cd": 22.0},
 	"dispel":   {"name": "Dispel",     "key": "q", "charges": 0, "cast": 0.0,                "target": true,  "offgcd": true, "cd": 8.0, "dispel": true},
 	"rekindle": {"name": "Rekindle",   "key": "r", "charges": 6, "cast": 6.0,                "target": true,  "cd": 0.0, "revive": true, "revive_frac": 0.40},
+	# BOON-GATED spells (drafted via WellBoons; "boon" gates castability, NOT in base loadout):
+	"meditate": {"name": "Meditate",   "key": "5", "charges": 0, "cast": 3.0,                "target": false, "boon": true, "cd": 25.0, "battery": true},
+	"boil":     {"name": "Boiling Over","key": "6","charges": 0, "cast": 0.0,                "target": false, "boon": true, "cd": 30.0, "dump": true},
 }
 
 ## The bar for an Aspect. Both specs share the whole book — the aspect only changes how

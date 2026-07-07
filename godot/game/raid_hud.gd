@@ -1628,6 +1628,7 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 		"alchemist": return RunState.start_alchemist(aspect, seed_v)
 		"mender": return RunState.start_mender(aspect, seed_v)
 		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
+		"well": return RunState.start_well(aspect, seed_v)
 		_: return RunState.start(aspect, seed_v)
 
 ## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
@@ -1651,6 +1652,12 @@ func _inject_boons(seat: Seat) -> void:
 				ak.creed_id = _run.creed
 			ak.modules = _run.modules.duplicate()
 			ak.rig = _run.rig.duplicate()      # ALCHEMIST-PLAN §3/rig: the wired Combo rig
+		elif seat.kit is WellKit:
+			var wk := seat.kit as WellKit
+			if _run.creed != "":
+				wk.creed_id = _run.creed
+			wk.modules = _run.modules.duplicate()
+			wk.rig = _run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -2588,18 +2595,30 @@ func _fw() -> String:
 		return "twinfang"
 	if _seat_key == "caster" and _seat_cls_now() == "alchemist":
 		return "alchemist"
+	if _seat_key == "healer" and _seat_cls_now() == "well":
+		return "well"
 	return ""
 
 ## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
 func _fw_creed_ids(fw: String) -> Array:
-	return AlchemistCreeds.v1_ids() if fw == "alchemist" else TwinfangCreeds.v1_ids()
+	if fw == "alchemist":
+		return AlchemistCreeds.v1_ids()
+	if fw == "well":
+		return WellCreeds.v1_ids(_aspect)      # per-spec pools (brim vs draw)
+	return TwinfangCreeds.v1_ids()
 
 func _fw_creed(fw: String, id: String) -> Dictionary:
-	return AlchemistCreeds.get_creed(id) if fw == "alchemist" else TwinfangCreeds.get_creed(id)
+	if fw == "alchemist":
+		return AlchemistCreeds.get_creed(id)
+	if fw == "well":
+		return WellCreeds.get_creed(id)
+	return TwinfangCreeds.get_creed(id)
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
 ## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
 func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+	if fw == "well":
+		return WellModules.built_ids()         # no Well creed hides a module in v1
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -2611,21 +2630,44 @@ func _fw_module_offer_ids(fw: String, creed: String) -> Array:
 	return out
 
 func _fw_module(fw: String, id: String) -> Dictionary:
-	return AlchemistModules.get_module(id) if fw == "alchemist" else TwinfangModules.get_module(id)
+	if fw == "alchemist":
+		return AlchemistModules.get_module(id)
+	if fw == "well":
+		return WellModules.get_module(id)
+	return TwinfangModules.get_module(id)
 
 ## Rig data dispatch (both classes mirror the TwinfangRig static API).
 func _fw_rig_when_table(fw: String) -> Dictionary:
-	return AlchemistRig.WHENS if fw == "alchemist" else TwinfangRig.WHENS
+	if fw == "alchemist":
+		return AlchemistRig.WHENS
+	if fw == "well":
+		return WellRig.WHENS
+	return TwinfangRig.WHENS
 
 func _fw_rig_then_table(fw: String) -> Dictionary:
-	return AlchemistRig.THENS if fw == "alchemist" else TwinfangRig.THENS
+	if fw == "alchemist":
+		return AlchemistRig.THENS
+	if fw == "well":
+		return WellRig.THENS
+	return TwinfangRig.THENS
 
 func _fw_rig_describe(fw: String, w: String, t: String) -> String:
-	return AlchemistRig.describe(w, t) if fw == "alchemist" else TwinfangRig.describe(w, t)
+	if fw == "alchemist":
+		return AlchemistRig.describe(w, t)
+	if fw == "well":
+		return WellRig.describe(w, t)
+	return TwinfangRig.describe(w, t)
 
 ## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
 ## board hides the burst WHENs Ripe/Perfect Wave and the Overfill THEN). Twinfang: unfiltered.
 func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
+	if fw == "well":
+		# WELL rig WHENs are per-spec (Brim landings vs Draw releases) — scope to the aspect.
+		var wp: Array = []
+		for id in WellRig.when_ids():
+			if WellRig.when_spec(String(id)) == _aspect:
+				wp.append(id)
+		return {"whens": WellRig.offer(wp, rng, 3), "thens": WellRig.offer(WellRig.then_ids(), rng, 3)}
 	if fw != "alchemist":
 		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
 			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
@@ -2663,8 +2705,11 @@ func _show_creed_pick(done: Callable) -> void:
 	_ui.add_child(head)
 	var hl := _title(head, "SWEAR A CREED", 34, Palette.CRIMSON)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	var sub := "H O W   Y O U   B R E W  —  one posture, the whole run" if fw == "alchemist" \
-		else "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run"
+	var sub := "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run"
+	if fw == "alchemist":
+		sub = "H O W   Y O U   B R E W  —  one posture, the whole run"
+	elif fw == "well":
+		sub = "H O W   Y O U   T E N D   T H E   W E L L  —  one temperament, the whole run"
 	_title(head, sub, 15, Palette.TEXT_DIM)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -3502,6 +3547,8 @@ const VERB_LABEL := {"tank": "GUARD", "blade": "RHYTHM", "caster": "KICK", "heal
 func _verb_label() -> String:
 	if _seat_key == "healer" and _healer_cls == "bloomweaver":
 		return "GARDEN"
+	if _seat_key == "healer" and _healer_cls == "well":
+		return "THE WELL"
 	if _seat_key == "caster" and _caster_cls == "alchemist":
 		return "BREW"
 	return String(VERB_LABEL.get(_seat_key, "BUILD"))
@@ -3524,7 +3571,14 @@ func _verb_summary_lines() -> Array:
 						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
 				return []
 			return VoidcallerBoons.verb_summary(_run.boons, _aspect)
-		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
+		"healer":
+			if _healer_cls == "well":
+				# MENDER-PLAN §4: show the wired Combo rig in the build panel (the Well's rig)
+				if not _run.rig.is_empty():
+					return ["⚡ Combo — " + WellRig.describe(
+						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
+				return WellBoons.verb_summary(_run.boons, _aspect)
+			return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
@@ -3644,7 +3698,13 @@ func _owned_boon_labels() -> Array:
 		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
 		"caster": pools = ([AlchemistBoons.SHARED, AlchemistBoons.BREW] if _caster_cls == "alchemist" \
 			else [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER])
-		"healer": pools = ([BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN] if _healer_cls == "bloomweaver" else [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK])
+		"healer":
+			if _healer_cls == "well":
+				pools = [WellBoons.SHARED, WellBoons.BRIM, WellBoons.DRAW]
+			elif _healer_cls == "bloomweaver":
+				pools = [BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN]
+			else:
+				pools = [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK]
 		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
 	var out: Array = []
 	for pool in pools:
