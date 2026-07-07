@@ -4,6 +4,10 @@
 ## shimmer and lit diamond end-gems. When the cast RESOLVES, the channel releases a
 ## golden bloom (expanding frame + glow at the mouth); a cancelled cast just fades.
 ## Invisible while idle — it never clutters. Pure view; the HUD feeds the fields.
+##
+## The whole instrument SCALES with the control's height (s = size.y / 60): the classic
+## healers keep their 60-tall bar pixel-for-pixel; the Well places it far taller and
+## every element — medallion, channel, window, type — grows with it.
 class_name CastChannel
 extends Control
 
@@ -55,25 +59,27 @@ func _draw() -> void:
 	if not active and _bloom <= 0.0 and not (show_idle_track and zone_lo >= 0.0):
 		return
 	var w := size.x
-	var bar := Rect2(54.0, 26.0, w - 70.0, 22.0)
+	var s := clampf(size.y / 60.0, 1.0, 2.4)
+	var bar := Rect2(54.0 * s, 26.0 * s, w - 70.0 * s, 22.0 * s)
 
-	# idle track (the Well/DRAW): the empty channel + the release window, faint —
-	# the window stays readable between casts.
+	# idle track (the Well/DRAW): the empty channel + the release window, readable
+	# between casts — the window is learned before the cast is ever live.
 	if not active and _bloom <= 0.0:
-		draw_rect(bar, Color(0.07, 0.09, 0.11, 0.75))
-		_draw_window(bar, 0.45)
-		draw_rect(bar, Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.35), false, 1.0)
+		draw_rect(bar, Color(0.06, 0.08, 0.10, 0.85))
+		draw_rect(Rect2(bar.position, Vector2(bar.size.x, bar.size.y * 0.45)), Color(0, 0, 0, 0.30))
+		_draw_window(bar, s, 0.55, false)
+		draw_rect(bar, Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.40), false, 1.0)
 		return
 
 	if active:
 		# spell medallion
-		var mc := Vector2(26.0, 37.0)
-		var mr := 17.0
+		var mc := Vector2(26.0 * s, 37.0 * s)
+		var mr := 17.0 * s
 		var halo := accent
 		halo.a = 0.16 + 0.10 * sin(_pulse * 2.0)
 		draw_circle(mc, mr * 1.35, halo)
 		draw_circle(mc, mr, Palette.FILL_BOT)
-		UiKit.gilded_ring(self, mc, mr, 2.0, 32)
+		UiKit.gilded_ring(self, mc, mr, 2.0 * s, 32)
 		if _tex != null:
 			var isz := mr * 1.2
 			var irect := Rect2(mc - Vector2(isz, isz) * 0.5, Vector2(isz, isz))
@@ -81,30 +87,44 @@ func _draw() -> void:
 			draw_texture_rect(_tex, irect, false, accent.lightened(0.2))
 
 		# header: the spell on a lit plaque, the target beside it
-		var pr := UiKit.engraved_plaque(self, Vector2(bar.position.x + 48.0, 9.0), label, true, 10)
+		var pr := UiKit.engraved_plaque(self, Vector2(bar.position.x + 48.0 * s, 9.0 * s), label, true,
+			int(round(10.0 * s)))
 		if target != "":
-			UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(pr.end.x + 8.0, 13.0),
-				"→  " + target, HORIZONTAL_ALIGNMENT_LEFT, w - pr.end.x - 12.0,
-				UiKit.SIZE["CAPTION"], Palette.TEXT)
+			UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(pr.end.x + 8.0 * s, 13.0 * s),
+				"→  " + target, HORIZONTAL_ALIGNMENT_LEFT, w - pr.end.x - 12.0 * s,
+				int(round(float(UiKit.SIZE["CAPTION"]) * s)), Palette.TEXT)
 
 		# the jeweled channel
 		UiKit.glass_bar_draw(self, bar, clampf(frac, 0.0, 1.0), accent)
 		# quarter ticks engraved into the floor
 		for i in range(1, 4):
 			var tx := bar.position.x + bar.size.x * float(i) / 4.0
-			draw_line(Vector2(tx, bar.end.y - 6.0), Vector2(tx, bar.end.y - 2.0), Palette.BG0, 2.0, true)
+			draw_line(Vector2(tx, bar.end.y - 6.0 * s), Vector2(tx, bar.end.y - 2.0 * s), Palette.BG0, 2.0 * s, true)
 		# the graded release window over the live channel
-		_draw_window(bar, 1.0)
+		_draw_window(bar, s, 1.0, true)
 		# travelling shimmer over the filled portion
 		var fw := bar.size.x * clampf(frac, 0.0, 1.0)
 		if fw > 12.0:
 			var sx := bar.position.x + fmod(_pulse * 42.0, fw - 8.0)
 			var sh := accent.lightened(0.5)
 			sh.a = 0.30
-			draw_rect(Rect2(sx, bar.position.y + 2.0, 6.0, bar.size.y - 4.0), sh)
+			draw_rect(Rect2(sx, bar.position.y + 2.0, 6.0 * s, bar.size.y - 4.0), sh)
+		# the PLAYHEAD needle (graded bar only): where you are, right now — white on the
+		# approach, gold the instant it crosses into the release window.
+		if zone_lo >= 0.0:
+			var px := bar.position.x + fw
+			var in_zone := frac >= zone_lo
+			var nc := Palette.GOLD_BRIGHT if in_zone else Color(0.93, 0.96, 1.0)
+			var ng := nc
+			ng.a = 0.30
+			draw_line(Vector2(px, bar.position.y - 6.0 * s), Vector2(px, bar.end.y + 4.0 * s), ng, 6.0 * s * 0.6, true)
+			draw_line(Vector2(px, bar.position.y - 6.0 * s), Vector2(px, bar.end.y + 4.0 * s), nc, 2.2, true)
+			var tri := PackedVector2Array([Vector2(px, bar.position.y - 2.0),
+				Vector2(px - 4.5 * s, bar.position.y - 9.0 * s), Vector2(px + 4.5 * s, bar.position.y - 9.0 * s)])
+			draw_colored_polygon(tri, nc)
 		# diamond end-gems, lit while channelling
-		_gem(Vector2(bar.position.x - 8.0, bar.position.y + bar.size.y * 0.5), 6.5, true)
-		_gem(Vector2(bar.end.x + 8.0, bar.position.y + bar.size.y * 0.5), 6.5, frac > 0.95)
+		_gem(Vector2(bar.position.x - 8.0 * s, bar.position.y + bar.size.y * 0.5), 6.5 * s, true)
+		_gem(Vector2(bar.end.x + 8.0 * s, bar.position.y + bar.size.y * 0.5), 6.5 * s, frac > 0.95)
 
 	# the release bloom — the heal lands
 	if _bloom > 0.0:
@@ -114,28 +134,74 @@ func _draw() -> void:
 		draw_rect(bar, fl)
 		var ring := accent.lightened(0.3)
 		ring.a = 0.6 * _bloom
-		draw_rect(Rect2(bar.position - Vector2(3.0 + 14.0 * b, 3.0 + 10.0 * b),
-			bar.size + Vector2(6.0 + 28.0 * b, 6.0 + 20.0 * b)), ring, false, 1.6)
-		var mouth := Vector2(bar.end.x + 8.0, bar.position.y + bar.size.y * 0.5)
+		draw_rect(Rect2(bar.position - Vector2((3.0 + 14.0 * b) * s, (3.0 + 10.0 * b) * s),
+			bar.size + Vector2((6.0 + 28.0 * b) * s, (6.0 + 20.0 * b) * s)), ring, false, 1.6)
+		var mouth := Vector2(bar.end.x + 8.0 * s, bar.position.y + bar.size.y * 0.5)
 		var mg := Palette.WIN
 		mg.a = 0.5 * _bloom
-		draw_circle(mouth, 7.0 + 20.0 * b, mg)
+		draw_circle(mouth, (7.0 + 20.0 * b) * s, mg)
 
-## The graded release window: a steel zone at the channel's end (CLEAN) + a bright gold
-## centre sliver (the STILL POINT). `a` scales the alpha (faint on the idle track).
-func _draw_window(bar: Rect2, a: float) -> void:
+## The graded release window: a steel glass zone at the channel's end (CLEAN) with an
+## entry gate + brackets, and THE STILL POINT — a bright gold sliver crowned by a diamond
+## gem. `a` scales the alpha (faint on the idle track); when the live needle is INSIDE
+## the zone the whole window flares — release NOW. Big bars earn engraved captions.
+func _draw_window(bar: Rect2, s: float, a: float, live: bool) -> void:
 	if zone_lo < 0.0:
 		return
 	var zx := bar.position.x + bar.size.x * clampf(zone_lo, 0.0, 1.0)
-	draw_rect(Rect2(zx, bar.position.y + 1.0, bar.end.x - zx, bar.size.y - 2.0),
-		Color(Palette.STEEL.r, Palette.STEEL.g, Palette.STEEL.b, 0.30 * a))
-	draw_line(Vector2(zx, bar.position.y - 2.0), Vector2(zx, bar.end.y + 2.0),
-		Color(Palette.STEEL.r, Palette.STEEL.g, Palette.STEEL.b, 0.85 * a), 2.0, true)
+	var zone := Rect2(zx, bar.position.y + 1.0, bar.end.x - zx, bar.size.y - 2.0)
+	var hot := live and frac >= zone_lo
+	var st := Palette.STEEL
+	# the zone glass (flares while the needle is inside)
+	draw_rect(zone, Color(st.r, st.g, st.b, (0.42 + 0.10 * sin(_pulse * 5.0) if hot else 0.26) * a))
+	if live:
+		# a slow shimmer breathing through the zone glass
+		var sx := zone.position.x + fmod(_pulse * 22.0, maxf(zone.size.x - 5.0, 1.0))
+		var sc := st.lightened(0.4)
+		sc.a = 0.22 * a
+		draw_rect(Rect2(sx, zone.position.y, 4.0, zone.size.y), sc)
+	# the entry gate: hairline + top/bottom brackets opening into the window
+	var gc := Color(st.r, st.g, st.b, (1.0 if hot else 0.85) * a)
+	draw_line(Vector2(zx, bar.position.y - 3.0 * s), Vector2(zx, bar.end.y + 3.0 * s), gc, 2.0, true)
+	draw_line(Vector2(zx, bar.position.y - 3.0 * s), Vector2(zx + 7.0 * s, bar.position.y - 3.0 * s), gc, 2.0, true)
+	draw_line(Vector2(zx, bar.end.y + 3.0 * s), Vector2(zx + 7.0 * s, bar.end.y + 3.0 * s), gc, 2.0, true)
+	# THE STILL POINT: halo → gold sliver → the crowning gem
 	if mark_lo >= 0.0 and mark_hi > mark_lo:
+		var g := Palette.GOLD_BRIGHT
 		var mx := bar.position.x + bar.size.x * clampf(mark_lo, 0.0, 1.0)
-		var mw := maxf(2.0, bar.size.x * (mark_hi - mark_lo))
-		draw_rect(Rect2(mx, bar.position.y, mw, bar.size.y),
-			Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.85 * a))
+		var mw := maxf(2.0 * s, bar.size.x * (mark_hi - mark_lo))
+		draw_rect(Rect2(mx - 3.0 * s, bar.position.y, mw + 6.0 * s, bar.size.y),
+			Color(g.r, g.g, g.b, 0.16 * a))
+		draw_rect(Rect2(mx, bar.position.y, mw, bar.size.y), Color(g.r, g.g, g.b, (0.95 if hot else 0.80) * a))
+		var gem_c := Vector2(mx + mw * 0.5, bar.position.y - 8.0 * s)
+		var ha := g
+		ha.a = (0.30 + 0.18 * sin(_pulse * 2.2)) * a
+		draw_circle(gem_c, 6.5 * s * 0.9, ha)
+		_gold_gem(gem_c, 4.5 * s, a)
+	# captions — the big graded bar only (the Well); classic healers never see these
+	if s > 1.4:
+		UiKit.engraved_plaque(self, Vector2(zx + zone.size.x * 0.5, bar.end.y + 13.0), "RELEASE WINDOW", hot, 9)
+		if hot:
+			var rc := Palette.GOLD_BRIGHT
+			rc.a = (0.75 + 0.25 * sin(_pulse * 6.0)) * a
+			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(zx - 96.0, bar.position.y - 10.0),
+				"RELEASE ▸", HORIZONTAL_ALIGNMENT_RIGHT, 90.0, UiKit.SIZE["LABEL"], rc)
+
+func _gold_gem(at: Vector2, r: float, a: float) -> void:
+	var pts := PackedVector2Array([at + Vector2(0, -r), at + Vector2(r * 0.75, 0),
+		at + Vector2(0, r), at + Vector2(-r * 0.75, 0)])
+	var body := Palette.GOLD
+	body.a = a
+	draw_colored_polygon(pts, body)
+	var rim := Palette.GOLD_BRIGHT
+	rim.a = a
+	draw_line(pts[0], pts[1], rim, 1.2, true)
+	draw_line(pts[3], pts[0], rim, 1.2, true)
+	var dim := Palette.GOLD_DIM
+	dim.a = a
+	draw_line(pts[1], pts[2], dim, 1.2, true)
+	draw_line(pts[2], pts[3], dim, 1.2, true)
+	draw_circle(at + Vector2(-r * 0.2, -r * 0.3), r * 0.25, Color(1, 1, 1, 0.75 * a))
 
 func _gem(at: Vector2, r: float, lit: bool) -> void:
 	var pts := PackedVector2Array([at + Vector2(0, -r), at + Vector2(r * 0.75, 0),

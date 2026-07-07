@@ -3339,7 +3339,7 @@ func _build_band_well() -> void:
 	_binds = WellBinds.load_binds()
 	_well_gauge = WellGauge.new()
 	_well_gauge.aspect = _aspect
-	_place(_well_gauge, 0.5, 1, 0.5, 1, -320, -296, 320, -166)
+	_place(_well_gauge, 0.5, 1, 0.5, 1, -330, -300, 330, -166)
 	_shake_root.add_child(_well_gauge)
 	# the shared healer cast bar; DRAW marks the release window on it and clicking the
 	# channel is a release press. The idle track keeps the window readable between casts.
@@ -3351,7 +3351,10 @@ func _build_band_well() -> void:
 		_castbar.mark_hi = sp_c + _wcfg.still_point * 0.5
 		_castbar.show_idle_track = true
 		_castbar.tapped.connect(func(): _ctrl.human({"type": "ability", "id": "release"}))
-	_place(_castbar, 0.5, 1, 0.5, 1, -240, -360, 240, -300)
+	# the Well's channel is placed TALL — the shared CastChannel scales its whole
+	# instrument with height, so this one bar is the big AAA read (classic healers
+	# keep their 60-tall placement pixel-for-pixel).
+	_place(_castbar, 0.5, 1, 0.5, 1, -330, -420, 330, -304)
 	_shake_root.add_child(_castbar)
 	var row := _rune_row(-380.0, 380.0)
 	_runes = []
@@ -3406,6 +3409,8 @@ func _render_band_well(s: CombatState, p: Seat, obs: Dictionary) -> void:
 		g.t_show = true
 		g.t_name = tgt.unit_name
 		g.t_frac = tgt.hp_frac()
+		g.t_hp = int(round(tgt.hp))
+		g.t_hpmax = int(round(tgt.hp_max))
 		g.t_band = _wcfg.brim_band if _aspect == "brim" else -1.0
 		g.t_glint = s.tick < int(tgt.vars.get("glint_until", -1))
 		g.t_ghost = -1.0

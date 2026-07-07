@@ -54,6 +54,10 @@ static var SAP := Color("a8d060")           # Sap orb (spring green)
 static var VERDANCE := Color("5fd6a3")      # Verdance gauge (living jade)
 static var THORN := Color("c98a5a")         # Thornveil / thorn damage (bark amber)
 
+# The Well (reworked direct-cast healer) accents — the charge orbs' living water
+static var WATER := Color("4fc3e8")         # well water (clear spring blue)
+static var WATER_DEEP := Color("175a7d")    # well water in shadow / orb depths
+
 # Alchemist ("the Brew" — caster seat #2) accents, lifted from the feel-test artifact
 static var VENOM_BREW := Color("ff7a33")    # Venom — hot, fades fast (ember orange)
 static var ROT_BREW := Color("33c2d8")      # Rot — cold, lingers (glacial cyan)
