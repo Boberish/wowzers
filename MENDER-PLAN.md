@@ -13,7 +13,16 @@ the Seals · ui_smoke_raid ALL OK · WSLg shots verified. **OWED (next build cla
 creeds/modules/boons/rig/keystones (§2-§5 below) + policy-depth (sharpen the BRIM win-gradient) +
 balance playtest + name lock + online creed/module/rig carry (shared Twinfang debt).
 Files: `godot/data/well/*` · `godot/sim/policies/well_policy.gd` · `godot/sim/well_sim.gd` ·
-`godot/game/ui/well_gauge.gd` · raid_hud/raid_frame/raid_content/raid_net/raid_sim wiring.
+`godot/game/ui/well_gauge.gd` · `godot/game/well_binds.gd` · raid_hud/raid_frame/raid_content/
+raid_net/raid_sim wiring.
+**⚡ CONTROLS + SHARED HEALER UI (Bill's feel pass, 2026-07-07):** healers share ONE base healing
+UI — hover-a-frame click-cast chords (WellBinds: L flash · R mend · Mid cascade · Sh+L spring ·
+Sh+R dispel), the **shared CastChannel** (now carries an optional graded release window + idle
+track + tap-to-release — Bloom/Mender rendering unchanged, and their reworks reuse it), the ally
+frames carry the class read overlays (Brim's gilded pour band on EVERY frame, always visible), and
+the WellGauge got **THE TARGET BAR** — the hovered/cast ally writ large with the window + the
+in-flight heal's ghost landing. **DRAW casts both ways:** tap/click starts → tap/click again
+releases, OR hold past ~250ms and release on key-up.
 ~~VERB PAIR LOCKED via feel-tester 2026-07-07~~ (Bill: "i like both alot, the draw one is very nice").
 **Scope:** rebuilds the **Mender** — the healer seat's direct-cast class — onto Creeds / Modules /
 WHEN-THEN. The Bloomweaver is NOT part of this (its framework re-clothing is its own later pass);
