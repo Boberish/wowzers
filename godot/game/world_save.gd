@@ -41,6 +41,14 @@ func save_to_disk() -> void:
 	cf.set_value("world", "json", canonical())
 	cf.save(CFG_PATH)
 
+## DEV RESET (the Atlas corner button, W1 preview): a fresh world — fog everywhere,
+## nothing conquered — written straight over the save. The permanence law is for the
+## GAME; playtesting needs do-overs.
+static func wipe() -> WorldSave:
+	var w := WorldSave.new()
+	w.save_to_disk()
+	return w
+
 # ============================================================ zone state
 
 func zone_state(zid: String) -> Dictionary:
