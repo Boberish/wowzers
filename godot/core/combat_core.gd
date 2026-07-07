@@ -822,10 +822,16 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 				f = seat.kit.dps_factor(s, seat, seat.hp_frac())   # Brinkwarden override
 			if f < 0.0:
 				f = f_hp(seat.hp_frac(), s.config)                 # default curve
-			total += seat.dps * f
-			meter_dmg(s, seat, &"attack", seat.dps * f * dt, false, false)
+			var contrib := seat.dps * f
+			# THE GLINT (Well healer): a glinted ally's blade cuts deeper for a window.
+			# Guarded on seat.vars → absent glint_until (-1) leaves contrib untouched =
+			# byte-identical for every non-Well fight (mirrors the s.raid_dr idiom).
+			if s.tick < int(seat.vars.get("glint_until", -1)):
+				contrib *= float(seat.vars.get("glint_mult", 1.0))
+			total += contrib
+			meter_dmg(s, seat, &"attack", contrib * dt, false, false)
 			if s.threat_enabled:
-				_add_threat(s, seat, seat.dps * f * dt)
+				_add_threat(s, seat, contrib * dt)
 	if s.boss.add_i >= 0:
 		s.boss.add_hp = maxf(0.0, s.boss.add_hp - total * dt)
 	else:

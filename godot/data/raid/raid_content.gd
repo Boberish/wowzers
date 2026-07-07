@@ -509,11 +509,28 @@ static func _bloomweaver(aspect: String) -> Seat:
 	u.vars = {"verdance": 0.0}
 	return u
 
+## The reworked direct-cast healer (codename "well", MENDER-PLAN.md): discrete CHARGES,
+## the graded pour/release, THE CURRENT, the personal GLINT. Same healer SEAT, distinct
+## CLASS — the Alchemist idiom, so the old Mender stays byte-identical unless "well" is
+## picked. Two aspects: brim (TARGET, grade the landing) / draw (SPEED, grade the release).
+static func _well(aspect: String) -> Seat:
+	var wcfg := WellConfig.new()
+	var u := Seat.new()
+	u.role = "healer"; u.unit_name = "The Well-tender"; u.fidelity = "full"
+	u.hp_max = 200.0; u.hp = 200.0; u.dps = 0.0
+	u.resource = 0.0; u.resource_max = 0.0        # NO mana — the Well is charges (in vars)
+	u.kit = WellKit.new(aspect, wcfg)
+	u.policy = WellPolicy.new()
+	u.vars = {"charges": wcfg.charges_max, "current": 0, "pulse_next": 0}
+	return u
+
 ## Build the healer seat for whichever healer CLASS the seat carries (default Mender).
-## Aspect defaults per class: Mender→tidecaller, Bloomweaver→wildgrove.
+## Aspect defaults per class: Mender→tidecaller, Bloomweaver→wildgrove, Well→brim.
 static func _healer_seat(cls: String, aspect: String) -> Seat:
 	if cls == "bloomweaver":
 		return _bloomweaver(aspect if aspect != "" else "wildgrove")
+	if cls == "well":
+		return _well(aspect if aspect != "" else "brim")
 	return _mender(aspect if aspect != "" else "tidecaller")
 
 ## The SECOND melee-DPS class in the raid: Reckoner (a Warrior — the auto-advancing

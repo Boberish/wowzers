@@ -20,6 +20,8 @@ const ALLY_SLACK := 0.06
 static func default_aspect(key: String, cls: String) -> String:
 	if key == "healer" and cls == "bloomweaver":
 		return "wildgrove"
+	if key == "healer" and cls == "well":
+		return "brim"
 	if key == "blade" and cls == "reckoner":
 		return "colossus"
 	if key == "caster" and cls == "alchemist":
@@ -37,6 +39,8 @@ static func cls_of(seat: Seat) -> String:
 	var gn := String(scr.get_global_name())
 	if gn == "BloomweaverKit":
 		return "bloomweaver"
+	if gn == "WellKit":
+		return "well"
 	if gn == "ReckonerKit":
 		return "reckoner"
 	if gn == "AlchemistKit":
@@ -170,7 +174,12 @@ static func make_policy(key: String, seed_v: int, cls: String = "") -> Policy:
 			cp.rng = DetRng.new(seed_v * 2749 + 3339)
 			return cp
 		_:
-			# healer — the second healer (Bloomweaver) or the default Mender
+			# healer — the reworked Well, the Bloomweaver, or the default Mender
+			if cls == "well":
+				var lp := WellPolicy.new()
+				lp.latency_ticks = ALLY_LATENCY
+				lp.rng = DetRng.new(seed_v * 2749 + 5531)
+				return lp
 			if cls == "bloomweaver":
 				var wp := BloomweaverPolicy.new()
 				wp.latency_ticks = ALLY_LATENCY
