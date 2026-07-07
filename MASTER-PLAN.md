@@ -729,6 +729,35 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-06 · main (docs only) · §CLASSES — **HEALER REWORK FIRST PASS — design board AT VERDICT**
+  (artifact https://claude.ai/code/artifact/68b0c28c-cc3a-4655-b9d5-fdc67e929e24). Bill's ask: heal-low +
+  overheal read as boons not specs; weigh merging Mender+Bloomweaver into one 2-spec class. Findings:
+  the code confirms the diagnosis (Tidecaller/Brinkwarden = one casting verb, one inverted Litany
+  condition — `mender_kit.gd:167`); **recommendation = DO NOT merge** (Split-law F10: cast-triage vs
+  seed-gardening are different games; decks are per-spec so the merge saves nothing; the seat toggle
+  already offers both). Proposed: Tidecaller/Brinkwarden DEMOTE → Foresight/Brink CREEDS; Reservoir→
+  ⭐ module · Nerve→module · Litany/Benediction→module (all re-homed coded machinery); NEW verb = **THE
+  WELL** (visible pulse-refill mana vessel, instrument) + **THE BRIM** (heals graded by where the
+  target's HP LANDS — perfect pour); second spec = **VIGIL** (hold a finished cast, release on the
+  spike — Fermata's press/release mirror); damage-healer = a 3rd healer-seat class, future. Build plan:
+  verdicts → MENDER-PLAN.md → HTML brim tester → guarded in-game base (`raid:healer:…`, byte-identical
+  unless picked) → deck/instrument/sim at `--fightlen` bands. **BRIM FEEL-TESTER BUILT & LIVE** (same
+  day, Bill: "make a browser basic tester"): party under scripted Rendmaw-style pressure (melee/
+  buster/nova/hex) + the 4-spell book + Meditate, the Well w/ pulse refills + dry state, brim-band
+  landing grades (PERFECT POUR refund / SPILL / plain) w/ landing preview + grade rail + efficiency
+  ledger, **BRIM ⇄ DRAW A/B toggle** + ⚙ knobs (band/refund/pulse/damage/draw-band) —
+  https://claude.ai/code/artifact/80b2169b-3f38-488e-a31c-d9b49a718b25 (source:
+  session scratchpad `brim-tester.html`). **⚡ 2026-07-07 — VERB PAIR LOCKED off the tester** (Bill:
+  "i like both alot, the draw one is very nice … can we do both specs with those?"): **BOTH tester
+  modes promote to the spec pair — SPEC 1 BRIM (grade the landing, on the ally's bar) · SPEC 2 DRAW
+  (grade the release, on your cast bar)** — same book/Well/GCD, attention inverts (read the party vs
+  read your hands; the Tempo/Fermata symmetry). VIGIL (the hold) folds into Draw build territory
+  (Patient-Hand creed / transformer candidate). Class doc created: **`MENDER-PLAN.md`** (creeds =
+  demoted aspects per-spec · modules = 3 re-homed machines w/ ⭐ Reservoir · tester knob baseline ·
+  build order, Alchemist idiom, old Mender stays frozen default). **NEXT: remaining 🟡 opens**
+  (name · preview baked-vs-earned · interrupt 1-or-0 · clutch dump · Draw creed pool · Ward in a
+  spill economy) **→ then the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
+  unless picked). *(healer-rework session)*
 - ☑ 2026-07-06 · main (docs only) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH — **THE PACING
   GRAMMAR locked (Bill: fights much too short, "rarely get a combo off").** Current truth: Seals
   enrage 90–142s, skirmishes 60–70s — the Framework-v2 kits out-arc the fights. Locked: length

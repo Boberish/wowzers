@@ -20,6 +20,7 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
+`MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, verb pair locked 2026-07-07) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `RAID-PLAN.md` (netcode-era reference) ·
 `HISTORY.md` (frozen milestone build-up M0→R2.5 + PoC notes — the old CLAUDE.md status list) ·
