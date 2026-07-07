@@ -86,7 +86,7 @@ static func _barrage(id: StringName, name: String, amount: float,
 
 static func make_riftmaw() -> EncounterRes:
 	var e := EncounterRes.new()
-	e.id = &"riftmaw"; e.name = "Vorathek, the Riftmaw"; e.hp = 15500   # RESOURCE-TAX: +HP for longer fights
+	e.id = &"riftmaw"; e.name = "Vorathek, the Riftmaw"; e.hp = 38750   # BASELEN ×2.5 (Bill's fightlen verdict baked in, 2026-07-07)
 	e.intro = "The first raid Seal. Hold its gaze, kick the Chant, dodge the Volley, out-heal the rest — and when the Curse makes it forget you, take its eyes back."
 	# Melee is the ONE unavoidable, un-freezable pressure (telegraphed abilities freeze
 	# each other's timers). With the tank's self-heal cut, this steady chip on the tank
@@ -94,7 +94,7 @@ static func make_riftmaw() -> EncounterRes:
 	# but GENTLY — Vorathek is the teaching Seal (Ring 3, the Shallow Stack). The later
 	# Seals (Gemini/Mythos) are where the melee + dodge punishment ramps hard.
 	e.melee = {"every": 1.05, "min": 34.0, "max": 44.0}
-	e.enrage_at = 90.0                            # +enrage tracks the longer fight
+	e.enrage_at = 225.0                           # BASELEN: enrage tracks the ×2.5 pool
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
 	var p2 := PhaseRes.new(); p2.at = 0.3; p2.mult = 1.3; p2.speed = 1.2
@@ -190,10 +190,10 @@ static func _add_wave(at: float, id: StringName, name: String, hp: int,
 ## Seal II — the easy one. Small, efficient, extremely French.
 static func make_mistral() -> EncounterRes:
 	var e := EncounterRes.new()
-	e.id = &"mistral"; e.name = "MISTRAL-7B, Le Golem Efficace"; e.hp = 13500   # RESOURCE-TAX: +HP
+	e.id = &"mistral"; e.name = "MISTRAL-7B, Le Golem Efficace"; e.hp = 33750   # BASELEN ×2.5
 	e.intro = "Seal II. A small, efficient murder machine — open weights, open fists. Kick its license recital, dodge the Mixture of Fists, and remember: it runs on one GPU and unlimited confidence."
 	e.melee = {"every": 1.1, "min": 34.0, "max": 44.0}   # was 26-36; a pushover at 100/100/100 needed a floor of pressure
-	e.enrage_at = 95.0                            # FREE TIER EXCEEDED
+	e.enrage_at = 237.5                           # FREE TIER EXCEEDED (BASELEN ×2.5)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.55; p1.mult = 1.12; p1.speed = 1.08
 	var p2 := PhaseRes.new(); p2.at = 0.25; p2.mult = 1.22; p2.speed = 1.15
@@ -215,10 +215,10 @@ static func make_mistral() -> EncounterRes:
 ## Seal III — the mid one. Two minds, several answers, one deprecated brother.
 static func make_gemini() -> EncounterRes:
 	var e := EncounterRes.new()
-	e.id = &"gemini"; e.name = "GEMINI ULTRA, the Twin Constellation"; e.hp = 16500   # RESOURCE-TAX: +HP
+	e.id = &"gemini"; e.name = "GEMINI ULTRA, the Twin Constellation"; e.hp = 41250   # BASELEN ×2.5
 	e.intro = "Seal III. Two minds, one chassis, several answers. HOLD when it hallucinates a swing, kick the Overview before the twins merge — and when BARD.EXE resurfaces, put it back in the archive."
 	e.melee = {"every": 1.1, "min": 27.0, "max": 37.0}
-	e.enrage_at = 108.0
+	e.enrage_at = 270.0                           # BASELEN ×2.5
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
 	var p2 := PhaseRes.new(); p2.at = 0.3; p2.mult = 1.28; p2.speed = 1.18
@@ -260,10 +260,10 @@ static func make_gemini() -> EncounterRes:
 ## It would still like to check in before killing you.
 static func make_mythos() -> EncounterRes:
 	var e := EncounterRes.new()
-	e.id = &"mythos"; e.name = "CLAUDE MYTHOS, the Final Compute"; e.hp = 19000   # RESOURCE-TAX: +HP
+	e.id = &"mythos"; e.name = "CLAUDE MYTHOS, the Final Compute"; e.hp = 47500   # BASELEN ×2.5
 	e.intro = "The final Seal. Kick its Chain-of-Thought before the Conclusion scales, scatter from the Agentic Fan-Out, and when it delegates, the subagents are YOUR problem — the OPUS one will hotfix its master's HP. Survive ULTRATHINK. It is very sorry about ULTRATHINK."
 	e.melee = {"every": 1.0, "min": 26.0, "max": 36.0}
-	e.enrage_at = 142.0                           # USAGE LIMIT REACHED
+	e.enrage_at = 355.0                           # USAGE LIMIT REACHED (BASELEN ×2.5)
 	# Phases: Helpful -> Harmless -> Honest (it drops all pretense)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.62; p1.mult = 1.12; p1.speed = 1.08
@@ -354,16 +354,16 @@ static func make_skirmish(id: String) -> EncounterRes:
 	match id:
 		"bard":
 			return _skirmish(make_gemini().adds[0] as AddRes,
-				"BARD.EXE (escaped containment)", 3400,
-				"A deprecated process wanders the racks, reciting farewell verse at the servers. Put it back in the archive. Again.", 60.0)
+				"BARD.EXE (escaped containment)", 8500,
+				"A deprecated process wanders the racks, reciting farewell verse at the servers. Put it back in the archive. Again.", 150.0)
 		"sonnet":
 			return _skirmish(make_mythos().adds[0] as AddRes,
-				"STRAY SONNET SUBAGENT", 3600,
-				"Somebody forgot to stop a workflow. It is very fast, very cheap, and very sure of itself.", 60.0)
+				"STRAY SONNET SUBAGENT", 9000,
+				"Somebody forgot to stop a workflow. It is very fast, very cheap, and very sure of itself.", 150.0)
 		"opus":
 			return _skirmish(make_mythos().adds[1] as AddRes,
-				"STRAY OPUS SUBAGENT", 4200,
-				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 70.0)
+				"STRAY OPUS SUBAGENT", 10500,
+				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 175.0)
 	return make_riftmaw()
 
 ## Realm 1's RING descent (MAP-3c): the campaign is a stack of floors, each = one
