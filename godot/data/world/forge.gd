@@ -43,6 +43,15 @@ const PALETTES := {
 		"brute": {"name": "HUSKMAN REAPER", "intro": "A harvest-hand the mill remade: slow, patient, and heavy as a loaded cart. Read the swing."},
 		"epithets": ["OF THE LOW FIELDS", "OF THE MILL ROAD", "OF THE OLD ROWS", "OF THE FALLOW EDGE"],
 	},
+	# Realm 1 "The Takeover" (THE DESCENT REFIT) — the strays between the story
+	# subagents. Same ironic-corporate voice as the skirmishes: earnest, wrong, at scale.
+	"takeover": {
+		"swarm": {"name": "CRAWLER SWARM", "intro": "A scraping fog of leftover bots — a thousand tiny fetch loops that just found something new to index: you."},
+		"stalker": {"name": "UNSUPERVISED LEARNER", "intro": "Nobody labeled its data, so it labels its own now. It has been studying how you dodge, and it would like to show you what it learned."},
+		"chanter": {"name": "SCRUM-CANTOR", "intro": "It holds the stand-up nobody is allowed to leave. Every verse it finishes restores its velocity. Interrupt the ceremony."},
+		"brute": {"name": "LEGACY MONOLITH", "intro": "Deprecated four quarters ago, decommissioned never. Everything still depends on it, and it swings like it knows."},
+		"epithets": ["FROM PROD", "OF THE BACKLOG", "OF THE DEAD SPRINT", "STILL IN BETA"],
+	},
 }
 
 ## Named souls on Forge bodies (the miniboss rule): keyed by the id's 6th part.

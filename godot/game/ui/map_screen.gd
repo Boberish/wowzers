@@ -62,7 +62,10 @@ func _ready() -> void:
 	queue_redraw()
 
 func _pos(n: Dictionary) -> Vector2:
-	var x: float = lerpf(X0, X1, float(n["row"]) / float(RunMap.ROWS - 1))
+	# span by THIS map's Seal row, not the class const — refit floors run 8 rows
+	# (classic 6-row maps: seal row 5 = ROWS-1, so their layout is pixel-identical)
+	var last_row: int = int(map.node(map.seal_id)["row"])
+	var x: float = lerpf(X0, X1, float(n["row"]) / float(maxi(last_row, 1)))
 	return Vector2(x, Y_LANE[int(n["lane"])])
 
 # ============================================================ chrome

@@ -41,12 +41,16 @@ var tickets: Array = []        ## MAP-2: ticket ids placed on this map (pickup�
 ## `shard_req` > 0 gates the Seal behind credential shards (MAP-3c ROOT floor).
 ## `n_tickets` > 0 seeds pickup→turn-in TICKET quests (MAP-2). All three default to
 ## off, so the solo map and every classic call stay byte-identical.
+## `rows` sizes the lattice (THE DESCENT REFIT): raid floors pass 8 (= 6 mid rows,
+## 20 nodes); the default keeps every classic 6-row call byte-identical. Min 6 —
+## the backdoor's fixed grid rows (1→3) need at least 4 mid rows to exist.
 static func generate(map_seed: int, n_fights: int, event_ids: Array,
-		extra_quota: Dictionary = {}, shard_req: int = 0, n_tickets: int = 0) -> RunMap:
+		extra_quota: Dictionary = {}, shard_req: int = 0, n_tickets: int = 0,
+		rows: int = ROWS) -> RunMap:
 	var m := RunMap.new()
 	m.seed = map_seed
 	var rng := DetRng.new(map_seed)
-	m._build(rng, n_fights, event_ids, extra_quota, shard_req, n_tickets)
+	m._build(rng, n_fights, event_ids, extra_quota, shard_req, n_tickets, maxi(rows, ROWS))
 	return m
 
 func node(id: int) -> Dictionary:
@@ -121,18 +125,18 @@ static func from_dict(d: Dictionary) -> RunMap:
 # ============================================================ generation
 
 func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {},
-		shard_req: int = 0, n_tickets: int = 0) -> void:
+		shard_req: int = 0, n_tickets: int = 0, rows: int = ROWS) -> void:
 	nodes.clear()
-	# entry (row 0) and the mid grid (rows 1..ROWS-2), then the Seal (row ROWS-1)
+	# entry (row 0) and the mid grid (rows 1..rows-2), then the Seal (row rows-1)
 	entry_id = _add(KIND_COMBAT, 0, 1)
 	nodes[entry_id]["fight"] = 0
 	var grid: Array = []                       # grid[row][lane] -> id
-	for r in range(1, ROWS - 1):
+	for r in range(1, rows - 1):
 		var lane_ids: Array = []
 		for l in LANES:
 			lane_ids.append(_add("", r, l))
 		grid.append(lane_ids)
-	seal_id = _add(KIND_SEAL, ROWS - 1, 1)
+	seal_id = _add(KIND_SEAL, rows - 1, 1)
 	nodes[seal_id]["fight"] = n_fights - 1
 
 	# ---- edges: entry fans out to every lane of row 1

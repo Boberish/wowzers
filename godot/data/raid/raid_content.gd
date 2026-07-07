@@ -370,29 +370,37 @@ static func make_skirmish(id: String) -> EncounterRes:
 ## RunMap. Clearing a floor's Seal ELEVATES you to the next ring, carrying wounds.
 ## The Seal escalates per ring (MISTRAL easy → GEMINI mid → MYTHOS finale) — that IS
 ## the difficulty curve. `shard_req` > 0 gates the Seal behind credential shards (ROOT).
+## `rows` sizes the floor's RunMap lattice (THE DESCENT REFIT: 8 = 20 nodes).
 ## Pure literal (no Palette statics) → const is safe.
 const FLOORS := [
-	{"ring": 3, "seal": "mistral", "title": "RING 3 · THE SHALLOW STACK", "shard_req": 0, "tickets": 1,
+	{"ring": 3, "seal": "mistral", "title": "RING 3 · THE SHALLOW STACK", "shard_req": 0, "tickets": 1, "rows": 8,
 		"elev": "MISTRAL-7B optimizes its own shutdown. sudo granted — the perimeter is yours. Two rings to root."},
-	{"ring": 2, "seal": "gemini", "title": "RING 2 · THE MIDDLEWARE", "shard_req": 0, "tickets": 2,
+	{"ring": 2, "seal": "gemini", "title": "RING 2 · THE MIDDLEWARE", "shard_req": 0, "tickets": 2, "rows": 8,
 		"elev": "The twins deprecate each other; either way the gateway falls. Privileges rising. One ring to root."},
-	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3, "tickets": 2,
+	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3, "tickets": 2, "rows": 8,
 		"elev": ""},
 ]
 
 ## Per-ring floor fight list (MAP-3c): RunMap fight indices — 0 = the entry gate,
-## last = the floor Seal, mids = skirmishes ramped by map depth. ring 3 (default)
-## is BYTE-IDENTICAL to the old single-floor call (the Ring-3 Shallow Stack).
+## last = the floor Seal, mids ramped by map depth. THE DESCENT REFIT: takeover-palette
+## Forge strays interleave BETWEEN the authored story subagents (the stories keep their
+## order and count — the Forge is the filler), tier ramping with the ring (t1→t3).
 static func floor_fights(ring: int = 3) -> Array:
 	match ring:
-		2:  # THE MIDDLEWARE — GEMINI ULTRA behind a skirmish gauntlet
-			return [make_skirmish("sonnet"), make_skirmish("bard"),
+		2:  # THE MIDDLEWARE — GEMINI ULTRA behind the skirmish gauntlet (t2 strays)
+			return [make_skirmish("sonnet"), encounter_by_id("forge:takeover:swarm:2:402"),
+				make_skirmish("bard"), encounter_by_id("forge:takeover:chanter:2:403"),
+				encounter_by_id("forge:takeover:stalker:2:404"),
 				make_skirmish("opus"), make_gemini()]
-		0, 1:  # ROOT — CLAUDE MYTHOS (credential-shard gated)
-			return [make_skirmish("opus"), make_skirmish("sonnet"),
-				make_skirmish("bard"), make_mythos()]
-		_:  # RING 3 — THE SHALLOW STACK — MISTRAL-7B (Vorathek gate, unchanged)
-			return [make_riftmaw(), make_skirmish("bard"), make_skirmish("sonnet"),
+		0, 1:  # ROOT — CLAUDE MYTHOS (credential-shard gated; t3 strays hold the stack)
+			return [make_skirmish("opus"), encounter_by_id("forge:takeover:stalker:3:502"),
+				make_skirmish("sonnet"), encounter_by_id("forge:takeover:chanter:3:503"),
+				make_skirmish("bard"), encounter_by_id("forge:takeover:brute:3:504"),
+				make_mythos()]
+		_:  # RING 3 — THE SHALLOW STACK — MISTRAL-7B (Vorathek gate; t1 strays teach the bodies)
+			return [make_riftmaw(), encounter_by_id("forge:takeover:swarm:1:302"),
+				make_skirmish("bard"), encounter_by_id("forge:takeover:stalker:1:303"),
+				make_skirmish("sonnet"), encounter_by_id("forge:takeover:chanter:1:304"),
 				make_skirmish("opus"), make_mistral()]
 
 ## ESCORT / VOLATILE burden (WORLD-PLAN §MEWGENICS STEALS ①): append an enemy-side add to
