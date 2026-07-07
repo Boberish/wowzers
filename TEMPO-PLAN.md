@@ -485,6 +485,17 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 > a fixed socket at the left end-cap (the coiling needle tints umbra instead). Probe asserts the
 > roam (4 distinct centres / 4 beats); checksums still byte-identical; expert AI tracks the roam
 > (24 bulls/run); cadence is now irregular by design (expert TTK 16→20s — far windows = long beats).
+> **THE DRAW (pacing pass, 2026-07-07 `fermata-pace` — Bill: "it takes all focus, can't cast my
+> spells… maybe I have to start holding down for it to start? less far-left windows unless high
+> Flow"):** the sweep is now PRESS-relative — the clock only runs while you hold; idle is genuinely
+> calm (Flow decay is the only pacing nudge) so dumps/kicks are cast between draws. Near windows
+> are EARNED: `fermata_near_slack 0.30s` extra keep-away at Flow 0 → 0 at max Flow (short twitchy
+> draws only inside a hot streak). Knock-on: Patient Knife / Patient Edge re-anchored to the
+> FAR-WINDOW fraction (`fermata_far_pivot 0.8 / far_span 0.6`) since draw length is now decided by
+> where the window lands; Patient Knife also raises its own shift floor (`patient_shift_min 1.30`
+> — the knife waits). Bar: idle cue "HOLD 1 — start the draw", parked needle, "too early" region =
+> the un-sharp coil floor. Verified: probe 4/4 PASS, checksums byte-identical, patient measurably
+> slower than base (22.0s vs 20.2s @expert), idle/charging/sharp WSLg shots clean.
 > **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
