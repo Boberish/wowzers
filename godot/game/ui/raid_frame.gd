@@ -43,6 +43,7 @@ var is_you: bool = false         ## the player's own card: gilded name
 var read_mode: String = ""       ## Mender aspect read overlay: "" | "tide" | "brink"
 var ripe: bool = false           ## Bloomweaver: this ally's Growth is in the harvest window
 var glint: bool = false          ## Well: this ally is GLINTING (a perfect heal — bonus damage)
+var brim_line: float = 0.0       ## Well/BRIM: the pour window start (0 = off) — always visible
 var read_a: float = 0.60         ## Tidecaller waterline (keep bars above it)
 var read_b: float = 0.40         ## Brinkwarden band top (catch bars inside 0.15..read_b)
 
@@ -274,6 +275,19 @@ func _draw() -> void:
 			UiKit.text_shadowed(self, UiKit.display(600), Vector2(bx, by + barh * 0.5 + 5.0),
 				str(int(round(_disp_hp))), HORIZONTAL_ALIGNMENT_CENTER, barw,
 				UiKit.SIZE["LABEL"], Palette.GOLD_BRIGHT)
+
+	# --- the Well/BRIM pour window: LAND the heal in this gilded band with no spill =
+	#     PERFECT POUR. Always visible on every frame while playing Brim — the aim lives
+	#     on the party's bars, so the read is the base click-cast UI itself. ---
+	if brim_line > 0.0 and not dead:
+		var bwx := bx + barw * clampf(brim_line, 0.0, 1.0)
+		draw_rect(Rect2(bwx, by + 2.0, bx + barw - bwx, barh - 4.0),
+			Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.15))
+		var bwc := Palette.GOLD_BRIGHT
+		bwc.a = 0.8 + (0.15 * sin(_pulse * 2.6) if _disp_frac < brim_line else 0.0)
+		draw_line(Vector2(bwx, by - 1.0), Vector2(bwx, by + barh + 1.0), bwc, 2.0, true)
+		draw_line(Vector2(bwx - 3.0, by - 3.5), Vector2(bwx, by - 0.5), bwc, 1.5, true)
+		draw_line(Vector2(bwx + 3.0, by - 3.5), Vector2(bwx, by - 0.5), bwc, 1.5, true)
 
 	# --- Mender aspect READ overlay: the two aspects want OPPOSITE things off the same
 	#     bar. Tidecaller keeps every bar ABOVE a teal waterline; Brinkwarden PARKS bars

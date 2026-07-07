@@ -7,6 +7,9 @@
 class_name CastChannel
 extends Control
 
+## Emitted when the channel is clicked — the Well/DRAW release press rides this.
+signal tapped
+
 var active: bool = false
 var frac: float = 0.0
 var label: String = ""
@@ -17,6 +20,20 @@ var spell_id: String = "":
 		if v != spell_id:
 			spell_id = v
 			_tex = RuneIcons.tex(v)
+
+## Optional graded RELEASE window (the Well/DRAW; -1 = none, other healers unchanged):
+## a marked zone at the channel's end + a bright centre sliver (the Still Point).
+## `show_idle_track` keeps the empty channel + window faintly visible between casts,
+## so the window can be learned before the cast is live.
+var zone_lo: float = -1.0
+var mark_lo: float = -1.0
+var mark_hi: float = -1.0
+var show_idle_track: bool = false
+
+func _gui_input(event: InputEvent) -> void:
+	if zone_lo >= 0.0 and event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_LEFT:
+		tapped.emit()
 
 var _tex: Texture2D
 var _pulse: float = 0.0
@@ -35,10 +52,18 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	if not active and _bloom <= 0.0:
+	if not active and _bloom <= 0.0 and not (show_idle_track and zone_lo >= 0.0):
 		return
 	var w := size.x
 	var bar := Rect2(54.0, 26.0, w - 70.0, 22.0)
+
+	# idle track (the Well/DRAW): the empty channel + the release window, faint —
+	# the window stays readable between casts.
+	if not active and _bloom <= 0.0:
+		draw_rect(bar, Color(0.07, 0.09, 0.11, 0.75))
+		_draw_window(bar, 0.45)
+		draw_rect(bar, Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.35), false, 1.0)
+		return
 
 	if active:
 		# spell medallion
@@ -68,6 +93,8 @@ func _draw() -> void:
 		for i in range(1, 4):
 			var tx := bar.position.x + bar.size.x * float(i) / 4.0
 			draw_line(Vector2(tx, bar.end.y - 6.0), Vector2(tx, bar.end.y - 2.0), Palette.BG0, 2.0, true)
+		# the graded release window over the live channel
+		_draw_window(bar, 1.0)
 		# travelling shimmer over the filled portion
 		var fw := bar.size.x * clampf(frac, 0.0, 1.0)
 		if fw > 12.0:
@@ -93,6 +120,22 @@ func _draw() -> void:
 		var mg := Palette.WIN
 		mg.a = 0.5 * _bloom
 		draw_circle(mouth, 7.0 + 20.0 * b, mg)
+
+## The graded release window: a steel zone at the channel's end (CLEAN) + a bright gold
+## centre sliver (the STILL POINT). `a` scales the alpha (faint on the idle track).
+func _draw_window(bar: Rect2, a: float) -> void:
+	if zone_lo < 0.0:
+		return
+	var zx := bar.position.x + bar.size.x * clampf(zone_lo, 0.0, 1.0)
+	draw_rect(Rect2(zx, bar.position.y + 1.0, bar.end.x - zx, bar.size.y - 2.0),
+		Color(Palette.STEEL.r, Palette.STEEL.g, Palette.STEEL.b, 0.30 * a))
+	draw_line(Vector2(zx, bar.position.y - 2.0), Vector2(zx, bar.end.y + 2.0),
+		Color(Palette.STEEL.r, Palette.STEEL.g, Palette.STEEL.b, 0.85 * a), 2.0, true)
+	if mark_lo >= 0.0 and mark_hi > mark_lo:
+		var mx := bar.position.x + bar.size.x * clampf(mark_lo, 0.0, 1.0)
+		var mw := maxf(2.0, bar.size.x * (mark_hi - mark_lo))
+		draw_rect(Rect2(mx, bar.position.y, mw, bar.size.y),
+			Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.85 * a))
 
 func _gem(at: Vector2, r: float, lit: bool) -> void:
 	var pts := PackedVector2Array([at + Vector2(0, -r), at + Vector2(r * 0.75, 0),

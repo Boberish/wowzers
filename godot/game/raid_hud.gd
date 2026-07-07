@@ -332,6 +332,8 @@ var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
 var _wcfg: WellConfig              ## healer (the Well — reworked direct-cast)
 var _well_gauge: WellGauge         ## the Well's charge vessel + Current + graded window
 var _well_hold_key: int = -1       ## Well/DRAW: which heal key owns the live hold-release
+var _well_hold_ms: int = 0         ## Well/DRAW: when the hold began (tap vs hold threshold)
+var _well_mouse_ms: int = 0        ## Well/DRAW: when a mouse-started cast began (hold-release)
 var _healer_cls: String = "mender" ## which class fills the healer seat: mender | bloomweaver | well
 var _blade_cls: String = "twinfang" ## which class fills the blade seat: twinfang | reckoner
 var _caster_cls: String = "voidcaller" ## which class fills the caster seat: voidcaller | alchemist
@@ -3329,14 +3331,28 @@ func _build_band_healer() -> void:
 		_rune_ids.append(id)
 	_hint_line(_healer_hint())
 
-## The Well's band: the charge-vessel instrument (WellGauge — charges + Current + the
-## release band) + the book rune rail. No mana orb — the Well IS the resource, in the gauge.
-## Hover an ally frame to target; BRIM taps 1-4, DRAW holds 1-4 and releases to pour.
+## The Well's band — built on the SHARED healer surfaces: click-cast chords (WellBinds),
+## the healer CastChannel (extended with DRAW's release window, always-visible track,
+## tap-to-release), and the WellGauge (charges + Current + the big TARGET bar Brim aims
+## on). No mana orb — the Well IS the resource, in the gauge.
 func _build_band_well() -> void:
+	_binds = WellBinds.load_binds()
 	_well_gauge = WellGauge.new()
 	_well_gauge.aspect = _aspect
-	_place(_well_gauge, 0.5, 1, 0.5, 1, -320, -318, 320, -168)
+	_place(_well_gauge, 0.5, 1, 0.5, 1, -320, -296, 320, -166)
 	_shake_root.add_child(_well_gauge)
+	# the shared healer cast bar; DRAW marks the release window on it and clicking the
+	# channel is a release press. The idle track keeps the window readable between casts.
+	_castbar = CastChannel.new()
+	if _aspect == "draw":
+		_castbar.zone_lo = 1.0 - _wcfg.draw_band
+		var sp_c := 1.0 - _wcfg.draw_band * 0.5
+		_castbar.mark_lo = sp_c - _wcfg.still_point * 0.5
+		_castbar.mark_hi = sp_c + _wcfg.still_point * 0.5
+		_castbar.show_idle_track = true
+		_castbar.tapped.connect(func(): _ctrl.human({"type": "ability", "id": "release"}))
+	_place(_castbar, 0.5, 1, 0.5, 1, -240, -360, 240, -300)
+	_shake_root.add_child(_castbar)
 	var row := _rune_row(-380.0, 380.0)
 	_runes = []
 	_rune_ids = []
@@ -3354,9 +3370,9 @@ func _build_band_well() -> void:
 	_hint_line(_well_hint())
 
 func _well_hint() -> String:
-	var verb := "TAP 1-4 to heal (grade = where they LAND)" if _aspect == "brim" \
-		else "HOLD 1-2, release to POUR (grade = the RELEASE; ride THE CURRENT)"
-	return "Hover an ally to target · %s · Q dispel · R rekindle a fallen ally · SPACE/F dodge (cancels a cast)" % verb
+	var verb := "click/tap to heal — LAND it in the gold band (no spill) = POUR" if _aspect == "brim" \
+		else "click/tap starts the cast — click/tap AGAIN (or hold & release) in the window = CLEAN"
+	return "Hover an ally · L flash · R mend · Mid cascade · Sh+L spring · Sh+R dispel · 1-4 keys · %s · SPACE/F dodge" % verb
 
 func _render_band_well(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var g := _well_gauge
@@ -3368,15 +3384,37 @@ func _render_band_well(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.charges_max = int(obs.get("charges_max", 12))
 	g.current = int(obs.get("current", 0))
 	g.current_max = int(obs.get("current_max", 5))
-	g.brim_band = float(obs.get("brim_band", 0.90))
-	g.draw_band = float(obs.get("draw_band", 0.15))
-	g.still_point = float(obs.get("still_point", 0.04))
+	# the SHARED cast channel (with DRAW's release window baked in at build)
 	var casting: Dictionary = obs.get("casting", {})
-	g.cast_active = not casting.is_empty()
-	if g.cast_active:
-		g.cast_p = clampf(float(s.tick - int(casting.get("start_tick", 0)))
-			/ maxf(float(casting.get("dur_ticks", 1)), 1.0), 0.0, 1.0)
-		g.cast_name = String(_wcfg.book.get(String(casting.get("id", "")), {}).get("name", ""))
+	if _castbar != null:
+		if casting.is_empty():
+			_castbar.active = false
+		else:
+			_castbar.active = true
+			_castbar.frac = clampf(float(s.tick - int(casting.get("start_tick", 0)))
+				/ maxf(float(casting.get("dur_ticks", 1)), 1.0), 0.0, 1.0)
+			var ct: Seat = casting.get("target")
+			_castbar.target = ct.unit_name if ct != null else ""
+			_castbar.spell_id = String(casting.get("id", ""))
+			_castbar.label = String(_wcfg.book.get(_castbar.spell_id, {}).get("name", _castbar.spell_id))
+	# THE TARGET BAR: the cast's target while casting, else the hovered/focused ally.
+	# Brim aims the pour here (band + the in-flight heal's ghost landing).
+	var tgt: Seat = casting.get("target") if not casting.is_empty() else null
+	if tgt == null:
+		tgt = _hover_seat if _hover_seat != null else _focus_seat
+	if tgt != null and tgt.alive():
+		g.t_show = true
+		g.t_name = tgt.unit_name
+		g.t_frac = tgt.hp_frac()
+		g.t_band = _wcfg.brim_band if _aspect == "brim" else -1.0
+		g.t_glint = s.tick < int(tgt.vars.get("glint_until", -1))
+		g.t_ghost = -1.0
+		if not casting.is_empty() and casting.get("target") == tgt:
+			var wsp: Dictionary = _wcfg.book.get(String(casting.get("id", "")), {})
+			if wsp.has("heal"):
+				g.t_ghost = clampf(tgt.hp_frac() + float(wsp.get("heal", 0.0)) / maxf(tgt.hp_max, 1.0), 0.0, 1.0)
+	else:
+		g.t_show = false
 
 ## The SECOND healer's band: Sap orb + Blooming Medallion (Verdance) + benediction cast
 ## channel + the Growth/ward rune rail. No mana, no Reservoir/Nerve strip — the whole
@@ -3738,14 +3776,32 @@ func _input(event: InputEvent) -> void:
 			_coil_held = false
 			_ctrl.human({"type": "ability", "id": "release"})
 		return
-	# the Well/DRAW hold-release: releasing the held heal key POURS (grades the release timing).
+	# the Well/DRAW hold-release: a heal key HELD past the tap threshold pours on key-up.
+	# A quick TAP leaves the cast running — tap/click again to pour (the two-click style).
 	if event is InputEventKey and not event.pressed and _pause == null and _screen == "combat" \
 			and _seat_key == "healer" and _healer_cls == "well" and _aspect == "draw":
 		if event.keycode == _well_hold_key:
+			var held := Time.get_ticks_msec() - _well_hold_ms
 			_well_hold_key = -1
-			_ctrl.human({"type": "ability", "id": "release"})
+			if held >= 250 and not _ctrl.player().casting.is_empty():
+				_ctrl.human({"type": "ability", "id": "release"})
 		return
-	# Mender click-cast: hover a frame, click a chord
+	# the Well/DRAW mouse release: a bound chord pressed WHILE CASTING = the release
+	# (click-click), and a mouse button held past the threshold releases on button-up.
+	if _pause == null and _screen == "combat" and _seat_key == "healer" \
+			and _healer_cls == "well" and _aspect == "draw" and event is InputEventMouseButton:
+		if event.pressed and not _ctrl.player().casting.is_empty() \
+				and String(_binds.get(_mouse_chord(event), "none")) != "none":
+			_well_mouse_ms = 0
+			_ctrl.human({"type": "ability", "id": "release"})
+			return
+		if not event.pressed and _well_mouse_ms > 0:
+			var mheld := Time.get_ticks_msec() - _well_mouse_ms
+			_well_mouse_ms = 0
+			if mheld >= 300 and not _ctrl.player().casting.is_empty():
+				_ctrl.human({"type": "ability", "id": "release"})
+				return
+	# healer click-cast (all healer classes): hover a frame, click a chord
 	if _pause == null and _seat_key == "healer" and _screen == "combat" \
 			and event is InputEventMouseButton and event.pressed and _hover_seat != null:
 		var id := String(_binds.get(_mouse_chord(event), "none"))
@@ -3803,14 +3859,17 @@ func _well_key(code: int) -> void:
 		KEY_SPACE, KEY_F:
 			_ctrl.human({"type": "dodge"})
 		KEY_1, KEY_2, KEY_3, KEY_4:
+			# DRAW does BOTH release styles: a press while casting = the release (tap-tap),
+			# and a key HELD past the tap threshold releases on key-up (hold-release).
+			if _aspect == "draw" and not _ctrl.player().casting.is_empty():
+				_well_hold_key = -1
+				_ctrl.human({"type": "ability", "id": "release"})
+				return
 			var id: String = {KEY_1: "flash", KEY_2: "mend", KEY_3: "cascade", KEY_4: "spring"}[code]
-			if _aspect == "draw" and (id == "flash" or id == "mend"):
-				# hold-release: start the cast now; the key-up (in _input) pours it
-				if _well_hold_key == -1:
-					_well_hold_key = code
-					_cast(id)
-			else:
-				_cast(id)
+			if _aspect == "draw":
+				_well_hold_key = code
+				_well_hold_ms = Time.get_ticks_msec()
+			_cast(id)
 		KEY_Q: _cast("dispel")
 		KEY_R: _cast("rekindle")
 
@@ -3975,6 +4034,8 @@ func _cast_on_well(seat: Seat, id: String) -> void:
 		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
 	if ready:
 		_ctrl.human({"type": "ability", "id": id, "target": seat if bool(sp.get("target", false)) else null})
+		if _aspect == "draw" and float(sp.get("cast", 0.0)) > 0.0:
+			_well_mouse_ms = Time.get_ticks_msec()   # arm mouse hold-release for this cast
 
 ## Bloomweaver click-cast: mirror the Sap/Verdance/garden gates for the gold/dim flash.
 func _cast_on_bloom(seat: Seat, id: String) -> void:
@@ -4155,6 +4216,9 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		fr.incoming_lethal = false
 		fr.ripe = false                      # Bloomweaver drives this per-frame below
 		fr.glint = s.tick < int(seat.vars.get("glint_until", -1))   # Well: this ally is glinting
+		# Well/BRIM: the pour window lives on EVERY frame, always (the aim IS the party bars)
+		fr.brim_line = _wcfg.brim_band if (_seat_key == "healer" and _healer_cls == "well" \
+			and _aspect == "brim" and _wcfg != null) else 0.0
 		if _seat_key == "healer":
 			fr.is_target = (seat == _hover_seat) or (_hover_seat == null and seat == _focus_seat)
 		else:
