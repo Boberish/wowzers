@@ -95,12 +95,22 @@ the blocked hit and return it) rather than just subtract. If you catch yourself 
 ## 6 · Process (design → verdict → build)
 
 1. Read the plan doc + the verdict history. List the verb's dials. Note standing laws.
-2. Draft the slate per the quotas above. Tag every card (greed / ease / speed / control /
-   precision / pacing / payoff / support / build-around / comeback / wild).
+2. Draft the slate per the quotas above. Tag every card with exactly ONE **TYPE** from the
+   shared vocabulary (same meaning across every class — Bill classifies at a glance):
+   **POWER** (just bigger numbers — the bread) · **GREED** (risk more for more; bites when you
+   overreach) · **STRAT** (rewards a specific plan or clever play) · **EASE** (more forgiving /
+   less twitchy — Bill likes this lane; watch it doesn't soften too far, and count your EASE
+   cards per deck) · **RULE** (changes a rule of the minigame — ⭐transformers and keystones
+   live here) · **TEAM** (helps the whole warband — the one support card).
+   Finer intent words (speed, control, comeback, build-around…) go in the WHY text, not pills.
 3. Self-audit: anti-pattern list (§3), offer-trio test (§1), archetype check (§4),
    BROKE/FADED/DEAD/OPENED if the verb moved.
 4. Ship a **verdict artifact**: interactive KEEP/TWEAK/CUT cards with **WHAT / WHY / FEELS**
-   + tags + status chips (STANDS/REWORKED/NEW) + an export blob. Bill verdicts; you fold.
+   + one colored TYPE pill + status chips (STANDS/REWORKED/NEW) + an export blob.
+   **Plain language everywhere** — write effects in the game's own verbs, gloss every mechanic
+   term, and open the page with a short "the words, quickly" glossary + a loop refresher
+   (Bill juggles several classes; a board that needs design lingo to read is a failed board).
+   Bill verdicts; you fold.
 5. **Hard-copy the slate into the class plan doc BEFORE building** (context dies; docs don't).
 6. Build kit-local and aspect-gated (byte-identical when unpicked), knobs on the config,
    sim probe cells per creed/module/build, determinism PASS, then the HUD slice.
