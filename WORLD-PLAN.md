@@ -337,7 +337,9 @@ Forge itself:** determinism PASS; band targets per tier hit within tolerance; ze
 never-winnable outputs across the full seed sweep; named minibosses excluded (those get
 a designer soul on a Forge body — generator does the body, a human does the signature).
 
-### FORGE — build spec v1 (claimed 2026-07-07, Bill: "lets go for the forge")
+### FORGE — build spec v1 — ✅ BUILT & MERGED 2026-07-07 (`d3722f5`; full record in the
+### Coordination Log; shipped as specced below + the chaff-pair authoring rule: a SWARM
+### is never alone. Open: packroll fillers → forge swarms; per-body stage rigs.)
 - **`data/world/forge.gd`** — `Forge.make(zone, body, tier, seed) -> EncounterRes`, pure
   static, own DetRng. **THE ID IS THE RECIPE:** generated encounters carry id
   `forge:<zone>:<body>:<tier>:<seed>` and `RaidContent.encounter_by_id` gains a `forge:`
