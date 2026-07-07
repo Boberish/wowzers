@@ -311,6 +311,11 @@ func _draw() -> void:
 		UiKit.text_shadowed(self, UiKit.display(750, 1), Vector2(0, my), _result_text(),
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
 			Color(_result_color().r, _result_color().g, _result_color().b, 0.55 + 0.45 * fa))
+	elif fermata and not coiling:
+		# THE DRAW is yours to start — no clock runs while idle (cast dumps in the calm).
+		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, my), "HOLD 1 — start the draw",
+			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"],
+			Color(0.72, 0.62, 1.0, 0.5 + 0.2 * sin(_pulse * 0.5)))
 	elif in_green:
 		UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), "STRIKE!",
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],

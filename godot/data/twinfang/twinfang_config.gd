@@ -146,9 +146,18 @@ extends Resource
 @export var fermata_shift_min: float = 0.75     ## nearest the window may land (× base centre)
 @export var fermata_shift_max: float = 1.85     ## farthest the window may land (× base centre)
 @export var fermata_ruler_sec: float = 1.80     ## the FIXED HUD ruler — roam space + a late reach
+# THE DRAW (pacing pass, Bill 2026-07-07): the sweep starts on the PRESS, not on the last strike
+# — idle has NO clock (Flow decay is the only pacing nudge), so dumps/kicks get cast in calm.
+# Near windows are EARNED: at low Flow the window keeps its distance (the slack), fading to 0 at
+# max Flow — the twitchy short draws only exist inside a hot streak.
+@export var fermata_near_slack: float = 0.30    ## extra window keep-away at Flow 0 (→ 0 at max Flow)
+# THE FAR-WINDOW PAYOFF: with a press-relative clock, "hold longer for more" is decided by where
+# the window LANDS, so the Patient cards key off the draw's length past the pivot (0 → 1 over span).
+@export var fermata_far_pivot: float = 0.80     ## draws whose window sat past this start paying…
+@export var fermata_far_span: float = 0.60      ## …scaling the Patient bonuses to full over this span
 # creeds
-@export var patient_per_sec: float = 0.15       ## Patient Knife: +dmg/sec coiled past sharp (0.15 = +1.5%/0.1s)
-@export var patient_cap: float = 0.20           ## Patient Knife: cap on the baked coil bonus
+@export var patient_cap: float = 0.20           ## Patient Knife: full far-window bonus (× far fraction)
+@export var patient_shift_min: float = 1.30     ## Patient Knife: the window never lands near — the knife waits
 @export var fleeting_min_sec: float = 0.20      ## Fleeting Shade: shorter min coil
 @export var fleeting_flow_cap: int = 4          ## Fleeting Shade: Flow ceiling (the cost)
 @export var fleeting_slip_amt: int = 2          ## Fleeting Shade: a Miss loses this (not a crash)
@@ -161,8 +170,7 @@ extends Resource
 @export var mark_open_bonus: float = 0.12       ## The Mark: Eviscerate +this per brand tier
 @export var mark_tier_cap: int = 3              ## The Mark: max brand tier
 # boons — COIL
-@export var patient_edge_per: float = 0.02      ## Patient Edge: +dmg per 0.1s coiled beyond sharp
-@export var patient_edge_cap: float = 0.18      ## Patient Edge: cap (raises the Patient bonus ceiling)
+@export var patient_edge_cap: float = 0.18      ## Patient Edge: full far-window bonus (× far fraction)
 @export var restless_dark_regen: float = 0.30   ## Restless Dark: +this fraction of energy regen while coiled
 @export var quiet_fuse_cut: float = 0.08        ## Quiet Fuse: min coil reduced by this
 @export var quiet_fuse_no_stagger: bool = false ## Quiet Fuse (Opus rung): unravel loses its stagger

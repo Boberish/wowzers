@@ -58,7 +58,7 @@ const TEMPO := [
 ## TEMPO/SHARED and work unchanged (Fermata shares Tempo's Flow + window).
 const FERMATA := [
 	# --- COIL — the hold itself ---
-	{"id": "patientEdge", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Patient Edge", "desc": "Releases deal +2% per 0.1s coiled beyond sharp (cap +18%). Reward the deep hold."},
+	{"id": "patientEdge", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Patient Edge", "desc": "The long stalk pays: releases hit up to +18% harder the farther the window sat. Reward the deep draw."},
 	{"id": "restlessDark", "type": "upgrade", "rarity": "haiku", "tags": ["coil", "energy"], "title": "Restless Dark", "desc": "Energy regenerates +30% while you're coiled — the shadow is restless."},
 	{"id": "quietFuse", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Quiet Fuse", "desc": "Your blade sharpens 0.08s sooner — a shorter fuse on every coil."},
 	{"id": "feint", "type": "relic", "rarity": "sonnet", "tags": ["coil", "unravel"], "title": "Feint", "desc": "An unravel PRIMES your next coil to sharpen 50% faster. Turn a fumble into tempo."},

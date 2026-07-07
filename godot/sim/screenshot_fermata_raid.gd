@@ -20,7 +20,9 @@ func _initialize() -> void:
 			out_dir = a.substr("--out=".length())
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	# warm the fight, then hold a coil for N ticks so the ring is caught fills/sharp.
+	# hold 0 = an IDLE shot (no coil started): the parked needle + "start the draw" cue.
 	steps = [
+		{"name": "fermata_idle",          "warm": 150, "hold": 0},   # THE DRAW at rest — no clock
 		{"name": "fermata_coil_charging", "warm": 150, "hold": 5},   # ~0.17s coiled → ring ~half
 		{"name": "fermata_coil_sharp",    "warm": 150, "hold": 14},  # ~0.47s coiled → white-hot sharp
 	]
@@ -62,9 +64,11 @@ func _process(_d: float) -> bool:
 			if waited >= int(steps[idx]["warm"]):
 				var s := _blade()
 				if s != null:
-					s.policy = null                       # stop the AI — we hold the coil ourselves
-				# start a coil (mid-air, since resets don't matter for the ring shot)
-				c.human({"type": "ability", "id": "coil"})
+					s.policy = null                       # stop the AI — we drive the coil ourselves
+				if int(steps[idx]["hold"]) > 0:
+					c.human({"type": "ability", "id": "coil"})
+				elif s != null:                           # idle shot: make sure no coil is live
+					c.human({"type": "ability", "id": "release"})
 				phase = 3
 		3:
 			hold_ticks += 1
@@ -72,7 +76,9 @@ func _process(_d: float) -> bool:
 				phase = 4
 		4:
 			settle += 1
-			if settle > 3:
+			# the idle shot waits out the release-verdict flash (~0.55s) so the parked-needle
+			# "start the draw" cue is what's on screen, not the fading verdict.
+			if settle > (25 if int(steps[idx]["hold"]) == 0 else 3):
 				phase = 5
 		5:
 			var img := root.get_texture().get_image()

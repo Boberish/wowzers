@@ -4157,7 +4157,13 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 		match id:
 			"strike":
 				afford = energy >= 12.0
-				usable = _rhythm.since >= _rhythm.swing_min
+				if _aspect == "fermata":
+					# THE DRAW: the coil button is live whenever you're not staggered — while
+					# holding it's "usable" once sharp (release-ready), idle it's always startable.
+					usable = (bool(obs.get("coil_sharp", false)) if bool(obs.get("coiling", false))
+						else not bool(obs.get("strike_locked", false)))
+				else:
+					usable = _rhythm.since >= _rhythm.swing_min
 			"eviscerate", "envenom":
 				afford = energy >= 25.0
 				usable = cpn >= 1

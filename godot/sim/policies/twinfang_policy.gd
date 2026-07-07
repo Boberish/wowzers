@@ -124,24 +124,21 @@ func _tempo_strike(obs: Dictionary, energy: float) -> Dictionary:
 		return _ab("strike")
 	return {}
 
-## FERMATA: the Strike is a HOLD — coil early enough to be sharp by the aim, release on the aim.
-## Same centre-aim + latency smear as Tempo (so the timing gradient is identical), split across
-## two inputs: PRESS to coil (`since` reaches press_at), RELEASE on the aim once sharp. A press
-## too late lands a late Miss; the coil-min gate makes a fire-and-forget click impossible.
+## FERMATA · THE DRAW: the sweep is PRESS-relative — the clock only runs while you hold, so the
+## policy simply begins a draw whenever it has the energy (a human paces theirs around dumps),
+## then releases on the centre-aim once sharp. Same latency smear as Tempo — the timing gradient
+## is identical; obs `since_strike` is already the press-relative sweep position (0 when idle).
 func _fermata_strike(obs: Dictionary, energy: float) -> Dictionary:
 	if bool(obs.get("strike_locked", false)):
 		return {}                                   # staggered from an unravel — wait it out
+	if not bool(obs.get("coiling", false)):
+		if energy >= float(obs.get("strike_cost", 12.0)):
+			return _ab("coil")                      # begin the draw — the window is already placed
+		return {}
 	var lo := int(obs.get("perfect_lo", 18))
 	var hi := int(obs.get("perfect_hi", 28))
-	var since := int(obs.get("since_strike", 0))
 	var target := maxi(lo, (lo + hi) / 2 - 1 + int(round(float(latency_ticks) * STRIKE_LAT_SCALE)))
-	if not bool(obs.get("coiling", false)):
-		# press early: hold coil_min BEFORE the aim so the blade is sharp when we release.
-		var press_at := maxi(0, target - int(obs.get("coil_min_ticks", 11)) - 2)
-		if since >= press_at and energy >= float(obs.get("strike_cost", 12.0)):
-			return _ab("coil")
-		return {}
-	if bool(obs.get("coil_sharp", false)) and since >= target:
+	if bool(obs.get("coil_sharp", false)) and int(obs.get("since_strike", 0)) >= target:
 		return _ab("release")
 	return {}
 
