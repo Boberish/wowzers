@@ -63,6 +63,15 @@ func _process(_delta: float) -> bool:
 		hud._start_map_run()
 		hud._enter_node(hud._map.seal_id)          # jump to the Seal fight
 		return false
+	if step == 2 and String(hud._screen) == "ledger":
+		# GEAR-2: the boss's Ledger page interposes before a Seal pull — swear the
+		# first oath (or take the plain pull button) and re-run this step with the
+		# fight live. (The probe predated the Ledger and crashed here — stale probe
+		# fixed with REFIT P3.1; ui_smoke_map presses through the same way.)
+		if not _press("SWEAR"):
+			_press("")
+		step = 1
+		return false
 	if step == 2:
 		var s: CombatState = hud._ctrl.state
 		CombatCore.damage_boss(s, s.seats[0], s.boss.hp)
@@ -71,22 +80,43 @@ func _process(_delta: float) -> bool:
 				break
 			hud._ctrl._process(1.0 / 30.0)
 			hud._process(1.0 / 30.0)
-		var scr := String(hud._screen)
-		var dropped := scr == "drop"
-		# advance through the drop card if one showed (press EQUIP or SCRAP)
-		if dropped:
-			if not (_press("EQUIP") or _press("SCRAP") or _press("REPLACE")):
-				print("[%s] FAIL: drop card had no continue button" % seat)
-				fails += 1
+		# Drive the WHOLE post-win chain in whatever order it interposes (the probe
+		# predated THE RECKONING recap + the framework's rig-wire ceremony — stale-probe
+		# fix, P3.1): recap CONTINUE → drop EQUIP/SCRAP → REFORGE draft chain (one per
+		# seat, COMMANDER) → the blade's rig board (ui_smoke_raid's drive, same ids).
+		var dropped := false
 		var drafted := false
-		# REFORGE boon drafts — COMMANDER chains one per seat (you, then each AI
-		# raider), so keep taking until the chain hands the screen onward.
 		var guard := 0
-		while String(hud._screen) == "draft" and guard < 8:
-			drafted = _take_draft() or drafted
+		while guard < 16 and String(hud._screen) in ["recap", "drop", "draft", "rig"]:
+			match String(hud._screen):
+				"recap":
+					_press("")
+				"drop":
+					dropped = true
+					if not (_press("EQUIP") or _press("SCRAP") or _press("REPLACE")):
+						print("[%s] FAIL: drop card had no continue button" % seat)
+						fails += 1
+						break
+				"draft":
+					if not _take_draft():
+						break
+					drafted = true
+				"rig":
+					hud._rig_on_when(true, "coup")
+					hud._rig_on_then(true, "overcharge")
+					if hud._rig_confirm != null and not hud._rig_confirm.disabled:
+						hud._rig_confirm.emit_signal("pressed")
+					else:
+						print("[%s] FAIL: rig board would not confirm" % seat)
+						fails += 1
+						break
 			guard += 1
 		var after_scr := String(hud._screen)
 		var has_descend := _press("DESCEND")       # press it if present (advances the floor)
+		# framework seats (blade/TEMPO): the floor-1 elevation interposes the MODULE
+		# install before the next map — drive it like ui_smoke_raid does.
+		if String(hud._screen) == "module":
+			hud._pick_module("edge", hud._build_floor)
 		var floor_after := int(hud._floor)
 		var ok := has_descend and floor_after == 1 and String(hud._screen) == "map"
 		if not ok:

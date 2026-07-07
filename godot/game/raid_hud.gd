@@ -1757,44 +1757,20 @@ func _party_integrity() -> float:
 func _enter_node(id: int) -> void:
 	_map_node = id
 	var n: Dictionary = _map.node(id)
-	var first_visit: bool = not bool(n.get("visited", false))
-	n["visited"] = true
-	if first_visit and bool(n.get("shard", false)):
-		# a credential shard, assembled toward root access (MAP-3c ROOT floor)
-		_map_inv["shards"] = int(_map_inv.get("shards", 0)) + 1
-	if first_visit:
-		_ticket_at(n)
-	if first_visit and bool(n["key"]) and not _map_inv.get("api_key", false):
-		_map_inv["api_key"] = true
+	# visited/shard/TICKET/key — the ONE rulebook (CampaignCore.ticket_at replaced the
+	# HUD's _ticket_at twin); purse Tokens route through _gain_tokens (Hashgrinder ×2).
+	var cp := _cp_view()
+	var out := CampaignCore.enter_node(cp, n, _map_gear.has("ticket_stub"))
+	_cp_writeback(cp)
+	if int(out["tokens"]) != 0:
+		_gain_tokens(int(out["tokens"]))
+	if bool(out["key_grabbed"]):
 		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
 			[{"label": "TAKE IT", "fx": {"key": true,
 				"result": "Authorization acquired. The raid agrees to never speak of where it was taped."}}],
 			Palette.GOLD_BRIGHT, _resolve_node.bind(n))
 		return
 	_resolve_node(n)
-
-## TICKETS (MAP-2): pick one up here, or close it if we're holding the matching one.
-## Rewards feed the wound-attrition economy; closing the whole floor = a sprint-retro
-## bonus. Toast shows on the next map screen (this node may launch a fight first).
-func _ticket_at(n: Dictionary) -> void:
-	var topen := String(n.get("ticket_open", ""))
-	if topen != "" and not _map_tickets.has(topen):
-		var td := MapContent.ticket(topen)
-		_map_tickets[topen] = String(td.get("title", "TICKET"))
-		_ticket_toast = "📋  %s  —  picked up (turn it in deeper on this lane)" % String(td.get("title", "TICKET"))
-	var tclose := String(n.get("ticket_close", ""))
-	if tclose != "" and _map_tickets.has(tclose):
-		var td2 := MapContent.ticket(tclose)
-		_map_tickets.erase(tclose)
-		_map_closed += 1
-		_apply_map_fx(td2.get("reward", {}))
-		if _map_gear.has("ticket_stub"):   # GEAR-1 (ARMORY strong): +10% integrity +1⏣
-			_apply_map_fx({"heal": 0.10})
-			_gain_tokens(1)
-		_ticket_toast = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
-		if _map_closed >= _map_ticket_total and _map_ticket_total > 0:
-			_apply_map_fx(MapContent.SPRINT_RETRO_FX)
-			_ticket_toast = "★  SPRINT RETRO — every ticket closed! Sectors repaired, reserves topped."
 
 func _resolve_node(n: Dictionary) -> void:
 	match String(n["kind"]):
@@ -1820,11 +1796,12 @@ func _resolve_node(n: Dictionary) -> void:
 		RunMap.KIND_COOLING:
 			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
 				[{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
-					"fx": {"charge": 10, "mana": 0.75, "result": MapContent.COOLING_RESULT}}],
+					"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}],
 				Palette.FLOW, _show_map)
 		RunMap.KIND_CACHE:
 			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
-				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)", "fx": {"charge": 25, "result": MapContent.CACHE_RESULT}}],
+				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)",
+					"fx": CampaignCore.CACHE_FX.merged({"result": MapContent.CACHE_RESULT})}],
 				Palette.GOLD, _show_map)
 
 ## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
@@ -2118,21 +2095,33 @@ func _raidify(choices: Array) -> Array:
 		out.append(c2)
 	return out
 
+## The campaign state as the cp VIEW dict MapFx/CampaignCore step (P3.1): arrays
+## (fracs/wounds/inv/flags/marks/tickets) mutate in place; scalars are copied back
+## by _cp_writeback. The ONE bridge between the HUD's members and the shared
+## campaign rulebook — until a RunDirector owns cp outright (P3.1b).
+func _cp_view() -> Dictionary:
+	return {"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
+		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags,
+		"marks": _map_marks, "charge": _map_charge,
+		"tickets": _map_tickets, "closed": _map_closed, "total": _map_ticket_total,
+		"toast": _ticket_toast}
+
+func _cp_writeback(cp: Dictionary) -> void:
+	_map_mana = float(cp["mana"])
+	_entropy = int(cp["entropy"])
+	_prior = int(cp["prior"])
+	_map_charge = int(cp["charge"])
+	_map_closed = int(cp["closed"])
+	_ticket_toast = String(cp["toast"])
+
 ## Events bruise or patch the WHOLE raid; only combat kills (integrity floors at 5%).
 ## Routes through the shared MapFx applier (single source of truth for offline +
 ## online + the sim walker). Integrity/wounds mutate in place through the cp view;
 ## scalar currencies are copied back after.
 func _apply_map_fx(fx: Dictionary) -> void:
-	var cp := {
-		"fracs": _map_fracs, "wounds": _map_wounds, "mana": _map_mana,
-		"entropy": _entropy, "prior": _prior, "inv": _map_inv, "flags": _flags, "marks": _map_marks,
-		"charge": _map_charge,
-	}
+	var cp := _cp_view()
 	MapFx.apply(cp, fx)
-	_map_mana = float(cp["mana"])
-	_entropy = int(cp["entropy"])
-	_prior = int(cp["prior"])
-	_map_charge = int(cp["charge"])
+	_cp_writeback(cp)
 	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
 	if int(fx.get("tokens", 0)) != 0:
 		_gain_tokens(int(fx["tokens"]))
@@ -5114,13 +5103,9 @@ func _on_end(won: bool) -> void:
 			return
 		var ri: int = SEAT_IDX[_seat_key]
 		var u: Seat = _ctrl.state.seats[0]
-		if won:
-			_map_fracs[ri] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
-		else:
-			_map_fracs[ri] = 0.35
-			_map_wounds[ri] = minf(0.4, float(_map_wounds[ri]) + 0.2)
-		if u.role == "healer":
-			_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		var gcp := _cp_view()
+		CampaignCore.writeback_exam(gcp, u, ri, won)   # verdict-keyed — ONE rulebook
+		_cp_writeback(gcp)
 		var ex: Dictionary = GateContent.exam(_seat_key, _seat_cls_now())
 		# GEAR-2: the sworn oath resolves on the exam's final state (win OR loss)
 		_resolve_oath(_ctrl.state, _ctrl.player(), won)
@@ -5139,20 +5124,11 @@ func _on_end(won: bool) -> void:
 		return
 	if _map != null and not _online:
 		# Topology floor: persist per-seat integrity + the healer's remaining mana.
-		# A raider dead at a WON fight REBOOTS at 35% (only a wipe ends the run);
-		# the Seal node ends the floor.
-		for i in _ctrl.state.seats.size():
-			if i < _map_fracs.size():
-				var u: Seat = _ctrl.state.seats[i]
-				if u.alive():
-					_map_fracs[i] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
-				else:
-					# reboot: back at 35% — and the crash leaves a CORRUPTED SECTOR
-					# (-20% max HP, stacking to 40%) only a Cooling Station repairs
-					_map_fracs[i] = 0.35
-					_map_wounds[i] = minf(0.4, float(_map_wounds[i]) + 0.2)
-				if u.role == "healer":
-					_map_mana = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		# A raider dead at a WON fight REBOOTS (only a wipe ends the run); the Seal
+		# node ends the floor. Integrity/reboot-wound/mana = the ONE rulebook.
+		var fcp := _cp_view()
+		CampaignCore.writeback(fcp, _ctrl.state)
+		_cp_writeback(fcp)
 		# GEAR-2: the sworn oath resolves on the fight's final state
 		_resolve_oath(_ctrl.state, _ctrl.player(), won)
 		if not won:
@@ -5160,7 +5136,9 @@ func _on_end(won: bool) -> void:
 			return
 		# THE KILL SWITCH: scavenge ⏻ from a cleared SKIRMISH (not the Seal — you cash out there)
 		if String(_map.node(_map_node)["kind"]) == RunMap.KIND_COMBAT:
-			_map_charge = mini(100, _map_charge + MapFx.SKIRMISH_CHARGE)
+			var scp := _cp_view()
+			CampaignCore.skirmish_scavenge(scp)
+			_cp_writeback(scp)
 		# GEAR-1: the kill's drop ceremony runs first, then the run continues wherever
 		# it was headed (map / elevation / campaign clear).
 		var after: Callable = _show_map

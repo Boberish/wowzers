@@ -193,6 +193,24 @@ Each its own worktree/claim, in this order:
    into a shared headless module, and make `net_server.gd:413–798` consume the SAME module
    (kills the ":501 mirror" duplication — one extraction closes two HIGH findings).
    Precedent that it detaches cleanly: bulwark_hud carried a standalone copy for solo.
+   **P3.1a ✅ BUILT 2026-07-07 (branch `refit-p3`) — THE MIRROR IS DEAD:**
+   `game/campaign_core.gd` is the ONE campaign rulebook — node entry (visited/shard/
+   TICKET/key), ticket open/close (+stub/purse returns), post-fight writeback
+   (+ verdict-keyed `writeback_exam` for gates — faithfulness caught in review: a healer
+   can lose an exam while standing), skirmish ⏻ scavenge, cooling/cache fx consts, and
+   `resolve_event_choice` (moved verbatim off NetServer; 6 probe callers repointed).
+   Both `net_server.gd` (`_ticket_srv` DELETED, writeback/cooling/cache/resolve consume
+   the core) and `raid_hud.gd` (`_ticket_at` DELETED; `_cp_view`/`_cp_writeback` bridge
+   the members to the shared rulebook) step it. raid_map_sim's walker = documented
+   diagnostic simplification, not a mirror. GATES: raid_map_sim + map_sim ab-gate
+   BYTE-IDENTICAL · all map probes green · net smokes + ui smokes ALL OK. Bonus: 2 of
+   main's 3 stale probes REVIVED as deliberate updates (`map_advance_probe` now drives
+   ledger/recap/rig/module ceremonies; `raid_boon_probe` presses through the recap) —
+   `fightlen_probe` remains the open expectations claim.
+   **P3.1b ☐ NEXT — the state move:** raid_hud's ~30 campaign members (`_map_*`, run/
+   party/gear/oath state) onto a `RunDirector` object both the HUD and the shell hold;
+   probes/smokes that poke `hud._map_*` update with it. Then the server's campaign dict
+   becomes the same object (`_broadcast_map` reads it).
 2. **WorldShell** — a persistent shell scene that OWNS atlas/zone/bastion (AtlasScreen/
    ZoneScreen adopt as-is; give Bastion a real screen class) + the screen router, and
    *launches* the combat HUD as an instance surface. Autostart becomes "drive the shell"
