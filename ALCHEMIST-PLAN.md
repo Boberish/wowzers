@@ -11,10 +11,11 @@ precedent, is byte-neutral). Gates: creed/module/rig/boon determinism all PASS �
 `alchemist_sim`. **Card BALANCE is the first-cut, Bill's-playtest dial** (each card distinct + sane; skill
 moves outcomes; standouts flagged: Chain Rupture −12.6s per verdict 7, Catalyst −9.0s opus; HotPour/Emulsion
 rig beats + Practiced Hand/Reduction are human-skill/comfort cards the safe AI doesn't chase). **Still OWED
-(post-playtest):** ~~the 2nd spec~~ → **§7 THE CASK — design LOCKED FOR BUILD 2026-07-07 (verb feel-tested
-5 iterations + full slate verdicted by Bill: 24 keep / 6 cut — claimable now)**, a real class puppet
-(art = voidcaller filler), Commander AI-caster toggle, online spec-carry of creed/module/rig,
-name/art decision. Play: **`--autostart=raid:caster:brew`**.
+(post-playtest):** ~~the 2nd spec~~ → **§7 THE CASK — SLICE 1 (verb base) BUILT & VERIFIED
+2026-07-07 (`cask-spec`); slices 2–5 (policy gradient · CASKWORKS HUD · card layers · balance)
+next — see §7.7**, a real class puppet (art = voidcaller filler), Commander AI-caster toggle,
+online spec-carry of creed/module/rig, name/art decision. Play: **`--autostart=raid:caster:brew`**
+(the Brew) · **`--autostart=raid:caster:cask`** (the Cask verb preview).
 
 **Prior status (base):** 🟢 BASE MINIGAME BUILT & PLAYABLE 2026-07-06 (`alchemist-core` — Bill's direct order:
 "can't go farther without knowing live things; just do the base mini game, UI/bars… the rest after";
@@ -426,10 +427,29 @@ elite-node dependency, same as Tempo's)
 past 6 strain never relieves. The one-monstrous-cask build (Single Malt + Heavy Hand synergy).
 
 ### 7.7 BUILD ORDER (the Opus slices — each guarded, byte-identical unless picked, sim'd, then next)
-1. **Verb base** — aspect `cask` on the alchemist kit (brew stays default; the Brew/Fermata guard
-   idiom). All §7.1 numbers as `cask_*` tunables. `alchemist_sim` cask cells: verb determinism +
-   the layer-A/B harness. Gates: default comp + undrafted-brew checksums BYTE-IDENTICAL to main;
-   determinism PASS 300 seeds.
+1. ✅ **Verb base — BUILT & VERIFIED 2026-07-07 (`cask-spec`).** aspect `cask` guarded on the
+   alchemist kit via `_cask()` (the Fermata idiom — `upkeep`/`on_action`/`observe` branch at the
+   top; every Brew eval still tests `brew`, so no checksum moves). All §7.1 numbers are `cask_*`
+   `@export`s on `AlchemistConfig`. Full reducer in `alchemist_kit.gd` (`_cask_*`): the walking
+   band, graded pours (Bull/Perfect/Good, MISS→dump), Venom-heat/Rot-time side effects + band
+   walk, per-side STRAIN (shrink + fill-speed, swap relief −2), SEAL→COOK→PEAK-tap with the
+   age-factor sour curve, PROOF (tap-earned), the Rot tail. First-cut cask `AlchemistPolicy`
+   branch (`_act_cask`, latency-scaled) + `alchemist_sim` cask cells (`_cask_ab` + `_prove_cask`,
+   `_run_one` threads `aspect`). Minimal HUD selection wired (`ALCHEMIST_ASPECTS`+cask,
+   `_sync_caster_cls`, `_launch` alias) so `--autostart=raid:caster:cask` resolves; the ALEMBIC
+   renders a mapped observe superset until slice 3. **Gates ALL GREEN:** undrafted-brew Crucible
+   seed1 = `4344960863911121821` (byte-identical, 40 & 300 seeds) · raid default comp = main
+   `8987010164597652967` (byte-identical A/B) · Cask@good seed13==seed13 PASS, Cask@sloppy
+   seed1≠seed2 (determinism 300 seeds) · `ui_smoke_raid` ALL OK. **Verb-health:** expert 100%
+   (crucible) / 92% (leech), clean 6-dose seals, all-peak taps (0 early/0 sour), 0 dumps →
+   climbing to ~17 dumps/run + collapse at sloppy (the stake bites); pour grades slide
+   bull→perfect→good with latency. **⚠ Handoff to slice 2:** the good-tier collapses hard
+   (crucible 18.7%, leech 0%) because the first-cut policy reuses the Brew's
+   `RELEASE_NOISE_PER_LAT` (0.022, tuned for the 0.28-wide brew band) against the cask's ~0.13
+   strained band — halve the cask noise coeff and add the strain-weave/chain temperament + a
+   softer tap-lateness model in the real 3-tier policy. Also open for slice 5: `cask_base` (55)
+   gives expert crucible TTK 58s vs the Brew's 37s — tune toward Seal-seat parity via `raid_sim
+   --caster=alchemist` cells (a cask aspect hook there is owed).
 2. **Policy** — 3 skill tiers (rule #3: no policy gradient, no ship): band-read accuracy/jitter,
    strain management (weave vs chain temperament per tier), seal-size strategy, peak-tap timing.
    Expert ≈ brew-comp parity on the Seals; sloppy pays visibly (dumps).

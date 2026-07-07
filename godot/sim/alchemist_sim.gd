@@ -62,6 +62,7 @@ func _initialize() -> void:
 			print("              pours/run: %s" % _fmt_pours(dsum, seeds))
 		print("")
 
+	_cask_ab(seeds, seed0)
 	_creed_ab(seeds, seed0)
 	_module_ab(seeds, seed0)
 	_rig_ab(seeds, seed0)
@@ -107,13 +108,46 @@ func _creed_ab(seeds: int, seed0: int) -> void:
 				float(dsum.get("pour_fizzle", 0)) / float(seeds)])
 	print("")
 
+## THE CASK (§7.7 step 1/2) — the 2nd-spec verb cell. Own bands + the pour/tap gradient:
+## peak-rate should fall and dumps climb as the tier gets sloppy (the skill dial), and both
+## encounters should be winnable at expert (the DPS band). Latency is the same skill knob.
+func _cask_ab(seeds: int, seed0: int) -> void:
+	print("CASK A/B — the 2nd spec, %d seeds/cell (expert lat0 · good lat6 · sloppy lat14):" % seeds)
+	print("encounter    skill    win-rate  avg TTK   taps(peak/early/sour)  seals  dumps  pours(bull/perf/good)")
+	print("--------------------------------------------------------------------------------------------------------")
+	for enc in ["crucible", "leech"]:
+		for sk in [{"lbl": "expert", "lat": 0}, {"lbl": "good", "lat": 6}, {"lbl": "sloppy", "lat": 14}]:
+			var wins := 0
+			var ttk_sum := 0.0
+			var dsum := {}
+			for seed in range(seed0, seed0 + seeds):
+				var r := _run_one(seed, enc, int(sk["lat"]), "", "", {}, {}, "cask")
+				var rd: Dictionary = r.get("diag", {})
+				for k in rd:
+					dsum[k] = int(dsum.get(k, 0)) + int(rd[k])
+				if r["won"]:
+					wins += 1; ttk_sum += float(r["ttk_sec"])
+			var wr := 100.0 * float(wins) / float(seeds)
+			var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+			print("%-12s %-7s %6.1f%%   %7.1fs   %5.1f/%4.1f/%4.1f       %5.1f  %5.1f   %4.1f/%4.1f/%4.1f" % [
+				enc, String(sk["lbl"]), wr, avg,
+				float(dsum.get("cask_tap_peak", 0)) / float(seeds),
+				float(dsum.get("cask_tap_early", 0)) / float(seeds),
+				float(dsum.get("cask_tap_sour", 0)) / float(seeds),
+				float(dsum.get("cask_seal", 0)) / float(seeds),
+				float(dsum.get("cask_dump", 0)) / float(seeds),
+				float(dsum.get("cask_pour_bull", 0)) / float(seeds),
+				float(dsum.get("cask_pour_perfect", 0)) / float(seeds),
+				float(dsum.get("cask_pour_good", 0)) / float(seeds)])
+	print("")
+
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "", rig := {}, boons := {}) -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "", rig := {}, boons := {}, aspect := "brew") -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
-	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
+	var s := AlchemistContent.make_state(seed, aspect, cfg, acfg, _encounter(enc_name))
 	var kit := s.seats[0].kit as AlchemistKit
 	if creed != "":
 		kit.creed_id = creed                    # SLICE A: swear the posture
@@ -202,6 +236,18 @@ func _prove_determinism() -> void:
 	print("  Boons@good    seed 11 == seed 11 -> %s   (checksum %d, %s)" % [
 		("PASS" if p["checksum"] == q["checksum"] else "FAIL"), p["checksum"],
 		("win" if p["won"] else p["loss_cause"])])
+	# THE CASK (§7) — the 2nd spec: deterministic same-seed AND divergent across seeds. Byte-
+	# identical-to-base is structural (aspect != "cask" never enters the cask path), so this
+	# only asserts the new path is itself reproducible.
+	var ca := _run_one(13, "crucible", 6, "", "", {}, {}, "cask")
+	var cb := _run_one(13, "crucible", 6, "", "", {}, {}, "cask")
+	print("  Cask@good     seed 13 == seed 13 -> %s   (checksum %d, %s)" % [
+		("PASS" if ca["checksum"] == cb["checksum"] else "FAIL"), ca["checksum"],
+		("win" if ca["won"] else ca["loss_cause"])])
+	var cc := _run_one(1, "leech", 14, "", "", {}, {}, "cask")
+	var cc2 := _run_one(2, "leech", 14, "", "", {}, {}, "cask")
+	print("  Cask@sloppy   seed 1 vs seed 2  -> %s" % (
+		"differ (good)" if cc["checksum"] != cc2["checksum"] else "IDENTICAL (suspect!)"))
 
 ## SLICE B gate — each Module must produce a DISTINCT, sane profile and keep determinism.
 ## "" is the byte-identical base. Third Reagent = a small amp; Fermentation = auto-detonations;

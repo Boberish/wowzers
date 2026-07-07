@@ -61,6 +61,8 @@ static var RECKONER_ASPECTS := [
 static var ALCHEMIST_ASPECTS := [
 	{"id": "brew", "name": "THE BREW", "accent": Palette.REACT, "icon": "envenom",
 		"desc": "Hold to charge the VIAL, release in the sweet band; feed two opposing poisons — Venom fades, Rot lingers — and RUPTURE the reaction at its ripe peak."},
+	{"id": "cask", "name": "THE CASK", "accent": Palette.REACT, "icon": "envenom",
+		"desc": "STACK 3–6 graded pours on a walking band — Venom = heat, Rot = time — a MISS dumps the batch; SEAL it, let it COOK, and TAP at the peak. (2nd spec · verb preview)"},
 ]
 
 ## The healer seat's THIRD class — the reworked direct-cast healer (codename "well",
@@ -152,7 +154,7 @@ func _sync_blade_cls() -> void:
 func _sync_caster_cls() -> void:
 	if _seat_key != "caster":
 		return
-	if _aspect == "brew":
+	if _aspect == "brew" or _aspect == "cask":
 		_caster_cls = "alchemist"
 	elif _aspect == "disruptor" or _aspect == "silencer":
 		_caster_cls = "voidcaller"
@@ -1508,7 +1510,9 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	if seat_id == "reckoner":              # debug alias: the blade seat as a Reckoner
 		seat_id = "blade"
 		_blade_cls = "reckoner"
-	if seat_id == "alchemist" or seat_id == "brew":   # debug alias: the caster seat as the Brew
+	if seat_id == "alchemist" or seat_id == "brew" or seat_id == "cask":   # debug alias: the caster seat (Brew / Cask)
+		if seat_id == "cask":
+			aspect = "cask"
 		seat_id = "caster"
 		_caster_cls = "alchemist"
 	if seat_id == "well" or seat_id == "brim" or seat_id == "draw":   # debug alias: the reworked healer
@@ -1531,7 +1535,7 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 		elif aspect == "tempo" or aspect == "venomancer":
 			_blade_cls = "twinfang"
 	if _seat_key == "caster":
-		if aspect == "brew":
+		if aspect == "brew" or aspect == "cask":
 			_caster_cls = "alchemist"
 		elif aspect == "disruptor" or aspect == "silencer":
 			_caster_cls = "voidcaller"
