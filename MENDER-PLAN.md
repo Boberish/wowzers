@@ -23,6 +23,19 @@ frames carry the class read overlays (Brim's gilded pour band on EVERY frame, al
 the WellGauge got **THE TARGET BAR** — the hovered/cast ally writ large with the window + the
 in-flight heal's ghost landing. **DRAW casts both ways:** tap/click starts → tap/click again
 releases, OR hold past ~250ms and release on key-up.
+**⚡ AAA UI SWEEP (Bill's feel pass #3, 2026-07-07, `f356bad`):** "base seems much better" → big/clear/
+fancy pass, pure view code. **CastChannel scales with control height** (s = size.y/60 — Mender/Bloom
+60-tall placements stay pixel-identical; the Well places it 660×116, everything doubles): the DRAW
+release window rebuilt — steel CLEAN zone w/ breathing shimmer + entry-gate brackets, gold Still-Point
+sliver crowned by a diamond gem, engraved RELEASE WINDOW caption, a **playhead needle** at the fill
+edge (white on approach → gold inside the window) + in-zone RELEASE ▸ flare. **WellGauge rewritten:**
+the charge blocks are now glass **WATER ORBS** (wavy waterline, rising bubbles, gilded rims, eased
+fill/drain so pours visibly drain water, newest-orb glow, DRY crimson pulse); Current pips carry a
+travelling light (the current flows); **THE TARGET BAR is a jeweled glass health bar** (glass_bar_draw
++ HP numerals in Cinzel, recent-damage trail, brighter ghost landing + landing hairline/marker, POUR
+entry gate + crowning gem + plaque, breathing glint aura); the verdict banner lands centre-stage on a
+dark chip, history rail = fading diamonds. Palette gains WATER / WATER_DEEP. Verified: ui_smoke_raid
+ALL OK · WSLg shots both specs clean.
 ~~VERB PAIR LOCKED via feel-tester 2026-07-07~~ (Bill: "i like both alot, the draw one is very nice").
 **Scope:** rebuilds the **Mender** — the healer seat's direct-cast class — onto Creeds / Modules /
 WHEN-THEN. The Bloomweaver is NOT part of this (its framework re-clothing is its own later pass);

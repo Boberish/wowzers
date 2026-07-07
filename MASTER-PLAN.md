@@ -748,10 +748,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-07 · `well-aaa-ui` (worktree `../wow-well-aaa`) · §CLASSES / `MENDER-PLAN.md` — **THE
-  WELL — AAA UI sweep (Bill's feel pass #3).** Pure view code: CastChannel scaled up + fancy DRAW
-  release window (needle/gem/flare), WellGauge charge blocks → animated water orbs, target bar →
-  jeweled glass health bar. No combat/engine touches. *(healer-rework session)*
+- ☑ 2026-07-07 · `well-aaa-ui` → main (`f356bad`) · §CLASSES / `MENDER-PLAN.md` — **THE WELL — AAA
+  UI sweep (Bill's feel pass #3: "casting bar bigger/clearer/fancier — especially the DRAW click
+  part; the well is just blocks → animated blue bubble things; spice up the health bar").** Pure
+  view code, zero combat touches. CastChannel now SCALES with control height (classic healers'
+  60-tall placement = pixel-identical; the Well places it 660×116) + the release window rebuilt:
+  steel CLEAN zone w/ shimmer + entry brackets, gold Still-Point sliver crowned by a gem,
+  RELEASE WINDOW caption, playhead needle (white → gold inside the window), in-zone RELEASE flare.
+  WellGauge rewritten: charges = glass WATER ORBS (wavy waterline, rising bubbles, gilded rims,
+  eased fill/drain, newest-orb glow, DRY pulse) · Current pips w/ travelling light · TARGET BAR =
+  jeweled glass health bar (HP numerals, damage trail, ghost landing + hairline, POUR gate/gem/
+  plaque, glint aura) · verdict banner centre-stage on a chip. Palette + WATER/WATER_DEEP.
+  **Verified:** ui_smoke_raid ALL OK · WSLg shots both specs clean (wave polygon degenerate-vertex
+  fix). *(healer-rework session)*
 
 - ☑ 2026-07-07 · main (docs only) · §MODES & ENDGAME / `WORLD-PLAN.md` §INSTANCES /
   `PROGRESSION-PLAN.md` §Laws — **RAID vs DUNGEON identity split (Bill, design session).**
