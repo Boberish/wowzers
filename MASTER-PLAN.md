@@ -1062,6 +1062,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
 
+- 📋 2026-07-07 · main (docs only) · §CLASSES — **FERMATA v4 DECK RE-AUDIT (design, at Bill's
+  verdict).** After the HUD wiring + ROAMING WINDOW + THE DRAW passes landed, Bill flagged the
+  structural cost: "you can no longer choose how long to charge the coil — rerun your ideas,
+  better explanations, tags." Every card re-read under the Draw: hold-length greed had become
+  roll-luck (Patient Knife → **OVERTIME tail** creed · Patient Edge → **DEEP EDGE** aim greed ·
+  Unseen Blade → **Shades bank while RESTING**), sharpen-speed cards faded (Feint → **THE
+  REROLL** — the direct "if it's close I can't pick" answer · First Pass was degenerate → **FIRST
+  NOTE** rested-opener · Quiet Fuse reframed), rig Deep Coil dead → **THE RESTED DRAW**, plus 3
+  NEW cards on the dials the Draw opened: **Composure** (no Flow decay after a Perfect+ release)
+  · **Refrain** (a Bull holds the window in place) · **Stretto** (windows roll nearer). Verdict
+  artifact rebuilt with WHAT/WHY/FEELS + greed/ease/speed/control tags + status chips (7 reworked
+  · 3 new · rest STANDS with re-check notes): 3c01d3ed… Full spec = TEMPO-PLAN §13 V4 block.
+  **Code holds the coded stopgaps until the verdicts land, then the reworks get recoded.**
+  *(fermata v4 design session)*
+
 - ☑ 2026-07-07 · `fermata` → main · §CLASSES — **FERMATA BUILT — Twinfang's second spec is real,
   deterministic, byte-identical when unpicked.** Bill: "yeah go ahead and build this fully." The
   hold-release aspect: Strike COILS (`coil`/`release` via `on_action`; release < the sharpen floor

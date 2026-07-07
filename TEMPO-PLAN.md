@@ -496,6 +496,33 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 > — the knife waits). Bar: idle cue "HOLD 1 — start the draw", parked needle, "too early" region =
 > the un-sharp coil floor. Verified: probe 4/4 PASS, checksums byte-identical, patient measurably
 > slower than base (22.0s vs 20.2s @expert), idle/charging/sharp WSLg shots clean.
+> **V4 DECK RE-AUDIT (2026-07-07 — DESIGN ONLY, at Bill's verdict; the CODE still holds the
+> stopgaps until he rules).** Bill: "you can no longer CHOOSE how long to charge the coil — the
+> window decides; rerun your ideas, better explanations, tags." Every card re-read under the Draw
+> (artifact 3c01d3ed, v4 — WHAT/WHY/FEELS + greed/ease/speed/control/etc tags per card):
+> - **BROKE (hold-length greed became roll-luck):** Patient Knife → **OVERTIME creed** (every
+>   window grows an amber tail ~40% past the green; releasing there = flat Perfect +20%, no Bull;
+>   past the tail = miss; far floor + unravel-crash kept) · Patient Edge → **DEEP EDGE** (damage
+>   grows the deeper past the plumb you release, up to +12/18/25% at the far lip — chosen
+>   micro-hold, deliberately fights the Bullseye centre) · Unseen Blade → **Shades bank while you
+>   REST** (1/0.7s idle, max 5, +6% each on the next release — the rest-vs-chain greed dial).
+> - **FADED (sharpen-speed is no longer the bottleneck):** Feint → **THE REROLL** (an unravel
+>   re-rolls the window; H stagger stays / S free / O biased near — the direct answer to "if it's
+>   close I can't pick") · Quiet Fuse → floor-lowerer reframe · First Pass (DEGENERATE: every draw
+>   is now "first after SHNK" ⇒ permanent widener) → **FIRST NOTE** (rest ≥1.5s → that window
+>   +20/30/40% wider).
+> - **DEAD:** rig WHEN Deep Coil (draws top out ~1.4s) → **THE RESTED DRAW** (begin a draw after
+>   resting 1.5s+). On-the-Edge WHEN re-read: now only possible on floor-tight windows (rarer =
+>   premium, fine). Unravel WHEN: watch Feint-reroll abuse in sims.
+> - **NEW (the dials the Draw opened — REST / ROLL / OVERTIME):** **Composure** (Flow doesn't
+>   decay for 2/3/4s after a Perfect+ release — the cast-in-the-calm card) · **Refrain** (a
+>   Bullseye HOLDS the window in place for the next draw; repeat +0/10/20%) · **Stretto**
+>   (windows roll nearer ~15/25/35%; S+ trims the low-Flow slack — the speed build's placement
+>   dial, opposite pole of the Knife).
+> - **Keystone text fix:** Eclipse chains now guarantee the chained window lands NEAR (a far roll
+>   would kill the dance). Tutti re-stated for the Draw: dumps fired mid-draw take the sweep's
+>   live grade; off-green −15%.
+> Boon lanes reorganized to teach the model: THE ROLL / THE DRAW / THE RELEASE / THE REST.
 > **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
