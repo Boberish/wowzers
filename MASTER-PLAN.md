@@ -749,6 +749,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `fermata-edge` → main (`f5d5397`) · §CLASSES — **FERMATA v5 EDGE BUILT — the
+  Ramp & the Snap + the full v5 slate, per `FERMATA-V5-BRIEF.md`.** Bill verdicted v5 (all KEEP
+  except feint + shadowstep cut) → built. **The verb:** fermata releases graded by DEPTH
+  (`_ramp_grade`: GOOD 45% / PERFECT 37% / BULLSEYE 18% at the lip); crossing the lip auto-SNAPS
+  (`_snap`: crash + lock + reroll, checked in upkeep + on a late release; no dead-note state);
+  wideners add ENTRY runway only. **Slate:** Patient = THE LONG RAMP (extension past the lip +
+  deep bonus + harsh snap); Fleeting snap-net; Shadow Dance = 3s NO-SNAP fever; CUT feint/
+  shadowstep/patientEdge/firstPass; NEW Stretto/Refrain/Cold Cut/**The Brink** (nerve meter in
+  `_deal`)/Composure/First Note; rig onedge→Razor, deepcoil→Rested; Unseen Blade banks Shades
+  while RESTING, Eclipse chains NEAR. **Policy:** fractional depth-aim + latency jitter (fixed a
+  narrow-window snap catastrophe). **HUD:** RhythmBar ramp bands + crimson LIP cliff + snap zone +
+  SNAPPED flash (WSLg-verified). **GATES:** Tempo `4932869838389671587` / Venom
+  `7876031242436484463` byte-identical to main · base+fat+mixed determinism PASS · input_check
+  5/5 incl SNAP · raid `--blade=fermata` det PASS · ui_smoke_raid 0 errors · nerve gradient healthy
+  (expert ~0 snaps/100%, sloppy 10+/50-70%). Owed (other layers): Brink/Shade/Mark/Dance HUD
+  meters · shadow-dim · keystone elite acquisition · Veil warband application · online spec-carry.
+  See [[tempo-second-spec-search]]. *(fermata v5 edge build session)*
+
 - ☑ 2026-07-07 · main (docs only) · §CLASSES / `ALCHEMIST-PLAN.md` §8 — **THE BREW deck REVIEW
   pass (deck-creator audit vs the Cask) — ⭐ PROPOSAL BOARD OUT, AT BILL'S VERDICT**
   (`86ca7f68…`). The built slate STANDS; the pass found: ZERO keystones (playbook wants 2–3) ·
@@ -788,14 +806,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   — never covers charges or the live window. **Verified:** ui_smoke_raid ALL OK · WSLg shots both
   specs, zero draw errors. *(healer-rework session)*
 
-- 🔒 2026-07-07 · `raid-forge` (worktree `../wow-raid-forge`) · §MAPS / §THE WORLD / `WORLD-PLAN.md`
+- ☑ 2026-07-07 · `raid-forge` → main (`781c4dc`) · §MAPS / §THE WORLD / `WORLD-PLAN.md`
   §FORGE — **THE DESCENT REFIT (Bill: "update the raid — packs, phases; more nodes, bigger paths;
-  quests/stories as-is with more filler in between").** Forge PALETTES["takeover"] (Realm-1 skins);
-  RunMap gains a `rows` param (default 6 = every existing map byte-identical; raid floors go 8 → 20
-  nodes/floor); floor_fights interleaves takeover forge fillers between the authored story minibosses
-  (tier ramps per ring t1→t3); packroll v2 swaps full-HP bard/sonnet fillers → forge SWARM/STALKER
-  lightweights + richer weights (closes the forge-built wart); net_server floor parity; map_screen
-  seal-row layout. Entry/Seal/events/tickets/gates untouched (stories as-is).
+  quests/stories as-is with more filler in between").** Forge PALETTES["takeover"] (Realm-1 skins:
+  CRAWLER SWARM / UNSUPERVISED LEARNER / SCRUM-CANTOR / LEGACY MONOLITH); RunMap gained a `rows`
+  param (default 6 = every existing map byte-identical; raid floors run 8 → **20 nodes/floor**);
+  floor_fights interleaves takeover forge fillers between the authored story minibosses (tier ramps
+  per ring t1→t3); packroll **v2** swaps full-HP bard/sonnet fillers → forge lightweights at the
+  ring's tier + weights 30/45/25 (**closes the forge-built wart** — a rolled trio lands mid-fight-
+  sized, not Seal-sized); +1 cooling/+1 cache keep the breather econ proportional; net_server floor
+  parity; map_screen scales to any seal row. Entry/Seal/events/tickets/gate quotas untouched
+  (stories as-is). **Gates:** packroll_probe v2 · map/pack/fight-seed/menu probes · both UI smokes ·
+  net_map_smoke (no desyncs) · raid_map_sim structural PASS on the 20-node floors (losses land on
+  Seals, never strays) · forge_sim spot ALL PASS · **frozen-main A/B twinfang(120)+raid(60)
+  BYTE-IDENTICAL** (additive/defaulted throughout). Windows play-copy synced. Owed next: per-body
+  stage rigs (art); zone-2 palettes.
 - ☑ 2026-07-07 · `well-aaa-ui` → main (`f356bad`) · §CLASSES / `MENDER-PLAN.md` — **THE WELL — AAA
   UI sweep (Bill's feel pass #3: "casting bar bigger/clearer/fancier — especially the DRAW click
   part; the well is just blocks → animated blue bubble things; spice up the health bar").** Pure
