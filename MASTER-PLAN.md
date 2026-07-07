@@ -754,9 +754,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   read your hands; the Tempo/Fermata symmetry). VIGIL (the hold) folds into Draw build territory
   (Patient-Hand creed / transformer candidate). Class doc created: **`MENDER-PLAN.md`** (creeds =
   demoted aspects per-spec · modules = 3 re-homed machines w/ ⭐ Reservoir · tester knob baseline ·
-  build order, Alchemist idiom, old Mender stays frozen default). **NEXT: remaining 🟡 opens**
-  (name · preview baked-vs-earned · interrupt 1-or-0 · clutch dump · Draw creed pool · Ward in a
-  spill economy) **→ then the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
+  build order, Alchemist idiom, old Mender stays frozen default). **⭐ VERDICT BOARD OUT (same day,
+  Bill: "give me an artifact with all the ideas for both, 1 tab each, 1–5 stars + comments"):**
+  https://claude.ai/code/artifact/958cdbe8-7c92-48cb-bf95-eae69b3994c1 — the full idea slate as
+  rateable cards (BRIM 25 · DRAW 25 · CLASS 9: base rules · 4 creeds · 3 modules · 10 boons · 4 rig
+  WHENs · keystone per spec + shared Well/Shining-Hour/Boiling-Over/kick/Dry-Ward/names), stars +
+  comments persist in-browser, EXPORT copies a paste-back summary. **NEXT: Bill's card verdicts off
+  the board** (they subsume the 🟡 opens: name · preview · interrupt · clutch dump · Draw creeds ·
+  Ward-spill) **→ then the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
   unless picked). *(healer-rework session)*
 - ☑ 2026-07-06 · main (docs only) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH — **THE PACING
   GRAMMAR locked (Bill: fights much too short, "rarely get a combo off").** Current truth: Seals

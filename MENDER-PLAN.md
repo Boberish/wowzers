@@ -8,7 +8,12 @@ WHEN-THEN. The Bloomweaver is NOT part of this (its framework re-clothing is its
 the **damage-healer is a 3rd healer-seat class, future**, with its own two specs.
 **Artifacts:** design board https://claude.ai/code/artifact/68b0c28c-cc3a-4655-b9d5-fdc67e929e24 ·
 **live verb tester** https://claude.ai/code/artifact/80b2169b-3f38-488e-a31c-d9b49a718b25
-(BRIM ⇄ DRAW A/B + ⚙ knobs; source `brim-tester.html`, session scratchpad).
+(BRIM ⇄ DRAW A/B + ⚙ knobs; source `brim-tester.html`, session scratchpad) ·
+**⭐ VERDICT BOARD (2026-07-07, out with Bill):** https://claude.ai/code/artifact/958cdbe8-7c92-48cb-bf95-eae69b3994c1
+— the FULL idea slate as rateable cards (BRIM tab 25 · DRAW tab 25 · CLASS tab 9: verb base rules,
+4 creeds + 3 modules + 10 boons + 4 rig WHENs + 1 keystone per spec, shared Well/support/comp-texture/
+names), 1–5 stars + comments, in-browser saves, EXPORT → paste-back. §2–§4 sketches below are
+superseded by that slate wherever they differ; Bill's export = the card verdicts of record.
 Companions: `TEMPO-PLAN.md` (framework + Fermata precedent) · `ALCHEMIST-PLAN.md` (build idiom) ·
 MASTER-PLAN §CLASS FRAMEWORK v2 (the 7 design rules).
 
