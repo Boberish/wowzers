@@ -762,6 +762,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-07 · `refit-p012` (worktree ../wow-refit) · §CODE AUDIT / `REFIT-PLAN.md` —
+  **REFIT PHASES P0+P1+P2 BUILD (Bill's go):** P0 paper cuts (server loop cap, room/conn/rate
+  caps, net hygiene) · P1 THE BIG DELETE (Esc repoint, ui_smoke_map re-host onto raid, ~6.5k
+  dead solo lines out) · P2 gates-in-a-box (sim_util.gd, verify-all.sh, ab-gate.sh,
+  preflight.sh). Gate: det PASS + balance sims byte-identical vs pre-branch baseline
+  (deletes + tooling are neutral; ui_smoke_map gets a documented new baseline; net caps
+  guarded high above smoke traffic). *(refit build session)*
+
 - ☑ 2026-07-07 · `cask-spec` → main · §CLASSES / `ALCHEMIST-PLAN.md` §7.7 — **THE CASK — SLICE 1
   (verb base) BUILT & VERIFIED.** aspect `cask` guarded on the Alchemist kit (Fermata idiom:
   `_cask()` branches at the top of `upkeep`/`on_action`/`observe`; Brew evals untouched). Full
