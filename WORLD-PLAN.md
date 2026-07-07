@@ -437,10 +437,23 @@ Zone skirmish 60–90s (the commute stays snappy) · zone elite/PACK 2–4 min �
 world boss 5–10 min. Zone spine stays mostly skirmish-weight so route-to-door holds the
 30–45 min attunement budget; packs live on side chains + capstones first.
 
+**How shapes are ASSIGNED (locked 2026-07-07, Bill's "how do they get decided?"):**
+authored in the permanence layer, seeded-within-quotas in the variance layer, always
+authored for named bosses. Concretely: **zone nodes** carry their shape by hand (the
+Granary Steps IS a pack-with-captain; the cave IS a gauntlet; a chase is a set-piece
+node) — the Forge's seed only varies which BODIES fill the slots from the zone palette,
+never the shape; **Topology floors** roll shapes from the run seed inside authored
+quotas (the RunMap quota-bag idiom: "mids draw from {pack-2, pack-3, duel} weighted") —
+deterministic per seed, varied across runs; **Seals / capstones / world bosses** are
+hand-built, never rolled.
+
 **Sequencing:** Bill feel-tests raw length FIRST (the `--fightlen=` dev scalar — global
-HP/enrage multiplier, byte-identical absent); the grammar then lands with W2 (the Forge
-gets a SHAPE axis: pack/duel/gauntlet) + the boss PILLAR PASS (Seals retuned onto packs/
-chase shapes + the bands). Healer regen / mana curves rebalance WITH the bands, not
+HP/enrage multiplier, byte-identical absent — VERDICT 2026-07-07: "much better") ; the
+grammar then lands with W2 (the Forge gets a SHAPE axis: pack/duel/gauntlet) + the boss
+PILLAR PASS (Seals retuned onto packs/chase shapes + the bands). **The PACK mechanism is
+the lead domino** — sequential encounters in one lockstep battle with per-class heat
+carry is an engine-adjacent slice (guarded, byte-identical for single fights) that
+everything else composes with. Healer regen / mana curves rebalance WITH the bands, not
 before (the inert-mana fix rides this).
 
 ---
