@@ -146,39 +146,46 @@ exist before lobbies/parties land on it). Acceptance bar for every phase: determ
 byte-identical where the change is meant to be neutral; smokes green; WSLg screenshots for
 anything visual.
 
-### Phase 0 — PAPER CUTS (same-day, no gameplay effect) — ✅ doc items DONE with this audit
-- ✅ CLAUDE.md sims-list drift + plan-doc index; psim.sh help string.
-- ☐ `server_main.gd`: cap the headless loop (`Engine.max_fps` or physics-tick) — one line,
-  stops idle 100%-CPU on the always-on box.
-- ☐ `net_server.gd`: `_rooms` cap + connection cap + per-peer message-rate guard in
-  `_handle` (`:233`) — the cheap DoS floor (first cut of the parked hardening item).
-- ☐ Net hygiene: duplicate spec line, phase comment, phantom hello/bye doc.
-- ☐ `rm godot/out/*` stale results (+ optional `--clean` in psim.sh).
+### Phase 0 — PAPER CUTS — ✅ BUILT 2026-07-07 (branch `refit-p012`)
+- ✅ CLAUDE.md sims-list drift + plan-doc index; psim.sh help string (with the audit).
+- ✅ `server_main.gd`: `Engine.max_fps = 60` — no more idle 100%-CPU on the always-on box.
+- ✅ `net_server.gd`: `MAX_PEERS` / `MAX_ROOMS` / `MSG_BUDGET_PER_SEC` (refuse at welcome ·
+  no room-minting past the cap · rolling 1 s per-peer budget, 4× over = cut) — every bound
+  far above legitimate 4-seat × 30 Hz traffic, so the net smokes ride unchanged.
+- ✅ Net hygiene: duplicate spec line dropped, phase comment fixed, protocol header now
+  matches the real taxonomy (phantom hello/bye out; class/arm/arming in).
+- ✅ stale `godot/out/` deleted-sim results cleaned (main repo, at merge).
 
-### Phase 1 — THE BIG DELETE (~6.5k lines; one session; byte-identical gate)
-1. `raid_hud.gd:3757` Esc → `_show_home()` (severs the ONLY live doorway; also fixes
-   Esc-dumps-you-in-a-dead-menu).
-2. Re-host `sim/ui_smoke_map.gd` on `raid_main.tscn` driving the RAID map flow (an active
-   gate must not test dead code) — prerequisite for deleting bulwark_hud.
-3. Delete: 5 solo HUDs + `main_menu.gd` + `main.tscn` + 5 `*_main.tscn` + `stage3d/` +
-   `stage2d/combat_stage_2d.gd` + `ui/gcd_cursor.gd` + `ui/litany_pips.gd` + the 6
-   dead-scene screenshot/tour sims + `sim/policies/tank_policy.gd` + `data/m0_content.gd`
-   (+ verify-then-delete `gauge_gallery.gd`; `screenshot_meter.gd` loses its twinfang half).
-4. Later, coordinated: trim kit `observe()` keys that only fed dead HUDs (engine+HUD
-   together; NOT part of the delete sweep).
-   Note: `map_content.event_ids()` looks dead but anchors `map_sim` determinism — KEEP.
+### Phase 1 — THE BIG DELETE — ✅ BUILT 2026-07-07 (net −6,854 lines · 50 files deleted)
+1. ✅ `raid_hud.gd` Esc outside combat → `_show_home()` (the only live doorway severed;
+   Esc no longer dumps you in the dead menu).
+2. ✅ `sim/ui_smoke_map.gd` RE-HOSTED onto `raid_main.tscn` — now a multi-frame RAID
+   descent driver: map → stops/events → ledger oaths → arming → burst-won pulls → drops →
+   boon-draft chains → PRIVILEGE ELEVATED. Flow smoke (routing invariants, fixed map
+   seed); this is its documented NEW BASELINE — the old solo walk died with the scenes.
+3. ✅ Deleted: 5 solo HUDs · `main_menu.gd` · 6 dead `.tscn` · `stage3d/` entire ·
+   `stage2d/combat_stage_2d.gd` · `gcd_cursor`/`litany_pips` · 6 dead screenshot/tour
+   sims · `gauge_gallery.gd` (stale Tempo-era gauge API — git history has it) ·
+   `tank_policy.gd` + `m0_content.gd` · `screenshot_meter.gd` trimmed raid-only.
+   Residual-ref grep CLEAN (every remaining hit is the live raid surface).
+4. ☐ Later, coordinated: trim kit `observe()` keys that only fed dead HUDs (engine+HUD
+   together; deliberately NOT in the delete sweep).
+   Note: `map_content.event_ids()` looks dead but anchors `map_sim` determinism — KEPT.
 
-### Phase 2 — GATES IN A BOX (the tooling that makes everything after safe)
-- `sim/sim_util.gd` — shared arg-parse/seed-loop/CSV/checksum-band printer (the parked §711
-  item, now overdue: one copy already diverged). New probe ≈ 30 lines, canonical checksum
-  format.
-- `scripts/verify-all.sh` — the merge-back bar as ONE command: 5 balance sims + system
-  probes + 4 smokes, headless, nonzero exit on any FAIL/parse error.
-- `scripts/ab-gate.sh <sim> [args]` — byte-identical A/B as a script: working tree vs
-  baseline (git worktree at merge-base or frozen snapshot), diff checksum/CSV md5, print
-  PASS/FAIL. Kills the `cp -r` folklore.
-- `server/preflight.sh` — assert protocol VERSION + build hash match before deploy (the
-  handshake-rejection design makes silent mismatch a real hazard).
+### Phase 2 — GATES IN A BOX — ✅ BUILT 2026-07-07
+- ✅ `sim/sim_util.gd` — `arg`/`arg_int`/`arg_float`/`fmt_causes` hoisted; 7 sims migrated
+  (raid/twinfang/alchemist/raid_map + well/healer/net), well_sim's already-diverged copy
+  folded back in. **As-built correction to the parked §711 note:** the `_write_csv`
+  bodies are NOT identical anymore — schemas legitimately differ per sim — so CSV
+  writers stay per-sim by design; only the true duplicates were hoisted.
+- ✅ `scripts/verify-all.sh` — the whole bar, one command: 5 balance sims + 26 probes +
+  3 UI smokes in parallel across cores, net smokes serialized on the loopback port,
+  per-script logs, nonzero exit on ANY fail / script-error / missing sim.
+- ✅ `scripts/ab-gate.sh <sim> [args]` — byte-identical A/B vs a worktree PINNED at
+  merge-base (a concurrent session's merge cannot false-diff), full-stdout diff +
+  fresh-CSV md5.
+- ✅ `server/preflight.sh` — refuses dirty deploys; prints the commit+protocol line to
+  compare against "version mismatch" reports.
 
 ### Phase 3 — THE THREE EXTRACTIONS (the shell inversion; the heart of the refit)
 Each its own worktree/claim, in this order:
@@ -258,9 +265,9 @@ always-on. (Carries forward the 07-03 parked item; `forge.gd:76` added to its li
 
 | Claim | Size | Depends on | Gate |
 |---|---|---|---|
-| P0 net/server paper cuts | hours | — | byte-identical (guarded) + net_smoke |
-| P1 THE BIG DELETE | 1 session | P0 Esc repoint first | verify surface green, byte-identical sims |
-| P2 GATES IN A BOX | 1 session | — (parallel-safe with P1) | self-proving (the scripts ARE the gate) |
+| ~~P0 net/server paper cuts~~ | ✅ 2026-07-07 | `refit-p012` | ab-gates + net smokes green |
+| ~~P1 THE BIG DELETE~~ | ✅ 2026-07-07 | `refit-p012` (−6,854 lines) | verify-all green, sims byte-identical |
+| ~~P2 GATES IN A BOX~~ | ✅ 2026-07-07 | `refit-p012` | dogfooded on this very merge |
 | P3.1 RunDirector | 1–2 sessions | P1 (less to move), P2 (safety) | byte-identical + net_smoke/net_map_smoke |
 | P3.2 WorldShell | 1–2 sessions | P3.1 | ui_smoke_raid/world + WSLg tour |
 | P3.3 Online split | 1 session | P3.2 | net smokes checksum-identical |

@@ -12,8 +12,8 @@ extends SceneTree
 const TICK_CAP_SEC := 180.0
 
 func _initialize() -> void:
-	var seeds := int(_arg("seeds", "300"))
-	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
+	var seeds := int(SimUtil.arg("seeds", "300"))
+	var seed0 := int(SimUtil.arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	print("=== Project Rift — ALCHEMIST base-minigame sim (the Brew) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
 	print("")
@@ -58,7 +58,7 @@ func _initialize() -> void:
 			print("%-12s %-7s  %6.1f%%   %8.1fs     %5.2f      %4.1f (%4.1f)     %s" % [
 				m["enc"], sk["label"], wr, avg, pot_sum / float(seeds),
 				float(dsum.get("ruptures", 0)) / float(seeds),
-				float(dsum.get("rupture_peak", 0)) / float(seeds), _fmt(causes)])
+				float(dsum.get("rupture_peak", 0)) / float(seeds), SimUtil.fmt_causes(causes)])
 			print("              pours/run: %s" % _fmt_pours(dsum, seeds))
 		print("")
 
@@ -68,9 +68,9 @@ func _initialize() -> void:
 	_rig_ab(seeds, seed0)
 	_boon_ab(seeds, seed0)
 
-	_write_csv(_arg("out", "res://out/alchemist_results.csv"), rows)
+	_write_csv(SimUtil.arg("out", "res://out/alchemist_results.csv"), rows)
 	print("wrote %d rows -> %s" % [rows.size(),
-		ProjectSettings.globalize_path(_arg("out", "res://out/alchemist_results.csv"))])
+		ProjectSettings.globalize_path(SimUtil.arg("out", "res://out/alchemist_results.csv"))])
 	quit()
 
 ## SLICE A gate — each Creed must produce a DISTINCT, sane profile AND keep the skill
@@ -373,17 +373,3 @@ func _write_csv(path: String, rows: Array) -> void:
 			r["ttk_sec"], r["boss_hp_left"], r["avg_potency"], r["loss_cause"], r["checksum"]])
 	f.close()
 
-func _fmt(causes: Dictionary) -> String:
-	if causes.is_empty():
-		return "-"
-	var parts: Array = []
-	for k in causes:
-		parts.append("%s=%d" % [k, causes[k]])
-	return ", ".join(parts)
-
-func _arg(key: String, def: String) -> String:
-	var prefix := "--%s=" % key
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with(prefix):
-			return a.substr(prefix.length())
-	return def

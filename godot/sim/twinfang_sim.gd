@@ -12,9 +12,9 @@ const TICK_CAP_SEC := 180.0
 var _open_default := true   # --open=off runs the whole sim as classic Twinfang (byte-identical baseline)
 
 func _initialize() -> void:
-	var seeds := int(_arg("seeds", "300"))
-	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
-	_open_default = _arg("open", "on") != "off"
+	var seeds := int(SimUtil.arg("seeds", "300"))
+	var seed0 := int(SimUtil.arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
+	_open_default = SimUtil.arg("open", "on") != "off"
 	print("*** DEPRECATED (2026-07-05): the SOLO bosses (Warden/Executioner) are retired 'old")
 	print("*** trash' — do NOT tune the Tempo rework here. The GATE is res://sim/raid_sim.gd")
 	print("*** (Seals: Mistral/Gemini/Mythos), Tempo blade via `--blade=tempo`. Kept only as a")
@@ -82,7 +82,7 @@ func _initialize() -> void:
 			print("%-12s %-11s %-7s  %6.1f%%   %8.1fs   %5.2f  rupt%4.1f env%4.1f psn%5.0f  %s" % [
 				m["enc"], m["aspect"], sk["label"], wr, avg,
 				flow_sum / float(seeds), rupt_sum / float(seeds),
-				env_sum / float(seeds), psn_sum / float(seeds), _fmt(causes)])
+				env_sum / float(seeds), psn_sum / float(seeds), SimUtil.fmt_causes(causes)])
 			if not dsum.is_empty():
 				print("              strike beats/run: %s" % _fmt_diag(dsum, seeds))
 				var sg := _fmt_strikes(dsum, seeds)
@@ -93,8 +93,8 @@ func _initialize() -> void:
 					print("              openings/run:    %s" % op)
 		print("")
 
-	_write_csv(_arg("out", "res://out/twinfang_results.csv"), rows)
-	print("wrote %d rows -> %s" % [rows.size(), ProjectSettings.globalize_path(_arg("out", "res://out/twinfang_results.csv"))])
+	_write_csv(SimUtil.arg("out", "res://out/twinfang_results.csv"), rows)
+	print("wrote %d rows -> %s" % [rows.size(), ProjectSettings.globalize_path(SimUtil.arg("out", "res://out/twinfang_results.csv"))])
 	quit()
 
 func _encounter(name: String) -> EncounterRes:
@@ -380,17 +380,3 @@ func _write_csv(path: String, rows: Array) -> void:
 			r["ttk_sec"], r["boss_hp_left"], r["boss_healed"], r["avg_flow"], r["loss_cause"], r["checksum"]])
 	f.close()
 
-func _fmt(causes: Dictionary) -> String:
-	if causes.is_empty():
-		return "-"
-	var parts: Array = []
-	for k in causes:
-		parts.append("%s=%d" % [k, causes[k]])
-	return ", ".join(parts)
-
-func _arg(key: String, def: String) -> String:
-	var prefix := "--%s=" % key
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with(prefix):
-			return a.substr(prefix.length())
-	return def

@@ -10,9 +10,9 @@ extends SceneTree
 const TICK_CAP_SEC := 260.0
 
 func _initialize() -> void:
-	var seeds := _arg_int("seeds", 200)
-	var seed0 := _arg_int("seed0", 1)
-	var out := _arg("out", "")
+	var seeds := SimUtil.arg_int("seeds", 200)
+	var seed0 := SimUtil.arg_int("seed0", 1)
+	var out := SimUtil.arg("out", "")
 
 	if seed0 == 1:
 		_prove_determinism()
@@ -141,11 +141,3 @@ func _write_csv(path: String, rows: Array) -> void:
 		f.store_line(String(r))
 	f.close()
 
-func _arg(key: String, def: String) -> String:
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--%s=" % key):
-			return a.substr(("--%s=" % key).length())
-	return def
-
-func _arg_int(key: String, def: int) -> int:
-	return int(_arg(key, str(def)))

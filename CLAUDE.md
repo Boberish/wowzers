@@ -30,9 +30,10 @@ the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (
 
 ## THE ERA (as of 2026-07-06) — what's live vs frozen
 - **ONE GAME · ONE HUD (locked 2026-07-03):** the raid campaign is the game; `raid_hud.gd` is
-  THE HUD. The five solo class HUDs + `main_menu` + `*_main.tscn` solo scenes are **DEAD** —
-  never add features there, never "port solo→raid." Every player-facing system lands on the
-  one HUD, once.
+  THE HUD. The five solo class HUDs + `main_menu` + `*_main.tscn` solo scenes + `stage3d/`
+  were **DELETED 2026-07-07 (REFIT P1, ~6.5k lines** — git history has them). Never "port
+  solo→raid"; every player-facing system lands on the one HUD, once. Esc outside combat
+  goes to the HUD's HOME screen (`_show_home`), never to a scene change.
 - **ROSTER REWORK (Class Framework v2):** every class is being rebuilt one at a time onto
   Creeds/Modules/WHEN-THEN (see `TEMPO-PLAN.md`). **Twinfang·Tempo is the active pilot**; the
   rest (Bulwark, Mender, Bloomweaver, Reckoner) are FROZEN — playable in the raid on current
@@ -79,6 +80,12 @@ the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (
   redeploy the server together with clients (old versions rejected at handshake by design).
 
 ## ACTIVE VERIFICATION (the merge-back bar)
+- **THE BAR IN TWO COMMANDS (REFIT P2):** `scripts/verify-all.sh` runs the whole surface
+  below headless-parallel (nonzero exit on ANY fail; `SEEDS=300` for heavy claims) ·
+  `scripts/ab-gate.sh <sim> [args]` is the byte-identical gate — working tree vs a PINNED
+  baseline worktree, so a concurrent session's merge can't false-diff you (replaces the
+  cp-to-scratch folklore). `server/preflight.sh` before any deploy (commit+protocol line).
+  Shared probe helpers live on `sim/sim_util.gd` (arg/arg_int/fmt_causes — don't re-roll).
 - **Balance sims (the live five):** `sim/twinfang_sim.gd` (Tempo pilot loop),
   `sim/raid_sim.gd` (the 4 Seals; `--boss=mythos`, `--caster=alchemist` etc),
   `sim/alchemist_sim.gd` (the Brew base loop), `sim/well_sim.gd` (the Well base loop)
@@ -89,7 +96,9 @@ the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (
   `commander_probe` · `map_sim` / `raid_map_sim` / `map_check_sim` + map probes ·
   `fight_seed_probe` · `menu_probe` · `meter_probe` · raid probes (`raid_probe`,
   `raid_boon_probe`, `raid_healer_probe`, `raid_bloom_probe`, `raid_reckoner_probe`).
-- **Smokes:** `ui_smoke_raid` (THE HUD) · `ui_smoke_map` · `net_smoke` / `net_map_smoke`
+- **Smokes:** `ui_smoke_raid` (THE HUD) · `ui_smoke_map` (the RAID descent walked screen by
+  screen — re-hosted onto raid_main in REFIT P1; the solo version died with the solo
+  scenes) · `ui_smoke_world` · `net_smoke` / `net_map_smoke`
   (real server + 2 WS clients over loopback, checksum-identical or fail).
 - **Visual probes (WSLg, NOT --headless):** `screenshot_*` / `*_tour` scripts → PNGs; use for
   any new screen or `_draw` work. Headless cannot render custom `_draw`.

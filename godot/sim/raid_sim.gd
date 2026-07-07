@@ -36,19 +36,19 @@ const SKILLS := [
 ]
 
 func _initialize() -> void:
-	var seeds := int(_arg("seeds", "200"))
-	var seed0 := int(_arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
-	var only := _arg("boss", "")
-	_healer_cls = _arg("healer", "mender")
-	_haspect = _arg("haspect", "")
-	_baspect = _arg("blade", "")
-	_brig = _arg("rig", "")
-	_caster_cls = _arg("caster", "voidcaller")
-	_probes = _arg("probes", "1") != "0"
-	_dmg = float(_arg("dmg", "1"))
-	_regen = float(_arg("regen", "-1"))
-	_fortify = float(_arg("fortify", "-1"))
-	_skills = _pick_skills(_arg("skills", ""))
+	var seeds := int(SimUtil.arg("seeds", "200"))
+	var seed0 := int(SimUtil.arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
+	var only := SimUtil.arg("boss", "")
+	_healer_cls = SimUtil.arg("healer", "mender")
+	_haspect = SimUtil.arg("haspect", "")
+	_baspect = SimUtil.arg("blade", "")
+	_brig = SimUtil.arg("rig", "")
+	_caster_cls = SimUtil.arg("caster", "voidcaller")
+	_probes = SimUtil.arg("probes", "1") != "0"
+	_dmg = float(SimUtil.arg("dmg", "1"))
+	_regen = float(SimUtil.arg("regen", "-1"))
+	_fortify = float(SimUtil.arg("fortify", "-1"))
+	_skills = _pick_skills(SimUtil.arg("skills", ""))
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
 	var healer_desc := ("Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")) \
 		if _healer_cls == "bloomweaver" else ("Mender(%s)" % (_haspect if _haspect != "" else "tidecaller"))
@@ -110,15 +110,15 @@ func _initialize() -> void:
 			print("%-7s  %6.1f%%   %8.1fs    %5.2f  %5.2f  %6.1f  %5.2f    %6.2f  %4.2f  %5.0f%% %5.0f%% %5.0f%%  %3.2f  %s" % [
 				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
-				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, _fmt(causes)])
+				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, SimUtil.fmt_causes(causes)])
 		print("")
 	if seed0 == 1 and _probes and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
 
-	_write_csv(_arg("out", "res://out/raid_results.csv"), rows)
+	_write_csv(SimUtil.arg("out", "res://out/raid_results.csv"), rows)
 	print("")
 	print("wrote %d rows -> %s" % [rows.size(),
-		ProjectSettings.globalize_path(_arg("out", "res://out/raid_results.csv"))])
+		ProjectSettings.globalize_path(SimUtil.arg("out", "res://out/raid_results.csv"))])
 	quit()
 
 ## The threat probe: same party, same seeds, but the tank never taunts. If threat is
@@ -314,17 +314,3 @@ func _write_csv(path: String, rows: Array) -> void:
 			r["loss_cause"], r["checksum"]])
 	f.close()
 
-func _fmt(causes: Dictionary) -> String:
-	if causes.is_empty():
-		return "-"
-	var parts: Array = []
-	for k in causes:
-		parts.append("%s=%d" % [k, causes[k]])
-	return ", ".join(parts)
-
-func _arg(key: String, def: String) -> String:
-	var prefix := "--%s=" % key
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with(prefix):
-			return a.substr(prefix.length())
-	return def

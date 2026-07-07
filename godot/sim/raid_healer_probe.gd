@@ -12,8 +12,8 @@ extends SceneTree
 const TICK_CAP_SEC := 300.0
 
 func _initialize() -> void:
-	var seeds := int(_arg("seeds", "60"))
-	var only := _arg("boss", "")
+	var seeds := int(SimUtil.arg("seeds", "60"))
+	var only := SimUtil.arg("boss", "")
 	var bosses: Array = ["riftmaw", "mythos"] if only == "" else [only]
 	print("=== RAID healer-pressure probe ===  %d seeds/cell (good skill)" % seeds)
 	print("party: Bulwark(warden,~%d hp) / Twinfang / Voidcaller / Mender(tidecaller, mana 900, regen 8/s)" % int(BulwarkConfig.new().hp_max))
@@ -145,9 +145,3 @@ func _spam_action(s: CombatState, healer: Seat) -> Dictionary:
 		return {}
 	return {"type": "ability", "id": "flash", "target": lowest}
 
-func _arg(key: String, def: String) -> String:
-	var prefix := "--%s=" % key
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with(prefix):
-			return a.substr(prefix.length())
-	return def

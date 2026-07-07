@@ -31,8 +31,8 @@ var _gate_seat := "tank"
 var _charge_at_seal: Array = []   # ⏻ ECON diagnostic: charge banked when a Seal is reached
 
 func _initialize() -> void:
-	var seeds := int(_arg("seeds", "60"))
-	_gate_seat = _arg("gateseat", "tank")
+	var seeds := int(SimUtil.arg("seeds", "60"))
+	_gate_seat = SimUtil.arg("gateseat", "tank")
 	if not RaidNet.SEAT_KEYS.has(_gate_seat):
 		_gate_seat = "tank"
 	print("=== Project Rift — raid map sim (Realm 1: the RING descent, MAP-3c) ===")
@@ -74,7 +74,7 @@ func _initialize() -> void:
 			var n := float(seeds)
 			print("%-7s  %5.1f%%      %5.2f            %5.2f            %d/%d          %s" % [
 				sk["label"], 100.0 * cleared / n, fight_sum / n,
-				(integ_sum / maxf(1.0, float(cleared))), gate_wins, gates, _fmt(losses)])
+				(integ_sum / maxf(1.0, float(cleared))), gate_wins, gates, SimUtil.fmt_causes(losses)])
 		# ⏻ ECON: avg charge banked when a Seal is reached, + the SURGE cut it buys
 		var avg_ch := _avg_i(_charge_at_seal)
 		print("  ⏻ charge@Seal: avg %.0f · max %d · SURGE cut ~%.0f%% boss HP" % [
@@ -446,17 +446,3 @@ func _avg(fracs: Array) -> float:
 		t += float(f)
 	return t / maxf(1.0, float(fracs.size()))
 
-func _fmt(losses: Dictionary) -> String:
-	if losses.is_empty():
-		return "-"
-	var parts: Array = []
-	for k in losses:
-		parts.append("%s=%d" % [k, losses[k]])
-	return ", ".join(parts)
-
-func _arg(key: String, def: String) -> String:
-	var prefix := "--%s=" % key
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with(prefix):
-			return a.substr(prefix.length())
-	return def

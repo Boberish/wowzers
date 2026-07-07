@@ -17,7 +17,7 @@ var last_in := 0
 var t := 0.0
 
 func _initialize() -> void:
-	seat = _arg("seat", "tank")
+	seat = SimUtil.arg("seat", "tank")
 	net = NetClient.new()
 	ctrl = NetCombatController.new()
 	root.add_child(net)
@@ -30,8 +30,8 @@ func _initialize() -> void:
 	net.room_update.connect(_on_room)
 	net.fight_started.connect(_on_start)
 	ctrl.encounter_ended.connect(func(_w): ended = true)
-	net.connect_to(_arg("url", "ws://127.0.0.1:%d" % NetProtocol.DEFAULT_PORT),
-		_arg("name", "Probe-" + seat), _arg("room", "PROBE"))
+	net.connect_to(SimUtil.arg("url", "ws://127.0.0.1:%d" % NetProtocol.DEFAULT_PORT),
+		SimUtil.arg("name", "Probe-" + seat), SimUtil.arg("room", "PROBE"))
 
 func _on_room(room: Dictionary) -> void:
 	var me := {}
@@ -113,9 +113,3 @@ func _drive() -> void:
 				ctrl.human({"type": "ability",
 					"id": ("fracture" if float(obs.get("focus", 0.0)) >= 26.0 else "bolt")})
 
-func _arg(key: String, def: String) -> String:
-	var prefix := "--%s=" % key
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with(prefix):
-			return a.substr(prefix.length())
-	return def

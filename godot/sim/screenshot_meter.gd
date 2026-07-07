@@ -1,8 +1,8 @@
 ## screenshot_meter.gd — visual probe for the DPS/HPS meter window: boots the RAID
 ## (tank seat, AI raiders), lets the fight run, and screenshots the meter in COMPACT
 ## (four raiders ranked) and DETAIL (per-spell) views, then burst-kills the boss and
-## shoots the END-SCREEN recap (RecapPanel + frozen meter). Finally a solo Twinfang
-## fight (meter auto-opens on your own spells). Needs a display (WSLg — NOT --headless):
+## shoots the END-SCREEN recap (RecapPanel + frozen meter). Needs a display (WSLg —
+## NOT --headless):
 ##   godot --path godot --script res://sim/screenshot_meter.gd -- --out=/absolute/dir
 extends SceneTree
 
@@ -43,10 +43,6 @@ func _initialize() -> void:
 				var ctrl = h.get("_ctrl")
 				CombatCore.damage_boss(ctrl.state, ctrl.state.seats[0], ctrl.state.boss.hp + 10.0),
 			"end_screen": true},
-		{"name": "meter_solo_twinfang", "scene": "res://game/twinfang_main.tscn",
-			"setup": func(h): h._start_run("tempo"),
-			"policy": func(): return TwinfangPolicy.new(),
-			"ticks": 330, "pre": func(_h): MeterPanel.view_state = 0},
 	]
 
 func _drive_player() -> void:

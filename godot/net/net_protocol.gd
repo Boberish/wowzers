@@ -2,13 +2,14 @@
 ## WebSocket; every message is a Dictionary with "t" = type. Tiny by design:
 ## lockstep streams INPUTS, not state (see RAID-PLAN.md §R2).
 ##
-## client -> server:  hello{name,ver} · join{room,name} · claim{seat} · unclaim{}
-##                    aspect{aspect} · ready{on} · boss{enc} (host) · start{}
+## client -> server:  join{room,name,ver} · claim{seat} · unclaim{}
+##                    aspect{aspect} · class{cls} · ready{on} · boss{enc} (host) · start{}
 ##                    mapstart{} (host — MAP-3b) · node{id} (leader) · choice{i} (leader)
-##                    pick{id} (online boons: this seat's drafted boon) · input{action} · leave{}
+##                    arm{...} · pick{id} (online boons: this seat's drafted boon) ·
+##                    input{action} · leave{}
 ## server -> client:  welcome{id,ver} · err{msg} · room{...lobby snapshot incl enc...}
 ##                    start{spec, you} · f{n, in:[[seat_i,action]..], cs?, ai?:[seat_i..]}
-##                    end{won,n} · bye{msg}
+##                    end{won,n,cause} · arming{...}
 ##                    map{...campaign snapshot incl seed...} · mapstop{title,body,choices,accent}
 ##                    draft{} (online boons: pick a boon now) · campaign{won}
 class_name NetProtocol
