@@ -1895,6 +1895,30 @@ func _bank_prior(won: bool) -> int:
 func _my_prior() -> int:
 	return LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
 
+## PACK QUOTAS v1 (WORLD-PLAN shape-assignment rule: "Topology floors roll shapes from
+## the run seed inside authored quotas"). MID skirmish nodes only — the entry body and
+## the Seal keep their authored shapes. Seeded from (map seed, node id): the same
+## descent always rolls the same packs (replay-true); rerolling the map rerolls them.
+## Weights stay conservative until the Forge's SWARM lightweights exist (the baked ×2.5
+## makes a trio ≈ Seal-sized): 50% solo · 35% duo · 15% trio. OFFLINE v1 — the online
+## descent's server builds its own specs (packs land there with the server pass).
+const PACK_FILLERS := ["bard", "sonnet"]   ## light bodies walk in first; the node's enc captains
+
+func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
+	if _map == null or _online:
+		return []
+	if fi <= 0 or fi >= _map_fights.size() - 1:
+		return []                        # entry + Seal: authored, never rolled
+	var rng := DetRng.new((_map.seed ^ (0x9A7B * (_map_node + 7))) & 0x7FFFFFFF)
+	var r := rng.next_float()
+	if r < 0.50:
+		return []                        # a classic solo pull
+	var pack: Array = [String(PACK_FILLERS[rng.next_u32() % PACK_FILLERS.size()])]
+	if r >= 0.85:
+		pack.append(String(PACK_FILLERS[rng.next_u32() % PACK_FILLERS.size()]))
+	pack.append(String(enc.id))          # smalls → captain (the node's own body)
+	return pack
+
 ## A map fight: the node's encounter through the SAME shared factory as every raid
 ## pull, then each seat starts at its carried integrity.
 func _launch_map_fight(fi: int) -> void:
@@ -1905,7 +1929,11 @@ func _launch_map_fight(fi: int) -> void:
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
 	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
-	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(enc.id), {}, _seat_boons_now())
+	# PACK QUOTAS: a rolled chain opens with fillers; the node's enc stays the KILL that
+	# matters (oaths swear against it, the drop ceremony fires on it — it dies last).
+	var pk := _roll_map_pack(fi, enc)
+	var enc_id := String(pk[0]) if not pk.is_empty() else String(enc.id)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), enc_id, {}, _seat_boons_now(), pk)
 	var s := RaidNet.build(spec, _seat_key)
 	_apply_fightlen(s)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
