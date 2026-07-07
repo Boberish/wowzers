@@ -729,6 +729,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `worldreset` → main (`9aeda85`) · §THE WORLD — **dev world-reset button**
+  (Bill: "i already beat that one, i cant redo it"). Atlas bottom-right "⟲ reset world (dev)",
+  armed double-press (first press turns ⚠ SURE?), `WorldSave.wipe()` writes a fresh save over
+  disk; world smoke proves reset → 0 conquered + flags forgotten. *(world-structure session)*
+
 - ☑ 2026-07-07 · `pack` → main (`f912a4f`) · §THE WORLD / ENGINE / `WORLD-PLAN.md` §FIGHT
   LENGTH — **PACK v1 BUILT (Bill: "make a good plan for the pack generator, then execute"):
   sequential encounters in ONE battle, heat carries.** Engine (guarded — every classic fight
