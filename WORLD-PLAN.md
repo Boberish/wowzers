@@ -234,10 +234,13 @@ TICKETS v2), the next unbuilt piece.
    the world save (pickup 4 → carry → turn-in 19), a `carry.burden` add via the existing add-wave
    engine (**CombatCore untouched, pure data**); route WARDEN'S REST(4) → GRANARY STEPS(5)
    burdened → UNDERMILL GATE(19). Verified: `world_probe` + `ui_smoke_world` green, `raid_sim`
-   **byte-identical** to baseline. Owed before merge-worthy breadth: richer burdens (kickable
-   cast / hazard beat, not just a melee add), a lane-law turn-in **reward** (a pool row — the
-   slice pays a standing flag + toast), route data lifted into authored node fields, and the
-   cleared-door turn-in edge. **Awaiting Bill's feel pass** (`--autostart=zone`).
+   **byte-identical** to baseline. **Deepened (`eaf628e`):** sustained TWO-WAVE burden (husks at
+   0.8/0.45, self-sequencing — a tune knob), a pre-pull WARNING on burdened fights (the player
+   connects the pressure to the vial), and the cleared-door turn-in **soft-lock fixed** (rush-
+   then-carry still completes). Owed before merge-worthy breadth: a richer burden *flavor* (a
+   kickable cast / hazard beat, once the interrupt pillar lands — the slice is a melee husk), a
+   lane-law turn-in **reward** (a pool row — the slice pays a standing flag + toast), and route
+   data lifted into authored node fields. **Awaiting Bill's feel pass** (`--autostart=zone`).
 2. **THE QUEST BOARD (②)** — Mewgenics splits quests into *Progression* (story items from bosses)
    and *Invention* (optional, from an NPC — a steady faucet). We have the progression side
    (DOOR/ROUTE/ESCORT tickets); we lack the optional heartbeat. Add a **QUEST-BOARD station in THE

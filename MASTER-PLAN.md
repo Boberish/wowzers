@@ -801,8 +801,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   fight). DESIGN LOCKED, not built — builds with W2/W3 (XP ledger on the world save, wave tables,
   crest gates, borderland nodes). *(world-structure session)*
 
-- 🔨 2026-07-06 · `escort-ticket` (`ca05269`, NOT merged) · §THE WORLD W2 — **ESCORT/VOLATILE
-  TICKET — thinnest flagged slice BUILT (Bill: "keep building"; §MEWGENICS STEALS ①).** Carry a
+- 🔨 2026-07-06 · `escort-ticket` (`ca05269`→`eaf628e`, NOT merged) · §THE WORLD W2 — **ESCORT/VOLATILE
+  TICKET — thinnest flagged slice BUILT + deepened (Bill: "keep building"/"keep going"; §MEWGENICS
+  STEALS ①).** *Deepened `eaf628e`:* sustained two-wave burden + pre-pull warning (pressure↔vial) +
+  cleared-door turn-in soft-lock fix — still byte-identical + green. Carry a
   payload PICKUP→TURN-IN; while carrying, fight/elite nodes get an enemy-side BURDEN add (the boss
   withdraws to face it) — a burden not a buff (OVERWORLD POWER + mutator-on-enemy laws hold),
   PERSISTENT via the world save's per-zone flags. **NEW `data/world/escort.gd`** = pure logic
