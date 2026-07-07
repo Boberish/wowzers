@@ -21,6 +21,59 @@ Legend: **🔒 LOCKED** (decided with Bill) · **🟡 OPEN** (settle before/at b
 
 ---
 
+## ⚖ THE BOARD VERDICTS — Bill's full export, 2026-07-07 (66/66 rated; the record — §§ below are patched to match)
+
+**LOCKED CORE (5★):** Clean Draw + THE CURRENT · THE BRINK (flagship Brim creed) · the shared BOOK
+concept · CHARGES as the resource name ("for now") · HIGH TIDE keystone · STRONG PULL · THE KEPT
+LIGHT · BRINK BELL · THE SHINING HOUR (class support boon).
+
+**THE CRIT MODEL (Bill's general note, folded):** *"perfects shouldn't refund mana, it's too much —
+perfects add a crit chance, bullseye guaranteed crit?"* → ALL precision mana-refunds are DEAD.
+**DRAW:** in-band release = +Current + ~20% crit chance · STILL POINT = guaranteed crit (×1.5).
+**BRIM:** a perfect pour ARMS the next cast — guaranteed crit, shown crit-sized in the landing
+preview (forecast crit: you size the next landing knowing it; RNG never ruins a pour). A crit that
+overshoots still spills. Millrace stays the only economy valve ("finally"). 🟡 the full 3-tier
+Good/Perfect/Bullseye ladder ("go full in, like tempo" — D-B2 note) — 2 tiers built, 3rd at build.
+
+**BOOK REWORK (C-6, C-9, C-7):** identity = **ALL heals are casted direct heals** — **Ward CUT ·
+Renew CUT · Meditate CUT from base → a draftable battery BOON** ("you need to manage mana"; the
+Well refills by pulse alone). Drafted shields/HoTs stay legal (Brink Bell 5★, Still Water/Afterflow
+4★ — the cut is base-book-only). **REKINDLE: no cooldown, long cast, big cost** — "if they die and
+you have the time and mana, go for it." Base book: Flash · Mend · Cascade · Wellspring · Dispel ·
+Rekindle.
+
+**COMP TEXTURE:** healer carries **NO KICK** (Rebuke 1★) — the 0 of the 2/1/0 distribution.
+
+**ACCEPTS (4★, tuned where noted):** Perfect Pour/Spill/base rules · Foresight · Long Draw ·
+Patient Hand ("cool bank") · Benediction · Plumb Line · Siphon · Triage Protocol · Wide Brim ·
+Second Ring · Overflowing Cup · Cool Hand · Low Catch · Cadence of Mend · Loose Grip · Short Pour ·
+Bucket Brigade · Last Drops · Still Water · Afterflow · Crest · Boiling Over ("a good healer can
+pick this if it's too easy") · Still Point (reward → crit) · pour/catch/spill/clean-draw WHENs ·
+Millrace. **Landing preview = BASE + a "blindfold" boon** (remove the preview, bigger rewards —
+B-V3). **BRIMFUL: yes, but only on the big cooldown buttons** (Cascade/Wellspring tier), never the
+bread casts (B-V4). **Double Draw tuned:** chain-cast bonus ~25–30%, "half is too much."
+
+**CUTS:** Deep Refund ("mana back? lame") · Runoff · Steady Arm · Edge of the Lip (fights the
+Still Point) + its edge WHEN · held-heal WHEN · Rebuke/kick · Slow Water (2★ — parked as a
+maybe-creed/module concept, "would need to be thought out more").
+
+**REWORKS OWED:**
+- **QUICK PULL → THE NARROWS** (Bill's spec): band smaller, a release OUTSIDE the band heals
+  ZERO, in-band heals much stronger. All-or-nothing precision creed.
+- **DEAD RECKONING → THE EDDY** (Bill's spec): don't hide the bar ("abusable once you get the
+  timing") — MOVE the band: its position drifts cast-to-cast (mid-bar, small jitter); you tag it
+  as it passes and the heal still resolves at cast end. Fresh timing every cast.
+- **⭐ RESERVOIR (3★ + the Ward cut guts its shield output):** rework pass owed — spill banks →
+  Surge as a burst HEAL, or park; Levee/Shallows (3★) tune with the creed pass.
+- **Undercook (3★):** reframed per Bill as the deliberate quick-sip tool ("super fast heal, way
+  less effective") — Short Pour 4★ is its boon lane. **Overrun (3★):** stays free — "you have so
+  much to gain by doing it" that enforcement isn't needed.
+
+**NAMES:** spec dev-labels **TARGET** (=Brim) and **SPEED** (=Draw) — "so i know the play
+difference, figure out later." Resource = **CHARGES**. Class name still open (2★ on the card).
+
+---
+
 ## 0. The diagnosis + the fork (locked 2026-07-06)
 
 - Bill's read, confirmed by code: **heal-low and overheal are boons, not specs.** The two aspects
@@ -40,52 +93,61 @@ under pressure. One book, one Well, two specs = **the same grade in two places**
 - **THE WELL (base, both specs):** mana is a visible vessel — casts draw from it, it refills in
   **pulses** (never a flat trickle), overheal **SPILLS** (wasted; banking spill is module
   territory), Meditate is the battery decision, and DRY is a visible state. The Well is the class
-  instrument on THE HUD. **🔒 DISCRETE (Bill, 2026-07-07 — "i like the ladles, but hate the name"):**
-  the Well holds **~12 discrete draughts** (working name **DRAMS**, name hunt open — alternates
-  DROPS/SCOOPS/CHARGES, board card C-10): Mend 1 ◍ · Flash 2 ◍ · Renew 1 ◍ · Cascade 3 ◍ ·
-  Meditate +4 ◍; the pulse drops in 1 ◍. There is NO separate mana — the Well IS the mana,
-  quantized. Boon ladders must speak in drams ("every 3rd pour returns 2").
-- **SPEC 1 · BRIM — grade the LANDING.** Casts stay completely normal; every direct heal is graded
-  by where the target's HP lands. In the brim band (default ≥90%) with zero spill = **PERFECT
-  POUR** (mana refund + the class proc moment) · overshoot = **SPILL** (counted waste) · land low =
-  safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs Mend vs
-  Cascade against incoming damage. Landing preview = the ghost segment (🟡 baked-in vs earned).
-- **SPEC 2 · DRAW — grade the RELEASE, ride THE CURRENT.** Casts complete **manually**: release
-  inside the end band = **CLEAN DRAW** (full heal) · early = **UNDERCOOKED** (heal × p^1.5) ·
-  overrun = auto-completes plain. **🔒 REWORKED 2026-07-07 (Bill: "too easy, shouldn't be a
-  refund"):** clean draws do NOT refund — they raise **THE CURRENT** (max 5): each stack casts
-  **+6% faster**. An undercook BREAKS it; running the Well **DRY** breaks it; it ebbs after ~4s
-  idle. Faster casting burns drams faster with no refund valve, so the rush throttles itself —
-  ride it, ease off, ride again. **Payoff split of record: Brim pays in WATER (the dram comes
-  back), Draw pays in TEMPO (the Current).** Bill's alternate payoffs (shield / HoT / stronger
-  heal on clean draws) live in the boon slate (STILL WATER / AFTERFLOW / THE CREST, board D-B11–13).
-  **🟢 THE STILL POINT (Bill, same day — the min-max tier):** a hairline sliver dead-centre of the
-  band (~4% of the bar, ≈100ms); tagging it = clean draw AND the dram back (strict superset, F15
-  Bullseye law). Self-balancing: the Current speeds the bar, so the Still Point hardens as you
-  ride higher. Tester knob 0–8% (0 = off); board card D-V5. Symmetry question for Brim (a
-  dead-full BRIMFUL tier) = board card B-V4, not built.
+  instrument on THE HUD. **🔒 DISCRETE, named CHARGES (board C-10, 5★ "charges for now"):**
+  the Well holds **~12 CHARGES**: Mend 1 ◍ · Flash 2 ◍ · Cascade 3 ◍; the pulse drops in 1 ◍ and
+  is the ONLY base refill (Meditate cut → a draftable battery boon; precision refunds dead per the
+  crit model). There is NO separate mana — the Well IS the mana, quantized. Boon ladders speak in
+  charges ("every 3rd pour returns 2").
+- **SPEC 1 · BRIM (dev-label TARGET) — grade the LANDING.** Casts stay completely normal; every
+  direct heal is graded by where the target's HP lands. In the brim band (default ≥90%) with zero
+  spill = **PERFECT POUR** — **ARMS the next cast: guaranteed crit** (forecast crit, shown
+  crit-sized in the preview; the class proc moment) · overshoot = **SPILL** (counted waste) · land
+  low = safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs
+  Mend vs Cascade against incoming damage. **Landing preview = BASE** (🔒 B-V3) + a blindfold boon
+  (preview off, bigger rewards). **BRIMFUL** (dead-full landing tier) = big CD buttons only (B-V4).
+- **SPEC 2 · DRAW (dev-label SPEED) — grade the RELEASE, ride THE CURRENT.** Casts complete
+  **manually**: release inside the end band = **CLEAN DRAW** (full heal, **+Current + ~20% crit
+  chance**) · early = **UNDERCOOKED** (heal × p^1.5 — the deliberate quick-sip, per Bill) ·
+  overrun = auto-completes plain (stays free — "so much to gain by releasing"). **THE CURRENT**
+  (max 5): each stack casts **+6% faster**. An undercook BREAKS it; running the Well **DRY**
+  breaks it; it ebbs after ~4s idle. Faster casting burns charges faster with no refund valve, so
+  the rush throttles itself. **Payoff split of record: Brim pays in FORESIGHT (the armed crit),
+  Draw pays in TEMPO + the gamble (crit chance now).** Shield / HoT / stronger-heal payoffs live
+  in the boon slate (STILL WATER / AFTERFLOW / THE CREST, board D-B11–13).
+  **🔒 THE STILL POINT (the min-max tier):** a hairline sliver dead-centre of the band (~4% of the
+  bar, ≈100ms); tagging it = clean draw AND a **guaranteed crit** (×1.5 — strict superset, F15
+  Bullseye law; the dram-back reward died with the crit-model verdict). Self-balancing: the
+  Current speeds the bar, so the Still Point hardens as you ride higher.
   The window lives on **your cast bar**; attention inverts — Brim reads the party, Draw reads your
   own hands. The Tempo/Fermata symmetry on the healing side.
-- **Shared by both specs:** the book (Flash / Mend / Renew / Ward / Cascade / Wellspring / Dispel /
-  Meditate / signature / Rekindle), the Well, the GCD, and **cast-vs-dodge discipline** (a dodge
-  cancels the cast; the healer's dodge-ration beats stay its test).
+- **Shared by both specs:** the book — **Flash / Mend / Cascade / Wellspring / Dispel / Rekindle**
+  (🔒 C-6: ALL heals are casted direct heals — Ward, Renew, Meditate cut from base; Rekindle =
+  no-CD long-cast big-cost), the Well, the GCD, and **cast-vs-dodge discipline** (a dodge cancels
+  the cast; the healer's dodge-ration beats stay its test).
 - **VIGIL (the hold) folds into DRAW build territory** 🔮 — a creed/module turns the overrun into a
   HELD state you walk around with and release on the spike. (Was the recommended spec 2; superseded
   by Bill's tester verdict. The good idea survives as Draw's transformer candidate.)
 
 ## 2. CREEDS 🟡 (per-spec pools — Tempo/Fermata precedent)
 
-**Brim pool — the demoted aspects, now postures:**
-- **FORESIGHT** (was Tidecaller) — play AHEAD: the band rewards topping before the hit; letting an
-  ally slip low is the slip.
-- **THE BRINK** (was Brinkwarden) — play BEHIND: heals scale on the bloodied (the ×2.5-at-0
-  machinery exists), the band moves DOWN (perfect = the low catch), overtopping is the slip.
-- Third creed TBD (a well/economy posture — e.g. a smaller Well, stronger pours).
+**Brim pool (⚖ verdicted 2026-07-07):**
+- **THE BRINK** 🔒 5★ flagship — play BEHIND: heals scale on the bloodied (the ×2.5-at-0 machinery
+  exists), the band moves DOWN (perfect = the low catch), overtopping is the slip.
+- **FORESIGHT** 🔒 4★ — play AHEAD: pours build stacks while nobody sits below 50%; a dip crashes
+  them.
+- **THE LEVEE / THE SHALLOWS** 🟡 both 3★ — keep the slots, tune with the creed pass (Levee's
+  double-refund hook is dead with the crit model — rework its payoff).
 
-**Draw pool — release temperaments (sketches, design pass owed):**
-- **THE PATIENT HAND** — the overrun becomes a HELD heal (the Vigil fold), gutter if held too long.
-- **THE QUICK PULL** — tighter band, softened undercooks; the fast crossover creed.
-- A slow/heavy precision mirror (Largo/Long-Night idiom: slower casts, smaller band, bigger heals).
+**Draw pool (⚖ verdicted 2026-07-07):**
+- **THE PATIENT HAND** 🔒 4★ "cool bank" — the overrun becomes a HELD heal in your hands (~3s,
+  instant release on the spike; gutters after — charge + cast wasted). Held releases don't feed
+  the Current.
+- **THE LONG DRAW** 🔒 4★ — the Largo mirror: casts ×1.3 slower, heals ×1.35, band ×0.75.
+- **THE NARROWS** 🟡 (reworked from Quick Pull 2★, Bill's spec) — band smaller, a release OUTSIDE
+  the band heals ZERO, in-band heals much stronger. All-or-nothing.
+- **THE EDDY** 🟡 (reworked from Dead Reckoning 3★, Bill's spec) — the band's position DRIFTS
+  cast-to-cast (mid-bar, small jitter); tag it as it passes, the heal still resolves at cast end.
+  Fresh timing every cast — reading beats rhythm-memory.
 
 ## 3. MODULES 🟡 (Floor-1 pick 1-of-3 · one ⭐ transformer · all three re-homed coded machinery)
 
@@ -140,19 +202,19 @@ medit +160/25s (tester-shortened; the kit's is 160/55s) · GCD 1.2s · pressure 
 7. Balance at `--fightlen` bands (3–5 min mid / ~10 min late) — **never against today's 60–142s
    fights**; this is where the inert-healer finding finally gets closed.
 
-## 8. OPEN verdicts 🟡
+## 8. OPEN 🟡 (post-verdict remainder — most of the old list resolved by the ⚖ block)
 
-1. **Name** — keep MENDER? Spec names: BRIM / DRAW are strong working verbs (alts: WELLSPRING /
-   DRAWN LIGHT).
-2. **Landing preview** — baked into Brim, or earned (boon/level unlock)? Tester has the toggle.
-3. **Interrupt carrier** — 1 or 0.
-4. **Clutch damage dump** — yes/no (sustained damage-healing stays with class #3).
-5. **Draw creed pool** — needs its real design pass.
-6. **Module pool** — shared vs per-spec wording.
-7. **Ward in a spill economy** — shields can never spill, making Ward the "safe" cast; does it need
-   a brim-adjacent rule (e.g. ward on a full-HP ally = graded pour) or is safe-but-unpaid correct?
-8. ~~FLOW vs LADLES~~ — **RESOLVED 2026-07-07: DISCRETE locked** (Bill likes it; see §1). Open
-   remainder = **the NAME**: "ladles" is dead; working name DRAMS (alternates DROPS / SCOOPS /
-   CHARGES) — board card C-10 collects the verdict.
-9. **The Current's numbers** — +6%/stack (max 5 → +30%)? Undercook = full crash vs −2 stacks
-   (creed territory)? Idle ebb 4s? All ⚙ feel-tester calls at build time.
+1. **Class name** — MENDER unloved (2★), no candidate yet. Specs ride dev-labels TARGET / SPEED;
+   resource = CHARGES. Figure out later, before the HUD pass.
+2. **Crit numbers** — ×1.5 multiplier? Draw's in-band chance ~20%? The full Good/Perfect/Bullseye
+   3-tier ladder ("go full in, like tempo") vs the built 2-tier? ⚙ tester + build-time sims.
+3. **The Current's numbers** — +6%/stack (max 5)? Undercook full crash vs −2 (creed territory)?
+   Idle ebb 4s? ⚙ tester calls.
+4. **⭐ Reservoir rework** — 3★ + the Ward cut guts its shields: spill→Surge as burst heal, or
+   park and find a new Brim transformer.
+5. **The Narrows / the Eddy** — numbers + build (Bill-specced reworks, §2).
+6. **Blindfold boon** (preview off, bigger rewards) + **Brimful on the big buttons** — design at
+   the boon pass.
+7. **Meditate-as-boon** — the battery's shape (charges +N? pulse burst?) in the boon slate.
+~~Landing preview~~ → BASE 🔒 · ~~Interrupt~~ → NO KICK 🔒 · ~~Ward/Dry-Ward~~ → Ward CUT 🔒 ·
+~~Clutch dump~~ → Boiling Over kept 4★ 🔒 · ~~resource name~~ → CHARGES 🔒.

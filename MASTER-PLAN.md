@@ -799,9 +799,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   https://claude.ai/code/artifact/958cdbe8-7c92-48cb-bf95-eae69b3994c1 — the full idea slate as
   rateable cards (BRIM 25 · DRAW 25 · CLASS 9: base rules · 4 creeds · 3 modules · 10 boons · 4 rig
   WHENs · keystone per spec + shared Well/Shining-Hour/Boiling-Over/kick/Dry-Ward/names), stars +
-  comments persist in-browser, EXPORT copies a paste-back summary. **NEXT: Bill's card verdicts off
-  the board** (they subsume the 🟡 opens: name · preview · interrupt · clutch dump · Draw creeds ·
-  Ward-spill) **→ then the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
+  comments persist in-browser, EXPORT copies a paste-back summary. **⚡ 2026-07-07 — BILL'S FULL
+  EXPORT LANDED (66/66 rated) + FOLDED → `MENDER-PLAN.md` ⚖ block is the record.** Headlines:
+  **THE CRIT MODEL** (precision mana-refunds ALL dead — Draw in-band = +Current + ~20% crit ·
+  Still Point = TRUE crit ×1.5 · Brim pour ARMS the next cast as a forecast crit shown in the
+  preview) · **BOOK REWORK** (all heals casted+direct: Ward/Renew CUT, Meditate → boon, Rekindle
+  no-CD long-cast) · resource = **CHARGES** · spec dev-labels **TARGET/SPEED** · healer = **0
+  kicks** · preview BASE + blindfold boon · Brimful on big-CD buttons only · creed reworks owed
+  (Quick Pull→THE NARROWS all-or-nothing · Dead Reckoning→THE EDDY drifting band, both
+  Bill-specced) · ⭐ Reservoir rework owed (3★ + Ward cut guts it) · cuts: Deep Refund/Runoff/
+  Steady Arm/Edge of the Lip/edge+held WHENs/Slow Water(parked). Tester **v5 = the verdicted
+  build** (charges default, 3-spell book, crit model live). **NEXT: Bill feels v5 (crit model =
+  my rec, needs his OK) → the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
   unless picked). *(healer-rework session)*
 - ☑ 2026-07-06 · main (docs only) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH — **THE PACING
   GRAMMAR locked (Bill: fights much too short, "rarely get a combo off").** Current truth: Seals
