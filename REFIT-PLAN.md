@@ -263,6 +263,19 @@ Each its own worktree/claim, in this order:
 3. **Online split** — the lobby/connect/netmap UX out of raid_hud into a shell-owned
    controller. "PLAY ONLINE" the screen dies here; connectivity becomes a shell property
    (presence), fights become instances you enter from the world.
+   **P3.3 ✅ BUILT 2026-07-07 — the seam that held:** the CONNECTION LIFECYCLE (connect
+   form `_show_online`/`_edit` + the full lobby `_show_lobby`/`_on_room_shell`) moved to
+   the shell — the presence door; the online DESCENT screens (net map/stops/draft/
+   arming/wait + `_launch_online` + the replica controller) STAY on the instance
+   surface — they are the online run, mirroring exactly where the offline descent
+   screens live. `_me()` stayed HUD-side (a state reader over `_room`/`_net`); the
+   `_on_net_dropped` router reads the SHELL's screen for lobby drops; 3 new stubs
+   (`_show_online`/`_show_lobby`/`_on_room`) keep the net-signal wiring and home-button
+   paths routing UP. GATES: net_smoke + net_map_smoke checksum-clean through the
+   shell-owned lobby · shell/menu/raid/world/map smokes ALL OK.
+   **PHASE 3 COMPLETE.** Still owed from its ledger: 7 screenshot_* WSLg re-hosts (next
+   visual pass) · state-ownership lift (`_d`/WorldSave/`_net` off the hud) — natural
+   P4 companion work.
 
 ### Phase 4 — SCALE RAILS (before the roster/content wave; each independent)
 - **Class registry** (`class_id → factory`) breaking the RunState/RaidContent fan-out.
