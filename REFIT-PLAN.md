@@ -230,11 +230,22 @@ Each its own worktree/claim, in this order:
    wired into verify-all. Probes/smokes loading `raid_main.tscn` directly are untouched
    by design — the HUD stays self-contained. GATES: shell_probe + menu_probe + all 3 ui
    smokes + both net smokes ALL OK.
-   **P3.2b ☐ NEXT — the screens migrate:** home/select/party + atlas/zone/bastion
-   builders move up to the shell (the shell takes `_d` + WorldSave with them; the
-   UiKit `_label/_title/_gap` hoist is the natural prerequisite so the builders don't
-   drag HUD helpers along); Esc/home routing inverts (instance ends → shell screen);
-   raid_hud keeps ONLY descent ceremonies + combat.
+   **P3.2b-1 ✅ BUILT 2026-07-07 — the helper prereq:** `UiKit.title_in`/`UiKit.place`
+   hoisted off raid_hud (121 call sites); the shell's screens build on the same helpers.
+   Also with this slice: `fightlen_probe` FIXED (the LAST stale probe — its zone
+   expectation was a hardcoded bard snapshot from before THE FORGE took the Gildfields
+   nodes; it now derives from `encounter_by_id(node.fight)`, testing the SCALAR not a
+   content snapshot; ALL OK ×1.00 and ×2.50). **All three of the audit's stale probes
+   are now revived — the open-claim item is CLOSED; verify-all runs 35/35.**
+   **P3.2b-2 ☐ NEXT (fresh-session-sized, ONE coherent cut):** home/`_show_class_select`/
+   `_show_raid_select`/aspect pick/party + atlas/zone/bastion builders move up to the
+   shell together — the aspect ceremony is SHARED by the raid and world paths
+   (`_world_pending` routes class→aspect→Atlas), so splitting them would cut a live
+   flow in half. The shell takes `_d` + WorldSave + the zone/world members with them;
+   every internal `_show_home()`-style call inverts to shell routing (Esc, end screens,
+   pause quit, zone leave, campaign cleared); `menu_probe`/`ui_smoke_world`/party
+   sections of `ui_smoke_raid`/`commander_probe` re-host onto `world_shell.tscn`;
+   raid_hud keeps ONLY descent ceremonies + combat + (until P3.3) online.
 3. **Online split** — the lobby/connect/netmap UX out of raid_hud into a shell-owned
    controller. "PLAY ONLINE" the screen dies here; connectivity becomes a shell property
    (presence), fights become instances you enter from the world.
