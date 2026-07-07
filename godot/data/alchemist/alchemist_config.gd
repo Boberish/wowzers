@@ -108,6 +108,63 @@ extends Resource
 ## blade-seat DPS band without touching any of the feel numbers above. Sim-tuned.
 @export var dmg_scale: float = 0.55
 
+# =====================================================================================
+# THE CASK — the 2nd spec (ALCHEMIST-PLAN §7). ALL guarded behind aspect == "cask" in the
+# kit, so every field below is inert for the Brew (byte-identical base). Numbers are the
+# feel-tester locks (artifact 72390dbd…); the whole block is sim-tunable like the rest.
+# The verb: STACK 3–6 graded pours on a walking band (Venom=heat/band↑, Rot=time+tail/band↓),
+# same-side STRAIN shrinks the band, a MISS dumps the batch → SEAL → ~5s cook → PEAK tap.
+# =====================================================================================
+# --- the vial (tester: dc = dt/time · (base + quad·c); strain speeds the fill) ---
+@export var cask_charge_base: float = 0.42    ## base fill coefficient
+@export var cask_charge_quad: float = 1.9     ## linear-in-charge accel term (exponential climb)
+@export var cask_charge_time: float = 1.2     ## divides the fill rate (bigger = slower)
+@export var cask_fizzle: float = 0.20         ## release under this = harmless BAIL (no dose, no dump)
+@export var cask_red_line: float = 0.97       ## hold past this = SPOILED = a MISS (dumps the batch)
+# --- the band (moving target zone; Venom climbs, Rot sinks — a deterministic directional walk) ---
+@export var cask_band_lo: float = 0.38        ## band centre floor
+@export var cask_band_hi: float = 0.88        ## band centre ceiling
+@export var cask_band_start: float = 0.62     ## a fresh cask's band centre
+@export var cask_band_step: float = 0.14      ## how far the centre moves per landed pour
+@export var cask_sweet_w: float = 0.16        ## base band width (before strain shrink)
+@export var cask_bull_frac: float = 0.30      ## inner fraction of the half-width = BULLSEYE
+@export var cask_good_frac: float = 1.8       ## up to this × half-width outside the band still LANDS (GOOD)
+@export var cask_grade_bull: float = 1.25     ## BULLSEYE quality multiplier
+@export var cask_grade_perfect: float = 1.0   ## PERFECT quality multiplier
+@export var cask_grade_good: float = 0.65     ## GOOD quality multiplier
+# --- strain (same-side chain shrinks the band + speeds the fill; a swap relieves the other side) ---
+@export var cask_strain_shrink: float = 0.82  ## band width ×this per chain level on that side
+@export var cask_strain_spd: float = 0.15     ## fill speed +this per chain level on that side
+@export var cask_swap_relief: int = 2         ## a landed pour relieves the OTHER side's strain by this
+# --- doses ---
+@export var cask_min_doses: int = 3           ## seal needs at least this many
+@export var cask_max_doses: int = 6           ## auto-seal here
+# --- side effects (the recipe) ---
+@export var cask_ven_heat: float = 0.20       ## each Venom dose: burst ×(1 + this) [additive per dose]
+@export var cask_rot_win: float = 0.20        ## each Rot dose: peak window +this seconds
+@export var cask_ven_finish: float = 1.25     ## last dose Venom: burst ×this
+@export var cask_rot_finish: float = 2.0      ## last dose Rot: tail ×this
+# --- cook + peak ---
+@export var cask_cook: float = 5.0            ## seconds of cooking to PEAK
+@export var cask_peak_base: float = 0.4       ## base peak half-window (before Rot doses widen it)
+@export var cask_peak_cap_frac: float = 0.6   ## peak half-window clamps to ≤ this × cook
+@export var cask_sour_half: float = 2.5       ## past the window, value halves every this many seconds
+@export var cask_waste_extra: float = 1.0     ## after value sits below the floor ~this long → WASTED
+@export var cask_dead_frac: float = 0.30      ## inner fraction of the window = DEAD CENTER
+@export var cask_dead_mult: float = 1.12      ## DEAD CENTER burst ×this
+@export var cask_ramp_floor: float = 0.15     ## age-factor at age 0 (cold, under-aged)
+@export var cask_ramp_span: float = 0.65      ## age-factor ramp span to the window (floor+span→1.0)
+@export var cask_sour_floor: float = 0.12     ## age-factor never decays below this
+# --- the tap ---
+@export var cask_base: float = 55.0           ## burst per unit volume (×q×heat×finish×age×center×proof×dmg_scale)
+@export var cask_tail_frac: float = 0.12      ## Rot tail total = burst × this × rotCount (spread over rotCount s)
+# --- proof (this spec's Potency — the earned-power bar; TAP-earned only) ---
+@export var cask_proof_max: int = 6           ## pip ceiling
+@export var cask_proof_per: float = 0.12      ## +this multiplier per pip on EVERYTHING
+@export var cask_proof_peak: int = 1          ## a peak tap: +this pip
+@export var cask_proof_miss: int = 2          ## an early/sour tap, a dump, or a waste: −this pips
+@export var cask_proof_whiff: int = 1         ## a miss with NO doses in progress: −this pips
+
 ## The ability book (perform() ids). brew_venom/brew_rot START a charge, pour RELEASES
 ## it, rupture detonates. No GCD, no resource cost — the vial's timing is the gate.
 @export var abilities: Dictionary = {
@@ -119,5 +176,9 @@ extends Resource
 }
 
 ## The bar for an Aspect. The Brew is the whole class (working-name filler aspect id).
-func loadout(_aspect: String) -> Array:
+## THE CASK (§7) reuses the exact input surface — hold 1/2 to charge, release to pour,
+## tap 3/R to SEAL then PEAK-TAP — so the bar is the same three verbs.
+func loadout(aspect: String) -> Array:
+	if aspect == "cask":
+		return ["brew_venom", "brew_rot", "rupture"]
 	return ["brew_venom", "brew_rot", "rupture"]

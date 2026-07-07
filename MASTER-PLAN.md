@@ -586,9 +586,10 @@ nodes, not node kinds.
   a raid-wide Debilitator SUPPORT debuff (sunder-precedent engine touch, byte-neutral). All guarded →
   undrafted brew byte-identical (`4344960863911121821`); raid default comp byte-identical to main
   (`4978452801628609439`). Full state + per-layer sim A/B + next slices: **`ALCHEMIST-PLAN.md`**.
-  Play: `--autostart=raid:caster:brew`. Card BALANCE is Bill's playtest dial; STILL OWED: ~~2nd
-  spec~~ → **THE CASK design LOCKED FOR BUILD 2026-07-07 (`ALCHEMIST-PLAN.md` §7 — claimable)**,
-  class puppet, online spec-carry of creed/module/rig, name/art.
+  Play: `--autostart=raid:caster:brew` (Brew) · `--autostart=raid:caster:cask` (Cask verb preview).
+  Card BALANCE is Bill's playtest dial; STILL OWED: ~~2nd spec~~ → **THE CASK — SLICE 1 (verb base)
+  BUILT & VERIFIED 2026-07-07 (`cask-spec`, `ALCHEMIST-PLAN.md` §7.7); slices 2–5 next**, class
+  puppet, online spec-carry of creed/module/rig, name/art.
 - **THE WELL ("the Mender rework") — 🟢 BASE BUILT & MERGED 2026-07-07** (`mender-rework`). The
   direct-cast HEALER rework as a guarded class `well` on the healer seat (byte-identical unless
   picked; old Mender stays default). Two graded specs — **brim** (TARGET, grade the landing) /
@@ -761,6 +762,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `cask-spec` → main · §CLASSES / `ALCHEMIST-PLAN.md` §7.7 — **THE CASK — SLICE 1
+  (verb base) BUILT & VERIFIED.** aspect `cask` guarded on the Alchemist kit (Fermata idiom:
+  `_cask()` branches at the top of `upkeep`/`on_action`/`observe`; Brew evals untouched). Full
+  §7.1 reducer in `alchemist_kit.gd` (walking band · graded pours Bull/Perfect/Good · MISS→dump ·
+  Venom-heat/Rot-time + band walk · per-side STRAIN w/ swap-relief · SEAL→COOK→PEAK-tap sour
+  curve · tap-earned PROOF · Rot tail), all numbers `cask_*` on `AlchemistConfig`. First-cut cask
+  `AlchemistPolicy._act_cask` + `alchemist_sim` cask cells (`_cask_ab`/`_prove_cask`, `_run_one`
+  threads aspect) + minimal HUD selection (`--autostart=raid:caster:cask`). **Gates ALL GREEN:**
+  undrafted brew = `4344960863911121821` (byte-identical, 300 seeds) · raid default comp = main
+  `8987010164597652967` (byte-identical A/B) · cask determinism PASS 300 seeds · `ui_smoke_raid`
+  ALL OK. Verb-health: expert 100%/92%, clean seals + all-peak taps, dumps climb + collapse at
+  sloppy (the stake works). **Next (slices 2–5):** the real 3-tier policy (halve cask aim-noise;
+  the good tier over-collapses on a first cut), CASKWORKS HUD, card layers, balance. New house
+  card-TYPE taxonomy in play (POWER/GREED/STRAT/EASE/RULE/TEAM). **⚠ Note:** the concurrent
+  `brew-review` pass (§8 below) proposes back-porting Bullseye/graded pours to the BREW's vial —
+  the Cask's graded-pour engine (`cask_grade_*`, Bull/Perfect/Good) is the reference to reuse.
 - ☐ 2026-07-07 · main (docs only) · §CLASSES — **TANK REWORK — design pass (high-level concepts
   → Bill's filter chain).** Fresh-start rework of the tank seat's class (old Bulwark = frozen
   placeholder, NOT the base): raid-only rules (no self-heal — mitigation/avoidance only), two

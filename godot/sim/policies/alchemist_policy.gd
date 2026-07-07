@@ -47,6 +47,10 @@ func act(obs: Dictionary) -> Dictionary:
 			_tg_seen = tick
 	var reacted := tg.is_empty() or tick - _tg_seen >= latency_ticks
 
+	# THE CASK (§7) — a wholly separate verb; branch here so the Brew ladder below is untouched.
+	if String(obs.get("aspect", "")) == "cask":
+		return _act_cask(obs, tick, tg, reacted)
+
 	# 0) string beats: dodge each one (feints held unless the skill roll flinches).
 	var beats: Array = tg.get("strikes", [])
 	if not beats.is_empty() and obs.get("dodge_ready", false):
@@ -141,6 +145,60 @@ func act(obs: Dictionary) -> Dictionary:
 	if bool(obs.get("has_spitfire", false)) and bool(obs.get("spitfire_ready", false)):
 		return {"type": "ability", "id": "spitfire"}
 	return {}
+
+# --- THE CASK policy (§7.7 step 2, first cut) --------------------------------
+## Ride the vial to the band centre, weave the two poisons to keep strain low, seal a
+## full-ish cask, tap at the peak. latency_ticks smears the release aim (→ dumps) and the
+## tap timing (→ sours) — the same skill gradient the Brew gets from the vial. Deterministic.
+func _act_cask(obs: Dictionary, _tick: int, tg: Dictionary, reacted: bool) -> Dictionary:
+	# 0) string beats — dodge each (shared footwork).
+	var beats: Array = tg.get("strikes", [])
+	if not beats.is_empty() and obs.get("dodge_ready", false):
+		for i in beats.size():
+			var b: Dictionary = beats[i]
+			if bool(b.get("resolved", false)) or bool(b.get("answered", false)) \
+					or not bool(b.get("mine", true)):
+				continue
+			if int(b.get("guard", 0)) == StrikeRes.Guard.UNANSWERABLE:
+				continue
+			var rem := float(b.get("remaining", 9.0))
+			if bool(b.get("feint", false)):
+				if rem <= _beat_aim(tg, i) and _beat_flinch(tg, i):
+					return {"type": "dodge"}
+				break
+			if rem <= _beat_aim(tg, i):
+				return {"type": "dodge"}
+			break
+	# 1) dodge the telegraphed swing in its answer window.
+	if reacted and not tg.is_empty() and bool(tg.get("defensible", false)) \
+			and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)):
+		if float(tg.get("remaining", 99.0)) <= float(obs.get("def_zone", 0.42)):
+			return {"type": "defense"}
+	# 2) the vial is up — ride it to my rolled aim, then pour.
+	if String(obs.get("charging", "")) != "":
+		if float(obs.get("charge", 0.0)) >= _release_aim:
+			return {"type": "ability", "id": "pour"}
+		return {}
+	# 3) a cask is cooking — wait out the exhale, then tap at the peak (latency taps late → sour).
+	if bool(obs.get("cask_cooking", false)):
+		var age := float(obs.get("cask_age", 0.0))
+		var cook := float(obs.get("cask_cook", 5.0))
+		var tap_at := cook - 1.0 / 30.0 + float(latency_ticks) / 30.0
+		if age >= tap_at:
+			return {"type": "ability", "id": "rupture"}
+		return {}
+	# 4) filling — seal a full-ish cask (tap while filling = SEAL), else pour the next dose.
+	var doses := int(obs.get("cask_doses", 0))
+	if doses >= int(obs.get("cask_max_doses", 6)) - 1:
+		return {"type": "ability", "id": "rupture"}
+	# weave: pour whichever poison has fewer doses (ties → venom) — keeps strain low, recipe even.
+	var vc := int(obs.get("cask_vcount", 0))
+	var rc := int(obs.get("cask_rcount", 0))
+	# roll THIS pour's release aim once, at the band centre, smeared by latency (→ dumps).
+	_release_aim = float(obs.get("cask_band", 0.62))
+	if rng != null and latency_ticks > 0:
+		_release_aim += (rng.next_float() * 2.0 - 1.0) * float(latency_ticks) * RELEASE_NOISE_PER_LAT
+	return {"type": "ability", "id": "brew_venom" if vc <= rc else "brew_rot"}
 
 # --- M7 beat rolls (cached per string; latency_ticks doubles as the noise knob) ---
 func _beat_aim(tg: Dictionary, i: int) -> float:

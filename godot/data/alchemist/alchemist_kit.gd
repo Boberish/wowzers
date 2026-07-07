@@ -44,6 +44,12 @@ func _b(id: String) -> bool:
 func _m(id: String) -> bool:
 	return bool(modules.get(id, false))
 
+## THE CASK (§7) guard. aspect == "cask" is a brand-new code path; every Brew eval tests
+## aspect == "brew" (or nothing), so widening never moves an existing checksum — the
+## Fermata idiom. When false the cask branches below are never entered (byte-identical base).
+func _cask() -> bool:
+	return aspect == "cask"
+
 ## A creed modifier, identity-defaulted. creed_id == "" returns the IDENTITY value, so every
 ## base-build expression collapses to its original constant (byte-identical gate).
 func _cr(key: String):
@@ -112,6 +118,9 @@ func _react_dps(seat: Seat) -> float:
 # --------------------------------------------------------------------------
 
 func upkeep(s: CombatState, seat: Seat) -> void:
+	if _cask():
+		_cask_upkeep(s, seat)
+		return
 	var dt := s.dt
 	# 1) the vial fills while held — slow at the bottom, accelerating hard near the top.
 	#    CREED (Anchorite): a LINEAR fill (no quad accel) at a faster base rate — predictable.
@@ -240,6 +249,8 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 # --------------------------------------------------------------------------
 
 func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null) -> bool:
+	if _cask():
+		return _cask_on_action(s, seat, id)
 	match id:
 		&"brew_venom":
 			return _start_charge(seat, "venom")
@@ -475,6 +486,8 @@ func _rupture(s: CombatState, seat: Seat) -> bool:
 # --------------------------------------------------------------------------
 
 func observe(s: CombatState, seat: Seat) -> Dictionary:
+	if _cask():
+		return _cask_observe(s, seat)
 	var m := minf(_venom(seat), _rot(seat))
 	# CREED- and BOON-effective values the policy needs (frozen/slowed Rot, wider/tighter band,
 	# bigger cap, faster fade, capped potency) — projection + feed target + rupture timing read these.
@@ -532,6 +545,327 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"reduction_ready": int(seat.vars.get("reduction_rdy", 0)) <= s.tick,
 		# the "ripe" cue: fuel × power, the artifact's rupGlow — the HUD sigil + policy read it
 		"ripe_glow": minf(1.0, m / cfg.ripe_fuel) * (cfg.ripe_glow_min + (1.0 - cfg.ripe_glow_min) * _potency(seat)),
+		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,
+		"def_zone": cfg.dodge_zone,
+		"def_cd": cfg.dodge_cd,
+	}
+
+# ==========================================================================
+# THE CASK (§7) — the 2nd spec. A brand-new verb reached only via aspect == "cask", never
+# by the Brew (byte-identical base). STACK graded pours on a walking band → SEAL → COOK →
+# PEAK tap. All state under a cask_ prefix in seat.vars; zero randomness; fixed 30 Hz.
+# ==========================================================================
+const CASK_TAIL_EVERY := 15   ## a Rot tail lands on this cadence (ticks) — 0.5s at 30 Hz
+
+func _cask_strain(seat: Seat, side: String) -> int:
+	return int(seat.vars.get("cask_strain_v" if side == "venom" else "cask_strain_r", 0))
+
+## The effective band half is width/2; width shrinks ×cask_strain_shrink per chain level.
+func _cask_band_width(seat: Seat, side: String) -> float:
+	return cfg.cask_sweet_w * pow(cfg.cask_strain_shrink, float(_cask_strain(seat, side)))
+
+func _cask_proof(seat: Seat) -> int:
+	return int(seat.vars.get("cask_proof", 0))
+
+## Set proof (clamped) and mirror it to the generic resource bar (proof IS this spec's power).
+func _cask_set_proof(seat: Seat, v: int) -> void:
+	var p := clampi(v, 0, cfg.cask_proof_max)
+	seat.vars["cask_proof"] = p
+	seat.resource = float(p) / float(cfg.cask_proof_max) * seat.resource_max
+
+## Cooking age in seconds, derived from the seal tick (integer tick is truth).
+func _cask_age(s: CombatState, seat: Seat) -> float:
+	return float(s.tick - int(seat.vars.get("cask_seal_tick", s.tick))) * s.dt
+
+## The age→value curve: a quadratic ramp up to the peak window (flat 1.0), then a sour decay
+## with a hard floor. Its shape decides EARLY (weak) / PEAK (full) / SOUR (bleeding) taps.
+func _cask_age_factor(age: float, cook: float, win: float) -> float:
+	if age < cook - win:
+		var x := age / maxf(0.001, cook - win)
+		return cfg.cask_ramp_floor + cfg.cask_ramp_span * x * x
+	if age <= cook + win:
+		return 1.0
+	return maxf(cfg.cask_sour_floor, pow(0.5, (age - (cook + win)) / cfg.cask_sour_half))
+
+# --- per-tick: advance the vial (fill + red-line spoil), age a cooking cask, drip the tail ---
+func _cask_upkeep(s: CombatState, seat: Seat) -> void:
+	var dt := s.dt
+	# 1) the vial fills while held — the tester curve, sped up by strain on the held side.
+	var side := String(seat.vars.get("charging", ""))
+	if side != "":
+		var c := float(seat.vars.get("charge", 0.0))
+		var rate := (cfg.cask_charge_base + cfg.cask_charge_quad * c) / cfg.cask_charge_time
+		rate *= (1.0 + cfg.cask_strain_spd * float(_cask_strain(seat, side)))
+		c += rate * dt
+		if c >= cfg.cask_red_line:                 # held too long → SPOILED, the batch is dumped
+			seat.vars["charge"] = cfg.cask_red_line
+			seat.vars["charging"] = ""
+			_cask_miss(s, seat, "spoiled")
+		else:
+			seat.vars["charge"] = c
+	# 2) a cooking cask ages toward its peak; too long past the window and it's WASTED.
+	if bool(seat.vars.get("cask_cooking", false)):
+		var age := _cask_age(s, seat)
+		var cook := float(seat.vars.get("cask_cook", cfg.cask_cook))
+		var win := float(seat.vars.get("cask_win", cfg.cask_peak_base))
+		if age >= cook - win and not bool(seat.vars.get("cask_chimed", false)):
+			seat.vars["cask_chimed"] = true
+			CombatCore.emit_event(s, {"t": "cask_ripe", "player": seat.is_player, "seat": seat})
+		if age >= cook + win + 2.0 * cfg.cask_sour_half + cfg.cask_waste_extra:
+			_cask_waste(s, seat)
+	# 3) the Rot tail from the last tap drips on a fixed cadence (banked count + per-hit value).
+	if s.tick % CASK_TAIL_EVERY == 0:
+		var left := int(seat.vars.get("cask_tail_left", 0))
+		if left > 0:
+			var per := float(seat.vars.get("cask_tail_per", 0.0))
+			if per >= 1.0:
+				CombatCore.damage_boss(s, seat, roundf(per), &"cask_tail")
+			seat.vars["cask_tail_left"] = left - 1
+	# keep the generic resource mirror live even on an idle exhale (proof drives it).
+	_cask_set_proof(seat, _cask_proof(seat))
+
+# --- actions: the shared surface (hold 1/2 charge · release pour · tap 3 = seal / peak-tap) ---
+func _cask_on_action(s: CombatState, seat: Seat, id: StringName) -> bool:
+	match id:
+		&"brew_venom":
+			return _cask_start_charge(seat, "venom")
+		&"brew_rot":
+			return _cask_start_charge(seat, "rot")
+		&"pour":
+			return _cask_pour(s, seat)
+		&"rupture":
+			return _cask_tap(s, seat)
+	return false
+
+func _cask_start_charge(seat: Seat, side: String) -> bool:
+	if String(seat.vars.get("charging", "")) != "":
+		return false
+	if bool(seat.vars.get("cask_cooking", false)):
+		return false                          # can't pour while a cask cooks — that's the exhale
+	seat.vars["charging"] = side
+	seat.vars["charge"] = 0.0
+	return true
+
+## Release the vial → grade against the strained band. BULLSEYE/PERFECT/GOOD land a dose;
+## anything wider (or held past the red line) MISSES and dumps the whole in-progress batch.
+func _cask_pour(s: CombatState, seat: Seat) -> bool:
+	var side := String(seat.vars.get("charging", ""))
+	if side == "":
+		return false
+	var lvl := float(seat.vars.get("charge", 0.0))
+	seat.vars["charging"] = ""
+	seat.vars["charge"] = 0.0
+	if lvl < cfg.cask_fizzle:                 # the bail — a low release costs nothing
+		CombatCore.emit_event(s, {"t": "cask_pour", "player": seat.is_player, "seat": seat,
+			"side": side, "grade": "bail"})
+		return true
+	if lvl >= cfg.cask_red_line:
+		_cask_miss(s, seat, "spoiled")
+		return true
+	var center := float(seat.vars.get("cask_band", cfg.cask_band_start))
+	var half := _cask_band_width(seat, side) * 0.5
+	var d := absf(lvl - center)
+	var gmult: float
+	var grade: String
+	if d <= half * cfg.cask_bull_frac:
+		gmult = cfg.cask_grade_bull; grade = "bull"
+	elif d <= half:
+		gmult = cfg.cask_grade_perfect; grade = "perfect"
+	elif d <= half * cfg.cask_good_frac:
+		gmult = cfg.cask_grade_good; grade = "good"
+	else:
+		_cask_miss(s, seat, "wide")
+		return true
+	_cask_add_dose(s, seat, side, lvl, gmult, grade)
+	return true
+
+func _cask_add_dose(s: CombatState, seat: Seat, side: String, lvl: float, gmult: float, grade: String) -> void:
+	seat.vars["cask_vol"] = float(seat.vars.get("cask_vol", 0.0)) + lvl
+	seat.vars["cask_doses"] = int(seat.vars.get("cask_doses", 0)) + 1
+	seat.vars["cask_grade_sum"] = float(seat.vars.get("cask_grade_sum", 0.0)) + gmult
+	seat.vars["cask_finish"] = side
+	if side == "venom":                       # heat comes from Venom, window + tail from Rot
+		seat.vars["cask_vcount"] = int(seat.vars.get("cask_vcount", 0)) + 1
+	else:
+		seat.vars["cask_rcount"] = int(seat.vars.get("cask_rcount", 0)) + 1
+	# STRAIN: this side climbs; the other relieves (a swap unwinds the built-up side).
+	var kv := "cask_strain_v" if side == "venom" else "cask_strain_r"
+	var ko := "cask_strain_r" if side == "venom" else "cask_strain_v"
+	seat.vars[kv] = int(seat.vars.get(kv, 0)) + 1
+	seat.vars[ko] = maxi(0, int(seat.vars.get(ko, 0)) - cfg.cask_swap_relief)
+	# the band walks: Venom climbs toward the red line, Rot settles down — plannable, no rng.
+	var band := float(seat.vars.get("cask_band", cfg.cask_band_start))
+	band += (cfg.cask_band_step if side == "venom" else -cfg.cask_band_step)
+	seat.vars["cask_band"] = clampf(band, cfg.cask_band_lo, cfg.cask_band_hi)
+	CombatCore._bump_diag(s, seat, "cask_pour_" + grade)
+	CombatCore.emit_event(s, {"t": "cask_pour", "player": seat.is_player, "seat": seat,
+		"side": side, "grade": grade, "doses": int(seat.vars["cask_doses"])})
+	if int(seat.vars["cask_doses"]) >= cfg.cask_max_doses:
+		_cask_seal(s, seat)
+
+## The tap does double duty: SEAL a filling cask, or PEAK-TAP a cooking one.
+func _cask_tap(s: CombatState, seat: Seat) -> bool:
+	if bool(seat.vars.get("cask_cooking", false)):
+		return _cask_peak_tap(s, seat)
+	return _cask_seal(s, seat)
+
+func _cask_seal(s: CombatState, seat: Seat) -> bool:
+	var doses := int(seat.vars.get("cask_doses", 0))
+	if doses < cfg.cask_min_doses:
+		return false                          # too thin — nothing to seal
+	var rc := int(seat.vars.get("cask_rcount", 0))
+	var vc := int(seat.vars.get("cask_vcount", 0))
+	seat.vars["cask_q"] = float(seat.vars.get("cask_grade_sum", 0.0)) / float(doses)
+	seat.vars["cask_win"] = minf(cfg.cask_cook * cfg.cask_peak_cap_frac,
+		cfg.cask_peak_base + cfg.cask_rot_win * float(rc))
+	seat.vars["cask_heat"] = 1.0 + cfg.cask_ven_heat * float(vc)
+	seat.vars["cask_cook"] = cfg.cask_cook
+	seat.vars["cask_cooking"] = true
+	seat.vars["cask_seal_tick"] = s.tick
+	seat.vars["cask_chimed"] = false
+	seat.vars["cask_strain_v"] = 0           # seal clears strain + re-centres the band
+	seat.vars["cask_strain_r"] = 0
+	seat.vars["cask_band"] = cfg.cask_band_start
+	CombatCore._bump_diag(s, seat, "cask_seal")
+	if doses >= cfg.cask_max_doses:
+		CombatCore._bump_diag(s, seat, "cask_seal_full")
+	CombatCore.emit_event(s, {"t": "cask_seal", "player": seat.is_player, "seat": seat,
+		"doses": doses, "q": float(seat.vars["cask_q"])})
+	return true
+
+func _cask_peak_tap(s: CombatState, seat: Seat) -> bool:
+	var age := _cask_age(s, seat)
+	var cook := float(seat.vars.get("cask_cook", cfg.cask_cook))
+	var win := float(seat.vars.get("cask_win", cfg.cask_peak_base))
+	var af := _cask_age_factor(age, cook, win)
+	var dead := cfg.cask_dead_mult if absf(age - cook) < cfg.cask_dead_frac * win else 1.0
+	var finish := String(seat.vars.get("cask_finish", ""))
+	var fin_burst := cfg.cask_ven_finish if finish == "venom" else 1.0
+	var vol := float(seat.vars.get("cask_vol", 0.0))
+	var q := float(seat.vars.get("cask_q", 0.0))
+	var heat := float(seat.vars.get("cask_heat", 1.0))
+	var pmult := 1.0 + cfg.cask_proof_per * float(_cask_proof(seat))
+	var burst := roundf(cfg.cask_base * vol * q * heat * fin_burst * af * dead * pmult * cfg.dmg_scale)
+	var in_peak := age >= cook - win and age <= cook + win
+	if in_peak:
+		_cask_set_proof(seat, _cask_proof(seat) + cfg.cask_proof_peak)
+		CombatCore._bump_diag(s, seat, "cask_tap_peak")
+	elif age < cook - win:
+		_cask_set_proof(seat, _cask_proof(seat) - cfg.cask_proof_miss)
+		CombatCore._bump_diag(s, seat, "cask_tap_early")
+	else:
+		_cask_set_proof(seat, _cask_proof(seat) - cfg.cask_proof_miss)
+		CombatCore._bump_diag(s, seat, "cask_tap_sour")
+	if burst >= 1.0:
+		CombatCore.damage_boss(s, seat, burst, &"cask_tap")
+	# the Rot tail — a lingering aftershock, doubled by a Rot finish. Banked so overlaps keep total.
+	var rc := int(seat.vars.get("cask_rcount", 0))
+	if rc > 0:
+		var fin_tail := cfg.cask_rot_finish if finish == "rot" else 1.0
+		var total := burst * cfg.cask_tail_frac * float(rc) * fin_tail
+		var ticks := rc * 2
+		var prev := float(seat.vars.get("cask_tail_left", 0)) * float(seat.vars.get("cask_tail_per", 0.0))
+		seat.vars["cask_tail_left"] = ticks
+		seat.vars["cask_tail_per"] = (total + prev) / float(ticks)
+	CombatCore.emit_event(s, {"t": "cask_tap", "player": seat.is_player, "seat": seat,
+		"amt": int(burst), "peak": in_peak})
+	_cask_reset_fill(seat)
+	seat.vars["cask_cooking"] = false
+	return true
+
+## A MISS: dump the whole in-progress batch (or a light whiff if nothing was stacked).
+func _cask_miss(s: CombatState, seat: Seat, why: String) -> void:
+	var doses := int(seat.vars.get("cask_doses", 0))
+	if doses > 0:
+		_cask_set_proof(seat, _cask_proof(seat) - cfg.cask_proof_miss)
+		CombatCore._bump_diag(s, seat, "cask_dump")
+		CombatCore.emit_event(s, {"t": "cask_dump", "player": seat.is_player, "seat": seat,
+			"doses": doses, "why": why})
+	else:
+		_cask_set_proof(seat, _cask_proof(seat) - cfg.cask_proof_whiff)
+		CombatCore._bump_diag(s, seat, "cask_whiff")
+	_cask_reset_fill(seat)
+
+func _cask_waste(s: CombatState, seat: Seat) -> void:
+	_cask_set_proof(seat, _cask_proof(seat) - cfg.cask_proof_miss)
+	CombatCore._bump_diag(s, seat, "cask_waste")
+	CombatCore.emit_event(s, {"t": "cask_waste", "player": seat.is_player, "seat": seat})
+	_cask_reset_fill(seat)
+	seat.vars["cask_cooking"] = false
+
+func _cask_reset_fill(seat: Seat) -> void:
+	seat.vars["cask_vol"] = 0.0
+	seat.vars["cask_doses"] = 0
+	seat.vars["cask_vcount"] = 0
+	seat.vars["cask_rcount"] = 0
+	seat.vars["cask_grade_sum"] = 0.0
+	seat.vars["cask_finish"] = ""
+	seat.vars["cask_strain_v"] = 0
+	seat.vars["cask_strain_r"] = 0
+	seat.vars["cask_band"] = cfg.cask_band_start
+
+## View/AI fields for the cask (never checksummed). Includes a brew-key superset so the
+## current ALEMBIC HUD renders mapped cask state instead of erroring (the real CASKWORKS
+## instrument is slice 3); the cask_* keys are what the cask policy reads.
+func _cask_observe(s: CombatState, seat: Seat) -> Dictionary:
+	var cooking := bool(seat.vars.get("cask_cooking", false))
+	var side := String(seat.vars.get("charging", ""))
+	var band := float(seat.vars.get("cask_band", cfg.cask_band_start))
+	var half := _cask_band_width(seat, side if side != "" else "venom") * 0.5
+	var proof := _cask_proof(seat)
+	var cook := float(seat.vars.get("cask_cook", cfg.cask_cook))
+	var win := float(seat.vars.get("cask_win", cfg.cask_peak_base))
+	var age := _cask_age(s, seat) if cooking else 0.0
+	var ripe := cooking and age >= cook - win and age <= cook + win
+	return {
+		"tick": s.tick,
+		"aspect": aspect,
+		"charging": side,
+		"charge": float(seat.vars.get("charge", 0.0)),
+		"charge_max": cfg.cask_red_line,
+		# --- the cask verb (policy reads these) ---
+		"cask_band": band,
+		"cask_band_half": half,
+		"cask_red_line": cfg.cask_red_line,
+		"cask_fizzle": cfg.cask_fizzle,
+		"cask_bull_frac": cfg.cask_bull_frac,
+		"cask_cooking": cooking,
+		"cask_age": age,
+		"cask_cook": cook,
+		"cask_win": win,
+		"cask_doses": int(seat.vars.get("cask_doses", 0)),
+		"cask_min_doses": cfg.cask_min_doses,
+		"cask_max_doses": cfg.cask_max_doses,
+		"cask_vcount": int(seat.vars.get("cask_vcount", 0)),
+		"cask_rcount": int(seat.vars.get("cask_rcount", 0)),
+		"cask_strain_v": int(seat.vars.get("cask_strain_v", 0)),
+		"cask_strain_r": int(seat.vars.get("cask_strain_r", 0)),
+		"cask_proof": proof,
+		"cask_proof_max": cfg.cask_proof_max,
+		# --- brew-key superset so the ALEMBIC HUD renders (mapped) rather than erroring ---
+		"venom": float(seat.vars.get("cask_vcount", 0)),
+		"rot": float(seat.vars.get("cask_rcount", 0)),
+		"cap": float(cfg.cask_max_doses),
+		"decay_venom": 0.0, "decay_rot": 0.0,
+		"sweet_lo": clampf(band - half, 0.0, 1.0),
+		"sweet_hi": clampf(band + half, 0.0, 1.0),
+		"overflow_at": cfg.cask_red_line,
+		"fizzle_below": cfg.cask_fizzle,
+		"balance": 0.5,
+		"potency": float(proof) / float(cfg.cask_proof_max),
+		"pot_cap": 1.0,
+		"pot_mult": 1.0 + cfg.cask_proof_per * float(proof),
+		"pot_feed_ok": true, "pot_bal_ok": true,
+		"react_dps": 0.0,
+		"brew_min": float(seat.vars.get("cask_doses", 0)),
+		"rupture_min": 0.0, "no_rupture": false,
+		"mod_third_reagent": false, "mod_fermentation": false, "mod_reaction_vessel": false,
+		"reagent": 0.0, "reagent_ready": false, "reagent_active": false,
+		"ferment": 0.0, "vessel": 0.0,
+		"has_spitfire": false, "spitfire_ready": false,
+		"has_decant": false, "decant_ready": false,
+		"has_reduction": false, "reduction_ready": false,
+		"ripe_glow": 1.0 if ripe else 0.0,
 		"boss_frac": (s.boss.hp / s.boss.hp_max) if s.boss.hp_max > 0.0 else 0.0,
 		"def_zone": cfg.dodge_zone,
 		"def_cd": cfg.dodge_cd,
