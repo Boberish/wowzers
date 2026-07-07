@@ -337,6 +337,37 @@ Forge itself:** determinism PASS; band targets per tier hit within tolerance; ze
 never-winnable outputs across the full seed sweep; named minibosses excluded (those get
 a designer soul on a Forge body — generator does the body, a human does the signature).
 
+### FORGE — build spec v1 (claimed 2026-07-07, Bill: "lets go for the forge")
+- **`data/world/forge.gd`** — `Forge.make(zone, body, tier, seed) -> EncounterRes`, pure
+  static, own DetRng. **THE ID IS THE RECIPE:** generated encounters carry id
+  `forge:<zone>:<body>:<tier>:<seed>` and `RaidContent.encounter_by_id` gains a `forge:`
+  prefix arm that REGENERATES from the id — specs stay strings, lockstep/replay/pack
+  chains all work with zero registry (additive arm; every existing id untouched).
+- **BODIES v1 (4):** SWARM (light, chip melee + dodge beats — the pack filler the quota
+  roll has been waiting for) · STALKER (feint-heavy swings) · CHANTER (kickable casts +
+  the kick-tax) · BRUTE (slow heavy parry exams). Each = HP/melee/enrage budget on the
+  BAKED baseline (swarm ≈ 4.5k … brute ≈ 9.5k — a swarm-swarm-brute trio lands mid-fight
+  size, fixing the "trio runs Seal-sized" wart) + 1–2 MOVES drawn seeded from the body's
+  verb palette (parry swing / dodge string / kickable chant / nova) with **TIER knobs**
+  (t1 teaching → t3 veteran: windows tighten, cadence quickens, string beats grow — never
+  raw stat inflation).
+- **ZONE PALETTE = the fiction skin:** per-zone name/intro tables (Gildfields: HUSKMAN
+  REAPER · CHAFF-SWARM · HEDGE STALKER · GRAIN-CANTOR…) — the Forge does mechanics, the
+  palette does soul. **Zone 1 content pass rides along:** every Gildfields stand-in
+  (bard/sonnet/opus) swaps to authored `forge:` ids (fixed seeds = the world's "light
+  seeded dressing", same fight for every player) — THE TONE CRACK CLOSES (no more
+  BARD.EXE in the fields). THE PALE TILLER = a t2 BRUTE body wearing its authored name
+  (the named-miniboss rule: generator body, human soul). The capstone stays VORATHEK
+  (casting pool). Raid Topology fillers stay bard/sonnet v1 (Realm-1 skin is correct
+  inside the door).
+- **`sim/forge_sim.gd`** — the certification harness (psim-sharded): sweep bodies ×
+  tiers × seeds at 3 policy tiers; print bands; ASSERT determinism (id ⇒ identical
+  checksum), zero expert-unwinnable, per-tier band tolerances; CSV per seed.
+- **Gates:** forge_sim ALL PASS (Zone-1 pool certified) · frozen-main A/B twinfang(120)
+  + raid(60) byte-identical (the encounter_by_id arm is additive) · world/raid smokes ·
+  pack/packroll/world probes · play-copy sync. Stage puppets default for forge ids
+  (per-body rigs = a later art pass).
+
 ---
 
 ## COMBAT PILLARS (rework-era laws — lock BEFORE continuing class reworks)
@@ -416,9 +447,9 @@ stream, always — packs are strictly sequential):
    payoff Bill's missing ("combo comes online" and STAYS online); each rework defines
    its pack-carry rule like it defines its PERFECT payoff. Forge assembles packs from
    BODY archetypes (SWARM smalls → BRUTE captain).
-2. **THE CHASE — KEPT** — a running battle: the enemy flees at HP thresholds, the stage
-   shifts (2–3 arenas, same HP pool), transit carries one authored dodge-string. The
-   fight that moves — zone-fiction gold (the Huskman captain fleeing deeper).
+2. **THE CHASE — PARKED (Bill, 2026-07-07: "not sure i like, pressure to do one thing
+   or another is meh, lets leave it open")** — the multi-arena running battle sits on
+   the shelf with the design intact; revisit only if a zone's fiction begs for it.
 3. **INTERLUDE WAVES — KEPT (lukewarm)** — the boss withdraws, light adds cycle through
    (proven Seal tech): an intensity valley that stays active. Use sparingly.
 
