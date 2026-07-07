@@ -33,7 +33,7 @@ PROBES=(
   map_mark_probe map_wager_probe map_check_online_probe
   fight_seed_probe menu_probe meter_probe
   raid_probe raid_boon_probe raid_healer_probe raid_bloom_probe raid_reckoner_probe
-  fermata_input_check fightlen_probe pack_probe packroll_probe world_probe
+  fermata_input_check fightlen_probe pack_probe packroll_probe world_probe shell_probe
 )
 SMOKES=( ui_smoke_raid ui_smoke_map ui_smoke_world )
 NET_SMOKES=( net_smoke net_map_smoke )   # sequential: both bind the loopback port

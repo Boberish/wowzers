@@ -343,49 +343,9 @@ func _ready() -> void:
 			_fightlen = maxf(1.0, float(a.substr("--fightlen=".length())))
 			if _fightlen > 1.001:
 				print("FIGHTLEN ×%.2f — offline boss HP + enrage scaled (dev feel toggle)" % _fightlen)
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--autostart=gate"):
-			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
-			# (no map context: the end screen closes it — a dev/verify entry)
-			var gspec := a.substr("--autostart=".length()).split(":")
-			_seat_key = gspec[1] if gspec.size() > 1 and SEAT_IDX.has(gspec[1]) else "tank"
-			_aspect = gspec[2] if gspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
-			_launch_gate_fight()
-		elif a.begins_with("--autostart=raidmap"):
-			# --autostart=raidmap[:seat[:aspect]]  → straight onto the Topology floor
-			var mspec := a.substr("--autostart=".length()).split(":")
-			_seat_key = mspec[1] if mspec.size() > 1 and SEAT_IDX.has(mspec[1]) else "tank"
-			_aspect = mspec[2] if mspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
-			_start_map_run()
-		elif a.begins_with("--autostart=world") or a.begins_with("--autostart=atlas"):
-			# --autostart=world[:seat[:aspect]]  → THE WORLD preview, straight onto the Atlas
-			var wspec := a.substr("--autostart=".length()).split(":")
-			_seat_key = wspec[1] if wspec.size() > 1 and SEAT_IDX.has(wspec[1]) else "tank"
-			_aspect = wspec[2] if wspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
-			_sync_healer_cls()
-			_sync_blade_cls()
-			_sync_caster_cls()
-			_show_atlas()
-		elif a.begins_with("--autostart=zone"):
-			# --autostart=zone[:seat[:aspect]]  → straight into ZONE 1 (the Gildfields)
-			var zspec := a.substr("--autostart=".length()).split(":")
-			_seat_key = zspec[1] if zspec.size() > 1 and SEAT_IDX.has(zspec[1]) else "tank"
-			_aspect = zspec[2] if zspec.size() > 2 else String((ASPECTS[_seat_key][0] as Dictionary)["id"])
-			_sync_healer_cls()
-			_sync_blade_cls()
-			_sync_caster_cls()
-			_zone_id = WorldContent.ZONE1
-			if _world == null:
-				_world = WorldSave.load_save()
-			_ensure_party()
-			_show_zone()
-		elif a.begins_with("--autostart=raid"):
-			# --autostart=raid[:seat[:aspect[:boss]]]  e.g. raid:blade:tempo:mythos
-			var spec := a.substr("--autostart=".length()).split(":")
-			var seat := spec[1] if spec.size() > 1 else "tank"
-			var aspect := spec[2] if spec.size() > 2 else ""
-			var enc := spec[3] if spec.size() > 3 else ""
-			_launch(seat, aspect, enc)
+	# P3.2a: the dev autostart idioms moved UP to WorldShell.drive_autostart — the
+	# shell owns the boot; this HUD is the instance surface it raises. (`--fightlen=`
+	# stays above: an instance feel-scalar, parsed before any pull.)
 
 func _clear() -> void:
 	TransitionVeil.flash_on(self)   # screens settle in, never snap

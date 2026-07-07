@@ -222,6 +222,19 @@ Each its own worktree/claim, in this order:
    *launches* the combat HUD as an instance surface. Autostart becomes "drive the shell"
    (one dev-harness entry, not a parallel boot path). raid_hud shrinks toward ~2k lines of
    combat-only HUD.
+   **P3.2a ✅ BUILT 2026-07-07 — the ownership inversion:** `game/world_shell.gd` +
+   `world_shell.tscn` is THE BOOT SCENE (`run/main_scene`); it raises raid_hud as its
+   instance surface and owns ALL dev autostart idioms (`drive_autostart`, moved verbatim
+   off `raid_hud._ready`; `--fightlen=` stays HUD-side as an instance feel-scalar). New
+   `sim/shell_probe.gd` proves the chain (boot→HOME + all 5 idioms → right screen),
+   wired into verify-all. Probes/smokes loading `raid_main.tscn` directly are untouched
+   by design — the HUD stays self-contained. GATES: shell_probe + menu_probe + all 3 ui
+   smokes + both net smokes ALL OK.
+   **P3.2b ☐ NEXT — the screens migrate:** home/select/party + atlas/zone/bastion
+   builders move up to the shell (the shell takes `_d` + WorldSave with them; the
+   UiKit `_label/_title/_gap` hoist is the natural prerequisite so the builders don't
+   drag HUD helpers along); Esc/home routing inverts (instance ends → shell screen);
+   raid_hud keeps ONLY descent ceremonies + combat.
 3. **Online split** — the lobby/connect/netmap UX out of raid_hud into a shell-owned
    controller. "PLAY ONLINE" the screen dies here; connectivity becomes a shell property
    (presence), fights become instances you enter from the world.
