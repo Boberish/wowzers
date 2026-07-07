@@ -52,6 +52,23 @@ func _initialize() -> void:
 	var dealt3 := hp2 - s.boss.hp
 	print("bare release (no coil) -> boss dmg = %.0f (expect 0)  %s" % [dealt3, "PASS" if dealt3 == 0.0 else "FAIL"])
 
+	# --- 4) THE ROAMING WINDOW: the green relocates after every resolve ---
+	# Strike a few beats and collect the live window centre each time — the tester's core read
+	# (no autopilot rhythm; the next window lands somewhere new).
+	var centers: Array = []
+	for _i in 4:
+		var obs := CombatCore.observe(s, blade)
+		centers.append((float(obs["perfect_lo"]) + float(obs["perfect_hi"])) * 0.5)
+		_enq(s, blade, {"type": "ability", "id": "coil"})
+		_step(s, 24)                                # sharpen well past the floor
+		_enq(s, blade, {"type": "ability", "id": "release"})
+		_step(s, 2)
+	var distinct := {}
+	for c in centers:
+		distinct[snappedf(float(c), 0.01)] = true
+	print("window centres over 4 beats (ticks): %s  -> %d distinct (expect >= 3)  %s" % [
+		str(centers), distinct.size(), "PASS" if distinct.size() >= 3 else "FAIL"])
+
 	quit()
 
 func _enq(s: CombatState, seat: Seat, action: Dictionary) -> void:

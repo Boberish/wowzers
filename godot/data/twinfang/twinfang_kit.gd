@@ -226,6 +226,17 @@ func _edge_window(seat: Seat) -> Array:
 		var halfL := (hi - lo) * 0.5 * cfg.largo_window_mult
 		lo = midL - halfL
 		hi = midL + halfL
+	# FERMATA · THE ROAMING WINDOW: relocate the green by this beat's shift (rolled on each
+	# resolve in _strike). Applied LAST so the width and every boon/creed effect above are
+	# preserved — only the CENTRE moves. Clamped reachable: the mouth can't sit before a fresh
+	# coil could sharpen (+ a read margin), and the far edge stays on the fixed fermata ruler.
+	if _fermata():
+		var fmid := (lo + hi) * 0.5
+		var fhalf := (hi - lo) * 0.5
+		fmid = clampf(fmid * float(seat.vars.get("window_shift", 1.0)),
+			_coil_min(seat) + fhalf + 0.10, cfg.fermata_ruler_sec - fhalf - 0.06)
+		lo = fmid - fhalf
+		hi = fmid + fhalf
 	return [lo, hi]
 
 # --- Venomancer POISON WHEEL: the lit lane (0=V, 1=F, 2=C) — the lane the NEXT Strike
@@ -743,7 +754,7 @@ func on_dodge_press(s: CombatState, seat: Seat) -> void:
 	if _b("vanish") and cfg.vanish_keep_sharp:
 		return                                                     # VANISH (opus): the coil survives, still sharp
 	if _b("shadowstep"):
-		seat.vars["coil_press_tick"] = s.tick - _tt(s, _coil_min(seat)) / 2   # kept at half progress
+		seat.vars["coil_press_tick"] = s.tick - int(_tt(s, _coil_min(seat)) / 2.0)   # kept at half progress
 		seat.vars["sharp"] = false
 		return
 	seat.vars["coiling"] = false
@@ -962,6 +973,11 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_sec := 0.0)
 			_creed_slip(s, seat)                                             # REWORK: a missed beat is a SLIP (Creed pays it)
 	# FENCER'S LINE: a Bullseye widens the NEXT window (one-shot); any other grade clears it.
 	seat.vars["fencer_next"] = (bullseye and _b("fencersLine"))
+	# FERMATA · THE ROAMING WINDOW: every resolve rolls where the NEXT green lands. Drawn from
+	# s.rng so lockstep replicas agree; only the fermata aspect reaches this line, so the
+	# tempo/venom rng streams are untouched (their checksums stay byte-identical).
+	if _fermata():
+		seat.vars["window_shift"] = lerpf(cfg.fermata_shift_min, cfg.fermata_shift_max, s.rng.next_float())
 	_gain_cp(seat, cp + (cfg.bull_bonus_cp if bullseye else 0))   # F15: a Bullseye grants extra combo (superset of Perfect)
 	if _b("strikeEnergy") and perfect:
 		_gain_energy(seat, cfg.efficiency_refund)                 # Efficiency: stacks ON TOP of the base refund
@@ -1231,7 +1247,9 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"swing_min_ticks": _tt(s, _swing_min_sec(seat)),
 		"perfect_lo": _tt(s, _perfect_lo_sec(seat)),
 		"perfect_hi": _tt(s, _perfect_hi_sec(seat)),
-		"rhythm_scale": _tt(s, cfg.perfect_end + 0.15),   # FIXED ruler (flow-0 anchor + margin) so the RhythmBar shows the accelerando
+		# FIXED ruler so the RhythmBar shows the accelerando (tempo) / the roaming window
+		# (fermata — wide enough for the whole roam band + a late reach, and it never rescales).
+		"rhythm_scale": _tt(s, cfg.fermata_ruler_sec if _fermata() else (cfg.perfect_end + 0.15)),
 		# GRADED WINDOW (§2c): the sub-band fractions (of the half-window from centre) so the
 		# RhythmBar can draw Bullseye-core / Perfect / Good-flank zones, not one flat green band.
 		"grade_bull_frac": cfg.grade_bull_frac,

@@ -138,6 +138,14 @@ extends Resource
 #     the existing checksums are untouched. Ladders in TEMPO-PLAN §13; base = the Haiku rung. ---
 @export var coil_min_sec: float = 0.35          ## min hold before the blade SHARPENS; release early = UNRAVEL
 @export var coil_unravel_stagger: float = 0.35  ## strike-lock after an unravel (no strike, NO Flow loss)
+# THE ROAMING WINDOW — Fermata's core read (from the feel-tester): the green RELOCATES after
+# every release, so there is no autopilot rhythm — you track where the next window landed and
+# ride the sweep to it. The shift multiplies the accelerando'd window CENTRE (width untouched),
+# clamped reachable: the mouth never sits before a fresh coil could sharpen, and the far edge
+# stays on the fixed fermata ruler. Rolled from s.rng per resolve (fermata-only draw).
+@export var fermata_shift_min: float = 0.75     ## nearest the window may land (× base centre)
+@export var fermata_shift_max: float = 1.85     ## farthest the window may land (× base centre)
+@export var fermata_ruler_sec: float = 1.80     ## the FIXED HUD ruler — roam space + a late reach
 # creeds
 @export var patient_per_sec: float = 0.15       ## Patient Knife: +dmg/sec coiled past sharp (0.15 = +1.5%/0.1s)
 @export var patient_cap: float = 0.20           ## Patient Knife: cap on the baked coil bonus

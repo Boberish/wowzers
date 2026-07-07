@@ -245,6 +245,8 @@ func _draw() -> void:
 	# ---- the gilded needle: motion trail, shaft, diamond head ----
 	var mx := tx + tw * prog
 	var mcol := Palette.PERFECT if in_green else (Palette.CRIMSON if past else Color(0.85, 0.87, 0.92))
+	if fermata and coiling and not in_green and not past:
+		mcol = Color(0.72, 0.62, 1.0)   # coiled: the needle rides umbra-violet — you're in shadow
 	# trail (the needle always travels left -> right)
 	var trail_w := minf(30.0, mx - tx)
 	if trail_w > 2.0:
@@ -261,19 +263,16 @@ func _draw() -> void:
 	draw_rect(Rect2(mx - 0.5, ty - 4.0, 1.0, th + 10.0), Color(1, 1, 1, 0.5))
 	_needle_head(Vector2(mx, ty - 9.0), mcol, in_green)
 
-	# ---- FERMATA: the coil charge ring on the needle — fills to the SHNK, then goes white-hot ----
+	# ---- FERMATA: the coil socket — a FIXED charge ring on the left end-cap (off the needle;
+	# a marker-chasing ring read as noise). The violet arc fills to the SHNK, then the whole
+	# ring runs white-hot while the release is live. The needle's umbra tint carries the rest.
 	if fermata and coiling:
-		var umbra := Color(0.72, 0.62, 1.0)               # the shadow-violet coil colour
-		var ctr := Vector2(mx, ty + th * 0.5)
-		var rr := 15.0
-		# a dim shadow aura trailing the needle so you can feel you're "in the dark"
-		var aura := umbra
-		aura.a = 0.10
-		draw_circle(ctr, rr + 6.0, aura)
-		# the track ring (dim) + the charge arc filling clockwise from 12 o'clock
-		draw_arc(ctr, rr, 0.0, TAU, 40, Color(umbra.r, umbra.g, umbra.b, 0.22), 3.0, true)
+		var umbra := Color(0.72, 0.62, 1.0)
+		var ctr := Vector2(tx, ty + th * 0.5)
+		var rr := 14.0
+		draw_arc(ctr, rr, 0.0, TAU, 40, Color(umbra.r, umbra.g, umbra.b, 0.25), 3.0, true)
 		if coil_sharp:
-			var hot := Color(1, 1, 1, 0.85 + 0.15 * sin(_pulse * 1.4))   # white-hot pulse = release-live
+			var hot := Color(1, 1, 1, 0.80 + 0.20 * sin(_pulse * 1.4))   # white-hot pulse = release-live
 			draw_arc(ctr, rr, 0.0, TAU, 40, hot, 3.5, true)
 		else:
 			var fill := TAU * clampf(coil_charge, 0.0, 1.0)
