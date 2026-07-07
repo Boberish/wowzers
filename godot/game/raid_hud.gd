@@ -787,18 +787,26 @@ func _enter_zone_node(id: int) -> void:
 	var z := WorldContent.zone(_zone_id)
 	_zone_node = id
 	_world.set_at(_zone_id, id)
+	# §MEWGENICS STEALS ① — escort transitions fire on ENTERING the node, cleared or not, so a
+	# turn-in at a door you already marked (rushed there before picking up) still completes the
+	# carry. For an uncleared escort node the message folds into its stop (camp/door) below.
+	if ESCORT_PREVIEW:
+		_escort_line = Escort.on_enter(_world, _zone_id, id)
 	if _world.is_cleared(_zone_id, id):
+		if _escort_line != "":        # a cleared node has no stop panel — surface it as a banner
+			_zone_toast = _escort_line
+			_escort_line = ""
 		_world_autosave()             # free travel — the token moves, conquered ground never re-fights
 		_show_zone()
 		return
 	var n := WorldContent.resolved_node(z, id, _world.flags(_zone_id))
-	# §MEWGENICS STEALS ① — fire any escort pickup/turn-in on first entering this node;
-	# the message is folded into the node's stop below (camp pickup / door turn-in).
-	if ESCORT_PREVIEW:
-		_escort_line = Escort.on_enter(_world, _zone_id, id)
 	match String(n["kind"]):
 		"fight", "elite", "boss":
 			var body := WorldContent.BOSS_INTRO if String(n["kind"]) == "boss" else String(n["sub"])
+			# §MEWGENICS STEALS ① — if the vial you're carrying will burden this fight, say so
+			# BEFORE the pull: the player must connect the extra pressure to the escort.
+			if ESCORT_PREVIEW and Escort.burden_for(_world, _zone_id, n) != "":
+				body = "◈  The vial weeps — the harvest-rot rises to meet you here. This fight is worse for the carrying.\n\n" + body
 			_zone_stop(String(n["name"]), body,
 				[{"label": "MOVE IN", "fx": {"result": "The warband forms up."}}],
 				ZoneScreen.KIND_COL[String(n["kind"])], _launch_zone_fight.bind(n))

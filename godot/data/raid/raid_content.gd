@@ -403,19 +403,26 @@ static func floor_fights(ring: int = 3) -> Array:
 ## when a spec's carry.burden is set, so absent = byte-identical. `enc` must be a fresh
 ## factory build (encounter_by_id returns one); we duplicate the adds array before appending.
 static func apply_burden(enc: EncounterRes, burden: String) -> void:
-	var a := AddRes.new()
+	var waves: Array = []
 	match burden:
 		"grain_rot":
-			a.at = 0.9                                    # bites early — the rot is already on you
-			a.id = &"grain_rot"
-			a.name = "ROT-SWOLLEN HUSK"
-			a.hp = 900
-			a.melee = {"every": 2.0, "min": 8, "max": 12}
-			a.abilities = []
+			# TUNE (Bill's feel pass): wave count / HP / cadence are the knobs. TWO husks =
+			# a SUSTAINED rot (the boss withdraws to face each), not a single speed bump. The
+			# boss's main HP freezes while a husk holds the field, so the waves self-sequence.
+			waves = [{"at": 0.8, "hp": 800}, {"at": 0.45, "hp": 800}]
 		_:
 			return                                        # unknown burden = no-op (still safe)
-	enc.adds = (enc.adds as Array).duplicate()
-	enc.adds.append(a)
+	var adds: Array = (enc.adds as Array).duplicate()   # never mutate a shared factory array
+	for wv in waves:
+		var a := AddRes.new()
+		a.at = float(wv["at"])
+		a.id = &"grain_rot"
+		a.name = "ROT-SWOLLEN HUSK"
+		a.hp = int(wv["hp"])
+		a.melee = {"every": 2.0, "min": 8, "max": 12}
+		a.abilities = []
+		adds.append(a)
+	enc.adds = adds
 
 static func encounter_by_id(id: String) -> EncounterRes:
 	match id:
