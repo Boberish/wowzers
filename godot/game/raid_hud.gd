@@ -896,7 +896,10 @@ func _launch_zone_fight(n: Dictionary) -> void:
 	_clear()
 	_ensure_party()
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
-	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]))
+	# PACK: an authored member chain on the node = one battle, fought sequentially
+	# (node["fight"] is always the chain's first id; [] = a classic single pull).
+	var pk: Array = n.get("pack", [])
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), {}, {}, pk)
 	var s := RaidNet.build(spec, _seat_key)
 	_apply_fightlen(s)
 	_loadout = _make_loadout()
@@ -931,6 +934,13 @@ func _apply_fightlen(s: CombatState) -> void:
 	s.boss.hp_max = roundf(s.boss.hp_max * _fightlen)
 	if s.encounter != null and is_finite(s.encounter.enrage_at) and s.encounter.enrage_at > 0.0:
 		s.encounter.enrage_at *= _fightlen
+	# PACK: the members still waiting scale too (s.encounter IS pack[0] — the lines
+	# above already covered it; touching [0] again would double-scale).
+	for i in range(1, s.pack.size()):
+		var enc: EncounterRes = s.pack[i]
+		enc.hp = int(roundf(float(enc.hp) * _fightlen))
+		if is_finite(enc.enrage_at) and enc.enrage_at > 0.0:
+			enc.enrage_at *= _fightlen
 	_shake_amt = 0.0
 	_online = false
 	_ctrl = _local_ctrl
@@ -4399,6 +4409,11 @@ func _handle_event(ev: Dictionary) -> void:
 		_brew_gauge.on_event(ev)   # THE ALEMBIC: pour verdicts / rupture burst / history
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
+		"pack_next":
+			# PACK: the next member takes the field — the name-card ceremony IS the
+			# walk-in banner. The plate/dial rebind free (they read s.encounter live).
+			BossIntro.play(_ui, "%s   ·   %d / %d" % [String(ev.get("name", "")),
+				int(ev.get("i", 0)) + 1, int(ev.get("n", 0))])
 		"negate":
 			# seat-less negates are string-impact echoes; strike_graded already
 			# judged that press — don't double-pop over it

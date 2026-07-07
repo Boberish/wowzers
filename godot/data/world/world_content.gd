@@ -70,8 +70,8 @@ static func _gildfields_nodes() -> Array:
 	N.append(_n(4, "camp", "WARDEN'S REST", Vector2(950, 620),
 		"a field-warden's shelter, cold hearth, fresh boot prints", {"spine": true}))
 	N.append(_n(5, "elite", "THE GRANARY STEPS", Vector2(1120, 530),
-		"the great granary, sealed from the inside — the HUSKMEN hold the steps",
-		{"fight": "opus", "spine": true}))
+		"the great granary, sealed from the inside — HUSKMEN hold the steps, their captain holds the door",
+		{"fight": "bard", "pack": ["bard", "sonnet", "opus"], "spine": true}))
 	N.append(_n(6, "event", "MILLWATCH RISE", Vector2(1290, 620),
 		"the watchtower still stands its post; its beacon is dark", {"event": "beacon", "spine": true}))
 	N.append(_n(7, "boss", "THE OLD MILL", Vector2(1470, 530),
@@ -81,7 +81,8 @@ static func _gildfields_nodes() -> Array:
 		"the old flight beacon above the fields — light it, and the sky roads open", {"spine": true}))
 	# ---- the cave chain (north): "go fight stuff in a cave…"
 	N.append(_n(9, "fight", "THE HOLLOW WARREN", Vector2(520, 350),
-		"burrows under the hedgerows, dug from BELOW", {"fight": "bard"}))
+		"burrows under the hedgerows, dug from BELOW — a GAUNTLET: they come one after another",
+		{"fight": "bard", "pack": ["bard", "sonnet", "bard"]}))
 	N.append(_n(10, "fight", "ROOTCELLAR DEPTHS", Vector2(700, 290),
 		"the farmsteads' cellars all connect. They didn't used to.", {"fight": "sonnet"}))
 	N.append(_n(11, "elite", "THE PALE TILLER", Vector2(880, 250),
@@ -124,7 +125,8 @@ static func _gildfields_nodes() -> Array:
 static func _n(id: int, kind: String, name: String, pos: Vector2, sub: String,
 		extra: Dictionary) -> Dictionary:
 	var d := {"id": id, "kind": kind, "name": name, "sub": sub, "pos": pos,
-		"edges": [], "fight": "", "event": "", "choice": "", "spine": false, "variants": {}}
+		"edges": [], "fight": "", "event": "", "choice": "", "spine": false, "variants": {},
+		"pack": []}   ## PACK: member chain for one battle; [0] == fight; [] = single pull
 	for k in extra:
 		d[k] = extra[k]
 	return d
