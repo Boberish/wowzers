@@ -1659,9 +1659,13 @@ func _build_floor() -> void:
 	_map_fights = RaidContent.floor_fights(int(fl["ring"]))
 	# every raid floor carries ONE personal GATE exam (Tier 1, §GAME SHAPE); the ROOT
 	# floor also gates its Seal behind credential shards (MAP-3c); TICKETS are the quests (MAP-2).
+	# THE DESCENT REFIT: floors run `rows` deep (8 = 20 nodes) — quest/story quotas stay
+	# authored (4 events, tickets per FLOORS), the extra mid slots pad to COMBAT filler;
+	# +1 cooling/+1 cache keep the breather + ⏻ economy proportional to the longer floor.
 	_map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
-		_map_fights.size(), MapContent.raid_event_ids(), {RunMap.KIND_GATE: 1},
-		int(fl["shard_req"]), int(fl.get("tickets", 0)))
+		_map_fights.size(), MapContent.raid_event_ids(),
+		{RunMap.KIND_GATE: 1, RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
+		int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
 	_map_node = -1
 	_map_inv = {}
 	_map_tickets = {}
@@ -1932,14 +1936,23 @@ func _bank_prior(won: bool) -> int:
 func _my_prior() -> int:
 	return LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
 
-## PACK QUOTAS v1 (WORLD-PLAN shape-assignment rule: "Topology floors roll shapes from
+## PACK QUOTAS v2 (WORLD-PLAN shape-assignment rule: "Topology floors roll shapes from
 ## the run seed inside authored quotas"). MID skirmish nodes only — the entry body and
 ## the Seal keep their authored shapes. Seeded from (map seed, node id): the same
 ## descent always rolls the same packs (replay-true); rerolling the map rerolls them.
-## Weights stay conservative until the Forge's SWARM lightweights exist (the baked ×2.5
-## makes a trio ≈ Seal-sized): 50% solo · 35% duo · 15% trio. OFFLINE v1 — the online
-## descent's server builds its own specs (packs land there with the server pass).
-const PACK_FILLERS := ["bard", "sonnet"]   ## light bodies walk in first; the node's enc captains
+## THE DESCENT REFIT: the walk-ins are takeover-palette Forge LIGHTWEIGHTS (swarm-
+## weighted, tier riding the ring t1→t3), so a rolled trio lands mid-fight-sized —
+## the v1 full-HP bard/sonnet wart is closed, and the weights open up with it:
+## 30% solo · 45% duo · 25% trio. OFFLINE — the online descent's server builds its
+## own specs (packs land there with the server pass).
+const PACK_FILLER_BODIES := ["swarm", "swarm", "stalker"]   ## swarm-weighted walk-ins
+
+## One rolled walk-in: a light Forge body at the ring's tier, seed drawn from the
+## node's own stream (variety across nodes, identical on replay).
+func _pack_filler(rng: DetRng) -> String:
+	var body := String(PACK_FILLER_BODIES[rng.next_u32() % PACK_FILLER_BODIES.size()])
+	var tier := clampi(4 - int(RaidContent.FLOORS[_floor]["ring"]), 1, 3)   # ring 3→t1 · 2→t2 · 0→t3
+	return "forge:takeover:%s:%d:%d" % [body, tier, 900 + int(rng.next_u32() % 64)]
 
 func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
 	if _map == null or _online:
@@ -1948,11 +1961,11 @@ func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
 		return []                        # entry + Seal: authored, never rolled
 	var rng := DetRng.new((_map.seed ^ (0x9A7B * (_map_node + 7))) & 0x7FFFFFFF)
 	var r := rng.next_float()
-	if r < 0.50:
+	if r < 0.30:
 		return []                        # a classic solo pull
-	var pack: Array = [String(PACK_FILLERS[rng.next_u32() % PACK_FILLERS.size()])]
-	if r >= 0.85:
-		pack.append(String(PACK_FILLERS[rng.next_u32() % PACK_FILLERS.size()]))
+	var pack: Array = [_pack_filler(rng)]
+	if r >= 0.75:
+		pack.append(_pack_filler(rng))
 	pack.append(String(enc.id))          # smalls → captain (the node's own body)
 	return pack
 

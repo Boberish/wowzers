@@ -451,14 +451,16 @@ func _start_map(id: int) -> void:
 	_broadcast_map(room)
 
 ## Generate the current ring's map. Online v1 carries NO personal GATE nodes
-## (extra_quota {}); the ROOT floor keeps its credential-shard gate + tickets.
+## (extra_quota gains only the refit's +1 cooling/+1 cache); the ROOT floor keeps its
+## credential-shard gate + tickets. Rows ride FLOORS like the offline descent.
 func _build_floor_srv(room: Dictionary) -> void:
 	var cp: Dictionary = room["campaign"]
 	var fl: Dictionary = RaidContent.FLOORS[int(cp["floor"])]
 	cp["fights"] = RaidContent.floor_fights(int(fl["ring"]))
 	cp["map"] = RunMap.generate(int(cp["map_seed"]) + int(cp["floor"]) * 101,
-		(cp["fights"] as Array).size(), MapContent.raid_event_ids(), {},
-		int(fl["shard_req"]), int(fl.get("tickets", 0)))
+		(cp["fights"] as Array).size(), MapContent.raid_event_ids(),
+		{RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
+		int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
 	cp["node"] = -1
 	cp["inv"] = {}
 	cp["tickets"] = {}

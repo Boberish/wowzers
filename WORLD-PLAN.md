@@ -368,7 +368,15 @@ a designer soul on a Forge body — generator does the body, a human does the si
 
 ### FORGE — build spec v1 — ✅ BUILT & MERGED 2026-07-07 (`d3722f5`; full record in the
 ### Coordination Log; shipped as specced below + the chaff-pair authoring rule: a SWARM
-### is never alone. Open: packroll fillers → forge swarms; per-body stage rigs.)
+### is never alone.)
+### THE DESCENT REFIT — ✅ BUILT (`raid-forge`, 2026-07-07): the Forge came home to the
+### raid. Realm-1 "takeover" palette (CRAWLER SWARM / UNSUPERVISED LEARNER / SCRUM-CANTOR /
+### LEGACY MONOLITH); floors grew to 8 rows = **20 nodes** (RunMap gained a `rows` param,
+### default 6 = every classic map byte-identical); `floor_fights` interleaves takeover
+### strays BETWEEN the story subagents (tier ramps t1→t3 with the ring); **packroll fillers
+### → forge lightweights** — the open item below is CLOSED (a rolled trio now lands
+### mid-fight-sized, not Seal-sized) with weights opened to 30/45/25; server + map screen
+### follow. Story quotas (events / tickets / gate) untouched. Still open: per-body stage rigs.
 - **`data/world/forge.gd`** — `Forge.make(zone, body, tier, seed) -> EncounterRes`, pure
   static, own DetRng. **THE ID IS THE RECIPE:** generated encounters carry id
   `forge:<zone>:<body>:<tier>:<seed>` and `RaidContent.encounter_by_id` gains a `forge:`
@@ -389,8 +397,10 @@ a designer soul on a Forge body — generator does the body, a human does the si
   seeded dressing", same fight for every player) — THE TONE CRACK CLOSES (no more
   BARD.EXE in the fields). THE PALE TILLER = a t2 BRUTE body wearing its authored name
   (the named-miniboss rule: generator body, human soul). The capstone stays VORATHEK
-  (casting pool). Raid Topology fillers stay bard/sonnet v1 (Realm-1 skin is correct
-  inside the door).
+  (casting pool). **Raid Topology now uses a "takeover"-palette Forge pool too** (THE
+  DESCENT REFIT): the story subagents (bard/sonnet/opus + the Seals) stay authored, and
+  Forge strays fill between them + ride the pack walk-ins — the Realm-1 skin stays correct
+  inside the door, now generated instead of duplicated.
 - **`sim/forge_sim.gd`** — the certification harness (psim-sharded): sweep bodies ×
   tiers × seeds at 3 policy tiers; print bands; ASSERT determinism (id ⇒ identical
   checksum), zero expert-unwinnable, per-tier band tolerances; CSV per seed.
