@@ -49,7 +49,33 @@ func _process(_delta: float) -> bool:
 	hud._show_creed_pick(func(): flags.skip = true)
 	assert(flags.skip, "a non-blade seat skips the creed pick (empty page, per design)")
 	hud._seat_key = "blade"
-	print("TEMPO framework: creed pick + module pick + kit inject ok; non-blade skips clean")
+	print("TEMPO framework: creed pick + module pick + kit inject ok; non-framework seat skips clean")
+
+	# WELL REWORK framework: the healer seat (class "well") snaps onto the SAME ceremony,
+	# with PER-SPEC creed pools + the deck folding into the WellKit (MENDER-PLAN §2-5).
+	hud._seat_key = "healer"
+	hud._aspect = "brim"
+	hud._sync_healer_cls()
+	assert(hud._healer_cls == "well", "brim aspect selects the well healer class")
+	hud._run = hud._make_run()
+	assert(hud._run.char_class == "well", "healer run should be well")
+	var wflags := {"creed": false, "mod": false}
+	hud._show_creed_pick(func(): wflags.creed = true)
+	assert(hud._screen == "creed" and not wflags.creed, "well creed pick should SHOW and wait")
+	hud._pick_creed("brink", func(): wflags.creed = true)
+	assert(hud._run.creed == "brink" and wflags.creed, "picking a well creed sets run.creed + continues")
+	hud._show_module_pick(func(): wflags.mod = true)
+	assert(hud._screen == "module" and not wflags.mod, "well module pick should SHOW and wait")
+	hud._pick_module("reservoir", func(): wflags.mod = true)
+	assert(hud._run.modules.has("reservoir") and wflags.mod, "picking a well module sets run.modules + continues")
+	hud._run.rig = {"when": "sweet_pour", "then": "gleam"}
+	var wseat: Seat = RaidContent._healer_seat("well", "brim")
+	hud._inject_boons(wseat)
+	var wk := wseat.kit as WellKit
+	assert(wk.creed_id == "brink" and wk.modules.has("reservoir") and String(wk.rig.get("when", "")) == "sweet_pour",
+		"creed + module + rig all fold into the well kit")
+	hud._seat_key = "blade"
+	print("WELL framework: per-spec creed + module + rig fold into the well kit ok")
 
 	# TEMPO §5 — the Combo rig: the wire board builds, a WHEN+THEN pick enables it, it folds in.
 	hud._run.rig = {}

@@ -828,6 +828,10 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			# byte-identical for every non-Well fight (mirrors the s.raid_dr idiom).
 			if s.tick < int(seat.vars.get("glint_until", -1)):
 				contrib *= float(seat.vars.get("glint_mult", 1.0))
+			# THE SHINING HOUR (Well support boon): while the whole party is topped, the
+			# warband deals more. Same guarded idiom — absent well_hour_until (-1) = no-op.
+			if s.tick < int(seat.vars.get("well_hour_until", -1)):
+				contrib *= float(seat.vars.get("well_hour_mult", 1.0))
 			total += contrib
 			meter_dmg(s, seat, &"attack", contrib * dt, false, false)
 			if s.threat_enabled:

@@ -105,13 +105,19 @@ static func encounters() -> Array:
 	return [make_spike(), make_attrition()]
 
 # --- seats ---
-static func make_healer(aspect: String, wcfg: WellConfig, boons: Dictionary, is_player: bool) -> Seat:
+## `deck` (optional) exercises the DECK layers in the sim: {creed:"", modules:{}, rig:{}}.
+## Empty deck + empty boons = the base build (byte-identical — the sim gate).
+static func make_healer(aspect: String, wcfg: WellConfig, boons: Dictionary, is_player: bool,
+		deck: Dictionary = {}) -> Seat:
 	var h := Seat.new()
 	h.role = "healer"; h.unit_name = "You"; h.is_player = is_player; h.fidelity = "full"
 	h.hp_max = 200.0; h.hp = 200.0; h.dps = 0.0        # untargetable-ish; deals no boss damage
 	h.resource = 0.0; h.resource_max = 0.0             # NO mana — the Well is charges, in vars
 	var kit := WellKit.new(aspect, wcfg)
 	kit.boons = boons
+	kit.creed_id = String(deck.get("creed", ""))
+	kit.modules = (deck.get("modules", {}) as Dictionary).duplicate()
+	kit.rig = (deck.get("rig", {}) as Dictionary).duplicate()
 	h.kit = kit
 	h.policy = WellPolicy.new()
 	h.vars = {"charges": wcfg.charges_max, "current": 0, "pulse_next": 0}
@@ -124,10 +130,10 @@ static func _make_ally(name: String, role: String, hp: float, dps: float) -> Sea
 	return u
 
 static func make_state(seed: int, aspect: String, cfg: TuningConfig,
-		wcfg: WellConfig, enc: EncounterRes, boons: Dictionary = {}) -> CombatState:
+		wcfg: WellConfig, enc: EncounterRes, boons: Dictionary = {}, deck: Dictionary = {}) -> CombatState:
 	var s := CombatCore.create_state(enc, cfg, seed)
 	s.seats = [
-		make_healer(aspect, wcfg, boons, true),
+		make_healer(aspect, wcfg, boons, true, deck),
 		_make_ally("Bront", "tank", 300.0, 8.0),
 		_make_ally("Kaelen", "dps", 120.0, 22.0),
 		_make_ally("Mira", "dps", 110.0, 20.0),

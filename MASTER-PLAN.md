@@ -781,6 +781,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   as-built; next up the plan: P3 extractions (RunDirector / WorldShell / online split).
   *(refit build session)*
 
+- ☑ 2026-07-07 · `well-deck` → main · §CLASSES — **THE WELL — THE DECK BUILT (healer rework
+  FINISHED).** The owed deck per `MENDER-PLAN.md` §2–5 + the ⚖ board verdicts is CODED + wired,
+  ALL guarded (empty creed + no modules/boons/rig = byte-identical base, proven). Shipped: per-spec
+  **CREEDS** (Brim: Brink/Foresight/Levee/Shallows · Draw: Patient Hand/Long Draw/Narrows/Eddy) ·
+  3 auto-firing **MODULES** (⭐ Reservoir · Triage Protocol · Benediction) · **24 BOONS** (Shining
+  Hour TEAM aura · Brink Bell · High Tide + Millrace keystones · Strong Pull · Kept Light · Meditate
+  battery + Boiling Over clutch spells + the accepts, each `ctype`-tagged) · the per-spec WHEN/THEN
+  **RIG**. Framework wiring: `_fw()`/`_fw_*` dispatch (per-spec creed & rig offers) + `_inject_boons`
+  + build-panel/REFORGE + `Draft.catalog`/`SIG_KEY` + `RunState.start_well` all handle "well". ONE
+  guarded engine touch (Shining Hour aura, mirrors the Glint read → byte-neutral). **Gates all green:**
+  determinism PASS base AND fully-loaded deck (both specs) · **default comp byte-identical — 4-Seal
+  checksums UNCHANGED (6880/8987/8338/4838)** · well plays+wins the whole Seal ladder (100% expert/
+  good, sloppy = the intended gradient) · `well_sim --load` deck bands read (deck lifts survival +
+  a real skill gradient) · ui_smoke_raid ALL OK + a new WELL-framework ceremony assertion · draft_sim
+  ALL OK. New files `godot/data/well/well_{creeds,modules,boons,rig}.gd`. OWED follow-ups (not
+  blockers): WellGauge module METERS (event flashes ship now) · AI use of the 2 drafted spells ·
+  balance playtest (Bill) · name lock · online deck carry (shared Twinfang debt). *(healer deck session)*
+
 - ☑ 2026-07-07 · `cask-spec` → main · §CLASSES / `ALCHEMIST-PLAN.md` §7.7 — **THE CASK — SLICE 1
   (verb base) BUILT & VERIFIED.** aspect `cask` guarded on the Alchemist kit (Fermata idiom:
   `_cask()` branches at the top of `upkeep`/`on_action`/`observe`; Brew evals untouched). Full
@@ -797,6 +815,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   card-TYPE taxonomy in play (POWER/GREED/STRAT/EASE/RULE/TEAM). **⚠ Note:** the concurrent
   `brew-review` pass (§8 below) proposes back-porting Bullseye/graded pours to the BREW's vial —
   the Cask's graded-pour engine (`cask_grade_*`, Bull/Perfect/Good) is the reference to reuse.
+
 - ☐ 2026-07-07 · main (docs only) · §CLASSES — **TANK REWORK — design pass (high-level concepts
   → Bill's filter chain).** Fresh-start rework of the tank seat's class (old Bulwark = frozen
   placeholder, NOT the base): raid-only rules (no self-heal — mitigation/avoidance only), two
