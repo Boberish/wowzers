@@ -150,17 +150,7 @@ func _end_fight(room: Dictionary) -> void:
 	var cp = room.get("campaign", null)
 	if cp != null and room.get("state") != null:
 		var s: CombatState = room["state"]
-		var fracs: Array = cp["fracs"]
-		for i in s.seats.size():
-			if i < fracs.size():
-				var u: Seat = s.seats[i]
-				if u.alive():
-					fracs[i] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
-				else:
-					fracs[i] = 0.35            # reboot
-					cp["wounds"][i] = minf(0.4, float(cp["wounds"][i]) + 0.2)  # + a corrupted sector
-				if u.role == "healer":
-					cp["mana"] = clampf(u.resource / maxf(1.0, u.resource_max), 0.05, 1.0)
+		CampaignCore.writeback(cp, s)   # integrity/reboot-wound/mana — the ONE rulebook
 		var won := s.won
 		room["state"] = null
 		room["pending"] = {}
@@ -172,7 +162,7 @@ func _end_fight(room: Dictionary) -> void:
 			return
 		var seal := bool((room.get("map_fight", {}) as Dictionary).get("is_seal", false))
 		if not seal:                                # scavenge ⏻ from a cleared skirmish
-			cp["charge"] = mini(100, int(cp["charge"]) + MapFx.SKIRMISH_CHARGE)
+			CampaignCore.skirmish_scavenge(cp)
 		if seal and int(cp["floor"]) + 1 >= RaidContent.FLOORS.size():
 			_broadcast(room, {"t": "campaign", "won": true})   # the last Seal (ROOT) — realm won
 			room["campaign"] = null
@@ -520,34 +510,12 @@ func _enter_node_srv(room: Dictionary, node_id: int) -> void:
 	var cp: Dictionary = room["campaign"]
 	var m: RunMap = cp["map"]
 	var n: Dictionary = m.node(node_id)
-	var first := not bool(n.get("visited", false))
-	n["visited"] = true
-	if first and bool(n.get("shard", false)):
-		cp["inv"]["shards"] = int(cp["inv"].get("shards", 0)) + 1
-	if first:
-		_ticket_srv(cp, n)
-	if first and bool(n["key"]) and not cp["inv"].get("api_key", false):
-		cp["inv"]["api_key"] = true
+	# visited/shard/TICKET/key — the ONE rulebook (CampaignCore killed the old
+	# "_ticket_srv: mirror of raid_hud._ticket_at" twin). No purse online: tokens dropped.
+	var out := CampaignCore.enter_node(cp, n)
+	if bool(out["key_grabbed"]):
 		cp["toast"] = "API KEY acquired — 401 doors are yours."
 	_resolve_node_srv(room, n)
-
-## Mirror of raid_hud._ticket_at, server-side.
-func _ticket_srv(cp: Dictionary, n: Dictionary) -> void:
-	var topen := String(n.get("ticket_open", ""))
-	if topen != "" and not cp["tickets"].has(topen):
-		var td := MapContent.ticket(topen)
-		cp["tickets"][topen] = String(td.get("title", "TICKET"))
-		cp["toast"] = "📋  %s  —  picked up (turn it in deeper on this lane)" % String(td.get("title", "TICKET"))
-	var tclose := String(n.get("ticket_close", ""))
-	if tclose != "" and cp["tickets"].has(tclose):
-		var td2 := MapContent.ticket(tclose)
-		cp["tickets"].erase(tclose)
-		cp["closed"] = int(cp["closed"]) + 1
-		_apply_fx_srv(cp, td2.get("reward", {}))
-		cp["toast"] = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
-		if int(cp["closed"]) >= int(cp["total"]) and int(cp["total"]) > 0:
-			_apply_fx_srv(cp, MapContent.SPRINT_RETRO_FX)
-			cp["toast"] = "★  SPRINT RETRO — every ticket closed! Sectors repaired, reserves topped."
 
 func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 	var cp: Dictionary = room["campaign"]
@@ -575,11 +543,11 @@ func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 		RunMap.KIND_COOLING:
 			# STOP LAUNDERING: no wound-clear (that was the bug), no fake integrity. Throttle
 			# spare cycles into the breaker (+⏻) and ease the healer's reserves (mana bites now).
-			_apply_fx_srv(cp, {"charge": 10, "mana": 0.75})
+			_apply_fx_srv(cp, CampaignCore.COOLING_FX)
 			cp["toast"] = "COOLING — spare cycles throttled into the breaker: +10 ⏻ · reserves eased. (Sectors need a DEFRAG.)"
 			_broadcast_map(room)
 		RunMap.KIND_CACHE:
-			_apply_fx_srv(cp, {"charge": 25})
+			_apply_fx_srv(cp, CampaignCore.CACHE_FX)
 			cp["toast"] = "CACHE HIT — a breaker component, still warm: +25 ⏻ toward the Kill Switch."
 			_broadcast_map(room)
 		_:
@@ -620,7 +588,7 @@ func _pick_choice(id: int, msg: Dictionary) -> void:
 	var ctx := _map_ctx_srv(room, seat)
 	# the pure decision (gate / roll / toast / ⚡ spend). The die slot is per (page, choice)
 	# so a branch sub-page has its own roll — identical to the leader's local resolve.
-	var r := resolve_event_choice(c, ctx, int((cp["map"] as RunMap).seed), int(cp["node"]),
+	var r := CampaignCore.resolve_event_choice(c, ctx, int((cp["map"] as RunMap).seed), int(cp["node"]),
 		MapCheck.choice_slot(page, i), int(msg.get("nudge", 0)), int(cp["entropy"]),
 		int(msg.get("attempt", 0)))     # post-fail mulligans the leader committed to
 	if not bool(r["accept"]):
@@ -670,34 +638,6 @@ func _broadcast_mapstop(room: Dictionary, event_id: String, page: String) -> voi
 		"seats": seats, "suggested": _suggest_seat(seats, choices), "entropy": int(cp["entropy"]),
 		"title": String(src.get("title", ev.get("title", ""))),
 		"body": String(src.get("body", "")), "choices": choices, "accent": "void"})
-
-## PURE, authoritative resolution of an event choice (Node-free, testable). Gate-checks,
-## rolls a CHECK on the deterministic die (identical to the leader's local display), spends
-## ⚡ (always, on commit), and formats the ✓/✗ toast. Returns everything the caller applies.
-## `accept:false` = a locked gate (reject). The die matches the client because both use the
-## same (map_seed, node, i) and the same server-broadcast %.
-static func resolve_event_choice(c: Dictionary, ctx: Dictionary, map_seed: int, node_id: int,
-		i: int, nudge_req: int, entropy_have: int, attempt: int = 0) -> Dictionary:
-	var gate: Dictionary = c.get("gate", {})
-	if not gate.is_empty() and not MapCheck.gate_ok(gate, ctx):
-		return {"accept": false}
-	if MapCheck.check_like(String(c.get("kind", "free"))):
-		var nudge := clampi(nudge_req, 0, mini(MapCheck.NUDGE_MAX, entropy_have))
-		var att := clampi(attempt, 0, MapCheck.MULLIGAN_MAX)
-		# ⚡ spent = nudge (pre-commit) + rerolls (attempt × cost); the die honours `att`
-		var spend := nudge + att * MapCheck.MULLIGAN_COST
-		var res := MapCheck.resolve(c, ctx, map_seed, node_id, i, att, {"nudge": nudge})
-		var toast := ("✓ %d%% — " % int(res["p"]) if bool(res["success"]) \
-			else "✗ rolled %d vs %d%% — " % [int(res["roll"]), int(res["p"])]) + String(res["result"])
-		return {"accept": true, "is_check": true, "fx": res["fx"], "toast": toast,
-			"entropy_after": maxi(0, entropy_have - spend), "success": bool(res["success"]),
-			"p": int(res["p"]), "roll": int(res["roll"]), "nudge": nudge,
-			"goto": String(res.get("goto", ""))}          # a check leg may fail-forward
-	var fx: Dictionary = (c.get("fx", {}) as Dictionary).duplicate()
-	# a free/branch choice's next stage: `branch` (kind branch) or `goto` (free)
-	return {"accept": true, "is_check": false, "fx": fx, "toast": String(fx.get("result", "")),
-		"entropy_after": entropy_have, "success": true,
-		"goto": String(c.get("branch", String(c.get("goto", ""))))}
 
 ## Candidate seats a check can be attempted by — every seat in the descent, in the
 ## canonical tank→blade→caster→healer order (stable across machines).

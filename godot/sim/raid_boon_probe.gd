@@ -61,7 +61,11 @@ func _process(_d: float) -> bool:
 				break
 			hud._ctrl._process(1.0 / 30.0)
 			hud._process(1.0 / 30.0)
-		var after_win := String(hud._screen)               # "drop" (gear card) expected
+		var after_win := String(hud._screen)               # recap → drop expected
+		# THE RECKONING: the per-fight recap interposes after the win — CONTINUE
+		# through it first (the probe predated the recap screen; stale-probe fix, P3.1).
+		if after_win == "recap":
+			_press("")
 		var pressed := _press("EQUIP") or _press("SCRAP") or _press("REPLACE")
 		var after_drop := String(hud._screen)              # "draft" (REFORGE) expected
 		print("[B flow] after_win=%s drop_continue=%s after_drop=%s draft_shown=%s" % [

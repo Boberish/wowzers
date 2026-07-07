@@ -50,7 +50,7 @@ func _test_online_mulligan() -> void:
 	var chk_choice := {"kind": "check", "check": {"verb": "T", "tags": ["x"], "base": 20},
 		"success": {"fx": {"heal": 0.1}}, "fail": {"fx": {"hurt": 0.05}}}
 	# server resolves at attempt 2 with 1 nudge: spend = 1 + 2×2 = 5 → entropy_after = 6-5 = 1
-	var srv := NetServer.resolve_event_choice(chk_choice, ctx, 4242, 5, 1, 1, 6, 2)
+	var srv := CampaignCore.resolve_event_choice(chk_choice, ctx, 4242, 5, 1, 1, 6, 2)
 	var cli := MapCheck.resolve(chk_choice, ctx, 4242, 5, 1, 2, {"nudge": 1})
 	_ok("online mulligan ⚡ accounting: 6 − (nudge 1 + 2×%d) = %d" % [MapCheck.MULLIGAN_COST, int(srv["entropy_after"])],
 		int(srv["entropy_after"]) == 6 - (1 + 2 * MapCheck.MULLIGAN_COST))

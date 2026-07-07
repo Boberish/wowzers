@@ -262,7 +262,9 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 			inv["api_key"] = true
 		if bool(n.get("shard", false)):
 			inv["shards"] = int(inv.get("shards", 0)) + 1
-		# TICKETS (MAP-2): pick up / close, mirroring the HUD's _ticket_at
+		# TICKETS (MAP-2): a SIMPLIFIED walker take (set-shaped, no toast/stub/purse).
+		# The shipping rule is CampaignCore.ticket_at (P3.1) — if the reward economy
+		# changes there, mirror it here (this walker is a diagnostic, not UI).
 		var topen := String(n.get("ticket_open", ""))
 		if topen != "":
 			if not inv.has("tickets"):

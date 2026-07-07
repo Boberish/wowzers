@@ -83,12 +83,12 @@ func _test_online_branch() -> void:
 	var ev := MapContent.event("rollback_daemon")
 	# the root "Hear the catch…" branch choice → goto 'catch'
 	var branch: Dictionary = (ev["choices"] as Array)[1]
-	var rb := NetServer.resolve_event_choice(branch, ctx, 1, 1, MapCheck.choice_slot("", 1), 0, 4)
+	var rb := CampaignCore.resolve_event_choice(branch, ctx, 1, 1, MapCheck.choice_slot("", 1), 0, 4)
 	_ok("server: branch choice surfaces goto='catch'", String(rb.get("goto", "")) == "catch")
 	# the catch page's SELF check, resolved server-side at the sub-page slot
 	var catch_check: Dictionary = (ev["pages"]["catch"]["choices"] as Array)[0]
 	var slot := MapCheck.choice_slot("catch", 0)
-	var srv := NetServer.resolve_event_choice(catch_check, ctx, 4242, 5, slot, 0, 4)
+	var srv := CampaignCore.resolve_event_choice(catch_check, ctx, 4242, 5, slot, 0, 4)
 	var cli := MapCheck.resolve(catch_check, ctx, 4242, 5, slot, 0, {"nudge": 0})
 	_ok("catch check: server==client on the sub-page slot",
 		int(srv["p"]) == int(cli["p"]) and bool(srv["success"]) == bool(cli["success"]))

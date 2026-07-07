@@ -58,14 +58,14 @@ func _initialize() -> void:
 	if not gate_ok:
 		fails += 1
 
-	# ---- the SERVER glue (NetServer.resolve_event_choice): nudge clamp, ⚡ spend, toast,
+	# ---- the SERVER glue (CampaignCore.resolve_event_choice): nudge clamp, ⚡ spend, toast,
 	# gate reject — driven directly, and cross-checked against the client-local resolve.
 	var glue_ok := true
 	var hd := MapContent.event("helpdesk")
 	var hack: Dictionary = (hd["choices"] as Array)[1]        # the HACK check
 	for nudge in [0, 1, 3, 9]:                                # 9 must clamp to min(3, ⚡hold)
 		var hold := 4
-		var srv := NetServer.resolve_event_choice(hack, ctx, 4242, 5, 1, nudge, hold)
+		var srv := CampaignCore.resolve_event_choice(hack, ctx, 4242, 5, 1, nudge, hold)
 		var eff_nudge: int = mini(3, mini(nudge, hold))
 		var cli := MapCheck.resolve(hack, ctx, 4242, 5, 1, 0, {"nudge": eff_nudge})
 		var toast_ok: bool = String(srv["toast"]).begins_with("✓") or String(srv["toast"]).begins_with("✗")
@@ -80,10 +80,10 @@ func _initialize() -> void:
 				int(cli["p"]), str(cli["success"]), str(toast_ok)])
 	# a free choice: accepted, not a check, ⚡ untouched
 	var free0: Dictionary = (hd["choices"] as Array)[0]
-	var fr := NetServer.resolve_event_choice(free0, ctx, 1, 1, 0, 0, 4)
+	var fr := CampaignCore.resolve_event_choice(free0, ctx, 1, 1, 0, 0, 4)
 	glue_ok = glue_ok and bool(fr["accept"]) and not bool(fr["is_check"]) and int(fr["entropy_after"]) == 4
 	# the locked badge: rejected server-side
-	var lg := NetServer.resolve_event_choice((MapContent.event("prompt_injection")["choices"] as Array)[0],
+	var lg := CampaignCore.resolve_event_choice((MapContent.event("prompt_injection")["choices"] as Array)[0],
 		no_key, 1, 1, 0, 0, 0)
 	glue_ok = glue_ok and not bool(lg["accept"])
 	print("server glue: nudge-clamp + ⚡-spend + ✓/✗ toast + free + gate-reject: %s" % ("PASS" if glue_ok else "FAIL"))
