@@ -40,7 +40,10 @@ under pressure. One book, one Well, two specs = **the same grade in two places**
 - **THE WELL (base, both specs):** mana is a visible vessel — casts draw from it, it refills in
   **pulses** (never a flat trickle), overheal **SPILLS** (wasted; banking spill is module
   territory), Meditate is the battery decision, and DRY is a visible state. The Well is the class
-  instrument on THE HUD.
+  instrument on THE HUD. **🟡 FLOW vs LADLES (Bill's fork, 2026-07-07):** continuous points (900,
+  % refunds) vs **discrete ladles** (~12 scoops: Mend 1 · Flash 2 · Cascade 3 · Meditate +4; a
+  graded cast hands its ladle back → a poured Mend is FREE; pulse = +1 ◍). There is NO separate
+  mana either way — the Well IS the mana. Tester has the A/B toggle; verdict = board card C-10.
 - **SPEC 1 · BRIM — grade the LANDING.** Casts stay completely normal; every direct heal is graded
   by where the target's HP lands. In the brim band (default ≥90%) with zero spill = **PERFECT
   POUR** (mana refund + the class proc moment) · overshoot = **SPILL** (counted waste) · land low =
@@ -136,3 +139,7 @@ medit +160/25s (tester-shortened; the kit's is 160/55s) · GCD 1.2s · pressure 
 6. **Module pool** — shared vs per-spec wording.
 7. **Ward in a spill economy** — shields can never spill, making Ward the "safe" cast; does it need
    a brim-adjacent rule (e.g. ward on a full-HP ally = graded pour) or is safe-but-unpaid correct?
+8. **FLOW vs LADLES** (§1 Well fork) — continuous pool vs discrete scoops. Ladles: countable at a
+   glance, crisp "ladle back" refunds, chunky costs (Flash 2 vs Mend 1 reads better than 33 vs 24);
+   cost = coarse boon tuning (H/S/O ladders must speak in ladles, e.g. "every 3rd pour returns 2").
+   Tester A/B live; board card C-10 is the verdict of record.
