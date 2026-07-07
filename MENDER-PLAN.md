@@ -59,6 +59,11 @@ under pressure. One book, one Well, two specs = **the same grade in two places**
   ride it, ease off, ride again. **Payoff split of record: Brim pays in WATER (the dram comes
   back), Draw pays in TEMPO (the Current).** Bill's alternate payoffs (shield / HoT / stronger
   heal on clean draws) live in the boon slate (STILL WATER / AFTERFLOW / THE CREST, board D-B11–13).
+  **🟢 THE STILL POINT (Bill, same day — the min-max tier):** a hairline sliver dead-centre of the
+  band (~4% of the bar, ≈100ms); tagging it = clean draw AND the dram back (strict superset, F15
+  Bullseye law). Self-balancing: the Current speeds the bar, so the Still Point hardens as you
+  ride higher. Tester knob 0–8% (0 = off); board card D-V5. Symmetry question for Brim (a
+  dead-full BRIMFUL tier) = board card B-V4, not built.
   The window lives on **your cast bar**; attention inverts — Brim reads the party, Draw reads your
   own hands. The Tempo/Fermata symmetry on the healing side.
 - **Shared by both specs:** the book (Flash / Mend / Renew / Ward / Cascade / Wellspring / Dispel /
