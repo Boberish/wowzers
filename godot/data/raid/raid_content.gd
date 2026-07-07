@@ -425,6 +425,13 @@ static func apply_burden(enc: EncounterRes, burden: String) -> void:
 	enc.adds = adds
 
 static func encounter_by_id(id: String) -> EncounterRes:
+	# THE FORGE (WORLD-PLAN W2): a "forge:" id IS the recipe — regenerate the encounter
+	# from the id alone (deterministic), so specs/lockstep/packs carry Forge fights as
+	# plain strings. Malformed forge ids fall through to the default (never crash).
+	if Forge.is_forge_id(id):
+		var f := Forge.from_id(id)
+		if f != null:
+			return f
 	match id:
 		"mistral": return make_mistral()
 		"gemini": return make_gemini()

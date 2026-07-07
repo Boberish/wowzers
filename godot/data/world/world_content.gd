@@ -58,10 +58,11 @@ static func _gildfields_nodes() -> Array:
 	# ---- the spine (west gate → the Old Mill → the beacon)
 	N.append(_n(0, "fight", "FIELDGATE", Vector2(240, 600),
 		"the broken tollgate where the goldroad enters the fields — something reaps here at night",
-		{"fight": "bard", "spine": true}))
+		{"fight": "forge:gildfields:brute:1:101", "spine": true}))
 	N.append(_n(1, "fight", "THE LONG FURROWS", Vector2(430, 510),
-		"rows cut arrow-straight to the horizon; no farmer walks them anymore",
-		{"fight": "sonnet", "spine": true}))
+		"rows cut arrow-straight to the horizon; no farmer walks them anymore — and the chaff moves in PAIRS",
+		{"fight": "forge:gildfields:swarm:1:102",
+		"pack": ["forge:gildfields:swarm:1:102", "forge:gildfields:swarm:1:112"], "spine": true}))
 	N.append(_n(2, "event", "HARROW CROSS", Vector2(610, 600),
 		"a crossroads shrine, its offering bowl still warm", {"event": "harrow", "spine": true}))
 	N.append(_n(3, "choice", "THE SLUICE", Vector2(790, 500),
@@ -71,7 +72,9 @@ static func _gildfields_nodes() -> Array:
 		"a field-warden's shelter, cold hearth, fresh boot prints", {"spine": true}))
 	N.append(_n(5, "elite", "THE GRANARY STEPS", Vector2(1120, 530),
 		"the great granary, sealed from the inside — HUSKMEN hold the steps, their captain holds the door",
-		{"fight": "bard", "pack": ["bard", "sonnet", "opus"], "spine": true}))
+		{"fight": "forge:gildfields:swarm:1:103",
+		"pack": ["forge:gildfields:swarm:1:103", "forge:gildfields:chanter:1:104",
+			"forge:gildfields:brute:1:105"], "spine": true}))
 	N.append(_n(6, "event", "MILLWATCH RISE", Vector2(1290, 620),
 		"the watchtower still stands its post; its beacon is dark", {"event": "beacon", "spine": true}))
 	N.append(_n(7, "boss", "THE OLD MILL", Vector2(1470, 530),
@@ -82,18 +85,21 @@ static func _gildfields_nodes() -> Array:
 	# ---- the cave chain (north): "go fight stuff in a cave…"
 	N.append(_n(9, "fight", "THE HOLLOW WARREN", Vector2(520, 350),
 		"burrows under the hedgerows, dug from BELOW — a GAUNTLET: they come one after another",
-		{"fight": "bard", "pack": ["bard", "sonnet", "bard"]}))
+		{"fight": "forge:gildfields:swarm:1:106",
+		"pack": ["forge:gildfields:swarm:1:106", "forge:gildfields:stalker:1:107",
+			"forge:gildfields:swarm:1:108"]}))
 	N.append(_n(10, "fight", "ROOTCELLAR DEPTHS", Vector2(700, 290),
-		"the farmsteads' cellars all connect. They didn't used to.", {"fight": "sonnet"}))
+		"the farmsteads' cellars all connect. They didn't used to.",
+		{"fight": "forge:gildfields:stalker:1:109"}))
 	N.append(_n(11, "elite", "THE PALE TILLER", Vector2(880, 250),
 		"a named terror: the field-ward that never stopped tilling — it plants things now",
-		{"fight": "opus"}))
+		{"fight": "forge:gildfields:brute:2:110:pale_tiller"}))
 	N.append(_n(12, "cache", "BURIED CACHE", Vector2(1050, 320),
 		"the Tiller's hoard — seed-silver and a warden's strongbox", {}))
 	# ---- the marsh chain (south): the smugglers' way — "…or rush to the dungeon"
 	N.append(_n(13, "fight", "THE DROWNED ACRE", Vector2(710, 760),
 		"the low field flooded years ago; the HUSKMEN nest in the wrecked barn",
-		{"fight": "sonnet", "variants": {"sluice=opened": {
+		{"fight": "forge:gildfields:stalker:1:111", "variants": {"sluice=opened": {
 			"kind": "cache", "name": "THE DROWNED ACRE (flooded)",
 			"sub": "your flood took the barn — the nest floats in pieces. The fields remember the sluice."}}}))
 	N.append(_n(14, "event", "REEDMERE", Vector2(890, 820),
