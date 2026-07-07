@@ -157,6 +157,13 @@ func _finish() -> bool:
 		String(w.flags(WorldContent.ZONE1).get("sluice", "?")),
 		str(w.has_waystation(WorldContent.ZONE1)),
 		str(WorldContent.zone_conquered(WorldContent.zone(WorldContent.ZONE1), w))])
+	# DEV RESET: the Atlas button wipes the world — fresh fog, nothing conquered
+	hud._world_dev_reset()
+	_check(hud._screen == "atlas", "reset lands back on the Atlas")
+	_check((hud._world as WorldSave).cleared_count(WorldContent.ZONE1) == 0,
+		"dev reset: a fresh world (0 conquered)")
+	_check((hud._world as WorldSave).flags(WorldContent.ZONE1).is_empty(),
+		"dev reset: the zone forgets its flags")
 	print("WORLD UI SMOKE: %s" % ("ALL PASS" if fails == 0 else "%d FAILURES" % fails))
 	quit(0 if fails == 0 else 1)
 	return true

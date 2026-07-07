@@ -706,8 +706,15 @@ func _show_atlas() -> void:
 	at.at_pin = _zone_id if _zone_id != "" else "bastion"
 	at.pin_entered.connect(_enter_atlas_pin)
 	at.back_requested.connect(_show_home)
+	at.reset_requested.connect(_world_dev_reset)
 	at.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(at)
+
+## DEV (W1 preview): wipe the world — fresh fog, fresh conquest, on disk too.
+func _world_dev_reset() -> void:
+	_world = WorldSave.wipe()
+	_zone_id = ""
+	_show_atlas()
 
 func _enter_atlas_pin(id: String) -> void:
 	match id:
