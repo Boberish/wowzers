@@ -729,6 +729,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `packroll` → main (`89918db`) · §THE WORLD / §MAPS — **PACK QUOTAS v1: the
+  Topology now ROLLS packs** (the "generator" half of Bill's pack ask; zones stay authored per
+  the shape-assignment rule). Offline descents: MID skirmish nodes roll 50% solo / 35% duo /
+  15% trio, seeded from (map seed, node id) — deterministic per descent; entry + Seal never
+  roll; light fillers (bard/sonnet) walk in first and the node's own body CAPTAINS (dies last —
+  oaths + drop ceremony stay anchored to the kill that matters); OVERCLOCK/curse marks land on
+  member 1 only (known v1 wart). Online descents unchanged (server-side pass later). Gate:
+  `sim/packroll_probe.gd` (never-roll slots · determinism · 50/38/12 measured @400 · captain
+  rule · built chain) ALL OK · raid smoke green · play copy synced. **NEXT feel knob:** duo/trio
+  weights + filler pool per ring; Forge SWARM bodies replace the full-HP fillers (a trio runs
+  Seal-sized at the baked ×2.5). *(world-structure session)*
+
 - ☑ 2026-07-07 · `baselen` → main (`7d740fe`) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH —
   **THE ×2.5 LENGTH IS NOW THE GAME (Bill: "i dont like the long fight and normal branch,
   merge this into the main").** All 4 Seals + 3 skirmishes: HP + enrage ×2.5 baked into
