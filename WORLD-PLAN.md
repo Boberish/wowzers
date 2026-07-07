@@ -456,6 +456,37 @@ carry is an engine-adjacent slice (guarded, byte-identical for single fights) th
 everything else composes with. Healer regen / mana curves rebalance WITH the bands, not
 before (the inert-mana fix rides this).
 
+### PACK — build spec v1 (claimed 2026-07-07, Bill: "make a good plan then execute")
+- **Engine (the guarded touch):** `CombatState.pack: Array[EncounterRes]` + `pack_i`
+  (empty = today's single fight, byte-identical). Boss death with members remaining ⇒
+  NOT over/won: advance `pack_i`, reset the SAME BossState in place (no stale refs) from
+  the next EncounterRes, swap `s.encounter`, stamp `boss.entered_tick`. Win fires only
+  on the last corpse; a wipe anytime is a wipe. **Heat carries for free** — same
+  CombatState, seats untouched (Flow/vials/rig/cooldowns/HP persist): the whole point.
+- **WALK-IN grace** (the diegetic valley): for `pack_walkin_ticks` (TuningConfig, ~75 =
+  2.5s) after a swap the new enemy takes no actions (no telegraphs, no melee); players
+  MAY act — opening on the approaching enemy is the pull fantasy, and a small free
+  window is the breather's reward. One `pack_next` event for HUD juice.
+- **Per-member enrage:** `BossState.entered_tick` (default 0 ⇒ identical math for
+  singles) — the enrage clock reads time-since-entry, so member 3 doesn't arrive
+  pre-enraged. Phases stay HP-fraction (reset with the in-place boss reset).
+- **Spec plumbing:** `make_spec(..., pack=[ids])` → `spec["pack"]` (absent/size<2 =
+  plain fight, normalized away); `RaidNet.build`/`RaidContent.make_state` resolve the
+  list. Pure data ⇒ rides `(seed, spec)` — lockstep/replay-safe by construction; online
+  untouched v1 (no protocol bump — the field is additive and unsent).
+- **HUD:** on `pack_next` — boss plate rebinds, BossIntro card for the next member,
+  "▸ NEXT" toast. The SLAIN kill-moment fires only at fight end (engine `over` is truth).
+- **Authoring (feel content):** Gildfields THE GRANARY STEPS = smalls→captain pack
+  (bard·sonnet·opus), THE HOLLOW WARREN = gauntlet (bard·sonnet·bard); Pale Tiller stays
+  a duel. `--fightlen` scales every member (and each member's enrage) so the scalar
+  and packs compose. ⚠ v1 packs reuse full-HP skirmish bodies — total pool runs Seal-
+  sized; the Forge's SWARM bodies later mint proper lightweights (feel-test knob: author
+  fewer members before shrinking bodies).
+- **Gates:** new `pack_probe` (determinism ×2 · win-after-last · walk-in silence ·
+  member-2 enrage clock · size-1 normalizes to plain) · frozen-main A/B psim twinfang(120)
+  + raid(60) byte-identical (engine touch!) · net_smoke (checksums) · raid/world/map/menu
+  smokes · fightlen_probe both modes.
+
 ---
 
 ## PROGRESSION RECONCILIATION (what the world changes — and deliberately doesn't)
