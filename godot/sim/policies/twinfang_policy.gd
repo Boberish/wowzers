@@ -26,6 +26,7 @@ var _beat_flinches: Dictionary = {}
 var _open_key: int = -1
 var _open_aim: int = 0
 var _dump_wait: int = 0         ## ticks a ready dump has waited for an opening (patience)
+var _draw_noise: float = 0.0    ## FERMATA (EDGE): this draw's release-DEPTH jitter (rolled per coil)
 
 func act(obs: Dictionary) -> Dictionary:
 	var tick := int(obs.get("tick", 0))
@@ -133,11 +134,20 @@ func _fermata_strike(obs: Dictionary, energy: float) -> Dictionary:
 		return {}                                   # staggered from an unravel — wait it out
 	if not bool(obs.get("coiling", false)):
 		if energy >= float(obs.get("strike_cost", 12.0)):
+			# roll this draw's release-DEPTH jitter once (per-policy rng; a clean expert = 0).
+			# Fractional (not a tick offset) so it scales with the window — a narrow high-Flow
+			# window snaps as readily as a wide one, which the additive smear got catastrophically
+			# wrong (it snapped every narrow window). Symmetric: latency spreads deep AND shallow.
+			_draw_noise = ((rng.next_float() * 2.0 - 1.0) * float(latency_ticks) * 0.016) if (rng != null and latency_ticks > 0) else 0.0
 			return _ab("coil")                      # begin the draw — the window is already placed
 		return {}
+	# EDGE verb — DEPTH aim: ride toward the lip. Aim deep (0.84 = the Bullseye band, a hair short
+	# of the cliff at 1.0); the jitter spreads a sloppy release deep (occasional SNAP) or shallow
+	# (a safe Perfect/Good). Expert lands 0.84 clean; sloppy lives on the brink.
 	var lo := int(obs.get("perfect_lo", 18))
 	var hi := int(obs.get("perfect_hi", 28))
-	var target := maxi(lo, (lo + hi) / 2 - 1 + int(round(float(latency_ticks) * STRIKE_LAT_SCALE)))
+	var depth := clampf(0.84 + _draw_noise, 0.30, 1.06)
+	var target := lo + int(round(float(hi - lo) * depth))
 	if bool(obs.get("coil_sharp", false)) and int(obs.get("since_strike", 0)) >= target:
 		return _ab("release")
 	return {}

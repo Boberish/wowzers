@@ -57,26 +57,30 @@ const TEMPO := [
 ## Understudy, Efficiency and the WINDOW bread (Wide Tempo / Fencer's Line / Rubato) CARRY from
 ## TEMPO/SHARED and work unchanged (Fermata shares Tempo's Flow + window).
 const FERMATA := [
-	# --- COIL — the hold itself ---
-	{"id": "patientEdge", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Patient Edge", "desc": "The long stalk pays: releases hit up to +18% harder the farther the window sat. Reward the deep draw."},
-	{"id": "restlessDark", "type": "upgrade", "rarity": "haiku", "tags": ["coil", "energy"], "title": "Restless Dark", "desc": "Energy regenerates +30% while you're coiled — the shadow is restless."},
-	{"id": "quietFuse", "type": "upgrade", "rarity": "haiku", "tags": ["coil"], "title": "Quiet Fuse", "desc": "Your blade sharpens 0.08s sooner — a shorter fuse on every coil."},
-	{"id": "feint", "type": "relic", "rarity": "sonnet", "tags": ["coil", "unravel"], "title": "Feint", "desc": "An unravel PRIMES your next coil to sharpen 50% faster. Turn a fumble into tempo."},
-	# --- VEIL — defense in shadow ---
-	{"id": "vanish", "type": "relic", "rarity": "sonnet", "tags": ["coil", "defense"], "title": "Vanish", "desc": "The first boss hit you take during a coil is softened by 50% — melt into the dark. Defence only."},
-	{"id": "shadowstep", "type": "upgrade", "rarity": "haiku", "tags": ["coil", "defense"], "title": "Shadowstep", "desc": "Dodging no longer costs you your whole coil — a dodge mid-coil keeps it at half progress instead of breaking it."},
-	{"id": "veilWarband", "type": "relic", "rarity": "opus", "tags": ["coil", "support"], "title": "Veil Over the Warband", "desc": "SUPPORT: while you're coiled the whole warband takes 4% less damage — the shadow stretches over your allies. Your coil uptime IS the raid mitigation."},
-	# --- RELEASE — the strike ---
-	{"id": "killingWhisper", "type": "upgrade", "rarity": "haiku", "tags": ["release", "bullseye"], "title": "Killing Whisper", "desc": "Bullseye releases deal +15% — the strike from the dark bites deeper."},
-	{"id": "twinEcho", "type": "relic", "rarity": "sonnet", "tags": ["release", "flow"], "title": "Twin Echo", "desc": "Releases at MAX Flow echo a second strike for 30%. Ride the top, strike twice."},
-	{"id": "firstBlood", "type": "relic", "rarity": "sonnet", "tags": ["release", "crash"], "title": "First Blood", "desc": "Your first release after any Miss or unravel lands an automatic Perfect — get back into the dark clean."},
-	{"id": "firstPass", "type": "upgrade", "rarity": "haiku", "tags": ["release", "window"], "title": "First Pass", "desc": "The first time the window comes around after your blade sharpens, it's +20% wider. Reward the decisive release."},
+	# --- THE ROLL — control where the window lands ---
+	{"id": "stretto", "type": "upgrade", "rarity": "haiku", "tags": ["roll", "speed"], "title": "Stretto", "desc": "Your windows roll ~15% nearer — more notes and more cliffs per minute. The speed pole (Stretto: the voices enter closer together)."},
+	{"id": "refrain", "type": "relic", "rarity": "sonnet", "tags": ["roll", "precision"], "title": "Refrain", "desc": "A BULLSEYE HOLDS the window in place — your next draw plays the same note (no re-roll). Nail the lip and the game lets you prove it wasn't luck."},
+	# --- THE RIDE — how deep you take each note ---
+	{"id": "coldCut", "type": "upgrade", "rarity": "haiku", "tags": ["ride", "combo"], "title": "Cold Cut", "desc": "A shallow GOOD-band release grants +1 combo. The safe release stops being a chicken-out and becomes a PLAY — farm combo for Eviscerate instead of chasing the lip."},
+	{"id": "theBrink", "type": "relic", "rarity": "sonnet", "tags": ["ride", "greed"], "title": "The Brink", "desc": "A NERVE meter: each Perfect-or-deeper release +1 (max 5), each stack +3% to ALL your damage. A SNAP zeroes it; a plain miss just holds it. Five deep rides and everything bites harder."},
+	{"id": "killingWhisper", "type": "upgrade", "rarity": "haiku", "tags": ["release", "bullseye"], "title": "Killing Whisper", "desc": "Bullseye releases deal +15% — the lip's own payoff, the deepest safe strike."},
+	# --- THE DRAW — while the needle runs (defense) ---
+	{"id": "vanish", "type": "relic", "rarity": "sonnet", "tags": ["draw", "defense"], "title": "Vanish", "desc": "The first boss hit you take during a draw is softened by 50% — the shadow takes it, the note continues. Defence only."},
+	{"id": "restlessDark", "type": "upgrade", "rarity": "haiku", "tags": ["draw", "energy"], "title": "Restless Dark", "desc": "Energy regenerates +30% while you're drawing — the stalk pays for itself."},
+	{"id": "quietFuse", "type": "upgrade", "rarity": "haiku", "tags": ["draw", "speed"], "title": "Quiet Fuse", "desc": "Your blade sharpens 0.08s sooner and windows may land a touch nearer — everything slightly closer to your hand."},
+	{"id": "veilWarband", "type": "relic", "rarity": "opus", "tags": ["draw", "support"], "title": "Veil Over the Warband", "desc": "SUPPORT: while you're drawing the whole warband takes 4% less damage. Your patience is the party's shield."},
+	# --- THE REST — idle is a resource ---
+	{"id": "composure", "type": "relic", "rarity": "sonnet", "tags": ["rest", "pacing"], "title": "Composure", "desc": "For 2s after a Perfect-or-deeper release your Flow does not decay — rest, Eviscerate, answer a mechanic without bleeding the streak. The song holds its breath while you work."},
+	{"id": "firstNote", "type": "upgrade", "rarity": "haiku", "tags": ["rest", "window"], "title": "First Note", "desc": "Rest 1.5s+ before a draw and that window gets +20% ENTRY runway — the lip never moves, just the safe side. A real breath, then a generous note."},
+	# --- FLOW & COMEBACK ---
+	{"id": "twinEcho", "type": "relic", "rarity": "sonnet", "tags": ["release", "flow"], "title": "Twin Echo", "desc": "Releases at MAX Flow echo a second strike for 30%. At full heat every note doubles."},
+	{"id": "firstBlood", "type": "relic", "rarity": "sonnet", "tags": ["release", "crash"], "title": "First Blood", "desc": "Your first release after any miss, SNAP or unravel lands an automatic Perfect — the crash never spirals, one clean note back onto the horse."},
 ]
 
 ## FERMATA keystones (§13.6) — elite-node drops, NEVER in the normal draft pool.
 const FERMATA_KEYSTONES := [
-	{"id": "unseenBlade", "type": "relic", "rarity": "opus", "tags": ["coil", "keystone"], "title": "The Unseen Blade", "desc": "KEYSTONE: while coiled you gain a SHADE every 0.5s (max 5); each Shade adds +6% to your NEXT release and they persist until spent. The slow-nuke build — hold, bank, unleash one giant strike."},
-	{"id": "eclipse", "type": "relic", "rarity": "opus", "tags": ["release", "bullseye", "keystone"], "title": "Eclipse", "desc": "KEYSTONE: a sharp Bullseye release instantly RE-COILS you, already sharp — chain release after release in perpetual shadow until a miss ends the dance."},
+	{"id": "unseenBlade", "type": "relic", "rarity": "opus", "tags": ["coil", "keystone"], "title": "The Unseen Blade", "desc": "KEYSTONE: while you REST (idle) you bank a SHADE every 0.7s (max 5); your next release spends them all at +6% each. Resting bleeds Flow but gathers the dark — chain or stalk is a choice every beat."},
+	{"id": "eclipse", "type": "relic", "rarity": "opus", "tags": ["release", "bullseye", "keystone"], "title": "Eclipse", "desc": "KEYSTONE: a sharp Bullseye instantly re-draws you, already sharp, and the chained window lands NEAR — bull, bull, bull, a drumroll of dares until one note misses or snaps."},
 	{"id": "phantom", "type": "relic", "rarity": "opus", "tags": ["release", "bullseye", "keystone"], "title": "Phantom", "desc": "KEYSTONE: a Bullseye release fires a PHANTOM twin strike for full damage — the second blade from the dark."},
 ]
 const VENOM := [

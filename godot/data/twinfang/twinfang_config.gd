@@ -151,16 +151,23 @@ extends Resource
 # Near windows are EARNED: at low Flow the window keeps its distance (the slack), fading to 0 at
 # max Flow — the twitchy short draws only exist inside a hot streak.
 @export var fermata_near_slack: float = 0.30    ## extra window keep-away at Flow 0 (→ 0 at max Flow)
-# THE FAR-WINDOW PAYOFF: with a press-relative clock, "hold longer for more" is decided by where
-# the window LANDS, so the Patient cards key off the draw's length past the pivot (0 → 1 over span).
-@export var fermata_far_pivot: float = 0.80     ## draws whose window sat past this start paying…
-@export var fermata_far_span: float = 0.60      ## …scaling the Patient bonuses to full over this span
+# THE RAMP & THE SNAP (EDGE verb, Bill 2026-07-07 "edge is way better"): inside the window damage
+# RAMPS entry→lip by depth (GOOD 45% · PERFECT 37% · BULLSEYE last 18%, hard against the cliff).
+# Crossing the lip auto-SNAPS the note (miss + Flow crash, no dead-note state). Wideners add ENTRY
+# runway only — the lip never moves. Depth d = (since − lo) / (hi − lo); bands split at good/perfect.
+@export var fermata_good_frac: float = 0.45     ## GOOD covers [0, this) of the depth ramp
+@export var fermata_perfect_frac: float = 0.37  ## PERFECT covers [good, good+this); BULLSEYE = the rest to the lip
+@export var snap_lock: float = 0.40             ## strike-lock after a SNAP (rode past the lip)
+@export var razor_sec: float = 0.05             ## The Razor (rig WHEN): a release this close before the lip
 # creeds
-@export var patient_cap: float = 0.20           ## Patient Knife: full far-window bonus (× far fraction)
+@export var patient_ramp_ext: float = 0.40      ## Patient Knife: the ramp continues this fraction PAST the lip…
+@export var patient_deep_mult: float = 0.20     ## …paying up to +this at the extension's end (a deeper lip)
+@export var patient_snap_stagger: float = 0.5   ## Patient Knife: a SNAP staggers this long (harsher cliff)
 @export var patient_shift_min: float = 1.30     ## Patient Knife: the window never lands near — the knife waits
 @export var fleeting_min_sec: float = 0.20      ## Fleeting Shade: shorter min coil
 @export var fleeting_flow_cap: int = 4          ## Fleeting Shade: Flow ceiling (the cost)
 @export var fleeting_slip_amt: int = 2          ## Fleeting Shade: a Miss loses this (not a crash)
+@export var fleeting_snap_amt: int = 2          ## Fleeting Shade: a SNAP bleeds this Flow instead of crashing
 @export var tutti_off_mult: float = 0.85        ## Tutti: an off-window (un-sharp) dump lands at this fraction
 # modules
 @export var shadowdance_fill: int = 6           ## sharp Perf/Bull at Flow>=min to fill Shadow Dance
@@ -169,24 +176,31 @@ extends Resource
 @export var shadowdance_seed: int = 2           ## Flow left after the Dance crashes
 @export var mark_open_bonus: float = 0.12       ## The Mark: Eviscerate +this per brand tier
 @export var mark_tier_cap: int = 3              ## The Mark: max brand tier
-# boons — COIL
-@export var patient_edge_cap: float = 0.18      ## Patient Edge: full far-window bonus (× far fraction)
-@export var restless_dark_regen: float = 0.30   ## Restless Dark: +this fraction of energy regen while coiled
-@export var quiet_fuse_cut: float = 0.08        ## Quiet Fuse: min coil reduced by this
-@export var quiet_fuse_no_stagger: bool = false ## Quiet Fuse (Opus rung): unravel loses its stagger
-@export var feint_sharpen: float = 0.50         ## Feint: after an unravel the next coil sharpens this much faster
-# boons — VEIL
-@export var vanish_reduce: float = 0.50         ## Vanish: the first boss hit per coil takes -this
-@export var vanish_keep_sharp: bool = false     ## Vanish (Opus rung): the eaten hit doesn't break the coil
-@export var veil_warband_reduce: float = 0.04   ## Veil Over the Warband: allies take -this while you're coiled
-# boons — RELEASE
+# boons — THE ROLL (control over where the window lands)
+@export var stretto_bias: float = 0.15          ## Stretto: windows roll this fraction toward the near edge
+@export var refrain_bonus: float = 0.0          ## Refrain (S/O rune): the held-window repeat hits +this
+# boons — THE RIDE / RELEASE
+@export var cold_cut_cp: int = 1                ## Cold Cut: a GOOD-band (shallow-safe) release grants +this combo
+@export var cold_cut_refund: float = 0.0        ## Cold Cut (S/O rune): the shallow release also refunds this energy
+@export var brink_per: float = 0.03             ## The Brink: +this damage per nerve stack (all outgoing)
+@export var brink_cap: int = 5                  ## The Brink: nerve-meter ceiling
 @export var killing_whisper_mult: float = 0.15  ## Killing Whisper: Bullseye releases +this
+@export var restless_dark_regen: float = 0.30   ## Restless Dark: +this fraction of energy regen while drawing
+@export var quiet_fuse_cut: float = 0.08        ## Quiet Fuse: min coil reduced by this
+# boons — THE DRAW (defense)
+@export var vanish_reduce: float = 0.50         ## Vanish: the first boss hit per draw takes -this
+@export var vanish_keep_sharp: bool = false     ## Vanish (Opus rung): the eaten hit doesn't break the draw
+@export var veil_warband_reduce: float = 0.04   ## Veil Over the Warband: allies take -this while you're drawing
+# boons — THE REST
+@export var composure_sec: float = 2.0          ## Composure: Flow decay paused this long after a Perfect+ release
+@export var first_note_pad: float = 0.20        ## First Note: after a 1.5s rest, the draw's ENTRY runway +this
+# boons — FLOW & COMEBACK
 @export var twin_echo_mult: float = 0.30        ## Twin Echo: a max-Flow release echoes a strike at this
-@export var first_pass_widen: float = 0.20      ## First Pass: the first window after SHNK is +this wider
+@export var quiet_fuse_no_stagger: bool = false ## Quiet Fuse (Opus rung): unravel loses its stagger
 # keystones (A8 — elite drops)
 @export var unseen_shade_per: float = 0.06      ## Unseen Blade: +dmg per Shade on the next release
 @export var unseen_shade_cap: int = 5           ## Unseen Blade: shade ceiling
-@export var unseen_shade_every: float = 0.5     ## Unseen Blade: gain a Shade per this long coiled
+@export var unseen_shade_every: float = 0.7     ## Unseen Blade: bank a Shade per this long RESTING (idle)
 @export var phantom_twin_mult: float = 1.0      ## Phantom: a Bullseye release fires a twin strike at this
 # On the Beat (a TEMPO-side card — dumps in the strike window gain the grade mult)
 @export var on_the_beat_frac: float = 0.60      ## fraction of the live window grade bonus a dump gains
