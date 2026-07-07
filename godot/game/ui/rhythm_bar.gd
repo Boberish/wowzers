@@ -31,6 +31,13 @@ var fermata: bool = false
 var coiling: bool = false
 var coil_charge: float = 0.0   ## 0..1 toward sharp
 var coil_sharp: bool = false
+# FERMATA · THE RAMP & THE SNAP (EDGE) — damage ramps entry→lip; the bullseye sits at the far
+# lip against the cliff, and crossing it SNAPS. `ramp` swaps the centre bands for the ramp draw.
+var ramp: bool = false
+var ramp_good_frac: float = 0.45   ## GOOD covers this fraction of the window from the entry
+var ramp_perfect_frac: float = 0.37 ## …then PERFECT; the rest to the lip is BULLSEYE
+var lip: int = 0               ## the cliff tick (= window hi, or hi+extension under Patient)
+var dance_no_snap: bool = false ## Shadow Dance: the cliff is gone — ride freely
 var _pulse: float = 0.0
 var _result: String = ""      ## "perfect" | "early" | "late"
 var _result_t: float = 0.0    ## fade timer for the verdict flash
@@ -51,7 +58,8 @@ func show_result(r: String) -> void:
 	_press_aim_f = _prev_aim_f
 	var hi := maxf(1.0, float(maxi(scale_ticks, perfect_hi + 2)))
 	_press_off_ticks = (_press_f - _press_aim_f) * hi
-	_bull = _result == "perfect" and absf(_press_off_ticks) <= 1.5   # ~50ms — the flourish only
+	# FERMATA ramp passes the real grade string; Tempo derives the bullseye from press-offset.
+	_bull = _result == "bullseye" if ramp else (_result == "perfect" and absf(_press_off_ticks) <= 1.5)
 
 func _process(delta: float) -> void:
 	_pulse += delta * 8.0
@@ -72,8 +80,10 @@ func _draw() -> void:
 	var aim_f := clampf(aim_tick / hi, 0.0, 1.0)
 	var near := clampf(1.0 - absf(float(since) - aim_tick) / 2.0, 0.0, 1.0)  # needle proximity to the plumb (±2t)
 	var prog := clampf(float(since) / hi, 0.0, 1.0)
-	var in_green := since >= perfect_lo and since <= perfect_hi
-	var past := since > perfect_hi
+	# FERMATA ramp: the valid ride is [lo, lip]; past the lip is the SNAP cliff.
+	var edge_hi := lip if (ramp and lip > 0) else perfect_hi
+	var in_green := since >= perfect_lo and since <= edge_hi
+	var past := since > edge_hi
 	var flashing := _result_t > 0.0
 	var fa := clampf(_result_t / HOLD, 0.0, 1.0)   # 1 -> 0 fade
 
@@ -96,7 +106,7 @@ func _draw() -> void:
 			"TEMPO ×%.1f — beat's faster!" % (1.0 + hot * 0.6) if flow >= fmax else "TEMPO ×%.1f" % (1.0 + hot * 0.6),
 			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], tcol)
 	else:
-		var cue := "hold 1, release in the green" if fermata else "tap 1 in the green"
+		var cue := ("hold 1 — ride to the lip" if ramp else "hold 1, release in the green") if fermata else "tap 1 in the green"
 		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), cue,
 			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], Palette.PERFECT)
 
@@ -137,78 +147,111 @@ func _draw() -> void:
 	var aim_x := tx + tw * aim_f
 	var bw := maxf(hi_x - lo_x, 2.0)
 	var gem_r := clampf(bw * 0.15, 3.0, 5.0)   # boundary gems shrink when the band pinches (accelerando)
-	var gz := Palette.PERFECT
-	gz.a = 0.20 + (0.20 if in_green else 0.0)
-	draw_rect(Rect2(lo_x, ty + 2, bw - 1, th - 4), gz)
-	# GRADED WINDOW (§2c): the flat band above is the GOOD zone (it LANDS, no Flow). A
-	# brighter PERFECT core and a gold BULLSEYE centre show where the beat actually scores —
-	# the whole point of aiming dead-centre now that the flanks only tread water.
-	var half := bw * 0.5
-	var pf := clampf(perfect_frac, 0.05, 1.0)
-	var bf := clampf(bull_frac, 0.02, pf)
-	var core := Palette.PERFECT.lightened(0.18)
-	core.a = 0.22 + 0.16 * near + (0.10 if in_green else 0.0)
-	draw_rect(Rect2(aim_x - half * pf, ty + 3, half * pf * 2.0, th - 6), core)
-	var bull := Palette.GOLD_BRIGHT
-	bull.a = 0.30 + 0.28 * near + (0.12 if in_green else 0.0)
-	draw_rect(Rect2(aim_x - half * bf, ty + 4, half * bf * 2.0, th - 8), bull)
-	# inner glow border + gloss
-	var ig := Palette.PERFECT
-	ig.a = 0.45 if in_green else 0.25
-	draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th - 6), ig, false, 1.2)
-	draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th * 0.30), Color(1, 1, 1, 0.10))
-	if in_green and bw > 16.0:      # travelling shimmer while the press would be Perfect
-		var sx := lo_x + fmod(_pulse * 34.0, maxf(bw - 8.0, 1.0))
-		var sh := Palette.PERFECT.lightened(0.5)
-		sh.a = 0.38
-		draw_rect(Rect2(sx, ty + 3, 7.0, th - 6), sh)
+	if ramp:
+		# ---- FERMATA · THE RAMP: GOOD (entry) → PERFECT → BULLSEYE, rising toward the lip ----
+		# damage climbs left→right; the bright end is the deepest, safest-but-greediest release.
+		var lip_x := tx + tw * clampf(float(lip) / hi, 0.0, 1.0)
+		var core_w := hi_x - lo_x
+		var g_end := lo_x + core_w * clampf(ramp_good_frac, 0.05, 0.9)
+		var p_end := lo_x + core_w * clampf(ramp_good_frac + ramp_perfect_frac, 0.1, 0.98)
+		var green := Palette.PERFECT
+		# GOOD — dim entry
+		draw_rect(Rect2(lo_x, ty + 3, g_end - lo_x, th - 6), Color(green.r, green.g, green.b, 0.14))
+		# PERFECT — brighter
+		draw_rect(Rect2(g_end, ty + 3, p_end - g_end, th - 6), Color(green.r, green.g, green.b, 0.30))
+		# BULLSEYE — bright gold, up to the lip (core hi, plus any Patient extension to lip_x)
+		var bull := Palette.GOLD_BRIGHT
+		draw_rect(Rect2(p_end, ty + 3, maxf(lip_x, hi_x) - p_end, th - 6), Color(bull.r, bull.g, bull.b, 0.42))
+		# the Patient extension past the core hi reads a shade amber (deeper lip, deeper pay)
+		if lip_x > hi_x + 1.0:
+			draw_rect(Rect2(hi_x, ty + 4, lip_x - hi_x, th - 8), Color(Palette.RAGE.r, Palette.RAGE.g, Palette.RAGE.b, 0.20))
+		draw_rect(Rect2(lo_x + 1, ty + 3, maxf(lip_x, hi_x) - lo_x - 2, th - 6),
+			Color(green.r, green.g, green.b, 0.30 if in_green else 0.18), false, 1.2)
+		# THE LIP — the cliff. Bold crimson + a white hairline. Hidden during the Dance (no snap).
+		if not dance_no_snap:
+			draw_line(Vector2(lip_x, ty - 6.0), Vector2(lip_x, ty + th + 6.0), Palette.CRIMSON, 2.6, true)
+			draw_line(Vector2(lip_x - 1.4, ty - 4.0), Vector2(lip_x - 1.4, ty + th + 4.0), Color(1, 1, 1, 0.8), 1.0, true)
+		else:
+			draw_line(Vector2(lip_x, ty - 4.0), Vector2(lip_x, ty + th + 4.0), Color(1, 1, 1, 0.35), 1.5, true)
+	else:
+		# ---- the CENTRE model (Tempo/Venom): GOOD flanks, PERFECT core, BULLSEYE centre ----
+		var gz := Palette.PERFECT
+		gz.a = 0.20 + (0.20 if in_green else 0.0)
+		draw_rect(Rect2(lo_x, ty + 2, bw - 1, th - 4), gz)
+		var half := bw * 0.5
+		var pf := clampf(perfect_frac, 0.05, 1.0)
+		var bf := clampf(bull_frac, 0.02, pf)
+		var core := Palette.PERFECT.lightened(0.18)
+		core.a = 0.22 + 0.16 * near + (0.10 if in_green else 0.0)
+		draw_rect(Rect2(aim_x - half * pf, ty + 3, half * pf * 2.0, th - 6), core)
+		var bull := Palette.GOLD_BRIGHT
+		bull.a = 0.30 + 0.28 * near + (0.12 if in_green else 0.0)
+		draw_rect(Rect2(aim_x - half * bf, ty + 4, half * bf * 2.0, th - 8), bull)
+		var ig := Palette.PERFECT
+		ig.a = 0.45 if in_green else 0.25
+		draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th - 6), ig, false, 1.2)
+		draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th * 0.30), Color(1, 1, 1, 0.10))
+		if in_green and bw > 16.0:      # travelling shimmer while the press would be Perfect
+			var sx := lo_x + fmod(_pulse * 34.0, maxf(bw - 8.0, 1.0))
+			var sh := Palette.PERFECT.lightened(0.5)
+			sh.a = 0.38
+			draw_rect(Rect2(sx, ty + 3, 7.0, th - 6), sh)
 
-	# ---- the "too LATE" reach past perfect_hi — amber, the mirror of the crimson early wall ----
-	# so the green now has an unmistakable END: early-fail (crimson, back-lean) and late-fail
-	# (amber→crimson, forward-lean) bracket the band. A late press still LANDS but earns no Flow.
-	var late_w := (tx + tw) - hi_x
-	if late_w > 1.0:
-		var late := Palette.RAGE
-		late.a = 0.28
-		draw_rect(Rect2(hi_x, ty + 2, late_w - 2, th - 4), late)
-		var deep := Palette.CRIMSON_DEEP    # opportunity visibly runs out toward the edge
-		deep.a = 0.20
-		draw_rect(Rect2(hi_x + late_w * 0.45, ty + 2, late_w * 0.55 - 2, th - 4), deep)
-		for hx in range(int(hi_x) + 6, int(tx + tw) - 2, 11):
-			draw_line(Vector2(float(hx) - 4.0, ty + 4.0), Vector2(float(hx) + 6.0, ty + th - 4.0),
-				Color(0, 0, 0, 0.22), 2.0, true)
+	# ---- FERMATA: the SNAP cliff — everything past the lip is a broken note (crimson) ----
+	if ramp and lip > 0 and not dance_no_snap:
+		var lip_px := tx + tw * clampf(float(lip) / hi, 0.0, 1.0)
+		var snap_w := (tx + tw) - lip_px
+		if snap_w > 1.0:
+			draw_rect(Rect2(lip_px, ty + 2, snap_w - 2, th - 4), Color(Palette.CRIMSON.r, Palette.CRIMSON.g, Palette.CRIMSON.b, 0.22))
+			for hx in range(int(lip_px) + 6, int(tx + tw) - 2, 11):
+				draw_line(Vector2(float(hx) - 4.0, ty + 4.0), Vector2(float(hx) + 6.0, ty + th - 4.0), Color(0, 0, 0, 0.22), 2.0, true)
+	if not ramp:
+		# ---- the "too LATE" reach past perfect_hi — amber, the mirror of the crimson early wall ----
+		# so the green now has an unmistakable END: early-fail (crimson, back-lean) and late-fail
+		# (amber→crimson, forward-lean) bracket the band. A late press still LANDS but earns no Flow.
+		var late_w := (tx + tw) - hi_x
+		if late_w > 1.0:
+			var late := Palette.RAGE
+			late.a = 0.28
+			draw_rect(Rect2(hi_x, ty + 2, late_w - 2, th - 4), late)
+			var deep := Palette.CRIMSON_DEEP    # opportunity visibly runs out toward the edge
+			deep.a = 0.20
+			draw_rect(Rect2(hi_x + late_w * 0.45, ty + 2, late_w * 0.55 - 2, th - 4), deep)
+			for hx in range(int(hi_x) + 6, int(tx + tw) - 2, 11):
+				draw_line(Vector2(float(hx) - 4.0, ty + 4.0), Vector2(float(hx) + 6.0, ty + th - 4.0),
+					Color(0, 0, 0, 0.22), 2.0, true)
 
-	# ---- three gem-set mullions: early wall · green OPEN · green CLOSE ----
-	for bd in [[tx + ex, Palette.GOLD_DIM, Palette.CRIMSON_DEEP.lightened(0.15), false, gem_r],
-			[lo_x, Palette.PERFECT, Palette.PERFECT.darkened(0.1), in_green, gem_r],
-			[hi_x, Palette.PERFECT, Palette.PERFECT, in_green, gem_r + 0.5]]:
-		var bx: float = bd[0]
-		var accent: Color = bd[1]
-		var gembody: Color = bd[2]
-		var glow: bool = bd[3]
-		var gr: float = bd[4]
-		draw_line(Vector2(bx, ty + 2), Vector2(bx, ty + th - 2), Palette.BG0, 3.0, true)
-		draw_line(Vector2(bx + 1.0, ty + 2), Vector2(bx + 1.0, ty + th - 2), accent, 1.5, true)
-		_gem(Vector2(bx, ty - 3.0), gr, gembody, glow)
+		# ---- three gem-set mullions: early wall · green OPEN · green CLOSE ----
+		for bd in [[tx + ex, Palette.GOLD_DIM, Palette.CRIMSON_DEEP.lightened(0.15), false, gem_r],
+				[lo_x, Palette.PERFECT, Palette.PERFECT.darkened(0.1), in_green, gem_r],
+				[hi_x, Palette.PERFECT, Palette.PERFECT, in_green, gem_r + 0.5]]:
+			var bx: float = bd[0]
+			var accent: Color = bd[1]
+			var gembody: Color = bd[2]
+			var glow: bool = bd[3]
+			var gr: float = bd[4]
+			draw_line(Vector2(bx, ty + 2), Vector2(bx, ty + th - 2), Palette.BG0, 3.0, true)
+			draw_line(Vector2(bx + 1.0, ty + 2), Vector2(bx + 1.0, ty + th - 2), accent, 1.5, true)
+			_gem(Vector2(bx, ty - 3.0), gr, gembody, glow)
 
-	# ---- THE AIM PLUMB — a thin STATIONARY gilded sight through the band centre ----
-	# Gold (not mint) + still (not sweeping) + sight-post chevrons (not a diamond head) so it
-	# never reads as the moving needle. It LOCKS ON: bloom + pip brighten as the needle nears.
-	if near > 0.0:
-		var bloom := Palette.GOLD_BRIGHT
-		bloom.a = 0.10 + 0.30 * near
-		draw_rect(Rect2(aim_x - (3.0 + 3.0 * near), ty - 2.0, 2.0 * (3.0 + 3.0 * near), th + 4.0), bloom)
-	# a dark seat for contrast, a bold gilded stroke, and a crisp white hairline core so the
-	# target reads as a definite AIM-HERE line at all times — the whole green still scores.
-	draw_line(Vector2(aim_x, ty - 6.0), Vector2(aim_x, ty + th + 6.0), Palette.BG0, 3.0, true)
-	var acol := Palette.GOLD_BRIGHT
-	acol.a = 0.82 + 0.18 * near
-	draw_line(Vector2(aim_x, ty - 6.0), Vector2(aim_x, ty + th + 6.0), acol, 1.6, true)
-	draw_line(Vector2(aim_x, ty - 4.0), Vector2(aim_x, ty + th + 4.0), Color(1, 1, 1, 0.45 + 0.40 * near), 0.7, true)
-	_sight_post(Vector2(aim_x, ty - 7.0), 1.0, near)
-	_sight_post(Vector2(aim_x, ty + th + 7.0), -1.0, near)
-	_gem(Vector2(aim_x, ty + th * 0.5), 3.4 + 1.4 * near,
-		Palette.GOLD_BRIGHT if near > 0.5 else Palette.GOLD, near > 0.6)
+		# ---- THE AIM PLUMB — a thin STATIONARY gilded sight through the band centre ----
+		# Gold (not mint) + still (not sweeping) + sight-post chevrons (not a diamond head) so it
+		# never reads as the moving needle. It LOCKS ON: bloom + pip brighten as the needle nears.
+		if near > 0.0:
+			var bloom := Palette.GOLD_BRIGHT
+			bloom.a = 0.10 + 0.30 * near
+			draw_rect(Rect2(aim_x - (3.0 + 3.0 * near), ty - 2.0, 2.0 * (3.0 + 3.0 * near), th + 4.0), bloom)
+		# a dark seat for contrast, a bold gilded stroke, and a crisp white hairline core so the
+		# target reads as a definite AIM-HERE line at all times — the whole green still scores.
+		draw_line(Vector2(aim_x, ty - 6.0), Vector2(aim_x, ty + th + 6.0), Palette.BG0, 3.0, true)
+		var acol := Palette.GOLD_BRIGHT
+		acol.a = 0.82 + 0.18 * near
+		draw_line(Vector2(aim_x, ty - 6.0), Vector2(aim_x, ty + th + 6.0), acol, 1.6, true)
+		draw_line(Vector2(aim_x, ty - 4.0), Vector2(aim_x, ty + th + 4.0), Color(1, 1, 1, 0.45 + 0.40 * near), 0.7, true)
+		_sight_post(Vector2(aim_x, ty - 7.0), 1.0, near)
+		_sight_post(Vector2(aim_x, ty + th + 7.0), -1.0, near)
+		_gem(Vector2(aim_x, ty + th * 0.5), 3.4 + 1.4 * near,
+			Palette.GOLD_BRIGHT if near > 0.5 else Palette.GOLD, near > 0.6)
 
 	# ---- verdict tint + ghost needle at the pressed spot ----
 	if flashing:
@@ -298,12 +341,15 @@ func _draw() -> void:
 			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "coiling…",
 				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
 		elif in_green:
-			UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), "RELEASE!",
-				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
+			# EDGE: deeper pays, but the lip SNAPS — the whole tension in one cue.
+			var rc := "RIDE IT — deeper pays" if ramp else "RELEASE!"
+			UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), rc,
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER" if not ramp else "LABEL"],
 				Color(1, 1, 1, 0.6 + 0.4 * sin(_pulse)))
 		elif past:
-			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(0, my), "LATE — RELEASE NOW",
-				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], Palette.RAGE)
+			var pc := "SNAP — held too deep" if ramp else "LATE — RELEASE NOW"
+			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(0, my), pc,
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], Palette.CRIMSON if ramp else Palette.RAGE)
 		else:
 			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "sharp — wait for green…",
 				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
@@ -365,11 +411,22 @@ func _needle_head(at: Vector2, col: Color, live: bool) -> void:
 
 func _result_color() -> Color:
 	match _result:
+		"bullseye": return Palette.GOLD_BRIGHT
 		"perfect": return Palette.PERFECT
+		"good": return Palette.PERFECT.darkened(0.2)
+		"snap": return Palette.CRIMSON
 		"early": return Palette.RAGE
 		_: return Palette.CRIMSON
 
 func _result_text() -> String:
+	# FERMATA (EDGE): the ramp verdicts read by DEPTH, and the SNAP is the cliff.
+	if ramp:
+		match _result:
+			"bullseye": return "BULLSEYE — the lip!"
+			"perfect": return "PERFECT"
+			"good": return "GOOD — safe & shallow"
+			"snap": return "SNAPPED — too deep"
+			_: return "MISS"
 	if _bull:
 		return "BULLSEYE!"
 	match _result:

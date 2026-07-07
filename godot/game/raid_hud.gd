@@ -4418,6 +4418,12 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var _cmin := maxi(1, int(obs.get("coil_min_ticks", 11)))
 	_rhythm.coil_charge = clampf(float(obs.get("coil_ticks", 0)) / float(_cmin), 0.0, 1.0)
 	_rhythm.coil_sharp = bool(obs.get("coil_sharp", false))
+	# FERMATA · THE RAMP & THE SNAP — feed the depth bands + the lip (the cliff) for the ramp draw.
+	_rhythm.ramp = bool(obs.get("fermata_ramp", false))
+	_rhythm.ramp_good_frac = float(obs.get("ramp_good_frac", 0.45))
+	_rhythm.ramp_perfect_frac = float(obs.get("ramp_perfect_frac", 0.37))
+	_rhythm.lip = int(obs.get("lip_ticks", 0))
+	_rhythm.dance_no_snap = bool(obs.get("dance_no_snap", false))
 	_tf_gauge.combo = int(obs.get("cp", 0))
 	_tf_gauge.combo_max = int(obs.get("cp_max", 5))
 	_tf_gauge.flow = int(obs.get("flow", 0))
@@ -4816,7 +4822,8 @@ func _handle_event(ev: Dictionary) -> void:
 			# GRADED WINDOW (§2c): flash the rhythm bar + pop the graded verdict.
 			if mine and _rhythm != null:
 				var res := String(ev.get("result", ""))
-				_rhythm.show_result("perfect" if (res == "perfect" or res == "bullseye") else res)
+				# FERMATA ramp: pass the real grade so the DEPTH verdict reads; Tempo folds bull→perfect.
+				_rhythm.show_result(res if _rhythm.ramp else ("perfect" if (res == "perfect" or res == "bullseye") else res))
 				match res:
 					"bullseye":
 						_big_text("BULLSEYE!", Palette.GOLD_BRIGHT, 38)
@@ -4825,6 +4832,12 @@ func _handle_event(ev: Dictionary) -> void:
 						_big_text("PERFECT!", Palette.PERFECT, 34)
 					"good":
 						_big_text("good", Palette.TEXT_DIM, 22, 0.42)
+		"snap":
+			# FERMATA (EDGE): rode past the lip — the note broke and Flow crashed.
+			if mine and _rhythm != null:
+				_rhythm.show_result("snap")
+				_big_text("SNAPPED!", Palette.CRIMSON, 36)
+				_add_shake(9.0)
 		"perfect":
 			pass   # the graded "strike" verdict (Bullseye/Perfect) owns the pop now (§2c)
 		"flow_lost":
