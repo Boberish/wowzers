@@ -4244,6 +4244,19 @@ func _healer_predictions(s: CombatState, obs: Dictionary) -> void:
 			if u == _hover_seat and u.hp_max > 0.0:
 				frp.incoming_frac = clampf(float(pe.get("growth_heal", 0.0)) / u.hp_max, 0.0, 1.0)
 		return
+	# THE WELL: BRIM's landing preview — ghost where the in-flight heal will land, so you
+	# can size it into the pour band (base feature per MENDER-PLAN B-V3).
+	if _healer_cls == "well":
+		var pw := _ctrl.player()
+		if pw != null and not pw.casting.is_empty() and _wcfg != null:
+			var wcid := String(pw.casting.get("id", ""))
+			var wsp: Dictionary = _wcfg.book.get(wcid, {})
+			if wsp.has("heal") and bool(wsp.get("target", false)) and pw.casting.get("target") != null:
+				var wt: Seat = pw.casting.get("target")
+				var wfr := _frame_of(wt)
+				if wfr != null:
+					wfr.incoming_frac = clampf(float(wsp.get("heal", 0.0)) / maxf(wt.hp_max, 1.0), 0.0, 1.0)
+		return
 	var p := _ctrl.player()
 	if p != null and not p.casting.is_empty():
 		var cid := String(p.casting.get("id", ""))
