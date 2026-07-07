@@ -27,13 +27,18 @@ Legend: **🔒 LOCKED** (decided with Bill) · **🟡 OPEN** (settle before/at b
 concept · CHARGES as the resource name ("for now") · HIGH TIDE keystone · STRONG PULL · THE KEPT
 LIGHT · BRINK BELL · THE SHINING HOUR (class support boon).
 
-**THE CRIT MODEL (Bill's general note, folded):** *"perfects shouldn't refund mana, it's too much —
-perfects add a crit chance, bullseye guaranteed crit?"* → ALL precision mana-refunds are DEAD.
-**DRAW:** in-band release = +Current + ~20% crit chance · STILL POINT = guaranteed crit (×1.5).
-**BRIM:** a perfect pour ARMS the next cast — guaranteed crit, shown crit-sized in the landing
-preview (forecast crit: you size the next landing knowing it; RNG never ruins a pour). A crit that
-overshoots still spills. Millrace stays the only economy valve ("finally"). 🟡 the full 3-tier
-Good/Perfect/Bullseye ladder ("go full in, like tempo" — D-B2 note) — 2 tiers built, 3rd at build.
+**~~THE CRIT MODEL~~ → ⚡ SUPERSEDED same day — THE GLINT (Bill: "i don't like the crit, it kills
+the planning for the brim — tear that out completely; not mana, not healing, already using it for
+the cascade").** Precision mana-refunds stay DEAD, and now crit/bigger-heals are dead too; the
+CD/big-button lane is taken (Cool Hand / Plumb Line feed Cascade). **The perfect reward points
+OUTWARD: ✧ THE GLINT** — a perfect (Brim pour · Draw Still Point) makes the warband's weapons
+catch the Well's light: **party +~25% damage for ~4s** (refresh, not stack). Non-mana, non-heal,
+non-CD — and it still pays the economy *indirectly*: harder hits → shorter fight → fewer charges
+spent. Precision refunds water through the boss's HP bar, never the Well. Draw's plain clean =
++Current only; Still Point = Current + Glint; Millrace = the only literal economy valve. The
+SHINING HOUR boon (5★) becomes the Glint's amplifier lane. Runner-up on file if Glint misses the
+feel pass: THE GILD (perfect braces the target — next boss hit −25%, one charge). 🟡 numbers
+(+%/duration) at ⚙; 🟡 the 3-tier Good/Perfect/Bullseye ladder (D-B2 note) still open.
 
 **BOOK REWORK (C-6, C-9, C-7):** identity = **ALL heals are casted direct heals** — **Ward CUT ·
 Renew CUT · Meditate CUT from base → a draftable battery BOON** ("you need to manage mana"; the
@@ -100,24 +105,23 @@ under pressure. One book, one Well, two specs = **the same grade in two places**
   charges ("every 3rd pour returns 2").
 - **SPEC 1 · BRIM (dev-label TARGET) — grade the LANDING.** Casts stay completely normal; every
   direct heal is graded by where the target's HP lands. In the brim band (default ≥90%) with zero
-  spill = **PERFECT POUR** — **ARMS the next cast: guaranteed crit** (forecast crit, shown
-  crit-sized in the preview; the class proc moment) · overshoot = **SPILL** (counted waste) · land
-  low = safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs
+  spill = **PERFECT POUR** — fires **✧ THE GLINT** (warband +damage ~4s; the class proc moment) ·
+  overshoot = **SPILL** (counted waste) · land low = safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs
   Mend vs Cascade against incoming damage. **Landing preview = BASE** (🔒 B-V3) + a blindfold boon
   (preview off, bigger rewards). **BRIMFUL** (dead-full landing tier) = big CD buttons only (B-V4).
 - **SPEC 2 · DRAW (dev-label SPEED) — grade the RELEASE, ride THE CURRENT.** Casts complete
-  **manually**: release inside the end band = **CLEAN DRAW** (full heal, **+Current + ~20% crit
-  chance**) · early = **UNDERCOOKED** (heal × p^1.5 — the deliberate quick-sip, per Bill) ·
+  **manually**: release inside the end band = **CLEAN DRAW** (full heal, **+Current**) · early =
+  **UNDERCOOKED** (heal × p^1.5 — the deliberate quick-sip, per Bill) ·
   overrun = auto-completes plain (stays free — "so much to gain by releasing"). **THE CURRENT**
   (max 5): each stack casts **+6% faster**. An undercook BREAKS it; running the Well **DRY**
   breaks it; it ebbs after ~4s idle. Faster casting burns charges faster with no refund valve, so
-  the rush throttles itself. **Payoff split of record: Brim pays in FORESIGHT (the armed crit),
-  Draw pays in TEMPO + the gamble (crit chance now).** Shield / HoT / stronger-heal payoffs live
-  in the boon slate (STILL WATER / AFTERFLOW / THE CREST, board D-B11–13).
+  the rush throttles itself. **Payoff split of record: clean rhythm pays INWARD (the Current);
+  precision tops pay OUTWARD (✧ the Glint) on both specs.** Shield / HoT / stronger-heal payoffs
+  live in the boon slate (STILL WATER / AFTERFLOW / THE CREST, board D-B11–13).
   **🔒 THE STILL POINT (the min-max tier):** a hairline sliver dead-centre of the band (~4% of the
-  bar, ≈100ms); tagging it = clean draw AND a **guaranteed crit** (×1.5 — strict superset, F15
-  Bullseye law; the dram-back reward died with the crit-model verdict). Self-balancing: the
-  Current speeds the bar, so the Still Point hardens as you ride higher.
+  bar, ≈100ms); tagging it = clean draw AND **✧ a Glint** (strict superset, F15 Bullseye law — the
+  dram-back and crit rewards both died on Bill's verdicts). Self-balancing: the Current speeds the
+  bar, so the Still Point hardens as you ride higher.
   The window lives on **your cast bar**; attention inverts — Brim reads the party, Draw reads your
   own hands. The Tempo/Fermata symmetry on the healing side.
 - **Shared by both specs:** the book — **Flash / Mend / Cascade / Wellspring / Dispel / Rekindle**
@@ -206,8 +210,9 @@ medit +160/25s (tester-shortened; the kit's is 160/55s) · GCD 1.2s · pressure 
 
 1. **Class name** — MENDER unloved (2★), no candidate yet. Specs ride dev-labels TARGET / SPEED;
    resource = CHARGES. Figure out later, before the HUD pass.
-2. **Crit numbers** — ×1.5 multiplier? Draw's in-band chance ~20%? The full Good/Perfect/Bullseye
-   3-tier ladder ("go full in, like tempo") vs the built 2-tier? ⚙ tester + build-time sims.
+2. **Glint numbers** — +25%? 4s? refresh-vs-stack? Does the tank's threat ride it? The full
+   Good/Perfect/Bullseye 3-tier ladder ("go full in, like tempo") vs the built 2-tier? ⚙ tester +
+   build-time sims (Glint = measurable in raid_sim: kill-time delta per pour).
 3. **The Current's numbers** — +6%/stack (max 5)? Undercook full crash vs −2 (creed territory)?
    Idle ebb 4s? ⚙ tester calls.
 4. **⭐ Reservoir rework** — 3★ + the Ward cut guts its shields: spill→Surge as burst heal, or
