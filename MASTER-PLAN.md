@@ -748,6 +748,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `well-aaa2` → main (`9eeaa41`) · §CLASSES / `MENDER-PLAN.md` — **THE WELL — AAA
+  pass #2 MERGED (Bill: "better but far from AAA — basic line borders, squares, no different
+  colors, banner covers the mana, bubbles childish").** Rendering-quality rebuild, pure view code:
+  **UiKit gains `glow_tex()`/`glow()` (cached radial falloff, tinted per draw — bloom-like light
+  in _draw without shaders) + `grad_rect`/`grad_rect_h` (per-vertex gradient fills)** — shared
+  toolkit, additive. WellGauge = ONE reliquary console (glass slab + shadow + filigree + water
+  crown glow + recessed POOL w/ drifting surface light); orbs = lit liquid spheres in metal
+  sockets (layered depth, refraction rim-light, specular, one drifting light-mote — cartoon
+  bubble rings gone); Current = chevron stream; target bar = hero bar (gradient fill, glowing
+  leading edge, finials). CastChannel seated on a glass pill, gradient fill + glowing edge;
+  DRAW channel wears Palette.WATER (spec color identity). Verdict banner rises ABOVE the channel
+  — never covers charges or the live window. **Verified:** ui_smoke_raid ALL OK · WSLg shots both
+  specs, zero draw errors. *(healer-rework session)*
+
 - 🔒 2026-07-07 · `raid-forge` (worktree `../wow-raid-forge`) · §MAPS / §THE WORLD / `WORLD-PLAN.md`
   §FORGE — **THE DESCENT REFIT (Bill: "update the raid — packs, phases; more nodes, bigger paths;
   quests/stories as-is with more filler in between").** Forge PALETTES["takeover"] (Realm-1 skins);
