@@ -13,7 +13,7 @@
 set -euo pipefail
 SIM="${1:?usage: psim.sh <sim_name> [seeds] [jobs] [-- extra args]}"
 case "$SIM" in
-  twinfang_sim|raid_sim|alchemist_sim) ;;
+  twinfang_sim|raid_sim|alchemist_sim|forge_sim) ;;
   *) echo "psim.sh supports: twinfang_sim raid_sim alchemist_sim (they carry --seed0 + a per-seed CSV)."
      echo "Old class sims were deleted 2026-07-06 (git history has them).  Got: '$SIM'"
      exit 2 ;;
