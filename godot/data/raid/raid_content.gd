@@ -570,8 +570,14 @@ static func _caster_seat(cls: String, aspect: String) -> Seat:
 ## `aspects` overrides its Aspect. Both default to the verified comp — an empty
 ## `classes` builds the exact original 4-seat state, byte-identical.
 static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
-		player: String = "tank", classes: Dictionary = {}) -> CombatState:
+		player: String = "tank", classes: Dictionary = {},
+		pack: Array = []) -> CombatState:
 	var s := CombatCore.create_state(enc, make_config(), seed)
+	# PACK (WORLD-PLAN §FIGHT LENGTH): a chain of members for ONE battle. Callers pass
+	# resolved EncounterRes with pack[0] == enc (already on the field). Size < 2 is a
+	# classic single fight — nothing set, byte-identical.
+	if pack.size() >= 2:
+		s.pack = pack
 	var seats := {
 		"tank": _tank(String(aspects.get("tank", "warden"))),
 		"blade": _blade_seat(String(classes.get("blade", "twinfang")), String(aspects.get("blade", ""))),

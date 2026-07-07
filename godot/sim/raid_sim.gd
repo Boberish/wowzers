@@ -53,9 +53,10 @@ func _initialize() -> void:
 	var healer_desc := ("Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")) \
 		if _healer_cls == "bloomweaver" else ("Mender(%s)" % (_haspect if _haspect != "" else "tidecaller"))
 	var caster_desc := "Alchemist(brew)" if _caster_cls == "alchemist" else "Voidcaller(disruptor)"
+	var blade_desc := "Twinfang(%s)" % (_baspect if _baspect != "" else "venomancer")
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
-	print("party: Bulwark(warden) / Twinfang(venomancer) / %s / %s" % [caster_desc, healer_desc])
+	print("party: Bulwark(warden) / %s / %s / %s" % [blade_desc, caster_desc, healer_desc])
 	if _dmg != 1.0 or _regen >= 0.0 or _fortify >= 0.0:
 		print("OVERRIDES:  dmg ×%.2f   regen %s   fortify %s   (live tweaks, not saved to files)" % [
 			_dmg, ("%.2f" % _regen if _regen >= 0.0 else "—"),

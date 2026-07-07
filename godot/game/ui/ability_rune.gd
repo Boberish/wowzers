@@ -14,6 +14,8 @@ class_name AbilityRune
 extends Control
 
 signal pressed
+signal held          ## FERMATA: mouse/touch DOWN (start a coil)
+signal released      ## FERMATA: mouse/touch UP (release the coil)
 
 var label: String = ""
 var key_num: int = 1
@@ -54,9 +56,13 @@ func _notification(what: int) -> void:
 		_hovered = false
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_press_k = 1.0
-		pressed.emit()
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_press_k = 1.0
+			pressed.emit()          # tap verbs listen here (fires on press, as before)
+			held.emit()             # hold verbs (Fermata coil) start here
+		else:
+			released.emit()         # hold verbs release here
 
 func _process(delta: float) -> void:
 	_pulse += delta * 4.5

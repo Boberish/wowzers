@@ -23,8 +23,14 @@ var perfect_frac: float = 0.55 ## …Perfect = centre this fraction; the flanks 
 var scale_ticks: int = 33     ## FIXED time-scale denominator (constant, NOT perfect_hi) so the
                               ## accelerando is visible: as the window shrinks it slides LEFT on a
                               ## fixed ruler instead of the whole bar rescaling with it.
-var flow: int = 0            ## Tempo only: drives the "how fast is the beat" readout
+var flow: int = 0            ## Tempo/Fermata: drives the "how fast is the beat" readout
 var flow_max: int = 6
+# FERMATA: the coil (hold-release) state — the bar dims while coiling, the needle carries a
+# charge ring that fills to the SHNK, and the cue line reads coil→sharp→release instead of tap.
+var fermata: bool = false
+var coiling: bool = false
+var coil_charge: float = 0.0   ## 0..1 toward sharp
+var coil_sharp: bool = false
 var _pulse: float = 0.0
 var _result: String = ""      ## "perfect" | "early" | "late"
 var _result_t: float = 0.0    ## fade timer for the verdict flash
@@ -90,7 +96,8 @@ func _draw() -> void:
 			"TEMPO ×%.1f — beat's faster!" % (1.0 + hot * 0.6) if flow >= fmax else "TEMPO ×%.1f" % (1.0 + hot * 0.6),
 			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], tcol)
 	else:
-		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), "tap 1 in the green",
+		var cue := "hold 1, release in the green" if fermata else "tap 1 in the green"
+		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), cue,
 			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], Palette.PERFECT)
 
 	# ---- the recessed glass channel ----
@@ -238,6 +245,8 @@ func _draw() -> void:
 	# ---- the gilded needle: motion trail, shaft, diamond head ----
 	var mx := tx + tw * prog
 	var mcol := Palette.PERFECT if in_green else (Palette.CRIMSON if past else Color(0.85, 0.87, 0.92))
+	if fermata and coiling and not in_green and not past:
+		mcol = Color(0.72, 0.62, 1.0)   # coiled: the needle rides umbra-violet — you're in shadow
 	# trail (the needle always travels left -> right)
 	var trail_w := minf(30.0, mx - tx)
 	if trail_w > 2.0:
@@ -254,6 +263,21 @@ func _draw() -> void:
 	draw_rect(Rect2(mx - 0.5, ty - 4.0, 1.0, th + 10.0), Color(1, 1, 1, 0.5))
 	_needle_head(Vector2(mx, ty - 9.0), mcol, in_green)
 
+	# ---- FERMATA: the coil socket — a FIXED charge ring on the left end-cap (off the needle;
+	# a marker-chasing ring read as noise). The violet arc fills to the SHNK, then the whole
+	# ring runs white-hot while the release is live. The needle's umbra tint carries the rest.
+	if fermata and coiling:
+		var umbra := Color(0.72, 0.62, 1.0)
+		var ctr := Vector2(tx, ty + th * 0.5)
+		var rr := 14.0
+		draw_arc(ctr, rr, 0.0, TAU, 40, Color(umbra.r, umbra.g, umbra.b, 0.25), 3.0, true)
+		if coil_sharp:
+			var hot := Color(1, 1, 1, 0.80 + 0.20 * sin(_pulse * 1.4))   # white-hot pulse = release-live
+			draw_arc(ctr, rr, 0.0, TAU, 40, hot, 3.5, true)
+		else:
+			var fill := TAU * clampf(coil_charge, 0.0, 1.0)
+			draw_arc(ctr, rr, -PI / 2.0, -PI / 2.0 + fill, 40, umbra, 3.5, true)
+
 	# ---- frame: 2-tone bevel, filigree corners, diamond end-caps ----
 	draw_line(track.position, Vector2(tx + tw, ty), Palette.GOLD_BRIGHT, 1.6, true)
 	draw_line(track.position, Vector2(tx, ty + th), Palette.GOLD, 1.6, true)
@@ -267,10 +291,31 @@ func _draw() -> void:
 
 	# ---- the message line beneath the track ----
 	var my := ty + th + 22.0
-	if flashing:
+	if fermata and coiling and not flashing:
+		# FERMATA cue: coiling → sharpen → (in green) release. Overrides the tap cues while held.
+		var umb := Color(0.72, 0.62, 1.0)
+		if not coil_sharp:
+			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "coiling…",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
+		elif in_green:
+			UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), "RELEASE!",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
+				Color(1, 1, 1, 0.6 + 0.4 * sin(_pulse)))
+		elif past:
+			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(0, my), "LATE — RELEASE NOW",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], Palette.RAGE)
+		else:
+			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "sharp — wait for green…",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
+	elif flashing:
 		UiKit.text_shadowed(self, UiKit.display(750, 1), Vector2(0, my), _result_text(),
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
 			Color(_result_color().r, _result_color().g, _result_color().b, 0.55 + 0.45 * fa))
+	elif fermata and not coiling:
+		# THE DRAW is yours to start — no clock runs while idle (cast dumps in the calm).
+		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, my), "HOLD 1 — start the draw",
+			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"],
+			Color(0.72, 0.62, 1.0, 0.5 + 0.2 * sin(_pulse * 0.5)))
 	elif in_green:
 		UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), "STRIKE!",
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],

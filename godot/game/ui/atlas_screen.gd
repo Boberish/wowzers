@@ -12,6 +12,7 @@ extends Control
 
 signal pin_entered(id: String)
 signal back_requested()
+signal reset_requested()   ## DEV (W1 preview): wipe the world save (armed double-press)
 
 var save: WorldSave
 var at_pin := "bastion"
@@ -54,6 +55,23 @@ func _build_header() -> void:
 	back.position = Vector2(28, 24)
 	back.custom_minimum_size = Vector2(120, 36)
 	add_child(back)
+	# DEV (W1 preview): wipe the world save for a fresh conquest — two clicks so a
+	# stray tap can't erase a real world (first press arms, second confirms).
+	var rst := Button.new()
+	rst.text = "⟲  reset world (dev)"
+	rst.flat = true
+	rst.add_theme_font_size_override("font_size", 12)
+	rst.add_theme_color_override("font_color", Color(Palette.CRIMSON, 0.55))
+	rst.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	rst.position = Vector2(-230, -52)
+	rst.custom_minimum_size = Vector2(210, 34)
+	rst.pressed.connect(func():
+		if rst.text.begins_with("⟲"):
+			rst.text = "⚠  SURE? — wipes ALL conquest"
+			rst.add_theme_color_override("font_color", Palette.CRIMSON)
+		else:
+			reset_requested.emit())
+	add_child(rst)
 
 func _label(text: String, fs: int, col: Color, at: Vector2, font: Font) -> void:
 	var l := Label.new()

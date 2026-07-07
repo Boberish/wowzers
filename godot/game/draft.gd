@@ -27,6 +27,7 @@ static func catalog(run) -> Variant:
 		"voidcaller": return VoidcallerBoons
 		"mender": return MenderBoons
 		"bloomweaver": return BloomweaverBoons
+		"alchemist": return AlchemistBoons
 	return null
 
 static func rarity(b: Dictionary) -> String:
@@ -37,6 +38,11 @@ static func rarity(b: Dictionary) -> String:
 ## (cap 5) and no exclusive twin already slotted; `req` needs its ability on the bar;
 ## non-spells can't already be owned.
 static func _ok(b: Dictionary, run) -> bool:
+	# CREED-AWARE OFFERS (ALCHEMIST verdict 6): a card tagged hide_creeds is never offered to
+	# a run running one of those creeds (the Purist never sees Rupture cards). Byte-identical
+	# for untagged cards and for runs whose creed isn't listed (every non-Alchemist run today).
+	if b.has("hide_creeds") and String(run.creed) in (b["hide_creeds"] as Array):
+		return false
 	if String(b.get("type", "")) == "spell":
 		if run.loadout.size() >= 5 or (b["id"] in run.loadout):
 			return false

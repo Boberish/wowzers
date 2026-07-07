@@ -62,18 +62,67 @@ func _initialize() -> void:
 			print("              pours/run: %s" % _fmt_pours(dsum, seeds))
 		print("")
 
+	_creed_ab(seeds, seed0)
+	_module_ab(seeds, seed0)
+	_rig_ab(seeds, seed0)
+	_boon_ab(seeds, seed0)
+
 	_write_csv(_arg("out", "res://out/alchemist_results.csv"), rows)
 	print("wrote %d rows -> %s" % [rows.size(),
 		ProjectSettings.globalize_path(_arg("out", "res://out/alchemist_results.csv"))])
 	quit()
 
+## SLICE A gate — each Creed must produce a DISTINCT, sane profile AND keep the skill
+## gradient (rule #4). Crucible @ expert (lat 0) AND sloppy (lat 14); "" = the byte-identical
+## base for reference. Forgiving creeds should help the sloppy tier without gifting the expert.
+func _creed_ab(seeds: int, seed0: int) -> void:
+	print("CREED A/B — Crucible, %d seeds/cell (expert lat0 · sloppy lat14):" % seeds)
+	print("creed          skill    win-rate  avg TTK   avg potency  ruptures(peak)  pours(potent/ok/hot/spoil/fizzle)")
+	print("-----------------------------------------------------------------------------------------------------------")
+	for cr in ["", "steady_hand", "volatile_mix", "anchorite", "purist"]:
+		for sk in [{"lbl": "expert", "lat": 0}, {"lbl": "sloppy", "lat": 14}]:
+			var wins := 0
+			var ttk_sum := 0.0
+			var pot_sum := 0.0
+			var dsum := {}
+			for seed in range(seed0, seed0 + seeds):
+				var r := _run_one(seed, "crucible", int(sk["lat"]), cr)
+				var rd: Dictionary = r.get("diag", {})
+				for k in rd:
+					dsum[k] = int(dsum.get(k, 0)) + int(rd[k])
+				pot_sum += float(r["avg_potency"])
+				if r["won"]:
+					wins += 1; ttk_sum += float(r["ttk_sec"])
+			var wr := 100.0 * float(wins) / float(seeds)
+			var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+			var lbl: String = "(base)" if String(cr) == "" else String(cr)
+			print("%-14s %-7s %6.1f%%   %7.1fs    %5.2f       %4.1f (%4.1f)     %.1f/%.1f/%.1f/%.1f/%.1f" % [
+				lbl, String(sk["lbl"]), wr, avg, pot_sum / float(seeds),
+				float(dsum.get("ruptures", 0)) / float(seeds),
+				float(dsum.get("rupture_peak", 0)) / float(seeds),
+				float(dsum.get("pour_potent", 0)) / float(seeds),
+				float(dsum.get("pour_ok", 0)) / float(seeds),
+				float(dsum.get("pour_hot", 0)) / float(seeds),
+				float(dsum.get("pour_spoiled", 0)) / float(seeds),
+				float(dsum.get("pour_fizzle", 0)) / float(seeds)])
+	print("")
+
 func _encounter(name: String) -> EncounterRes:
 	return AlchemistContent.make_leech() if name == "leech" else AlchemistContent.make_crucible()
 
-func _run_one(seed: int, enc_name: String, latency: int) -> Dictionary:
+func _run_one(seed: int, enc_name: String, latency: int, creed := "", module := "", rig := {}, boons := {}) -> Dictionary:
 	var cfg := AlchemistContent.make_config()
 	var acfg := AlchemistContent.make_alchemist_config()
 	var s := AlchemistContent.make_state(seed, "brew", cfg, acfg, _encounter(enc_name))
+	var kit := s.seats[0].kit as AlchemistKit
+	if creed != "":
+		kit.creed_id = creed                    # SLICE A: swear the posture
+	if module != "":
+		kit.modules = {module: true}            # SLICE B: install the module
+	if not rig.is_empty():
+		kit.rig = rig                           # SLICE C: wire the Combo rig
+	if not boons.is_empty():
+		kit.boons = boons                       # SLICE D/E/F: drafted boons + spells
 	var pol := s.seats[0].policy as AlchemistPolicy
 	pol.latency_ticks = latency
 	pol.rng = DetRng.new(seed * 2749 + 4441)   # separate reproducible brew-aim stream
@@ -83,6 +132,7 @@ func _run(s: CombatState) -> Dictionary:
 	var cap := int(TICK_CAP_SEC / s.dt)
 	var pot_acc := 0.0
 	var pot_samples := 0
+	var peak_vessel := 0.0
 	while not s.over and s.tick < cap:
 		var seat := s.seats[0]
 		if seat.policy != null and seat.alive():
@@ -93,6 +143,7 @@ func _run(s: CombatState) -> Dictionary:
 		s.events.clear()
 		pot_acc += float(seat.vars.get("potency", 0.0))
 		pot_samples += 1
+		peak_vessel = maxf(peak_vessel, float(seat.vars.get("vessel", 0.0)))
 	if not s.over:
 		s.loss_cause = "timeout"
 	if s.loss_cause == "player_death" and s.encounter.enrage_at > 0.0 and s.time() >= s.encounter.enrage_at:
@@ -102,6 +153,7 @@ func _run(s: CombatState) -> Dictionary:
 		"ttk_sec": s.time(),
 		"boss_hp_left": s.boss.hp,
 		"avg_potency": (pot_acc / float(pot_samples)) if pot_samples > 0 else 0.0,
+		"peak_vessel": peak_vessel,
 		"diag": s.diag,
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
@@ -125,6 +177,135 @@ func _prove_determinism() -> void:
 	print("  Leech@good    seed 3 == seed 3  -> %s   (checksum %d, %s)" % [
 		("PASS" if d["checksum"] == e["checksum"] else "FAIL"), d["checksum"],
 		("win" if d["won"] else d["loss_cause"])])
+	# a CREED run must also be deterministic (the posture modifiers are pure — no rng).
+	var g := _run_one(5, "crucible", 6, "volatile_mix")
+	var h := _run_one(5, "crucible", 6, "volatile_mix")
+	print("  Volatile@good seed 5 == seed 5  -> %s   (checksum %d, %s)" % [
+		("PASS" if g["checksum"] == h["checksum"] else "FAIL"), g["checksum"],
+		("win" if g["won"] else g["loss_cause"])])
+	# a MODULE run too (the Vessel banks float-heavy accumulation — assert it's reproducible).
+	var i := _run_one(7, "crucible", 6, "", "reaction_vessel")
+	var j := _run_one(7, "crucible", 6, "", "reaction_vessel")
+	print("  Vessel@good   seed 7 == seed 7  -> %s   (checksum %d, %s)" % [
+		("PASS" if i["checksum"] == j["checksum"] else "FAIL"), i["checksum"],
+		("win" if i["won"] else i["loss_cause"])])
+	# a RIG run too (fire points + THEN payloads thread the state — assert reproducible).
+	var k := _run_one(9, "crucible", 6, "", "", {"when": "boil", "then": "quicken"})
+	var l := _run_one(9, "crucible", 6, "", "", {"when": "boil", "then": "quicken"})
+	print("  Rig@good      seed 9 == seed 9  -> %s   (checksum %d, %s)" % [
+		("PASS" if k["checksum"] == l["checksum"] else "FAIL"), k["checksum"],
+		("win" if k["won"] else k["loss_cause"])])
+	# a BOON+SPELL run too (rule-changers + spell cooldowns thread the state).
+	var bset := {"catalyst": true, "chainRupture": true, "deepeningRot": true, "spitfire": true, "reduction": true}
+	var p := _run_one(11, "crucible", 6, "", "", {}, bset)
+	var q := _run_one(11, "crucible", 6, "", "", {}, bset)
+	print("  Boons@good    seed 11 == seed 11 -> %s   (checksum %d, %s)" % [
+		("PASS" if p["checksum"] == q["checksum"] else "FAIL"), p["checksum"],
+		("win" if p["won"] else p["loss_cause"])])
+
+## SLICE B gate — each Module must produce a DISTINCT, sane profile and keep determinism.
+## "" is the byte-identical base. Third Reagent = a small amp; Fermentation = auto-detonations;
+## Reaction-Vessel = the cannon (0 reaction landings between big Rupture dumps).
+func _module_ab(seeds: int, seed0: int) -> void:
+	print("MODULE A/B — Crucible @ good lat6 (%d seeds/module):" % seeds)
+	print("module            win-rate  avg TTK   ruptures(peak)  ferments  catalysts  peak-vessel")
+	print("-----------------------------------------------------------------------------------------")
+	for mod in ["", "third_reagent", "fermentation", "reaction_vessel"]:
+		var wins := 0
+		var ttk_sum := 0.0
+		var dsum := {}
+		var vessel_sum := 0.0
+		for seed in range(seed0, seed0 + seeds):
+			var r := _run_one(seed, "crucible", 6, "", mod)
+			var rd: Dictionary = r.get("diag", {})
+			for k in rd:
+				dsum[k] = int(dsum.get(k, 0)) + int(rd[k])
+			vessel_sum += float(r.get("peak_vessel", 0.0))
+			if r["won"]:
+				wins += 1; ttk_sum += float(r["ttk_sec"])
+		var wr := 100.0 * float(wins) / float(seeds)
+		var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+		var lbl: String = "(base)" if String(mod) == "" else String(mod)
+		print("%-17s %6.1f%%   %7.1fs    %4.1f (%4.1f)     %5.1f     %5.1f      %7.0f" % [
+			lbl, wr, avg,
+			float(dsum.get("ruptures", 0)) / float(seeds),
+			float(dsum.get("rupture_peak", 0)) / float(seeds),
+			float(dsum.get("ferments", 0)) / float(seeds),
+			float(dsum.get("catalysts", 0)) / float(seeds),
+			vessel_sum / float(seeds)])
+	print("")
+
+## SLICE C gate — the Combo rig. "" = the byte-identical base; each wired WHEN→THEN must
+## FIRE (rig_fire count > 0) and move damage a little (the ~10% flavour layer). Crucible @ good.
+func _rig_ab(seeds: int, seed0: int) -> void:
+	# Rows 1–6 cover every THEN KIND via a WHEN the safe AI actually fires (damage/fuel/
+	# potency/dot/amp/empower). Rows 7–8 are the HUMAN beats: the reactive AI never greeds
+	# into a HOT pour nor holds near-perfect balance, so HotPour/Emulsion fire ~0 for it —
+	# correct greed-dial design (they pay a premium a human earns), not dead code.
+	var wires := [
+		{"lbl": "SweetPour→Splash",   "rig": {"when": "sweet_pour", "then": "splash"}},    # damage
+		{"lbl": "SweetPour→Backwash", "rig": {"when": "sweet_pour", "then": "backwash"}},  # fuel
+		{"lbl": "Boil→Quicken",       "rig": {"when": "boil", "then": "quicken"}},          # potency
+		{"lbl": "PerfectWave→Residue","rig": {"when": "perfect_wave", "then": "residue"}},  # dot
+		{"lbl": "Ripe→Fume",          "rig": {"when": "ripe", "then": "fume"}},             # amp
+		{"lbl": "Ripe→Overfill",      "rig": {"when": "ripe", "then": "overfill"}},         # empower
+		{"lbl": "HotPour→Splash*",    "rig": {"when": "hot_pour", "then": "splash"}},       # human greed beat
+		{"lbl": "Emulsion→Splash*",   "rig": {"when": "emulsion", "then": "splash"}},       # human precision beat
+	]
+	print("RIG A/B — Crucible @ EXPERT lat0 (%d seeds/wire; *=human-only beat, AI fires ~0):" % seeds)
+	print("wire                    win-rate  avg TTK   rig-fires/run")
+	print("-----------------------------------------------------------")
+	# base row (no rig)
+	var wires_all: Array = [{"lbl": "(base — no rig)", "rig": {}}]
+	wires_all.append_array(wires)
+	for wr in wires_all:
+		var wins := 0
+		var ttk_sum := 0.0
+		var fires := 0
+		for seed in range(seed0, seed0 + seeds):
+			var r := _run_one(seed, "crucible", 0, "", "", wr["rig"])
+			fires += int((r.get("diag", {}) as Dictionary).get("rig_fire", 0))
+			if r["won"]:
+				wins += 1; ttk_sum += float(r["ttk_sec"])
+		var pct := 100.0 * float(wins) / float(seeds)
+		var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
+		print("%-23s %6.1f%%   %7.1fs    %6.1f" % [String(wr["lbl"]), pct, avg, float(fires) / float(seeds)])
+	print("")
+
+## SLICE D/E/F gate — each boon/spell must produce a DISTINCT, sane profile and keep
+## determinism. "" = the byte-identical base. Crucible @ good lat6 (leech would be similar);
+## most raise DPS a little (a boon SHOULD earn its slot); Debilitator is best seen in the raid.
+func _boon_ab(seeds: int, seed0: int) -> void:
+	var cards := [
+		"deepCauldron", "preservative", "clingingRot", "steadyPour", "practicedHand",
+		"quickStudy", "distilledFocus", "concentrate", "killingDraught", "corrosiveBlood",
+		"volatileReaction", "perfectEmulsion", "deepeningRot", "debilitator", "rupturing",
+		"chainRupture", "catalyst", "lastCall", "spitfire", "decant", "reduction",
+	]
+	print("BOON A/B — Crucible @ good lat6 (%d seeds/card; Δ vs base TTK):" % seeds)
+	print("card               win-rate  avg TTK   ΔTTK    avg potency")
+	print("-------------------------------------------------------------")
+	var base_cell := _boon_cell(seeds, seed0, {})
+	var base_ttk := float(base_cell["ttk"])
+	print("%-18s %6.1f%%   %7.1fs   %+5.1f    %5.2f" % ["(base)", 100.0, base_ttk, 0.0, float(base_cell["pot"])])
+	for id in cards:
+		var c := _boon_cell(seeds, seed0, {String(id): true})
+		print("%-18s %6.1f%%   %7.1fs   %+5.1f    %5.2f" % [
+			String(id), float(c["wr"]), float(c["ttk"]), float(c["ttk"]) - base_ttk, float(c["pot"])])
+	print("")
+
+func _boon_cell(seeds: int, seed0: int, boons: Dictionary) -> Dictionary:
+	var wins := 0
+	var ttk_sum := 0.0
+	var pot_sum := 0.0
+	for seed in range(seed0, seed0 + seeds):
+		var r := _run_one(seed, "crucible", 6, "", "", {}, boons)
+		pot_sum += float(r["avg_potency"])
+		if r["won"]:
+			wins += 1; ttk_sum += float(r["ttk_sec"])
+	return {"wr": 100.0 * float(wins) / float(seeds),
+		"ttk": (ttk_sum / float(wins)) if wins > 0 else 0.0,
+		"pot": pot_sum / float(seeds)}
 
 ## Pour-grade averages per run (the vial gradient: potent/hot should dominate expert,
 ## fizzle/spoiled should climb as the tier gets sloppy).

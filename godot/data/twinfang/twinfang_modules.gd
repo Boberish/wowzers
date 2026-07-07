@@ -28,6 +28,20 @@ const MODULES := {
 		"name": "The Overdrive", "kicker": "Transformer", "gauge": "overdrive",
 		"blurb": "At max Flow the multiplier stops and fills an OVERDRIVE meter — unleash a FEVER (window all-green, Strikes auto-chain at Coup tier), then crash to a seed and rebuild.",
 		"built": true,
+		"aspect": "tempo",
+	},
+	# --- FERMATA (§13.3) modules — offered on the fermata aspect. ---
+	"shadowdance": {
+		"name": "Shadow Dance", "kicker": "Transformer", "gauge": "dance",
+		"blurb": "Sharp Perfect/Bullseye releases at high Flow fill a meter; unleash THE DANCE — 3s of bullet-time where coils sharpen instantly and Bullseyes come easy — then crash to a seed. A skill amplifier you choose to enter.",
+		"built": true,
+		"aspect": "fermata",
+	},
+	"mark": {
+		"name": "The Mark", "kicker": "Combo layer", "gauge": "brand",
+		"blurb": "Sharp Bullseye releases brand the boss (tier I→III). Eviscerate CONSUMES the brand for +12% per tier — cash at II or push for III? A finisher decision, not a passive.",
+		"built": true,
+		"aspect": "fermata",
 	},
 	"metronome": {
 		"name": "The Metronome", "kicker": "Second rhythm", "gauge": "pendulum",
@@ -47,10 +61,15 @@ static func get_module(id: String) -> Dictionary:
 static func ids() -> Array:
 	return MODULES.keys()
 
-## The modules whose mechanics are implemented (offerable in the Floor-1 pick).
-static func built_ids() -> Array:
+## The modules whose mechanics are implemented (offerable in the Floor-1 pick). Pass an aspect
+## to get only that aspect's modules — a module with no "aspect" key is aspect-neutral.
+static func built_ids(aspect := "") -> Array:
 	var out: Array = []
 	for id in MODULES:
-		if bool(MODULES[id].get("built", false)):
-			out.append(id)
+		if not bool(MODULES[id].get("built", false)):
+			continue
+		var a := String(MODULES[id].get("aspect", ""))
+		if aspect != "" and a != "" and a != aspect:
+			continue
+		out.append(id)
 	return out

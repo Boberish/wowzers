@@ -124,8 +124,13 @@ stays instance-only VERBATIM (behind a door the run still exists); zones get per
 **THE ZONE REMEMBERS** (permanent zone flags rewire later nodes; co-op replay = the
 **GUEST-WORLD rule** — a session plays the least-progressed member's world, pending choices
 write back only to saves that still had them). Zone sizing: spine ~8–12 nodes (attunement
-budget caps it), breadth scales — Zone 1 target ~20 nodes. PARKED: **RAID RITES** (mandatory
-re-done entry nodes to keep raids a big deal — Bill, later).
+budget caps it), breadth scales — Zone 1 target ~20 nodes. **MEWGENICS STEALS folded
+(2026-07-06, W2 target):** **ESCORT/VOLATILE tickets** (carry a payload that spreads an
+enemy-side mutator to fights en route — a burden, not a buff), a **BASTION QUEST BOARD**
+(optional-ticket faucet), and a legible easy/hard **RISK FORK** (reward = pool/standing, never
+stats) — spec in WORLD-PLAN §MEWGENICS STEALS. PARKED: **RAID RITES** (mandatory
+re-done entry nodes to keep raids a big deal — Bill, later); their post-boss "bank now or push
+deeper" push-your-luck decision (RUN layer only, not zones).
 
 **W1 ✅ BUILT & MERGED 2026-07-06 (`b9c26aa` — full record in the Coordination Log):** the
 Atlas + **ZONE 1 "THE GILDFIELDS"** (20-node Westfall-arc conquest map, ZONE REMEMBERS sluice
@@ -573,12 +578,16 @@ nodes, not node kinds.
 - **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
 **Open ideas** (from Ascension research, parked until a 6th/7th class is wanted):
-- **THE ALCHEMIST ("The Brew") — 🟢 BASE MINIGAME BUILT & PLAYABLE 2026-07-06** (Bill's direct order —
-  playtest before boons). The 7th class, the CASTER seat's second option (voidcaller stays default —
-  byte-identical unless picked): Vial/Venom+Rot/Reaction/Potency/Rupture per the feel-test artifact,
-  THE ALEMBIC instrument on the one HUD, 3-tier policy + `alchemist_sim` (in `psim.sh`), its own gate
-  exam, `raid_sim --caster=alchemist`. Full state + bands + next slices: **`ALCHEMIST-PLAN.md`**.
-  Play: `--autostart=raid:caster:brew`. Awaiting Bill's live feel verdicts → then creeds/modules/boons.
+- **THE ALCHEMIST ("The Brew") — 🟢 FULL CARD SLATE BUILT 2026-07-06** (`alch-cards`). The 7th class,
+  the CASTER seat's second option (voidcaller stays default — byte-identical unless picked): the base
+  minigame (Vial/Venom+Rot/Reaction/Potency/Rupture + THE ALEMBIC) PLUS the whole framework —
+  **4 Creeds · 3 Modules (incl. ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons · 3 Spells**, the
+  shared HUD ceremony generalized off the Twinfang-only gate (`_fw()` provider), creed-aware offers +
+  a raid-wide Debilitator SUPPORT debuff (sunder-precedent engine touch, byte-neutral). All guarded →
+  undrafted brew byte-identical (`4344960863911121821`); raid default comp byte-identical to main
+  (`4978452801628609439`). Full state + per-layer sim A/B + next slices: **`ALCHEMIST-PLAN.md`**.
+  Play: `--autostart=raid:caster:brew`. Card BALANCE is Bill's playtest dial; STILL OWED: 2nd spec,
+  class puppet, online spec-carry of creed/module/rig, name/art.
 - Self-brink DPS: gauge climbs = more damage, cap = self-destruct (Cultist Insanity / Stormbringer Static archetype). Verb: *ride the redline*. Strong fit.
 - Over-defend punishment tank layer (Mountain King self-stun) — could bolt onto Bulwark as a boon/mod instead.
 - Imposed-rhythm caster (Runemaster attunement auto-cycle) — kit rotates on a clock you don't control.
@@ -720,6 +729,166 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `worldreset` → main (`9aeda85`) · §THE WORLD — **dev world-reset button**
+  (Bill: "i already beat that one, i cant redo it"). Atlas bottom-right "⟲ reset world (dev)",
+  armed double-press (first press turns ⚠ SURE?), `WorldSave.wipe()` writes a fresh save over
+  disk; world smoke proves reset → 0 conquered + flags forgotten. *(world-structure session)*
+
+- ☑ 2026-07-07 · `pack` → main (`f912a4f`) · §THE WORLD / ENGINE / `WORLD-PLAN.md` §FIGHT
+  LENGTH — **PACK v1 BUILT (Bill: "make a good plan for the pack generator, then execute"):
+  sequential encounters in ONE battle, heat carries.** Engine (guarded — every classic fight
+  byte-identical): `CombatState.pack/pack_i` (empty = single), `BossState.entered_tick` (0
+  default), `_pack_advance` on member death (in-place BossState reset — no stale refs;
+  telegraph cleared; fresh threat = re-establish the pull; seeded ability stagger),
+  **walk-in grace** `pack_walkin_ticks` (TuningConfig, 75 = 2.5s — no enemy actions, players
+  may open: the diegetic valley), **per-member enrage** (entry-relative clock). Spec: pack ids
+  ride `(seed, spec)` (make_spec/make_state/build; size<2 normalizes away; online untouched,
+  no protocol bump). HUD: `pack_next` name-card ("NAME · 2/3"), plate/dial rebind free (they
+  read s.encounter live); `--fightlen` scales waiting members + their enrage. Content: THE
+  GRANARY STEPS = bard→sonnet→opus (smalls→captain), THE HOLLOW WARREN = bard→sonnet→bard
+  (gauntlet); node `pack:[]` payload. **Gates:** `sim/pack_probe.gd` ALL OK (size-1 pack ==
+  plain pull checksum-identical · 3-member win via policies 44.5s · walk-in silence · entry-
+  relative enrage · determinism) · frozen-main A/B psim twinfang(120) + raid(60) merged CSVs
+  **BYTE-IDENTICAL** · net_smoke checksums clean · world/raid/map smokes + menu/world/fightlen
+  probes green (world smoke now drives the Granary pack). **NEXT:** Bill feel-test (packs ×
+  fightlen — the total pool runs Seal-sized: author fewer members OR wait for Forge SWARM
+  bodies); then THE CHASE shape; Topology pack quotas (dungeon floors); Seal pillar pass.
+  *(world-structure session)*
+
+- ☑ 2026-07-06 · main (docs only) · §CLASSES — **HEALER REWORK FIRST PASS — design board AT VERDICT**
+  (artifact https://claude.ai/code/artifact/68b0c28c-cc3a-4655-b9d5-fdc67e929e24). Bill's ask: heal-low +
+  overheal read as boons not specs; weigh merging Mender+Bloomweaver into one 2-spec class. Findings:
+  the code confirms the diagnosis (Tidecaller/Brinkwarden = one casting verb, one inverted Litany
+  condition — `mender_kit.gd:167`); **recommendation = DO NOT merge** (Split-law F10: cast-triage vs
+  seed-gardening are different games; decks are per-spec so the merge saves nothing; the seat toggle
+  already offers both). Proposed: Tidecaller/Brinkwarden DEMOTE → Foresight/Brink CREEDS; Reservoir→
+  ⭐ module · Nerve→module · Litany/Benediction→module (all re-homed coded machinery); NEW verb = **THE
+  WELL** (visible pulse-refill mana vessel, instrument) + **THE BRIM** (heals graded by where the
+  target's HP LANDS — perfect pour); second spec = **VIGIL** (hold a finished cast, release on the
+  spike — Fermata's press/release mirror); damage-healer = a 3rd healer-seat class, future. Build plan:
+  verdicts → MENDER-PLAN.md → HTML brim tester → guarded in-game base (`raid:healer:…`, byte-identical
+  unless picked) → deck/instrument/sim at `--fightlen` bands. **BRIM FEEL-TESTER BUILT & LIVE** (same
+  day, Bill: "make a browser basic tester"): party under scripted Rendmaw-style pressure (melee/
+  buster/nova/hex) + the 4-spell book + Meditate, the Well w/ pulse refills + dry state, brim-band
+  landing grades (PERFECT POUR refund / SPILL / plain) w/ landing preview + grade rail + efficiency
+  ledger, **BRIM ⇄ DRAW A/B toggle** + ⚙ knobs (band/refund/pulse/damage/draw-band) —
+  https://claude.ai/code/artifact/80b2169b-3f38-488e-a31c-d9b49a718b25 (source:
+  session scratchpad `brim-tester.html`). **⚡ 2026-07-07 — VERB PAIR LOCKED off the tester** (Bill:
+  "i like both alot, the draw one is very nice … can we do both specs with those?"): **BOTH tester
+  modes promote to the spec pair — SPEC 1 BRIM (grade the landing, on the ally's bar) · SPEC 2 DRAW
+  (grade the release, on your cast bar)** — same book/Well/GCD, attention inverts (read the party vs
+  read your hands; the Tempo/Fermata symmetry). VIGIL (the hold) folds into Draw build territory
+  (Patient-Hand creed / transformer candidate). Class doc created: **`MENDER-PLAN.md`** (creeds =
+  demoted aspects per-spec · modules = 3 re-homed machines w/ ⭐ Reservoir · tester knob baseline ·
+  build order, Alchemist idiom, old Mender stays frozen default). **⭐ VERDICT BOARD OUT (same day,
+  Bill: "give me an artifact with all the ideas for both, 1 tab each, 1–5 stars + comments"):**
+  https://claude.ai/code/artifact/958cdbe8-7c92-48cb-bf95-eae69b3994c1 — the full idea slate as
+  rateable cards (BRIM 25 · DRAW 25 · CLASS 9: base rules · 4 creeds · 3 modules · 10 boons · 4 rig
+  WHENs · keystone per spec + shared Well/Shining-Hour/Boiling-Over/kick/Dry-Ward/names), stars +
+  comments persist in-browser, EXPORT copies a paste-back summary. **NEXT: Bill's card verdicts off
+  the board** (they subsume the 🟡 opens: name · preview · interrupt · clutch dump · Draw creeds ·
+  Ward-spill) **→ then the build claim** (guarded base `raid:healer:brim|draw`, byte-identical
+  unless picked). *(healer-rework session)*
+- ☑ 2026-07-06 · main (docs only) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH — **THE PACING
+  GRAMMAR locked (Bill: fights much too short, "rarely get a combo off").** Current truth: Seals
+  enrage 90–142s, skirmishes 60–70s — the Framework-v2 kits out-arc the fights. Locked: length
+  from STRUCTURE, never sponges/screens — two laws (**NO FLAT SPONGES**: every added minute
+  arrives with a structure beat · **DEMAND ROTATION**: long fights rotate the loaded skill;
+  dodge ration budgets per SEGMENT) + six shapes to mix (Bill: "mix all those"): **PACK**
+  (1–4 sequential enemies, one battle, HEAT CARRIES across members — a per-class pack-carry rule
+  joins each rework's spec) · **VERSE/CHORUS** (default long boss) · **REPRIEVE** phase-pause
+  with a job (+THE DENY: kickable boss recovery — pillar-3 showcase) · **THE CHASE** (multi-
+  arena running battle) · **INTERLUDE WAVES** (proven) · **SIDE-DUEL/AURA-ADD** (Manastorm
+  steal). Bands: zone skirmish 60–90s · pack/elite 2–4m · capstone 4–6m · dungeon Seal 5–8m ·
+  raid Seal 8–12m ("10-min boss" = raid tier) · world boss 5–10m; the zone spine stays
+  skirmish-weight (attunement budget holds). Healer mana/regen rebalances WITH the bands — the
+  logged inert-healer finding is largely a fight-length symptom. Lands with W2 Forge (SHAPE
+  axis) + the boss PILLAR PASS. **VERDICT PASS (Bill, same day):** PACK kept (primary) · CHASE
+  kept · WAVES kept-lukewarm · verse/chorus CUT (illegible) · REPRIEVE+DENY CUT (a pause with
+  jobs is MORE stress; no flow-preserving hard-stop exists → new law: **NO HARD STOPS, valleys
+  are diegetic** — walk-ins/withdrawals/transits, the clock never freezes) · side-duel/aura-add
+  CUT ("very anti fun"). **`--fightlen=N` dev feel-scalar BUILT & MERGED (`c0ccffd`,
+  branch `fightlen`):** all five offline launch paths scale boss HP+enrage post-build
+  (RaidMarks idiom, INF-guarded, flag absent = untouched); `sim/fightlen_probe.gd` proves ×1
+  byte-equal + ×2.5 exact (riftmaw 15500/90s → 38750/225s; bard 3400/60s → 8500/150s);
+  raid/world smokes + menu probe green. Bill feel-tests with `--fightlen=2.5` next.
+  *(world-structure session)*
+
+- ☑ 2026-07-06 · main (docs only) · §SYSTEMS / `PROGRESSION-PLAN.md` §LEVELS + `WORLD-PLAN.md` —
+  **LEVELS: the paced unlock rollout (design session with Bill, direct).** Bill's ask: WoW-shaped
+  slow roll — level up for boons, zone milestones introduce Modules/Creeds, high-level areas tease
+  the future, oaths give XP, "once max level you've unlocked it all"; goal = spread the skill curve.
+  **Verdict: legal under Law #1** (levels = options/access, never stats; XP = non-spendable event
+  meter, not a meta-currency; StS front-load note AMENDED — stretched, not deleted). **Locked model
+  = HYBRID WAVES:** milestones unlock SYSTEMS account-wide (Zone 1 crest → Modules · first dungeon →
+  Creeds · Zone 2 → rig · first Seal → 2nd curio slot); event-XP levels (quests/oaths/firsts/
+  conquest/instance clears — NO kill-grind, the world can't farm anyway) pace each class's boon pool
+  in authored waves of ~2–3; Ledger/gear/curios untouched; endgame stays Depth/Versions. **Zone
+  gating (Bill's catch: options-not-power means difficulty alone can't wall the skilled): CREST-
+  GATED SPINE + OPEN BORDERLANDS** — Zone N+1 needs Zone N's crest (access-lane, a moment not a
+  number); 1–2 over-tier borderland pockets per zone stay open as the Duskwood tease (Forge TIER
+  wall, standing pay only). Skill-spread = two dials: buttons grow with account age, demands grow
+  with content tier; no scaling system needed (a low-level friend plays a simpler kit in the same
+  fight). DESIGN LOCKED, not built — builds with W2/W3 (XP ledger on the world save, wave tables,
+  crest gates, borderland nodes). *(world-structure session)*
+
+- 🔨 2026-07-06 · `escort-ticket` (`ca05269`→`eaf628e`, NOT merged) · §THE WORLD W2 — **ESCORT/VOLATILE
+  TICKET — thinnest flagged slice BUILT + deepened (Bill: "keep building"/"keep going"; §MEWGENICS
+  STEALS ①).** *Deepened `eaf628e`:* sustained two-wave burden + pre-pull warning (pressure↔vial) +
+  cleared-door turn-in soft-lock fix — still byte-identical + green. Carry a
+  payload PICKUP→TURN-IN; while carrying, fight/elite nodes get an enemy-side BURDEN add (the boss
+  withdraws to face it) — a burden not a buff (OVERWORLD POWER + mutator-on-enemy laws hold),
+  PERSISTENT via the world save's per-zone flags. **NEW `data/world/escort.gd`** = pure logic
+  (WorldSave + node → transitions + burden id, like WorldContent) so it's headless-testable and
+  the HUD is a thin caller behind `ESCORT_PREVIEW`. Burden = `RaidContent.apply_burden` appends a
+  fixed AddRes to a FRESH encounter via the existing add-wave engine (**CombatCore untouched**);
+  rides `RaidNet.build`'s `carry` as pure data → **absent = byte-identical**. Gildfields route:
+  WARDEN'S REST(4) → GRANARY STEPS(5) burdened → UNDERMILL GATE(19). **Verified:** `world_probe`
+  ALL OK (state machine + gate + persistence + deterministic burden that provably changes the
+  fight) · `ui_smoke_world` ALL PASS (HUD drive + escort-inert-on-rush guard) · `raid_sim`
+  **byte-identical** to main baseline (`raid_results.csv` same md5, 2401 rows). **Owed before
+  merge:** richer burdens (kickable cast / hazard beat) · lane-law turn-in reward (a pool row, not
+  today's standing flag+toast) · route→authored node fields · cleared-door turn-in edge. **Awaiting
+  Bill's feel pass** (`--autostart=zone`, or run from the `wow-escort-ticket` worktree). *(escort slice session)*
+
+- ☑ 2026-07-06 · `alch-cards` → main · §CLASSES / `ALCHEMIST-PLAN.md` — **THE ALCHEMIST CARD SLATE,
+  CODED (all six slices).** Bill: "go ahead and code it" (the locked pre-build slate). On top of the
+  base minigame: **4 Creeds · 3 Modules (incl. the ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons ·
+  3 Spells**, each landed guarded + sim-A/B'd + policy-taught per layer. (a) Framework generalized —
+  `_fw()` provider + `_fw_creed/module/rig*` dispatch replaced the Twinfang-only `_blade_tempo_human()`
+  gate everywhere (creed pick / module pick / rig wire / `_inject_boons` / build panel / rig-fire pop);
+  the Alchemist caster swears a Creed. (b) Modules w/ a compact ALEMBIC gauge + catalyst key 4. (c) Rig
+  off the brew's own beats (fuel raw-fractional). (d/e) Boons incl. **Debilitator** — the SUPPORT debt,
+  a raid-wide `boss.debilitate` debuff via a **sunder-precedent engine touch** (BossState/TuningConfig/
+  CombatCore, guarded byte-neutral). (f) Spells keys 5/6/7. **Creed-aware offers** (verdict 6):
+  `hide_creeds` tag + `Draft._ok()` check + module/rig-board filters — draft offers 21 cards, Purist
+  hides the 4 rupture cards (21→17). **GATES:** undrafted brew BYTE-IDENTICAL (Crucible seed1
+  `4344960863911121821`); raid DEFAULT comp byte-identical to pure main (`4978452801628609439`, freeze-
+  snapshot A/B — the Debilitate touch is byte-neutral); creed/module/rig/boon determinism ALL PASS;
+  **net_smoke ALL OK** (lockstep) · gear/commander/raid/draft probes PASS · ui_smoke_raid + ui_smoke_world
+  PASS · WSLg ALEMBIC render OK. Card BALANCE = Bill's playtest dial (each distinct+sane, skill moves
+  outcomes; Chain Rupture −12.6s/Catalyst −9.0s are the standouts; HotPour/Emulsion/Practiced Hand/
+  Reduction are human-skill/comfort cards the safe AI doesn't chase). **Owed:** 2nd spec · class puppet ·
+  ONLINE spec-carry of creed/module/rig (offline map+gate carry them via `_inject_boons`; RaidNet spec
+  doesn't — a shared Twinfang follow-up) · Commander AI-caster toggle · name/art. *(alch-cards session)*
+
+- ☑ 2026-07-06 · main (docs only) · §THE WORLD / `WORLD-PLAN.md` — **MEWGENICS RESEARCH → 3 STEALS
+  FOLDED (Bill: "fold ideas, 123").** Deep-research pass on Mewgenics' overworld/quest loop
+  (verify stage cut per Bill — Opus + trusted sources; 19 sources, reviews + wiki.gg). Finding:
+  its skeleton already matches ours (node maps · pickup→turn-in quests · attrition · persistent
+  linear unlocks), so only three parts were worth taking, each adapted to our laws and targeting
+  **W2** (Forge + TICKETS v2): **① ESCORT/VOLATILE tickets** (new grammar verb — carried payload
+  applies an enemy-side mutator to fights en route; a BURDEN not a buff → OVERWORLD POWER +
+  mutator-on-enemy laws hold; turns TICKETS into a mechanic; GILDFIELDS grain-vial fit) · **② THE
+  QUEST BOARD** (BASTION station = optional-ticket faucet, their Invention-Quest split; lane-law
+  rewards only) · **③ the legible RISK FORK** (sharpen "cave vs rush" into a signposted
+  reconverging easy/hard beat; reward axis swapped to pool/standing, never Mewgenics' level-ups).
+  **NOT stolen:** roster retirement/churn (breeding engine Bill cut; fights fixed-warband) · mana
+  combat (wrong genre) · route predictability (ZONE REMEMBERS already beats it). **Parked (run
+  layer, not zones):** their post-boss "bank now or push deeper" push-your-luck. WORLD-PLAN gained
+  §MEWGENICS STEALS + an ESCORT entry in the quest grammar + a QUEST BOARD station. *(mewgenics
+  research session)*
+
 - ☑ 2026-07-06 · `tempo-real` → main (`67f5efc`) · §TEMPO — **THE WHOLE TEMPO PLAN, CODED.** Bill:
   "code everything, make it real." All kit-local + deterministic across 6 files (boons/config/creeds/
   modules/kit + sim). Cuts (Opportunist·Held Note·spells·Killer's Eye; Edge→Largo creed·Deathmark cut;
@@ -745,7 +914,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   offers get a mechanism** (`hide_creeds` tag + `Draft._ok()` check, byte-identical untagged) **and
   extend to modules** (Purist never sees Fermentation/Reaction-Vessel) · HUD framework plumbing
   noted Twinfang-hardcoded (generalization = slice a). Build order = ALCHEMIST-PLAN §6.3 slices
-  a–f; next session codes it. *(alchemist run-through session)*
+  a–f; next session codes it. **→ CODED in `alch-cards` (entry above).** *(alchemist run-through session)*
 
 - ☑ 2026-07-06 · `world-w1` → main (`b9c26aa`) · §THE WORLD W1 — **THE ATLAS + ZONE 1 + THE
   BASTION BUILT (Bill: "go ahead and build this... 1st zone is big impressions"), flagged
@@ -829,6 +998,46 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   so **the class OWES a new ⭐ transformer** (ALCHEMIST-PLAN §3 lists candidates). Bands basically
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
+
+- ☑ 2026-07-07 · `fermata` → main · §CLASSES — **FERMATA BUILT — Twinfang's second spec is real,
+  deterministic, byte-identical when unpicked.** Bill: "yeah go ahead and build this fully." The
+  hold-release aspect: Strike COILS (`coil`/`release` via `on_action`; release < the sharpen floor
+  UNRAVELS — no strike, ~0.35s stagger, no Flow loss; the AI presses early + releases on the
+  centre-aim, same latency gradient as Tempo split across two inputs). Shares Tempo's Flow/combo/
+  Coup/Opening/crit via a new `_tempo_family()` gate. **Coded:** 4 creeds (Patient Knife / Fleeting
+  Shade / Long Night / Tutti) · 2 modules (⭐Shadow Dance duration-gated bullet-time · The Mark
+  brand→Evis cash) · 11 boons (COIL/VEIL/RELEASE + On the Beat on the Tempo side) · 3 keystones
+  (Unseen Blade / Eclipse / Phantom) · 3 rig WHENs · fermata sim probe + `--blade=fermata` in
+  raid_sim + the lobby entry (Twinfang = Tempo + Fermata; venom → AI-only legacy since poison is
+  the Alchemist). **VERIFIED:** twinfang_sim base+fat fermata determinism PASS; @expert base =
+  25.7 bullseyes/run (coil lands dead-centre = Tempo's ~22), @good smears to Perfect (identical
+  gradient), 0 unravels from the clean AI; **Tempo `4932869838389671587` + Venom
+  `7876031242436484463` checksums MATCH main byte-for-byte**; raid_sim `--blade=fermata` Mistral
+  det PASS + 100% win/skill (distinct checksum + TTK from venom); ui_smoke_raid OK (only the
+  pre-existing raid_frames/col_std errors). **SIM SIMPLIFICATIONS (flagged for the HUD pass):**
+  Tutti's coiled-kick + Phantom's two-blade crossing + Veil-over-warband's ally application are
+  feel/wiring the instant-dump sim can't express — modelled as grade-mult / flat twin / published
+  flag respectively. **OWED (other layers):** HUD gauges (charge ring off-marker per Bill, shadow
+  dim, Shade/Mark/Dance meters) · elite acquisition for the 3 keystones · online spec-carry. See
+  [[tempo-second-spec-search]]. *(fermata build session)*
+
+- 📋 2026-07-06 · main (docs only) · §CLASSES — **FERMATA: Twinfang's second spec — VERB LOCKED with
+  Bill via feel-testers, full deck DESIGNED (TEMPO-PLAN §13 rewritten as the hard-copy ledger; NOT
+  built).** The §13 hunt ran four candidates: MOTIF (aim-cuts→wounds→SEVER) rejected "no strategy,
+  too similar to the warrior" · OSTINATO (engrave-runes engine-builder) rejected "novel but strategies
+  aren't jumping out" · a rubber-band/pot/spring tri-tester rejected "too far from just the tempo
+  variation — but I liked the hold" → **LOCKED: Tempo with a HOLD instead of a TAP** (strike on
+  RELEASE; min-coil 0.35s kills the click-cheat; one-way sweep; charge ring + SHNK sharpen cue; base
+  has NO hold-length bonus). Fantasy = WoW Subtlety steal (coil INTO shadow, strike from the dark),
+  name FERMATA (the held musical note). Tester iterated live with Bill (slower sweep, min-coil,
+  one-way, charge-ring visual, ⚙ tweak sliders): `scratchpad/fermata-tester.html` → artifact
+  e920ea01… + local copy `~/fermata-tester.html` (claude.ai was down). Deck = 3 creeds (Patient
+  Knife / Fleeting Shade / Long Night) · 2 modules (⭐SHADOW DANCE bullet-time transformer · THE MARK
+  brand-and-cash) · 12 boons in 4 lanes keyed off the coil STATE (COIL/VEIL/RELEASE/AMBUSH, incl.
+  Bill's auto-dodge as Vanish + support Veil Over the Warband) · 3 rig WHENs · 1 elite keystone
+  (Unseen Blade). **NEXT:** Bill's deck verdict pass (interactive triage page shipped alongside) →
+  build per §13.7 order (engine note: `perform()` needs a press/release action pair). *(fermata
+  design session)*
 
 - ☑ 2026-07-06 · main (docs only) · §CLASS FRAMEWORK v2 — **correction: the `tempo-boons` card slate
   was never blocked.** It merged to main 2026-07-05 (`fe4d109`/`8c845ca`; rig `d1515e7`; build-out

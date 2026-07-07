@@ -116,7 +116,8 @@ The hub zone, unlocked from the start, no combat. It **physicalizes the meta scr
 (and answers PROGRESSION-PLAN's open "hub screen" question): the **LEDGER HALL** (per-boss
 pages, oaths, tables), the **CHARACTER SHEET** (proof crests, deepest ring, versions,
 per-class levels), the **WARBAND CAMP** (Commander party setup lives here as a place),
-a **PRACTICE yard** (the unlock-inert practice surface), and later the social lobby.
+a **PRACTICE yard** (the unlock-inert practice surface), the **QUEST BOARD** (optional zone
+tickets — the Invention-Quest faucet, §MEWGENICS STEALS ②), and later the social lobby.
 v1 = one gorgeous screen with stations, Gilded Reliquary language; it's a menu wearing
 a town, and that's fine — it can grow doors later.
 
@@ -161,6 +162,14 @@ only — keys/shards stay Topology texture (zones are deliberately LIGHTER than 
   of the zone's dungeon, turn-in back in the zone. Reads run RESULTS (seed-verified),
   never injects state into a run.
 - **EVENT tickets** — recurring quests on world events (standing lane, no-FOMO). W4.
+- **ESCORT / VOLATILE tickets (Mewgenics steal, 2026-07-06)** — pick up a payload at node A,
+  carry it to a turn-in: while you hold it, intervening fights gain an enemy-side MUTATOR
+  (extra add / hazard beat — a BURDEN, never a buff, so the OVERWORLD POWER rule and the
+  "mutator lives on the enemy side" rule both hold). The quest IS a run of harder fights, not a
+  fetch errand — this turns TICKETS from an errand into a mechanic. Reuses the ELITE-mutator
+  palette on a carried object instead of a node; enemy-side data rides `(seed, spec)` →
+  sim-clean, lockstep-safe. Drop/timeout = payload lost (route as a failed ticket; no run-state
+  injection). Rationale in §MEWGENICS STEALS ①.
 - **Forge hook:** a ticket can flip a node's Forge variant ("the bandit leader appears
   once you've read the note") — authored feel on generated content.
 
@@ -208,6 +217,50 @@ flags riding the campaign broadcast:
   fights cheap; events/choices are the real authoring cost). Full-clear ≈ 45–70 min,
   route-to-door well inside the budget. Later zones scale to ~25–35 by adding chains,
   never spine.
+
+### MEWGENICS STEALS — escort payloads · quest board · the risk fork (folded 2026-07-06, Bill: "123")
+Three refinements lifted from Mewgenics' overworld (deep-research pass, 2026-07-06). Its skeleton
+already matches ours (node maps · pickup→turn-in quests · attrition · persistent unlocks), so the
+value is these specific parts, each adapted to our locked laws. **Land target: W2** (Forge +
+TICKETS v2), the next unbuilt piece.
+1. **ESCORT / VOLATILE tickets (①)** — the headline steal. Mewgenics quests carry a *run-altering
+   modifier item* to a destination; ours were inert. New ticket verb (full spec in the grammar
+   list above): holding the payload applies an enemy-side mutator to intervening fights — a
+   BURDEN, never player power, so OVERWORLD POWER + "mutator on the enemy side" both hold. Turns a
+   fetch quest into a MECHANIC. **GILDFIELDS fit:** escort the cracked GRAIN-VIAL toward the
+   UNDERMILL door — the harvest-rot spreads an extra add into every fight en route until you turn
+   it in (the dying-harvest arc made playable, not just backdrop). **SLICE BUILT (2026-07-06,
+   branch `escort-ticket` `ca05269`, flagged `ESCORT_PREVIEW`):** pure `Escort` state machine on
+   the world save (pickup 4 → carry → turn-in 19), a `carry.burden` add via the existing add-wave
+   engine (**CombatCore untouched, pure data**); route WARDEN'S REST(4) → GRANARY STEPS(5)
+   burdened → UNDERMILL GATE(19). Verified: `world_probe` + `ui_smoke_world` green, `raid_sim`
+   **byte-identical** to baseline. **Deepened (`eaf628e`):** sustained TWO-WAVE burden (husks at
+   0.8/0.45, self-sequencing — a tune knob), a pre-pull WARNING on burdened fights (the player
+   connects the pressure to the vial), and the cleared-door turn-in **soft-lock fixed** (rush-
+   then-carry still completes). Owed before merge-worthy breadth: a richer burden *flavor* (a
+   kickable cast / hazard beat, once the interrupt pillar lands — the slice is a melee husk), a
+   lane-law turn-in **reward** (a pool row — the slice pays a standing flag + toast), and route
+   data lifted into authored node fields. **Awaiting Bill's feel pass** (`--autostart=zone`).
+2. **THE QUEST BOARD (②)** — Mewgenics splits quests into *Progression* (story items from bosses)
+   and *Invention* (optional, from an NPC — a steady faucet). We have the progression side
+   (DOOR/ROUTE/ESCORT tickets); we lack the optional heartbeat. Add a **QUEST-BOARD station in THE
+   BASTION** minting optional DEED/route tickets for standing + pool rows only (lane law) — a
+   persistent "reason to go back into the Gildfields" that isn't the authored spine, and a real
+   *function* for the hometown. (Station added to §THE BASTION.)
+3. **THE RISK FORK (③)** — sharpen the "cave vs rush" fork (§First visit) into a legible, recurring
+   2-way beat: EASY branch (1 fight, reconverges fast) vs HARD branch (Champion/ELITE fight + extra
+   node + fatter cache), stakes signposted BEFORE the commit, both reconverging at the capstone.
+   Steal the legibility + cadence; **swap the reward axis** — Mewgenics pays the hard path in
+   level-ups/loot (in-run power, illegal here) → ours pays in **pool rows / standing / a fatter
+   cache**, never stats. "Choose your poison" given a repeatable shape.
+
+**Explicitly NOT stolen:** roster retirement/churn (it's the breeding engine Bill cut, and it
+fights the fixed-warband fantasy) · the mana combat system (wrong genre) · their headline flaw,
+route *predictability* — ZONE REMEMBERS + branching already beat it, so don't over-linearize
+chasing their readability. **Where we're already ahead:** choice-persistence (they have none) and
+verified procedural generation (they hand-author). **Parked for the RUN layer, not zones:** their
+post-boss "bank now or push deeper" push-your-luck decision fits TOPOLOGY/raids (run economy dies
+on failure), not persistent-conquest zones — revisit at the raid retune.
 
 ---
 
@@ -329,6 +382,115 @@ a designer soul on a Forge body — generator does the body, a human does the si
 
 ---
 
+## FIGHT LENGTH & THE PACING GRAMMAR (locked with Bill, 2026-07-06)
+
+**The finding (Bill, playtest):** fights are much too short — "I rarely get a combo off
+before stuff dies" (Seals enrage at 90–142s; skirmishes at 60–70s; the Framework-v2 kits
+have build arcs longer than the fights). Target: medium fights 3–5 min, late bosses ~10
+min, overall boosted HP — BUT long fights tax focus, and menu/out-of-game time between
+fights is lame. So length comes from STRUCTURE inside one battle, never from sponges or
+screens. **Side dividend:** longer fights are the lever that finally makes the healer
+economy bite (the logged inert-mana finding — mana ≥93%, idle 93–98% — was a fight-length
+symptom as much as a tuning one).
+
+### The three LAWS (verdict pass folded, Bill 2026-07-06)
+1. **NO FLAT SPONGES.** Every added minute of fight length arrives with a *structure
+   beat* (a new pack member, an arena, an add wave) — never the same intensity stretched.
+   HP boosts ride structure.
+2. **DEMAND ROTATION.** A long fight rotates which skill is loaded instead of sustaining
+   everything — scheduled focus peaks with real valleys. The dodge ration budgets its
+   ~3–8 beats **per segment**, placed at moments (pillar #2 unchanged, applied per-segment).
+3. **NO HARD STOPS — valleys are DIEGETIC** (Bill's ruling: a pause "adds more stress...
+   and how do we pause a battle? that's hard to keep your flow"). The battle clock never
+   freezes into a text screen or countdown. The breather IS the fiction: the next pack
+   member walking in (2–3s, no telegraphs), the boss withdrawing behind an add cycle,
+   the chase transit. You stay in the arena, hands on the kit, pressure simply low.
+
+### The GRAMMAR (fight shapes — Bill's verdict pass, 2026-07-06)
+All shapes are INTRA-battle (zero menu time) and Single-Target-Law-clean (one telegraph
+stream, always — packs are strictly sequential):
+1. **PACK — KEPT, the primary shape** — 1–4 enemies fought sequentially in ONE battle:
+   two smalls + a captain = a medium fight; 3–4 smalls = a gauntlet; one long duel.
+   2–3s walk-in breathers between members (the diegetic valley). **Heat carries:**
+   per-class combo state (Flow / vials / rig charge) persists across the pack — the
+   payoff Bill's missing ("combo comes online" and STAYS online); each rework defines
+   its pack-carry rule like it defines its PERFECT payoff. Forge assembles packs from
+   BODY archetypes (SWARM smalls → BRUTE captain).
+2. **THE CHASE — KEPT** — a running battle: the enemy flees at HP thresholds, the stage
+   shifts (2–3 arenas, same HP pool), transit carries one authored dodge-string. The
+   fight that moves — zone-fiction gold (the Huskman captain fleeing deeper).
+3. **INTERLUDE WAVES — KEPT (lukewarm)** — the boss withdraws, light adds cycle through
+   (proven Seal tech): an intensity valley that stays active. Use sparingly.
+
+**CUT (Bill's verdict pass — do not resurrect casually):**
+- **Verse/chorus phase grammar** — illegible as a concept ("i don't really get it");
+  the *instinct* (escalating authored pressure + punish windows) survives informally in
+  how Seals are already authored, but it is not a named system.
+- **REPRIEVE phase-pause + THE DENY** — a pause with jobs is MORE stress, not less; a
+  hard-stop pause has no flow-preserving mechanism (see Law 3). Never pause a battle.
+- **SIDE-DUEL / AURA-ADD** — "very anti fun stuff," ditched for now (the Manastorm
+  aura-add steal goes back on the shelf).
+
+### Length bands (starting targets — tune.sh; enrage + regen retune with them)
+Zone skirmish 60–90s (the commute stays snappy) · zone elite/PACK 2–4 min · zone capstone
+4–6 min · dungeon Seal 5–8 min · raid Seal 8–12 min (the "10-min boss" = raid tier) ·
+world boss 5–10 min. Zone spine stays mostly skirmish-weight so route-to-door holds the
+30–45 min attunement budget; packs live on side chains + capstones first.
+
+**How shapes are ASSIGNED (locked 2026-07-07, Bill's "how do they get decided?"):**
+authored in the permanence layer, seeded-within-quotas in the variance layer, always
+authored for named bosses. Concretely: **zone nodes** carry their shape by hand (the
+Granary Steps IS a pack-with-captain; the cave IS a gauntlet; a chase is a set-piece
+node) — the Forge's seed only varies which BODIES fill the slots from the zone palette,
+never the shape; **Topology floors** roll shapes from the run seed inside authored
+quotas (the RunMap quota-bag idiom: "mids draw from {pack-2, pack-3, duel} weighted") —
+deterministic per seed, varied across runs; **Seals / capstones / world bosses** are
+hand-built, never rolled.
+
+**Sequencing:** Bill feel-tests raw length FIRST (the `--fightlen=` dev scalar — global
+HP/enrage multiplier, byte-identical absent — VERDICT 2026-07-07: "much better") ; the
+grammar then lands with W2 (the Forge gets a SHAPE axis: pack/duel/gauntlet) + the boss
+PILLAR PASS (Seals retuned onto packs/chase shapes + the bands). **The PACK mechanism is
+the lead domino** — sequential encounters in one lockstep battle with per-class heat
+carry is an engine-adjacent slice (guarded, byte-identical for single fights) that
+everything else composes with. Healer regen / mana curves rebalance WITH the bands, not
+before (the inert-mana fix rides this).
+
+### PACK — build spec v1 — ✅ BUILT & MERGED 2026-07-07 (`f912a4f`; record in the
+### Coordination Log. Shipped exactly as specced below; Granary Steps + Hollow Warren
+### author the first packs; Bill feel-tests with `--fightlen` composing on top.)
+- **Engine (the guarded touch):** `CombatState.pack: Array[EncounterRes]` + `pack_i`
+  (empty = today's single fight, byte-identical). Boss death with members remaining ⇒
+  NOT over/won: advance `pack_i`, reset the SAME BossState in place (no stale refs) from
+  the next EncounterRes, swap `s.encounter`, stamp `boss.entered_tick`. Win fires only
+  on the last corpse; a wipe anytime is a wipe. **Heat carries for free** — same
+  CombatState, seats untouched (Flow/vials/rig/cooldowns/HP persist): the whole point.
+- **WALK-IN grace** (the diegetic valley): for `pack_walkin_ticks` (TuningConfig, ~75 =
+  2.5s) after a swap the new enemy takes no actions (no telegraphs, no melee); players
+  MAY act — opening on the approaching enemy is the pull fantasy, and a small free
+  window is the breather's reward. One `pack_next` event for HUD juice.
+- **Per-member enrage:** `BossState.entered_tick` (default 0 ⇒ identical math for
+  singles) — the enrage clock reads time-since-entry, so member 3 doesn't arrive
+  pre-enraged. Phases stay HP-fraction (reset with the in-place boss reset).
+- **Spec plumbing:** `make_spec(..., pack=[ids])` → `spec["pack"]` (absent/size<2 =
+  plain fight, normalized away); `RaidNet.build`/`RaidContent.make_state` resolve the
+  list. Pure data ⇒ rides `(seed, spec)` — lockstep/replay-safe by construction; online
+  untouched v1 (no protocol bump — the field is additive and unsent).
+- **HUD:** on `pack_next` — boss plate rebinds, BossIntro card for the next member,
+  "▸ NEXT" toast. The SLAIN kill-moment fires only at fight end (engine `over` is truth).
+- **Authoring (feel content):** Gildfields THE GRANARY STEPS = smalls→captain pack
+  (bard·sonnet·opus), THE HOLLOW WARREN = gauntlet (bard·sonnet·bard); Pale Tiller stays
+  a duel. `--fightlen` scales every member (and each member's enrage) so the scalar
+  and packs compose. ⚠ v1 packs reuse full-HP skirmish bodies — total pool runs Seal-
+  sized; the Forge's SWARM bodies later mint proper lightweights (feel-test knob: author
+  fewer members before shrinking bodies).
+- **Gates:** new `pack_probe` (determinism ×2 · win-after-last · walk-in silence ·
+  member-2 enrage clock · size-1 normalizes to plain) · frozen-main A/B psim twinfang(120)
+  + raid(60) byte-identical (engine touch!) · net_smoke (checksums) · raid/world/map/menu
+  smokes · fightlen_probe both modes.
+
+---
+
 ## PROGRESSION RECONCILIATION (what the world changes — and deliberately doesn't)
 
 - **The WORLD track becomes literal.** PROGRESSION-PLAN track #1 gets its UI: the Atlas
@@ -337,6 +499,12 @@ a designer soul on a Forge body — generator does the body, a human does the si
   unlocks, it never mints them.
 - **Law #1 fully intact:** zone/quest/event rewards are access / pool rows / standing.
   Numbers still die with the run; the run still lives behind instance doors.
+- **LEVELS (locked 2026-07-06 — full spec in PROGRESSION-PLAN §LEVELS):** the unlock
+  rollout becomes a WoW-shaped journey — milestones unlock SYSTEMS (zone crests → Modules/
+  Creeds/rig/curio slots), event-XP levels pace each class's boon pool in waves; levels =
+  options, never stats. **Zone gating: the campaign spine hard-gates by CREST**
+  (attunement-style, Zone N's crest opens Zone N+1); each zone keeps 1–2 open over-tier
+  **BORDERLAND** nodes as the high-level tease (Forge TIER wall, standing rewards only).
 - **The Ledger lives in the hometown.** Standing (crests, versions, depth records) gets
   its physical home; the lobby-crest social layer points there.
 - **Saves:** world state (fog/nodes/quests/flight/attunements) = a versioned local save

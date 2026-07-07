@@ -22,8 +22,8 @@ static var ASPECTS := {
 	"blade": [
 		{"id": "tempo", "name": "TEMPO", "accent": Palette.FLOW, "icon": "flurry",
 			"desc": "Chain Perfect Strikes — Flow tiers transform your kit, ending in Coup de Grâce at max Flow."},
-		{"id": "venomancer", "name": "VENOMANCER", "accent": Palette.POISON, "icon": "envenom",
-			"desc": "Keep three poisons alive, ramp Toxic Synergy, detonate the fat cocktail with Rupture."},
+		{"id": "fermata", "name": "FERMATA", "accent": Palette.VOID, "icon": "flurry",
+			"desc": "HOLD to coil into shadow — release in the window to strike from the dark. The held note; Tempo's patient half."},
 	],
 	"caster": [
 		{"id": "disruptor", "name": "DISRUPTOR", "accent": Palette.KICK, "icon": "overload",
@@ -121,13 +121,13 @@ func _sync_healer_cls() -> void:
 		_healer_cls = "mender"
 
 ## Keep _blade_cls consistent with the chosen aspect (the aspect uniquely identifies
-## the blade class: Reckoner = colossus/berserker · Twinfang = tempo/venomancer).
+## the blade class: Reckoner = colossus/berserker · Twinfang = tempo/fermata/venomancer).
 func _sync_blade_cls() -> void:
 	if _seat_key != "blade":
 		return
 	if _aspect == "colossus" or _aspect == "berserker":
 		_blade_cls = "reckoner"
-	elif _aspect == "tempo" or _aspect == "venomancer":
+	elif _aspect == "tempo" or _aspect == "fermata" or _aspect == "venomancer":
 		_blade_cls = "twinfang"
 
 ## Keep _caster_cls consistent with the chosen aspect (the aspect uniquely identifies
@@ -224,6 +224,10 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 # below stays inert until THE WORLD is entered, so every existing path is untouched.
 const WORLD_PREVIEW := true        ## the home-menu door (front-door flip is W3)
 const ESCORT_PREVIEW := true       ## §MEWGENICS STEALS ① escort/volatile tickets (thinnest slice; off ⇒ byte-identical)
+## FIGHTLEN (dev feel-scalar, WORLD-PLAN §FIGHT LENGTH): `--fightlen=2.5` multiplies boss
+## HP + enrage on OFFLINE pulls so the length bands can be FELT before the W2 grammar
+## builds. 1.0 (absent) = untouched, byte-identical everywhere; online never reads it.
+var _fightlen := 1.0
 var _world: WorldSave = null       ## the permanence layer (null until the world is entered)
 var _world_pending := false        ## WORLD picked on home — the Atlas opens after the aspect ceremony
 var _zone_id := ""                 ## the zone the warband stands in ("" = not in a zone)
@@ -319,6 +323,7 @@ var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
 var _brew_hold_key: int = -1       ## Alchemist: which key (1/2) owns the live brew hold
+var _coil_held: bool = false       ## FERMATA: the Strike coil is being held (key 1 or the slot-0 rune)
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -337,6 +342,11 @@ func _ready() -> void:
 	_net_ctrl.encounter_ended.connect(_on_end_moment)
 	_ctrl = _local_ctrl
 	_show_home()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--fightlen="):   # dev feel-scalar — parse BEFORE any autostart pull
+			_fightlen = maxf(1.0, float(a.substr("--fightlen=".length())))
+			if _fightlen > 1.001:
+				print("FIGHTLEN ×%.2f — offline boss HP + enrage scaled (dev feel toggle)" % _fightlen)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--autostart=gate"):
 			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
@@ -698,8 +708,15 @@ func _show_atlas() -> void:
 	at.at_pin = _zone_id if _zone_id != "" else "bastion"
 	at.pin_entered.connect(_enter_atlas_pin)
 	at.back_requested.connect(_show_home)
+	at.reset_requested.connect(_world_dev_reset)
 	at.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(at)
+
+## DEV (W1 preview): wipe the world — fresh fog, fresh conquest, on disk too.
+func _world_dev_reset() -> void:
+	_world = WorldSave.wipe()
+	_zone_id = ""
+	_show_atlas()
 
 func _enter_atlas_pin(id: String) -> void:
 	match id:
@@ -914,8 +931,12 @@ func _launch_zone_fight(n: Dictionary) -> void:
 		var b := Escort.burden_for(_world, _zone_id, n)
 		if b != "":
 			carry = {"burden": b}
-	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), carry)
+	# PACK: an authored member chain on the node = one battle, fought sequentially
+	# (node["fight"] is always the chain's first id; [] = a classic single pull).
+	var pk: Array = n.get("pack", [])
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), carry, {}, pk)
 	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -931,10 +952,30 @@ func _launch_zone_gate() -> void:
 	_clear()
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect, _seat_cls_now())
+	_apply_fightlen(s)
 	_gate_live = true
 	_zone_live = true
 	_loadout = _make_loadout()
 	_build_combat(s)
+
+## FIGHTLEN: scale THIS pull's boss pool + enrage clock (the dev feel toggle, offline
+## only). Mutates the built state exactly like RaidMarks does (post-build, pre-begin);
+## phases key off HP fractions so they stay proportional; INF enrage (enrage-less
+## fights) is guarded. _fightlen == 1.0 (flag absent) touches nothing.
+func _apply_fightlen(s: CombatState) -> void:
+	if _fightlen <= 1.001 or s == null or s.boss == null:
+		return
+	s.boss.hp = roundf(s.boss.hp * _fightlen)
+	s.boss.hp_max = roundf(s.boss.hp_max * _fightlen)
+	if s.encounter != null and is_finite(s.encounter.enrage_at) and s.encounter.enrage_at > 0.0:
+		s.encounter.enrage_at *= _fightlen
+	# PACK: the members still waiting scale too (s.encounter IS pack[0] — the lines
+	# above already covered it; touching [0] again would double-scale).
+	for i in range(1, s.pack.size()):
+		var enc: EncounterRes = s.pack[i]
+		enc.hp = int(roundf(float(enc.hp) * _fightlen))
+		if is_finite(enc.enrage_at) and enc.enrage_at > 0.0:
+			enc.enrage_at *= _fightlen
 	_shake_amt = 0.0
 	_online = false
 	_ctrl = _local_ctrl
@@ -1475,6 +1516,7 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1557,14 +1599,21 @@ func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
 func _inject_boons(seat: Seat) -> void:
 	if _run != null and seat != null and seat.kit != null:
 		seat.kit.boons = _run.boons
-		# TEMPO REWORK (offline plumbing): fold the run's Creed + Modules into the blade
-		# kit. Guarded to TwinfangKit — other classes carry neither, so this is a no-op there.
+		# CLASS FRAMEWORK (offline plumbing): fold the run's Creed + Modules + Rig into a
+		# reworked kit. Both Twinfang and Alchemist carry the same three fields; every other
+		# class carries none, so this is skipped there (byte-identical no-op).
 		if seat.kit is TwinfangKit:
 			var tk := seat.kit as TwinfangKit
 			if _run.creed != "":
 				tk.creed_id = _run.creed
 			tk.modules = _run.modules.duplicate()
 			tk.rig = _run.rig.duplicate()      # TEMPO §5: the wired Combo rig
+		elif seat.kit is AlchemistKit:
+			var ak := seat.kit as AlchemistKit
+			if _run.creed != "":
+				ak.creed_id = _run.creed
+			ak.modules = _run.modules.duplicate()
+			ak.rig = _run.rig.duplicate()      # ALCHEMIST-PLAN §3/rig: the wired Combo rig
 
 ## Generate the current ring's map (RaidContent.FLOORS[_floor]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -1858,6 +1907,7 @@ func _launch_map_fight(fi: int) -> void:
 	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
 	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(enc.id), {}, _seat_boons_now())
 	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
 	_arm_gear(s.seats[SEAT_IDX[_seat_key]])   # GEAR-1: your curios ride into the pull
 	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # Draft 2.0: your boons ride in too
 	for i in s.seats.size():
@@ -1930,6 +1980,7 @@ func _launch_gate_fight() -> void:
 	_clear()
 	var seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
 	var s := GateContent.make_state(seed, _seat_key, _aspect, _seat_cls_now())
+	_apply_fightlen(s)
 	_arm_gear(s.seats[0])   # GEAR-1: the exam is fought with your curios on
 	_inject_boons(s.seats[0])   # Draft 2.0: boons on for the exam too
 	if _map != null:
@@ -2353,8 +2404,8 @@ func _show_boon_draft(done: Callable) -> void:
 	if _run == null:
 		done.call()
 		return
-	# TEMPO §5: the FIRST draft is where you wire your Combo (blade/Tempo only), then the boons.
-	if _blade_tempo_human() and _run.rig.is_empty():
+	# FRAMEWORK: the FIRST draft is where you wire your Combo rig (any reworked class), then boons.
+	if _fw() != "" and _run.rig.is_empty():
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
@@ -2449,12 +2500,78 @@ func _close_armor_modal() -> void:
 func _blade_tempo_human() -> bool:
 	return _seat_key == "blade" and _seat_cls_now() == "twinfang"
 
+## The CLASS-FRAMEWORK provider for the HUMAN seat: which reworked class's Creed/Module/Rig
+## content drives the pick screens, or "" if this seat's class has no framework yet. Twinfang
+## on the blade, the Brew (Alchemist) on the caster; every other seat/class skips the screens
+## (empty pages — per Bill, non-conforming classes leave them blank). Generalizes the old
+## _blade_tempo_human() gate so a second reworked class snaps onto the same ceremony.
+func _fw() -> String:
+	if _seat_key == "blade" and _seat_cls_now() == "twinfang":
+		return "twinfang"
+	if _seat_key == "caster" and _seat_cls_now() == "alchemist":
+		return "alchemist"
+	return ""
+
+## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
+func _fw_creed_ids(fw: String) -> Array:
+	return AlchemistCreeds.v1_ids() if fw == "alchemist" else TwinfangCreeds.v1_ids()
+
+func _fw_creed(fw: String, id: String) -> Dictionary:
+	return AlchemistCreeds.get_creed(id) if fw == "alchemist" else TwinfangCreeds.get_creed(id)
+
+## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
+## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
+func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+	if fw != "alchemist":
+		return TwinfangModules.built_ids()
+	var out: Array = []
+	for id in AlchemistModules.built_ids():
+		if creed != "" and AlchemistModules.has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		out.append(id)
+	return out
+
+func _fw_module(fw: String, id: String) -> Dictionary:
+	return AlchemistModules.get_module(id) if fw == "alchemist" else TwinfangModules.get_module(id)
+
+## Rig data dispatch (both classes mirror the TwinfangRig static API).
+func _fw_rig_when_table(fw: String) -> Dictionary:
+	return AlchemistRig.WHENS if fw == "alchemist" else TwinfangRig.WHENS
+
+func _fw_rig_then_table(fw: String) -> Dictionary:
+	return AlchemistRig.THENS if fw == "alchemist" else TwinfangRig.THENS
+
+func _fw_rig_describe(fw: String, w: String, t: String) -> String:
+	return AlchemistRig.describe(w, t) if fw == "alchemist" else TwinfangRig.describe(w, t)
+
+## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
+## board hides the burst WHENs Ripe/Perfect Wave and the Overfill THEN). Twinfang: unfiltered.
+func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
+	if fw != "alchemist":
+		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
+			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
+	var wpool: Array = []
+	for id in AlchemistRig.when_ids():
+		if creed != "" and AlchemistRig.when_has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		wpool.append(id)
+	var tpool: Array = []
+	for id in AlchemistRig.then_ids():
+		if creed != "" and AlchemistRig.then_has_tag(String(id), "rupture") \
+				and AlchemistCreeds.hides_tag(creed, "rupture"):
+			continue
+		tpool.append(id)
+	return {"whens": AlchemistRig.offer(wpool, rng, 3), "thens": AlchemistRig.offer(tpool, rng, 3)}
+
 ## Run-start: SWEAR A CREED — the risk temperament for the whole descent (§3). Forced pick.
 func _show_creed_pick(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human() or _run.creed != "":
+	var fw := _fw()
+	if _run == null or fw == "" or _run.creed != "":
 		done.call()
 		return
-	var ids: Array = TwinfangCreeds.v1_ids().duplicate()   # the shipping pool (grows with unlocks)
+	var ids: Array = _fw_creed_ids(fw).duplicate()         # the shipping pool (grows with unlocks)
 	if ids.size() > 3 and _run.draft_rng != null:          # sample 3 deterministically when it's bigger
 		for i in range(ids.size() - 1, 0, -1):
 			var j := int(_run.draft_rng.next_u32() % (i + 1))
@@ -2468,14 +2585,16 @@ func _show_creed_pick(done: Callable) -> void:
 	_ui.add_child(head)
 	var hl := _title(head, "SWEAR A CREED", 34, Palette.CRIMSON)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	_title(head, "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run", 15, Palette.TEXT_DIM)
+	var sub := "H O W   Y O U   B R E W  —  one posture, the whole run" if fw == "alchemist" \
+		else "H O W   Y O U   P A Y   F O R   A   S L I P  —  one vow, the whole run"
+	_title(head, sub, 15, Palette.TEXT_DIM)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 18)
 	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in ids:
-		var c: Dictionary = TwinfangCreeds.get_creed(String(id))
+		var c: Dictionary = _fw_creed(fw, String(id))
 		var card := AspectCard.new(String(c.get("name", id)) + "  ·  " + String(c.get("kicker", "")),
 			String(c.get("blurb", "")), Palette.CRIMSON, "flurry")
 		card.chosen.connect(_pick_creed.bind(String(id), done))
@@ -2484,16 +2603,17 @@ func _show_creed_pick(done: Callable) -> void:
 func _pick_creed(id: String, done: Callable) -> void:
 	if _run != null:
 		_run.creed = id
-	_toast_add("⚔  Creed sworn — %s" % String(TwinfangCreeds.get_creed(id).get("name", id)))
+	_toast_add("⚔  Creed sworn — %s" % String(_fw_creed(_fw(), id).get("name", id)))
 	done.call()
 
 ## End of Floor 1: INSTALL A MODULE — a new HUD gauge + way to play (§4). Forced pick.
 func _show_module_pick(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human():
+	var fw := _fw()
+	if _run == null or fw == "":
 		done.call()
 		return
 	var avail: Array = []
-	for id in TwinfangModules.built_ids():                 # only the implemented modules are offerable
+	for id in _fw_module_offer_ids(fw, _run.creed):        # implemented + creed-allowed modules
 		if not _run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
@@ -2514,7 +2634,7 @@ func _show_module_pick(done: Callable) -> void:
 	_place(box, 0.5, 0.5, 0.5, 0.5, -370, -150, 370, 175)
 	_ui.add_child(box)
 	for id in avail:
-		var m: Dictionary = TwinfangModules.get_module(String(id))
+		var m: Dictionary = _fw_module(fw, String(id))
 		var card := AspectCard.new(String(m.get("name", id)) + "  ·  " + String(m.get("kicker", "")),
 			String(m.get("blurb", "")), Palette.FLOW, "flurry")
 		card.chosen.connect(_pick_module.bind(String(id), done))
@@ -2523,7 +2643,7 @@ func _show_module_pick(done: Callable) -> void:
 func _pick_module(id: String, done: Callable) -> void:
 	if _run != null:
 		_run.modules[id] = true
-	_toast_add("⬡  Module installed — %s" % String(TwinfangModules.get_module(id).get("name", id)))
+	_toast_add("⬡  Module installed — %s" % String(_fw_module(_fw(), id).get("name", id)))
 	done.call()
 
 # ---- TEMPO §5: the ONE Combo rig — wire a WHEN → THEN (first draft; re-wire at Floor 2) ----
@@ -2535,11 +2655,13 @@ var _rig_confirm: Button = null
 ## WIRE YOUR COMBO — pick 1 of 3 WHENs + 1 of 3 THENs; the readout shows the computed number
 ## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
 func _show_rig_wire(done: Callable) -> void:
-	if _run == null or not _blade_tempo_human():
+	var fw := _fw()
+	if _run == null or fw == "":
 		done.call()
 		return
-	var whens := TwinfangRig.offer(TwinfangRig.when_ids(), _run.draft_rng, 3)
-	var thens := TwinfangRig.offer(TwinfangRig.then_ids(), _run.draft_rng, 3)
+	var offered := _fw_rig_offered(fw, _run.creed, _run.draft_rng)
+	var whens: Array = offered["whens"]
+	var thens: Array = offered["thens"]
 	_rig_w = ""
 	_rig_t = ""
 	_screen = "rig"
@@ -2556,8 +2678,8 @@ func _show_rig_wire(done: Callable) -> void:
 	cols.add_theme_constant_override("separation", 54)
 	_place(cols, 0.5, 0.5, 0.5, 0.5, -440, -180, 440, 150)
 	_ui.add_child(cols)
-	cols.add_child(_rig_col("WHEN — the moment", whens, TwinfangRig.WHENS, true))
-	cols.add_child(_rig_col("THEN — the payoff", thens, TwinfangRig.THENS, false))
+	cols.add_child(_rig_col("WHEN — the moment", whens, _fw_rig_when_table(fw), true))
+	cols.add_child(_rig_col("THEN — the payoff", thens, _fw_rig_then_table(fw), false))
 	var foot := VBoxContainer.new()
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
 	foot.add_theme_constant_override("separation", 12)
@@ -2570,7 +2692,7 @@ func _show_rig_wire(done: Callable) -> void:
 	_rig_confirm.disabled = true
 	_rig_confirm.pressed.connect(func():
 		_run.rig = {"when": _rig_w, "then": _rig_t}
-		_toast_add("⚡  Combo wired — " + TwinfangRig.describe(_rig_w, _rig_t))
+		_toast_add("⚡  Combo wired — " + _fw_rig_describe(fw, _rig_w, _rig_t))
 		done.call())
 	foot.add_child(_rig_confirm)
 
@@ -2579,14 +2701,35 @@ func _rig_col(label: String, ids: Array, table: Dictionary, is_when: bool) -> VB
 	col.add_theme_constant_override("separation", 10)
 	_title(col, label, 13, Palette.CRIMSON if is_when else Palette.FLOW)
 	var group := ButtonGroup.new()
+	var accent: Color = Palette.CRIMSON if is_when else Palette.FLOW
 	for id in ids:
 		var d: Dictionary = table.get(String(id), {})
 		var b := Button.new()
 		b.toggle_mode = true
 		b.button_group = group
-		b.custom_minimum_size = Vector2(330, 62)
-		b.clip_text = true
-		b.text = "%s — %s" % [String(d.get("name", id)), String(d.get("blurb", ""))]
+		b.custom_minimum_size = Vector2(330, 84)
+		b.clip_text = false
+		# The blurb is too long for one clipped line — render name + WRAPPED blurb as child
+		# labels (mouse passes through to the button, so the whole card stays clickable).
+		var box := VBoxContainer.new()
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_theme_constant_override("separation", 3)
+		box.set_anchors_preset(Control.PRESET_FULL_RECT)
+		box.offset_left = 12; box.offset_top = 8; box.offset_right = -12; box.offset_bottom = -8
+		var name_l := Label.new()
+		name_l.text = String(d.get("name", id))
+		name_l.add_theme_font_size_override("font_size", 15)
+		name_l.add_theme_color_override("font_color", accent)
+		name_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(name_l)
+		var blurb_l := Label.new()
+		blurb_l.text = String(d.get("blurb", ""))
+		blurb_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		blurb_l.add_theme_font_size_override("font_size", 11)
+		blurb_l.add_theme_color_override("font_color", Palette.TEXT_DIM)
+		blurb_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(blurb_l)
+		b.add_child(box)
 		if is_when:
 			b.toggled.connect(_rig_on_when.bind(String(id)))
 		else:
@@ -2606,7 +2749,7 @@ func _rig_refresh() -> void:
 	if _rig_readout == null:
 		return
 	if _rig_w != "" and _rig_t != "":
-		_rig_readout.text = TwinfangRig.describe(_rig_w, _rig_t)
+		_rig_readout.text = _fw_rig_describe(_fw(), _rig_w, _rig_t)
 		_rig_readout.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
 		if _rig_confirm != null:
 			_rig_confirm.disabled = false
@@ -2882,7 +3025,19 @@ func _add_runes(row: HBoxContainer, ids: Array, accent = null) -> void:
 		rune.icon_id = id
 		if accent != null:
 			rune.accent = accent
-		rune.pressed.connect(_use_ability.bind(i))
+		# FERMATA: the slot-0 Strike rune is a HOLD (press = coil, release = strike). Every other
+		# rune, and every other seat, stays a tap. Mirrors the keyboard hold in _fermata_key/_input.
+		if i == 0 and _seat_key == "blade" and _aspect == "fermata" and id == "strike":
+			rune.held.connect(func():
+				if _screen == "combat" and not _coil_held:
+					_coil_held = true
+					_ctrl.human({"type": "ability", "id": "coil"}))
+			rune.released.connect(func():
+				if _screen == "combat" and _coil_held:
+					_coil_held = false
+					_ctrl.human({"type": "ability", "id": "release"}))
+		else:
+			rune.pressed.connect(_use_ability.bind(i))
 		row.add_child(rune)
 		_runes.append(rune)
 		_rune_ids.append(id)
@@ -3043,7 +3198,35 @@ func _build_band_alchemist() -> void:
 	row.add_child(_guard)
 	_runes = []
 	_rune_ids = []
-	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · 3 — RUPTURE · SPACE — DODGE · F — DODGE beats")
+	# The module's active button + any drafted spells get their own runes (only when owned —
+	# read from the campaign run, which _inject_boons folds into this fight's kit).
+	var extras := "3 — RUPTURE"
+	if _run != null and _run.modules.has("third_reagent"):
+		row.add_child(_alch_rune("catalyst", "CATALYST", "4", "flash", Palette.GOLD_BRIGHT,
+			"Drop the Third Reagent — amplify the reaction for a few seconds. Best while potency is high."))
+		extras += " · 4 — CATALYST"
+	var spell_runes := [
+		["spitfire", "SPITFIRE", "5", "bolt", "An instant off-brew acid dart — free filler between pours."],
+		["decant", "DECANT", "6", "cascade", "Pour the fuller poison into the emptier — a cd-gated snap toward balance."],
+		["reduction", "REDUCTION", "7", "surge", "Boil VOLUME into POWER — trade brew for a slug of Potency before a Rupture."],
+	]
+	for sp in spell_runes:
+		if _run != null and (String(sp[0]) in _run.loadout or _run.boons.has(String(sp[0]))):
+			row.add_child(_alch_rune(String(sp[0]), String(sp[1]), String(sp[2]), String(sp[3]),
+				Palette.REACT, String(sp[4])))
+			extras += " · %s — %s" % [String(sp[2]), String(sp[1])]
+	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · %s · SPACE — DODGE · F — DODGE beats" % extras)
+
+## One Alchemist ability rune (catalyst / a drafted spell) wired to send its action.
+func _alch_rune(id: String, label: String, key: String, icon: String, accent: Color, tip: String) -> AbilityRune:
+	var r := AbilityRune.new()
+	r.label = label
+	r.key_label = key
+	r.icon_id = icon
+	r.accent = accent
+	r.tooltip_text = tip
+	r.pressed.connect(func(): _ctrl.human({"type": "ability", "id": id}))
+	return r
 
 func _build_band_healer() -> void:
 	if _healer_cls == "bloomweaver":
@@ -3156,8 +3339,14 @@ func _verb_summary_lines() -> Array:
 				return ["⚡ Combo — " + TwinfangRig.describe(
 					String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
 			return TwinfangBoons.verb_summary(_run.boons, _aspect)
-		"caster": return ([] if _caster_cls == "alchemist" \
-			else VoidcallerBoons.verb_summary(_run.boons, _aspect))
+		"caster":
+			if _caster_cls == "alchemist":
+				# show the wired Combo rig in the build panel (the Brew's rig)
+				if not _run.rig.is_empty():
+					return ["⚡ Combo — " + AlchemistRig.describe(
+						String(_run.rig.get("when", "")), String(_run.rig.get("then", "")))]
+				return []
+			return VoidcallerBoons.verb_summary(_run.boons, _aspect)
 		"healer": return (BloomweaverBoons.verb_summary(_run.boons, _aspect) if _healer_cls == "bloomweaver" else MenderBoons.verb_summary(_run.boons, _aspect))
 		_: return BulwarkBoons.guard_summary(_run.boons, _aspect)
 
@@ -3276,7 +3465,7 @@ func _owned_boon_labels() -> Array:
 	var pools: Array = []
 	match _seat_key:
 		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
-		"caster": pools = ([] if _caster_cls == "alchemist" \
+		"caster": pools = ([AlchemistBoons.SHARED, AlchemistBoons.BREW] if _caster_cls == "alchemist" \
 			else [VoidcallerBoons.SHARED, VoidcallerBoons.DISRUPTOR, VoidcallerBoons.SILENCER])
 		"healer": pools = ([BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN] if _healer_cls == "bloomweaver" else [MenderBoons.SHARED, MenderBoons.TIDE, MenderBoons.BRINK])
 		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
@@ -3404,6 +3593,8 @@ func _input(event: InputEvent) -> void:
 			"blade":
 				if _blade_cls == "reckoner":
 					_reckoner_key(event.keycode)
+				elif _aspect == "fermata":
+					_fermata_key(event.keycode)          # the hold-release blade
 				else:
 					_martial_key(event.keycode)
 			"caster":
@@ -3421,6 +3612,13 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == _brew_hold_key:
 			_brew_hold_key = -1
 			_ctrl.human({"type": "ability", "id": "pour"})
+		return
+	# FERMATA's hold-release Strike: releasing key 1 RELEASES the coil (resolves the strike).
+	if event is InputEventKey and not event.pressed and _pause == null \
+			and _screen == "combat" and _seat_key == "blade" and _aspect == "fermata":
+		if event.keycode == KEY_1 and _coil_held:
+			_coil_held = false
+			_ctrl.human({"type": "ability", "id": "release"})
 		return
 	# Mender click-cast: hover a frame, click a chord
 	if _pause == null and _seat_key == "healer" and _screen == "combat" \
@@ -3442,6 +3640,23 @@ func _martial_key(code: int) -> void:
 			if _seat_key == "tank" and not _gate_live:
 				_ctrl.human({"type": "ability", "id": "challenge"})
 		KEY_1: _use_ability(0)
+		KEY_2: _use_ability(1)
+		KEY_3: _use_ability(2)
+		KEY_4: _use_ability(3)
+		KEY_5: _use_ability(4)
+
+## FERMATA: the Strike is a HOLD — key 1 DOWN coils into shadow, key 1 UP (in _input) releases.
+## The dumps (Eviscerate/Kick/Coup, keys 2-4) stay instant taps at base — same as Tempo.
+func _fermata_key(code: int) -> void:
+	match code:
+		KEY_SPACE:
+			_ctrl.human({"type": "defense"})
+		KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1:
+			if not _coil_held:
+				_coil_held = true
+				_ctrl.human({"type": "ability", "id": "coil"})
 		KEY_2: _use_ability(1)
 		KEY_3: _use_ability(2)
 		KEY_4: _use_ability(3)
@@ -3505,6 +3720,14 @@ func _alchemist_key(code: int) -> void:
 				_ctrl.human({"type": "ability", "id": "brew_rot"})
 		KEY_3, KEY_R:
 			_ctrl.human({"type": "ability", "id": "rupture"})
+		KEY_4:
+			_ctrl.human({"type": "ability", "id": "catalyst"})   # MODULE (Third Reagent): drop it in
+		KEY_5:
+			_ctrl.human({"type": "ability", "id": "spitfire"})   # SPELL (drafted): filler dart
+		KEY_6:
+			_ctrl.human({"type": "ability", "id": "decant"})     # SPELL (drafted): snap-to-balance
+		KEY_7:
+			_ctrl.human({"type": "ability", "id": "reduction"})  # SPELL (drafted): volume→power
 
 ## The Reckoner's keys: SPACE = the two-tap SWING (phase-aware — a WIND press, then
 ## the STRIKE apex press); F = dodge; 1-4 = Overswing / Ultraswing / Onslaught / Signature.
@@ -3931,8 +4154,15 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_rhythm.bull_frac = float(obs.get("grade_bull_frac", 0.18))       # GRADED WINDOW (§2c) zones
 	_rhythm.perfect_frac = float(obs.get("grade_perfect_frac", 0.55))
 	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando visible
-	_rhythm.flow = int(obs.get("flow", 0)) if String(obs.get("aspect", "")) == "tempo" else 0
+	var _asp := String(obs.get("aspect", ""))
+	_rhythm.flow = int(obs.get("flow", 0)) if (_asp == "tempo" or _asp == "fermata") else 0
 	_rhythm.flow_max = int(obs.get("flow_max", 6))
+	# FERMATA: feed the coil (hold-release) state so the bar shows the charge ring + coil cues.
+	_rhythm.fermata = _asp == "fermata"
+	_rhythm.coiling = bool(obs.get("coiling", false))
+	var _cmin := maxi(1, int(obs.get("coil_min_ticks", 11)))
+	_rhythm.coil_charge = clampf(float(obs.get("coil_ticks", 0)) / float(_cmin), 0.0, 1.0)
+	_rhythm.coil_sharp = bool(obs.get("coil_sharp", false))
 	_tf_gauge.combo = int(obs.get("cp", 0))
 	_tf_gauge.combo_max = int(obs.get("cp_max", 5))
 	_tf_gauge.flow = int(obs.get("flow", 0))
@@ -3962,7 +4192,13 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 		match id:
 			"strike":
 				afford = energy >= 12.0
-				usable = _rhythm.since >= _rhythm.swing_min
+				if _aspect == "fermata":
+					# THE DRAW: the coil button is live whenever you're not staggered — while
+					# holding it's "usable" once sharp (release-ready), idle it's always startable.
+					usable = (bool(obs.get("coil_sharp", false)) if bool(obs.get("coiling", false))
+						else not bool(obs.get("strike_locked", false)))
+				else:
+					usable = _rhythm.since >= _rhythm.swing_min
 			"eviscerate", "envenom":
 				afford = energy >= 25.0
 				usable = cpn >= 1
@@ -4098,6 +4334,14 @@ func _render_band_alchemist(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.react_dps = float(obs.get("react_dps", 0.0))
 	g.ripe_glow = float(obs.get("ripe_glow", 0.0))
 	g.brew_min = float(obs.get("brew_min", 0.0))
+	# MODULES (slice B): the equipped one lights a compact gauge on the instrument.
+	g.mod_third_reagent = bool(obs.get("mod_third_reagent", false))
+	g.mod_fermentation = bool(obs.get("mod_fermentation", false))
+	g.mod_reaction_vessel = bool(obs.get("mod_reaction_vessel", false))
+	g.mod_reagent = float(obs.get("reagent", 0.0))
+	g.mod_reagent_active = bool(obs.get("reagent_active", false))
+	g.mod_ferment = float(obs.get("ferment", 0.0))
+	g.mod_vessel = float(obs.get("vessel", 0.0))
 	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
 	_guard.usable = bool(obs.get("defense_ready", false))
 	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
@@ -4206,6 +4450,11 @@ func _handle_event(ev: Dictionary) -> void:
 		_brew_gauge.on_event(ev)   # THE ALEMBIC: pour verdicts / rupture burst / history
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
+		"pack_next":
+			# PACK: the next member takes the field — the name-card ceremony IS the
+			# walk-in banner. The plate/dial rebind free (they read s.encounter live).
+			BossIntro.play(_ui, "%s   ·   %d / %d" % [String(ev.get("name", "")),
+				int(ev.get("i", 0)) + 1, int(ev.get("n", 0))])
 		"negate":
 			# seat-less negates are string-impact echoes; strike_graded already
 			# judged that press — don't double-pop over it
@@ -4346,6 +4595,11 @@ func _handle_event(ev: Dictionary) -> void:
 			if mine:
 				var tn := String((TwinfangRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
 				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.FLOW, 22, 0.5)
+		"brew_rig":
+			# ALCHEMIST rig fired — same pop, off the Brew's rig vocabulary.
+			if mine:
+				var tn := String((AlchemistRig.THENS.get(String(ev.get("then", "")), {}) as Dictionary).get("name", "?"))
+				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.REACT, 22, 0.5)
 		"opening":
 			# THE OPENING — a dump landed in the boss's vulnerability window
 			if mine and _opening != null:

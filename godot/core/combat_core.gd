@@ -54,6 +54,8 @@ static func update(s: CombatState) -> void:
 	_apply_seat_effects(s)                 # 2b. HoTs heal, DoTs tick, wards expire
 	if s.boss.sunder > 0.0:                # 2c. SUNDER bleeds toward 0 (guarded — only the tank feeds it)
 		s.boss.sunder = maxf(0.0, s.boss.sunder - s.config.sunder_decay * s.dt)
+	if s.boss.debilitate > 0.0:            # DEBILITATE bleeds toward 0 (guarded — only the Alchemist feeds it)
+		s.boss.debilitate = maxf(0.0, s.boss.debilitate - s.config.debilitate_decay * s.dt)
 	var ph := current_phase(s)             # 3. boss phase
 	_boss_think(s, ph)                     # 4. melee + advance/resolve telegraph, else pick next
 	_apply_group_damage(s, s.dt)           # 5. stat-block allies chip the boss
@@ -203,6 +205,12 @@ static func current_phase(s: CombatState) -> PhaseRes:
 
 static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	var enc := s.encounter
+
+	# PACK walk-in (guarded — entered_tick is 0 for every classic fight): the next
+	# member is still crossing the field. No forms, no melee, no telegraphs; the
+	# players may open on it (WORLD-PLAN: the diegetic valley, not a hard stop).
+	if s.boss.entered_tick > 0 and s.tick < s.boss.entered_tick + s.config.pack_walkin_ticks:
+		return
 
 	# Add waves (raid): form transitions happen only BETWEEN swings, never mid-telegraph.
 	if s.telegraph == null and not enc.adds.is_empty():
@@ -671,6 +679,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 		mult = seat.kit.outgoing_mult(seat)
 	if s.boss.sunder > 0.0:                     # SUNDER: the cracked wall takes MORE from everyone
 		mult *= 1.0 + s.boss.sunder * s.config.sunder_k
+	if s.boss.debilitate > 0.0:                 # DEBILITATE: the corroded boss takes MORE from the whole raid
+		mult *= 1.0 + s.boss.debilitate * s.config.debilitate_k
 	if s.party_out_mult != 1.0:                 # OVERCLOCK DMG-amp prime (default 1.0 → byte-neutral)
 		mult *= s.party_out_mult
 	var d := roundf(raw * mult)
@@ -826,9 +836,12 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 static func _apply_enrage(s: CombatState, dt: float) -> void:
 	# OVERCLOCK STALL (+s) delays enrage; a curse (−s) hastens it. Read off a COPY —
 	# never mutate the shared EncounterRes. Default offset 0.0 → byte-identical.
+	# PACK: the clock is time-since-THIS-member-entered (entered_tick is 0 for every
+	# classic fight, so the math below is byte-identical there).
 	var e := s.encounter.enrage_at + s.enrage_offset
-	if e > 0.0 and s.time() >= e:
-		var over := s.time() - e
+	var t := s.time() - float(s.boss.entered_tick) * s.dt
+	if e > 0.0 and t >= e:
+		var over := t - e
 		var ed := s.config.enrage_base * over * dt
 		for seat in s.seats:
 			if seat.alive():
@@ -836,6 +849,11 @@ static func _apply_enrage(s: CombatState, dt: float) -> void:
 
 static func _check_end(s: CombatState) -> void:
 	if s.boss.hp <= 0.0:
+		# PACK: a member fell but the battle isn't over — the next one takes the field.
+		# (Guarded: pack is empty for every classic fight, so this branch never fires.)
+		if not s.pack.is_empty() and s.pack_i < s.pack.size() - 1:
+			_pack_advance(s)
+			return
 		s.boss.hp = 0.0
 		s.over = true
 		s.won = true
@@ -871,6 +889,47 @@ static func _check_end(s: CombatState) -> void:
 			s.over = true; s.won = false; s.loss_cause = "player_death"
 		elif not any_alive:
 			s.over = true; s.won = false; s.loss_cause = "wipe"
+
+## PACK (WORLD-PLAN §FIGHT LENGTH): the fallen member's replacement walks in. The SAME
+## BossState object resets in place (no stale references anywhere), the encounter swaps,
+## and the walk-in grace begins. The SEATS are untouched — that's the heat carry: your
+## Flow / vials / rig charge / cooldowns ride into the next pull. A fresh threat table
+## (the tank re-establishes) is the new pull's texture. Runs inside update() on the
+## seeded stream — deterministic, lockstep-safe, and absent from every classic fight.
+static func _pack_advance(s: CombatState) -> void:
+	s.pack_i += 1
+	var enc: EncounterRes = s.pack[s.pack_i]
+	s.encounter = enc
+	s.telegraph = null                      # the dead member's swing dies with it
+	var b := s.boss
+	b.hp = float(enc.hp)
+	b.hp_max = float(enc.hp)
+	b.heal_total = 0.0
+	b.silenced_until_tick = -1
+	b.exposed_until_tick = -1
+	b.expose_amt = 0.0
+	b.dmg_buff = 0.0
+	b.sunder = 0.0
+	b.debilitate = 0.0
+	b.last_curse_tick = -999999
+	b.melee_timer = 1000000
+	b.ability_timer = {}
+	b.add_i = -1
+	b.add_hp = 0.0
+	b.add_hp_max = 0.0
+	b.adds_spawned = {}
+	b.threat = {}
+	b.taunt_seat_i = -1
+	b.taunt_until_tick = -1
+	b.entered_tick = s.tick                 # walk-in grace + per-member enrage key off this
+	var i := 0
+	for ab in enc.abilities:
+		var stagger := 2.0 + float(i) * 1.5 + s.rng.next_float() * (ab.cd * 0.3)
+		b.ability_timer[ab.id] = to_ticks(stagger, s.config.fixed_hz)
+		i += 1
+	if not enc.melee.is_empty():
+		b.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
+	_emit(s, {"t": "pack_next", "i": s.pack_i, "n": s.pack.size(), "name": enc.name})
 
 static func _primary_target(s: CombatState) -> Seat:
 	for seat in s.seats:

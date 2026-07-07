@@ -54,7 +54,7 @@ static func cls_of(seat: Seat) -> String:
 ## replica builds the identical fight with each player's drafted boons applied. Absent /
 ## empty = a boon-less seat (AI raiders, or a seat that hasn't drafted) — byte-identical.
 static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
-		carry: Dictionary = {}, seat_boons: Dictionary = {}) -> Dictionary:
+		carry: Dictionary = {}, seat_boons: Dictionary = {}, pack: Array = []) -> Dictionary:
 	var seats: Array = []
 	for key in SEAT_KEYS:
 		var c: Dictionary = seat_cfg.get(key, {})
@@ -72,6 +72,10 @@ static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
 	var spec := {"seed": seed, "enc": enc, "seats": seats}
 	if not carry.is_empty():
 		spec["carry"] = carry
+	# PACK: a chain of encounter ids for one battle (pack[0] must equal `enc`). Size < 2
+	# normalizes away — the spec (and the fight) stays byte-identical to a classic pull.
+	if pack.size() >= 2:
+		spec["pack"] = pack.duplicate()
 	return spec
 
 ## Build the fight state from a spec — identically on every machine.
@@ -85,14 +89,23 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 		aspects[k] = String(e["aspect"])
 		classes[k] = String(e.get("cls", SEAT_CLASS.get(k, "")))
 	var carry: Dictionary = spec.get("carry", {})
-	var enc := RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw")))
+	# PACK (main): resolve the member chain (pure data in the spec → every replica builds
+	# the same battle). pack[0] is the encounter on the field; absent = classic single fight.
+	var pack_res: Array = []
+	var pk: Array = spec.get("pack", [])
+	if pk.size() >= 2:
+		for pid in pk:
+			pack_res.append(RaidContent.encounter_by_id(String(pid)))
+	var enc_res: EncounterRes = pack_res[0] if not pack_res.is_empty() \
+		else RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw")))
 	# ESCORT/VOLATILE burden (WORLD-PLAN §MEWGENICS STEALS ①) rides the carry as pure data:
-	# append an enemy-side add to this FRESH encounter. Absent burden = the encounter is
-	# untouched, so every existing raid/zone pull stays byte-identical.
+	# append an enemy-side add to the ON-FIELD encounter (pack lead, or the single fight).
+	# Absent burden = untouched, so every existing raid/zone/pack pull stays byte-identical.
 	var burden := String(carry.get("burden", ""))
 	if burden != "":
-		RaidContent.apply_burden(enc, burden)
-	var s := RaidContent.make_state(int(spec.get("seed", 1)), enc, aspects, my_seat, classes)
+		RaidContent.apply_burden(enc_res, burden)
+	var s := RaidContent.make_state(int(spec.get("seed", 1)),
+		enc_res, aspects, my_seat, classes, pack_res)
 	var seed_v := int(spec.get("seed", 1))
 	for e in spec.get("seats", []):
 		var key := String(e["key"])

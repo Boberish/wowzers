@@ -73,7 +73,8 @@ func act(obs: Dictionary) -> Dictionary:
 			and bool(obs.get("kick_ready", false)) and energy >= 10.0:
 		return _ab("kick")
 
-	if String(obs.get("aspect", "tempo")) == "tempo":
+	var asp := String(obs.get("aspect", "tempo"))
+	if asp == "tempo" or asp == "fermata":    # Fermata rides the Tempo brain — only the Strike coils
 		return _tempo(obs, energy)
 	return _venom(obs, energy)
 
@@ -112,6 +113,8 @@ func _tempo(obs: Dictionary, energy: float) -> Dictionary:
 ## a full reaction delay dwarfs the ~10-tick window; ~0.35 lands the gradient across the tiers.
 const STRIKE_LAT_SCALE := 0.30
 func _tempo_strike(obs: Dictionary, energy: float) -> Dictionary:
+	if bool(obs.get("fermata", false)):
+		return _fermata_strike(obs, energy)
 	var lo := int(obs.get("perfect_lo", 18))
 	var hi := int(obs.get("perfect_hi", 28))
 	# aim CENTRE (−1 compensates the 1-tick enqueue delay so lat 0 lands dead centre);
@@ -119,6 +122,24 @@ func _tempo_strike(obs: Dictionary, energy: float) -> Dictionary:
 	var target := maxi(lo, (lo + hi) / 2 - 1 + int(round(float(latency_ticks) * STRIKE_LAT_SCALE)))
 	if int(obs.get("since_strike", 0)) >= target and energy >= float(obs.get("strike_cost", 12.0)):
 		return _ab("strike")
+	return {}
+
+## FERMATA · THE DRAW: the sweep is PRESS-relative — the clock only runs while you hold, so the
+## policy simply begins a draw whenever it has the energy (a human paces theirs around dumps),
+## then releases on the centre-aim once sharp. Same latency smear as Tempo — the timing gradient
+## is identical; obs `since_strike` is already the press-relative sweep position (0 when idle).
+func _fermata_strike(obs: Dictionary, energy: float) -> Dictionary:
+	if bool(obs.get("strike_locked", false)):
+		return {}                                   # staggered from an unravel — wait it out
+	if not bool(obs.get("coiling", false)):
+		if energy >= float(obs.get("strike_cost", 12.0)):
+			return _ab("coil")                      # begin the draw — the window is already placed
+		return {}
+	var lo := int(obs.get("perfect_lo", 18))
+	var hi := int(obs.get("perfect_hi", 28))
+	var target := maxi(lo, (lo + hi) / 2 - 1 + int(round(float(latency_ticks) * STRIKE_LAT_SCALE)))
+	if bool(obs.get("coil_sharp", false)) and int(obs.get("since_strike", 0)) >= target:
+		return _ab("release")
 	return {}
 
 # --- Venomancer: PLAY THE WHEEL. Striking in the green rides V→F→C, topping all three

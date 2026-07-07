@@ -10,6 +10,9 @@ class_name TwinfangGauge
 extends Control
 
 var aspect: String = "tempo"
+## Fermata is Flow-based like Tempo — it shows the tier-gem wing, never the poison wheel.
+func _flow_wing() -> bool:
+	return aspect == "tempo" or aspect == "fermata"
 var combo: int = 0
 var combo_max: int = 5
 var flow: int = 0
@@ -39,8 +42,8 @@ func _draw() -> void:
 
 	# ornamental wings (ignite with the payoff on their side)
 	UiKit.wing_flourish(self, c, -1.0, 210.0, Palette.CP, combo >= combo_max)
-	UiKit.wing_flourish(self, c, 1.0, 210.0, Palette.PERFECT if aspect == "tempo" else Palette.POISON,
-		(tier >= 3) if aspect == "tempo" else bool(venom.get("syn_active", false)))
+	UiKit.wing_flourish(self, c, 1.0, 210.0, Palette.PERFECT if _flow_wing() else Palette.POISON,
+		(tier >= 3) if _flow_wing() else bool(venom.get("syn_active", false)))
 
 	# ---- the Flow crystal core ----
 	if maxed or _flash > 0.0:
@@ -97,7 +100,7 @@ func _draw() -> void:
 	UiKit.engraved_plaque(self, Vector2(gx0 - spacing * 2.0, h - 11.0), "COMBO", full)
 
 	# ---- right wing: the aspect readout ----
-	if aspect == "tempo":
+	if _flow_wing():
 		_tempo_wing(c, h)
 	else:
 		_venom_wing(c, h)

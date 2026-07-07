@@ -22,11 +22,20 @@ extends Resource
 # --- Enrage ramp ---
 @export var enrage_base: float = 6.0           ## raid dmg/sec added per second past enrage
 
+# --- PACK walk-in (WORLD-PLAN §FIGHT LENGTH: the diegetic valley) ---
+## Ticks after a pack member takes the field before it ACTS (no melee/telegraphs/forms).
+## Players may act — opening on the approaching enemy is the pull fantasy. Only pack
+## members 2+ ever have entered_tick > 0, so classic fights never read this.
+@export var pack_walkin_ticks: int = 75        ## 2.5s at 30 Hz
+
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
 @export var sunder_max: float = 5.0            ## pip ceiling
 @export var sunder_k: float = 0.06             ## boss takes +6% MORE per pip (×1.30 at full)
 @export var sunder_decay: float = 1.1          ## pips bled per second when not fed (aggressive)
+# --- DEBILITATE (Alchemist Debilitator boon feeds boss.debilitate; inert/0 for everyone else) ---
+@export var debilitate_k: float = 0.03         ## boss takes +3% MORE per stack (×1.09 at 3 stacks)
+@export var debilitate_decay: float = 0.5      ## stacks bled per second when not fed (gentle corrosion)
 
 # --- M7 strike strings + the universal dodge ---
 # Grade windows: seconds BEFORE a beat's impact that a dodge press still answers
