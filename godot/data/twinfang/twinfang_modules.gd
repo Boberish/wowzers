@@ -33,7 +33,7 @@ const MODULES := {
 	# --- FERMATA (§13.3) modules — offered on the fermata aspect. ---
 	"shadowdance": {
 		"name": "Shadow Dance", "kicker": "Transformer", "gauge": "dance",
-		"blurb": "Sharp Perfect/Bullseye releases at high Flow fill a meter; unleash THE DANCE — 3s of bullet-time where coils sharpen instantly and Bullseyes come easy — then crash to a seed. A skill amplifier you choose to enter.",
+		"blurb": "Sharp Perfect/Bullseye releases at high Flow fill a meter; unleash THE DANCE — 3s where THERE IS NO SNAP (ride past the lip freely, everything grades at least Perfect, coils sharpen instantly) — then crash to a seed. Three seconds of fearlessness.",
 		"built": true,
 		"aspect": "fermata",
 	},

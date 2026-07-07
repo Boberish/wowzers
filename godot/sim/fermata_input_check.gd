@@ -69,6 +69,20 @@ func _initialize() -> void:
 	print("window centres over 4 beats (ticks): %s  -> %d distinct (expect >= 3)  %s" % [
 		str(centers), distinct.size(), "PASS" if distinct.size() >= 3 else "FAIL"])
 
+	# --- 5) THE SNAP: hold PAST the lip and the note breaks (auto-miss + Flow crash) ---
+	_step(s, 16)                                   # clear any lock
+	blade.vars["flow"] = 3                          # so we can see the crash
+	var snap0 := int(s.diag.get("snap", 0))
+	var hpS := s.boss.hp
+	_enq(s, blade, {"type": "ability", "id": "coil"})
+	_step(s, 62)                                   # hold ~2s — well past any lip (ruler is 1.8s)
+	var snapped := int(s.diag.get("snap", 0)) > snap0
+	var dealtS := hpS - s.boss.hp
+	var crashed := int(blade.vars.get("flow", 9)) == 0 and not bool(blade.vars.get("coiling", true))
+	print("held past the lip -> snap +%d (expect +1), dmg %.0f (expect 0), Flow crashed+idle %s  %s" % [
+		int(s.diag.get("snap", 0)) - snap0, dealtS, str(crashed),
+		"PASS" if (snapped and dealtS == 0.0 and crashed) else "FAIL"])
+
 	quit()
 
 func _enq(s: CombatState, seat: Seat, action: Dictionary) -> void:

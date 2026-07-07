@@ -25,6 +25,7 @@ func _initialize() -> void:
 		{"name": "fermata_idle",          "warm": 150, "hold": 0},   # THE DRAW at rest — no clock
 		{"name": "fermata_coil_charging", "warm": 150, "hold": 5},   # ~0.17s coiled → ring ~half
 		{"name": "fermata_coil_sharp",    "warm": 150, "hold": 14},  # ~0.47s coiled → white-hot sharp
+		{"name": "fermata_ramp_riding",   "warm": 150, "hold": 20},  # ~0.67s — sharp, riding the ramp toward the lip
 	]
 
 func _ctrl():
