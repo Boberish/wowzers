@@ -31,14 +31,17 @@ LIGHT · BRINK BELL · THE SHINING HOUR (class support boon).
 the planning for the brim — tear that out completely; not mana, not healing, already using it for
 the cascade").** Precision mana-refunds stay DEAD, and now crit/bigger-heals are dead too; the
 CD/big-button lane is taken (Cool Hand / Plumb Line feed Cascade). **The perfect reward points
-OUTWARD: ✧ THE GLINT** — a perfect (Brim pour · Draw Still Point) makes the warband's weapons
-catch the Well's light: **party +~25% damage for ~4s** (refresh, not stack). Non-mana, non-heal,
-non-CD — and it still pays the economy *indirectly*: harder hits → shorter fight → fewer charges
-spent. Precision refunds water through the boss's HP bar, never the Well. Draw's plain clean =
-+Current only; Still Point = Current + Glint; Millrace = the only literal economy valve. The
-SHINING HOUR boon (5★) becomes the Glint's amplifier lane. Runner-up on file if Glint misses the
-feel pass: THE GILD (perfect braces the target — next boss hit −25%, one charge). 🟡 numbers
-(+%/duration) at ⚙; 🟡 the 3-tier Good/Perfect/Bullseye ladder (D-B2 note) still open.
+OUTWARD: ✧ THE GLINT — PERSONAL (Bill: "just for the person we are healing, not everyone"):** a
+perfect (Brim pour · Draw Still Point) makes **the healed ally's** weapon catch the Well's light:
+**that ally +~40% damage for ~4s** (refresh, not stack; a Still-Point Cascade glints all three it
+healed). Non-mana, non-heal, non-CD — and it pays the economy *indirectly*: harder hits → shorter
+fight → fewer charges spent. Being personal puts the Glint INSIDE the triage game: WHO you bless
+matters (a glinted striker ≈ 3× a glinted tank, but the striker has to need the heal) — perfect
+target-selection texture for Brim. Draw's plain clean = +Current only; Still Point = Current +
+Glint; Millrace = the only literal economy valve. The SHINING HOUR boon (5★) becomes the Glint's
+amplifier lane. Runner-up on file: THE GILD (perfect braces the target — next boss hit −25%, one
+charge). 🟡 numbers (+%/duration/threat) at ⚙; 🟡 the 3-tier Good/Perfect/Bullseye ladder (D-B2
+note) still open.
 
 **BOOK REWORK (C-6, C-9, C-7):** identity = **ALL heals are casted direct heals** — **Ward CUT ·
 Renew CUT · Meditate CUT from base → a draftable battery BOON** ("you need to manage mana"; the
@@ -105,8 +108,8 @@ under pressure. One book, one Well, two specs = **the same grade in two places**
   charges ("every 3rd pour returns 2").
 - **SPEC 1 · BRIM (dev-label TARGET) — grade the LANDING.** Casts stay completely normal; every
   direct heal is graded by where the target's HP lands. In the brim band (default ≥90%) with zero
-  spill = **PERFECT POUR** — fires **✧ THE GLINT** (warband +damage ~4s; the class proc moment) ·
-  overshoot = **SPILL** (counted waste) · land low = safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs
+  spill = **PERFECT POUR** — fires **✧ THE GLINT on the healed ally** (+damage ~4s; the class proc
+  moment) · overshoot = **SPILL** (counted waste) · land low = safe, unpaid. The graded window lives on the **ally's bar**; the skill is sizing Flash vs
   Mend vs Cascade against incoming damage. **Landing preview = BASE** (🔒 B-V3) + a blindfold boon
   (preview off, bigger rewards). **BRIMFUL** (dead-full landing tier) = big CD buttons only (B-V4).
 - **SPEC 2 · DRAW (dev-label SPEED) — grade the RELEASE, ride THE CURRENT.** Casts complete
@@ -210,9 +213,9 @@ medit +160/25s (tester-shortened; the kit's is 160/55s) · GCD 1.2s · pressure 
 
 1. **Class name** — MENDER unloved (2★), no candidate yet. Specs ride dev-labels TARGET / SPEED;
    resource = CHARGES. Figure out later, before the HUD pass.
-2. **Glint numbers** — +25%? 4s? refresh-vs-stack? Does the tank's threat ride it? The full
-   Good/Perfect/Bullseye 3-tier ladder ("go full in, like tempo") vs the built 2-tier? ⚙ tester +
-   build-time sims (Glint = measurable in raid_sim: kill-time delta per pour).
+2. **Glint numbers** — +40% on one ally? 4s? refresh-vs-stack? Does a glinted tank gain threat?
+   The full Good/Perfect/Bullseye 3-tier ladder ("go full in, like tempo") vs the built 2-tier?
+   ⚙ tester + build-time sims (Glint = measurable in raid_sim: kill-time delta per pour).
 3. **The Current's numbers** — +6%/stack (max 5)? Undercook full crash vs −2 (creed territory)?
    Idle ebb 4s? ⚙ tester calls.
 4. **⭐ Reservoir rework** — 3★ + the Ward cut guts its shields: spill→Surge as burst heal, or

@@ -837,8 +837,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   EXPORT LANDED (66/66 rated) + FOLDED → `MENDER-PLAN.md` ⚖ block is the record.** Headlines:
   ~~THE CRIT MODEL~~ **→ ✧ THE GLINT (crit TORN OUT same day — Bill: "kills the planning for the
   brim; not mana not healing, already using it for the cascade"):** a perfect (Brim pour · Draw
-  Still Point) = **warband +~25% damage ~4s** — precision pays OUTWARD through kill speed, never
-  the Well; clean rhythm pays INWARD (the Current); refunds/crits/bigger-heals all dead ·
+  Still Point) = **the HEALED ALLY +~40% damage ~4s** (PERSONAL — Bill: "just for the person we
+  are healing, not everyone"; who you bless joins the triage game) — precision pays OUTWARD
+  through kill speed, never the Well; clean rhythm pays INWARD (the Current);
+  refunds/crits/bigger-heals all dead ·
   **BOOK REWORK** (all heals casted+direct: Ward/Renew CUT, Meditate → boon, Rekindle no-CD
   long-cast) · resource = **CHARGES** · spec dev-labels **TARGET/SPEED** · healer = **0 kicks** ·
   preview BASE + blindfold boon · Brimful on big-CD buttons only · creed reworks owed (Quick
