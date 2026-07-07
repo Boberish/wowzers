@@ -152,6 +152,10 @@ func _finish() -> bool:
 	hud._show_atlas()
 	_check(hud._screen == "atlas", "conquest done → the Atlas")
 	var w: WorldSave = hud._world
+	# §MEWGENICS STEALS ① — the rush route never enters the pickup node (4), so the escort
+	# must have stayed inert through the whole HUD drive (flag guard didn't misfire).
+	_check(not Escort.carrying(w, WorldContent.ZONE1),
+		"escort inert on the rush (pickup node never visited)")
 	print("conquered %d/20 nodes · sluice=%s · waystation=%s · zone_cleared=%s" % [
 		w.cleared_count(WorldContent.ZONE1),
 		String(w.flags(WorldContent.ZONE1).get("sluice", "?")),

@@ -223,6 +223,7 @@ var _ticket_toast := ""            ## a one-shot ticket pop, shown on the next m
 # no boons/gear/wounds/economy in or out; conquest is the only writeback. All state
 # below stays inert until THE WORLD is entered, so every existing path is untouched.
 const WORLD_PREVIEW := true        ## the home-menu door (front-door flip is W3)
+const ESCORT_PREVIEW := true       ## §MEWGENICS STEALS ① escort/volatile tickets (thinnest slice; off ⇒ byte-identical)
 ## FIGHTLEN (dev feel-scalar, WORLD-PLAN §FIGHT LENGTH): `--fightlen=2.5` multiplies boss
 ## HP + enrage on OFFLINE pulls so the length bands can be FELT before the W2 grammar
 ## builds. 1.0 (absent) = untouched, byte-identical everywhere; online never reads it.
@@ -233,6 +234,7 @@ var _zone_id := ""                 ## the zone the warband stands in ("" = not i
 var _zone_node := -1               ## the zone node being resolved right now
 var _zone_live := false            ## the current fight is a ZONE pull (isolated, bare kit)
 var _zone_toast := ""              ## one-shot zone banner (conquest / withdrawal / crest)
+var _escort_line := ""             ## one-shot escort transition line, folded into the next node stop
 var _party_ctx := ""               ## "" = raid flow (DESCEND) · "bastion" = the Warband Camp
 
 # The Inference Check meta (Topology deep events): ⚡ Entropy is the within-run luck
@@ -802,7 +804,15 @@ func _enter_zone_node(id: int) -> void:
 	var z := WorldContent.zone(_zone_id)
 	_zone_node = id
 	_world.set_at(_zone_id, id)
+	# §MEWGENICS STEALS ① — escort transitions fire on ENTERING the node, cleared or not, so a
+	# turn-in at a door you already marked (rushed there before picking up) still completes the
+	# carry. For an uncleared escort node the message folds into its stop (camp/door) below.
+	if ESCORT_PREVIEW:
+		_escort_line = Escort.on_enter(_world, _zone_id, id)
 	if _world.is_cleared(_zone_id, id):
+		if _escort_line != "":        # a cleared node has no stop panel — surface it as a banner
+			_zone_toast = _escort_line
+			_escort_line = ""
 		_world_autosave()             # free travel — the token moves, conquered ground never re-fights
 		_show_zone()
 		return
@@ -810,6 +820,10 @@ func _enter_zone_node(id: int) -> void:
 	match String(n["kind"]):
 		"fight", "elite", "boss":
 			var body := WorldContent.BOSS_INTRO if String(n["kind"]) == "boss" else String(n["sub"])
+			# §MEWGENICS STEALS ① — if the vial you're carrying will burden this fight, say so
+			# BEFORE the pull: the player must connect the extra pressure to the escort.
+			if ESCORT_PREVIEW and Escort.burden_for(_world, _zone_id, n) != "":
+				body = "◈  The vial weeps — the harvest-rot rises to meet you here. This fight is worse for the carrying.\n\n" + body
 			_zone_stop(String(n["name"]), body,
 				[{"label": "MOVE IN", "fx": {"result": "The warband forms up."}}],
 				ZoneScreen.KIND_COL[String(n["kind"])], _launch_zone_fight.bind(n))
@@ -852,21 +866,27 @@ func _zone_stop_event(n: Dictionary, ev: Dictionary) -> void:
 ## Camps, caches, the waystation, the instance door — one beat of fiction, then conquest.
 func _zone_simple_stop(n: Dictionary) -> void:
 	var nn := String(n["name"])   # (not `name` — shadows the Node property)
+	# §MEWGENICS STEALS ① — an escort pickup/turn-in fired on this node: lead the fiction
+	# with it (camp = the vial; door = sealing it away). One-shot, empty otherwise.
+	var pre := ""
+	if _escort_line != "":
+		pre = "◈  " + _escort_line + "\n\n"
+		_escort_line = ""
 	match String(n["kind"]):
 		"camp":
-			_zone_stop(nn, String(WorldContent.CAMP_TEXT.get(nn, "The warband rests.")),
+			_zone_stop(nn, pre + String(WorldContent.CAMP_TEXT.get(nn, "The warband rests.")),
 				[{"label": "REST A WHILE", "fx": {"result": "The fields keep their quiet."}}],
 				Palette.FLOW, func(): _zone_clear_node(_zone_node))
 		"cache":
-			_zone_stop(nn, String(WorldContent.CACHE_TEXT.get(nn, "Spoils of the fields.")),
+			_zone_stop(nn, pre + String(WorldContent.CACHE_TEXT.get(nn, "Spoils of the fields.")),
 				[{"label": "TAKE STOCK", "fx": {"result": "Marked, counted, carried."}}],
 				Palette.GOLD, func(): _zone_clear_node(_zone_node))
 		"waystation":
-			_zone_stop(nn, WorldContent.WAYSTATION_TEXT,
+			_zone_stop(nn, pre + WorldContent.WAYSTATION_TEXT,
 				[{"label": "LIGHT THE BEACON", "fx": {"result": "The sky roads answer."}}],
 				Palette.WIN, func(): _zone_clear_node(_zone_node))
 		"door":
-			_zone_stop(nn, WorldContent.DOOR_TEXT,
+			_zone_stop(nn, pre + WorldContent.DOOR_TEXT,
 				[{"label": "MARK THE ATLAS", "fx": {"result": "The route is yours. The door will know you."}}],
 				Palette.RELIC, func(): _zone_clear_node(_zone_node))
 
@@ -897,16 +917,24 @@ func _world_autosave() -> void:
 ## gear / wounds / carry — an isolated pull, full HP in, nothing out but conquest.
 ## Built by the SAME shared factory as every raid pull, with NO overrides — so a zone
 ## stand-in fight is byte-identical to its source encounter (the W1 acceptance bar).
+## THE ONE EXCEPTION (§MEWGENICS STEALS ①): while escorting a payload, a fight/elite node
+## rides a `carry.burden` — an enemy-side add — so the pull is *harder*, never buffed
+## (bare-kit law intact; a no-burden pull is still byte-identical).
 func _launch_zone_fight(n: Dictionary) -> void:
 	_gate_live = false
 	_screen = "combat"
 	_clear()
 	_ensure_party()
 	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var carry := {}
+	if ESCORT_PREVIEW:
+		var b := Escort.burden_for(_world, _zone_id, n)
+		if b != "":
+			carry = {"burden": b}
 	# PACK: an authored member chain on the node = one battle, fought sequentially
 	# (node["fight"] is always the chain's first id; [] = a classic single pull).
 	var pk: Array = n.get("pack", [])
-	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), {}, {}, pk)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), carry, {}, pk)
 	var s := RaidNet.build(spec, _seat_key)
 	_apply_fightlen(s)
 	_loadout = _make_loadout()

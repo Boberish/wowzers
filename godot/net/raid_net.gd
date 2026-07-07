@@ -88,8 +88,9 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 		var k := String(e["key"])
 		aspects[k] = String(e["aspect"])
 		classes[k] = String(e.get("cls", SEAT_CLASS.get(k, "")))
-	# PACK: resolve the member chain (pure data in the spec → every replica builds the
-	# same battle). pack[0] is the encounter on the field; absent = classic single fight.
+	var carry: Dictionary = spec.get("carry", {})
+	# PACK (main): resolve the member chain (pure data in the spec → every replica builds
+	# the same battle). pack[0] is the encounter on the field; absent = classic single fight.
 	var pack_res: Array = []
 	var pk: Array = spec.get("pack", [])
 	if pk.size() >= 2:
@@ -97,6 +98,12 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 			pack_res.append(RaidContent.encounter_by_id(String(pid)))
 	var enc_res: EncounterRes = pack_res[0] if not pack_res.is_empty() \
 		else RaidContent.encounter_by_id(String(spec.get("enc", "riftmaw")))
+	# ESCORT/VOLATILE burden (WORLD-PLAN §MEWGENICS STEALS ①) rides the carry as pure data:
+	# append an enemy-side add to the ON-FIELD encounter (pack lead, or the single fight).
+	# Absent burden = untouched, so every existing raid/zone/pack pull stays byte-identical.
+	var burden := String(carry.get("burden", ""))
+	if burden != "":
+		RaidContent.apply_burden(enc_res, burden)
 	var s := RaidContent.make_state(int(spec.get("seed", 1)),
 		enc_res, aspects, my_seat, classes, pack_res)
 	var seed_v := int(spec.get("seed", 1))
@@ -113,7 +120,7 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 			seat.kit.boons = sb
 	# MAP-3b: fold the carried campaign state in (wounds cut max HP, then integrity of
 	# what's left; the healer's mana carries too). Mirrors the offline _launch_map_fight.
-	var carry: Dictionary = spec.get("carry", {})
+	# (`carry` was hoisted above for the escort burden — same dict, reused here.)
 	if not carry.is_empty():
 		# INTEGRITY RETIRED: fights boot at FULL HP of the WOUND-reduced pool (a carried HP
 		# fraction is meaningless — a healer tops it off in seconds). WOUNDS (max-HP cuts a

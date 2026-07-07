@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_remembers()
 	_save_roundtrip()
 	_fight_identity()
+	_escort()
 	print("WORLD PROBE: %s" % ("ALL OK" if fails == 0 else "%d FAILURES" % fails))
 	quit(0 if fails == 0 else 1)
 
@@ -144,6 +145,45 @@ func _fight_identity() -> void:
 		var c2 := _run_fight(spec_b)
 		_ck(c1 == c2, "fight determinism for %s (%d vs %d)" % [enc_id, c1, c2])
 	print("stand-in fights: spec stable + step-deterministic — ok")
+
+# ------------------------------------------------------------ 6. escort / volatile ticket
+## §MEWGENICS STEALS ① — the whole mechanic headless: the pickup→carry→turn-in state
+## machine on a real WorldSave, the burden gate (fights burdened, capstone/non-fights not),
+## persistence through the canonical save, and that the burden actually changes a fight
+## deterministically (rides `carry` as pure data → byte-identical when absent).
+func _escort() -> void:
+	var zid := WorldContent.ZONE1
+	var z := WorldContent.zone(zid)
+	var save := WorldSave.new()
+	var r := Escort.route(zid)
+	_ck(Escort.has_route(zid) and int(r["pickup"]) == 4 and int(r["turnin"]) == 19,
+		"the Gildfields defines the grain-vial escort (pickup 4 → turn-in 19)")
+	# nothing carried at zone start ⇒ no burden anywhere
+	_ck(Escort.state(save, zid) == "" and not Escort.carrying(save, zid), "escort starts empty")
+	_ck(Escort.burden_for(save, zid, (z["nodes"] as Array)[5]) == "", "no burden before pickup")
+	# pickup at the warden's rest
+	_ck(Escort.on_enter(save, zid, 4) != "", "entering the warden's rest picks up the vial")
+	_ck(Escort.carrying(save, zid), "carrying after pickup")
+	_ck(Escort.on_enter(save, zid, 4) == "", "pickup is one-shot (idempotent)")
+	# the burden gate: fight/elite en route are burdened; the capstone boss and non-fights aren't
+	_ck(Escort.burden_for(save, zid, (z["nodes"] as Array)[5]) == Escort.BURDEN, "elite en route is burdened")
+	_ck(Escort.burden_for(save, zid, (z["nodes"] as Array)[9]) == Escort.BURDEN, "a plain fight en route is burdened")
+	_ck(Escort.burden_for(save, zid, (z["nodes"] as Array)[7]) == "", "the capstone boss is spared")
+	_ck(Escort.burden_for(save, zid, (z["nodes"] as Array)[4]) == "", "a camp is not a fight")
+	# turn-in at the door
+	_ck(Escort.on_enter(save, zid, 19) != "", "the Undermill door turns the vial in")
+	_ck(Escort.state(save, zid) == "done" and not Escort.carrying(save, zid), "escort done after turn-in")
+	_ck(Escort.burden_for(save, zid, (z["nodes"] as Array)[5]) == "", "done ⇒ the road is clean again")
+	# persistence: the escort state survives the canonical save round-trip (permanence)
+	var rt := WorldSave.from_json(save.canonical())
+	_ck(Escort.state(rt, zid) == "done", "escort state persists through the world save")
+	# the burden is real AND deterministic (same seed ⇒ same checksum; differs from the plain pull)
+	var plain := _run_fight(RaidNet.make_spec(880011, {}, "opus"))
+	var burd_a := _run_fight(RaidNet.make_spec(880011, {}, "opus", {"burden": Escort.BURDEN}))
+	var burd_b := _run_fight(RaidNet.make_spec(880011, {}, "opus", {"burden": Escort.BURDEN}))
+	_ck(burd_a == burd_b, "burdened fight is deterministic (%d vs %d)" % [burd_a, burd_b])
+	_ck(burd_a != plain, "the burden actually changes the fight (burdened %d != plain %d)" % [burd_a, plain])
+	print("escort: pickup→burden→turn-in + persistence + deterministic burden — ok")
 
 func _run_fight(spec: Dictionary) -> int:
 	var s := RaidNet.build(spec, "")
