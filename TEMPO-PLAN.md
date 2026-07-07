@@ -475,8 +475,17 @@ other classes byte-identical, determinism PASS, sims + smokes green.
 > SHNK) + coil cues; the TwinfangGauge shows Fermata's Flow tier-gems, not the poison wheel. Verified
 > by `fermata_input_check` (sharp=dmg / early=unravel / bare=no-op) + WSLg shots. Applies to the
 > world preview too (shared HUD).
-> **STILL OWED (other layers):** the charge ring is on the needle — Bill wanted it OFF-marker, so a
-> fixed-gauge-position pass is still open · shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
+> **THE ROAMING WINDOW (2026-07-07, `fermata-window` — Bill: "the artifact game had the window
+> moving"):** the green now RELOCATES after every resolve — a per-beat shift (s.rng, fermata-only
+> draw) multiplies the accelerando'd window CENTRE in ONE spot at the end of `_edge_window` (width
+> + every boon/creed effect preserved; policy/HUD/grading all read through it automatically),
+> clamped reachable (mouth ≥ coil floor + 0.10s read margin; far edge on the ruler). Fermata gets
+> a FIXED 1.8s ruler so the bar never rescales — the band jumps around on it, tester-style. Knobs:
+> `fermata_shift_min/max 0.75/1.85 · fermata_ruler_sec 1.80`. Charge ring moved OFF the needle to
+> a fixed socket at the left end-cap (the coiling needle tints umbra instead). Probe asserts the
+> roam (4 distinct centres / 4 beats); checksums still byte-identical; expert AI tracks the roam
+> (24 bulls/run); cadence is now irregular by design (expert TTK 16→20s — far windows = long beats).
+> **STILL OWED (other layers):** shadow-dim while coiling · Shade/Mark/Dance meter gauges ·
 > elite acquisition for the 3 keystones (Topology elite node) · online spec-carry in `(seed, spec)`.
 > The frozen poison-wheel Venom stays as the AI-only legacy aspect (poison is the Alchemist now);
 > the blade lobby shows Tempo + Fermata.
