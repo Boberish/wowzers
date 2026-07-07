@@ -287,6 +287,35 @@ on failure), not persistent-conquest zones — revisit at the raid retune.
   which resolves the tone question cleanly: jokes live inside realm doors, the world
   outside them is earnest. Zone skins are world-fiction, Topology skins stay per-realm.
 
+### RAID vs DUNGEON — the identity split (locked with Bill, 2026-07-07)
+
+Bill's WoW-classic instinct ("raids: lockout + humans-only + aggro; dungeons: M+ farm")
+triaged against the laws — what survived is the *identity* split, not the gates:
+
+- **Aggro is raid grammar.** Threat/taunt (`threat_enabled`) fires ONLY behind raid
+  doors — dungeons, zone fights, events, and gates never enable it. Already true in code
+  (per-fight flag, every call site guarded — `combat_core.gd`); now a content LAW. Raids
+  double down on coordination-shaped boss mechanics (threat drops, tank swaps, split
+  soaks) — the mechanics theater.
+- **Dungeons are the M+ push surface.** The infinite Depth ladder (`spec.depth` numeric
+  spine + affix breakpoints — design locked 2026-07-04, MASTER-PLAN §MODES & ENDGAME)
+  gets the DUNGEON door as its **primary home**: 30–45 min runs are the natural
+  push/farm cadence, and Forge tiers + TICKETS mutators are the affix vocabulary. One
+  scalar, two doors — raids keep their Depth dial as the long-form flex; the dungeon is
+  where you *push*. (The dungeon Version dial stays — Versions = discrete authored
+  mechanic-adds, Depth = the continuous procedural scalar, as reconciled 07-04.)
+- **Co-op-REWARDING, never co-op-GATED.** Human-only raids were weighed and CUT: they
+  break the Warband Law and kill the flagship content for the actual audience. AI
+  backfill stays everywhere; raids make human seats *shine* through coordination
+  mechanics, not requirements.
+- **No lockouts, re-affirmed.** A raid daily lockout was weighed and CUT: PROGRESSION
+  law 4 (no timed content) stands — there is no economy to pace (numbers die with the
+  run), and descent length (1.5–3 h) + the parked RAID RITES already carry the "raids
+  are a big deal" weight without a clock.
+- The *real* goal behind the instinct — "make people play together" — is recorded as an
+  open want (MASTER-PLAN parking lot: **MMO-feel levers**); it will be served by
+  presence/social systems, never by content gates.
+
 ---
 
 ## WORLD EVENTS — the "big boss randomly pops" layer

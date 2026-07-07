@@ -662,7 +662,7 @@ tanks keep the densest; marquee moments survive.
 
 - **Trial Ladder ("Versions")** — NEW: replay any boss at v1/v2/v3…; each version ADDS MECHANICS (extra string beats, feints, phases — never just +HP%), better rewards, fake patch notes. Deterministic engine ⇒ seed-verified leaderboards nearly free. Design vs `TuningConfig` + strings content.
 - **Run modifiers** (Hades-Heat/Hardcore-Trials style): opt-in stacking difficulty for exclusive rewards — after Trial Ladder proves the scaling hooks.
-- **RAID DEPTH — the infinite "Mythic+" ladder (design LOCKED with Bill 2026-07-04; RANK track in `PROGRESSION-PLAN.md`).** The endgame is an *unbounded* difficulty ladder on the raid: `spec.depth` (a scalar on the fight spec → rides `(seed, spec)`, so lockstep/checksums/headless sims stay correct for free) scales a cheap **numeric spine** (boss HP / damage / enrage clock) AND gates authored **AFFIX TIERS at Depth breakpoints**. Because combat is *timing*, the load-bearing scaling axis is **compressing windows / adding beats**, never stat inflation you can gear past — the affixes REUSE the existing strings/feints/interrupt/add engine (extra string beat, denser feints, tighter parry/dodge windows, an added interruptible cast, an aura-add) at a `TuningConfig` intensity knob. Real M+ structure = numeric spine + affix breakpoints; the game's edge = **a window you can't hit stays unhit no matter your gear**, so skill stays load-bearing forever. Deterministic engine ⇒ **seed-verified Depth leaderboards nearly free**; your best Depth IS your gear score (RANK track). Relationship to the Trial Ladder: **Versions** = per-boss, discrete, *authored* mechanic-adds (fake patch notes); **Depth** = the raid-wide, continuous, *procedural* scalar those affixes ride on. Build after the Trial Ladder proves the scaling hooks + `spec.depth` plumbing.
+- **RAID DEPTH — the infinite "Mythic+" ladder (design LOCKED with Bill 2026-07-04; RANK track in `PROGRESSION-PLAN.md`).** The endgame is an *unbounded* difficulty ladder on the raid: `spec.depth` (a scalar on the fight spec → rides `(seed, spec)`, so lockstep/checksums/headless sims stay correct for free) scales a cheap **numeric spine** (boss HP / damage / enrage clock) AND gates authored **AFFIX TIERS at Depth breakpoints**. Because combat is *timing*, the load-bearing scaling axis is **compressing windows / adding beats**, never stat inflation you can gear past — the affixes REUSE the existing strings/feints/interrupt/add engine (extra string beat, denser feints, tighter parry/dodge windows, an added interruptible cast, an aura-add) at a `TuningConfig` intensity knob. Real M+ structure = numeric spine + affix breakpoints; the game's edge = **a window you can't hit stays unhit no matter your gear**, so skill stays load-bearing forever. Deterministic engine ⇒ **seed-verified Depth leaderboards nearly free**; your best Depth IS your gear score (RANK track). Relationship to the Trial Ladder: **Versions** = per-boss, discrete, *authored* mechanic-adds (fake patch notes); **Depth** = the raid-wide, continuous, *procedural* scalar those affixes ride on. Build after the Trial Ladder proves the scaling hooks + `spec.depth` plumbing. **World-era note (2026-07-07, with Bill):** the DUNGEON door becomes Depth's **primary push surface** (30–45 min runs = the M+ cadence; Forge tiers + TICKETS mutators = the affix vocabulary); raids keep the dial as the long-form flex. Same scalar, two doors — see WORLD-PLAN §INSTANCES "RAID vs DUNGEON identity split" (also locks aggro/threat as raid-only grammar; CUT there: human-only raids, daily lockout).
 - **Power model — Law #1 REAFFIRMED (Bill 2026-07-04 — the persistent-gear treadmill was weighed and DECLINED).** Endgame scaling does NOT ship with persistent gear power. Weighed the classic ARPG/WoW "keep your gear, get durably stronger, scaling races your power" treadmill against `PROGRESSION-PLAN.md` Law #1 ("numbers die with the run; skill is the character level") — declined for two concrete costs: (1) permanent power breaks the **co-op scaling contract** — one Depth can't be "right" for both a broken veteran and a fresh friend in one lockstep lobby (carry or one-shot); a shared honest Depth dial + run-scoped gear is what lets *any* mix of players share a fair fight (the 4-player dream). (2) It makes the balance sims **gear-conditional** (violates Law #6 — every win-rate band becomes "…at gear level X"). What scales instead: **Depth grows CURATION CAPACITY, not hitting power** — higher Depth levels up your *shopper* (richer drop-rarity weights + stronger drop-steering, see §SYSTEMS E.5), never your *fighter*. The "I'm a monster this run" fantasy stays **run-scoped** (deeper pool + more drafts at high Depth = a genuinely broken build the scaling is tuned to meet), re-earned each run (fast, because your pool is rich); permanence banks pool + access + Depth record.
 - **Open ideas:** endless "Manastorm" mode; ~~meta-progression (account tokens → cosmetic/QoL)~~ — superseded by `PROGRESSION-PLAN.md` (standing/crests + pool growth, no account currencies); ~~daily seed challenge~~ — CUT from core per `PROGRESSION-PLAN.md` (no timed content; deterministic-seed leaderboards stay a free opt-in someday).
 
@@ -718,6 +718,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## CURRENT / OPEN IDEAS (parking lot — promote into a section when claimed)
 
+- **MMO-feel levers (Bill's want, 2026-07-07 — the real goal behind the cut lockout/humans-only
+  raid instinct):** make playing together the emotionally best way to play WITHOUT gating
+  content. Candidates, all law-compatible: (a) **warband lending** — Commander-built raiders
+  shareable between saves (your kid's tank, as he specced and named it, tanks your raid —
+  async co-op through each other's builds); (b) **Bastion quest-board bounties posted for
+  each other** ("beat my Trial time", seed-verified — rides the deterministic replay we
+  already have); (c) **ghost/replay races** on the Depth ladder (whole runs replay from
+  `(run_seed, picks, spends)`); (d) **co-op-only cosmetic standing** — titles/banners/transmog
+  earned only in shared runs (Law 1's social track). W4's presence layer + world-event open
+  lobbies remain the baseline. None claimed.
+
 - **TEAM-COMP layer (Bill 2026-07-04, deliberately split from the commander merge — "another subject,
   focus the ai pick 1st"):** damage SCHOOLS (physical / void / poison / nature) + per-boss resist/immune/
   weak profiles so the party you assemble answers the encounter. Design sketch from the commander session:
@@ -736,6 +747,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-07 · main (docs only) · §MODES & ENDGAME / `WORLD-PLAN.md` §INSTANCES /
+  `PROGRESSION-PLAN.md` §Laws — **RAID vs DUNGEON identity split (Bill, design session).**
+  Bill's WoW-classic instinct (raid daily lockout + humans-only raids + aggro-only-in-raids +
+  M+ dungeons) triaged against the laws. **LOCKED:** aggro/threat = **raid-only grammar**
+  (formalizes the existing `threat_enabled` per-fight guard as content law — dungeons/zones/
+  events/gates never enable it; raids double down on coordination mechanics); **dungeons =
+  the M+ push surface** (the 07-04 Depth ladder gets the dungeon door as its primary home —
+  30–45 min = the push cadence, Forge tiers + mutators = affixes; raids keep the dial as the
+  long-form flex). **CUT (recorded so we don't re-derive):** humans-only raids (breaks the
+  Warband Law; with no player base it kills the flagship content — Bill: "my head is too far
+  in wow classic land") and the daily lockout (PROGRESSION law 4 re-affirmed in place; RAID
+  RITES + descent length carry the "big deal" weight, no clock). The instinct's REAL goal —
+  "make people play together" — recorded as **MMO-feel levers** in the parking lot
+  (warband lending / bounty board / ghost races / co-op standing). No code. *(design session)*
 
 - ☑ 2026-07-07 · `mender-rework` → main (merge, base build) · §CLASSES / `MENDER-PLAN.md` — **THE
   WELL — reworked direct-cast healer, BASE BUILT & MERGED.** The healer rework (MENDER-PLAN, Bill's

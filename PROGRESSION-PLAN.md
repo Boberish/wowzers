@@ -36,6 +36,9 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
    utility. An effect that reads "+X% to your verb" is a boon, never gear.
 4. **Forbidden:** crafting hubs, meta currencies, pre-run loadouts (aspect pick is the ONLY
    pre-run choice), timed content (daily/weekly), use-based mastery, pool opt-out.
+   *(Timed-content ban re-affirmed 2026-07-07: a raid daily lockout was weighed for
+   MMO-feel and CUT — nothing to pace without a player base, and descent length + the
+   parked RAID RITES carry the "big deal" weight. See WORLD-PLAN §INSTANCES identity split.)*
 5. **Everything rides the fight spec.** Persistent state that touches combat enters as pure
    data in `(seed, spec)` — exactly like aspects — so lockstep, checksums, AI-takeover, and
    headless sims stay correct. Drop rolls are seeded; raids use per-seat personal loot.
