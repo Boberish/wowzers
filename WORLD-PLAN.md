@@ -431,11 +431,18 @@ stream, always — packs are strictly sequential):
 - **SIDE-DUEL / AURA-ADD** — "very anti fun stuff," ditched for now (the Manastorm
   aura-add steal goes back on the shelf).
 
-### Length bands (starting targets — tune.sh; enrage + regen retune with them)
-Zone skirmish 60–90s (the commute stays snappy) · zone elite/PACK 2–4 min · zone capstone
-4–6 min · dungeon Seal 5–8 min · raid Seal 8–12 min (the "10-min boss" = raid tier) ·
-world boss 5–10 min. Zone spine stays mostly skirmish-weight so route-to-door holds the
-30–45 min attunement budget; packs live on side chains + capstones first.
+### Length bands — ✅ BASELINE BAKED ×2.5 (Bill: "merge this into the main", 2026-07-07,
+### `7d740fe`) — the LONG FIGHTS scalar became the authored numbers (one launcher again).
+All 4 Seals + 3 skirmishes: HP + enrage ×2.5 in `raid_content.gd`; `--fightlen` survives
+as a dev knob RELATIVE to the new baseline; gate exams (class-content 1v1s) deliberately
+stay authored-short — snappy exams, Bill can veto. **New raid bands @60 seeds:** riftmaw
+100/97/77 · mistral 100/100/100 · gemini 100/87/10 · mythos 100/83/0 — expert holds
+everywhere, good pays a fair tax on deep Seals, sloppy craters on Ring 2/0: the skill
+spread widening is the DESIGN GOAL working; the **healer regen/mana retune is the
+good-tier lever** if playtests want deep Seals kinder. Original targets (zone skirmish
+60–90s · pack/elite 2–4 min · capstone 4–6 min · dungeon Seal 5–8 min · raid Seal 8–12
+min · world boss 5–10 min) now read against the baked baseline; the zone spine stays
+skirmish-weight so route-to-door holds the 30–45 min attunement budget.
 
 **How shapes are ASSIGNED (locked 2026-07-07, Bill's "how do they get decided?"):**
 authored in the permanence layer, seeded-within-quotas in the variance layer, always

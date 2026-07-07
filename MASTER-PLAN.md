@@ -729,6 +729,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `baselen` → main (`7d740fe`) · §BOSSES / `WORLD-PLAN.md` §FIGHT LENGTH —
+  **THE ×2.5 LENGTH IS NOW THE GAME (Bill: "i dont like the long fight and normal branch,
+  merge this into the main").** All 4 Seals + 3 skirmishes: HP + enrage ×2.5 baked into
+  `raid_content.gd` (riftmaw 38750/225s · mistral 33750/237.5 · gemini 41250/270 · mythos
+  47500/355 · bard 8500/150 · sonnet 9000/150 · opus 10500/175); adds untouched (matches what
+  Bill felt under the scalar); gate exams (class-content 1v1s) stay authored-short by choice.
+  The LONG FIGHTS bat is DELETED — one launcher; `--fightlen` survives as a dev knob relative
+  to the new baseline. **Gates:** twinfang_sim 120 **BYTE-IDENTICAL** vs fresh frozen main ·
+  raid determinism PASS · full battery green (pack/fightlen/world probes, world/raid/map/menu
+  smokes, net_smoke). **New raid bands @60:** riftmaw 100/97/77 · mistral 100/100/100 ·
+  gemini 100/87/10 · mythos 100/83/0 — skill spread widens (the design goal); the healer
+  regen/mana retune is the standing good-tier lever (the raid-healer inert-mana finding
+  closes through it). Windows play copy synced. *(world-structure session)*
+
 - ☑ 2026-07-07 · `worldreset` → main (`9aeda85`) · §THE WORLD — **dev world-reset button**
   (Bill: "i already beat that one, i cant redo it"). Atlas bottom-right "⟲ reset world (dev)",
   armed double-press (first press turns ⚠ SURE?), `WorldSave.wipe()` writes a fresh save over
