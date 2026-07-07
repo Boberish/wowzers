@@ -321,6 +321,7 @@ var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
 var _brew_hold_key: int = -1       ## Alchemist: which key (1/2) owns the live brew hold
+var _coil_held: bool = false       ## FERMATA: the Strike coil is being held (key 1 or the slot-0 rune)
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2979,7 +2980,19 @@ func _add_runes(row: HBoxContainer, ids: Array, accent = null) -> void:
 		rune.icon_id = id
 		if accent != null:
 			rune.accent = accent
-		rune.pressed.connect(_use_ability.bind(i))
+		# FERMATA: the slot-0 Strike rune is a HOLD (press = coil, release = strike). Every other
+		# rune, and every other seat, stays a tap. Mirrors the keyboard hold in _fermata_key/_input.
+		if i == 0 and _seat_key == "blade" and _aspect == "fermata" and id == "strike":
+			rune.held.connect(func():
+				if _screen == "combat" and not _coil_held:
+					_coil_held = true
+					_ctrl.human({"type": "ability", "id": "coil"}))
+			rune.released.connect(func():
+				if _screen == "combat" and _coil_held:
+					_coil_held = false
+					_ctrl.human({"type": "ability", "id": "release"}))
+		else:
+			rune.pressed.connect(_use_ability.bind(i))
 		row.add_child(rune)
 		_runes.append(rune)
 		_rune_ids.append(id)
@@ -3535,6 +3548,8 @@ func _input(event: InputEvent) -> void:
 			"blade":
 				if _blade_cls == "reckoner":
 					_reckoner_key(event.keycode)
+				elif _aspect == "fermata":
+					_fermata_key(event.keycode)          # the hold-release blade
 				else:
 					_martial_key(event.keycode)
 			"caster":
@@ -3552,6 +3567,13 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == _brew_hold_key:
 			_brew_hold_key = -1
 			_ctrl.human({"type": "ability", "id": "pour"})
+		return
+	# FERMATA's hold-release Strike: releasing key 1 RELEASES the coil (resolves the strike).
+	if event is InputEventKey and not event.pressed and _pause == null \
+			and _screen == "combat" and _seat_key == "blade" and _aspect == "fermata":
+		if event.keycode == KEY_1 and _coil_held:
+			_coil_held = false
+			_ctrl.human({"type": "ability", "id": "release"})
 		return
 	# Mender click-cast: hover a frame, click a chord
 	if _pause == null and _seat_key == "healer" and _screen == "combat" \
@@ -3573,6 +3595,23 @@ func _martial_key(code: int) -> void:
 			if _seat_key == "tank" and not _gate_live:
 				_ctrl.human({"type": "ability", "id": "challenge"})
 		KEY_1: _use_ability(0)
+		KEY_2: _use_ability(1)
+		KEY_3: _use_ability(2)
+		KEY_4: _use_ability(3)
+		KEY_5: _use_ability(4)
+
+## FERMATA: the Strike is a HOLD — key 1 DOWN coils into shadow, key 1 UP (in _input) releases.
+## The dumps (Eviscerate/Kick/Coup, keys 2-4) stay instant taps at base — same as Tempo.
+func _fermata_key(code: int) -> void:
+	match code:
+		KEY_SPACE:
+			_ctrl.human({"type": "defense"})
+		KEY_F:
+			_ctrl.human({"type": "dodge"})
+		KEY_1:
+			if not _coil_held:
+				_coil_held = true
+				_ctrl.human({"type": "ability", "id": "coil"})
 		KEY_2: _use_ability(1)
 		KEY_3: _use_ability(2)
 		KEY_4: _use_ability(3)
@@ -4070,8 +4109,15 @@ func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	_rhythm.bull_frac = float(obs.get("grade_bull_frac", 0.18))       # GRADED WINDOW (§2c) zones
 	_rhythm.perfect_frac = float(obs.get("grade_perfect_frac", 0.55))
 	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando visible
-	_rhythm.flow = int(obs.get("flow", 0)) if String(obs.get("aspect", "")) == "tempo" else 0
+	var _asp := String(obs.get("aspect", ""))
+	_rhythm.flow = int(obs.get("flow", 0)) if (_asp == "tempo" or _asp == "fermata") else 0
 	_rhythm.flow_max = int(obs.get("flow_max", 6))
+	# FERMATA: feed the coil (hold-release) state so the bar shows the charge ring + coil cues.
+	_rhythm.fermata = _asp == "fermata"
+	_rhythm.coiling = bool(obs.get("coiling", false))
+	var _cmin := maxi(1, int(obs.get("coil_min_ticks", 11)))
+	_rhythm.coil_charge = clampf(float(obs.get("coil_ticks", 0)) / float(_cmin), 0.0, 1.0)
+	_rhythm.coil_sharp = bool(obs.get("coil_sharp", false))
 	_tf_gauge.combo = int(obs.get("cp", 0))
 	_tf_gauge.combo_max = int(obs.get("cp_max", 5))
 	_tf_gauge.flow = int(obs.get("flow", 0))

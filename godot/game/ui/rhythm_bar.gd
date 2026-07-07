@@ -23,8 +23,14 @@ var perfect_frac: float = 0.55 ## …Perfect = centre this fraction; the flanks 
 var scale_ticks: int = 33     ## FIXED time-scale denominator (constant, NOT perfect_hi) so the
                               ## accelerando is visible: as the window shrinks it slides LEFT on a
                               ## fixed ruler instead of the whole bar rescaling with it.
-var flow: int = 0            ## Tempo only: drives the "how fast is the beat" readout
+var flow: int = 0            ## Tempo/Fermata: drives the "how fast is the beat" readout
 var flow_max: int = 6
+# FERMATA: the coil (hold-release) state — the bar dims while coiling, the needle carries a
+# charge ring that fills to the SHNK, and the cue line reads coil→sharp→release instead of tap.
+var fermata: bool = false
+var coiling: bool = false
+var coil_charge: float = 0.0   ## 0..1 toward sharp
+var coil_sharp: bool = false
 var _pulse: float = 0.0
 var _result: String = ""      ## "perfect" | "early" | "late"
 var _result_t: float = 0.0    ## fade timer for the verdict flash
@@ -90,7 +96,8 @@ func _draw() -> void:
 			"TEMPO ×%.1f — beat's faster!" % (1.0 + hot * 0.6) if flow >= fmax else "TEMPO ×%.1f" % (1.0 + hot * 0.6),
 			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], tcol)
 	else:
-		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), "tap 1 in the green",
+		var cue := "hold 1, release in the green" if fermata else "tap 1 in the green"
+		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, 14.0), cue,
 			HORIZONTAL_ALIGNMENT_RIGHT, w - 18.0, UiKit.SIZE["CAPTION"], Palette.PERFECT)
 
 	# ---- the recessed glass channel ----
@@ -254,6 +261,24 @@ func _draw() -> void:
 	draw_rect(Rect2(mx - 0.5, ty - 4.0, 1.0, th + 10.0), Color(1, 1, 1, 0.5))
 	_needle_head(Vector2(mx, ty - 9.0), mcol, in_green)
 
+	# ---- FERMATA: the coil charge ring on the needle — fills to the SHNK, then goes white-hot ----
+	if fermata and coiling:
+		var umbra := Color(0.72, 0.62, 1.0)               # the shadow-violet coil colour
+		var ctr := Vector2(mx, ty + th * 0.5)
+		var rr := 15.0
+		# a dim shadow aura trailing the needle so you can feel you're "in the dark"
+		var aura := umbra
+		aura.a = 0.10
+		draw_circle(ctr, rr + 6.0, aura)
+		# the track ring (dim) + the charge arc filling clockwise from 12 o'clock
+		draw_arc(ctr, rr, 0.0, TAU, 40, Color(umbra.r, umbra.g, umbra.b, 0.22), 3.0, true)
+		if coil_sharp:
+			var hot := Color(1, 1, 1, 0.85 + 0.15 * sin(_pulse * 1.4))   # white-hot pulse = release-live
+			draw_arc(ctr, rr, 0.0, TAU, 40, hot, 3.5, true)
+		else:
+			var fill := TAU * clampf(coil_charge, 0.0, 1.0)
+			draw_arc(ctr, rr, -PI / 2.0, -PI / 2.0 + fill, 40, umbra, 3.5, true)
+
 	# ---- frame: 2-tone bevel, filigree corners, diamond end-caps ----
 	draw_line(track.position, Vector2(tx + tw, ty), Palette.GOLD_BRIGHT, 1.6, true)
 	draw_line(track.position, Vector2(tx, ty + th), Palette.GOLD, 1.6, true)
@@ -267,7 +292,23 @@ func _draw() -> void:
 
 	# ---- the message line beneath the track ----
 	var my := ty + th + 22.0
-	if flashing:
+	if fermata and coiling and not flashing:
+		# FERMATA cue: coiling → sharpen → (in green) release. Overrides the tap cues while held.
+		var umb := Color(0.72, 0.62, 1.0)
+		if not coil_sharp:
+			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "coiling…",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
+		elif in_green:
+			UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), "RELEASE!",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
+				Color(1, 1, 1, 0.6 + 0.4 * sin(_pulse)))
+		elif past:
+			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(0, my), "LATE — RELEASE NOW",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], Palette.RAGE)
+		else:
+			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "sharp — wait for green…",
+				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
+	elif flashing:
 		UiKit.text_shadowed(self, UiKit.display(750, 1), Vector2(0, my), _result_text(),
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
 			Color(_result_color().r, _result_color().g, _result_color().b, 0.55 + 0.45 * fa))
