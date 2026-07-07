@@ -748,6 +748,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔒 2026-07-07 · `raid-forge` (worktree `../wow-raid-forge`) · §MAPS / §THE WORLD / `WORLD-PLAN.md`
+  §FORGE — **THE DESCENT REFIT (Bill: "update the raid — packs, phases; more nodes, bigger paths;
+  quests/stories as-is with more filler in between").** Forge PALETTES["takeover"] (Realm-1 skins);
+  RunMap gains a `rows` param (default 6 = every existing map byte-identical; raid floors go 8 → 20
+  nodes/floor); floor_fights interleaves takeover forge fillers between the authored story minibosses
+  (tier ramps per ring t1→t3); packroll v2 swaps full-HP bard/sonnet fillers → forge SWARM/STALKER
+  lightweights + richer weights (closes the forge-built wart); net_server floor parity; map_screen
+  seal-row layout. Entry/Seal/events/tickets/gates untouched (stories as-is).
 - ☑ 2026-07-07 · `well-aaa-ui` → main (`f356bad`) · §CLASSES / `MENDER-PLAN.md` — **THE WELL — AAA
   UI sweep (Bill's feel pass #3: "casting bar bigger/clearer/fancier — especially the DRAW click
   part; the well is just blocks → animated blue bubble things; spice up the health bar").** Pure
