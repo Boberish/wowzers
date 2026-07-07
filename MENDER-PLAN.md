@@ -1,8 +1,20 @@
 # MENDER-PLAN — the direct-cast healer onto Framework v2 (the Well · twin graded specs BRIM / DRAW)
 
-**Status:** 🟢 **VERB PAIR LOCKED via feel-tester 2026-07-07** (Bill: "i like both alot, the draw one
-is very nice … can we do both specs with those?" — both tester modes promoted to the spec pair).
-Creed/module/deck design = owed; **nothing built in-engine yet**.
+**Status:** 🟢 **BASE BUILT & MERGED 2026-07-07** (branch `mender-rework` → main). The reworked
+healer ships as a guarded class **`well`** (codename — Bill's name pick open) on the healer seat,
+Alchemist idiom: byte-identical unless picked. Both specs playable — **`--autostart=raid:healer:brim`**
+(TARGET · grade the landing) / **`raid:healer:draw`** (SPEED · grade the release, ride THE CURRENT).
+Built: CHARGES economy · pure-cast book (flash/mend/cascade/wellspring/dispel/rekindle) · BRIM
+pour/spill grade + landing preview · DRAW clean/still/undercook + THE CURRENT · the personal GLINT ·
+the WellGauge HUD (charge vessel · Current pips · release band + Still Point · verdict rail) · per-ally
+✦ Glint chip · `well_sim` + `raid_sim --healer=well` + net carry. **Gates:** determinism PASS both
+specs · default comp byte-identical to main across all 4 Seals (6880/8987/8338/4838) · well plays+wins
+the Seals · ui_smoke_raid ALL OK · WSLg shots verified. **OWED (next build claim): the DECK** —
+creeds/modules/boons/rig/keystones (§2-§5 below) + policy-depth (sharpen the BRIM win-gradient) +
+balance playtest + name lock + online creed/module/rig carry (shared Twinfang debt).
+Files: `godot/data/well/*` · `godot/sim/policies/well_policy.gd` · `godot/sim/well_sim.gd` ·
+`godot/game/ui/well_gauge.gd` · raid_hud/raid_frame/raid_content/raid_net/raid_sim wiring.
+~~VERB PAIR LOCKED via feel-tester 2026-07-07~~ (Bill: "i like both alot, the draw one is very nice").
 **Scope:** rebuilds the **Mender** — the healer seat's direct-cast class — onto Creeds / Modules /
 WHEN-THEN. The Bloomweaver is NOT part of this (its framework re-clothing is its own later pass);
 the **damage-healer is a 3rd healer-seat class, future**, with its own two specs.

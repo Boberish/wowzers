@@ -588,6 +588,14 @@ nodes, not node kinds.
   (`4978452801628609439`). Full state + per-layer sim A/B + next slices: **`ALCHEMIST-PLAN.md`**.
   Play: `--autostart=raid:caster:brew`. Card BALANCE is Bill's playtest dial; STILL OWED: 2nd spec,
   class puppet, online spec-carry of creed/module/rig, name/art.
+- **THE WELL ("the Mender rework") — 🟢 BASE BUILT & MERGED 2026-07-07** (`mender-rework`). The
+  direct-cast HEALER rework as a guarded class `well` on the healer seat (byte-identical unless
+  picked; old Mender stays default). Two graded specs — **brim** (TARGET, grade the landing) /
+  **draw** (SPEED, grade the release + THE CURRENT) — over a CHARGES economy + pure-cast book, with
+  the personal GLINT (perfect heal → healed ally +dmg). Full base: kit/verbs/policy/sim/HUD/net,
+  determinism + byte-identical + Seal-play + smoke + WSLg all green. Play:
+  `--autostart=raid:healer:brim|draw`. OWED (next build claim): the DECK (creeds/modules/boons/rig/
+  keystones), BRIM policy-gradient, balance, name lock, online creed carry. Full state: `MENDER-PLAN.md`.
 - Self-brink DPS: gauge climbs = more damage, cap = self-destruct (Cultist Insanity / Stormbringer Static archetype). Verb: *ride the redline*. Strong fit.
 - Over-defend punishment tank layer (Mountain King self-stun) — could bolt onto Bulwark as a boon/mod instead.
 - Imposed-rhythm caster (Runemaster attunement auto-cycle) — kit rotates on a clock you don't control.
@@ -729,6 +737,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · `mender-rework` → main (merge, base build) · §CLASSES / `MENDER-PLAN.md` — **THE
+  WELL — reworked direct-cast healer, BASE BUILT & MERGED.** The healer rework (MENDER-PLAN, Bill's
+  tester+board verdicts) ships as a guarded class **`well`** on the healer seat (Alchemist idiom —
+  byte-identical unless picked; old Mender untouched as the default). **Built:** CHARGES economy
+  (12, pulse +1/2s, no mana) · pure-cast book (flash/mend/cascade/wellspring/dispel/rekindle —
+  Ward/Renew/Meditate cut; Rekindle no-CD long-cast) · **BRIM** (aspect `brim`, dev-label TARGET)
+  grades the LANDING (pour/spill/plain + landing preview) · **DRAW** (aspect `draw`, SPEED) grades
+  the RELEASE (clean/still/undercook/overrun) + **THE CURRENT** (cast-haste streak, breaks on
+  undercook/DRY, ebbs) · **THE GLINT** (personal — healed ally +40% dmg 4s via one guarded engine
+  touch in `_apply_group_damage`, byte-neutral) · the **WellGauge** HUD (charge vessel · Current
+  pips · release band + Still-Point sliver · verdict rail) · per-ally ✦ Glint frame chip · `WellPolicy`
+  (both specs, 3 tiers) · `well_sim` (+psim.sh) · `raid_sim --healer=well` · RaidNet carry. **Gates:**
+  determinism PASS both specs · DEFAULT comp byte-identical to main across all 4 Seals
+  (6880/8987/8338/4838, verified pre+post) · well plays+WINS all 4 Seals · `ui_smoke_raid` ALL OK
+  (brim+draw combos added) · WSLg shots verified (both instruments + Glint chip render). Play:
+  `--autostart=raid:healer:brim|draw`. **Bands:** draw gradient clean (maw 25/21/15 · rot 45/36/16
+  · glint 83/33/18); brim survival-strong (win-gradient thin — policy depth owed). **NEXT (the deck,
+  a follow-up build claim):** creeds (Brink/Foresight/Levee/Shallows · Patient-Hand/Long-Draw/
+  Narrows/Eddy) · modules (⭐Reservoir/Benediction/Plumb-Line · ⭐Siphon/Double-Draw/Triage) · the
+  accepted boon slate + rig WHENs + High-Tide/Millrace keystones · sharpen the BRIM win-gradient ·
+  balance playtest · class NAME lock · online creed/module/rig carry (shared Twinfang debt). See
+  `MENDER-PLAN.md` ⚖ block. *(healer-rework session)*
 - ☑ 2026-07-07 · `forge` → main (`d3722f5`) · §THE WORLD W2 / `WORLD-PLAN.md` §FORGE — **THE
   FORGE v1 BUILT (Bill: "lets go for the forge"; THE CHASE parked same day — "pressure to do
   one thing or another is meh").** `data/world/forge.gd`: seeded encounter assembler — 4 BODIES
