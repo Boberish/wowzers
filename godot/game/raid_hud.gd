@@ -481,236 +481,29 @@ func _set_net_status(m: String) -> void:
 	if _net_status != null and is_instance_valid(_net_status):
 		_net_status.text = m
 
+# ---- P3.3: the CONNECTION-LIFECYCLE screens (connect form / lobby) live on the
+# WorldShell now — connectivity is becoming a shell property. These stubs keep the
+# net-signal wiring and the instance's own flows routing UP; the online DESCENT
+# screens (net map/stops/draft/arming/wait) stay HERE — they are the online run.
 func _show_online() -> void:
-	_ensure_net()
-	_online = true
-	_screen = "netconnect"
-	_clear()
-	var cfg := NetClient.load_cfg()
-	var url := String(cfg.get("url", ""))
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--server="):
-			url = a.substr("--server=".length())
-	if url == "":
-		if OS.has_feature("web"):
-			# browser build: default to the host that served this page (ws on http,
-			# wss on https) — a sent link "just works" when one box runs both
-			var host := str(JavaScriptBridge.eval("window.location.hostname", true))
-			var scheme := "wss" if str(JavaScriptBridge.eval("window.location.protocol", true)) == "https:" else "ws"
-			url = "%s://%s:%d" % [scheme, host, NetProtocol.DEFAULT_PORT]
-		else:
-			url = "ws://127.0.0.1:%d" % NetProtocol.DEFAULT_PORT
-	var pname := String(cfg.get("name", ""))
-	if pname == "":
-		pname = "Raider%d" % (randi() % 1000)
-	var room := String(cfg.get("room", NetProtocol.DEFAULT_ROOM))
+	if _shell != null:
+		_shell._show_online()
 
-	var box := VBoxContainer.new()
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 12)
-	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -260, -220, 260, 220)
-	_ui.add_child(box)
-	var hl := UiKit.title_in(box, "THE RIFT — ONLINE", 34, Palette.GOLD)
-	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	UiKit.title_in(box, "Run the server (see server/README.md), share the address, pull together.", 13, Palette.TEXT_DIM)
-	var name_edit := _edit(box, "your name", pname)
-	var url_edit := _edit(box, "server (ws://host:port)", url)
-	var room_edit := _edit(box, "room code", room)
-	var go := Button.new()
-	go.text = "CONNECT"
-	go.custom_minimum_size = Vector2(240, 46)
-	go.add_theme_font_size_override("font_size", 17)
-	box.add_child(go)
-	_net_status = UiKit.title_in(box, "", 13, Palette.TEXT_DIM)
-	var back := Button.new()
-	back.text = "◂ back"
-	back.flat = true
-	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	box.add_child(back)
-	go.pressed.connect(func():
-		var u := url_edit.text.strip_edges()
-		var n := name_edit.text.strip_edges()
-		var r := room_edit.text.strip_edges().to_upper()
-		NetClient.save_cfg(u, n, r)
-		_net.close()
-		_set_net_status("connecting to %s …" % u)
-		_net.connect_to(u, n, r))
-	back.pressed.connect(func():
-		_net.close()
-		_online = false
-		_show_select())
-
-func _edit(parent: Node, placeholder: String, value: String) -> LineEdit:
-	var e := LineEdit.new()
-	e.placeholder_text = placeholder
-	e.text = value
-	e.custom_minimum_size = Vector2(420, 40)
-	e.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	parent.add_child(e)
-	return e
+func _show_lobby() -> void:
+	if _shell != null:
+		_shell._show_lobby()
 
 func _on_room(room: Dictionary) -> void:
 	_room = room
-	if _screen == "netconnect" or _screen == "lobby":
-		_show_lobby()
+	if _shell != null:
+		_shell._on_room_shell()
 
+## Your player row in the room snapshot (a STATE reader — lives with _room/_net).
 func _me() -> Dictionary:
 	for p in _room.get("players", []):
 		if int(p.get("id", -1)) == _net.peer_id():
 			return p
 	return {}
-
-func _show_lobby() -> void:
-	_screen = "lobby"
-	_online_map = false               # MAP-3b: back in the lobby = not descending
-	_d.run = null                       # online descents rebuild the boon run from the map seed
-	_clear()
-	var me := _me()
-	var box := VBoxContainer.new()
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 10)
-	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -330, -280, 330, 280)
-	_ui.add_child(box)
-	var hl := UiKit.title_in(box, "ROOM  ·  %s" % String(_room.get("code", "")), 30, Palette.GOLD)
-	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	UiKit.title_in(box, "claim a seat · pick your aspect · ready · the host pulls", 13, Palette.TEXT_DIM)
-
-	for key in RaidNet.SEAT_KEYS:
-		var claimant := {}
-		for p in _room.get("players", []):
-			if String(p.get("seat", "")) == key:
-				claimant = p
-		var row := HBoxContainer.new()
-		row.alignment = BoxContainer.ALIGNMENT_CENTER
-		row.add_theme_constant_override("separation", 10)
-		box.add_child(row)
-		var lab := Label.new()
-		var who := "— AI —"
-		if not claimant.is_empty():
-			who = String(claimant["name"]) + (" (YOU)" if claimant == me else "")
-			who += "  ·  " + String(claimant.get("aspect", "")).capitalize()
-			if bool(claimant.get("ready", false)):
-				who += "  ✓"
-		var seat_disp := String(SEAT_NAMES[key])
-		if key == "healer":       # the healer seat is Mender OR Bloomweaver
-			seat_disp = "THE BLOOMWEAVER" if String(claimant.get("cls", "")) == "bloomweaver" else "THE MENDER"
-		lab.text = "%-14s %s" % [seat_disp, who]
-		lab.custom_minimum_size = Vector2(430, 34)
-		lab.add_theme_font_size_override("font_size", 16)
-		lab.add_theme_color_override("font_color",
-			Palette.GOLD_BRIGHT if claimant == me and not claimant.is_empty() else Palette.TEXT)
-		row.add_child(lab)
-		if claimant.is_empty():
-			var cb := Button.new()
-			cb.text = "CLAIM"
-			cb.custom_minimum_size = Vector2(110, 34)
-			cb.pressed.connect(func(): _net.send({"t": "claim", "seat": key, "prior": _my_prior()}))
-			row.add_child(cb)
-		elif claimant == me:
-			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
-				var mycls := String(me.get("cls", "mender"))
-				var clsb := Button.new()
-				var mcn: String = {"bloomweaver": "BLOOMWEAVER", "well": "WELL"}.get(mycls, "MENDER")
-				clsb.text = "◈ " + mcn
-				clsb.custom_minimum_size = Vector2(150, 34)
-				clsb.pressed.connect(func():
-					var nc: String = {"mender": "well", "well": "bloomweaver", "bloomweaver": "mender"}.get(mycls, "well")
-					_net.send({"t": "class", "cls": nc}))
-				row.add_child(clsb)
-			if key == "blade":      # toggle the blade CLASS (Twinfang ⇄ Reckoner)
-				var bcls := String(me.get("cls", "twinfang"))
-				if bcls == "":
-					bcls = "twinfang"
-				var bclsb := Button.new()
-				bclsb.text = "◈ " + ("RECKONER" if bcls == "reckoner" else "TWINFANG")
-				bclsb.custom_minimum_size = Vector2(150, 34)
-				bclsb.pressed.connect(func():
-					_net.send({"t": "class", "cls": "twinfang" if bcls == "reckoner" else "reckoner"}))
-				row.add_child(bclsb)
-			if key == "caster":     # toggle the caster CLASS (Voidcaller ⇄ Alchemist)
-				var ccls := String(me.get("cls", "voidcaller"))
-				if ccls == "":
-					ccls = "voidcaller"
-				var cclsb := Button.new()
-				cclsb.text = "◈ " + ("ALCHEMIST" if ccls == "alchemist" else "VOIDCALLER")
-				cclsb.custom_minimum_size = Vector2(150, 34)
-				cclsb.pressed.connect(func():
-					_net.send({"t": "class", "cls": "voidcaller" if ccls == "alchemist" else "alchemist"}))
-				row.add_child(cclsb)
-			var ab := Button.new()
-			ab.text = "ASPECT ⇄"
-			ab.custom_minimum_size = Vector2(110, 34)
-			ab.pressed.connect(func():
-				var pool: Array = _lobby_aspects(key, String(me.get("cls", "")))
-				var cur := String(me.get("aspect", ""))
-				var idx := 0
-				for i in pool.size():
-					if String(pool[i]["id"]) == cur:
-						idx = i
-				_net.send({"t": "aspect", "aspect": String(pool[(idx + 1) % pool.size()]["id"])}))
-			row.add_child(ab)
-
-	# The Seal for the next pull — everyone sees it; the host cycles it.
-	var enc_id := String(_room.get("enc", "riftmaw"))
-	var seals := RaidContent.run_encounters()
-	var seal_name := enc_id
-	var seal_i := 0
-	for i in seals.size():
-		if String((seals[i] as EncounterRes).id) == enc_id:
-			seal_name = (seals[i] as EncounterRes).name
-			seal_i = i
-	var srow := HBoxContainer.new()
-	srow.alignment = BoxContainer.ALIGNMENT_CENTER
-	srow.add_theme_constant_override("separation", 10)
-	box.add_child(srow)
-	var slab := Label.new()
-	slab.text = "SEAL %s  ·  %s" % [["I", "II", "III", "IV"][mini(seal_i, 3)], seal_name]
-	slab.custom_minimum_size = Vector2(430, 32)
-	slab.add_theme_font_size_override("font_size", 15)
-	slab.add_theme_color_override("font_color", Palette.GOLD)
-	srow.add_child(slab)
-	if int(_room.get("host", -1)) == _net.peer_id():
-		var sb := Button.new()
-		sb.text = "SEAL ⇄"
-		sb.custom_minimum_size = Vector2(110, 32)
-		sb.pressed.connect(func():
-			var nxt: EncounterRes = seals[(seal_i + 1) % seals.size()]
-			_net.send({"t": "boss", "enc": String(nxt.id)}))
-		srow.add_child(sb)
-
-	var ctlrow := HBoxContainer.new()
-	ctlrow.alignment = BoxContainer.ALIGNMENT_CENTER
-	ctlrow.add_theme_constant_override("separation", 16)
-	box.add_child(ctlrow)
-	_my_ready = bool(me.get("ready", false))
-	var rb := Button.new()
-	rb.text = "READY  ✓" if _my_ready else "READY?"
-	rb.custom_minimum_size = Vector2(150, 44)
-	rb.pressed.connect(func(): _net.send({"t": "ready", "on": not _my_ready}))
-	ctlrow.add_child(rb)
-	if int(_room.get("host", -1)) == _net.peer_id():
-		var pull := Button.new()
-		pull.text = "⚔  PULL"
-		pull.custom_minimum_size = Vector2(150, 44)
-		pull.add_theme_font_size_override("font_size", 17)
-		pull.pressed.connect(func(): _net.send({"t": "start"}))
-		ctlrow.add_child(pull)
-		var descend := Button.new()
-		descend.text = "🌐  DESCEND"
-		descend.custom_minimum_size = Vector2(170, 44)
-		descend.add_theme_font_size_override("font_size", 17)
-		descend.pressed.connect(func(): _net.send_mapstart())    # MAP-3b: the Topology descent
-		ctlrow.add_child(descend)
-	_net_status = UiKit.title_in(box, "PULL = one Seal · DESCEND = the Topology campaign (leader routes) · empty seats fight as AI", 12, Palette.TEXT_DIM)
-	var back := Button.new()
-	back.text = "◂ leave room"
-	back.flat = true
-	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	back.pressed.connect(func():
-		_net.close()
-		_online = false
-		_show_select())
-	box.add_child(back)
 
 func _launch_online(spec: Dictionary, you: String) -> void:
 	if you == "" or not SEAT_IDX.has(you):
@@ -739,8 +532,8 @@ func _on_net_dropped(reason: String) -> void:
 		return
 	if _screen == "combat":
 		_show_end(false)
-	elif _screen == "lobby" or _screen == "netconnect":
-		_show_online()
+	elif _shell != null and (String(_shell._screen) == "lobby" or String(_shell._screen) == "netconnect"):
+		_show_online()   # routes up: rebuild the connect form with the reason
 		_set_net_status("✗ " + reason)
 
 func _on_net_fight_ended(won: bool, _cause: String) -> void:
