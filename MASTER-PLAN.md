@@ -586,7 +586,8 @@ nodes, not node kinds.
   a raid-wide Debilitator SUPPORT debuff (sunder-precedent engine touch, byte-neutral). All guarded →
   undrafted brew byte-identical (`4344960863911121821`); raid default comp byte-identical to main
   (`4978452801628609439`). Full state + per-layer sim A/B + next slices: **`ALCHEMIST-PLAN.md`**.
-  Play: `--autostart=raid:caster:brew`. Card BALANCE is Bill's playtest dial; STILL OWED: 2nd spec,
+  Play: `--autostart=raid:caster:brew`. Card BALANCE is Bill's playtest dial; STILL OWED: ~~2nd
+  spec~~ → **THE CASK design LOCKED FOR BUILD 2026-07-07 (`ALCHEMIST-PLAN.md` §7 — claimable)**,
   class puppet, online spec-carry of creed/module/rig, name/art.
 - **THE WELL ("the Mender rework") — 🟢 BASE BUILT & MERGED 2026-07-07** (`mender-rework`). The
   direct-cast HEALER rework as a guarded class `well` on the healer seat (byte-identical unless
@@ -748,6 +749,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-07 · main (docs only) · §CLASSES / `ALCHEMIST-PLAN.md` — **THE CASK — the Alchemist's
+  2nd spec DESIGN LOCKED FOR BUILD (§7 written, the Opus handoff spec).** Designed live with Bill
+  through 5 browser feel-tester iterations (artifact `72390dbd…`) + a plain-language card board
+  (`374af4b3…`) verdicted 24 KEEP / 6 CUT. The verb: STACK 3–6 graded pours (Bullseye/Perfect/
+  Good — Bill's order) into a cask on a walking band — Venom=heat/band-up, Rot=time+tail/band-down,
+  same-side STRAIN (band shrinks ×0.82 + fills faster, swap relieves −2), last dose = FINISH,
+  a MISS DUMPS the batch → seal → ~5s cook → PEAK tap (sour after). PROOF pips = the earned-power
+  bar (tap-earned only). 3 creeds (Solera/Overproofer/Single Malt) · 3 modules (⭐ THE BLEND
+  compounding master-blend transformer / Cellar bottling / Copper Still racking) · 12 boons +
+  A-Round-for-the-House SUPPORT · 3 rig WHENs · Century Cask keystone (A8) · Spitfire-only spell
+  carry (Decant/Reduction spec-hidden). CUT ledger + build slices 1–5 + gates in §7. **NEW HOUSE
+  TAXONOMY (Bill): every card tags POWER/GREED/STRAT/EASE/RULE/TEAM** — reuse on all future
+  boards. UNDER-FIRE feel (F3) flagged untested — first in-game playtest answers. Build claimable.
 - ☑ 2026-07-07 · `well-aaa2` → main (`9eeaa41`) · §CLASSES / `MENDER-PLAN.md` — **THE WELL — AAA
   pass #2 MERGED (Bill: "better but far from AAA — basic line borders, squares, no different
   colors, banner covers the mana, bubbles childish").** Rendering-quality rebuild, pure view code:

@@ -11,8 +11,10 @@ precedent, is byte-neutral). Gates: creed/module/rig/boon determinism all PASS �
 `alchemist_sim`. **Card BALANCE is the first-cut, Bill's-playtest dial** (each card distinct + sane; skill
 moves outcomes; standouts flagged: Chain Rupture −12.6s per verdict 7, Catalyst −9.0s opus; HotPour/Emulsion
 rig beats + Practiced Hand/Reduction are human-skill/comfort cards the safe AI doesn't chase). **Still OWED
-(post-playtest):** the 2nd spec, a real class puppet (art = voidcaller filler), Commander AI-caster toggle,
-online spec-carry of creed/module/rig, name/art decision. Play: **`--autostart=raid:caster:brew`**.
+(post-playtest):** ~~the 2nd spec~~ → **§7 THE CASK — design LOCKED FOR BUILD 2026-07-07 (verb feel-tested
+5 iterations + full slate verdicted by Bill: 24 keep / 6 cut — claimable now)**, a real class puppet
+(art = voidcaller filler), Commander AI-caster toggle, online spec-carry of creed/module/rig,
+name/art decision. Play: **`--autostart=raid:caster:brew`**.
 
 **Prior status (base):** 🟢 BASE MINIGAME BUILT & PLAYABLE 2026-07-06 (`alchemist-core` — Bill's direct order:
 "can't go farther without knowing live things; just do the base mini game, UI/bars… the rest after";
@@ -324,3 +326,122 @@ CUT at triage: Sealed Flask, Deep Draught, Emulsion, Equilibrium, Catalytic Bond
    Commander AI-caster toggle · ONLINE spec-carry of creed/module/rig (offline map+gate paths carry
    them now via `_inject_boons`; RaidNet spec doesn't yet — a shared follow-up with Twinfang) ·
    name/art decision. **Card balance = Bill's playtest dial** (first-cut bands in `alchemist_sim`).
+
+---
+
+## 7. THE CASK — the second spec 🟢 (design LOCKED FOR BUILD 2026-07-07 — the Opus build spec)
+
+**Status:** verb feel-tested through **5 live iterations with Bill** (browser tester, artifact
+`72390dbd…`; card board `374af4b3…`) + **full slate verdicted 2026-07-07: 24 KEEP / 6 CUT / 0 open.**
+This section is the build handoff — everything below is decided; numbers are first-cut tunables
+(all on `AlchemistConfig` as `cask_*`, zero literals). Working name **THE CASK** (name/art filler,
+same rule as the class).
+
+**Fantasy & polarity (the Fermata move, applied here):** the base Brew is the TWITCH brewer —
+continuous decay, live upkeep. The Cask is the RECIPE brewer — discrete batches, planned pour
+sequences, one big timed payoff. Same class soul (two poisons, vial greed, sweet-band pours);
+the twist is the TIME GRAIN: continuous → batch. Shape = **HARD SPRINT (the stack) → SHORT
+EXHALE (the cook) → the PEAK TAP** — the F4 wave at spec scale. Dead ends already playtested
+OFF by Bill, do not resurrect: 10s idle cooks (v1) · pure-random band jumps (v2) ·
+miss-only-drags-quality (v3) · full strain reset on swap (v4).
+
+### 7.1 THE VERB (base kit — tester-verified numbers)
+- **THE STACK:** pour 3–6 doses into the cask, either poison, any order. Each pour = the Brew's
+  hold-release vial (charge accelerates: `dc = dt/1.2s × (0.42+1.9c)`), released into **THE BAND** —
+  a moving target zone (width 0.16, roams 0.38–0.88, starts 0.62).
+- **GRADED POURS (Bill's order, folded from the Master's-Measure verdict note):** BULLSEYE = inner
+  30% of the band, dose quality ×1.25 · PERFECT = the band, ×1.0 · GOOD = up to 1.8× half-width
+  outside, ×0.65 · beyond = **MISS**. Red line at 0.97 = spoil = MISS. Release under 0.20 charge =
+  harmless fizzle-bail (the escape hatch — deliberately kept).
+- **A MISS DUMPS THE BATCH** ("RUINED"): every stacked dose lost, proof −2, strain + band reset.
+  This is the spec's stake — the deeper the stack, the scarier each release.
+- **SIDE EFFECTS (the recipe):** **VENOM = HEAT** — each dose +20% burst; the band CLIMBS
+  (+0.11–0.17) toward the red line. **ROT = TIME** — each dose +0.2s peak window + a damage TAIL;
+  the band SINKS the same amount. Directional, plannable — VVRRV is a plotted path. (Bill note:
+  the walk is TEXTURE, "just not to be too static" — keep steps modest, hang no more cards on it.)
+- **STRAIN:** each consecutive same-side landed pour shrinks that side's band ×0.82 AND speeds its
+  fill +15%; pouring the other side relieves the first by **2** (not a full reset — v5 lock). Seal
+  or dump clears all strain. Makes "burst burst burst, dot, burst" (Bill's line) the emergent play.
+- **THE FINISH:** the last dose stamps the batch — Venom finish ×1.25 burst · Rot finish ×2 tail.
+- **SEAL:** tap the cask at 3+ doses (auto at 6). Quality q = avg pour grade; volume = sum of doses.
+- **THE COOK:** ~5s hands-off to PEAK; peak window = ±(0.4 + 0.2×rotCount)s, clamp ≤0.6×cook. Ripe
+  chime + halo at window start. Past the window it SOURS: value ×0.5^(dt/2.5s); under 0.25 for ~1s →
+  WASTED (dump penalties, no damage).
+- **THE TAP:** burst = `cask_base × vol × q × heat × finish × ageFactor × deadCenter × proofMult`
+  (`dmg_scale` raid dial applies, same as the Brew). DEAD CENTER (inner 30% of the window) ×1.12.
+  Tail (if rot in the recipe) = burst × 0.12 × rotCount over rotCount seconds, ticking every 0.5s.
+- **PROOF (the earned-power bar, this spec's Potency):** 0–6 pips, +12%/pip on everything. Peak tap
+  +1 · early/sour tap −2 · dump −2. **Proof is earned at the TAP only** — the Proof-of-the-Malt
+  boon (proof from pours) was CUT to keep the bar honest.
+- **Controls = the Brew's exact surface** (zero new input verbs): hold 1/2 = charge V/R, release =
+  pour, 3/R tap = seal / peak-tap / rack. Multi-cask target priority: rack-active → ripest cooking →
+  fullest filling.
+
+### 7.2 CREEDS (spec pool, pick 1 — all KEEP)
+- **THE SOLERA** [EASE] — casks never sour, the peak HOLDS. Cost: max 4 doses, proof cap 4.
+- **THE OVERPROOFER** [GREED] — cook ×0.5, peak window ×0.6, peak-tap damage +30% (Bill asked:
+  "taps +30%" = the payoff hit); a dump also crashes proof to 0.
+- **THE SINGLE MALT** [STRAT] — strain shrink softened to ×0.91 but swaps relieve NOTHING.
+  The one-poison chain purist; kills the weave, enables the all-V gauntlet.
+
+### 7.3 MODULES (Floor-1 pick — all KEEP)
+- ⭐ **THE BLEND** [RULE — the spec's transformer] — casks aren't tapped; each sealed cask pours
+  into ONE master blend compounding +12%/clean batch. Tap the blend whenever — a DUMPED batch
+  TAINTS it (halves it). The whole fight = one rolling hold-or-cash.
+- **THE CELLAR** [STRAT] — peak-tapped casks can be BOTTLED (shelf of 2) instead of drunk; throw
+  bottles on demand — bank burst for Openings / phase transitions.
+- **THE COPPER STILL** [GREED] — repeatable RACK stir-beats mid-cook: each hit +quality but +1.2s
+  cook and faster sour after peak. Push-your-luck; the opt-in active cook.
+
+### 7.4 BOONS (address rule; type tags = Bill's cross-class taxonomy; ladders H/S/O on paper,
+fixed rarity in code this slice — Tempo/Brew parity)
+- **POUR:** Master's Measure [POWER] — Perfect+ pours pour +10/15/22% volume (rides the graded
+  system) · Heavy Hand [POWER] — max doses +1 / +1 & bigger / +2.
+- **STRAIN:** Iron Wrist [EASE] — shrink ×0.86/0.88/0.90 · Momentum Pour [GREED] — +6/9/13% volume
+  per strain level on that dose (Bill: "trade window size for dmg — stacks with the perfect/good
+  system") · Clean Break [STRAT] — first pour after a swap +20/30/45% volume (the anti-Single-Malt).
+- **COOK:** Slow Proof [GREED] — cook +25%, tap +30/40/55% · Cooper's Ear [EASE] — window
+  +0.3/0.45/0.6s · Breathe [EASE] — cook −0.8/1.2/1.6s.
+- **TAP:** Overproof [STRAT] — late taps BURN instead of souring: 60/70/80% + burn DoT ·
+  Long Echo [POWER] — tails +40/60/90% · The Finisher [POWER] — V ×1.4/1.5/1.65 · R tail
+  ×2.5/3/3.5 · Killing Vintage [STRAT] — below 20/25/33% boss HP casks never sour ·
+  **A Round for the House [TEAM — the spec's SUPPORT]** — peak taps buff party damage
+  +3/4.5/6% for 4s (application rides the Battle-Hymn/Debilitator raid-channel precedent).
+- **CUT (Bill 2026-07-07, do not resurrect without cause):** Practiced Tilt ("the jump doesn't
+  really do much") · Bail Money · Proof of the Malt (proof stays tap-earned) · **Angel's Share —
+  the cook stays SILENT, no leak DoT; the wait is pure anticipation** · Decant (no live bars —
+  spec-hidden) · Reduction-reread (spec-hidden). **Spell carries: SPITFIRE ONLY** (unchanged;
+  still the designated interrupt carrier). Spec-hide mechanism = the `hide_creeds` idiom extended
+  to a spec tag in `Draft._ok()` — byte-identical for everyone else.
+- **Parked candidate (unjudged):** Double Barrel — a second cask slot (tester toggle existed;
+  never boarded). Offer to Bill at balance pass.
+
+### 7.5 RIG (new WHENs → the existing class THEN table, mult ≈ inverse-freq × premium)
+WHEN I land a strain-×3 pour (~2.2) · WHEN I seal a 6-dose cask (~3.5) · WHEN I tap dead-center
+(~5). THENs unchanged (Splash/Backwash/Quicken/Residue/Fume/Overfill; fuel THENs read raw-fractional).
+
+### 7.6 KEYSTONE (A8 — elite drop, never in normal drafts; acquisition = the shared Topology
+elite-node dependency, same as Tempo's)
+**THE CENTURY CASK** [RULE] — the dose cap is GONE; each dose past 6 adds +8% to everything, but
+past 6 strain never relieves. The one-monstrous-cask build (Single Malt + Heavy Hand synergy).
+
+### 7.7 BUILD ORDER (the Opus slices — each guarded, byte-identical unless picked, sim'd, then next)
+1. **Verb base** — aspect `cask` on the alchemist kit (brew stays default; the Brew/Fermata guard
+   idiom). All §7.1 numbers as `cask_*` tunables. `alchemist_sim` cask cells: verb determinism +
+   the layer-A/B harness. Gates: default comp + undrafted-brew checksums BYTE-IDENTICAL to main;
+   determinism PASS 300 seeds.
+2. **Policy** — 3 skill tiers (rule #3: no policy gradient, no ship): band-read accuracy/jitter,
+   strain management (weave vs chain temperament per tier), seal-size strategy, peak-tap timing.
+   Expert ≈ brew-comp parity on the Seals; sloppy pays visibly (dumps).
+3. **HUD** — THE CASKWORKS instrument on `raid_hud` (reuse the ALEMBIC hold-zones; cask dial +
+   recipe beads + strain pips + aging ring — the gauge-vs-cues question ships GAUGE ON, cues too).
+   `ui_smoke_raid` drive + a WSLg `screenshot_` probe (headless can't render `_draw`).
+4. **Creeds → Modules → Boons/Rig → Keystone** — the alch-cards slice pattern (a–f), spec-aware
+   offers via the extended hide tag, fixed rarities, sim A/B per layer, policy taught per layer.
+5. **Balance = Bill's playtest dial** (first-cut bands in `alchemist_sim`; `--caster=alchemist`
+   raid cells for both specs).
+- **Owed / shared follow-ups (not this claim):** online spec-carry (with Twinfang/Brew) · keystone
+  acquisition (Topology elite nodes) · Commander AI-caster toggle · name/art · **the UNDER-FIRE
+  feel risk (F3): stack-sprinting vs boss swings/dodge beats is UNTESTED — first in-game playtest
+  answers it; if the sprint dies under fire, the levers are dodge-holds-charge (already the Brew's
+  rule) and/or this spec inheriting the auto-evasion identity candidate.**
