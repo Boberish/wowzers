@@ -31,7 +31,9 @@ COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Tw
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (Seal pillar pass) ·
 `FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `REFIT-PLAN.md` (structural audit v2 →
-the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (netcode-era reference) ·
+the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
+loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·
+`RAID-PLAN.md` (netcode-era reference) ·
 `HISTORY.md` (frozen milestone build-up M0→R2.5 + PoC notes — the old CLAUDE.md status list) ·
 `PORT-PLAN.md` / `rift-godot-port-brief.md` / `poc/` (origins, historical).
 
