@@ -330,12 +330,9 @@ slots); dungeon-subset config; suspend/resume between nodes; borderland nodes. A
 
 - **Material economy + crafting** (essences/reagents/Embers/Riftcores, Foundry/cauldron) —
   CUT. Raid exclusivity is preserved structurally instead: raid bosses own tables that drop
-  nowhere else, and Seal oaths/versions gate their deep rows. **⚠ PARTIALLY REVERSED
-  2026-07-08 (Bill):** *event-shaped* crafting is now permitted — signature material drops off
-  named/elite DEFEAT events, extracted alive (the existing extraction-schematic hook), forged
-  into an **oath-gated keystone UNLOCK** (a draftable pool row, not power). The COUNTER-GRIND
-  economy (essences/Foundry/reagent bars, "kill N → craft") stays cut — materials come from
-  *events*, not counters (the events-not-counters rule below is intact). See `TEETH-PLAN.md`.
+  nowhere else, and Seal oaths/versions gate their deep rows. **⚠ briefly reversed 2026-07-08, then RE-CUT 2026-07-09 (Bill):** materials
+  are redundant with kill=unlock (boss-specific) or a farm/grind (generic); the "earn a keystone"
+  fantasy stays via **kill → unlock + an oath-kept**. Crafting stays CUT. See `TEETH-PLAN.md`.
 - **Use-based mastery / Inscription** (E33 Pictos) — CUT: passive bookkeeping, no moment.
   Unlocks must be *events* (defeat / perform / extract), not counters.
 - **Pre-run equipped loadouts** and the run-start random sigil offer — CUT.

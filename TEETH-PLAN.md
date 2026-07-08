@@ -88,20 +88,17 @@ scored, best/closest resolves the payout.
 - **"Random resources to roll on":** the crafting materials (below) sit in the loot table as roll
   results. Home: `PROGRESSION-PLAN.md` §loot (revive the B-half) + `raid_hud._after_drop`.
 
-### ✅ CRAFTING — event-shaped only (partially reverses the old CUT)
-- **Reverses** PROGRESSION-PLAN's "Material economy + crafting — CUT" **partially**: a narrow,
-  event-shaped crafting is now IN.
-- **The shape that stays legal:** signature materials are **drops off named/elite defeat EVENTS**
-  (not a farm counter) → **extracted alive** to bank (the existing *extraction-schematic* hook:
-  kept only if you reach the Seal alive) → forged at a bench into a **keystone UNLOCK** = a
-  *draftable pool row*, never equipped power.
-- **Best version:** gate the keystone behind material **+ an oath-kept** — the oath *is* the
-  rotation lesson for the thing you unlock (existing "deep/keystone nodes need an oath" hook).
-- **What stays CUT:** the counter-grind economy (essences/Foundry/reagent bars, "kill 200 → 50
-  feathers"). Materials come from EVENTS not counters (Law #4 events-not-counters intact); the
-  output is an unlock not a number (Law #1 intact). Bill (2026-07-08): *"if crafting/loot only
-  unlock content like everything else it's fine — it's just the resources rule, breakable."*
-- Home: `PROGRESSION-PLAN.md` (amend the cut) + a materials inventory type on the save + a bench.
+### ❌ CRAFTING / MATERIALS — DROPPED (re-cut 2026-07-09, Bill's own reasoning)
+- **Reversed this morning, then re-cut.** We greenlit event-shaped crafting on 07-08; Bill then
+  dismantled it: a boss-**specific** material is redundant (if the kill can just unlock the thing,
+  the material is a pointless middle-step), and a **generic** material is something you farm =
+  grind (which we cut). Either way materials add nothing but a grind we don't want.
+- **The fantasy survives without them:** "earn your way to a keystone" is already delivered by
+  **kill → unlock, gated behind an OATH** (the oath *is* the work / the rotation lesson). So no
+  bench, no materials, no crafting — back to the original design's cut, re-derived from first
+  principles.
+- PROGRESSION-PLAN §Cut-list + MASTER §SYSTEMS E crafting-reversal notes reverted to "stays CUT"
+  with a breadcrumb.
 
 ### ✅ CURSE CARDS — via the named "biting blessings" hook
 - Fits the "more teeth" theme + pairs with harsher picks. Two flavors:
@@ -126,11 +123,12 @@ scored, best/closest resolves the payout.
 
 ## REFINEMENTS (worked out later the same session, 2026-07-08 — after the initial commit `096334c`)
 
-### 💠 BOSS LOOT ROLL — RANDOM RARITY (🔒 CONFIRMED, Bill 2026-07-08: "for sure … better rarity = better reward"; revises the earlier rarity-upgrade framing)
-- The boss-kill roll produces a **random rarity** (Haiku / Sonnet / Opus, weighted, **with pity** so droughts are bounded) — the rarity reveal IS the dopamine, and **better rarity = better reward.** Reuses the **already-built rarity-first drop roll** (step 1 = rarity, step 2 = an item of that rarity). Proven tech, not new — we just make it the boss-kill moment.
-- **Legal by construction:** rarity scales *impact / build-definingness*, NOT raw permanent stats, and drops are **run-scoped** (evaporate at run end; persistence is the unlock/collection side). So "better rarity = better reward" = a bigger swing this run / a cooler unlock, never a permanently stronger character.
-- **Co-op:** need/greed picks who wins (everyone NEED, or be nice and GREED). **AI allies can roll too** — a run-scoped drop they use that run, so the "AI keep no gear" blocker doesn't apply (it only ever bit *persistent* gear). Banter flavor stays (*"I rolled a 98…"*).
-- The earlier **"upgrade a boon to Opus"** folds in as ONE possible high-rarity reward type; **crafting materials drop no-choice** (not rolled). Open feel-detail: exactly what each tier hands you (curio / run-scoped boon-bump / material).
+### 💠 THE BOSS-KILL REWARD STACK — base rewards + a need/greed BONUS roll on top (🔒 CONFIRMED, Bill 2026-07-08/09)
+- **Two layers.** BASE = **personal, guaranteed, no-contest**: your unlock if a row's still locked (the checkmark / collection) + a **curio drop** you equip run-scoped — this is "equipment for everyone" (2 slots, refreshed each run, evaporates at run end). ON TOP = a **contested need/greed BONUS roll** for a **random-rarity UPGRADE** (bump a boon/curio this run) — the communal shiny, one winner.
+- **Random rarity = the dopamine; better rarity = better reward.** Reuses the built **rarity-first roll** (Haiku/Sonnet/Opus, weighted + **pity** so droughts are bounded). Better rarity = a bigger swing this run / a cooler upgrade.
+- **"On top" is the whole point — no-FOMO kept.** The base is guaranteed (everyone leaves with their loot); the need/greed roll is **pure bonus**, so losing it costs nothing (you kept your base). That's the WoW group-loot social buzz WITHOUT the punishment.
+- **Legal by construction:** the upgrade is **run-scoped** (dies with the run); rarity scales *impact*, not permanent stats. **AI allies roll too** (run-scoped ⇒ the "AI keep no gear" blocker doesn't apply); solo = a near-guaranteed win + banter (*"I rolled a 98…"*).
+- **NO materials** (crafting cut — see §CRAFTING / MATERIALS). Open feel-details: (a) do base curio drops *also* flash a rarity reveal, or concentrate the slot-machine into just the bonus roll? (b) exactly what the upgrade bumps (a boon's rarity / a curio).
 
 ### 🧩 CO-OP CONTEST = a cooperative PUZZLE → party bonus, never punishment (refines §CONTEST)
 - Co-op mode of the CONTEST node = the party clears a **coordination puzzle** together; success pays a **party bonus** (a reroll charge / rarity bump / standing). Opt out or flub it = **only a missed opportunity**, zero penalty (co-op-rewarding-never-punishing; no FOMO).
