@@ -31,9 +31,9 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
    synergy-weighted in-rarity picks, and a token floor on every roll (dupes + auto-scrap).
    Sandbagging (playing worse to avoid an unlock) must never be correct. Spot-assert in sims:
    expected run value non-decreasing in pool size.
-3. **Lane discipline.** Boons (the draft) own the verb: +%, verb mods, *agency* (choice-of-3).
+3. **Lane discipline.** Boons (the draft) own the core mechanic: +%, mechanic mods, *agency* (choice-of-3).
    Gear owns *fortune + new buttons*: procs, actives-with-charges, set pairs, map/economy
-   utility. An effect that reads "+X% to your verb" is a boon, never gear.
+   utility. An effect that reads "+X% to your core mechanic" is a boon, never gear.
 4. **Forbidden:** crafting hubs, meta currencies, pre-run loadouts (aspect pick is the ONLY
    pre-run choice), timed content (daily/weekly), use-based mastery, pool opt-out.
    *(Timed-content ban re-affirmed 2026-07-07: a raid daily lockout was weighed for

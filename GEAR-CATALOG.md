@@ -9,7 +9,7 @@ combat item below names its hook and its combo so implementation is mechanical.
 ## Design rules (recap + catalog-local)
 
 - **Lane law:** gear = fortune + new buttons (procs on execution moments, actives-with-charges,
-  set pairs, map/economy utility). Never a passive "+X% to your verb" — that's a boon.
+  set pairs, map/economy utility). Never a passive "+X% to your core mechanic" — that's a boon.
 - **Guardrail — gear never plays the game for you.** No auto-grades, no auto-presses. Gear
   *rewards* reads and *offers decisions*; it never makes them. (One deliberate meme exception:
   THE UNPLUGGING, flagged below.)
@@ -40,7 +40,7 @@ no per-class curios (kills the Bloomweaver-dark gap + per-class authoring; every
 Retention is unaffected: you still unlock via boss oaths into a collection Ledger — the *reward* is just usable
 by any class; the deep per-class retention moves to **Creeds / Modules / cards** (the class layer).
 
-**THREE HARD RULES** (supersede the old lane law for curios): (1) **never touch the combat verb** — no Flow /
+**THREE HARD RULES** (supersede the old lane law for curios): (1) **never touch the core mechanic** — no Flow /
 Perfect-graded window / strike-result hook / Marks (those are Creed/Module/card territory); (2) **always-on
 rule-changes / "while X" conditionals / set-bonuses — NO one-shot or per-floor/per-fight counter budgets** (gate
 only on natural beats: at a Seal, when you'd die, on a boss kill); (3) **no ability-charms** (nothing hung on

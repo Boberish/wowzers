@@ -26,7 +26,7 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
-`MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, verb pair locked 2026-07-07) ·
+`MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, pair locked 2026-07-07) ·
 `TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (Seal pillar pass) ·
@@ -45,7 +45,7 @@ the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (
   Creeds/Modules/WHEN-THEN (see `TEMPO-PLAN.md`). **Twinfang·Tempo is the active pilot**; the
   rest (Bulwark, Mender, Bloomweaver, Reckoner) are FROZEN — playable in the raid on current
   kits, balance not maintained. **Voidcaller is CUT from the roster plan** (stays in code as
-  the frozen caster-seat placeholder until that seat's rework); its interrupt verb moves to
+  the frozen caster-seat placeholder until that seat's rework); its interrupt moves to
   **interrupt-by-ability** (WORLD-PLAN pillar #3). **THE SPLIT (2026-07-06):** the Brew /
   Venom spec is now its OWN class (`ALCHEMIST-PLAN.md`, working name filler) — **base minigame
   BUILT & playable same day** as the caster seat's second option (`--autostart=raid:caster:brew`;
