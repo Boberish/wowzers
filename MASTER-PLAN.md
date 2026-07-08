@@ -780,7 +780,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   folds into the parallel Depth thread (do NOT fork/re-spec Depth). No code touched; crafting
   reversal flagged at PROGRESSION-PLAN §Cut-list + MASTER §SYSTEMS E. **OPEN feel-verdicts:**
   pilot class · curse magnitudes · CONTEST scoring · endless framing. **NEXT:** build per
-  §RECOMMENDED BUILD ORDER once Bill picks a slice. *(teeth-pass session)*
+  §RECOMMENDED BUILD ORDER once Bill picks a slice. **+ REFINEMENTS folded later same
+  day** (rarity-upgrade loot-roll · co-op puzzle · RESTED real-time XP-multiplier · the
+  "borrow the grammar" next-level filter · retention framework → TEETH-PLAN §REFINEMENTS).
+  *(teeth-pass session)*
 - ☑ 2026-07-08 · `dodge-unify` → main (`de9cc10`) · §COMBAT / `DODGE-PLAN.md` — **UNIFY THE
   DODGE — the redundant F dodge is GONE (Bill's go, scoped). BUILT & MERGED.** The two input
   verbs (SPACE `defense` + F `dodge`) collapse into ONE spacebar dodge that answers BOTH a

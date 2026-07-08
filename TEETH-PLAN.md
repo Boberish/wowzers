@@ -124,6 +124,39 @@ scored, best/closest resolves the payout.
 
 ---
 
+## REFINEMENTS (worked out later the same session, 2026-07-08 — after the initial commit `096334c`)
+
+### 💠 LOOT ROLL — the prize is a RARITY-UPGRADE, not an item (Bill's pivot; supersedes the need/greed-for-an-item framing in §LOOT above)
+- The need/greed roll's prize = **"upgrade any one of your boons to Opus, this run."** Run-scoped (dies with the run) ⇒ legal power, and lower-stakes than winning/losing a whole item — nobody loses their build, the winner just gets a bump.
+- **Dissolves the AI-gear blocker:** because the prize is a run-scoped boon-upgrade, the AI allies can genuinely play the roll — an ally who wins upgrades *their* boon and the party's stronger; no "AI keep no gear" problem. The banter flavor still works (*"I rolled a 98…"*), it's just no longer a scrap-hack.
+- **Social layer:** everyone can NEED (contest the upgrade) or be nice and GREED (pass). Crafting **materials drop no-choice** like gear — they are NOT what you roll on.
+
+### 🧩 CO-OP CONTEST = a cooperative PUZZLE → party bonus, never punishment (refines §CONTEST)
+- Co-op mode of the CONTEST node = the party clears a **coordination puzzle** together; success pays a **party bonus** (a reroll charge / rarity bump / standing). Opt out or flub it = **only a missed opportunity**, zero penalty (co-op-rewarding-never-punishing; no FOMO).
+- "Puzzle" **widens** CONTEST from a pure timing check to **coordination** (each seat answers its part of a shared pattern). Open feel-verdict: what a puzzle *is* in a movement-less game (synced beats / split soaks / a communal telegraph).
+
+### ⏳ RESTED — the real-time layer (Bill likes the WoW "rested" model; NOT built)
+- The Hades-II "real-time passage" feeling, done as **rested**: while away, a capped pool banks on **wall-clock** time; on return, your **earned event-XP pays ~2×** until it drains.
+- **It multiplies EARNED XP, it does NOT hand out unlocks** (Bill's catch: a free "unlock any boon" would kill the quest). You still play the events to earn; rested only gets you to your next pick faster — the quest + oath gates are untouched.
+- **Reuses the ONE XP meter** — no new currency, no new faucet, only the bonus. XP sources (all events, no kill-grind): quest turn-ins · oaths kept · first kills · zone conquest · gate proofs · instance clears.
+- **Automatically law-safe:** XP only ever buys *options*, never power ⇒ "faster XP" = breadth sooner, never stronger; it can't become a treadmill even in principle. No decay, no reset, no gating ⇒ zero FOMO.
+- **Bends (next-level):** event-based XP makes rested read as *"your next few milestones pay double"* (cleaner than WoW's mob-drain); optional skew toward your **least-played classes** = a "try your alts" nudge (which also levels your warband's other seats — the AI drafts from YOUR unlocks).
+- **Shape note:** rested is *bank-while-away → spend-on-return*, NOT "ticks during play." The Hades-II "grows while you're in a run" flavor is a separate optional **rig/process** (a Bastion machine on wall-clock) + the **logged-off warband auto-runs → watch-the-replay** idea (real deterministic sims your AIs actually played). Both layer on top; rested alone is ~90% of the feeling for ~10% of the plumbing. Home: `PROGRESSION-PLAN.md` §THE UNLOCK SYSTEM (a rested multiplier on the meter).
+
+### 🧭 THE "NEXT LEVEL" FILTER — a design law (Bill: keep it ahead of its time, not a repack)
+- **Borrow the grammar, innovate the sentence.** Familiar SHELLS (draft, loot-roll, raid, unlocks, rested) are *smart* to borrow — they onboard players instantly. A game is only a "repack" if it borrows the shells **and** has a vanilla core.
+- **The test for every borrowed system:** *does our version do something the original literally couldn't, because of (a) movement-removed timing combat or (b) the deterministic sim-is-game / real-AI-policy engine?* Yes → next-level. Straight port → bend it until it passes.
+- Already passing this session: need/greed → run-scoped rarity-bump + **AI allies who roll & banter**; co-op minigame → a **puzzle on the timing engine**; idle/planting → **real deterministic runs your AI agents actually played**.
+- **The moat (original, not borrowed):** the combat (raid trinity as a timing/reaction game) + the engine (deterministic, sim-is-game, AI teammates = real policies → solo == co-op, certified procedural fights, a maxed player + a fresh friend share a fair fight).
+
+### 🌱 RETENTION — the "is there a point once you unlock everything" question (framework; recurs)
+- A no-power game swaps the **power** grind for a **mastery + collection + standing** grind. Unlocking everything is the *tutorial*, not the finish. The forever-game: **Depth** (infinite, competitive, social skill rank) · **other classes** (each a deep tree; also upgrades your warband) · **collection/standing** (cosmetics, titles, crests, oath-completions, Versions) · **new content**.
+- **Grinder valve = cosmetics + standing + Depth crests + repeatable OATHS** (re-swear ever-harder for run-scoped Token purses + drop-luck; the unlock is one-time, the challenge is infinitely repeatable). **Never** rerolls/consumables/power (that would undo the "teeth" + Law #1).
+- **The social answer:** the no-power rule *is* what lets a maxed player and a fresh friend share one fair fight (the co-op scaling contract) — plus the parked MMO-feel levers (co-op-only cosmetics, oath-gifting, warband lending, shared Depth pushing). The rule Bill was "fighting" is what makes "play with friends forever" possible.
+- **Confirmed fact:** the AI warband drafts from YOUR account unlocks ⇒ leveling any class improves every seat your warband fills.
+
+---
+
 ## WHERE EACH LANDS (doc homes, for when these get claimed)
 - Rerolls → `ASCENSION-STEAL-PLAN.md` + `game/draft.gd` (+ curio reconciliation).
 - CONTEST → `WORLD-PLAN.md` node/quest grammar (new node kind) + scoring over `strike_judge.gd`.
