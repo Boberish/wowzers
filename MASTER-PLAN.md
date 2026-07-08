@@ -762,17 +762,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-08 · `dodge-unify` (worktree ../wow-dodge) · §COMBAT / `DODGE-PLAN.md` —
-  **UNIFY THE DODGE — remove the redundant F dodge (Bill's go, scoped live).** Collapse the
-  two input verbs (SPACE `defense` + F `dodge`) into ONE spacebar dodge that answers BOTH a
-  single DEFENSIBLE swing (instant negate) AND barrage-string beats, on one cd (0.35s recovery
-  on a connect / 1.3s whiff lockout — flat first, sim after). **SCOPE (Bill, direct): Twinfang,
-  Alchemist, Well (brim/draw) ONLY** — the rest (Bulwark [being replaced by the new tank],
-  Voidcaller, Mender, Bloomweaver, Reckoner) stay BYTE-IDENTICAL via an opt-in `unified_dodge()`
-  kit hook (default false → old split branches). Engine merge in `combat_core`, F key/hints
-  dropped for the three in `raid_hud`, policies unchanged (both action types route to the one
-  handler). Verify: det PASS + re-baseline twinfang_sim/raid_sim, well_sim byte-identical
-  (healer path unchanged), smokes. *(dodge-unify session)*
+- ☑ 2026-07-08 · `dodge-unify` → main (`de9cc10`) · §COMBAT / `DODGE-PLAN.md` — **UNIFY THE
+  DODGE — the redundant F dodge is GONE (Bill's go, scoped). BUILT & MERGED.** The two input
+  verbs (SPACE `defense` + F `dodge`) collapse into ONE spacebar dodge that answers BOTH a
+  single DEFENSIBLE swing (instant negate) AND barrage-string beats, on one cd (**0.35s recovery
+  on a connect / 1.3s whiff lockout** — flat model, single-swing negates included; "flat first,
+  sim after"). **SCOPE (Bill, direct): Twinfang, Alchemist, Well (brim/draw) ONLY** — Bulwark
+  (being replaced by the new tank), Voidcaller, Mender, Bloomweaver, Reckoner keep their
+  two-verb split **BYTE-IDENTICAL** via an opt-in `ClassKit.unified_dodge()` hook (default
+  false → the untouched `else` branches). **How:** new `CombatCore._unified_dodge()` fires every
+  hook the two verbs did + owns one cd (`dodge_ready_tick`, mirrored to `defense_ready_tick` for
+  the rune/policy gates); `_answer_strike` returns a connect-bool + takes `apply_cd` (default
+  true = old split path). HUD: F dropped from a new `_twinfang_key` (split off the shared
+  `_martial_key` so Voidcaller/tank keep F), `_fermata_key`, `_alchemist_key`, `_well_key`;
+  hints reworded. Policies unchanged. **VERIFIED:** `verify-all` **37/37 GREEN** (det self-checks
+  on twinfang/raid/alchemist/well/forge, all probes, `ui_smoke_raid`, net smokes) · twinfang_sim
+  gradient holds (expert 100% → sloppy 76–98%, e.g. executioner-tempo) · **ab-gate well_sim
+  BYTE-IDENTICAL** vs baseline (healer path untouched). Docs: DODGE-PLAN→BUILT/scoped, CLAUDE.md
+  + WORLD-PLAN pillar 2. **OPEN:** the 3 non-scope classes convert to the one dodge at their own
+  reworks (new tank first); the `_guard` rune cd-fraction bar scales off the old `def_cd` denom
+  (cosmetic sliver, usable-flag correct); playtest-tune the flat negate cd. *(dodge-unify session)*
 - ☑ 2026-07-08 · main (docs only) · §SYSTEMS E / `PROGRESSION-PLAN.md` §THE UNLOCK SYSTEM —
   **THE UNLOCK SYSTEM consolidated (design session with Bill, direct) — the five competing
   progression ideas in `UNLOCK-BRIEF.md` collapsed into ONE coherent system.** Through-line:
