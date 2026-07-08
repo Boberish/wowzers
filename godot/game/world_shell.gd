@@ -30,6 +30,23 @@ func _ready() -> void:
 	add_child(_ui)                      # sits over the HUD — shell screens draw on top
 	_show_home()
 	drive_autostart(OS.get_cmdline_user_args())
+	_maybe_boot_spike_web()   # web builds get no cmdline args — boot the spike from ?spike instead
+
+## THROWAWAY: boot the mobile Tempo spike (a full-screen touch Control over the blank HUD).
+## Its own _input drives it, so the IGNORE _ui surface doesn't block its touches.
+func _boot_mobile_spike() -> void:
+	_clear_shell_ui()
+	var spike := MobileSpike.new()
+	spike.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(spike)
+
+## Web has no cmdline args; read the page URL (?spike) the same way the online field does.
+func _maybe_boot_spike_web() -> void:
+	if not OS.has_feature("web"):
+		return
+	var q := str(JavaScriptBridge.eval("window.location.search", true))
+	if q.findn("spike") >= 0:
+		_boot_mobile_spike()
 
 ## Clear the shell surface AND blank the instance surface under it (a shell screen
 ## replaces whatever the HUD showed). hud._clear() calls back to _clear_shell_ui —
@@ -53,7 +70,11 @@ func _clear_shell_ui() -> void:
 ## an instance feel-scalar, parsed there before any pull).
 func drive_autostart(args: PackedStringArray) -> void:
 	for a in args:
-		if a.begins_with("--autostart=gate"):
+		if a.begins_with("--autostart=mobilespike"):
+			# THROWAWAY mobile touch spike (Twinfang·Tempo feel test). Native/editor entry;
+			# the web build boots it via the ?spike URL param (see _maybe_boot_spike_web).
+			_boot_mobile_spike()
+		elif a.begins_with("--autostart=gate"):
 			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
 			# (no map context: the end screen closes it — a dev/verify entry)
 			var gspec := a.substr("--autostart=".length()).split(":")
