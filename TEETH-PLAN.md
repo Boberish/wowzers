@@ -126,10 +126,11 @@ scored, best/closest resolves the payout.
 
 ## REFINEMENTS (worked out later the same session, 2026-07-08 — after the initial commit `096334c`)
 
-### 💠 LOOT ROLL — the prize is a RARITY-UPGRADE, not an item (Bill's pivot; supersedes the need/greed-for-an-item framing in §LOOT above)
-- The need/greed roll's prize = **"upgrade any one of your boons to Opus, this run."** Run-scoped (dies with the run) ⇒ legal power, and lower-stakes than winning/losing a whole item — nobody loses their build, the winner just gets a bump.
-- **Dissolves the AI-gear blocker:** because the prize is a run-scoped boon-upgrade, the AI allies can genuinely play the roll — an ally who wins upgrades *their* boon and the party's stronger; no "AI keep no gear" problem. The banter flavor still works (*"I rolled a 98…"*), it's just no longer a scrap-hack.
-- **Social layer:** everyone can NEED (contest the upgrade) or be nice and GREED (pass). Crafting **materials drop no-choice** like gear — they are NOT what you roll on.
+### 💠 BOSS LOOT ROLL — RANDOM RARITY (🔒 CONFIRMED, Bill 2026-07-08: "for sure … better rarity = better reward"; revises the earlier rarity-upgrade framing)
+- The boss-kill roll produces a **random rarity** (Haiku / Sonnet / Opus, weighted, **with pity** so droughts are bounded) — the rarity reveal IS the dopamine, and **better rarity = better reward.** Reuses the **already-built rarity-first drop roll** (step 1 = rarity, step 2 = an item of that rarity). Proven tech, not new — we just make it the boss-kill moment.
+- **Legal by construction:** rarity scales *impact / build-definingness*, NOT raw permanent stats, and drops are **run-scoped** (evaporate at run end; persistence is the unlock/collection side). So "better rarity = better reward" = a bigger swing this run / a cooler unlock, never a permanently stronger character.
+- **Co-op:** need/greed picks who wins (everyone NEED, or be nice and GREED). **AI allies can roll too** — a run-scoped drop they use that run, so the "AI keep no gear" blocker doesn't apply (it only ever bit *persistent* gear). Banter flavor stays (*"I rolled a 98…"*).
+- The earlier **"upgrade a boon to Opus"** folds in as ONE possible high-rarity reward type; **crafting materials drop no-choice** (not rolled). Open feel-detail: exactly what each tier hands you (curio / run-scoped boon-bump / material).
 
 ### 🧩 CO-OP CONTEST = a cooperative PUZZLE → party bonus, never punishment (refines §CONTEST)
 - Co-op mode of the CONTEST node = the party clears a **coordination puzzle** together; success pays a **party bonus** (a reroll charge / rarity bump / standing). Opt out or flub it = **only a missed opportunity**, zero penalty (co-op-rewarding-never-punishing; no FOMO).
