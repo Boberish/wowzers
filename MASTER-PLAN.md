@@ -762,6 +762,76 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-08 · main (docs only) · §SYSTEMS E / `PROGRESSION-PLAN.md` §THE UNLOCK SYSTEM —
+  **THE UNLOCK SYSTEM consolidated (design session with Bill, direct) — the five competing
+  progression ideas in `UNLOCK-BRIEF.md` collapsed into ONE coherent system.** Through-line:
+  *build-craft is persistent and slow (the tree); the run is fast and play-forward — heaviest
+  in the raid, lightest on mobile.* Decisions locked: (1) **ONE tree, ONE meter** — every
+  source (raid/dungeon/world/M+) feeds a single XP meter; points open per-class **tree nodes**
+  (boons/keystones/modules/creeds/curios), bread-and-butter = levels only + **you choose the
+  order** (retires the LEVELS fixed authored-wave rollout), deep/keystone nodes **also need an
+  OATH KEPT** (leveling + oaths meet in the middle; oaths teach AND gate). Buys access/options
+  **never power** (Law #1/#4 intact) → the brief's "all points → your choice" made law-legal.
+  (2) **Density fix** — diagnosed StS/Hades run 1 primary in-run system + rare big-swing over
+  many fights; we'd drifted to 5–6 systems, worst on the ~3–5-fight dungeon. Fix = the tree
+  absorbs build-craft; **TWO surfaces, different density**: DUNGEON (<1h, mobile, variable,
+  Creed + boon draft + **1 keystone after 1st boss** + no-choice drops + optional Market;
+  Depth = its endgame) vs RAID (1.5–3h, +Module, **1 keystone after floor 1–2**, oaths at
+  bosses, Market nodes). Keystones **1/run both surfaces** (partial layer, not every class).
+  (3) **Dungeon variety** — each dungeon turns on a different SUBSET of systems (flavors; pick
+  your mix; no run overloaded). (4) **Gear KEPT, reframed** — no-choice drops = the one real
+  loot-moment (distinct by *agency*, zero configurator), Market = optional node; nothing
+  folded (GEAR-1/2 stand). (5) **Suspend, don't pause** — no mid-combat pause (breaks flow);
+  leave/resume between nodes even as a group; run locked to you till finish/quit; co-op
+  quitter → AI backfill. (6) **Spine** — Zone 1 Gildfields (tutorial, rolls out every system)
+  → Zone 2 (+dungeon) → Zone 3 (+dungeon) → Zone 4 = the raid; crest-gated, open borderlands.
+  `PROGRESSION-PLAN.md` §THE UNLOCK SYSTEM rewritten (supersedes §LEVELS/HYBRID-WAVES);
+  `UNLOCK-BRIEF.md` retired (tombstone → the new section). **One-page artifact** published.
+  No code touched. **NEXT:** builds with the world track (W2/W3) — XP+tree on the world save,
+  node-open UI, per-surface in-run stacks, dungeon-subset config, suspend/resume. *(unlock
+  consolidation session)*
+- ☐ 2026-07-07 · `refit-p3` (worktree ../wow-p3) · §CODE AUDIT / `REFIT-PLAN.md` §3 P3 —
+  **P3 SHELL INVERSION (Bill's go) — P3.1a MERGED, rest in flight:** ✅ **P3.1a
+  CampaignCore (merged to main):** the ONE campaign rulebook (`game/campaign_core.gd`) —
+  net_server's ":501 mirror" `_ticket_srv` DELETED, HUD `_ticket_at` DELETED, writeback/
+  cooling/cache/event-resolve shared; ab-gates BYTE-IDENTICAL, net+ui smokes green; 2 of
+  main's 3 stale probes REVIVED (`map_advance_probe` drives ledger/recap/rig/module,
+  `raid_boon_probe` recap; `fightlen_probe` still the open claim). ✅ **P3.1b RunDirector
+  (merged):** `game/run_director.gd` owns the descent's 31 members + cp_view/cp_sync;
+  raid_hud holds ONE `_d` (HUD + 11 probes rewritten); the server KEEPS its cp dict by
+  design (natively the cp shape, serializable for the rejoin era). verify-all 33/34
+  (only stale fightlen). ✅ **P3.2a WorldShell inversion (merged):** `world_shell.tscn`
+  IS the boot scene — the shell raises raid_hud as its instance surface + owns all dev
+  autostart idioms (`drive_autostart`); new `shell_probe` guards the chain (in
+  verify-all); all smokes green. ✅ **P3.2b-1 (merged):** `UiKit.title_in`/`place`
+  hoisted (121 sites) + **`fightlen_probe` FIXED — ALL THREE audit stale probes now
+  revived, the open-claim item is CLOSED, verify-all runs 35/35.** ✅ **P3.2b-2 THE
+  SCREENS MOVED UP (merged):** all 23 world-layer functions (home/select/party/atlas/
+  bastion/zone/conquest) live on `world_shell.gd` — one contiguous cut, typed-`hud`
+  access, two-surface `_ui` discipline, 4 routing stubs on the HUD (Esc/fight-end/zone
+  route UP); menu/world/raid smokes + shell_probe re-hosted; **verify-all 35/35 ALL
+  GREEN + real main_scene boot verified via the Godot MCP** (raid_hud 5,309 → ~4,700
+  this phase). OWED: 7 screenshot_* WSLg scripts re-host at the next visual pass
+  (left loud, logged in REFIT-PLAN). ✅ **P3.3 ONLINE SPLIT (merged) — PHASE 3
+  COMPLETE:** connect form + lobby live on the shell (the presence door); the online
+  DESCENT screens stay instance-side (they ARE the online run); net smokes
+  checksum-clean through the shell-owned lobby. **THE SHELL INVERSION IS DONE** —
+  world_shell owns boot + every world/lobby screen; raid_hud is the instance surface
+  (~4,400 lines, from 5,309). Owed from the P3 ledger: 7 screenshot_* WSLg re-hosts ·
+  state-ownership lift (`_d`/WorldSave/`_net` off the hud) — P4 companions. NEXT
+  CLAIMS: REFIT-PLAN §3 P4 SCALE RAILS (class registry / ClassBand / vuln stack /
+  Profile save / run_seed / Split-law guard / twinfang spec split) + §4 the MMO shell.
+  *(refit P3 session — entry left uncommitted alongside the dungeon session's WIP claim)*
+
+- ☐ 2026-07-07 · main (docs only) · §WORLD / `WORLD-PLAN.md` — **DUNGEON 1 (THE UNDERMILL)
+  — design pass (Bill's brief: Westfall/Deadmines spin, NOT the AI theme; keystone elites;
+  quest-system pass w/ adjustments; learner bosses; taunt already raid-only; proposes the
+  Combo RIG going raid-only too).** Covers: theme spin options · run shape (1-floor Topology,
+  keyed door) · KEYSTONE + keystone-elite/mutator grammar (Forge extension, forge_sim-
+  certified) · TICKETS v2 W3 test slate + journal/board · learner boss roster recast from the
+  casting pool. Design only, no code; verdicts → fold into WORLD-PLAN §DUNGEON 1 + Forge/W3
+  scope. *(dungeon design session)*
+
 - ☑ 2026-07-07 · `refit-p012` → main · §CODE AUDIT / `REFIT-PLAN.md` — **REFIT P0+P1+P2
   BUILT & MERGED (Bill's go).** P0: server `max_fps=60` + `MAX_PEERS`/`MAX_ROOMS`/msg-rate
   floor + net hygiene. P1 THE BIG DELETE: Esc→`_show_home` (dead-menu doorway severed),
@@ -815,12 +885,64 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   card-TYPE taxonomy in play (POWER/GREED/STRAT/EASE/RULE/TEAM). **⚠ Note:** the concurrent
   `brew-review` pass (§8 below) proposes back-porting Bullseye/graded pours to the BREW's vial —
   the Cask's graded-pour engine (`cask_grade_*`, Bull/Perfect/Good) is the reference to reuse.
-
-- ☐ 2026-07-07 · main (docs only) · §CLASSES — **TANK REWORK — design pass (high-level concepts
-  → Bill's filter chain).** Fresh-start rework of the tank seat's class (old Bulwark = frozen
-  placeholder, NOT the base): raid-only rules (no self-heal — mitigation/avoidance only), two
-  specs = the DODGE tank + the SHIELD tank, minigame-deep/kit-narrow, damage explicitly NOT the
-  focus. Design only this session; no code. *(tank design session)*
+- ☐ 2026-07-07 · main (docs only) · §CLASSES — **TANK REWORK — design pass, ROUND 5: "TWO KITS"
+  (parry-vs-dodge · block-wall · combo dumps), tester v5 out.** Fresh-start rework of the tank seat's
+  class (old Bulwark = frozen placeholder, NOT the base); no self-heal ever; damage never leads.
+  **⚠ CUT HISTORY (don't rebuild): R2 THREE DOORS/lanes · R3 SHIELD CHARGE-&-PLANT WALL + circle-size
+  + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 the shared 3-verb kit (STRONG DODGE
+  as a Duelist verb, ATTACK on the Warden, hold-blocks-EVERYTHING as base) — all superseded.**
+  **🔒 THE LOCKED CORE — classic rhythm defense (E33 energy) on the HUD's own timing UI:** ONE stream
+  of incoming hits drawn as **VERTICAL BARS, HEIGHT = power** (skinny lines; the ONLY fat bar is the
+  Warden's HOLD attack — a hit with a **time dimension** you hold your block across, "inside the
+  existing dodge, not a new thing"). **PARTIAL mitigation is the law** — even a perfect leaves a
+  sliver (mit CAP): the tank is meant to bleed so the healer always has work. **🔒 THE HEALER DUET =
+  the scoreboard (replaced the balance meter):** your HP bleeds and a sim healer refills it — bleed
+  too little = healer idle, too much = you fall. **🔒 COMBO POINTS ◆** are the new build-and-spend
+  resource. **⚡ THE TWO KITS ARE NOW DISTINCT (Bill's spec — this is the headline):**
+  **• THE DUELIST (dense/twitch, def+off):** the whole game is **balancing PARRY vs DODGE** —
+  **DODGE** (ONE dodge for soft AND hard hits, cheap, partial — but **🔒 you must PERFECT the big
+  ones**: a GOOD dodge fully covers small hits and leaks hard on tall bars; only perfect covers a
+  big hit — size matters with no second dodge button) vs **PARRY** (its own verb; **tiny window**; costs a big fatigue
+  slug **whether it lands or not** so you CAN'T spam it — you pick your moments; land = gut the hit +
+  counter + **bank a ◆**; miss = you swung, ate most of it, no ◆). Just one attack, no big/small.
+  He faces **UNAVOIDABLE** hits he must eat. Spend ◆ on **⚡ DUMP (offense)** OR **🛡 GUARD (a few
+  seconds of heavy damage-cut, defensive)** — your call. Skinny lines only.
+  **• THE WARDEN (heavy/endurance, def-only + off-cooldown):** **two defensive buttons, NO attack** —
+  **BLOCK** (light tap, cheap; a **perfect block banks ◆**) + **BRACE** (heavy; and it's just the
+  block **held** — hold it across the fat **HOLD bars** and **overlapping** pairs; drains fatigue
+  fast). He can block **everything** (no unavoidables; **PIERCE** is a boss affix, ⚙ knob). Offense =
+  **⚡ DUMP**, an **off-rhythm "blind" burst** fuelled by the ◆ from perfect blocks (modules vary the
+  dump later). **The old hold-blocks-everything-for-free = a MODULE now**, not base (too strong).
+  His stream is **slower + heavier** (sustained/overlap) to contrast the Duelist's density.
+  **⚙ WINDOWS:** tight PARRY/perfect (~60ms), bigger GOOD (~230ms). **Kept:** consistent stream (no
+  phases), FATIGUE leash, feints (hollow — READ if ignored, BAITED if answered), per-boss authored
+  streams (encounter data, Warband Law), coherence rule. **⭐ TESTER v5 (same URL, touch buttons +
+  keys):** https://claude.ai/code/artifact/174a77c3-54fe-4449-8a04-81abbcf421fe — DUELIST ⇄ WARDEN
+  A/B, per-spec button rows (Dodge/Parry/⚡Dump/🛡Guard · Block/Brace/⚡Dump), combo pips, HP-vs-healer
+  duet + boss HP, fatigue bar, feints/unavoidables/hold-bars/overlaps/pierce, ⚙ knobs (windows, mit
+  tables, healer inflow, fatigue + combo costs, pierce affix). Source `tank-tester.html`, scratchpad.
+  **Next:** Bill plays v5 → verdicts (parry-vs-dodge tension; is the tiny parry window + high cost
+  right; combo off/def choice; Warden block-all + hold feel; healer duet; do the kits read on mobile)
+  → class plan doc (TANK-PLAN) + deck pass (deck-creator skill; the hold-all wall + dump variations
+  are early module candidates) + name pick (class + FATIGUE resource) → guarded build claim (Well
+  idiom, byte-identical unless picked). *(tank design session)*
+- ☐ 2026-07-08 · main (docs only) · §CLASSES — **TANK REWORK — DUELIST DECK v1 DESIGNED, AT BILL'S
+  VERDICT** (deck-creator pass on the round-5 dodge-and-shield kit; Bill's brief: replay-driving
+  cards, **DEEP stacked builds — not many strategies fighting**). **`TANK-PLAN.md` WRITTEN** (locked
+  core + tester-v5 baseline knobs + the dials + the full slate hard-copied + build order). The slate:
+  **4 creeds** (Veteran EASE learner / Wager GREED pole / Bellows rhythm — clean answers restore wind /
+  **Dancer WILD — parry button GONE, perfect dodges ARE the parry**) · **3 modules, one ⭐** (⭐ Crucible
+  — the BLEED fills it → WHITE STEEL → crash; Scales balance-pan anti-autopilot; Whetstone — banked ◆
+  sharpen, unanswered hits dull) · **15 boons in 4 dial-lanes** (SWING/STEP/BANK/SPEND; 3 EASE, ≤1
+  dressed pardon per lane; flagships: Return to Sender — guard stores + hurls back; All In full-bank
+  dare; Overreach blood-parries feeding Crucible) · **rig 4 earnable WHENs** (Tall Land/Big Spend/
+  Wall/Read → STRIKE·IRON·BREATH·PIP·BANNER) · **3 elite keystones** (AVALANCHE — dump = returning
+  timed string, the gate reverses; BORROWED TIME — lands slow the stream; IMPOSSIBLE PARRY —
+  unavoidables parryable at double cost) · ✦ Hold the Line TEAM support · 4 verified Warden carries.
+  **Three named ladders** (HEADSMAN bank-and-burst / IRONSIDE guard-engine / GHOST footwork-chain) —
+  every card feeds ≥1, zero ballast. **⭐ VERDICT BOARD (KEEP/TWEAK/CUT + names + export):**
+  https://claude.ai/code/artifact/cf273dd1-4169-45e2-b990-47000941d417 — class + WIND name picks ride
+  the board. **Next:** Bill's export blob → fold → guarded build per TANK-PLAN §4. *(deck session)*
 
 - ☑ 2026-07-07 · main (docs only) · §CODE AUDIT — **STRUCTURAL AUDIT v2 (post-pivot) — DONE,
   `REFIT-PLAN.md` WRITTEN.** 5-agent fan-out (engine/net/UI-HUD/world-meta/tooling) vs the
