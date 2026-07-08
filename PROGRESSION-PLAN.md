@@ -211,64 +211,120 @@ First kills across the campaign roster = the StS front-loaded wave — 4 Seals +
 minibosses + the 15 exam bosses arriving as GATE nodes / owned adds (MASTER-PLAN §GAME SHAPE)
 — every early run ends in guaranteed unlocks, **no separate milestone system needed**. Oaths
 and versions carry the long tail. Nothing is timed, ever; the core loop must stand alone
-(Bill, locked). **⚠ AMENDED 2026-07-06 — the front-load is STRETCHED into the world's
-leveling journey: see §LEVELS below.** (First-kill signatures still fire; the pacing of
-system/pool rollout now follows the LEVELS model.)
+(Bill, locked). **⚠ AMENDED 2026-07-06/08 — the front-load is STRETCHED into the world's
+leveling journey: see §THE UNLOCK SYSTEM below.** (First-kill signatures still fire; the
+pacing of system/pool rollout now follows the tree / two-surface model.)
 
-## LEVELS — the paced unlock rollout (locked with Bill, 2026-07-06)
+## THE UNLOCK SYSTEM — the consolidated progression model (locked with Bill, 2026-07-08)
 
-**The ask (Bill):** slow-roll the unlocks into a WoW-shaped journey — "you level up, each
-level a new boon; after a zone they introduce modules, after the next map creeds; steer off
-the path and a high-level area teases the future. Once you're max level you've unlocked it
-all — it's just the time in between." Underlying goal: **spread the skill curve** — more
-buttons for veterans without overwhelming new players.
+**Supersedes §LEVELS / HYBRID-WAVES (2026-07-06)** — the fixed authored-wave rollout is
+replaced by a player-steered TREE. This consolidates every competing progression idea
+(leveling · oaths · talent tree · gear · the Hades grind) that `UNLOCK-BRIEF.md` collected,
+into one system. One-page map: **the UNLOCK SYSTEM artifact (2026-07-08).** The through-line —
+the sentence everything below is a consequence of:
 
-**Verdict: legal under Law #1** — levels grant OPTIONS and ACCESS, never stats (WORLD-PLAN
-Lock #2's "levels = options" made literal; per-class level = the paced pool, overall level =
-the sum, as the Framework already displays). Numbers still die with the run. XP is a
-non-spendable meter, not a meta-currency (Law #4 intact).
+> **Build-craft is persistent and slow. The run is fast and play-forward — heaviest in the
+> raid, lightest on mobile.**
 
-### The model — HYBRID WAVES (Bill's pick over pure-ladder and front-load-plus-extras)
-- **MILESTONES unlock SYSTEMS, account-wide, once** (moments, never counters — the trainer
-  beat): Zone 1 crest → MODULES · first dungeon clear → CREEDS · Zone 2 crest → the Combo
-  RIG · first Seal → 2nd curio slot. (Exact mapping tunes with the final zone count.)
-- **XP LEVELS pace the boon POOL, per class**, in authored waves of ~2–3 boons per level
-  (synergy-aware order; the draft's pity + synergy slot smooth thin early pools). Rarity
-  stays printed on items, never unlocked.
-- **XP sources are EVENTS ONLY** (the cut-list's "no passive counters" survives): quest
-  turn-ins, OATH KEPT, first kills, zone conquest, gate proofs, instance clears. **No
-  kill-grind XP** — the world can't farm anyway (nodes never respawn). Repeatable instance
-  XP is fine: max level is a finite cap, rushing buys breadth sooner, never power ⇒
-  sandbagging and grinding are both non-strategies (Monotonic Pool Law extends to wave
-  boundaries — spot-check in sims).
-- **Ledger / gear / curios UNTOUCHED** — deed-driven ITEM unlocks stay exactly as built
-  (Bill: "you still get gear unlocks, the curios stay").
-- **Max level = the full pool** = "just the time in between"; the endgame stays
-  Depth / Versions / leaderboards — skill, not level. **Alts:** systems stay unlocked
-  account-wide; pools re-level per class (teaches the class; tune the pace faster).
+Heavy setup moves OUT of the run (onto the persistent tree, its own screen, where spending
+time is the *point*) so the RUN stays play-forward. This is the fix for Bill's density
+diagnosis (2026-07-08): *"you spend more time setting up your build than playing."*
 
-### Zone gating — CREST-GATED SPINE, OPEN BORDERLANDS (Bill's catch, 2026-07-06)
-Bill spotted the flaw in a pure soft gate: *because levels buy options, not power,
-mechanical difficulty alone won't wall the skilled* — "we'll have to hard cap it." The cap:
-- **The campaign spine hard-gates by CREST**, attunement-style: Zone N+1's Atlas entry
-  needs Zone N's ZONE CLEARED. Access-lane legal (Proofs already gate Seals/realms), a
-  MOMENT not a number — the XP level itself is never a wall, so mixed-level parties stay
-  legal everywhere they can stand. Co-op composes for free: the guest-world rule already
-  binds a party to the least-progressed member's frontier.
-- **Each zone keeps 1–2 open BORDERLAND nodes** — over-tier pockets off the path (the
-  Duskwood-border tease Bill wants): open to anyone, brutally over-tier via Forge TIER
-  (windows/cadence, never stats), paying standing/cosmetics only — never required. The
-  sequence-break heroes get their legend; the journey's pacing stays protected.
+### 1 · The persistent layer — THE LEDGER TREE
+- **ONE XP METER, fed by every source** (raid · dungeon · world quests · M+). This IS the
+  brief's "everything funnels into points you spend to unlock what you want" — made
+  law-legal because points buy **access/options, never power** (Law #1 & #4 intact; a node
+  grants a *draftable option*, not in-run power). Resolves the reward-source question: sources
+  do NOT mint separate currencies.
+- **Points open NODES on a per-class tree** — boons, keystones, modules, creeds, curios.
+  Bread-and-butter nodes cost **levels only**, and **you choose the order** (this is the
+  "talent tree / unlock what you want" ask; the LEVELS fixed-wave order is retired).
+- **Deep + keystone nodes also need an OATH KEPT** — leveling and oaths *meet in the middle*.
+  The oath **is the rotation lesson** for the thing it unlocks (oaths teach AND gate — the
+  brief's dual purpose). This is where "oaths gate more than gear" lands: they gate the
+  *spectacular tier* of every branch, not just curios.
+- **Crests light whole branches** (campaign milestones, account-wide moments — the trainer
+  beat, never a counter). The same screen doubles as the **OATH LOG** (brief's ask — one
+  artifact, not three).
+- **Max level = the full pool** = "just the time in between." Endgame stays
+  Depth / Versions / leaderboards — skill, not level.
+- **XP sources are EVENTS ONLY** (unchanged): quest turn-ins, OATH KEPT, first kills, zone
+  conquest, gate proofs, instance clears. **No kill-grind XP.** Repeatable instance XP is
+  fine — max level is a finite cap; rushing buys breadth sooner, never power ⇒ sandbagging
+  and grinding both stay non-strategies (Monotonic Pool Law extends to node boundaries —
+  spot-check in sims).
+- **Alts:** systems stay unlocked account-wide; per-class pools re-level (teaches the class;
+  tune the pace faster).
 
-### Skill-spread — the actual goal, as two independent dials
-Buttons grow with ACCOUNT AGE (the rollout above); demands grow with CONTENT TIER
-(Versions/Depth compress windows + add beats). Neither touches stats ⇒ a level-3 friend
-plays their simpler kit inside a veteran's fight and it just works — no scaling system
-exists or is needed (Warband Law).
+### 2 · The in-run layer — TWO SURFACES, deliberately different density
+Density diagnosis (2026-07-08): StS/Hades run **ONE primary in-run system + a rare
+big-swing** over many fights (StS ~16–20 fights, Hades ~40–50); we had drifted to 5–6
+parallel systems, worst on the short dungeon (~3–5 fights). Fix: the tree absorbs
+build-craft; each surface runs a *light* in-run stack.
 
-**Status: DESIGN LOCKED, not built.** Builds with the world track (earliest W2/W3): XP
-ledger + level on the world save, level-up moments, per-class wave tables, crest gates on
-the Atlas, borderland nodes in zone authoring. All of it rides `(seed, spec)` as pure data.
+**DUNGEON — the fast loop (< 1h, variable length, mobile-first, run in loops):**
+- **Creed** at start (the one starting mechanic — Bill: "one mechanic at the start is good").
+- **Boon draft** = the loop.
+- **ONE keystone, after the 1st boss** (its single big mid-run pick — in place of a module).
+- **No-choice curio drops** (fortune) + **Market as an OPTIONAL node** (route to it or skip).
+- **Depth ladder = its endgame** (the M+ push home — locked identity split). Oaths light.
+
+**RAID — the full run (1.5–3h, ~24–36 fights, StS/Hades-shaped):**
+- **Creed + Module** at Floor 1.
+- **Boon draft** = per-fight small increments.
+- **ONE keystone, after floor 1–2** (the StS2 "big buff per act", dialed to 1/run — rare,
+  big; a **partial layer**, not every class has one yet).
+- **No-choice drops + Market nodes**; **oaths at bosses** (the deep-unlock weight).
+- **Depth = long-form flex.**
+
+**Keystones = 1 per run on BOTH surfaces** ⇒ the raid's only real extras over the dungeon are
+Module + oaths + length.
+
+**DUNGEON VARIETY (Bill, 2026-07-08):** each dungeon turns on a different **subset** of the
+in-run systems (Dungeon A = Creed only · Dungeon B = Module-not-Creed · …). Dungeons become
+flavors; the player picks the mechanic-mix they like; systems spread across content so no
+single run is overloaded. *Which dungeon drops Creed is a tuning dial* (it shifts class
+temperament) — feel-test, not free-for-all.
+
+### 3 · Gear — settled (do we keep it? YES, reframed)
+No-choice curio **drops** stay: distinct from boons by **agency** (surprise vs craft), zero
+configurator time — the one real WoW loot-moment. **NOT folded** (folding kills that moment).
+The **Market** (the buy-a-curio *choice* screen) becomes an **optional node**, first to trim
+if density bites. Already built (GEAR-1/2) — a reframing, not new work. Confirms Bill's own
+instinct that *"a drop that just gives one thing, no choice, is the interesting one"* — our
+drops already work that way; the redundant choice-screen was the Market, now made optional.
+
+### 4 · Run rules — SUSPEND, don't pause (Bill, 2026-07-08)
+- **No mid-combat pause** — it breaks the flow (weighed and rejected).
+- **Suspend between nodes** — leave and resume, even as a group (mobile-friendly).
+- A run is **locked to you until you finish or quit** — no concurrent re-attempt of the same
+  instance.
+- Co-op quitter → **AI backfill** (Warband Law).
+
+### 5 · The campaign spine — CREST-GATED, OPEN BORDERLANDS
+Concrete Realm-1 shape (Bill, 2026-07-08): **Zone 1 "The Gildfields" (tutorial) rolls out
+EVERY system as you clear it** → **Zone 2** (+1 dungeon) → **Zone 3** (+1 dungeon) →
+**Zone 4 = the raid finale**. Systems are taught inside Zone 1; the boon *pool* keeps
+leveling forever after.
+- **The spine hard-gates by CREST**, attunement-style: Zone N+1's Atlas entry needs Zone N's
+  ZONE CLEARED. Access-lane legal (Proofs already gate Seals/realms), a MOMENT not a number —
+  the XP level is never a wall, so mixed-level parties stay legal (guest-world rule binds a
+  party to the least-progressed member's frontier).
+- **Each zone keeps 1–2 open BORDERLAND nodes** — over-tier pockets off the path, brutally
+  over-tier via Forge TIER (windows/cadence, never stats), paying standing/cosmetics only.
+  Sequence-break heroes get their legend; the journey's pacing stays protected.
+
+### Skill-spread — the goal, two independent dials (unchanged)
+Buttons grow with ACCOUNT AGE (the tree rollout); demands grow with CONTENT TIER
+(Versions/Depth compress windows + add beats). Neither touches stats ⇒ a low-level friend
+plays their simpler kit inside a veteran's fight and it just works — no scaling system exists
+or is needed (Warband Law).
+
+**Status: DESIGN LOCKED 2026-07-08, not built.** Builds with the world track (earliest
+W2/W3): XP ledger + level + the tree on the world save; node-open UI (levels-only vs
+levels+oath gates); crest gates on the Atlas; per-surface in-run stacks (creed/module/keystone
+slots); dungeon-subset config; suspend/resume between nodes; borderland nodes. All rides
+`(seed, spec)` as pure data.
 
 ## Cut list (decided — do not resurrect casually)
 
