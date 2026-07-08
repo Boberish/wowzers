@@ -21,6 +21,7 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, verb pair locked 2026-07-07) ·
+`TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (Seal pillar pass) ·
 `FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `REFIT-PLAN.md` (structural audit v2 →
