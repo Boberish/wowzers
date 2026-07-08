@@ -419,7 +419,10 @@ a designer soul on a Forge body — generator does the body, a human does the si
    anchor. *(Bill, 2026-07-06: "put the mechanics into one thing.")*
 2. **DODGE RATION.** The universal dodge STAYS for every seat — it's the one demand the
    boss can make of everyone, and M7.2 proved strings carry skill gradients (venom
-   Executioner 95/78/52; the Choir finale *improved*). But it's rationed: **a few
+   Executioner 95/78/52; the Choir finale *improved*). **(2026-07-08, `DODGE-PLAN.md`): it
+   is now ONE verb** — the swing-negate and the barrage beat-dodge collapse onto a single
+   spacebar dodge (0.35s recovery / 1.3s whiff), live for Twinfang/Alchemist/Well and the
+   default for every reworked kit; the redundant F dodge is retired as classes convert. But it's rationed: **a few
    authored beats per fight, not a hundred** — target ~3–8 answerable beats per non-tank
    seat per boss (knob per tier), placed at moments, not as weather. Every class rework
    MUST define (a) its PERFECT/GOOD payoff into its own resource (M7.2 pattern) and

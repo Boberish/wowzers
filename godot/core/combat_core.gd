@@ -78,7 +78,9 @@ static func update(s: CombatState) -> void:
 static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 	match String(action.get("type", "")):
 		"defense":
-			if s.tick >= seat.defense_ready_tick:
+			if seat.kit != null and seat.kit.unified_dodge():
+				_unified_dodge(s, seat)          # the ONE dodge (Twinfang/Alchemist/Well)
+			elif s.tick >= seat.defense_ready_tick:
 				var active := _def_active(s, seat)
 				var cd := _def_cd(s, seat)
 				seat.dodging_until_tick = s.tick + to_ticks(active, s.config.fixed_hz)
@@ -102,7 +104,9 @@ static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 			# M7 universal dodge — every class has it, separate from the class
 			# defensive verb (guard/kick untouched). Short recovery between presses;
 			# grading against the live string happens in _answer_strike.
-			if s.tick >= seat.dodge_ready_tick:
+			if seat.kit != null and seat.kit.unified_dodge():
+				_unified_dodge(s, seat)
+			elif s.tick >= seat.dodge_ready_tick:
 				seat.dodge_ready_tick = s.tick + to_ticks(s.config.dodge_recovery, s.config.fixed_hz)
 				if seat.kit != null:
 					seat.kit.on_dodge_press(s, seat)
@@ -434,28 +438,70 @@ static func stagger_boss(s: CombatState) -> void:
 # Strike strings (M7) — multi-beat telegraphs answered with the universal dodge
 # --------------------------------------------------------------------------
 
+## THE ONE DODGE (Bill 2026-07-08 — DODGE-PLAN.md). A single press answers BOTH shapes:
+## an instant negate of a single DEFENSIBLE swing aimed here, OR a graded barrage-beat.
+## The boss resolves one telegraph per tick, so only one shape is ever live — no ambiguity.
+## One cooldown replaces the old defense_cd/dodge split: fast recovery on a connect, whiff
+## lockout on a wasted press. Only kits that opt in via unified_dodge() route here; every
+## other class keeps the split "defense"/"dodge" branches above, byte-identical.
+static func _unified_dodge(s: CombatState, seat: Seat) -> void:
+	if s.tick < seat.dodge_ready_tick:
+		return
+	var active := _def_active(s, seat)
+	seat.dodging_until_tick = s.tick + to_ticks(active, s.config.fixed_hz)  # pre-emptive negate window
+	if seat.kit != null:
+		seat.kit.on_dodge_press(s, seat)        # healer cast-cancel / Fermata coil-break
+	_emit(s, {"t": "dodge", "player": seat.is_player, "seat": seat})
+	var connected := false
+	# A single DEFENSIBLE swing aimed here, already inside the active window -> negate it now.
+	if seat.kit != null and s.telegraph != null \
+			and s.telegraph.ability.response == AbilityRes.Response.DEFENSIBLE \
+			and s.telegraph.target == seat:
+		var rem := (s.telegraph.start_tick + s.telegraph.dur_ticks) - s.tick
+		if s.telegraph.ability.feint or rem <= to_ticks(active, s.config.fixed_hz):
+			seat.kit.on_negate(s, seat, s.telegraph.ability)
+			_emit(s, {"t": "negate", "player": seat.is_player, "seat": seat,
+				"size": s.telegraph.ability.size, "feint": s.telegraph.ability.feint})
+			s.telegraph = null
+			connected = true
+	# Else a live barrage string with a beat I can still answer -> grade it (owns no cd here).
+	if not connected and s.telegraph != null and not s.telegraph.ability.strikes.is_empty():
+		connected = _answer_strike(s, seat, false)
+	# The one cooldown: fast recovery on a connect, whiff lockout on a wasted press.
+	var cd := s.config.dodge_recovery if connected else s.config.dodge_whiff_cd
+	seat.dodge_ready_tick = s.tick + to_ticks(cd, s.config.fixed_hz)
+	seat.defense_ready_tick = seat.dodge_ready_tick   # keep the rune/policy gates in lockstep
+	if seat.kit != null:
+		seat.kit.on_defense_press(s, seat)      # Twin Step spare-charge recharge (may refund the gate)
+
 ## Attribute a universal-dodge press to the next answerable beat of the live
 ## string and grade it by how tight the press was. Pressing a FEINT beat takes
 ## the bait; a press too early for any beat WHIFFS into the long lockout —
 ## panic-mashing eats the rest of the combo. No live string = free movement.
-static func _answer_strike(s: CombatState, seat: Seat) -> void:
+## Grade the seat's next answerable barrage beat. Returns true only when a REAL beat
+## connected (graze/good/perfect) — a too-early whiff or a baited feint returns false.
+## apply_cd=true (the split "dodge" verb) sets the whiff lockout itself, byte-identical
+## to before; the unified dodge passes false and owns the one cooldown from the return.
+static func _answer_strike(s: CombatState, seat: Seat, apply_cd := true) -> bool:
 	var tg := s.telegraph
 	if tg == null or tg.ability.strikes.is_empty():
-		return
+		return false
 	var idx := _next_answerable(tg, seat)
 	if idx < 0:
-		return                                  # none of the remaining beats are yours
+		return false                            # none of the remaining beats are yours
 	var st: StrikeRes = tg.ability.strikes[idx]
 	var early := float((tg.start_tick + to_ticks(st.at, s.config.fixed_hz)) - s.tick) * s.dt
 	if early > s.config.strike_graze:           # too early even for a graze
-		seat.dodge_ready_tick = s.tick + to_ticks(s.config.dodge_whiff_cd, s.config.fixed_hz)
+		if apply_cd:
+			seat.dodge_ready_tick = s.tick + to_ticks(s.config.dodge_whiff_cd, s.config.fixed_hz)
 		_bump_diag(s, seat, "whiff")
 		_emit(s, {"t": "dodge_whiff", "seat": seat, "player": seat.is_player})
-		return
+		return false
 	var grade := StrikeRes.Grade.GRAZE
 	if st.feint:
 		grade = StrikeRes.Grade.BAITED          # committing the dodge to a fake IS the mistake
-		seat.dodge_ready_tick = s.tick + to_ticks(s.config.dodge_whiff_cd, s.config.fixed_hz)
+		if apply_cd:
+			seat.dodge_ready_tick = s.tick + to_ticks(s.config.dodge_whiff_cd, s.config.fixed_hz)
 	elif early <= s.config.strike_perfect:
 		grade = StrikeRes.Grade.PERFECT
 	elif early <= s.config.strike_good:
@@ -468,6 +514,7 @@ static func _answer_strike(s: CombatState, seat: Seat) -> void:
 		seat.kit.on_strike_result(s, seat, tg.ability, st, grade)
 	_emit(s, {"t": "strike_graded", "grade": grade, "seat": seat,
 		"player": seat.is_player, "idx": idx, "feint": st.feint, "size": st.size})
+	return grade != StrikeRes.Grade.BAITED     # a real beat connected; a bait/whiff did not
 
 ## First unresolved beat this seat can still answer (skips UNANSWERABLE beats,
 ## beats aimed at someone else, and beats this seat already answered).

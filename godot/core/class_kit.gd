@@ -16,6 +16,12 @@ func upkeep(_s: CombatState, _seat: Seat) -> void:
 func on_defense_press(_s: CombatState, _seat: Seat) -> void:
 	pass
 
+## THE ONE DODGE (DODGE-PLAN.md): opt in so a single SPACE press answers both a
+## DEFENSIBLE swing (negate) and barrage beats, on one cooldown. Default false keeps
+## the split "defense"/"dodge" verbs byte-identical for every class that hasn't moved.
+func unified_dodge() -> bool:
+	return false
+
 ## A DEFENSIBLE swing was negated by a well-timed press. Default = pure negate
 ## (no extra effect); Warden overrides to reflect + bank Counter + open Riposte.
 func on_negate(_s: CombatState, _seat: Seat, _ability: AbilityRes) -> void:

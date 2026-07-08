@@ -38,6 +38,11 @@ func defense_active() -> float:
 func defense_cd() -> float:
 	return cfg.dodge_cd
 
+## THE ONE DODGE: the Brew's swing-negate and barrage beat-dodge collapse onto the
+## single SPACE press (DODGE-PLAN.md 2026-07-08).
+func unified_dodge() -> bool:
+	return true
+
 func _b(id: String) -> bool:
 	return bool(boons.get(id, false))
 

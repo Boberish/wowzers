@@ -64,7 +64,12 @@ the Shell Refit: fix plan + target architecture, 2026-07-07) · `RAID-PLAN.md` (
    flavor = adds / owned adds / split phases / chains only.
 2. **DODGE RATION** — universal dodge stays for every seat, but ~3–8 authored beats per
    fight for non-tanks (tanks keep the densest footwork). Every rework defines its
-   PERFECT/GOOD payoff and where beats sit in its rhythm.
+   PERFECT/GOOD payoff and where beats sit in its rhythm. **ONE DODGE VERB (2026-07-08,
+   `DODGE-PLAN.md`):** the old two-verb split (SPACE defensive-negate + a separate F
+   barrage-dodge) is collapsed into ONE spacebar dodge that answers both shapes, on one cd
+   (0.35s recovery / 1.3s whiff). LIVE for **Twinfang · Alchemist · Well**; the rest keep
+   the two-verb split byte-identical (opt-in `ClassKit.unified_dodge()`) until reworked —
+   every new/reworked kit ships on the one dodge.
 3. **INTERRUPT-BY-ABILITY** — no kick button, no kicker class: flagged existing abilities
    (ideally dumps — the *interrupt tax*) kick inside a TIGHT window; per-class carrier
    counts (2/1/0) are comp texture. Sims measure accidental vs deliberate kick rates.

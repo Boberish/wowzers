@@ -2449,7 +2449,7 @@ func _build_band_blade() -> void:
 	row.add_child(sep)
 	_add_runes(row, _loadout)
 	_strike_idx = _rune_ids.find("strike")
-	_hint_line("SPACE — DODGE (protects Flow)    ·    F — DODGE beats    ·    hold aggro low — the boss eats loose blades")
+	_hint_line("SPACE — DODGE (negate a swing OR answer beats; protects Flow)    ·    hold aggro low — the boss eats loose blades")
 
 ## The Reckoner's band: HP + RAGE orbs, the WIND/APEX swing instrument, and the
 ## Overswing/Ultraswing/Onslaught/Signature rune rail. The SWING itself is SPACE
@@ -2553,7 +2553,7 @@ func _build_band_alchemist() -> void:
 			row.add_child(_alch_rune(String(sp[0]), String(sp[1]), String(sp[2]), String(sp[3]),
 				Palette.REACT, String(sp[4])))
 			extras += " · %s — %s" % [String(sp[2]), String(sp[1])]
-	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · %s · SPACE — DODGE · F — DODGE beats" % extras)
+	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · %s · SPACE — DODGE (swing or beats)" % extras)
 
 ## One Alchemist ability rune (catalyst / a drafted spell) wired to send its action.
 func _alch_rune(id: String, label: String, key: String, icon: String, accent: Color, tip: String) -> AbilityRune:
@@ -2648,7 +2648,7 @@ func _build_band_well() -> void:
 func _well_hint() -> String:
 	var verb := "click/tap to heal — LAND it in the gold band (no spill) = POUR" if _aspect == "brim" \
 		else "click/tap starts the cast — click/tap AGAIN (or hold & release) in the window = CLEAN"
-	return "Hover an ally · L flash · R mend · Mid cascade · Sh+L spring · Sh+R dispel · 1-4 keys · %s · SPACE/F dodge" % verb
+	return "Hover an ally · L flash · R mend · Mid cascade · Sh+L spring · Sh+R dispel · 1-4 keys · %s · SPACE dodge" % verb
 
 func _render_band_well(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var g := _well_gauge
@@ -3045,7 +3045,7 @@ func _input(event: InputEvent) -> void:
 				elif _aspect == "fermata":
 					_fermata_key(event.keycode)          # the hold-release blade
 				else:
-					_martial_key(event.keycode)
+					_twinfang_key(event.keycode)
 			"caster":
 				if _caster_cls == "alchemist":
 					_alchemist_key(event.keycode)
@@ -3119,14 +3119,24 @@ func _martial_key(code: int) -> void:
 		KEY_4: _use_ability(3)
 		KEY_5: _use_ability(4)
 
+## Twinfang (Tempo/Venom): SPACE is THE ONE DODGE — it negates a single swing aimed
+## at you OR answers a barrage beat (whichever is live). F retired (DODGE-PLAN.md).
+func _twinfang_key(code: int) -> void:
+	match code:
+		KEY_SPACE:
+			_ctrl.human({"type": "defense"})
+		KEY_1: _use_ability(0)
+		KEY_2: _use_ability(1)
+		KEY_3: _use_ability(2)
+		KEY_4: _use_ability(3)
+		KEY_5: _use_ability(4)
+
 ## FERMATA: the Strike is a HOLD — key 1 DOWN coils into shadow, key 1 UP (in _input) releases.
 ## The dumps (Eviscerate/Kick/Coup, keys 2-4) stay instant taps at base — same as Tempo.
 func _fermata_key(code: int) -> void:
 	match code:
 		KEY_SPACE:
-			_ctrl.human({"type": "defense"})
-		KEY_F:
-			_ctrl.human({"type": "dodge"})
+			_ctrl.human({"type": "defense"})   # THE ONE DODGE
 		KEY_1:
 			if not _coil_held:
 				_coil_held = true
@@ -3149,8 +3159,8 @@ func _hspells() -> Dictionary:
 ## Q dispel · R rekindle (hover a fallen ally) · SPACE/F dodge (cancels a cast).
 func _well_key(code: int) -> void:
 	match code:
-		KEY_SPACE, KEY_F:
-			_ctrl.human({"type": "dodge"})
+		KEY_SPACE:
+			_ctrl.human({"type": "dodge"})   # THE ONE DODGE (healers face only barrage beats)
 		KEY_1, KEY_2, KEY_3, KEY_4:
 			# DRAW does BOTH release styles: a press while casting = the release (tap-tap),
 			# and a key HELD past the tap threshold releases on key-up (hold-release).
@@ -3208,9 +3218,7 @@ func _bloomweaver_key(code: int) -> void:
 func _alchemist_key(code: int) -> void:
 	match code:
 		KEY_SPACE:
-			_ctrl.human({"type": "defense"})
-		KEY_F:
-			_ctrl.human({"type": "dodge"})
+			_ctrl.human({"type": "defense"})   # THE ONE DODGE
 		KEY_1:
 			if _brew_hold_key == -1:
 				_brew_hold_key = KEY_1

@@ -793,11 +793,19 @@ func defense_active() -> float:
 func defense_cd() -> float:
 	return cfg.dodge_cd
 
+## THE ONE DODGE: Twinfang (Tempo/Fermata/Venom) folds its swing-negate and its
+## barrage beat-dodge onto the single SPACE press (DODGE-PLAN.md 2026-07-08).
+func unified_dodge() -> bool:
+	return true
+
 ## Twin Step (Phase B): the engine just charged the dodge cooldown — a spare charge
 ## eats it, so a second step is available back-to-back; upkeep restores the spare.
+## Under the unified dodge the live gate is dodge_ready_tick (kept in lockstep with
+## defense_ready_tick), so refund BOTH.
 func on_defense_press(s: CombatState, seat: Seat) -> void:
 	if _b("tfPropTwinStep") and int(seat.vars.get("dodge_spare", 1)) > 0:
 		seat.vars["dodge_spare"] = int(seat.vars.get("dodge_spare", 1)) - 1
+		seat.dodge_ready_tick = s.tick
 		seat.defense_ready_tick = s.tick
 		seat.vars["dodge_recharge_tick"] = s.tick + _tt(s, cfg.mod_step_recharge)
 

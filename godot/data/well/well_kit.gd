@@ -629,6 +629,11 @@ func on_heal(_s: CombatState, _caster: Seat, _target: Seat, _eff: float, over: f
 	if _m("reservoir") and over > 0.0 and _caster != null:
 		_caster.vars["reserve"] = float(_caster.vars.get("reserve", 0.0)) + over * cfg.reserve_bank
 
+## THE ONE DODGE: the Well answers barrage beats on the single SPACE press (its only
+## dodge — healers face no DEFENSIBLE swings), F retired (DODGE-PLAN.md 2026-07-08).
+func unified_dodge() -> bool:
+	return true
+
 ## Dodging cancels the cast bar — the healer's discipline test. Charges unspent (paid at
 ## resolve), Current untouched. A HELD (Patient Hand) heal survives — it's cocked, not casting.
 func on_dodge_press(s: CombatState, seat: Seat) -> void:

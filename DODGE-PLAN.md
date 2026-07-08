@@ -1,6 +1,28 @@
 # DODGE-PLAN — collapse the two dodge verbs into ONE (remove the F dodge)
 
-**Status:** 🔴 DESIGN — ready to execute. Written 2026-07-08 (Bill's call). *Another agent executes this;
+**Status:** 🟢 BUILT (branch `dodge-unify`, 2026-07-08) — **scoped to the active roster per Bill's live call.**
+
+**What shipped (Bill, direct 2026-07-08):** the two input verbs collapse into ONE spacebar dodge for the
+THREE active classes only — **Twinfang (Tempo/Fermata/Venom), Alchemist (the Brew), Well (Brim/Draw)**.
+One press now answers BOTH a single DEFENSIBLE swing (instant negate) AND barrage-string beats, on ONE
+cooldown (**0.35s recovery on a connect / 1.3s whiff lockout** — the barrage model, flat, applied to
+single-swing negates too; "flat first, sim after"). The **F key is retired** for those three. Bill's
+scope calls, made live: **"active classes only … Twinfang, Alchemist, brim/draw healer, forget the rest"**
+and **"ignore Bulwark — we will remove it and add a new tank."** So **Bulwark · Voidcaller · Mender ·
+Bloomweaver · Reckoner keep their current two-verb split (SPACE defensive verb + F beat-dodge) BYTE-IDENTICAL**
+until their own reworks — they simply don't opt into the new hook.
+
+**How (the merge, not a rewrite):** a new opt-in `ClassKit.unified_dodge()` (default **false**). Only the
+three in-scope kits return true; their `"defense"`/`"dodge"` actions both route to one new
+`CombatCore._unified_dodge()` (negate-or-answer + the one cd, `defense_ready_tick`/`dodge_ready_tick` kept
+in lockstep for the rune/policy gates). Every other class takes the untouched `else` branches → the old
+`defense_cd`/`dodge` model, byte-identical. HUD: F dropped from `_twinfang_key` (new, split off the shared
+`_martial_key` so Voidcaller/tank keep F) · `_fermata_key` · `_alchemist_key` · `_well_key`; hints reworded.
+Policies unchanged (both action types reach the one handler). See the Coordination Log entry for the merge.
+
+<details><summary>Original design brief (below, as authored 2026-07-08) — superseded by the scoped build above.</summary>
+
+**Original status:** 🔴 DESIGN — ready to execute. Written 2026-07-08 (Bill's call). *Another agent executes this;
 the mobile-spike session continues in parallel.* Work in a worktree; add a MASTER-PLAN Coordination Log
 claim before starting.
 
@@ -122,3 +144,5 @@ also preserved. Verify each still procs after the merge.
   action-type rename touches the wire).
 - **Each beat-dodge boon** still procs (list above).
 - WSLg: the one DODGE rune + cue reads for a single swing AND a barrage.
+
+</details>
