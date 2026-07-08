@@ -12,8 +12,14 @@ REALMS (Realm 1 "The Takeover" = the ironic AI takeover: Mistral → Gemini → 
 `MASTER-PLAN.md` is the living state: status by section, claims, open ideas, realm bibles.
 CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 1. Read `MASTER-PLAN.md`; claim your work in its Coordination Log before starting.
-2. Work in a **git worktree** (`git worktree add ../wow-<task> -b <task>`), never directly on
-   `main`. Commit early/often; merge `main` into your branch often.
+2. **Code changes** → work in a **git worktree** (`git worktree add ../wow-<task> -b <task>`),
+   never directly on `main`; commit early/often; merge `main` into your branch often.
+   **Docs-only design work** → commit **straight to `main`** (the "main (docs only)" pattern),
+   no worktree needed.
+   ⚠ **COMMIT BEFORE YOU STOP — never leave uncommitted work in the shared tree.** That's how
+   concurrent sessions clobber each other and lose files. Committing docs needs **no
+   permission** (Bill, 2026-07-08): commit your own output as you finish it; don't ask, don't
+   pile it up. (Pushing to a remote is still a separate, explicit action.)
 3. Verify against your section's acceptance bar (see ACTIVE VERIFICATION below), merge back.
 4. **Update `MASTER-PLAN.md` after the work** — status, what changed, what's next.
 
