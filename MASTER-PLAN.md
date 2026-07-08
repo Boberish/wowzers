@@ -762,6 +762,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-08 · `dodge-unify` (worktree ../wow-dodge) · §COMBAT / `DODGE-PLAN.md` —
+  **UNIFY THE DODGE — remove the redundant F dodge (Bill's go, scoped live).** Collapse the
+  two input verbs (SPACE `defense` + F `dodge`) into ONE spacebar dodge that answers BOTH a
+  single DEFENSIBLE swing (instant negate) AND barrage-string beats, on one cd (0.35s recovery
+  on a connect / 1.3s whiff lockout — flat first, sim after). **SCOPE (Bill, direct): Twinfang,
+  Alchemist, Well (brim/draw) ONLY** — the rest (Bulwark [being replaced by the new tank],
+  Voidcaller, Mender, Bloomweaver, Reckoner) stay BYTE-IDENTICAL via an opt-in `unified_dodge()`
+  kit hook (default false → old split branches). Engine merge in `combat_core`, F key/hints
+  dropped for the three in `raid_hud`, policies unchanged (both action types route to the one
+  handler). Verify: det PASS + re-baseline twinfang_sim/raid_sim, well_sim byte-identical
+  (healer path unchanged), smokes. *(dodge-unify session)*
 - ☑ 2026-07-08 · main (docs only) · §SYSTEMS E / `PROGRESSION-PLAN.md` §THE UNLOCK SYSTEM —
   **THE UNLOCK SYSTEM consolidated (design session with Bill, direct) — the five competing
   progression ideas in `UNLOCK-BRIEF.md` collapsed into ONE coherent system.** Through-line:
