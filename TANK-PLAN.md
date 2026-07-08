@@ -8,6 +8,13 @@ The Warden's deck is a LATER pass (after the Duelist proves the frame).
 **Names open (on the board):** the class (VANGUARD / AEGIS / STALWART / IRONCLAD / Bill's own) and
 the fatigue resource (WIND leads — the tester already yells WINDED; BREATH / LEGS / POISE alternates).
 
+**Dodge-unify reconciled (2026-07-08) — design + deck UNCHANGED.** The dodge-unify (one SPACE dodge,
+F retired) was scoped to Twinfang/Alchemist/Well and does NOT touch the tank. Nothing on the board
+changes. Two rules it makes explicit (§1a): the two kits are the **dodge tank** and the **shield tank**;
+the tank runs its OWN dense defensive stream and **skips the universal dodge** every other seat gets —
+so parry cleanly reclaims the now-free F, and no card is affected. (Plain words — "move"/"answer",
+not "verb" — jargon dropped per the deck-creator pass.)
+
 ## §1 · THE LOCKED CORE (round 5 — full history in MASTER-PLAN §CLASSES 2026-07-07)
 
 Classic rhythm defense on the HUD's own timing UI: ONE stream of incoming hits drawn as
@@ -26,8 +33,24 @@ Classic rhythm defense on the HUD's own timing UI: ONE stream of incoming hits d
 - **THE WARDEN** (heavy/endurance, def-only): BLOCK (tap; perfect banks ◆) + BRACE (the block HELD
   across fat HOLD bars / overlaps; drains fast). Blocks everything (PIERCE = boss affix knob).
   Offense = ⚡ DUMP off-rhythm. The old hold-blocks-all-free = a module, not base.
+
+### §1a · THE TANK SKIPS THE UNIVERSAL DODGE (post dodge-unify, 2026-07-08)
+The tank's bar-stream **IS** the boss's telegraph stream to this seat — dense by design (pillar #2,
+"the densest footwork"). So the tank does **NOT** run the separate universal dodge RATION the other
+seats get (~3–8 sparse beats bolted onto their kit, `combat_core.gd:104` "every class has it, separate
+from the class"). The tank's minigame already **is** its dodge/defense — one stream, not dodging on top
+of dodging.
+- **Dodge tank** answers each bar with **DODGE (SPACE)** or **PARRY (F)**. F is free — the universal
+  F-dodge was retired in dodge-unify — so parry reclaims it as its natural home.
+- **Shield tank** answers with **BLOCK / BRACE**. It has no dodge and needs none.
+- Both **replace** the universal dodge; they never stack on it.
+- The Duelist's DODGE stays its OWN graded, height-law dodge **leashed by WIND** (≈1/step), NOT the flat
+  universal 0.35s/1.3s cd — the wind pool is the anti-spam, so wind (not a global cooldown) is what
+  limits chaining a barrage; keep fast recovery. The tank **never** opts into `ClassKit.unified_dodge()`
+  (that hook merges two INPUTS for the three non-tank kits; the tank already runs bespoke parry + dodge).
+
 - **⚠ CUT HISTORY (don't rebuild):** R2 THREE DOORS/lanes · R3 SHIELD CHARGE-&-PLANT WALL +
-  circle-size + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 shared 3-verb kit.
+  circle-size + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 shared 3-move kit.
 
 **Tester v5 baseline knobs** (the deck's numbers hang off these; all become `duel_*` config):
 parry window 60ms · good 230ms · wind pool 10, regen 1.9/s, dodge 1, parry 3.5 (land or miss) ·
@@ -122,14 +145,16 @@ OPENED n/a (first deck; old Bulwark guard boons are the frozen placeholder's, no
 1. **Fold verdicts** into this doc (statuses → STANDS/REWORKED/CUT), lock names (class + wind).
 2. **Guarded base kit** (Well idiom): class codename on the tank seat, `--autostart=raid:tank:duelist`,
    old Bulwark stays the default — **byte-identical unless picked** (A/B via `scripts/ab-gate.sh`).
-   Verb reducer in the kit (bars/wind/◆/duet hooks via existing seat surfaces); all numbers
+   The kit reducer runs bespoke **parry (F) + dodge (SPACE)** — **no `unified_dodge()` opt-in, and no
+   universal dodge ration** (§1a); bars/wind/◆/duet hooks via existing seat surfaces; all numbers
    `duel_*` on the class config. Boss streams = encounter data (authored per Seal, Warband Law).
 3. **Deck layers** kit-local + `_fw()` dispatch (creeds/modules/boons/rig per the Well's framework
    wiring); fixed rarities + `ctype` tags per [[card-type-tags]].
 4. **Sims:** `duelist_sim` base loop + per-creed/module/build cells (Whetstone hold-EV, Crucible
    ignite timing, Dancer one-button win-rate) · determinism PASS 300 seeds · `raid_sim --tank=` carry.
 5. **HUD slice:** the bar-stream on the raid HUD's timing instrument (StrikeJudge idiom) + ◆ pips +
-   wind bar + module gauges; WSLg screenshot probe (headless can't render `_draw`).
+   wind bar + module gauges; WSLg screenshot probe (headless can't render `_draw`). This stream IS the
+   boss's telegraph to the tank seat — do NOT also spawn the universal dodge ration/cue (§1a).
 6. **Pillar #3 flag:** ⚡ DUMP is the natural interrupt-carrier (burn the bank to kick) — engine-side
    flag with the interrupt-by-ability pass, not before.
 

@@ -984,7 +984,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   **Three named ladders** (HEADSMAN bank-and-burst / IRONSIDE guard-engine / GHOST footwork-chain) —
   every card feeds ≥1, zero ballast. **⭐ VERDICT BOARD (KEEP/TWEAK/CUT + names + export):**
   https://claude.ai/code/artifact/cf273dd1-4169-45e2-b990-47000941d417 — class + WIND name picks ride
-  the board. **Next:** Bill's export blob → fold → guarded build per TANK-PLAN §4. *(deck session)*
+  the board. **Dodge-unify reconciled 2026-07-08 (Bill):** design + deck UNCHANGED — the tank keeps its
+  own dodge-and-shield minigame and **skips the universal dodge** every other seat runs (TANK-PLAN §1a);
+  dodge tank = parry (reclaims the freed F) + dodge, shield tank = block/brace; "verb" jargon dropped.
+  **Next:** Bill's export blob → fold → guarded build per TANK-PLAN §4. *(deck session)*
 
 - ☑ 2026-07-07 · main (docs only) · §CODE AUDIT — **STRUCTURAL AUDIT v2 (post-pivot) — DONE,
   `REFIT-PLAN.md` WRITTEN.** 5-agent fan-out (engine/net/UI-HUD/world-meta/tooling) vs the
