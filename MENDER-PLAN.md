@@ -1,5 +1,8 @@
 # MENDER-PLAN — the direct-cast healer onto Framework v2 (the Well · twin graded specs BRIM / DRAW)
 
+> **2026-07-10:** the BRIM BRANCH SLATE (§9) is 🟡 AT VERDICT — verdicted material filed + four
+> themes (Low Catch · Overflow Engine · Glintsmith · Deep Well). Draw's slate is queue row 6.
+
 **Status:** 🟢 **BASE BUILT & MERGED 2026-07-07** (branch `mender-rework` → main). The reworked
 healer ships as a guarded class **`well`** (codename — Bill's name pick open) on the healer seat,
 Alchemist idiom: byte-identical unless picked. Both specs playable — **`--autostart=raid:healer:brim`**
@@ -309,3 +312,142 @@ medit +160/25s (tester-shortened; the kit's is 160/55s) · GCD 1.2s · pressure 
 7. **Meditate-as-boon** — the battery's shape (charges +N? pulse burst?) in the boon slate.
 ~~Landing preview~~ → BASE 🔒 · ~~Interrupt~~ → NO KICK 🔒 · ~~Ward/Dry-Ward~~ → Ward CUT 🔒 ·
 ~~Clutch dump~~ → Boiling Over kept 4★ 🔒 · ~~resource name~~ → CHARGES 🔒.
+
+---
+
+## 9. THE BRIM BRANCH SLATE — four build-theme candidates 🟡 AT VERDICT (2026-07-10)
+
+**What this is** (SLATE-PLAN row 5; branch = build THEME, dials addressed never bent). The Brim's
+deck exists in code but is branch-thin — this pass names the ladders the verdicted material
+already implies (filing) and pitches the theme layer for the Phase-2 deck pass (row D5). Base
+kit untouched (the charges Well · the book · the landing grade · ✧ the Glint); example cards are
+ILLUSTRATIONS — no CARD-CATALOG rows. **How it was made:** §§0–8 + the ⚖ board re-read + fresh
+sweep `research/brim-sweep.md` (Trauma Center graded-chores · the FFXIV green-DPS warning ·
+Ana's no-free-value) → 4 lenses → 4 themes → **3 skeptic passes (1 kill, ~7 fixes folded)**.
+
+### 9.1 The harvest (Brim-sized)
+
+1. **Idle time is the class's known wound** (raid healer idle 93–98%, memory'd) — the best theme
+   gives quiet minutes a JOB, not a filler nuke (the FFXIV green-DPS warning): all outward
+   damage rides ✧ Glints THROUGH allies, never a healer rotation.
+2. **Grading chores is the tension engine** (Trauma Center) — precision themes can chain pours
+   into operation-shaped sequences; the blindfold boon already owns the no-free-value pole (Ana).
+3. **The spec's own module fights its own grade** — perfect pour = ZERO spill, but ⭐Reservoir
+   BANKS spill. That fork (Glint or bank, chosen per cast) isn't a bug; it's the overflow
+   build's identity, stated out loud.
+4. **The Brink is pre-validated** (Bill's 5★ flagship creed) — the play-behind theme starts from
+   the strongest verdict in the class.
+
+### 9.2 THE FILING TABLE (verdicted material → the themes below; zero orphans)
+
+| Existing (state) | Files under |
+|---|---|
+| THE BRINK creed 🔒5★ | **LOW CATCH** (the entry creed) |
+| FORESIGHT creed 🔒4★ | **GLINTSMITH** (play-ahead keeps the party topped) |
+| LEVEE / SHALLOWS creeds 🟡 (rework owed) | **DEEP WELL** candidates (Levee's dead refund hook → the pulse-refund rework below) |
+| ⭐ THE RESERVOIR module | **OVERFLOW ENGINE** (the transformer) |
+| TRIAGE PROTOCOL module | **LOW CATCH** |
+| BENEDICTION module | generic (any theme's 5th-pip rhythm) |
+| ✧ Glint 3-tier ladder (🟡 ledger) | **GLINTSMITH** (the spine) |
+| THE SHINING HOUR support sketch | **GLINTSMITH** (the TEAM card) |
+| Blindfold boon (B-V3 rider) | **GLINTSMITH** (the greed pole) |
+| Battery boon (Meditate remnant) | **DEEP WELL** |
+| WHEN sketches (perfect-pour · catch ≤40% · spill) | Low Catch / Overflow / Glintsmith respectively |
+
+### 9.3 THEME 1 — THE LOW CATCH · *the save is the point*
+
+**What its cards do:** play-behind, formalized — the Brink's moved-down band becomes a build:
+catches (landings into a LOW band) pay escalating value, Nerve/Last Stand machinery feeds it,
+catch-WHENs premium. **Skeptic fix folded:** the theme keys off BAND-POSITION catches (the
+Brink moves the band down — self-authored lows), not only ally-HP crises, so zone fights don't
+put it to sleep.
+**Dials addressed:** the landing (band position) · the pour (sizing into small remaining gaps).
+**Example cards:** boon *Knife's Edge* (GREED) — the band drops another 10%, catches +25% ·
+boon *Steady Under Fire* (STRAT) — a catch during a boss telegraph string also refunds 1 ◍ ·
+keystone **THE UNDERTOW** — three consecutive catches with zero spill pull the whole party's
+bars up 10% in one visible wave.
+**Greed/comfort + EASE knob:** depth-greed (how low the band rides); comfort = Foresight-style
+topping instead. Knob: catch-band width.
+**Nearest neighbor:** the Scarlet Trade (the DUELIST spends his own HP; the Low Catch surfs
+ALLIES' lows — reading the party, never pricing it).
+
+### 9.4 THEME 2 — THE OVERFLOW ENGINE · *waste is a second currency*
+
+**What its cards do:** the ⭐Reservoir ladder named — deliberate overshoot banks spill →
+SURGE shields → the flywheel re-banks. The per-cast fork IS the build: Glint (clean) or bank
+(spill), chosen against the fight's next 10 seconds.
+**Dials addressed:** the landing (overshoot as a choice) · the Well (the second chamber).
+**Example cards:** boon *Runneth Over* (STRAT) — spill banks at 130% rate on Cascade (the
+big-pour engine) · boon *Pressure Head* (GREED) — while the Reservoir is over half, pours cost
++1 ◍ but Surge shields ×1.4 · keystone **THE FLOODGATE** — a full Reservoir can be opened as
+one party-wide shield wall; every point it absorbs re-banks at half.
+**Greed/comfort + EASE knob:** bank-greed (riding a full chamber); comfort = drip it as small
+shields. Knob: spill-bank rate.
+**Nearest neighbor + ledger flag:** the Warden's PAYLOAD (banks prevented damage, hurls it as
+DAMAGE on his timing) — the Overflow banks overheal into SHIELDS on an auto-flywheel; recorded
+in the SLATE-PLAN §5 distinctness ledger for the deck passes.
+
+### 9.5 THEME 3 — THE GLINTSMITH · *your healing is the warband's whetstone* (TEAM)
+
+**What its cards do:** the outward build — ✧ Glint uptime as the job (the 3-tier ladder is the
+spine), Shining Hour as the TEAM card, the blindfold as the greed pole, and the Ana-grenade
+two-beat: PRIME an ally (short amplified-landing window), then size the pour into it. The
+FFXIV-warning answer: the healer's damage is delivered through clean healing, full stop.
+**Dials addressed:** the Glint (duration/tiers/targets) · the landing (primed windows).
+**Example cards:** boon *Whetstone Waters* (POWER) — Glints +1s and stack to 2 allies · boon
+*Blind Pour* (GREED) — landing preview OFF, perfect pours Glint at tier+1 (the no-free-value
+pole) · boon *The Primed Vein* (STRAT) — prime an ally: their next landing window widens ×1.5
+and a perfect there Glints the WHOLE party for 1s · keystone **THE GILDED HOUR** — while all
+four Glints are live at once, time gilds: every ally's next clean answer crits.
+**Greed/comfort + EASE knob:** precision-greed (blindfold); comfort = preview on, small steady
+Glints. Knob: Glint grace-window on near-perfect landings.
+**Nearest neighbor + ledger flag:** the Cask's TAPROOM (thrown consumables on ally timing) and
+the Warden's BANNERMAN (aggro uptime) — the Glintsmith's buffs are AUTOMATIC procs of clean
+healing, no handoff, no uptime bar; third TEAM shape, recorded in the distinctness ledger.
+
+### 9.6 THEME 4 — THE DEEP WELL · *the vessel itself is the instrument*
+
+**What its cards do:** the charge/pulse economy made a build — and the skeptics' bar was "no
+bread wearing a theme's costume," so every card here creates a DECISION: casting ON the pulse
+beat (the Well's refill moment) refunds; the LAST charge carries a premium (dry-flirting);
+batteries are chosen moments, not passive regen.
+**Dials addressed:** the Well (pulse timing, charge counts) · the pour (cost sizing).
+**Example cards:** creed *THE TIDE* (the Levee rework candidate) — the pulse drops 2 ◍ but
+arrives half as often: feast-and-famine banking · boon *On the Beat* (STRAT) — a cast released
+within 0.3s of a pulse refunds 1 ◍ (the Well becomes a rhythm surface) · boon *The Last Drop*
+(GREED) — your final charge heals ×1.5 but going DRY locks the next pulse · keystone **THE
+ARTESIAN** — five on-the-beat casts in a row and the Well runs artesian: ~6s of free-flowing
+casts, no charge cost, then the vessel gasps (next 2 pulses skip).
+**Greed/comfort + EASE knob:** dry-flirting greed; comfort = big battery, never below 3 ◍.
+Knob: pulse-beat window width.
+**Nearest neighbor:** SF6 burnout / the Crucible (self-authored crash cycles) — the Artesian
+crash is the healer-safe version (missed refills, never missed heals); Draw's Current (sibling)
+is cast-RHYTHM — the Deep Well is REFILL-rhythm; distinct clocks, stated.
+
+### 9.7 SLATE-LEVEL CHECKS + the pick
+
+**Spread:** crisis surfing (Low Catch) · waste banking (Overflow) · outward TEAM (Glintsmith) ·
+vessel economy (Deep Well) — four clocks (spikes · spill cycles · uptime · the pulse), none
+shared with Draw's Current (sibling distinctness stated per theme).
+**Skeptic record:** 3 passes · **1 kill** (**the Surgeon** — a Trauma-Center operation theme:
+chained multi-ally pour sequences as the core; killed because sequence-chaining re-invents
+Draw's rhythm identity on Brim's bar — the operation SHAPE survives as single cards inside
+Glintsmith/Low Catch) · ~7 fixes folded (Low Catch band-position fix · Deep Well
+decisions-not-bread bar · blindfold homed as Glintsmith's greed pole · Ana-grenade shaped as
+PRIME, no new button · Overflow fork stated as identity · Artesian crash healer-safe · TEAM
+distinctness vs Taproom/Bannerman recorded).
+**Skeptic ranking (pick-tension, strongest→weakest):** Low Catch · Overflow Engine · Glintsmith
+· Deep Well.
+**Composition notes:** Low Catch + Overflow is the classic pair (crisis + banking — both love
+Cascade). Glintsmith + Deep Well is the metronome build (pulse-beat casts feeding Glint uptime).
+Low Catch + Glintsmith fight over band position (down vs topped) — legal, spicy, flagged.
+All four leave the book and the grade untouched.
+**Engine debts:** none new — Reservoir/Nerve/pips/Glint machinery is coded; Shining Hour is a
+party-state check; PRIME is a kit-local ally flag.
+**Skipped on purpose:** **the Surgeon** (killed, above) · **a healer damage lane** (the FFXIV
+warning made law — Glints or nothing) · **an Ana anti-heal/debuff shape** (boss-facing debuffs
+are the Debilitator/support lane, and off-fantasy here) · **VIGIL/held-cast territory** (Draw's
+transformer candidate — the sibling owns holds).
+
+**Next:** Bill picks 2–3 themes → Phase-2 row D5 authors the Brim deck reshape around them
+(filing hard-copied, CARD-CATALOG rows, EASE knobs per theme), inside the ⚖ board verdicts.

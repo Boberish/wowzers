@@ -814,10 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 01:44 · main (docs only) — **CLAIM: SLATE MACHINE row 5 — Well·BRIM branch slate**
-  (fresh sweep → `research/brim-sweep.md` → filing + landing-grammar themes → 3 skeptics →
-  `MENDER-PLAN.md` new § 🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session,
-  tick 01:42)*
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §9 (NEW) + `research/brim-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 5: Well·BRIM branch slate — DONE, four themes AT BILL'S
+  VERDICT** (filing table homes every verdicted creed/module/sketch, zero orphans). **THE LOW
+  CATCH** (play-behind formalized — Brink 5★ entry, band-position catches so zone fights don't
+  sleep) · **THE OVERFLOW ENGINE** (⭐Reservoir named — the Glint-or-bank per-cast fork stated
+  as the identity; Payload distinctness recorded) · **THE GLINTSMITH** (TEAM — Glint-uptime as
+  the idle-time job, the FFXIV green-DPS warning made law: damage only through clean healing;
+  blindfold = greed pole, Ana-grenade → PRIME) · **THE DEEP WELL** (pulse-beat casts, dry-
+  flirting, Levee rework → THE TIDE creed candidate). 3 skeptic passes: 1 kill (the Surgeon —
+  operation-chains re-invent Draw's rhythm on Brim's bar), ~7 fixes. Ranking: Low Catch ·
+  Overflow · Glintsmith · Deep Well. No CARD-CATALOG rows (deck reshape = Phase-2 row D5).
+  *(slate-machine session, tick 01:42)*
 
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §9 (NEW) + `research/cask-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 4: Alchemist·CASK branch slate — DONE.** The §7 slate is
