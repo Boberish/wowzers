@@ -821,7 +821,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   reads as confusing — explain/reskin) → verdict on the raid TICKETS vs zone TICKETS-v2 quest
   systems (mix / merge / keep separate). Bosses stay (recast later — nothing set in stone).
   Deliverable: NEW `DESCENT-PLAN.md` at Bill's verdict (multi-agent workflow: recon → 3-angle
-  design panel → judged synthesis) + ledger rows. Docs only, no code. *(raid-rebuild session)*
+  design panel → judged synthesis) + ledger rows. Docs only, no code. **Also in the brief
+  (addendum):** literal NEW minigame/puzzle node types (structure now, content later) + fold in
+  the parked MASTER-PLAN ideas (PROMPT MARKET merchant · CAPTCHA micro-skill-checks · secret
+  rooms · TEETH CONTEST nodes). **RESUME PROTOCOL (Bill's order: retry rate limits, survive
+  token-end):** workflow run `wf_7a379a0b-44a`; a 6-min session cron babysits it. If THIS session
+  dies before `DESCENT-PLAN.md` lands: in a fresh session read the workflow journal
+  `~/.claude/projects/-home-bill-projects-Wowzers/55c10657-7a29-4b99-a894-35ed79e1d42b/subagents/workflows/wf_7a379a0b-44a/journal.jsonl`
+  (every finished agent's output — recon digests / designs / judge reports / synth are all there;
+  the script sits next to it under `…/workflows/scripts/`), hand-author a continuation workflow
+  from whatever phase is missing (cross-session resumeFromRunId does NOT work), then finish:
+  write `DESCENT-PLAN.md`, tick this claim, ledger rows, commit. *(raid-rebuild session)*
 
 - ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
   class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW
