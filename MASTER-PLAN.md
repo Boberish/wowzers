@@ -773,6 +773,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §5/§6 + deck-creator skill + BUILD-LEDGER §C —
+  **THE ABILITY LAW: the button budget (Bill).** The signature CD existed but no rules governed
+  ability/button count. Bill's frame: keep the game about **optimizing rotations** (not WoW's 50
+  buttons), but movement-removal freed complexity budget for a few more spells — and mobile must
+  work. Locked (both forks at my recommendation): **(1) count in TOUCH TARGETS** (dodge, CD,
+  module buttons, drafted spells all count — mobile is the binding wall; the spike's play-proven
+  layout = 5 targets, scales to 7 as 2-left/5-right). **(2) chassis free** = core 2–3 + dodge +
+  CD (4–5 targets). **(3) allowance +2, HARD CEILING 7**, entering only via existing doors —
+  drafted spells (earned in-run, fight-1 kit stays lean) + ≤1 module button (catalyst precedent);
+  boons/creeds/rig never add buttons; interrupts ride existing buttons (pillar #3 pattern).
+  **Exception: the Well (the broad-kit pilot) ceiling 8** — breadth is its fantasy and its casts
+  share one grammar; trim its loaded 10 at reshape. **(4) every button carries a WHEN, not just a
+  WHAT** — press-on-cooldown = a passive in a button costume (fold to passive/rig THEN); this is
+  the real rotation-protector, the ceilings are the fence. Reconciles DECK-LAYOUT's stale "bar
+  cap 5" (was quoting per-class `SPELL_CAP`: 5 Twinfang/Alch/Voidcaller, 8 Well — now derived
+  from the ceiling). Compliance debt ledgered (BUILD-LEDGER §C new row): Brew fully-drafted = 9
+  w/ CD, Well loaded = 10 — trims land at each class's reshape, no code now. §0 collision map
+  unmoved (touches files already under the Phase-2 program row). *(this session)*
+
 - ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §2/§4/§6 + CARD-CATALOG (Type field) + deck-creator
   skill — **CARD-TYPES DEMOTED: LENSES, NOT A LAW (Bill).** Bill questioned the 6 card-types
   ("to be strict removes a ton of freedom… these are some ideas to start off"). Verified first:

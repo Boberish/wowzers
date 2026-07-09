@@ -185,7 +185,7 @@ learners and relaxers crank comfort. No menu, no persistent power.
 
 ---
 
-## PART 5 — THE SIGNATURE CD + the spells rule (the reconcile)
+## PART 5 — THE SIGNATURE CD · THE ABILITY LAW (the button budget) · the spells rule
 
 **The signature CD** is the class's one baseline big-moment (~1 min). For some classes it
 *formalizes* a big-moment they already have; for others it's a new baseline button. It **amplifies
@@ -193,6 +193,42 @@ skill** (double your perfects for 8s if you built the combo and line it up with 
 next 3 throws max-potency if you prepped vials) — never a flat `button = damage`. DPS CDs all help
 damage but in **different shapes** (a burst you line up · a hold-and-release charge · a reactive
 punish window); role CDs are role-shaped (a clutch group-save · a wall).
+
+### THE ABILITY LAW — the button budget (locked 2026-07-09, Bill)
+
+Lifting movement out of the game freed complexity budget — we can afford a few more buttons than
+a bare 3-button kit. But the game stays about **optimizing a rotation**, never WoW's 50 buttons,
+and every kit must fit a phone. Four rules:
+
+1. **Count in TOUCH TARGETS, not "abilities."** Dodge counts, the signature CD counts, a module's
+   button counts, every drafted spell counts. Desktop always has slack; **mobile is the binding
+   wall**, so the law is written in buttons-on-glass. (The mobile spike shipped exactly 5 targets
+   — big dodge under the left thumb, strike + 3 small under the right — and that layout is
+   play-proven; it scales to 7: 2 left, 5 right.)
+2. **The chassis is free: core 2–3 + dodge + signature CD = 4–5 targets.** Every class gets this
+   without justification (Tempo today: strike · evis · coup + dodge, + the CD owed).
+3. **The allowance: +2 above the chassis · HARD CEILING 7 — and extra buttons enter only through
+   doors that already exist:** drafted spells (`type:"spell"`, earned in-run — the fight-1 kit
+   stays lean and learnable; you *earn* buttons 6 and 7 mid-run) and **at most one module button**
+   (the Alchemist's catalyst is the precedent). **Boons, creeds, and the rig NEVER add buttons** —
+   they change what existing buttons do. Interrupts ride existing buttons (pillar #3 set the
+   pattern: a new *need* doesn't get a new *button*).
+   **The one exception — the broad-kit class: the Well, ceiling 8.** Breadth is its fantasy (Rule
+   #2: budget where the fantasy is), and it's legal because its casts share ONE grammar (all pours
+   on one timing system), so more buttons doesn't mean more things to track.
+4. **Every button must carry a WHEN, not just a WHAT.** This is the rule that actually protects
+   "optimize the rotation" — the ceilings are just the fence. If the optimal play is "press it on
+   cooldown, every time," it is not a button: make it a passive, a rig THEN, or fold it into an
+   existing press. The freed movement budget buys **deeper timing on few buttons**, not more
+   buttons.
+
+**Compliance (current kits, counted honestly):** Twinfang 4 (+CD = 5, room to draft to 7) ·
+Alchemist fully drafted = 8 (+CD = 9 — **over**; at reshape the catalyst module button + the 3
+drafted spells compete for the 2 allowance slots) · the Well loaded = 10 (**over even its 8** —
+the book gets a trim/fold at its reshape). The per-class `SPELL_CAP` in code (5 on
+Twinfang/Alchemist/Voidcaller, 8 on the Well) is just the draft-machinery knob — retune each
+class's knob to whatever its ceiling leaves free. The old "bar cap 5" note below was quoting that
+knob; this law supersedes it.
 
 **The spells rule — reconciled (2026-07-09).** The old law "spell/extra-button lanes are dead"
 (*"I don't like flurry, grace note, coda"*) stands **as an anti-filler rule**, now stated
@@ -203,8 +239,9 @@ precisely: **new buttons need a class-law reason.** Two things clear that bar:
   the **Well is the spells-reweight pilot** (direct-cast heals — charge/empower pours, a proactive
   shield, a beacon, the rewind showpiece; HoTs stay a whisper so Bloomweaver keeps that lane).
 
-The `type:"spell"` machinery is unchanged (bar cap 5, exclusive `excl` twins); it's *used* where
-the class law calls for it, never sprinkled as filler.
+The `type:"spell"` machinery is unchanged (per-class `SPELL_CAP`, exclusive `excl` twins); each
+class's cap now derives from the ABILITY LAW above (whatever its ceiling leaves free). It's *used*
+where the class law calls for it, never sprinkled as filler.
 
 ---
 
@@ -236,6 +273,12 @@ must be fun BARE; (7) comp-variant content is parked.
   checklist (spread + coverage, applied **per deck**) plus a best-fit reading tag; *"exactly one
   type per card"* is dropped and no design is ever contorted to fit a box. EASE (the dial
   archetype) and TEAM (the Support slot) keep their own laws independent of the tags. See §4.
+- **THE ABILITY LAW** (2026-07-09, Bill) — the button budget, counted in **touch targets** (mobile
+  is the binding wall): chassis free (core 2–3 + dodge + signature CD), **+2 allowance** entering
+  only via existing doors (drafted spells · ≤1 module button), **hard ceiling 7** (the Well, the
+  one sanctioned broad-kit, gets 8). Boons/creeds/rig never add buttons; interrupts ride existing
+  buttons. **Every button needs a WHEN, not just a WHAT** — press-on-cooldown is a passive in a
+  button costume. See §5.
 - **The Rig is REQUIRED** (2026-07-09, Bill) — every class deck ships the single-circuit WHEN→THEN
   rig (see §1's RIG LAW): class-authored earned WHENs, greed-dial payout (`base × mult`), wire after
   fight 1 + one free Floor-2 re-wire. **The stackable multi-proc model stays CUT** — no THEN-board,

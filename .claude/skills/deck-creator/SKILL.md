@@ -91,6 +91,12 @@ the blocked hit and return it) rather than just subtract. If you catch yourself 
   knob on the class config (sims sweep it).
 - Wideners/forgiveness effects TAPER with power (help the cold player, not the hot one),
   and under edge-graded mechanics they extend the SAFE side only — never move the payoff lip.
+- **THE ABILITY LAW (DECK-LAYOUT §5, 2026-07-09):** buttons are budgeted in TOUCH TARGETS —
+  chassis (core 2–3 + dodge + signature CD) + max **2 more**, entering only via drafted spells or
+  ≤1 module button; **hard ceiling 7** (the Well, the sanctioned broad-kit, 8). Boons/creeds/rig
+  NEVER add buttons — they change what existing buttons do. Any new button must carry a **WHEN,
+  not just a WHAT**: if optimal play is "press on cooldown," author it as a passive or a rig THEN
+  instead.
 
 ## 6 · Process (design → verdict → build)
 
