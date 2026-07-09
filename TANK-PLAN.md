@@ -1,8 +1,9 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
-**Status:** 🟡 **DESIGN — base minigame being sharpened (2026-07-09); Duelist deck v1 AT BILL'S VERDICT.**
-Latest locks: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter, universal, progressive
-peel (§1c)** · consequences flagged (§1d). The round-5 minigame (tester v5) is the base; the Duelist deck
+**Status:** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
+VERDICT.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
+universal, progressive peel (§1c)** · consequences worked/deferred (§1d). Flow-economy *numbers* are left
+to a live slice (Bill: "playtest for feel"). The round-5 minigame (tester v5) is the base; the Duelist deck
 is on the verdict board:
 https://claude.ai/code/artifact/cf273dd1-4169-45e2-b990-47000941d417 — interactive KEEP/TWEAK/CUT,
 export blob comes back here. **Nothing is built yet.** Old Bulwark = frozen placeholder, NOT the base.
@@ -181,9 +182,12 @@ consumed by role:
   "flow"-type clean-rhythm meter; the tank's is the same *family*, doing a role-appropriate job (blade →
   damage, tank → aggro, healer → throughput). **Available where it fits, never forced** (Alchemist maybe
   not — Rule #1 asymmetric content). A framework note for the class-reshape phase (DECK-LAYOUT).
-- **⏭ NEXT THREAD — the flow economy:** DECIDED so far = flow moves on skill only, its own bar, peel on the
-  victim's dodge bar + grace-delay. STILL OPEN = the exact numbers (what a clean answer ADDS, what a slip
-  SUBTRACTS, decay rate, the flow→aggro% curve incl. 30%/0%). Nothing tunes until these are set.
+- **🎚 The flow economy — RULES locked, NUMBERS = playtest (Bill, 2026-07-09):** the *rules* are set
+  (skill-only, own bar, peel on the victim's dodge bar + grace-delay, the ≥30%/0% shape). The *numbers*
+  (what a clean answer ADDS, what a slip SUBTRACTS, decay rate, the exact flow→aggro% curve) are
+  **deliberately left to playtest for feel** — the two-track process ([[build-process-two-track]]:
+  structure now, feel from the thinnest playable slice). **Not a blocker** — it's the first thing a live
+  slice tunes.
 
 - **⚠ CUT HISTORY (don't rebuild):** R2 THREE DOORS/lanes · R3 SHIELD CHARGE-&-PLANT WALL +
   circle-size + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 shared 3-move kit.

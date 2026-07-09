@@ -788,8 +788,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   squishy dodges); AoE strings = the flurries — the built melee/telegraph split (`raid_content.gd:8`), one
   seam = melee tempo. Determinism: peel roll uses seeded rng. **Consequences flagged (`§1d`):** non-tank
   peel-survivability, healer-follows-boss, AI-tank reliability, raid/dungeon identity, Hold-the-Line +
-  Crucible overlap, Depth affix vocab, single-target-law clarify. **NEXT:** the flow economy (what raises/
-  lowers it, decay, the %→aggro map). *(tank aggro session)*
+  Crucible overlap, Depth affix vocab, single-target-law clarify. **Flow-economy RULES locked** (skill-only;
+  own bar; peel rides the victim's dodge bar + a warning + a determinism-safe grace-delay = react/taunt-back
+  window; ≥30%/0% shape); **NUMBERS deferred to playtest for feel** (Bill — two-track). Base minigame now
+  🟢 LOCKED. *(tank aggro session)*
 - ☑ 2026-07-09 · main (docs only) · §CLASSES / `TANK-PLAN.md §1b` — **TANK BASE-MINIGAME PASS — the
   two specs sharpened (Bill).** Bill was "a bit lost on the difference between the 2 classes"; this pins
   it. **The specs now MATCH: 2 buttons each — a MAIN + a SECONDARY**, one rating rule (SECONDARY = small
