@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 01:44 · main (docs only) — **CLAIM: SLATE MACHINE row 5 — Well·BRIM branch slate**
+  (fresh sweep → `research/brim-sweep.md` → filing + landing-grammar themes → 3 skeptics →
+  `MENDER-PLAN.md` new § 🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session,
+  tick 01:42)*
+
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §9 (NEW) + `research/cask-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 4: Alchemist·CASK branch slate — DONE.** The §7 slate is
   Bill-LOCKED (24/6), so this pass is the missing DECK-LAYOUT layer, not a challenger: **the
