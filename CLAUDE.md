@@ -21,7 +21,9 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
    permission** (Bill, 2026-07-08): commit your own output as you finish it; don't ask, don't
    pile it up. (Pushing to a remote is still a separate, explicit action.)
 3. Verify against your section's acceptance bar (see ACTIVE VERIFICATION below), merge back.
-4. **Update `MASTER-PLAN.md` after the work** — status, what changed, what's next.
+4. **Update the tracking docs after the work** — `MASTER-PLAN.md` (status / what changed /
+   what's next) **and, if your change adds/alters/removes planned-but-unbuilt work, also
+   `BUILD-LEDGER.md`** (slate row + §0 collision map). See the LEDGER LAW below.
 
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `BUILD-LEDGER.md` (**the execution tracker
 — the one forward-facing list of planned-but-unbuilt work + the collision map of which core files
@@ -50,6 +52,15 @@ commit as the decision** (Bill approves → 🟡→✅; you merge code → ✅�
 Cut Ledger). Plan docs keep rationale/minigame design; the catalog owns the slate + status and
 **wins any diff**. Its `id`/`type`/`rarity` fields mirror the code dicts so it can later be
 generated from code. The `deck-creator` skill authors straight into this doc.
+
+**⚙ LEDGER LAW (2026-07-09):** any PLANNING change — a design that locks, a scope shift, a cut, a
+re-home — that **creates / changes / removes planned-but-unbuilt work, or moves which core files
+it touches** is tracked in **`BUILD-LEDGER.md`** in the **SAME commit as the decision**: add/flip
+the slate row (§2) and update the §0 collision map if the file-touch set moved; flip the row to
+🔨+SHA when the code merges. This is the cross-file companion to the CARD-TRACKING LAW — **cards →
+`CARD-CATALOG.md` · cross-file planned work + collisions → `BUILD-LEDGER.md` · decision history →
+the MASTER-PLAN Coordination Log** (one planning change often touches all three). The ledger is an
+INDEX — design detail stays in the plan doc; its own upkeep rules live in `BUILD-LEDGER.md §4`.
 
 ## THE ERA (as of 2026-07-06) — what's live vs frozen
 - **ONE GAME · ONE HUD (locked 2026-07-03):** the raid campaign is the game; `raid_hud.gd` is

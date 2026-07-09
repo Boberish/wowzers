@@ -13,7 +13,7 @@
    `git worktree add ../wow-<task> -b <task>` → work there → commit early and often.
 4. **Sync often**: merge `main` into your branch regularly (at least before merging back) so parallel work never drifts far apart. **⚡ If your worktree predates 2026-07-03, `git merge main` NOW** — it brings **`scripts/psim.sh`** (runs the ACTIVE sims — `twinfang_sim` + `raid_sim` since the 2026-07-06 fresh slate — sharded across cores, **~5×** faster: `scripts/psim.sh <sim> [seeds] [jobs] [-- --boss=…]`). Prefer it over a single-threaded `godot --headless … --script res://sim/<sim>.gd -- --seeds=N`. It sims **your** worktree's code (self-locating root), so you still need to be synced. A missing/old `psim.sh` fails safe (no wrong results); output is byte-identical to a single run.
 5. **Verify before merging back**: run the acceptance bar for your section (listed per-section below; default = the active sims [`twinfang_sim` + `raid_sim`] + the system probes/UI smokes you touched, determinism PASS, and byte-identical checksums for any engine change). *(The old class/boss sims were deleted 2026-07-06 — see §CLASSES / CLAUDE.md ACTIVE VERIFICATION.)*
-6. **Merge to `main`, then UPDATE THIS FILE** — status, what changed, what's next, tick the Coordination Log entry. A task isn't done until the master plan says so.
+6. **Merge to `main`, then UPDATE THIS FILE** — status, what changed, what's next, tick the Coordination Log entry. A task isn't done until the master plan says so. **If the work created/changed/removed planned-but-unbuilt scope (or moved which files it touches), also update `BUILD-LEDGER.md`** (slate row + §0 collision map) in the same commit — the **LEDGER LAW** (CLAUDE.md). Cards additionally go to `CARD-CATALOG.md` (CARD-TRACKING LAW).
 7. Engine law is unchanged and non-negotiable: `CombatCore` stays a pure, deterministic, Node-free reducer (see CLAUDE.md).
 8. Cleanup: `git worktree remove ../wow-<task>` when merged.
 
@@ -773,6 +773,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · CLAUDE.md + MASTER §HOW-TO-WORK — **LEDGER LAW added (process).**
+  Gap found (Bill): the trigger to update `BUILD-LEDGER.md` lived only inside the ledger's own §4, so
+  a session doing design work elsewhere didn't know it was on the hook (I missed it on the EASE-dial
+  change until reminded). Fix: a prominent **⚙ LEDGER LAW** callout in CLAUDE.md (parallel to the
+  CARD-TRACKING LAW) + woven into workflow step 4 + mirrored in MASTER §HOW-TO-WORK step 6. Rule: any
+  planning change that creates/changes/removes planned-but-unbuilt work (or moves its file-touch set)
+  updates the ledger in the **same commit**; 🔨+SHA on merge. Three-way split made explicit: cards →
+  CARD-CATALOG · cross-file planned work + collisions → BUILD-LEDGER · decision history → this Coord
+  Log. *(this session)*
 - ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §4/§6 + deck-creator skill + CARD-CATALOG —
   **EASE → THE DIFFICULTY DIAL (Bill's idea).** EASE was going to get skipped (less "fun") and was
   flooding the pool (flat comfort cards are easy to author). Fix, locked with Bill (3 forks, all
