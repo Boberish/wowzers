@@ -813,6 +813,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 00:44 · main (docs only) — **CLAIM: SLATE MACHINE row 1 — Tank·WARDEN branch
+  slate** (SLATE-PLAN §1 pass: fresh sweep → `research/warden-sweep.md` → themed pitches → 3
+  skeptics → `TANK-PLAN.md` new § 🟡 AT VERDICT). Hold lifted (00:42 passed). Docs only; no
+  code, no CARD-CATALOG rows. *(slate-machine session, tick 00:42)*
+
 - ☐ 2026-07-10 · main (docs only) + 2nd session cron — **CLAIM: SLATE MACHINE PHASE 2 — THE DECK
   MACHINE (Bill).** SLATE-PLAN §5–§6 NEW: when every Phase-1 slate has landed, a second 15-min
   loop (`4,19,34,49`) authors the **FULL DECK (design only, never code)** per target around its
