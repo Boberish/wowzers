@@ -2,6 +2,14 @@
 
 **Purpose:** capture what we're taking from Project Ascension / *Conquest of Azeroth* (a classless WoW private server, CoA launched 2026-07-03) and turn it into a real milestone plan. This file is the **decisions of record** from the research session; the next step is to expand it into a `PORT-PLAN.md`-style milestone plan.
 
+> **⚠ PARTLY STALE (flagged by the 2026-07-09 loop audit, `GAME-LOOPS.md` §3):** two spots below
+> describe the as-built code, not the locked design — (a) **rerolls left the Token economy**
+> (🔒 `TEETH-PLAN.md`: reroll = a scarce earned/bought banked charge; LOCK retires with it; Tokens
+> re-home to the Market) — the REROLL/LOCK spend lines here fold in with that build claim; (b) the
+> *"Rift in one line"* above predates the world era (no Creeds/Modules/overworld/two-surface run —
+> current shape: `GAME-LOOPS.md` §1 + `DECK-LAYOUT.md` §1). The steal-philosophy + Draft-2.0
+> record below still stands.
+
 **Rift in one line:** co-op roguelike, MMO-trinity combat with *movement removed* → replaced by *timed active decisions*; one verb per role; run = pick 1-of-2 Aspect at start → chain 5 bosses → draft 1-of-3 boons between fights. 5 classes + 2nd healer done; M7 Strings (graded defense) roster-wide; R0/R1 co-op raid playable.
 
 **Core research finding:** Ascension's genius is NOT "random spells" — it's the **anti-feelbad + build-as-assembly philosophy**: power = many small standalone modifiers that recombine *with no lockouts*, plus systems that keep randomness fair and steerable (Synergy rolls, pity/bad-luck protection, rarity-as-frequency, reroll currency, slot-based enchants). We're fundamentally different (fixed roles, execution-driven), so we steal the *philosophy*, not the classless structure.

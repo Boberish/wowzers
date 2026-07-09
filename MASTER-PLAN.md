@@ -568,7 +568,10 @@ nodes, not node kinds.
     (v6 handshake) + `net_map_smoke` (real server + 2 WS clients, events answered, ZERO desyncs) ALL OK.
     ui_smoke_raid green; offline all byte-identical/unchanged. (The WS smoke's random route hit only
     shallow events, so the deterministic probe carries the check-path proof — noted.)
-  - **NEXT (unclaimed):** P3 multi-stage BRANCHES + cross-node FLAGS (schema fields exist; the
+  - **~~NEXT (unclaimed)~~ — ⚠ STALE (2026-07-09 loop audit, `GAME-LOOPS.md` §3): everything in
+    this list SHIPPED** (see the P3 / SEAT-PICKER / WAGER+MULLIGAN merged bullets above + the
+    Overall-Progress row "FEATURE-COMPLETE (all follow-ups merged)"). Kept for history:
+    P3 multi-stage BRANCHES + cross-node FLAGS (schema fields exist; the
     'A Favor Returned' payoff). P2-remainder: MULLIGAN (post-fail reroll, attempt+1) · CUSHION · the
     WAGER kind. **Seat-picker** (party designates who steps up to a check — the protocol already carries
     `seat`) + **online Prior** (client transmits its tier at lobby). More deep events (entropy_daemon /
@@ -773,11 +776,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-09 · main (docs only) · NEW `GAME-LOOPS.md` + CLAUDE.md index line — **CLAIM: core
-  game-loop AUDIT (Bill).** Idea-level (not code): read every plan doc, map the full loop stack
-  (moment→run→session→meta), where each loop is defined, gaps/contradictions/fragmentation, and a
-  verdict on whether the many-.md structure is the right store. Output = one consolidated loop-map
-  doc + recommendation. No design changes, no card/ledger rows. *(this session)*
+- ☑ 2026-07-09 · main (docs only) · NEW `GAME-LOOPS.md` + CLAUDE.md index line + 2 drift banners —
+  **core game-loop AUDIT (Bill) — DONE.** Read all 23 plan docs; **`GAME-LOOPS.md`** is the
+  deliverable: the game stated as 7 loops (beat→fight→node→run→world→account→warband) with status
+  + doc-of-record pointers (§1/§2), audit findings (§3: 5 drift spots · 4 stale blocks · 6 gaps —
+  headline: **the DUNGEON surface has no plan**; signature CD built nowhere; run loop = 6 doc
+  homes), and the storage verdict (§4: **keep .md-in-git** — the fracture was a read-path problem,
+  fixed by the index-doc pattern, not the medium; don't consolidate into bigger files). Zero live
+  contradictions found — every conflict was a stale echo with the newer doc winning by written
+  rule. Side fixes in the same commit: ⚠ stale banners on `ASCENSION-STEAL-PLAN.md` (rerolls-out +
+  pre-world one-liner) and MASTER §MAPS' shipped "NEXT" list. Recommended follow-ups (Bill
+  verdicts): freeze RAID-PLAN · author the DUNGEON spec before W3 · §ONLINE/§CLASSES stale-header
+  fixes. No design changes, no card/ledger rows. *(this session)*
 
 - ☐ 2026-07-09 · main (docs only) · TEMPO-PLAN (new branch-slate section) + `research/` (NEW dir) +
   BUILD-LEDGER §2 — **CLAIM: Twinfang·Tempo deck rebuild, Phase A (Bill).** Ground-up reshape onto

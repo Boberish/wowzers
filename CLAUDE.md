@@ -27,7 +27,10 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `BUILD-LEDGER.md` (**the execution tracker
 — the one forward-facing list of planned-but-unbuilt work + the collision map of which core files
-each change touches; an INDEX not a spec, 2026-07-09**) · `WORLD-PLAN.md` (the world pivot +
+each change touches; an INDEX not a spec, 2026-07-09**) · `GAME-LOOPS.md` (**the loop map — the
+read-optimized index of the game as its 7 player-facing loops (beat→fight→node→run→world→account→
+warband), each with status + doc-of-record pointers; owning docs win any diff; + the 2026-07-09
+loop-audit findings**) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
 signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE single source of truth for
 every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,
