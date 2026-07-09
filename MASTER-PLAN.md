@@ -773,6 +773,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-09 · main (docs only) · TEMPO-PLAN (new branch-slate section) + `research/` (NEW dir) +
+  BUILD-LEDGER §2 — **CLAIM: Twinfang·Tempo deck rebuild, Phase A (Bill).** Ground-up reshape onto
+  DECK-LAYOUT, Bill's scope: Tempo first (Fermata pass later), **base ideas only this pass** —
+  (1) build `research/` — a reusable game-design knowledge base, 6 files (WoW retail · StS2 ·
+  Hades 1+2 · Across the Obelisk · Expedition 33 · wildcards sweep) researched by Opus agents;
+  (2) 4-lens synthesis over it; (3) **5–6 branch/sub-spec BASE-IDEA pitches for Tempo** (fun/twist
+  bar, dials may bend, ability-law doors for identity buttons) → small adversarial pass → Bill's
+  talk-through verdict. No cards proposed, no code, CARD-CATALOG untouched this pass. *(this
+  session)*
+
 - ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §5/§6 + deck-creator skill + BUILD-LEDGER §C —
   **THE ABILITY LAW: the button budget (Bill).** The signature CD existed but no rules governed
   ability/button count. Bill's frame: keep the game about **optimizing rotations** (not WoW's 50
