@@ -145,6 +145,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Duelist HUD slice | 🔒 | TANK §4.5 | `raid_hud` timing instrument, own FLOW bar, shared aggro box | WSLg screenshot (headless can't `_draw`). Non-tanks get no flow bar. |
 | Warden spec (base + deck) | 🟡 | TANK §5 | new — BLOCK/SHIELD/SHIELD-SLAM, no dodge | Base locked; deck = later pass after Duelist proves the frame. Receives re-homed guard cards. |
 | **Warden — BRANCH SLATE (5 themes)** | 🟡 | TANK §6 + `research/warden-sweep.md` | design only (deck pass = Phase-2 row D1) | Payload · Slam · Rampart · Bannerman · Thornback — Bill picks 2–3. Absorbs the 🔮 guard trio + carries (filing table). Bannerman flags the buff-channel debt. |
+| **Duelist — CHALLENGER SLATE (3 vs the v1 ladders)** | 🟡 | TANK §7 + `research/duelist-sweep.md` | design only (deck revision = Phase-2 row D2) | Matador · Stormweave · Scarlet Trade join the SAME §3 verdict board as deck v1 (incumbents = PITCH #0a/b/c); Bill picks 2–3 ladders total. 1 kill (Planted Blade — collision), ~8 fixes. |
 | Tank per-Seal streams + interrupt flag + spec-carry | ⏳ | TANK §4.6 | encounter data per Seal | Ship with build, not deck. Interrupt flag with the pillar-#3 pass. |
 
 ### C. Class reshape (Phase 2) + shared class substrate

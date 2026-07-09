@@ -1,7 +1,8 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
 **Status:** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
-VERDICT; Warden BRANCH SLATE (§6, 5 themes) 🟡 AT VERDICT 2026-07-10.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
+VERDICT + 3 challenger themes (§7) joined that board 2026-07-10; Warden BRANCH SLATE (§6, 5 themes)
+🟡 AT VERDICT 2026-07-10.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
 universal, progressive peel (§1c)** · consequences worked/deferred (§1d). Flow-economy *numbers* are left
 to a live slice (Bill: "playtest for feel"). The round-5 minigame (tester v5) is the base; the Duelist deck
 is on the verdict board:
@@ -525,3 +526,162 @@ too thin alone; folded into Rampart as a boon shape).
 
 **Next:** Bill picks 2–3 → the Warden deck pass (§5 top item; SLATE-PLAN Phase 2 row D1 authors
 it around the winners — creeds/modules/boons/rig/keystones/EASE knobs + CARD-CATALOG rows).
+
+## §7 · THE DUELIST CHALLENGER SLATE — 3 challengers vs the v1 ladders 🟡 AT VERDICT (2026-07-10)
+
+**⚠ Read this with the §3 board, not instead of it** (SLATE-PLAN row 2, kind = *challenger
+slate*). Deck v1's three ladders ARE branch themes and they are **PITCH #0a/#0b/#0c** below,
+restated in the slate anatomy so everything competes at one bar. **This section adds three
+CHALLENGERS to the same verdict: Bill still picks 2–3 ladders TOTAL.** Incumbents win → deck v1
+stands exactly as authored; a challenger wins → it swaps in at the Phase-2 deck revision (row
+D2), inheriting the v1 verdicts that survive. Base kit untouched; example cards are
+ILLUSTRATIONS — no CARD-CATALOG rows this pass. **How it was made:** knowledge base re-mined +
+fresh sweep `research/duelist-sweep.md` (Sekiro streaks · SF6 Drive/burnout · Punch-Out's bait
+puzzle · Nine Sols) → 4 lenses → 3 challengers → **3 skeptic passes (1 kill pre-slate, ~8 fixes
+folded)**.
+
+### The harvest (challenger-sized — what v1 leaves on the table)
+
+1. **Nothing in v1 pays the READ.** Feints are a base mechanic (READ/BAITED) and Punch-Out
+   proves the bait-puzzle carries a whole game — but v1 files one boon there (Read the Room,
+   Ghost lane) and moves on. The biggest unclaimed dial.
+2. **Nothing in v1 pays the WEAVE.** The all-or-eat-it-all flurry → free RIPOSTE is the kit's
+   most dramatic instrument, and zero cards touch it.
+3. **The blood shapes are scattered.** Blood Price + Overreach + Crucible all monetize damage
+   taken, but they're filed across three lanes — the vampire-without-healing fantasy is sitting
+   there un-assembled.
+4. **SF6's burnout confirms the Crucible's crash design** (self-authored overspend penalty) —
+   not a new theme; boon material for Ironside if it survives.
+5. **Sekiro's escalating deflect streak** is half-present (The Rally); a boss-side posture bar
+   stays parked (engine debt) — streaks stay kit-local.
+
+### PITCH #0a — THE HEADSMAN (incumbent) · *bank it, then one huge answer*
+Bank-and-burst on ◆: Wager creed → Whetstone → SWING/BANK/SPEND boons → 👑 THE AVALANCHE.
+**Dials:** the bank · the spend. **Clock:** self-set hold-then-cash cycles. **Greed:** riding a
+full sharp bank. EASE knob: (deck pass — bank-decay grace). *Full spec: §3.*
+
+### PITCH #0b — THE IRONSIDE (incumbent) · *the fire feeds on what you eat*
+The damage-taken engine: Veteran/Bellows → ⭐ Crucible → Blood Price/Overreach/Deep Pockets →
+👑 THE IMPOSSIBLE PARRY. **Dials:** the wind · the duet. **Clock:** ignite cycles keyed to the
+bleed. **Greed:** igniting early / spending to the brink (the SF6-burnout boon shapes land
+here). *Full spec: §3. Note: post-GUARD-drop this ladder is purely the Crucible engine — its
+old shield cards are the Warden's now (§6 filing table).*
+
+### PITCH #0c — THE GHOST (incumbent) · *never touched, always moving*
+The footwork chain: Dancer → Scales → Feather Step/Perfect Form/Read the Room → 👑 BORROWED
+TIME. **Dials:** the step · the read (light). **Clock:** whole-fight streak. **Greed:** the
+balance edge (Scales). *Full spec: §3.*
+
+---
+
+### CHALLENGER 1 — THE MATADOR · *the fight is won before you press*
+
+**What its cards do:** the bait puzzle becomes the build. Correct READS (ignoring a feint) and
+LATE answers (landing in the last slice of a window — deliberate, chosen per bar) build
+**insight**; insight makes your next commit bigger. Taunt-grade moments (the boss's feint-heavy
+verses) become YOUR verses. Punch-Out's grammar on our instrument.
+**Dials addressed:** the read (the unclaimed dial) · the swing (insight's casher). No bends;
+insight is a kit-local counter.
+**Absorbs:** *Read the Room* (from the Ghost lane — its natural home) · the feint/unavoidable
+authored stream (encounter data already carries it).
+**Example new cards:** creed *Cold Blood* — reads build insight from run start; feints read a
+touch slower (the tell is loud for you) · boon *The Late Answer* (GREED) — a parry landed in the
+window's last slice counts double insight, a whiff there costs 2 · boon *Toro* (STRAT) — a
+BAITED feint (you pressed) spends 1 insight to forgive the wind loss: the matador's cape-flick,
+a play not a pardon · keystone **LA ESTOCADA** — at full insight your next perfect parry is THE
+KILL READ: the stream visibly holds its breath (one silent beat), then your counter lands ×3
+with the banked insight erupting. Spent, back to zero, earn it again.
+**Greed/comfort + EASE knob:** patience-greed (the late answer, the held press); comfort = answer
+early and safe, insight trickles anyway. Knob: feint-tell clarity (how loud hollow bars read).
+**Skeptic fix folded:** insight also accrues (reduced) from clean reads of ANY bar type, so a
+feint-light boss doesn't kill the theme; authored streams guarantee feint density per Seal.
+**Nearest neighbor:** Tempo's PUNISH theme (lives on the Opening — offense windows); the Matador
+lives on the DEFENSE stream's tells. The Warden has no feint-economy theme. Punch-Out is the
+pedigree.
+
+---
+
+### CHALLENGER 2 — THE STORMWEAVE · *the flurry is your favorite part*
+
+**What its cards do:** the weave→riposte instrument gets paid. Flurry appetite (cards that make
+weaves richer), riposte riders (the free RIPOSTE becomes a build moment), weave-streak payoffs.
+An execution-burst theme for the player who grins when the bars come fast.
+**Dials addressed:** the step (weave events ONLY — skeptic-scoped: generic dodge-grade payoffs
+stay the Ghost's; this theme keys strictly to weave/riposte events) · the spend (riposte
+riders). No bends.
+**Absorbs:** nothing — pure new cards on an unpaid instrument (the cleanest filing in the slate).
+**Example new cards:** creed *Storm Footing* — clean weaves refund +1 wind from run start ·
+boon *Eye of the Storm* (STRAT) — a clean weave's riposte also banks ◆ · boon *Thread the
+Needle* (GREED) — your weave windows tighten 15% but a clean weave's riposte hits ×1.5: opt into
+the harder dance · keystone **THE TEMPEST ANSWER** — a clean weave through a full flurry turns
+your riposte into a mirrored flurry: your counter comes out as the SAME bar-string reflected
+back across the gate, each press of it graded. The boss's hardest moment becomes your biggest.
+**Greed/comfort + EASE knob:** density-greed (opt-in tighter weaves); comfort = weave at base
+width, riders still pay. Knob: riposte-window width.
+**Skeptic fix folded:** riposte riders extend at reduced value to parry-counters, so the theme
+breathes between authored flurries.
+**Nearest neighbor:** the Warden answers the same flurry bars with the HOLD (endurance) — the
+Stormweave answers with execution. The Ghost owns generic footwork; composition warning: Ghost +
+Stormweave both live on THE STEP — picking both piles one dial (legal, but flagged).
+
+---
+
+### CHALLENGER 3 — THE SCARLET TRADE · *your blood is a currency*
+
+**What its cards do:** assembles the scattered blood shapes into one build — HP spent as a
+resource, on YOUR terms. The Duelist already eats unavoidables by design (low HP, fast swings);
+this theme makes the eating a ledger: blood spent → value banked, with hard floors and the
+healer duet pricing every trade.
+**Dials addressed:** the duet · the bank. No bends; no self-heal anywhere (the healer refills —
+your job is making the bleed WORTH her time).
+**Absorbs:** *Blood Price* (from the Bank lane — its natural capital) · *Overreach* (stays
+Swing-filed, double-tagged) · synergizes with (never requires) the Crucible.
+**Example new cards:** creed *Red Ledger* — unavoidables bank ◆ from run start (small) · boon
+*Paid in Iron* (STRAT) — while below 60% HP your counters +12/18/25% · boon *The Deep Cut*
+(GREED) — once per bank-cycle, VOLUNTARILY eat a normal bar unanswered: it banks ◆◆ and +3 wind;
+never below 25% HP (chosen per use — the self-cut) · keystone **CRIMSON DIVIDEND** — spending a
+full bank while under 40% HP pays the dump ×2 and the gate floods red; the healer's refill of
+that dip visibly pours into your next bank (the duet made spectacular).
+**Greed/comfort + EASE knob:** literal blood-greed (floors stated on every card); comfort = trade
+only what the stream forces. Knob: blood-floor height (how deep the cards let you go).
+**Skeptic fixes folded:** every HP-spend card carries a floor (Overreach precedent); the duet
+coupling is flagged as tuning surface (a blood build makes the healer's job harder — priced at
+the deck pass, and it's TEXTURE for the §1c "healer follows the boss" work, not a conflict).
+**Nearest neighbor:** WoW Blood DK (vampiric — ours never self-heals; the warband's healer is
+the other half of the trade) · the Warden's skipped "Juggernaut" (eat-on-purpose was WRONG for
+the no-unavoidables shield kit; it's native here — the kits stay different, per the §1b split).
+
+---
+
+### SLATE-LEVEL CHECKS + the pick
+
+**Spread across all six:** bank-burst (#0a) · engine/brink (#0b) · streak (#0c) · read (C1) ·
+event-burst (C2) · blood ledger (C3) — six clocks, no shared cadence; C1 is the only theme in
+the CLASS that pays not-pressing.
+**Skeptic record:** 3 passes · 1 pre-slate kill (**the Planted Blade** — Nine Sols
+plant-and-detonate: triple-collision with Fermata's Mark / Tempo's Wound / the Warden's Payload)
+· ~8 fixes folded (Matador feint-drought valve · Stormweave scoped to weave-events-only + the
+Ghost composition warning · Scarlet floors + duet-pricing flag · SF6 burnout filed as Ironside
+boon material, not a theme).
+**Challenger ranking (pick-tension, strongest→weakest):** Matador · Scarlet Trade · Stormweave.
+The slate does NOT re-rank the incumbents — that's the live §3 board; these three are offered
+INTO it.
+**Composition notes:** Matador + any incumbent composes cleanly (new dial, no collisions).
+Scarlet + Ironside is the natural pair (both monetize the bleed — one build, two engines;
+flag: check the healer's workload at the deck pass). Ghost + Stormweave piles THE STEP (flagged
+above). Headsman + Scarlet both feed THE BANK — legal, rich, watch auto-pick pressure on bank
+boons.
+**Engine debts:** none for Matador/Scarlet (kit-local counters + existing floors idiom);
+Stormweave's mirrored-flurry keystone needs the riposte instrument to render a returning string
+(the Avalanche already proves the shape).
+**AI-pilotable:** Matador = press-timing offset + feint-classification the policy already does ·
+Stormweave = weave-entry decision (threshold) · Scarlet = HP-floor-aware trade timing (threshold)
+— all expressible at 3 tiers.
+**Skipped on purpose:** **the Planted Blade** (killed — collision, above) · **the Burnout**
+(SF6 spend-crash as its own theme — the Crucible IS that cycle; folded to boon shapes) · **the
+Posture-Breaker** (Sekiro boss-bar — engine debt, parked with the old Counterpoint pitch) ·
+**a Duelist TEAM theme** (the Warden's Bannerman owns the tank class's TEAM lane this round;
+two tank TEAM themes would split the same warband surface).
+
+**Next:** these three join the §3 verdict board — Bill picks 2–3 ladders TOTAL across
+incumbents + challengers → the Phase-2 deck pass (row D2) authors/revises around the winners.
