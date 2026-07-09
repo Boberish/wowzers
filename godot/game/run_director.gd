@@ -43,6 +43,7 @@ var gear_unlocks: Dictionary = {}  ## boss_id -> unlocked item ids (Ledger rows)
 var drop_rng: DetRng = null        ## the drop stream — NEVER the combat rng
 
 # ---- Draft 2.0 + COMMANDER: the human's boon run, and the AI raiders you command
+var run_seed: int = -1             ## the descent's ONE minted seed (REFIT P4): drops/floors/fights/drafts derive closed-form — a run replays from this integer
 var run: RunState = null           ## the human's boon run (null = no descent live)
 var taken_boons: Array = []        ## drafted boon dicts (for the build panel: title/rarity)
 var party: Dictionary = {}         ## AI seats only: seat_key -> {cls, aspect} (persists across descents)

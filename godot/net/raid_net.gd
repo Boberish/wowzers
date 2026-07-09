@@ -57,8 +57,16 @@ static func cls_of(seat: Seat) -> String:
 ## `seat_boons` (online boons): seat_key -> {boon_id: true}. Ridden per seat so every
 ## replica builds the identical fight with each player's drafted boons applied. Absent /
 ## empty = a boon-less seat (AI raiders, or a seat that hasn't drafted) — byte-identical.
+## `ctx`: which surface is pulling — "instance" (raid/dungeon: the full run economy
+## rides) or "zone" (overworld: BARE KIT). The zone spec structurally refuses
+## seat_boons (WORLD-PLAN pillar #5 / REFIT P4 split-law guard) instead of trusting
+## every call site to remember the law.
 static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
-		carry: Dictionary = {}, seat_boons: Dictionary = {}, pack: Array = []) -> Dictionary:
+		carry: Dictionary = {}, seat_boons: Dictionary = {}, pack: Array = [],
+		ctx: String = "instance") -> Dictionary:
+	if ctx == "zone" and not seat_boons.is_empty():
+		push_error("SPLIT LAW: a zone fight spec carried seat_boons — dropped (bare-kit law)")
+		seat_boons = {}
 	var seats: Array = []
 	for key in SEAT_KEYS:
 		var c: Dictionary = seat_cfg.get(key, {})

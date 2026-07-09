@@ -434,7 +434,7 @@ func _launch_zone_fight(n: Dictionary) -> void:
 	_screen = "combat"
 	_clear()
 	_ensure_party()
-	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var run_seed := _mint_run_seed()   # recorded — a zone pull replays like any run
 	var carry := {}
 	if ESCORT_PREVIEW:
 		var b := Escort.burden_for(_world, _zone_id, n)
@@ -443,7 +443,7 @@ func _launch_zone_fight(n: Dictionary) -> void:
 	# PACK: an authored member chain on the node = one battle, fought sequentially
 	# (node["fight"] is always the chain's first id; [] = a classic single pull).
 	var pk: Array = n.get("pack", [])
-	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), carry, {}, pk)
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), String(n["fight"]), carry, {}, pk, "zone")
 	var s := RaidNet.build(spec, _seat_key)
 	_apply_fightlen(s)
 	_loadout = _make_loadout()
@@ -826,7 +826,7 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	_clear()
 	# offline uses the SAME shared fight factory the netcode locksteps on
 	# (COMMANDER: the assembled party's aspects/classes ride single-Seal pulls too)
-	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	var run_seed := _mint_run_seed()   # recorded — a Seal pull replays like any run
 	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
 	var s := RaidNet.build(spec, _seat_key)
 	_apply_fightlen(s)
@@ -871,10 +871,15 @@ func _start_map_run() -> void:
 	_d.taken_boons = []
 	if DisplayServer.get_name() != "headless":
 		_d.gear_unlocks = GearStore.load_unlocks()
-	_d.drop_rng = DetRng.new(int(Time.get_ticks_usec()) & 0x7FFFFFFF)
+	# REPRODUCIBLE DESCENT (REFIT P4): ONE minted seed is the whole run's identity —
+	# drops, floor topology, fights, and every boon draft derive from it closed-form,
+	# so a descent replays from the one recorded integer (the Profile keeps the stream:
+	# root/counter/last_seed — the replay/ghost-race hook).
+	_d.run_seed = _mint_run_seed()
+	_d.drop_rng = DetRng.new((_d.run_seed ^ 0x5EEDD07) & 0x7FFFFFFF)
 	# Draft 2.0: the human's boon run — the 1-of-3 draft fires after each won fight and
 	# its picks ride into every pull.
-	_d.run = _make_run()
+	_d.run = _make_run(_d.run_seed)
 	# COMMANDER: each AI raider gets its own boon run too — you draft on their behalf
 	# after every won fight. Seeds decorrelated from yours (disjoint draft streams).
 	_ensure_party()
@@ -888,11 +893,19 @@ func _start_map_run() -> void:
 ## A minimal RunState for the human seat, just to carry boons + the draft economy
 ## (class/aspect/draft_rng/tokens/pity). Its encounter chain is ignored — the raid
 ## drives its own fights; we only borrow the boon pool + Draft 2.0 machinery.
-func _make_run() -> RunState:
+## seed_v: the descent seed offline (reproducible drafts); -1 online — the caller
+## re-seeds draft_rng from the server's descent seed anyway.
+func _make_run(seed_v: int = -1) -> RunState:
 	_sync_healer_cls()
 	_sync_blade_cls()
 	_sync_caster_cls()
-	return _make_seat_run(_seat_cls_now(), _aspect, -1)
+	return _make_seat_run(_seat_cls_now(), _aspect, seed_v)
+
+## Mint a recorded run seed off the Profile's persisted stream (REFIT P4): every
+## offline run/pull is reproducible from the profile's (root, counter) pair — and
+## headless draws from the FIXED root, so smokes stay deterministic AND disk-inert.
+func _mint_run_seed() -> int:
+	return Profile.current().next_run_seed()
 
 ## COMMANDER: a boon RunState for ANY seat (class starter by cls) — the commander
 ## drafts on behalf of the AI raiders, so they carry the same run machinery you do.
@@ -945,7 +958,9 @@ func _build_floor() -> void:
 	# THE DESCENT REFIT: floors run `rows` deep (8 = 20 nodes) — quest/story quotas stay
 	# authored (4 events, tickets per FLOORS), the extra mid slots pad to COMBAT filler;
 	# +1 cooling/+1 cache keep the breather + ⏻ economy proportional to the longer floor.
-	_d.map = RunMap.generate(int(Time.get_ticks_usec()) & 0x7FFFFFFF,
+	# floor topology derives from the descent seed (REFIT P4 reproducible runs);
+	# +1 so floor 0 never collapses the fold to the bare run_seed.
+	_d.map = RunMap.generate(int((_d.run_seed * 1000003 + (_d.floor_i + 1) * 7919 + 1) & 0x7FFFFFFF),
 		_d.fights.size(), MapContent.raid_event_ids(),
 		{RunMap.KIND_GATE: 1, RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
 		int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
@@ -1236,7 +1251,11 @@ func _launch_map_fight(fi: int) -> void:
 	_screen = "combat"
 	_clear()
 	var enc: EncounterRes = _d.fights[clampi(fi, 0, _d.fights.size() - 1)]
-	var run_seed := int(Time.get_ticks_usec() & 0x7FFFFFFF)
+	# fight seed: closed-form off (descent seed, floor, fight, NODE) — the node id is
+	# folded so two same-index nodes never replay the identical fight (the
+	# RunState.fight_seed() idiom); same node re-entered = same fight, by design.
+	var run_seed := int((_d.run_seed * 1000003 + (_d.floor_i + 1) * 7919 \
+		+ (fi + 1) * 104729 + (_d.node + 2) * 6763) & 0x7FFFFFFF)
 	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
 	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
 	# PACK QUOTAS: a rolled chain opens with fillers; the node's enc stays the KILL that
