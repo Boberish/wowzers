@@ -25,7 +25,10 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
-signature CD · rules, consolidated 2026-07-09) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
+signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE single source of truth for
+every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,
+strict idea→verdict→approved→built→cut lifecycle; wins any diff with a plan doc, 2026-07-09) ·
+`TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, pair locked 2026-07-07) ·
 `TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·
@@ -37,6 +40,14 @@ loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-0
 `RAID-PLAN.md` (netcode-era reference) ·
 `HISTORY.md` (frozen milestone build-up M0→R2.5 + PoC notes — the old CLAUDE.md status list) ·
 `PORT-PLAN.md` / `rift-godot-port-brief.md` / `poc/` (origins, historical).
+
+**⚙ CARD-TRACKING LAW (2026-07-09):** every card — creed/module/boon/rig/keystone/support/spell,
+any class — is tracked in **`CARD-CATALOG.md`**, one row, one status glyph (💡 idea → 🟡 at verdict →
+✅ approved → 🔨 built+SHA → 🔮 parked / ✂️ cut). Propose there, and **flip the status in the SAME
+commit as the decision** (Bill approves → 🟡→✅; you merge code → ✅→🔨+SHA; Bill cuts → move to the
+Cut Ledger). Plan docs keep rationale/minigame design; the catalog owns the slate + status and
+**wins any diff**. Its `id`/`type`/`rarity` fields mirror the code dicts so it can later be
+generated from code. The `deck-creator` skill authors straight into this doc.
 
 ## THE ERA (as of 2026-07-06) — what's live vs frozen
 - **ONE GAME · ONE HUD (locked 2026-07-03):** the raid campaign is the game; `raid_hud.gd` is

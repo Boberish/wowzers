@@ -145,6 +145,12 @@ every card sits on (dial-lane / ladder / card-type) · the 6 card-types · the s
 signature CD · the spells reconcile — merged into one spec the deck-creator + every class reshape
 target. The 7 CLASS DESIGN RULES below stay canonical here.
 
+**⚙ CANONICAL CARD SLATE + STATUS → `CARD-CATALOG.md` (2026-07-09):** the anatomy's counterpart —
+where the *actual cards* live (every creed/module/boon/rig/keystone/support/spell, all classes),
+one row each with a strict idea→verdict→approved→built→cut status. Schema in DECK-LAYOUT, content in
+CARD-CATALOG. Wins any diff with a plan doc; fields mirror the code dicts for a later dump-from-code.
+Tank·Duelist is the populated worked reference; other active classes are stubs pending back-fill.
+
 **The bold move:** every class gets re-thought from the ground up onto ONE new framework. Full spec:
 **`TEMPO-PLAN.md`**. This supersedes the ad-hoc per-class kits — the class-fun reworks + slot-verbs were the
 right instincts; this makes them a *system*. Each class becomes: a **core timing minigame** (the verb) →
@@ -767,6 +773,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · `CARD-CATALOG.md` — **THE CARD SLATE + STATUS CONSOLIDATION
+  (Bill: "how do we track boons/cards/creeds — want something solid + localized, a rule/skill").**
+  Diagnosis: card design was scattered across 4 plan docs in 4 formats while the built truth lived
+  separately in `data/<class>/*.gd`, with nothing linking them (drift showcase: "Duelist" = a
+  proposed player kit in docs but a boss encounter in code). Bill's steer: generate-from-code is the
+  right end-state but not yet (still planning, not everything's in code) → **for now a doc with
+  STRICTER rules.** New `CARD-CATALOG.md` = the single source of truth for every card's design +
+  status: one row per card, one format (mirrors the code dict fields for a later dump-from-code), a
+  strict lifecycle (💡 idea → 🟡 at verdict → ✅ approved → 🔨 built+SHA → 🔮 parked / ✂️ cut) with
+  the rule "flip status in the SAME commit as the decision," and a Cut Ledger (never resurrect).
+  **Tank·Duelist fully populated as the worked reference**; other active classes are stubs pending
+  back-fill on Bill's go. Pointers wired: CLAUDE.md index + new CARD-TRACKING LAW · deck-creator
+  SKILL step 5 (authors into the catalog) · MASTER §CLASS FRAMEWORK. No code touched. **NEXT:**
+  back-fill Twinfang/Alchemist/Well slates into the format (once Bill OKs it on the tank). *(card-catalog session)*
 - ☑ 2026-07-09 · main (docs only) · §CLASS FRAMEWORK / `DECK-LAYOUT.md` — **THE DECK LAYOUT
   CONSOLIDATION (Bill: "merge all these ideas into a deck layout, then relook at classes").**
   New `DECK-LAYOUT.md` = the canonical class-deck anatomy, merging what was scattered across

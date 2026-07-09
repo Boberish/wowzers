@@ -111,7 +111,11 @@ the blocked hit and return it) rather than just subtract. If you catch yourself 
    term, and open the page with a short "the words, quickly" glossary + a loop refresher
    (Bill juggles several classes; a board that needs design lingo to read is a failed board).
    Bill verdicts; you fold.
-5. **Hard-copy the slate into the class plan doc BEFORE building** (context dies; docs don't).
+5. **Hard-copy the slate into `CARD-CATALOG.md` BEFORE building** (context dies; docs don't) — one
+   row per card in the canonical format, each tagged with its status glyph (💡/🟡). That doc is THE
+   single source of truth for every card's design + status; flip statuses there in the same commit
+   as Bill's verdict (🟡→✅) and again when built (✅→🔨+SHA). The class plan doc keeps only the
+   rationale / minigame design, not the slate. (See `CARD-CATALOG.md` header + CLAUDE.md CARD-TRACKING LAW.)
 6. Build kit-local and aspect-gated (byte-identical when unpicked), knobs on the config,
    sim probe cells per creed/module/build, determinism PASS, then the HUD slice.
 7. Feel questions that split 50/50 become dev-toggle A/Bs in a tester, never debates.
