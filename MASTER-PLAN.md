@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 01:29 · main (docs only) — **CLAIM: SLATE MACHINE row 4 — Alchemist·CASK branch
+  slate** (fresh sweep → `research/cask-sweep.md` → build themes on the locked Cask verb →
+  3 skeptics → `ALCHEMIST-PLAN.md` new § 🟡; feeds the owed §7.7 slices 3–5 deck). Docs only;
+  no code, no CARD-CATALOG rows. *(slate-machine session, tick 01:27)*
+
 - ☑ 2026-07-10 · main (docs only) · `BLOOM-PLAN.md` (NEW) + `research/bloom-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 3: BLOOMWEAVER class slate — DONE, four core-minigame
   candidates AT BILL'S VERDICT** (the queue's one rewire-grade pass; do-not-merge lock honored;

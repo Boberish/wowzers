@@ -31,7 +31,7 @@ reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 | 1 | Tank · **Warden** | branch slate | `TANK-PLAN.md` §6 | 🟡 | — | LANDED 07-10: 5 themes (Payload · Slam · Rampart · Bannerman · Thornback), 1 kill, ~11 fixes, filing table for the 🔮 trio + carries. Bill picks 2–3. |
 | 2 | Tank · **Duelist** | challenger slate | `TANK-PLAN.md` §7 | 🟡 | — | LANDED 07-10: 3 challengers (Matador · Stormweave · Scarlet Trade) join the live §3 board; v1 ladders = PITCH #0a/b/c; Bill picks 2–3 total. 1 kill, ~8 fixes. |
 | 3 | **Bloomweaver** (whole class) | class slate | `BLOOM-PLAN.md` (NEW) | 🟡 | — | LANDED 07-10: 4 core candidates (Orchard Clock · Trellis · Briar · Pruning), each w/ 2 spec seeds; 1 kill (Pollinators), ~9 fixes. Bill picks ONE core. |
-| 4 | Alchemist · **Cask** | branch slate | `ALCHEMIST-PLAN.md` new § | ⬜ | — | Verb slices 1–2 built, cards owed (§7.7) — slate feeds the owed deck. |
+| 4 | Alchemist · **Cask** | branch slate | `ALCHEMIST-PLAN.md` new § | 🔄 | 07-10 01:29 | Verb slices 1–2 built, cards owed (§7.7) — slate feeds the owed deck. |
 | 5 | Well · **Brim** | branch slate | `MENDER-PLAN.md` new § | ⬜ | — | Deck built but branch-thin. Healer grammar: grade-the-landing (TARGET). |
 | 6 | Well · **Draw** | branch slate | `MENDER-PLAN.md` new § | ⬜ | — | Sibling distinctness vs Brim is the hard check (SPEED/CURRENT vs TARGET). |
 | 7 | Alchemist · **Brew** | challenger slate | `ALCHEMIST-PLAN.md` new § | ⬜ | — | Live deck + the §8 review pass (11 proposals 🟡) = a RICH incumbent — fold both in as PITCH #0 material; don't duplicate the review pass. |
