@@ -813,6 +813,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · main (docs only) — **CLAIM: THE RAID REBUILD plan (Bill) — zoom-out redesign of
+  the raid run structure.** Bill's brief: raid is "all over the place" — decide total run length
+  (STS2-scale OK, but the rhythm game is taxing) → boss timer budget → time left for trash/elites
+  (fights scale in length as the deck grows) → the node-type slate (SHOP wanted · CURSES wanted ·
+  events thin = content-later) → a legible reward-type system (the ticket/keys/random-% layer
+  reads as confusing — explain/reskin) → verdict on the raid TICKETS vs zone TICKETS-v2 quest
+  systems (mix / merge / keep separate). Bosses stay (recast later — nothing set in stone).
+  Deliverable: NEW `DESCENT-PLAN.md` at Bill's verdict (multi-agent workflow: recon → 3-angle
+  design panel → judged synthesis) + ledger rows. Docs only, no code. *(raid-rebuild session)*
+
 - ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
   class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW
   **`SLATE-PLAN.md`** = the generalized pass (§1) + slate laws (§2) + **THE QUEUE** (§0: Warden →
