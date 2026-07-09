@@ -3,13 +3,13 @@
 ## line is the permanence/variance line — this file is the PERMANENCE side: cleared is
 ## cleared forever, flags never reset, nothing here is run-scoped.
 ##
-## Versioned ConfigFile at user://rift_world.cfg (the rift_net.cfg idiom). HUD-flow
-## ONLY: sims and probes build saves in memory and never touch disk (headless batch
-## runs stay disk-inert — mirror of GearStore).
+## Stored in the Profile aggregate (REFIT P4 save unification — the old standalone
+## user://rift_world.cfg is legacy, imported once). HUD-flow ONLY: sims and probes
+## build saves in memory and never touch disk (headless batch runs stay disk-inert —
+## the Profile guards user:// itself).
 class_name WorldSave
 extends RefCounted
 
-const CFG_PATH := "user://rift_world.cfg"
 const VERSION := 1
 
 ## {version, at_zone, zones: {zone_id: {cleared: {node_id_str: true}, flags: {name: value}, at: int}},
@@ -22,24 +22,15 @@ static func load_save() -> WorldSave:
 	var w := WorldSave.new()
 	if DisplayServer.get_name() == "headless":
 		return w
-	var cf := ConfigFile.new()
-	if cf.load(CFG_PATH) != OK:
-		return w
-	var raw := String(cf.get_value("world", "json", ""))
-	if raw == "":
-		return w
-	var parsed = JSON.parse_string(raw)
-	if parsed is Dictionary and int(parsed.get("version", 0)) == VERSION:
-		w.data = parsed
+	var stored := Profile.current().world()
+	if int(stored.get("version", 0)) == VERSION:
+		w.data = stored
 	return w
 
 func save_to_disk() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
-	var cf := ConfigFile.new()
-	cf.load(CFG_PATH)   # keep future sections intact if the file grows
-	cf.set_value("world", "json", canonical())
-	cf.save(CFG_PATH)
+	Profile.current().set_world(data)
 
 ## DEV RESET (the Atlas corner button, W1 preview): a fresh world — fog everywhere,
 ## nothing conquered — written straight over the save. The permanence law is for the
@@ -89,9 +80,10 @@ func has_waystation(zid: String) -> bool:
 # ============================================================ canonical serialization
 ## Sorted-key JSON so the same world state always emits the same bytes — the
 ## round-trip determinism probe hashes this (and future co-op write-back diffs it).
+## The one canonical serializer lives on Profile (the save layer's root).
 
 func canonical() -> String:
-	return _canon(data)
+	return Profile.canon(data)
 
 static func from_json(raw: String) -> WorldSave:
 	var w := WorldSave.new()
@@ -99,20 +91,3 @@ static func from_json(raw: String) -> WorldSave:
 	if parsed is Dictionary and int(parsed.get("version", 0)) == VERSION:
 		w.data = parsed
 	return w
-
-static func _canon(v) -> String:
-	if v is Dictionary:
-		var keys: Array = (v as Dictionary).keys()
-		keys.sort()
-		var parts: Array = []
-		for k in keys:
-			parts.append("%s:%s" % [JSON.stringify(String(k)), _canon(v[k])])
-		return "{%s}" % ",".join(parts)
-	if v is Array:
-		var items: Array = []
-		for x in v:
-			items.append(_canon(x))
-		return "[%s]" % ",".join(items)
-	if v is float and v == floorf(v):
-		return str(int(v))   # JSON floats: 3.0 and 3 must canonicalize identically
-	return JSON.stringify(v)

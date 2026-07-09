@@ -5,11 +5,10 @@
 ## a veteran's file makes the facility a hair more cooperative, never a win button.
 ##
 ## HUD-flow ONLY: sims/probes/headless never touch disk (batch runs must not read or
-## write user://). Mirrors GearStore / net_client's ConfigFile idiom.
+## write user:// — the Profile aggregate guards it).
 class_name LuckProfile
 extends RefCounted
 
-const CFG_PATH := "user://rift_prior.cfg"
 const PRIOR_CAP := 100
 const FLOOR_CAP := 10            ## +% ceiling the Prior floor can ever add to a check
 const FLOOR_DIV := 20           ## prior/20 → the floor %  (prior 100 → +5, capped 10 anyway)
@@ -29,14 +28,10 @@ static func starting_entropy(prior: int) -> int:
 static func has_free_mulligan(prior: int) -> bool:
 	return int(prior) >= 50
 
+## Disk moved to the Profile aggregate (REFIT P4 save unification —
+## user://rift_prior.cfg is legacy, imported once). The caps live HERE.
 static func load_prior() -> int:
-	var cf := ConfigFile.new()
-	if cf.load(CFG_PATH) != OK:
-		return 0
-	return clampi(int(cf.get_value("prior", "value", 0)), 0, PRIOR_CAP)
+	return clampi(Profile.current().prior(), 0, PRIOR_CAP)
 
 static func save_prior(prior: int) -> void:
-	var cf := ConfigFile.new()
-	cf.load(CFG_PATH)               # keep any future sections intact
-	cf.set_value("prior", "value", clampi(int(prior), 0, PRIOR_CAP))
-	cf.save(CFG_PATH)
+	Profile.current().set_prior(clampi(int(prior), 0, PRIOR_CAP))

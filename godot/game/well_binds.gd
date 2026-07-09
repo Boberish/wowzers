@@ -4,8 +4,6 @@
 class_name WellBinds
 extends RefCounted
 
-const PATH := "user://well_binds.json"
-
 ## The mouse chords a raid frame can emit (see RaidFrame._gui_input / _mouse_chord).
 const CHORDS := ["left", "right", "middle", "shift+left", "shift+right", "ctrl+left", "ctrl+right"]
 const DEFAULTS := {
@@ -15,21 +13,15 @@ const DEFAULTS := {
 }
 const SPELL_OPTIONS := ["none", "flash", "mend", "cascade", "spring", "dispel", "rekindle"]
 
+## Disk moved to the Profile aggregate (REFIT P4 save unification — the old
+## user://well_binds.json is legacy, imported once). Chord validation stays HERE.
 static func load_binds() -> Dictionary:
 	var b: Dictionary = DEFAULTS.duplicate(true)
-	if FileAccess.file_exists(PATH):
-		var f := FileAccess.open(PATH, FileAccess.READ)
-		if f != null:
-			var data = JSON.parse_string(f.get_as_text())
-			f.close()
-			if data is Dictionary:
-				for k in data:
-					if k in CHORDS:
-						b[k] = String(data[k])
+	var stored := Profile.current().binds("well")
+	for k in stored:
+		if k in CHORDS:
+			b[k] = String(stored[k])
 	return b
 
 static func save_binds(binds: Dictionary) -> void:
-	var f := FileAccess.open(PATH, FileAccess.WRITE)
-	if f != null:
-		f.store_string(JSON.stringify(binds))
-		f.close()
+	Profile.current().set_binds("well", binds)
