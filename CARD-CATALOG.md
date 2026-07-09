@@ -104,8 +104,11 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 > **⚠ BASE-MINIGAME PASS (2026-07-09, Bill — `TANK-PLAN.md §1b`):** GUARD is **dropped** from the
 > Duelist (◆ → DUMP = damage only; defensive utility moves to the ~1-min defensive CD). So the SPEND
 > lane's **Return to Sender** + **Cheap Iron** and the **The Wall** rig lose their premise here → **🔮
-> PARKED, re-home to the Warden** (shield-based). New base moves added: **WEAVE** (Duelist flurry answer)
-> + **SHIELD SLAM** / small-only dodge (Warden). Deck reshape deferred (branches after the minigame).
+> PARKED, re-home to the Warden** (shield-based). Both specs now read the same: **2 matched buttons
+> (MAIN + SECONDARY)**, one rating rule (§1b). Duelist = DODGE(2nd)/PARRY(main) + **WEAVE** (flurry);
+> Warden = BLOCK(2nd)/SHIELD(main, HELD across flurries) + **SHIELD SLAM** (a *perfect shield hits back*,
+> the parry-twin — not a separate button), **no dodge**. **FLOW → a module** (row below). Deck reshape
+> deferred (branches after the minigame).
 
 ### Signature CD ⏱
 | Card (id) | Type | Rarity | Status | Effect |
@@ -126,6 +129,7 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 | ⭐ **The Crucible** | RULE | — | 🟡 | TRANSFORMER. Damage TAKEN fills it → IGNITES ~6s WHITE STEEL (parries cost 0 wind, lands bank ◆◆, counters ×1.5) → crash (regen dead 4s, gauge empty). Ignite timing is the decision. |
 | **The Scales** | STRAT | — | 🟡 | Balance pan: parries tip crimson, dodges tip blue; near-BALANCE grows an edge (→ +12% dealt / −12% taken); pegging a side kills it until re-centred. Anti-autopilot. |
 | **The Whetstone** | GREED | — | 🟡 | Each banked ◆ sharpens over 4s (sharp pip ×1.5 in a dump); an unanswered real hit dulls your sharpest pip. Hold-vs-spend with teeth. |
+| **Flow** _(both specs)_ | STRAT | — | 💡 | Clean-answer streak → **ramps your DUMP damage** (the "lots of dodge, not much dmg" lever). `TANK-PLAN §1b`, Bill 2026-07-09: a **module for now** — promote to base if loved. Competes for the Floor-1 module slot; reconcile at deck reshape. |
 
 ### Boons — LANE: THE SWING
 | Card (id) | Type | Rarity | Status | Effect |

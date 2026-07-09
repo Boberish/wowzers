@@ -25,21 +25,28 @@ Classic rhythm defense on the HUD's own timing UI: ONE stream of incoming hits d
 - **COMBO ◆** = the build-and-spend resource. **FATIGUE** (wind) = the leash.
 - Feints (hollow — READ if ignored, BAITED if answered) · consistent stream, no phases ·
   per-boss authored streams (encounter data, Warband Law).
-- **THE DUELIST — the dodge tank** (dense/twitch, def+off): the whole game is balancing **PARRY vs
-  DODGE**. DODGE (graded — a GOOD covers small, leaks on tall; only PERFECT covers a big one) · PARRY
-  (tiny ~60ms window, big fatigue cost **land or miss**; land = gut the hit + counter + bank ◆) ·
-  **WEAVE** (2026-07-09 — a *flurry* arrives as a burst of fast skinny bars; **dodge ALL of them or eat
-  the whole hit**, no partial credit; a clean weave opens a free **RIPOSTE**). He faces **UNAVOIDABLE**
-  bars he must **eat** (the bleed). Skinny bars only — a flurry is a fast cluster, never a fat bar.
-  **◆ → ⚡ DUMP = damage** (🛡 GUARD dropped 2026-07-09 — shielding is the Warden's identity; §1b).
-- **THE WARDEN — the shield tank** (heavy/endurance, def-only + off-cd): **BLOCK** (tap — answers
-  small/normal/big) + **BRACE = the HOLD** (the block *held* across the fat HOLD bars / overlaps;
-  drains fast) + a **small-only DODGE** (2026-07-09 — saves him on small bars only, even a perfect
-  won't cover normal/big; slow to recover — he's no duelist) + **SHIELD SLAM** (2026-07-09 — his skill
-  move in place of a parry: a timed release after a block/hold = counter + **banks ◆**). Blocks
-  **everything** — **no unavoidables** (PIERCE = boss affix knob); he bleeds via the partial-mit sliver
-  + hold-drain instead. **◆ → ⚡ DUMP = damage**, off-rhythm. Stream is **slower + heavier**
-  (sustained/overlap) vs the Duelist's density. The old hold-blocks-all-free = a module, not base.
+**⚖ THE SPECS MATCH (2026-07-09): each has exactly 2 answer buttons — a MAIN + a SECONDARY — read the
+same way; only the flavor differs.** SECONDARY answers small (any rating) / normal (good+), **never
+tall**, and **never hits back** (even a perfect leaves a sliver — the healer's never bored). MAIN answers
+**any** size incl. tall, and a **PERFECT MAIN hits back** (counter + banks ◆). No third button. *(Which
+button is "main" for the dodge tank — PARRY — is Bill's "block for small/med, shield for big" pattern
+applied to "dodge for small/med, parry for big"; flip the labels if read backwards.)*
+- **THE DUELIST — the dodge tank** (dense/twitch, def+off). **DODGE (secondary) + PARRY (main).** DODGE
+  is the bread — a % mitigation that scales with timing, small/normal only, can't take a big one. PARRY
+  is the main — tiny ~60ms window, big fatigue cost land-or-miss, answers any size, perfect = hit back.
+  A *flurry* = a burst of fast skinny bars → **WEAVE** it (rapid dodges, **all or eat it all**; a clean
+  weave opens a free RIPOSTE). **Eats UNAVOIDABLE** bars (the bleed). Skinny bars only. **◆ → ⚡ DUMP =
+  damage.** **LOW HP, bar swings FAST** — a build for a quick healer. Fatigue = a **small pool, fast
+  recharge** (the "ninja"), a **bubble**; DODGE recovers fast if you time the re-press (fumble → penalty),
+  PARRY recovers slow even on a land.
+- **THE WARDEN — the shield tank** (heavy/endurance, def-only + off-cd). **BLOCK (secondary) + SHIELD
+  (main).** BLOCK is the light tap — small/normal % mitigation. SHIELD is the main — answers any size
+  incl. big, is **HELD** across the fat HOLD/flurry bars, and a **PERFECT SHIELD hits back** (= **SHIELD
+  SLAM**, the parry-twin). **No dodge** (dropped 2026-07-09). Blocks **everything** — no unavoidables
+  (PIERCE = affix knob); bleeds via the partial-mit sliver + hold-drain. **◆ → ⚡ DUMP = damage**,
+  off-rhythm. **MORE HP, takes bigger % chunks** — steadier bar. Fatigue = a **big pool, slow recharge**,
+  a **bar** (his real leash — over-hold and you're winded). Stream slower + heavier vs the Duelist's
+  density. The old hold-blocks-all-free = a module, not base.
 
 ### §1a · THE TANK SKIPS THE UNIVERSAL DODGE (post dodge-unify, 2026-07-08)
 The tank's bar-stream **IS** the boss's telegraph stream to this seat — dense by design (pillar #2,
@@ -47,54 +54,53 @@ The tank's bar-stream **IS** the boss's telegraph stream to this seat — dense 
 seats get (~3–8 sparse beats bolted onto their kit, `combat_core.gd:104` "every class has it, separate
 from the class"). The tank's minigame already **is** its dodge/defense — one stream, not dodging on top
 of dodging.
-- **Dodge tank** answers each bar with **DODGE (SPACE)** or **PARRY (F)**. F is free — the universal
-  F-dodge was retired in dodge-unify — so parry reclaims it as its natural home.
-- **Shield tank** answers with **BLOCK / BRACE**. It has no dodge and needs none.
+- **Dodge tank** answers each bar with **DODGE (secondary)** or **PARRY (main)**. Parry reclaims the
+  now-free F (the universal F-dodge was retired in dodge-unify).
+- **Shield tank** answers with **BLOCK (secondary) / SHIELD (main)**. It has **no dodge** and needs none.
 - Both **replace** the universal dodge; they never stack on it.
 - The Duelist's DODGE stays its OWN graded, height-law dodge **leashed by WIND** (≈1/step), NOT the flat
   universal 0.35s/1.3s cd — the wind pool is the anti-spam, so wind (not a global cooldown) is what
   limits chaining a barrage; keep fast recovery. The tank **never** opts into `ClassKit.unified_dodge()`
   (that hook merges two INPUTS for the three non-tank kits; the tank already runs bespoke parry + dodge).
 
-### §1b · BASE-MINIGAME REFINEMENTS (2026-07-09, Bill) — the two specs, sharpened
-The specs were blurring together; this pins what's DIFFERENT. Each spec is **fast on its signature
-answer, slow on its off-tool**, and both spend ◆ purely on damage — the ~1-min defensive CD carries
-the "oh-shit" mitigation instead.
+### §1b · BASE-MINIGAME REFINEMENTS (2026-07-09, Bill) — the two specs, matched
+The specs were blurring together; this pins what's DIFFERENT while making the two READ the same. **2
+buttons each (MAIN + SECONDARY), no third**, on one rating rule:
 
-**Who answers what (bar shape → answer):**
-| Bar shape | Dodge tank | Shield tank |
+| Bar | Dodge tank (2nd DODGE · main PARRY) | Shield tank (2nd BLOCK · main SHIELD) |
 |---|---|---|
-| small (skinny) | DODGE (a GOOD is enough) or PARRY | DODGE or BLOCK |
-| normal | DODGE (clean) or PARRY | BLOCK (dodge fails) |
-| big / tall | DODGE **only if PERFECT** or PARRY | BLOCK (dodge fails even on a perfect) |
-| **flurry** | **WEAVE** — dodge every fast bar or eat it all | **HOLD** the block through it → **SHIELD SLAM** |
-| unavoidable (red) | **EAT it** (the bleed) | just BLOCK (no unavoidables) |
-| feint (hollow) | READ — don't press | READ — don't waste a hold |
+| small | either button, **any rating** | either button, **any rating** |
+| normal | **MAIN any** rating · SECONDARY needs **good+** | **MAIN any** · SECONDARY needs **good+** |
+| tall / big | **MAIN only** (PARRY) | **MAIN only** (SHIELD) |
+| **flurry** | **WEAVE** — rapid DODGE, **all or eat it all** → clean weave = free RIPOSTE | **HOLD** the SHIELD through it |
+| unavoidable | **EAT it** (the bleed) | **SHIELD it** (no unavoidables) |
+| feint | READ — don't press | READ — don't waste a press |
 
-**Recovery — fast on your signature answer, slow on your off-tool:**
-- **Dodge tank:** DODGE recovers fast **if you time the re-press** (chain the rhythm); miss the window →
-  a bigger recovery penalty. PARRY recovers slow **even on a land**, longer on a miss.
-- **Shield tank:** BLOCK recovers fast (the wall). Its small-only DODGE recovers **slow** (the awkward
-  off-tool).
+- **PERFECT MAIN hits back** (PARRY / SHIELD-SLAM) = counter + banks ◆. The SECONDARY never hits back and
+  **even a perfect leaves a sliver** (partial-mit law — the healer always has work).
+- **SECONDARY = the bread** you spam through the dense small/normal stream; **MAIN = the commit** for the
+  big ones + the hit-back.
 
-**◆ = damage · CD = defense (2026-07-09):** tanks are defense-rich / damage-poor, so **◆ → DUMP is pure
-damage** for *both* specs (no defensive ◆-spend — 🛡 GUARD is dropped). The defensive utility GUARD used
-to give moves to the class's **~1-min defensive signature CD** — the `DECK-LAYOUT.md §5` slot every class
-owes, role-shaped for the tank as **a wall** (amplifies skill by lining it up with a boss window, never
-`button = damage`). Owed, not yet designed. **⚠ Card fallout:** the SPEND lane's guard cards (Return to
-Sender, Cheap Iron) + the Wall rig lose their premise on the Duelist → re-home to the Warden; SPEND lane
-is now DUMP-only and wants a rethink. Deferred per Bill (branches after the minigame) — flagged in `CARD-CATALOG.md`.
+**The two specs are leashed DIFFERENTLY (this is the feel-split):**
+- **Dodge tank — twitch/recovery leash + LOW HP.** DODGE recovers fast **if you time the re-press**
+  (chain the rhythm); fumble → a bigger recovery penalty. PARRY recovers slow even on a land. Fatigue = a
+  **small pool, fast recharge** (a **bubble**). HP is **low and swings fast** → a build for a *quick* healer.
+- **Shield tank — endurance-pool leash + HIGH HP.** BLOCK/SHIELD recover fine; his real leash is a **big
+  pool that recharges slow** (a **bar**) that HOLDING drains fast — over-commit and you're winded. HP is
+  **high, taken in bigger % chunks** → a steadier bar for a steadier healer.
 
-**Both stay honest to the duet:** the dodge tank bleeds from the unavoidables it eats; the shield tank —
-able to block anything — bleeds via the partial-mit sliver + a mistimed/overlong HOLD draining out +
-PIERCE affixes. Neither goes un-hittable.
+**◆ = damage · CD = defense:** both specs spend **◆ → DUMP = pure damage** (tanks are defense-rich /
+damage-poor — no defensive ◆-spend; 🛡 GUARD dropped). The mitigation GUARD used to give moves to the
+class's **~1-min defensive signature CD** — the `DECK-LAYOUT.md §5` slot every class owes, role-shaped for
+the tank as **a wall** (amplifies skill by lining it up with a boss window, never `button = damage`).
+Owed, not yet designed. **⚠ Card fallout:** the guard cards (Return to Sender, Cheap Iron) + the Wall rig
+re-home to the Warden; SPEND lane is now DUMP-only. Deferred per Bill (branches after the minigame) —
+flagged in `CARD-CATALOG.md`.
 
-**🟨 OPEN — FLOW (Bill: "idk", 2026-07-09):** proposal — name the clean-answer streak **FLOW**, shared by
-both specs: clean answers (dodge/parry/weave · block/hold/slam) build it → keeps recovery fast AND **ramps
-your DUMP damage** (the lever "lots of dodge, not much dmg" is asking for); eating an unavoidable /
-fumbling an answer drops it. Echoes Twinfang·Tempo's Flow (shared vocabulary across classes). Keep the
-*slow-mo* flavor as the Ghost keystone (Borrowed Time) so base FLOW ≠ that keystone. **Pending Bill's
-yes/no before it locks.**
+**FLOW = a MODULE for now (Bill, 2026-07-09):** the clean-answer streak → **ramps your DUMP damage** (the
+lever "lots of dodge, not much dmg" is asking for), built as a **draftable module**, not base. Both specs
+can take it. *"If we really like it we can add it normal [to the base]."* Keep the *slow-mo* flavor to the
+Ghost keystone (Borrowed Time) so it doesn't double up.
 
 - **⚠ CUT HISTORY (don't rebuild):** R2 THREE DOORS/lanes · R3 SHIELD CHARGE-&-PLANT WALL +
   circle-size + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 shared 3-move kit.

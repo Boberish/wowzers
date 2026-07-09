@@ -775,17 +775,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 - ☑ 2026-07-09 · main (docs only) · §CLASSES / `TANK-PLAN.md §1b` — **TANK BASE-MINIGAME PASS — the
   two specs sharpened (Bill).** Bill was "a bit lost on the difference between the 2 classes"; this pins
-  it. **Dodge tank** = DODGE (graded, PERFECT covers big) + PARRY (banks ◆) + new **WEAVE** (a flurry =
-  a burst of fast skinny bars, **dodge ALL or eat it all**, clean weave → free RIPOSTE); faces
-  UNAVOIDABLES (eats). **Shield tank** = BLOCK (tap small/normal/big) + BRACE=**HOLD** (long bars) + new
-  **small-only DODGE** (slow recover) + new **SHIELD SLAM** (timed release = counter + banks ◆, its
-  answer to having no parry); blocks everything (no unavoidables). **🛡 GUARD DROPPED** — both specs'
-  **◆ → DUMP = pure damage** (tanks are defense-rich/damage-poor); the defensive utility moves to the
-  **~1-min defensive signature CD** (`DECK-LAYOUT §5`, role-shaped as a wall). **Recovery rule:** fast on
-  your signature answer, slow on your off-tool. **Card fallout** (deferred, flagged in CARD-CATALOG):
-  Return to Sender / Cheap Iron / The Wall → 🔮 re-home to Warden; SPEND lane now DUMP-only. **OPEN:**
-  FLOW as a shared clean-streak → DUMP-damage lever (Bill "idk" — pending yes/no). Branches/deck reshape
-  come AFTER the minigame locks. *(tank base-minigame session)*
+  it. **The specs now MATCH: 2 buttons each — a MAIN + a SECONDARY**, one rating rule (SECONDARY = small
+  any / normal good+ / no tall / no hit-back; MAIN = any size + a **perfect hits back**). **Dodge tank** =
+  DODGE (2nd, % mit small/normal) + PARRY (main) + **WEAVE** (a flurry = fast skinny bars, **dodge ALL or
+  eat it all**, clean weave → free RIPOSTE); eats UNAVOIDABLES. **Shield tank** = BLOCK (2nd) + SHIELD
+  (main — **HELD** across flurries; a **perfect shield hits back = SHIELD SLAM**, the parry-twin), **no
+  dodge** (dropped); blocks everything (no unavoidables). **Leashed differently:** dodge tank = twitch
+  recovery + **LOW HP, fast bar** + small fast-recharge pool (a "bubble", quick-healer build); shield tank
+  = **big slow-recharge pool** (a "bar", his real leash) + **HIGH HP, bigger chunks**. **🛡 GUARD
+  DROPPED** — both specs' **◆ → DUMP = pure damage**; defensive utility → the **~1-min defensive signature
+  CD** (`DECK-LAYOUT §5`, a wall; owed). **Card fallout** (deferred, flagged in CARD-CATALOG): Return to
+  Sender / Cheap Iron / The Wall → 🔮 re-home to Warden; SPEND lane now DUMP-only. **FLOW = a MODULE for
+  now** (clean-streak → ramps DUMP; promote to base if loved). Branches/deck reshape come AFTER the
+  minigame locks. *(tank base-minigame session)*
 - ☑ 2026-07-09 · main (docs only) · `CARD-CATALOG.md` — **THE CARD SLATE + STATUS CONSOLIDATION
   (Bill: "how do we track boons/cards/creeds — want something solid + localized, a rule/skill").**
   Diagnosis: card design was scattered across 4 plan docs in 4 formats while the built truth lived
