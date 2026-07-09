@@ -703,17 +703,208 @@ Owed same-as-Tempo wiring: HUD gauges · elite acquisition (A8) · online spec-c
 
 ---
 
-## 14. THE TEMPO BRANCH SLATE — six sub-spec base ideas 🟡 AT VERDICT (2026-07-09)
+## 14. THE TEMPO BRANCHES — six build-theme candidates 🟡 AT VERDICT (2026-07-10)
 
-**What this is.** The ground-up Tempo deck rebuild starts here (Bill, 2026-07-09): six candidate
-BRANCHES (sub-specializations, `DECK-LAYOUT.md §3`) — pick 2–3, then the full deck gets authored
-around the winners. **Base ideas only:** every example card below is an ILLUSTRATION of how the
-branch could work, not a proposed card (no CARD-CATALOG rows until the deck-build pass).
+**What this is (corrected pass — Bill, 2026-07-10).** A BRANCH is a **build theme inside the
+existing spec** (the tank's Headsman/Ironside/Ghost precedent): a general category that cards,
+creeds and modules FEED, so drafts coalesce into synergy. **Tempo's base minigame and identity are
+untouched** — no dial bends, no new buttons, no identity gauges. Pick **2–3 themes**; the deck
+pass then files the existing pool + new cards into the winners (each winner gets its chain: entry
+creed → module → boons → capstone keystone, per `DECK-LAYOUT.md §3`). Example cards below are
+ILLUSTRATIONS, not proposals — no CARD-CATALOG rows this pass.
 
-**How it was made:** researched from 6 games into `research/` (WoW retail · StS 1+2 · Hades 1+2 ·
-Across the Obelisk · Expedition 33 · a 12-game wildcards sweep) → four synthesis lenses (branch
-shapes · greed · timing grammar · spectacle/party) → pitches → **3 adversarial skeptics (0 kills,
-~17 fixes — all folded below)**.
+*(The first version of this section pitched six minigame-REWIRE ideas — those were the wrong
+altitude for "branch" and are parked as future SPEC/ASPECT ideas in §15, per Bill: "this is cool,
+we can have more spec ideas, but I want to keep my current specs.")*
+
+**Ground:** the `research/` knowledge base + the four lens digests from the first pass (the theme-
+grade material carries over); the existing built pool from Appendix A / `twinfang_boons.gd`.
+
+### The theme candidates at a glance
+
+| # | Theme | In three words | Mostly |
+|---|---|---|---|
+| 1 | **THE WOUND** | bleed, then cash | new cards |
+| 2 | **THE FINISH** | fewer, bigger hits | names existing cards |
+| 3 | **SWIFT** | more, faster hits | mixed |
+| 4 | **THE EDGE** | cleanliness becomes crits | names existing cards (A7) |
+| 5 | **THE PUNISH** | live for the Opening | mixed |
+| 6 | **THE BAND** | your groove helps everyone | new cards (thin — maybe texture) |
+
+*(Poison is deliberately absent — that's the Alchemist's lane. Bleeds are the Twinfang-legal cut.)*
+
+---
+
+### THEME 1 — THE WOUND · *bleed, then cash*
+
+**What its cards do:** clean cuts keep cutting. Bullseyes leave short bleeds (a few beats each);
+boons deepen and extend them; Eviscerate can consume the live bleeds for a burst. The game is
+keeping the pot boiling and cashing before it cools.
+**Dials addressed:** the grade (bleeds key to Bullseye/Perfect) · Eviscerate (the casher). Nothing
+bends; a small wound-counter rides the boss frame.
+**Absorbs from the existing pool:** the `bloodletter` rig THEN (the bleed payoff already in code) ·
+the unbuilt `hemorrhage` module data (becomes this theme's module seed).
+**Example new cards:** creed *Open Veins* — Bullseyes leave a bleed from run start · module
+*Hemorrhage* — the wound counter + bleeds tick +1 beat longer · boon *Deep Cuts* (STRAT) —
+Perfects also bleed · boon *Arterial Note* (GREED) — bleeds tick 30% harder but expire 1 beat
+sooner · keystone *EXSANGUINATE* — consuming 5+ live bleeds in one Eviscerate erupts in a
+blood-burst that staggers the boss.
+**Greed/comfort + EASE knob:** greed = riding bleeds long before cashing; knob = bleed duration
+grace.
+**Nearest neighbor:** Alchemist poison (brewed vials, potency, sustained rot) — bleeds are
+physical, short-lived, and cashed in bursts; Fermata's Mark (brand tiers on hold-grammar) — this
+is tap-grammar with expiry pressure.
+
+---
+
+### THEME 2 — THE FINISH · *fewer, bigger hits*
+
+**What its cards do:** weight the payoff end of the loop — max-combo Eviscerates, heavier Coups,
+payoff timing. The Largo player's natural home: slow hands, huge punctuation.
+**Dials addressed:** combo points (hold them) · Eviscerate/Coup (make them enormous). Nothing bends.
+**Absorbs from the existing pool:** the whole EVISCERATE lane (*eviPlus · execute · overkill ·
+staccato*) + the COUP lane (*crescendo · daCapo · syncopation*) + **Largo** as the natural entry
+creed. This theme mostly NAMES a ladder the pool already implies.
+**Example new cards:** boon *Grand Pause* (STRAT) — an Eviscerate at exactly max combo hits +35% ·
+boon *Heavy Ink* (GREED) — combo points above 3 each add +10% to the next finisher but decay one
+per missed beat · keystone *THE CODA* — a max-combo Eviscerate inside an Opening echoes as a
+second, free finisher (the double-hit fills the screen).
+**Greed/comfort + EASE knob:** greed = holding combo for the perfect moment; knob = finisher-beat
+width.
+**Nearest neighbor:** Fermata (patience as a SPEC) — Fermata holds the *input*; the Finish holds
+the *resource* while the hands stay Tempo-fast. And THE WOUND (also cashes via Eviscerate) — Wound
+cashes a dot-pot, Finish cashes combo weight; they cross-feed rather than collide.
+
+---
+
+### THEME 3 — SWIFT · *more, faster hits*
+
+**What its cards do:** strike frequency — energy refunds, uptempo windows, streaks of Perfects.
+The anti-Largo pole.
+**Dials addressed:** energy (refunds make it a real economy) · the beat (uptempo riders on
+existing knobs). Nothing bends — cards ride the accelerando that already exists.
+**Absorbs from the existing pool:** *pressAdvantage · coldOpen* (the STRIKE bread) · the
+FLOW-generic boons (*tightrope · encore · shatterfall* file here first-pass) · **doubleTime**
+(already keystone-class in the pool — becomes this theme's capstone).
+**Example new cards:** creed *Uptempo* — the beat runs faster baseline, Perfects refund +2 energy ·
+boon *Quickstep* (GREED) — each Perfect speeds your next window AND tightens it · boon *Momentum*
+(POWER) — consecutive Perfects +1% each, cap 10, resets on a miss · keystone *DOUBLE TIME*
+(absorbed) — the beat doubles for a stretch after sustained clean play.
+**Greed/comfort + EASE knob:** greed = self-tightening for speed; knob = beat speed.
+**Nearest neighbor:** THE EDGE (both love clean taps) — Swift pays *frequency* (more notes), Edge
+pays *quality* (each note crits harder). Distinct poles; natural cross-feed pair.
+
+---
+
+### THEME 4 — THE EDGE · *cleanliness becomes crits*
+
+**What its cards do:** convert clean play into crit quality. This theme ALREADY EXISTS as the A7
+"Whetted Edge" package — naming it as a branch legitimizes the ladder and gives the deck pass its
+filing. Cheapest theme to build.
+**Dials addressed:** the grade → the EDGE meter (already in code, opt-in via Hone). Nothing bends.
+**Absorbs from the existing pool:** *hone* (the keystone) · *heartseeker* (Bullseyes always crit) ·
+*serrated* (+crit damage) · *assassinsNote* (+crit in the Opening — soft-feeds THE PUNISH too:
+the worked example of a card feeding two themes) · the *killingEdge* rig THEN (banked crit
+charges).
+**Example new cards:** creed *Whetstone* — a crit-flavored temperament (crits steady the beat: the
+window doesn't tighten on the beat after a crit) · boon *Stropped* (POWER) — +EDGE gain from
+Bullseyes.
+**Greed/comfort + EASE knob:** greed = the meter's slip penalty is real (−3); knob = EDGE-decay
+grace.
+**Nearest neighbor:** SWIFT (see above). Base Tempo law intact — **no crits without opting into
+this ladder** (locked law, honored: the whole theme is opt-in via its creed/keystone).
+
+---
+
+### THEME 5 — THE PUNISH · *live for the Opening*
+
+**What its cards do:** feed Opening play — arrive loaded, hit the punish harder, get paid for
+clean kicks. Keys to boss events, not your resources.
+**Dials addressed:** the Opening (bigger/better use of the window that already exists) · Coup (the
+dump that carries the interrupt tax). Nothing bends — the Opening stays one graded punish window
+exactly as built.
+**Absorbs from the existing pool:** the *punish/peak* rig WHENs · *assassinsNote* (shared with
+EDGE) · the interrupt-by-ability texture when it lands (TEMPO §10).
+**Example new cards:** creed *Predator's Rest* — Flow doesn't decay while a boss telegraph is
+winding up (you coil INTO the window; plain-words: waiting for the boss stops costing you) · boon
+*Seize the Gap* (POWER) — Opening hits +20% · boon *Aftershock* (STRAT) — a Peak-grade punish
+extends the Opening half a beat · keystone *THE GUILLOTINE* — a Peak-grade punish on a cast you
+just kicked hits execute-grade with a visible flourish.
+**Greed/comfort + EASE knob:** greed = saving your dump for the Peak (miss the centre and the
+bonus is gone); knob = Opening width.
+**Nearest neighbor:** THE FINISH (both burst) — Punish keys to *boss events*, Finish keys to
+*your combo*. Cross-feed: a max-combo finisher inside an Opening is both — that overlap is the
+soft-branch point, not a collision.
+
+---
+
+### THEME 6 — THE BAND · *your groove helps everyone*
+
+**What its cards do:** warband texture — your clean rhythm throws small windows and echoes to the
+other three seats. The one TEAM-flavored direction.
+**Dials addressed:** Flow uptime + your finishers, mirrored outward. Nothing bends; rides the
+already-owed raid buff channel (Battle Hymn's application debt).
+**Absorbs from the existing pool:** *battleHymn* (the existing support card — this theme is its
+family).
+**Example new cards:** boon *Encore Call* (TEAM) — after your finisher, the next ally's big hit
+echoes 15% of it · boon *Steady Drummer* (TEAM) — while your Flow ≥4, allies' windows shrink
+slower · keystone *THE ANTHEM* — at Flow 6 the aura visibly pulses across all four seats and
+Openings you punish linger longer for allies.
+**Greed/comfort + EASE knob:** the donation trade (your meter dips, the warband's rises); knob =
+none natural — flagged.
+**Honesty flag:** thinnest candidate — may be a 2–3 card TEXTURE inside other builds rather than
+a full branch with its own ladder; also gated on the buff-channel debt. In the slate because TEAM
+is otherwise unrepresented.
+
+---
+
+### THE EXISTING-POOL FILING (first pass — proof the themes organize the real deck)
+
+| Built card (lane) | Files under |
+|---|---|
+| heartseeker · serrated · hone · killingEdge (STRIKE/rig) | THE EDGE |
+| assassinsNote (STRIKE) | THE EDGE + THE PUNISH (soft, feeds both) |
+| pressAdvantage · coldOpen (STRIKE bread) | SWIFT |
+| eviPlus · execute · overkill · staccato (EVISCERATE) | THE FINISH |
+| crescendo · daCapo · syncopation (COUP) | THE FINISH |
+| tightrope · encore · shatterfall · flowCap (FLOW) | SWIFT first-pass; some stay generic |
+| doubleTime (FLOW, keystone-class) | SWIFT (capstone) |
+| battleHymn (FLOW, support) | THE BAND |
+| bloodletter (rig THEN) · hemorrhage (unbuilt module data) | THE WOUND |
+| wideTempo · fencersLine · rubato (WINDOW wideners) | none — fold into the EASE dial at the deck pass (standing rule) |
+| understudy (auto-dodge) | generic — the one insurance card, belongs to no theme (allowed) |
+| Largo (creed) | THE FINISH (entry creed) |
+| flourish · drumline · heldbreath (creeds) | generic temperaments — stay theme-free |
+| Overdrive ⭐ (module) | untouched — stays the spec's module regardless of picks |
+
+### Slate checks (inline skeptic pass, small)
+
+- **Distinctness:** SWIFT vs EDGE = frequency vs quality (flagged, resolved as poles). WOUND vs
+  FINISH share the cash button (Eviscerate) but cash different things (dot-pot vs combo weight) —
+  cross-feed, not collision. PUNISH vs FINISH = boss-event vs own-resource. All six answer "what
+  do your cards care about?" differently.
+- **Coverage:** every built card files into a theme, the EASE fold, or explicit generic — no
+  orphans; no theme exists only on paper except THE BAND (flagged honestly).
+- **Anti-patterns:** no luck-greed (all greed chosen per card), one insurance card total
+  (understudy, pre-existing), no new buttons anywhere, no identity gauges (Hemorrhage's counter
+  is module-tier and the WOUND plays fine without it).
+- **Spread:** 2 name-the-existing (EDGE, FINISH) · 2 new-blood (WOUND, BAND) · 2 mixed (SWIFT,
+  PUNISH). Bill's examples covered: bleeds = WOUND · fast attacks = SWIFT · slow big ones =
+  FINISH · poison = excluded (Alchemist's lane).
+
+**Next:** Bill picks 2–3 themes → the deck pass (deck-creator skill) files old + new cards into
+the winners' ladders, builds each chain (entry creed → module → boons → capstone keystone),
+authors the EASE dial's knob list, and hard-copies the slate into CARD-CATALOG.
+
+---
+
+## 15. TEMPO SPEC/ASPECT IDEA PARKING 🔮 (six rewire pitches, 2026-07-09 — re-homed 2026-07-10)
+
+**What this is.** The first branch-slate pass pitched six MINIGAME-REWIRE ideas — the wrong
+altitude for "branch" (they change how Tempo plays, not how its cards file). Bill's verdict:
+*"this is cool, we can have more specs ideas, but I want to keep my current specs."* So they are
+PARKED here as future spec/aspect/keystone-scale material — record, don't build. Everything below
+is the original text (research provenance intact; the skeptic fixes are folded in).
 
 ### The harvest (what the research says, one page)
 
@@ -999,9 +1190,10 @@ Motif/Redline) · the Hoarder/Star Bank (branch-scale banking brushed Fermata's 
 survives as a signature-CD shape: bank the CD by nailing marked phrase beats) · the Pendulum
 (Eclipse-style mode flip — good, but didn't beat any of the six; fold-able later as a module).
 
-**Next:** Bill picks 2–3 → full deck authored around the winners (deck-creator pass: creeds,
-modules, 10–16 boons in lanes, rig WHENs, keystones, EASE knob list, CARD-CATALOG rows, verdict
-artifact).
+**Status:** PARKED 🔮 (2026-07-10) — no picks pending here. Any of the six may return as a future
+spec/aspect (the roster owes second specs elsewhere), or shrink to keystone/module-scale ideas
+inside the real branch themes (§14). The Hoarder→signature-CD note and Counterpoint's
+Coup-as-interrupt proposal remain live inputs to their own open verdicts.
 
 ---
 

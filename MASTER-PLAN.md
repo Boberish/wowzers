@@ -813,6 +813,86 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TANK-PLAN §6 (NEW) + `research/warden-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 1: Tank·WARDEN branch slate — DONE, five themes AT BILL'S
+  VERDICT.** Fresh sweep (Lies of P guard-regain · Bloodborne rally · MonHun guard-counter ·
+  For Honor superior block · Vermintide stamina economy) → **THE PAYLOAD** (stored damage,
+  hurled back — seeds off 🔮 Return to Sender) · **THE SLAM** (guard-counter chains) · **THE
+  RAMPART** (wind-pool endurance; prices the hold-all-wall module) · **THE BANNERMAN** (TEAM —
+  aggro-uptime + clutch block-share; buff-channel debt flagged) · **THE THORNBACK** (graded-tap
+  reflect; honesty-noted last). 3 skeptic passes: 1 kill (Wrecking Crew = Headsman repack), ~11
+  fixes folded. Filing table homes the 🔮 guard trio + all 4 carries. Base kit untouched, no new
+  buttons, no CARD-CATALOG rows (deck = Phase-2 row D1). *(slate-machine session, tick 00:42)*
+
+- ☐ 2026-07-10 · main (docs only) + 2nd session cron — **CLAIM: SLATE MACHINE PHASE 2 — THE DECK
+  MACHINE (Bill).** SLATE-PLAN §5–§6 NEW: when every Phase-1 slate has landed, a second 15-min
+  loop (`4,19,34,49`) authors the **FULL DECK (design only, never code)** per target around its
+  slate's **top-3-ranked branches** (Bill's ✅ picks override) — deck-creator skill + DECK-LAYOUT
+  slots + coherence gates (dream-draft walkthroughs · offer-trio · overlap audits · anti-pattern
+  sweep · AI-pilotability) + a cross-deck DISTINCTNESS LEDGER (§5) + 3 inline skeptics → deck §
+  🟡 AT VERDICT + **CARD-CATALOG rows at 🟡**. Existing decks (Duelist v1 / Well / Brew / Fermata
+  v5) are handled as REVISIONS, absorb-don't-duplicate. Ledger §C row added; `slate-loop` skill
+  now re-arms BOTH crons. *(slate-machine session)*
+
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §14 REDONE + NEW §15 parking + SLATE-PLAN
+  correction + BUILD-LEDGER row — **BRANCH = BUILD THEME, not a rewire (Bill's correction).**
+  Bill clarified: a branch is a general CATEGORY inside the existing spec (bleeds / fast attacks /
+  slow big ones — the tank-ladder precedent), a filing system so cards/creeds/mods synergize —
+  the spec's minigame and identity stay. The 2026-07-09 six rewire-pitches were the wrong
+  altitude → **re-homed to TEMPO §15 as SPEC/ASPECT IDEA PARKING 🔮** (Bill: cool as future spec
+  ideas). **SLATE-PLAN.md fixed BEFORE the 00:42 hold lift** (761fbcc): theme anatomy for
+  branch/challenger rows, rewire anatomy reserved for class slates (Bloomweaver), laws 2–3
+  rewritten — so the cron loop doesn't repeat the mistake across 8 targets. **§14 redone as the
+  corrected worked reference: six THEME candidates 🟡 AT VERDICT** — THE WOUND (bleed→cash) ·
+  THE FINISH (combo weight, names the evis/coup lanes + Largo) · SWIFT (frequency/energy,
+  doubleTime capstone) · THE EDGE (names the A7 crit package) · THE PUNISH (Opening-fed) ·
+  THE BAND (TEAM texture, flagged thin) — with the existing-pool FILING TABLE (every built card →
+  its theme / EASE-fold / generic; zero orphans) + inline skeptic checks. Poison excluded
+  (Alchemist's lane). Bill picks 2–3 themes → deck pass. *(this session)*
+
+- ☐ 2026-07-10 · main (docs only) — **CLAIM: THE RAID REBUILD plan (Bill) — zoom-out redesign of
+  the raid run structure.** Bill's brief: raid is "all over the place" — decide total run length
+  (STS2-scale OK, but the rhythm game is taxing) → boss timer budget → time left for trash/elites
+  (fights scale in length as the deck grows) → the node-type slate (SHOP wanted · CURSES wanted ·
+  events thin = content-later) → a legible reward-type system (the ticket/keys/random-% layer
+  reads as confusing — explain/reskin) → verdict on the raid TICKETS vs zone TICKETS-v2 quest
+  systems (mix / merge / keep separate). Bosses stay (recast later — nothing set in stone).
+  Deliverable: NEW `DESCENT-PLAN.md` at Bill's verdict (multi-agent workflow: recon → 3-angle
+  design panel → judged synthesis) + ledger rows. Docs only, no code. **Also in the brief
+  (addendum):** literal NEW minigame/puzzle node types (structure now, content later) + fold in
+  the parked MASTER-PLAN ideas (PROMPT MARKET merchant · CAPTCHA micro-skill-checks · secret
+  rooms · TEETH CONTEST nodes). **RESUME PROTOCOL (Bill's order: retry rate limits, survive
+  token-end):** workflow run `wf_7a379a0b-44a`; a 6-min session cron babysits it. If THIS session
+  dies before `DESCENT-PLAN.md` lands: in a fresh session read the workflow journal
+  `~/.claude/projects/-home-bill-projects-Wowzers/55c10657-7a29-4b99-a894-35ed79e1d42b/subagents/workflows/wf_7a379a0b-44a/journal.jsonl`
+  (every finished agent's output — recon digests / designs / judge reports / synth are all there;
+  the script sits next to it under `…/workflows/scripts/`), hand-author a continuation workflow
+  from whatever phase is missing (cross-session resumeFromRunId does NOT work), then finish:
+  write `DESCENT-PLAN.md`, tick this claim, ledger rows, commit. *(raid-rebuild session)*
+
+- ☐ 2026-07-10 · main (docs only) + session watcher loop — **CLAIM: THE DUNGEON REBUILD plan,
+  GATED on THE RAID REBUILD above (Bill).** A self-paced loop in this session watches that claim
+  (wake = `DESCENT-PLAN.md` present in HEAD; heartbeat ~25 min; STALL = workflow journal quiet
+  >45 min with no plan landed → THIS session executes that claim's RESUME PROTOCOL, so the raid
+  plan can't die silently). When the raid plan lands: run the SAME zoom-out structure pass for
+  the DUNGEON surface (the GAME-LOOPS §3 headline gap — no dungeon plan exists; inputs =
+  WORLD-PLAN §THE DUNGEON + the b2afbca raid/dungeon identity split [dungeons = the M+ Depth
+  push surface] + DESCENT-PLAN.md's raid verdicts as the frame to diff against, inline
+  multi-lens design not a Workflow) → NEW `DUNGEON-PLAN.md` at Bill's verdict + ledger rows,
+  then the loop stops. *(dungeon-watcher session)*
+
+- ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
+  class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW
+  **`SLATE-PLAN.md`** = the generalized pass (§1) + slate laws (§2) + **THE QUEUE** (§0: Warden →
+  Duelist → Bloomweaver(class-level) → Cask → Brim → Draw → Brew → Fermata) + the loop protocol
+  (§3); NEW `.claude/skills/slate-loop/` = the restart entry point (the cron is SESSION-ONLY —
+  in a new session invoke `/slate-loop` to resume); BUILD-LEDGER §C row + CLAUDE.md index line.
+  Each pass: fresh WebSearches → `research/<target>-sweep.md` → 4-lens synthesis → 4–6 pitches
+  (incumbent deck = PITCH #0 where one exists) → 3 inline skeptics → slate lands **🟡 AT VERDICT**
+  in the target's plan doc. "Done" = slate at verdict — the loop does NOT wait for Bill's picks;
+  deck-creator passes are separate claims after each verdict. *(slate-machine session — the loop
+  runs here)*
+
 - ☐ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **CLAIM: THE
   OLD-GAME PURGE + audit follow-ups (Bill).** (1) docs: record the purge decisions (GAME SHAPE
   amendment · roster · casting-pool cut · BREADTH/gear consequences), fix the loop-audit drift +

@@ -36,6 +36,8 @@ signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE sing
 every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,
 strict idea→verdict→approved→built→cut lifecycle; wins any diff with a plan doc, 2026-07-09) ·
 `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
+`SLATE-PLAN.md` (**THE SLATE MACHINE** — the all-class branch-slate queue + the generic
+Tempo-§14-style pass + the 15-min loop protocol; restart via the `slate-loop` skill, 2026-07-10) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, pair locked 2026-07-07) ·
 `TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·
