@@ -184,8 +184,10 @@ and fixed here. **The slate below this section is now the build spec.**
   showed it barely bound — ±5pp win, same TTK/potency; a disciplined brewer never over-pours), then
   removed entirely. The HARD cap (12) is the only ceiling now; full pours always land. **⚠ knock-on:
   the two cards defined BY saturation are cut with it — the Reckless Brewer creed (§2) and the ⭐
-  Still module (§3) — so the class now OWES a replacement ⭐ transformer** (design law: every class
-  gets exactly one). The reaction's `min(V,R) × balance` skill is untouched — keeping the bars EVEN
+  Still module (§3) — so the class ~~now OWES a replacement ⭐ transformer~~ **[OWE VOID 2026-07-09,
+  Bill — the transformer requirement is DROPPED; modules are add-ons now, `DECK-LAYOUT.md §1`. No
+  replacement transformer is owed — the Reaction-Vessel `min(V,R)×balance` core stands on its own;
+  fill any freed module slot with whatever adds the most play.]** The reaction's `min(V,R) × balance` skill is untouched — keeping the bars EVEN
   is still the whole game; you just can't waste a pour into a full side anymore.
 - The reaction slowly **consumes the brew** — keep feeding it; no banking a stable pile.
 

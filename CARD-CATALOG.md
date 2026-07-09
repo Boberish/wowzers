@@ -128,10 +128,16 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 | **The Bellows** | STRAT | — | 🟡 | Wind regen halved; every clean answer (land or perfect step) +1.5 wind instantly. The pool becomes a chain. |
 | **The Dancer** | RULE | — | 🟡 | **WILD — the parry button is GONE.** A PERFECT dodge IS the parry (counter + ◆ every other perfect); GOOD stays a dodge; baited lockout +0.2s. Pure height-reading; the mobile creed. |
 
-### Modules (Floor-1 pick 1-of-3 · exactly one ⭐)
+### Modules (Floor-1 pick 1-of-3 · **add-ons to the minigame — no transformer requirement**)
+> **⚠ MODULE REFRAME (2026-07-09, Bill — `DECK-LAYOUT.md §1`):** a module is an **add-on/supplement**
+> to the core minigame (a gauge layered on top; base playable without it), NOT a mandated transformer.
+> The old "exactly one ⭐ transformer per class" rule is **dropped** ("something about transforming I
+> don't get" — Bill). The fill→transform→crash shape is now just one *optional* flavor. So **The
+> Crucible below is up for keep / simplify to a plain supplement / cut** at reshape.
+
 | Card (id) | Type | Rarity | Status | Effect |
 |---|---|---|---|---|
-| ⭐ **The Crucible** | RULE | — | 🟡 | TRANSFORMER. Damage TAKEN fills it → IGNITES ~6s WHITE STEEL (parries cost 0 wind, lands bank ◆◆, counters ×1.5) → crash (regen dead 4s, gauge empty). Ignite timing is the decision. |
+| **The Crucible** | RULE | — | 🟡 | _Optional fill-and-unleash gauge (transform no longer required)._ Damage TAKEN fills it → IGNITE ~6s WHITE STEEL (parries cost 0 wind, lands bank ◆◆, counters ×1.5) → crash (regen dead 4s, gauge empty). Ignite timing is the decision. **At verdict: keep the fill→ignite→crash shape, simplify to a steady supplement, or cut.** |
 | **The Scales** | STRAT | — | 🟡 | Balance pan: parries tip crimson, dodges tip blue; near-BALANCE grows an edge (→ +12% dealt / −12% taken); pegging a side kills it until re-centred. Anti-autopilot. |
 | **The Whetstone** | GREED | — | 🟡 | Each banked ◆ sharpens over 4s (sharp pip ×1.5 in a dump); an unanswered real hit dulls your sharpest pip. Hold-vs-spend with teeth. |
 | **Flow** _(the module)_ | STRAT | — | 💡 | **Reframed 2026-07-09:** base FLOW is now the **AGGRO meter** (`TANK-PLAN §1c`) — always on. This MODULE is the *upgrade*: your flow ALSO **ramps your DUMP damage** (aggro-hold → damage engine, the "lots of dodge, not much dmg" lever). Competes for the Floor-1 module slot; reconcile at deck reshape. |

@@ -15,7 +15,7 @@ history in MASTER-PLAN before writing a single card.
 | Slot | Count | What it is | Law |
 |---|---|---|---|
 | **Creeds** | 3–5, pick 1/run | A run-long temperament that reshapes the spec's risk | Curated, never rarity-rolled. Include: one forgiving/crossover, one greed pole, one rhythm-changer, and **one WILD creed that rewrites the core mechanic** (Tutti-class) |
-| **Modules** | 2–3, Floor-1 pick | A new UI dynamic — a gauge that adds a way to play | Exactly **one ⭐ transformer** per class (Overdrive/Shadow Dance-class: fills → a temporary transformed state → crashes). A module must EARN its pixels — "a passive, not extra UI" gets cut |
+| **Modules** | 2–3, Floor-1 pick | An **add-on to the core minigame** — a supplemental gauge/UI dynamic layered on top (base stays playable without it) | A module must EARN its pixels — "a passive, not extra UI" gets cut. **No transformer requirement** (2026-07-09, Bill): steady supplement / build engine / *optional* fill→unleash→reset gauge — vary the 2–3, don't mandate the transform archetype |
 | **Boons** | 10–16 | The draftable pool, in LANES named after the core mechanic's dials | Every card names the dial it touches (the address rule). Each lane: ≥1 greed card, ≤1 insurance card |
 | **Rig** | 2–4 WHENs | Earned MOMENTS that plug into the class THEN table | A WHEN must be *chooseable or earnable*, never a passive roll; rare WHENs pay premium by construction |
 | **Keystones** | 2–3 | Build-definers dropped by ELITES only, never normal drafts | **Spectacle-grade, never a stat.** Bill's bar: "keystones need to be way more fun than open kick window." If it doesn't change how the bar/minigame LOOKS in play, it isn't a keystone |
@@ -99,8 +99,9 @@ the blocked hit and return it) rather than just subtract. If you catch yourself 
    shared vocabulary (same meaning across every class — Bill classifies at a glance):
    **POWER** (just bigger numbers — the bread) · **GREED** (risk more for more; bites when you
    overreach) · **STRAT** (rewards a specific plan or clever play) · **EASE** (**the difficulty
-   dial** — see below) · **RULE** (changes a rule of the minigame — ⭐transformers and keystones
-   live here) · **TEAM** (helps the whole warband — the one support card).
+   dial** — see below) · **RULE** (changes a rule of the minigame — keystones live here, and an
+   *optional* transformer-style module; no class is *required* to have a transformer) · **TEAM**
+   (helps the whole warband — the one support card).
    **EASE = the difficulty dial (redesigned 2026-07-09).** Do NOT author a stack of flat "wider
    window / slower beat" comfort cards (easy to write, dull to draft, floods the pool). Author
    **one dial archetype**: on drop it **rolls 2–3 of the class's knobs**; the player takes ONE and

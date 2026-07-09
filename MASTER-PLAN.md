@@ -773,6 +773,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §1/§3/§4/§6 + CARD-CATALOG + deck-creator skill +
+  ALCHEMIST-PLAN §2 + MASTER §1599 + BUILD-LEDGER §C — **MODULES = ADD-ONS, TRANSFORMER REQUIREMENT
+  DROPPED + SUB-SPECS ARE THE DEPTH ENGINE (Bill).** Two linked steers: (1) a **module is a
+  supplement/add-on** to the core minigame (a gauge layered on top, base fully playable without it) —
+  NOT the mandated "fills → transformed state → crashes" transformer ("something about transforming I
+  don't get" — Bill). The **"exactly one ⭐ transformer per class" law is removed**; transformers
+  become one *optional* module flavor. Knock-on: the two **"class OWES a transformer" debts**
+  (Alchemist post-Still-cut, both here + ALCH-PLAN) are **VOID** — no replacement owed; The Crucible
+  (tank ⭐) drops to a plain module up for keep/simplify/cut at reshape. (2) **Sub-specializations
+  (= the ladders/branches) are the depth engine** for "we need more boons/upgrades": deepen a class by
+  adding/filling a branch (its own boons + module + keystone = meaningful cards), not by stacking flat
+  boons — which the **EASE dial** already de-floods. Net: *more cards that matter, fewer that don't*.
+  No code (Phase-2 reshape territory). *(this session)*
 - ☑ 2026-07-09 · main (docs only) · CLAUDE.md + MASTER §HOW-TO-WORK — **LEDGER LAW added (process).**
   Gap found (Bill): the trigger to update `BUILD-LEDGER.md` lived only inside the ledger's own §4, so
   a session doing design work elsewhere didn't know it was on the hook (I missed it on the EASE-dial
@@ -1596,7 +1609,8 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   off" → mechanic removed entirely (config/kit/gauge/policy/sim/codex). The HARD cap (12) is the
   only ceiling; full pours always land; `min(V,R)×balance` skill untouched. ⚠ Knock-on: the two
   cards built ON saturation are cut too — the **Reckless Brewer** creed and the **⭐ Still** module —
-  so **the class OWES a new ⭐ transformer** (ALCHEMIST-PLAN §3 lists candidates). Bands basically
+  so ~~the class OWES a new ⭐ transformer~~ **[OWE VOID 2026-07-09 — transformer requirement dropped,
+  modules are add-ons; no replacement owed. See Coord Log.]** (ALCHEMIST-PLAN §3 lists candidates). Bands basically
   unchanged (sat barely bound); det PASS; default comp still byte-identical (alchemist not in it).
   *(alchemist-core session)*
 

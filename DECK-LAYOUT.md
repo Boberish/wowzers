@@ -25,7 +25,7 @@ number here differs from an older doc, this doc wins** (the older ones get a poi
 | **Core minigame** | 1 | The class's timing minigame + its **dials** (what a card can touch). Always-on, fun bare. | Skill must move outcomes (Rule #4). Dodge stays the light shared safety. |
 | **Signature CD** ⏱ | **1, baseline** | The class's ~1-min big-moment button — every class has one, *un-drafted* (fun bare). One button, not a lane. | **Amplifies skill, never `button = damage`** — pays off setup/timing (line it up with a boss window / your built combo). Varied by class; complements the drafted modules, never duplicates them. |
 | **Creeds** | 3–5, **pick 1/run** | A run-long temperament that reshapes the spec's risk. | Curated, never rarity-rolled. Include one forgiving/crossover, one greed pole, one rhythm-changer, and **one WILD creed that rewrites the core mechanic**. |
-| **Modules** | 2–3, **Floor-1 pick** | A new UI dynamic — a gauge that adds a way to play. | Exactly **one ⭐ transformer** per class (fills → temporary transformed state → crashes). A module must EARN its pixels. |
+| **Modules** | 2–3, **Floor-1 pick** | An **add-on to the core minigame** — a supplemental gauge/UI dynamic that layers a *new way to play on top of* the base loop (which stays fully playable without it). | A module must EARN its pixels — a passive with no new UI gets cut. **No transformer requirement** (dropped 2026-07-09, Bill): a module can be a steady supplement, a build engine, or *optionally* a fill→unleash→reset gauge — pick whatever adds the most play. Vary the 2–3; don't mandate an archetype. |
 | **Boons** | 10–16 | The draftable pool, filed in **dial-lanes** (the address rule). | Every card names the dial it touches. Each lane: ≥1 greed, ≤1 insurance. |
 | **Rig** | 2–4 WHENs | The one **WHEN→THEN** wiring — a single legible circuit, wired at first draft, re-wired once at end of Floor 2. | A WHEN must be chooseable/earnable, never a passive roll; rare WHENs pay premium. Does NOT grow within a run. |
 | **Keystones** | **pool 2–3 · run 1** | Build-definers: authored 2–3 per spec (~1 per ladder), **acquire 1/run from an ELITE** (1-of-2 pick). | **Spectacle-grade, never a stat** — if it doesn't change how the minigame *looks* in play, it isn't a keystone. Persistently unlocked into the pool via **level + an oath kept**. |
@@ -40,6 +40,30 @@ keystones into your pools · run start → draft 1-of-3 Creeds + Aspect · after
 Rig · every won fight → 1-of-3 boon draft · end of Floor 1 → pick 1 Module · elite nodes → acquire
 a keystone (1-of-2) · end of Floor 2 → re-wire the Rig (free). The **signature CD is always
 present** (baseline, never granted).
+
+### THE RIG LAW — required, single-circuit, no stacking (locked 2026-07-04 · law-stated 2026-07-09)
+
+Every class deck **ships a Rig** — a class reshape without one isn't done. One system, identical
+chassis on every class; only the WHENs/THENs are class-authored:
+
+- **WHENs (2–4+, class-authored)** — earned moments in the class's own minigame (a dead-centre
+  strike · a full-bank dump · a correctly-ignored feint). Chooseable/earnable, **never a passive
+  roll**. **THENs** are a small class table of modest role-shaped payoffs (bonus damage / resource
+  refund / a brief buff / a warband banner).
+- **ONE circuit per run.** Wire **1 WHEN → 1 THEN** at the first draft (after fight 1); **re-wire
+  once, free, at end of Floor 2**. It never grows mid-run — no second wire, no amplify ladder.
+- **The greed-dial payout (the balancer).** A THEN's magnitude is **computed** from the WHEN it's
+  plugged into (`base × mult`), `mult` ≈ inverse-frequency × a rarity premium. A can't-miss WHEN
+  pays a steady hum; a rare WHEN pays a spike — **collectible only if you actually land it**. No
+  pairing rules; the wiring board shows the number before you commit. (Built reference:
+  `data/twinfang/twinfang_rig.gd` — one lookup table, not combinatorics.)
+- **Power budget = SIDE BOOST** — ~10% of the class's own output (~4% TTK). A flavour layer that
+  reads as one sentence (*"WHEN I land a Riff → THEN the boss bleeds"*), never a pillar.
+- **⚠ NO STACKING — cut 2026-07-04, never resurrect.** The old stackable model (a board of pieces,
+  any WHEN fires every THEN) re-created the trickle and produced Bill's exact complaint —
+  *"side-effect damage is killing the boss and I don't know why."* The only banking allowed is
+  **inside one THEN, small and capped** (Killing Edge banks crit charges cap 3; Overcharge takes
+  the max, never adds). A boon may double a rig fire (Second Opinion) — it may never add a circuit.
 
 ---
 
@@ -81,6 +105,16 @@ The thematic axis, formalized from the tank precedent (Headsman / Ironside / Gho
   ladder/type ("offers a Thorns boon") so you can **route toward the build you're chasing** — the
   Hades god-routing layer. Keep a **mix**: some legible (strategy), some random (discovery).
 
+**Sub-specializations ARE the depth engine (2026-07-09, Bill).** Each ladder/branch *is* a
+sub-specialization, and **adding or deepening one is the primary lever for pool depth** — the
+answer to "we need more boons/upgrades." A new sub-spec pays for itself in *meaningful* cards: its
+own boons (a full dial-lane spread), its module, its capstone keystone — each pulling a distinct
+build, none of it filler. Pair this with the **EASE dial** (§4, which collapsed the flat-comfort
+flood into one rolled archetype) and you land the goal exactly: **more cards that matter, fewer that
+don't** — *depth from sub-specs, de-bloat from EASE*. So when a class feels thin, the fix is usually
+**a third branch with its own arc**, not ten more +5% boons. (This is why the count is "2 default, 3
+when the fantasy fills it" — a rich spec earns a third sub-spec; a lean one stays at two.)
+
 ---
 
 ## PART 4 — THE 6 CARD-TYPES (the universal vocabulary)
@@ -93,7 +127,8 @@ at a glance). Verbatim:
 - **STRAT** — rewards a specific plan or clever play.
 - **EASE** — **the difficulty dial**: tune one of the class's own minigame knobs softer for
   comfort *or* harder for +damage. *(See the dial note below.)*
-- **RULE** — changes a rule of the minigame (⭐ transformers and keystones live here). *(Bill's
+- **RULE** — changes a rule of the minigame (keystones live here; and an *optional* transformer-style
+  module — the ⭐ just marks a class's flashiest module, no longer a required one). *(Bill's
   "weird" cards.)*
 - **TEAM** — helps the whole warband (the one Support card). *(Bill's "support" card.)*
 
@@ -167,6 +202,17 @@ must be fun BARE; (7) comp-variant content is parked.
   Supersedes the old "floor up / ceiling down" framing. See §4.
 - **Branches are soft** — attractors, not cages; hard-gating is the only thing that shoehorns.
 - **The CD amplifies skill** — never `button = damage`.
+- **Modules are add-ons, not transformers** (2026-07-09, Bill) — a module *supplements* the core
+  minigame (a gauge layered on top; the base stays fully playable without it). The old "exactly one
+  ⭐ transformer per class" **mandate is dropped** — the fill→transform→crash shape is now just one
+  *optional* module flavor, not a required slot. See §1.
+- **Sub-specializations are the depth engine** (2026-07-09, Bill) — deepen a class by adding/filling
+  a branch (its own boons + module + keystone), not by stacking flat boons; EASE-dial de-bloat +
+  sub-spec depth = more cards that matter, fewer that don't. See §3.
+- **The Rig is REQUIRED** (2026-07-09, Bill) — every class deck ships the single-circuit WHEN→THEN
+  rig (see §1's RIG LAW): class-authored earned WHENs, greed-dial payout (`base × mult`), wire after
+  fight 1 + one free Floor-2 re-wire. **The stackable multi-proc model stays CUT** — no THEN-board,
+  no second wire; banking only inside one THEN, small and capped.
 
 ---
 
