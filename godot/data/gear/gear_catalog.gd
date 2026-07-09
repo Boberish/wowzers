@@ -68,15 +68,14 @@ const ITEMS := {
 }
 
 ## Ledger tables: canonical EncounterRes.id -> rows. Row kinds: "signature" (first
-## kill — guaranteed unlock + that kill's drop). Gate exams key by their canonical
-## solo ids (the recast is display-only), so a PROVING GROUNDS practice kill of the
-## same encounter stays inert simply because practice never rolls drops.
+## kill — guaranteed unlock + that kill's drop). (Gate-exam pages died with THE
+## PURGE 2026-07-10 — gates and the exam bosses are deleted.)
 ## OATH rows carry a severity (I/II/III = printed rarity tier) + a deed the Oaths
 ## detector engine can evaluate off `seat.diag`/`seat.vars` (kinds in game/oaths.gd).
 ## v2: universal curios only. Offender rows removed; new curios unlock via UNIVERSAL deeds
 ## (zero_deaths / curses / no_dips — no class-specific deed, since curios are cross-spec).
-## The gate pages (gatekeeper/warden/priest/rendmaw) held only class-welded offenders → now
-## empty (no drop) until the v2 pool grows.
+## (The old gate pages died in THE PURGE; ELITE nodes are the candidate roll site
+## when the v2 pool grows — GEAR-CATALOG.md banner.)
 const TABLES := {
 	"riftmaw": [
 		{"row": "signature", "item": "riftmaw_tooth"},

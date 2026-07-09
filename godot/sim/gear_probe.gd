@@ -145,66 +145,8 @@ func _initialize() -> void:
 	t5.kit._kick(s5t, t5)
 	oks.append(["vial: tempo kick pays +2 Flow", int(t5.vars.get("flow", 0)) == 2])
 
-	# ------------------------------------------- SPARK PLUG (first kick, half cd)
-	var s6 := _mini_state(tune)
-	var vccfg := VoidcallerConfig.new()
-	var c6 := Seat.new()
-	c6.role = "dps"
-	c6.hp_max = 100.0
-	c6.hp = 100.0
-	c6.kit = VoidcallerKit.new("disruptor", vccfg)
-	c6.gear = ["spark_plug"]
-	s6.seats = [c6]
-	s6.tick = 100
-	var kick_ab := AbilityRes.new()
-	kick_ab.response = AbilityRes.Response.INTERRUPTIBLE
-	var tg6 := Telegraph.new()
-	tg6.ability = kick_ab
-	tg6.start_tick = 100
-	tg6.dur_ticks = 30
-	s6.telegraph = tg6
-	c6.kit._do_interrupt(s6, c6, "space")
-	oks.append(["plug: the first answered kick refunds its whole cooldown",
-		c6.defense_ready_tick == s6.tick])
-	s6.tick = 200
-	var tg6b := Telegraph.new()
-	tg6b.ability = kick_ab
-	tg6b.start_tick = 200
-	tg6b.dur_ticks = 30
-	s6.telegraph = tg6b
-	c6.kit._do_interrupt(s6, c6, "space")
-	oks.append(["plug: and the second", c6.defense_ready_tick == s6.tick])
-	s6.tick = 300
-	var tg6c := Telegraph.new()
-	tg6c.ability = kick_ab
-	tg6c.start_tick = 300
-	tg6c.dur_ticks = 30
-	s6.telegraph = tg6c
-	c6.kit._do_interrupt(s6, c6, "space")
-	oks.append(["plug: the third kick pays full price (2 sparks per fight)",
-		c6.defense_ready_tick == 200 and int(c6.gear_vars.get("spark_n", 0)) == 2])
-
-	# ------------------------------------------------- SALT VIAL (dispel heals 25)
-	var s7 := _mini_state(tune)
-	var mcfg := MenderConfig.new()
-	var h7 := Seat.new()
-	h7.role = "healer"
-	h7.hp_max = 100.0
-	h7.hp = 100.0
-	h7.resource = 500.0
-	h7.kit = MenderKit.new("tidecaller", mcfg)
-	h7.gear = ["salt_vial"]
-	var sick := Seat.new()
-	sick.role = "dps"
-	sick.hp_max = 100.0
-	sick.hp = 30.0
-	sick.debuff = {"id": "rot"}
-	s7.seats = [h7, sick]
-	h7.kit._resolve_spell(s7, h7, "dispel", sick)
-	oks.append(["salt: the cleanse also heals its target 60", is_equal_approx(sick.hp, 90.0)])
-	oks.append(["salt: the dispel's mana comes back (net unchanged)",
-		is_equal_approx(h7.resource, 500.0)])
-	oks.append(["salt: the debuff is gone (dispel unchanged)", sick.debuff.is_empty()])
+	# (SPARK PLUG + SALT VIAL sub-tests retired 2026-07-10: their host kits — the
+	# Voidcaller kick / the Mender dispel — died in THE PURGE.)
 
 	# ================================================================ GEAR-2: OATHS
 	# ---- detectors (pure functions over diag/vars) ----
@@ -311,36 +253,7 @@ func _initialize() -> void:
 		int(wg.vars["counter"]) == 2 and int(wg.diag.get("chain_break", 0)) == 2])
 	# (twinfang Flow+grace sub-test retired: grace_period is CUT from the v2 catalog and
 	# the Tempo kit's Flow-wipe was reworked — this dead-content assertion no longer maps.)
-	# GRACE: a voidcaller whiff hands the press back (whiff still counted)
-	var sgv := _mini_state(tune)
-	var vg := Seat.new()
-	vg.role = "dps"
-	vg.hp_max = 100.0
-	vg.hp = 100.0
-	vg.kit = VoidcallerKit.new("disruptor", VoidcallerConfig.new())
-	vg.gear = ["grace_period"]
-	vg.defense_ready_tick = 260
-	sgv.seats = [vg]
-	vg.kit._do_interrupt(sgv, vg, "space")     # telegraph null -> whiff
-	oks.append(["grace: the whiffed kick comes back (whiff still counted)",
-		vg.defense_ready_tick == sgv.tick and int(vg.diag.get("kick_whiff", 0)) == 1])
-	# GRACE: one Litany pip stays lit through a decay
-	var sgm := _mini_state(tune)
-	var mg := Seat.new()
-	mg.role = "healer"
-	mg.hp_max = 100.0
-	mg.hp = 100.0
-	mg.kit = MenderKit.new("tidecaller", MenderConfig.new())
-	mg.gear = ["grace_period"]
-	mg.vars["litany"] = 3
-	mg.vars["litany_idle"] = 89                # one tick from the 3.0s decay
-	sgm.seats = [mg]
-	mg.kit.upkeep(sgm, mg)
-	var l_hold: bool = int(mg.vars["litany"]) == 3
-	mg.vars["litany_idle"] = 89
-	mg.kit.upkeep(sgm, mg)
-	oks.append(["grace: a Litany pip stays lit once, then decays",
-		l_hold and int(mg.vars["litany"]) == 2])
+	# (GRACE voidcaller-whiff + mender-Litany sub-tests retired 2026-07-10 — THE PURGE.)
 	# STICKY NOTE: answering the curse fast refunds rage (+ the deed counter ticks)
 	var ss := _mini_state(tune)
 	ss.threat_enabled = true
@@ -397,41 +310,7 @@ func _initialize() -> void:
 	var struck: bool = tvk._strike(sev, tv)
 	oks.append(["encore: Venom strikes cost 6 less while it rings",
 		struck and is_equal_approx(tv.resource, 4.0) and int(tv.vars["encore_left"]) == 1])
-	# ECHO CHAMBER: a clean kick at full Backlash echoes a free 0.6x Overload
-	var sec := _mini_state(tune)
-	var ve := Seat.new()
-	ve.role = "dps"
-	ve.hp_max = 100.0
-	ve.hp = 100.0
-	var vek := VoidcallerKit.new("disruptor", VoidcallerConfig.new())
-	ve.kit = vek
-	ve.gear = ["echo_chamber"]
-	ve.vars["backlash"] = 5
-	sec.seats = [ve]
-	var tge := Telegraph.new()
-	tge.ability = AbilityRes.new()
-	tge.ability.response = AbilityRes.Response.INTERRUPTIBLE
-	tge.start_tick = sec.tick
-	tge.dur_ticks = 15                          # rem 0.5s <= clean zone
-	sec.telegraph = tge
-	vek._do_interrupt(sec, ve, "space")
-	oks.append(["echo: full-bank clean kick echoes the Overload (stacks kept)",
-		sec.boss.hp <= 1000.0 - 204.0 - 100.0 and int(ve.vars["backlash"]) == 5])
-	# OVERFLOW SLUICE: spill past a full Reservoir wards the tank at 0.5x
-	var ssl := _mini_state(tune)
-	var hm := Seat.new()
-	hm.role = "healer"
-	hm.hp_max = 100.0
-	hm.hp = 100.0
-	var hmk := MenderKit.new("tidecaller", MenderConfig.new())
-	hm.kit = hmk
-	hm.gear = ["overflow_sluice"]
-	hm.vars["reservoir"] = hmk._res_max()
-	var tk2 := _tank_seat(BulwarkKit.new("warden", bcfg))
-	ssl.seats = [tk2, hm]
-	hmk.on_overheal(ssl, hm, tk2, 100.0)
-	oks.append(["sluice: the spill wards the tank (0.5x of 55 conv = 28)",
-		is_equal_approx(tk2.absorb, 28.0) and tk2.absorb_owner_i == 1])
+	# (ECHO CHAMBER + OVERFLOW SLUICE sub-tests retired 2026-07-10 — THE PURGE.)
 	# SCRATCHPAD: rage trickles while a long wind-up thinks
 	var ssc := _mini_state(tune)
 	var wsc := _tank_seat(BulwarkKit.new("warden", bcfg))
@@ -495,10 +374,12 @@ func _riftmaw_run(seed: int, gear: Array) -> int:
 	var bp := s.seats[1].policy as TwinfangPolicy
 	bp.latency_ticks = 4
 	bp.rng = DetRng.new(seed * 2749 + 2338)
-	var cp := s.seats[2].policy as VoidcallerPolicy
+	var cp := s.seats[2].policy as AlchemistPolicy
 	cp.latency_ticks = 4
 	cp.rng = DetRng.new(seed * 2749 + 3339)
-	(s.seats[3].policy as MenderPolicy).latency_ticks = 5
+	var hpw := s.seats[3].policy as WellPolicy
+	hpw.latency_ticks = 5
+	hpw.rng = DetRng.new(seed * 2749 + 5531)
 	var cap := int(150.0 / s.dt)
 	while not s.over and s.tick < cap:
 		for seat in s.seats:

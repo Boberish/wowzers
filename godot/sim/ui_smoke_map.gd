@@ -15,7 +15,7 @@ var hud: Control
 var step := 0
 var fails := 0
 var takes := 0            # boon-draft picks taken (human + commanded AI raiders)
-var fights := 0           # burst-won pulls (gates + combat + the Seal)
+var fights := 0           # burst-won pulls (combat + the Seal)
 var stops := 0            # mapstop panels driven
 var stall := 0            # steps since the screen last changed
 var last_screen := ""

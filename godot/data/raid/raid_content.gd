@@ -1,6 +1,6 @@
 ## Raid content (R0 — see RAID-PLAN.md): the first ENSEMBLE encounter. Four
-## FULL-fidelity seats of different classes — Bulwark tank, Mender healer,
-## Twinfang + Voidcaller dps — against one raid boss, in a single CombatState with
+## FULL-fidelity seats of different classes — Bulwark tank, Well healer,
+## Twinfang + Alchemist dps — against one raid boss, in a single CombatState with
 ## threat/taunt enabled. Every kit/config pairing is exactly the solo one; the only
 ## new rules are threat targeting and the role-extinction loss line.
 ##
@@ -478,30 +478,6 @@ static func _blade(aspect: String) -> Seat:
 		u.vars["venom"] = TwinfangKit.new_venom()
 	return u
 
-static func _caster(aspect: String) -> Seat:
-	var vcfg := VoidcallerConfig.new()
-	var u := Seat.new()
-	u.role = "dps"; u.unit_name = "The Voidcaller"; u.fidelity = "full"
-	u.hp_max = vcfg.hp_max; u.hp = vcfg.hp_max; u.dps = 0.0
-	u.resource = 0.0; u.resource_max = vcfg.focus_max
-	u.kit = VoidcallerKit.new(aspect, vcfg)
-	u.policy = VoidcallerPolicy.new()
-	u.vars = {"backlash": 0, "next_instant": false, "kicks": 0}
-	return u
-
-static func _mender(aspect: String) -> Seat:
-	var mcfg := MenderConfig.new()
-	var u := Seat.new()
-	u.role = "healer"; u.unit_name = "The Mender"; u.fidelity = "full"
-	u.hp_max = 200.0; u.hp = 200.0; u.dps = 0.0
-	u.resource = mcfg.mana_max; u.resource_max = mcfg.mana_max
-	u.kit = MenderKit.new(aspect, mcfg)
-	u.policy = MenderPolicy.new()
-	# RAID: dial mana regen DOWN here (not in the shared MenderConfig) so active
-	# healing actually taxes mana — solo/practice Mender stays byte-identical.
-	u.vars = {"reservoir": 0.0, "nerve": 0.0, "regen_mult": 0.5}
-	return u
-
 ## The SECOND healer class in the raid: Bloomweaver (anticipate — HoTs + wards, no
 ## mana; Sap resource + earned Verdance). Same healer SEAT, different CLASS — chosen
 ## via make_state's `classes` dict / the fight spec's per-seat `cls`. Mirrors the
@@ -532,46 +508,23 @@ static func _well(aspect: String) -> Seat:
 	u.vars = {"charges": wcfg.charges_max, "current": 0, "pulse_next": 0}
 	return u
 
-## Build the healer seat for whichever healer CLASS the seat carries (default Mender).
-## Aspect defaults per class: Mender→tidecaller, Bloomweaver→wildgrove, Well→brim.
+## Build the healer seat for whichever healer CLASS the seat carries (default WELL —
+## THE PURGE 2026-07-10: the old Mender is deleted; the reworked Well is the healer).
+## Aspect defaults per class: Well→brim, Bloomweaver→wildgrove.
 static func _healer_seat(cls: String, aspect: String) -> Seat:
 	if cls == "bloomweaver":
 		return _bloomweaver(aspect if aspect != "" else "wildgrove")
-	if cls == "well":
-		return _well(aspect if aspect != "" else "brim")
-	return _mender(aspect if aspect != "" else "tidecaller")
+	return _well(aspect if aspect != "" else "brim")
 
-## The SECOND melee-DPS class in the raid: Reckoner (a Warrior — the auto-advancing
-## two-tap swing). Same BLADE SEAT, different CLASS — chosen via make_state's `classes`
-## dict / the fight spec's per-seat `cls`. Mirrors the solo factory (_make_reckoner),
-## minus is_player. Rage builds from swinging; starts with a little.
-static func _reckoner(aspect: String) -> Seat:
-	var rcfg := ReckonerConfig.new()
-	var u := Seat.new()
-	u.role = "dps"; u.unit_name = "The Reckoner"; u.fidelity = "full"
-	u.hp_max = rcfg.hp_max; u.hp = rcfg.hp_max; u.dps = 0.0
-	u.resource = 40.0; u.resource_max = rcfg.rage_max
-	u.kit = ReckonerKit.new(aspect, rcfg)
-	u.policy = ReckonerPolicy.new()
-	u.vars = {"phase": 0, "wind_start": 6, "momentum": 0.0, "poise": 0.0, "weight": "",
-		"over_armed": false, "ultra_armed": false, "stagger_until": 0,
-		"seq_winds": [], "seq_strikes": []}
-	return u
-
-## Build the blade seat for whichever melee-DPS CLASS the seat carries (default Twinfang).
-## Aspect defaults per class: Twinfang→venomancer (the verified comp), Reckoner→colossus.
-## An empty cls/aspect reproduces `_blade("venomancer")` bit-for-bit (byte-identical).
-static func _blade_seat(cls: String, aspect: String) -> Seat:
-	if cls == "reckoner":
-		return _reckoner(aspect if aspect != "" else "colossus")
+## Build the blade seat (Twinfang is the only blade class — Reckoner deleted in THE
+## PURGE 2026-07-10; `cls` is accepted for spec compatibility and ignored).
+static func _blade_seat(_cls: String, aspect: String) -> Seat:
 	return _blade(aspect if aspect != "" else "venomancer")
 
-## The SECOND caster-seat class in the raid: the Alchemist ("the Brew" — the patient
-## poison/DoT DPS, ALCHEMIST-PLAN.md base minigame). Same CASTER SEAT, different CLASS —
-## chosen via make_state's `classes` dict / the fight spec's per-seat `cls`. Mirrors the
-## solo factory (data/alchemist/alchemist_content.gd:_make_brewer), minus is_player.
-## ⚠ carries NO kick — the seat trades the interrupt for the brew until
-## interrupt-by-ability lands (WORLD-PLAN pillar 3 / audit F22).
+## THE caster-seat class: the Alchemist ("the Brew" — the patient poison/DoT DPS,
+## ALCHEMIST-PLAN.md). Sole caster class since THE PURGE 2026-07-10 (Voidcaller deleted).
+## ⚠ carries NO kick — NO seat carries one until interrupt-by-ability lands
+## (WORLD-PLAN pillar 3): Seal verses go uncontested in the interim, by decision.
 static func _alchemist(aspect: String) -> Seat:
 	var acfg := AlchemistConfig.new()
 	var u := Seat.new()
@@ -584,23 +537,19 @@ static func _alchemist(aspect: String) -> Seat:
 		"potency": 0.0, "react_bank": 0.0}
 	return u
 
-## Build the caster seat for whichever caster CLASS the seat carries (default Voidcaller).
-## Aspect defaults per class: Voidcaller→disruptor (the verified comp), Alchemist→brew.
-## An empty cls/aspect reproduces `_caster("disruptor")` bit-for-bit (byte-identical).
-static func _caster_seat(cls: String, aspect: String) -> Seat:
-	if cls == "alchemist":
-		return _alchemist(aspect if aspect != "" else "brew")
-	return _caster(aspect if aspect != "" else "disruptor")
+## Build the caster seat (Alchemist is the only caster class — Voidcaller deleted in
+## THE PURGE 2026-07-10; `cls` is accepted for spec compatibility and ignored).
+static func _caster_seat(_cls: String, aspect: String) -> Seat:
+	return _alchemist(aspect if aspect != "" else "brew")
 
 ## Build a raid fight. `aspects` may override any seat's Aspect; `player` names the
 ## human seat ("tank"/"blade"/"caster"/"healer") for diag mirroring — every seat is
 ## policy-driven until a driver swaps a human adapter in (R1).
 ## Seat order puts the tank first among targetable seats, so the boss opens on it
 ## before anyone has threat (the pull).
-## `classes` overrides a seat's CLASS (the blade, caster and healer seats are
-## polymorphic: twinfang/reckoner · voidcaller/alchemist · mender/bloomweaver);
-## `aspects` overrides its Aspect. Both default to the verified comp — an empty
-## `classes` builds the exact original 4-seat state, byte-identical.
+## `classes` overrides a seat's CLASS (post-purge the only polymorphic seat is the
+## healer: well/bloomweaver); `aspects` overrides its Aspect. Defaults = the post-purge
+## comp: Bulwark(warden) · Twinfang(venomancer) · Alchemist(brew) · Well(brim).
 static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
 		player: String = "tank", classes: Dictionary = {},
 		pack: Array = []) -> CombatState:
@@ -613,9 +562,9 @@ static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
 	var seats := {
 		"tank": _tank(String(aspects.get("tank", "warden"))),
 		"blade": _blade_seat(String(classes.get("blade", "twinfang")), String(aspects.get("blade", ""))),
-		"caster": _caster_seat(String(classes.get("caster", "voidcaller")),
+		"caster": _caster_seat(String(classes.get("caster", "alchemist")),
 			String(aspects.get("caster", ""))),
-		"healer": _healer_seat(String(classes.get("healer", "mender")),
+		"healer": _healer_seat(String(classes.get("healer", "well")),
 			String(aspects.get("healer", ""))),
 	}
 	if seats.has(player):

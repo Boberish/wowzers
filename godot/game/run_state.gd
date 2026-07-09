@@ -6,7 +6,7 @@
 class_name RunState
 extends RefCounted
 
-var char_class: String = "bulwark"   ## "bulwark" | "mender" | "twinfang" | "voidcaller" | "bloomweaver" | "reckoner" | "alchemist" | "well"
+var char_class: String = "bulwark"   ## "bulwark" | "twinfang" | "bloomweaver" | "alchemist" | "well"  (post-purge 2026-07-10)
 var aspect: String = "warden"
 var loadout: Array = []           ## ability ids in key order (1..N)
 var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
@@ -41,12 +41,6 @@ static func start(aspect: String, seed_v: int = -1) -> RunState:
 	r.encounters = BulwarkContent.run_encounters()
 	return r
 
-static func start_mender(aspect: String, seed_v: int = -1) -> RunState:
-	var r := _base("mender", aspect, seed_v)
-	r.loadout = MenderConfig.new().order(aspect)
-	r.encounters = MenderContent.run_encounters()
-	return r
-
 static func start_bloomweaver(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("bloomweaver", aspect, seed_v)
 	r.loadout = BloomweaverConfig.new().order(aspect)
@@ -57,18 +51,6 @@ static func start_twinfang(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("twinfang", aspect, seed_v)
 	r.loadout = TwinfangConfig.new().loadout(aspect)
 	r.encounters = TwinfangContent.run_encounters()
-	return r
-
-static func start_reckoner(aspect: String, seed_v: int = -1) -> RunState:
-	var r := _base("reckoner", aspect, seed_v)
-	r.loadout = ReckonerConfig.new().loadout(aspect)
-	r.encounters = ReckonerContent.run_encounters()
-	return r
-
-static func start_voidcaller(aspect: String, seed_v: int = -1) -> RunState:
-	var r := _base("voidcaller", aspect, seed_v)
-	r.loadout = VoidcallerConfig.new().loadout(aspect)
-	r.encounters = VoidcallerContent.run_encounters()
 	return r
 
 static func start_alchemist(aspect: String, seed_v: int = -1) -> RunState:

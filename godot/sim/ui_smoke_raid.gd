@@ -106,12 +106,10 @@ func _process(_delta: float) -> bool:
 	print("THE RECKONING: recap builds; biggest hit amt=%d src=%s" % [
 		int(big.get("amt", 0)), str(big.get("src", "-"))])
 
-	# the healer seat's TWO classes: Mender (tidecaller/brinkwarden) + the second
-	# healer Bloomweaver (wildgrove/thornveil) — _launch infers the class from aspect.
+	# the healer seat's TWO classes: the Well (brim/draw) + Bloomweaver
+	# (wildgrove/thornveil) — _launch infers the class from aspect.
 	for combo in [["tank", "warden"], ["tank", "juggernaut"], ["blade", "venomancer"],
-			["blade", "tempo"], ["blade", "colossus"], ["blade", "berserker"],
-			["caster", "disruptor"], ["caster", "silencer"], ["caster", "brew"],
-			["healer", "tidecaller"], ["healer", "brinkwarden"],
+			["blade", "tempo"], ["caster", "brew"], ["caster", "cask"],
 			["healer", "wildgrove"], ["healer", "thornveil"],
 			["healer", "brim"], ["healer", "draw"]]:
 		hud._launch(combo[0], combo[1])
@@ -162,13 +160,13 @@ func _process(_delta: float) -> bool:
 	shell._show_party_setup()
 	assert(String(shell._screen) == "party", "party screen didn't build (shell screen, P3.2b)")
 	var cpa := _press(hud, "ASPECT")          # SOME AI row's toggle (row order is a UI detail)
-	var cpc := _press(hud, "◈")               # healer class toggle cycles Mender -> Well -> Bloomweaver
+	var cpc := _press(hud, "◈")               # healer class toggle: Well ⇄ Bloomweaver
 	assert(cpa and cpc, "party toggle buttons missing")
-	assert(String(hud._d.party["healer"]["cls"]) == "well",
-		"healer class toggle (1st) should reach Well: %s" % str(hud._d.party))
-	_press(hud, "◈")                          # second press -> Bloomweaver (full 3-way cycle)
 	assert(String(hud._d.party["healer"]["cls"]) == "bloomweaver",
-		"healer class toggle (2nd) should reach Bloomweaver: %s" % str(hud._d.party))
+		"healer class toggle (1st) should reach Bloomweaver: %s" % str(hud._d.party))
+	_press(hud, "◈")                          # second press -> back to the Well
+	assert(String(hud._d.party["healer"]["cls"]) == "well",
+		"healer class toggle (2nd) should return to Well: %s" % str(hud._d.party))
 	hud._d.party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
 	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._d.party)])
 	var cpd := _press(hud, "⚔")               # DESCEND
@@ -192,7 +190,7 @@ func _process(_delta: float) -> bool:
 		(hud._d.ai_runs["healer"] as RunState).boons.size()])
 	hud._d.party = {}                            # back to the verified default comp
 
-	# Topology raid floor (MAP-3a): map screen -> gate fight -> back on the map,
+	# Topology raid floor (MAP-3a): map screen -> entry fight -> back on the map,
 	# node fx (raid patch, refuel, wound repair), the privilege-elevated screen
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
@@ -205,8 +203,8 @@ func _process(_delta: float) -> bool:
 	print("oath sworn: ok=%s -> screen=%s sworn=%s" % [
 		str(psw), hud._screen, str(not hud._d.sworn.is_empty())])
 	var sgate: CombatState = hud._ctrl.state
-	print("gate fight: enc=%s screen=%s" % [String(sgate.encounter.id), hud._screen])
-	CombatCore.damage_boss(sgate, sgate.seats[0], sgate.boss.hp)   # burst-win the gate
+	print("entry fight: enc=%s screen=%s" % [String(sgate.encounter.id), hud._screen])
+	CombatCore.damage_boss(sgate, sgate.seats[0], sgate.boss.hp)   # burst-win the entry pull
 	for i in 30:
 		hud._ctrl._process(1.0 / 30.0)
 		hud._process(1.0 / 30.0)
@@ -274,82 +272,7 @@ func _process(_delta: float) -> bool:
 		var pk := _press(hud, "SCRAP")
 		print("kept-oath drop scrapped: ok=%s tokens=%d" % [str(pk), hud._tokens_now()])
 
-	# Tier-1 PERSONAL GATE (§GAME SHAPE): intro panel -> exam fight -> result ->
-	# map; a LOST gate = force-reboot (wound) and the run CONTINUES
-	var gid := -1
-	for nd in hud._d.map.nodes:
-		if String(nd["kind"]) == RunMap.KIND_GATE:
-			gid = int(nd["id"])
-	print("gate node present: %s (id=%d)" % [str(gid >= 0), gid])
-	hud._enter_node(gid)
-	var intro_ok: bool = hud._screen == "mapstop"
-	print("gate intro panel: ok=%s screen=%s" % [str(intro_ok), hud._screen])
-	hud._launch_gate_fight()                       # what STEP THROUGH ALONE does
-	var sx: CombatState = hud._ctrl.state
-	print("gate exam fight: enc=%s boss='%s' seats=%d gate_live=%s" % [
-		String(sx.encounter.id), String(sx.encounter.name), sx.seats.size(), str(hud._gate_live)])
-	print("exam seat armed with curios: %s" % str(sx.seats[0].gear))
-	CombatCore.damage_boss(sx, sx.seats[0], sx.boss.hp)      # burst-win the exam
-	for i in 30:
-		hud._ctrl._process(1.0 / 30.0)
-		hud._process(1.0 / 30.0)
-		if hud._screen != "combat":
-			break
-	print("gate won -> result panel: screen=%s frac[tank]=%.2f" % [
-		hud._screen, hud._d.fracs[0]])
-	hud._launch_gate_fight()                       # loss path: the exam kills you
-	var sl: CombatState = hud._ctrl.state
-	sl.seats[0].hp = 0.0
-	for i in 30:
-		hud._ctrl._process(1.0 / 30.0)
-		hud._process(1.0 / 30.0)
-		if hud._screen != "combat":
-			break
-	print("gate LOST -> rebooted through: screen=%s frac=%.2f wound=%.2f map_alive=%s" % [
-		hud._screen, hud._d.fracs[0], hud._d.wounds[0], str(hud._d.map != null)])
-	# the blade seat's OTHER class: the Reckoner's personal GATE = its Sentinel exam
-	hud._seat_key = "blade"
-	hud._blade_cls = "reckoner"
-	hud._aspect = "colossus"
-	hud._launch_gate_fight()
-	var grk: CombatState = hud._ctrl.state
-	for gi in 60:
-		hud._ctrl._process(1.0 / 30.0)
-		hud._process(1.0 / 30.0)
-	var rkkit := "<none>"
-	if grk.seats[0].kit != null and grk.seats[0].kit.get_script() != null:
-		rkkit = String(grk.seats[0].kit.get_script().get_global_name())
-	assert(rkkit == "ReckonerKit", "reckoner gate didn't build a ReckonerKit (got %s)" % rkkit)
-	print("gate exam blade/RECKONER ok  enc=%s boss='%s' kit=%s" % [
-		String(grk.encounter.id), String(grk.encounter.name), rkkit])
-	hud._blade_cls = "twinfang"
-	# the caster seat's OTHER class: the Alchemist's personal GATE = its Crucible exam
-	hud._seat_key = "caster"
-	hud._caster_cls = "alchemist"
-	hud._aspect = "brew"
-	hud._launch_gate_fight()
-	var gal: CombatState = hud._ctrl.state
-	for gi in 60:
-		hud._ctrl._process(1.0 / 30.0)
-		hud._process(1.0 / 30.0)
-	var alkit := "<none>"
-	if gal.seats[0].kit != null and gal.seats[0].kit.get_script() != null:
-		alkit = String(gal.seats[0].kit.get_script().get_global_name())
-	assert(alkit == "AlchemistKit", "alchemist gate didn't build an AlchemistKit (got %s)" % alkit)
-	print("gate exam caster/ALCHEMIST ok  enc=%s boss='%s' kit=%s" % [
-		String(gal.encounter.id), String(gal.encounter.name), alkit])
-	hud._caster_cls = "voidcaller"
-	# every other seat's exam builds its band + fights live for a moment
-	for gseat in ["blade", "caster", "healer"]:
-		hud._seat_key = gseat
-		hud._aspect = String((hud.ASPECTS[gseat][0] as Dictionary)["id"])
-		hud._launch_gate_fight()
-		var gs: CombatState = hud._ctrl.state
-		for i in 60:
-			hud._ctrl._process(1.0 / 30.0)
-			hud._process(1.0 / 30.0)
-		print("gate exam %-6s ok  enc=%s boss='%s' seats=%d" % [
-			gseat, String(gs.encounter.id), String(gs.encounter.name), gs.seats.size()])
+	# (the personal-GATE walk died 2026-07-10 — THE PURGE: gates + exam bosses deleted)
 	hud._seat_key = "tank"
 	hud._aspect = "warden"
 	# MAP-3c floor progression screens (replaces the old single _show_map_cleared):
@@ -483,10 +406,7 @@ func _drive(s: CombatState, seat_key: String) -> int:
 					elif bool(obs.get("gcd_ready", false)):
 						hud._ctrl.human({"type": "ability", "id": ("rampage" if float(obs.get("rage", 0.0)) >= 40.0 else "cleave")})
 				"blade":
-					if hud._blade_cls == "reckoner":
-						var rph := int(obs.get("phase", 0))
-						hud._ctrl.human({"type": "ability", "id": ("wind" if (rph == 0 or rph == 3) else "strike")})
-					elif not tg.is_empty() and bool(tg.get("defensible", false)) \
+					if not tg.is_empty() and bool(tg.get("defensible", false)) \
 							and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)) \
 							and float(tg.get("remaining", 9.0)) <= 0.4:
 						hud._ctrl.human({"type": "defense"})

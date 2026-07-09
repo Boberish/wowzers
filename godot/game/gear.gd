@@ -7,7 +7,7 @@ extends RefCounted
 const SLOTS := 2
 
 ## GEAR-2: rarity-first weights by ring depth (PROGRESSION/GEAR-CATALOG table).
-## ARMORY retune: drops are scarce EVENTS now (Seal/gate/first-kill only), so each
+## ARMORY retune: drops are scarce EVENTS now (Seal/first-kill only), so each
 ## roll pays richer — a full descent should all but guarantee one opus moment.
 static func rarity_weights(ring: int) -> Dictionary:
 	if ring <= 0:

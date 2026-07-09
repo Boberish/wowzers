@@ -195,135 +195,6 @@ const DATA := {
 	"gear": "CURIOS apply as usual (fortune + off-verb only — cross-class law). No class boon pool yet: REFORGE drafts skip this seat until the boon slate lands.",
 },
 # ============================================================ VOIDCALLER · CASTER DPS
-"voidcaller": {
-	"name": "THE VOIDCALLER", "role": "CASTER DPS · INTERRUPT", "accent": "void",
-	"verb": "The boss's cast bar IS the fight — KICK it (Space), then nuke between kicks.",
-	"fantasy": "A control caster who wins by silencing. The boss's purple cast is a clock you're racing: interrupt it on the last slice (a CLEAN kick) for extra reward and a heal, then Fracture into the gap. There's no hard enrage — the boss's own self-heal is your DPS check, so a missed kick loses you the race.",
-	"resources": [
-		{"name": "HEALTH", "tint": "blood", "body": "340 max. At 0 the run ends. You have no armor — you sustain by KICKING: every interrupt heals you 14."},
-		{"name": "FOCUS", "tint": "void", "body": "0–100, starts EMPTY. Bolt +14, PERFECT dodge +12, READ beat +8. Spent on Fracture (26) and Quietus (30). The whole job: keep Fracture fed between kicks."},
-	],
-	"defense": {"name": "KICK (interrupt)", "key": "SPACE",
-		"body": "Your defensive verb reused as offense. 5s cooldown (3s with Snap Cast), OFF the GCD. Cancels the boss's INTERRUPTIBLE cast and heals you 14. A CLEAN kick — pressed on the last 0.62s slice of the cast bar — pays DOUBLE and banks more spec. A whiff (nothing castable, or too early) STILL burns the cooldown, so don't panic-kick. Denying a self-heal = DENIED. F = dodge string beats."},
-	"moves": [
-		{"name": "Bolt", "key": "1", "cost": "free · 34 · +14 Focus", "tag": "",
-			"body": "Instant filler between casts — your Focus battery."},
-		{"name": "Fracture", "key": "2", "cost": "26 Focus · 1.15s cast · 118", "tag": "",
-			"body": "Your nuke. Taking a hit mid-cast PUSHES IT BACK — protect it by kicking. Overload makes the next one instant."},
-		{"name": "Barrier", "key": "3", "cost": "free · 45% DR 3s · cd 10", "tag": "",
-			"body": "Eat the UNINTERRUPTIBLE channels — the casts you can't kick."},
-		{"name": "Overload", "key": "4", "cost": "spend ALL Backlash · 68 × stack", "tag": "disruptor",
-			"body": "Disruptor payoff: dump your Backlash for a spike, then your NEXT Fracture is instant. The reward for clean kicks."},
-		{"name": "Quietus", "key": "4", "cost": "30 Focus · cd 9", "tag": "silencer",
-			"body": "Silencer lockdown: cancel the cast + hard-Silence 5s + Expose (+50% dmg taken). Opens the burn window."},
-		{"name": "Silence / Counterspell", "key": "5*", "cost": "free · interrupt", "tag": "",
-			"body": "Draftable 2nd interrupt for overlapping casts (Silence adds a mute; Counterspell reflects 90). Kick-rotation insurance."},
-	],
-	"aspects": [
-		{"id": "disruptor", "name": "DISRUPTOR", "tint": "kick", "tagline": "Clean-kick → bank → Overload.",
-			"identity": "You race the boss's self-heals; clean interrupts are ammunition for a burst button. The DPS-check aspect.",
-			"bar": "BACKLASH (0–5): a CLEAN kick banks +2, a regular kick +1. Dump the whole stack with Overload (68 × stack) → and your next Fracture goes instant.",
-			"rotation": [
-				"Bolt to build Focus.",
-				"CLEAN-kick the boss's cast (last slice) → +2 Backlash + a heal.",
-				"Fracture whenever Focus ≥ 26.",
-				"At high Backlash → Overload for a spike, then cast the now-instant Fracture free.",
-				"Barrier the channels you can't kick; DENY every self-heal or you lose the race.",
-			],
-			"branches": [
-				{"name": "Overload burst", "via": "boons: Punish, Feedback, Backlash Burn",
-					"body": "Interrupt dmg +40%, Overload refunds 20 Focus, clean kicks leave a burn. Stack Backlash and unload for big Overload windows."},
-				{"name": "Machine-gun kicks", "via": "boons: Snap Cast, Twin Void (opus)",
-					"body": "Kick cd → 3s + a SECOND kick charge. Interrupt everything, bank Backlash constantly, never let a cast finish."},
-				{"name": "Denial", "via": "boons: Void Feast, Starve the Choir",
-					"body": "Denying a heal strikes back for 50% of the denied healing, and a denial re-fires your kick payloads. Punish the boss for even trying to retrain."},
-			]},
-		{"id": "silencer", "name": "SILENCER", "tint": "void", "tagline": "Lock it out, burn the window.",
-			"identity": "The control fantasy — the boss can't cast while you're on it. Trades the burst race for a hard lockout.",
-			"bar": "SILENCE + EXPOSED: clean kicks Silence up to 4.6s and Expose (+30% dmg taken); Quietus hard-Silences 5s and Exposes +50%. All your damage scales up while the boss is Exposed.",
-			"rotation": [
-				"Clean-kick to Silence + Expose the boss.",
-				"Quietus to cancel + hard-Silence 5s + Expose +50%.",
-				"Unload Fracture / Bolt into the open Exposed window (everything hits harder).",
-				"Re-kick as Silence fades — never let it finish a cast.",
-			],
-			"branches": [
-				{"name": "Perma-lock", "via": "boons: Lingering Hush, Snap Cast, Twin Void (opus)",
-					"body": "Silences +40% longer, kick cd → 3s, a 2nd charge. Chain silences so the boss literally never casts."},
-				{"name": "Glass-cannon Expose", "via": "boons: Laid Bare, Quietus windows",
-					"body": "Expose +50% stronger — every Quietus opens a huge damage window. Front-load everything into the exposed boss."},
-				{"name": "Sustain-lock", "via": "boon: Reprieve",
-					"body": "Each Silence heals you 30. Turns the lockout into self-sustain — you outlive anything the boss can chip you with."},
-			]},
-	],
-	"gear": "CURIOS: Spark Plug refunds half the first kick's cd, LE CHAT's Bell gives +30 starting Focus, Riftmaw Tooth pays Focus on a denied self-heal. Tokens mint off your clean-kick count.",
-},
-# ============================================================ MENDER · HEALER
-"mender": {
-	"name": "THE MENDER", "role": "HEALER · KEEP-ALIVE", "accent": "win",
-	"verb": "Feed one 5-pip LITANY chain — the two aspects fill it by playing OPPOSITE.",
-	"fantasy": "You keep four bars alive through a raid you can NOT out-heal by spamming. Every in-condition heal links a Litany chain (bigger heals, then a party Benediction at 5), and your Aspect decides the condition: Tidecaller lights pips by topping AHEAD of damage, Brinkwarden by catching allies BEHIND, in the red. Same meter, opposite playstyle. You cast by hovering a raid frame and click-casting (or 1-6/Q/E/7).",
-	"resources": [
-		{"name": "MANA", "tint": "void", "body": "900 max, regens 8/s. Pays every spell (GCD 1.2s). A PERFECT dodge refunds 20; Meditate restores 280. Efficiency (mend over flash) matters — you can dry out."},
-		{"name": "LITANY (pips)", "tint": "gold", "body": "0–5 combo meter. +1 per IN-CONDITION flash/mend; decays a pip after 3s idle. Payloads scale ×(1+0.15·pips), and the 5th pip cashes a party Benediction bloom then resets. The condition is INVERTED per aspect (see below)."},
-	],
-	"defense": {"name": "DODGE", "key": "SPACE / F",
-		"body": "Healers ARE hittable — rand-target bolts and AoE 'doom beats' hit you (your own frame joins the triage list, self-castable). Dodge CANCELS your in-progress cast: mana is only charged at resolve, so the cancel costs you the TIME, not the mana. The cast-vs-dodge call is the healer's discipline test. A PERFECT dodge refunds 20 mana."},
-	"moves": [
-		{"name": "Flash Heal", "key": "1  (R-click)", "cost": "22 mana · 1.5s · heal 70", "tag": "",
-			"body": "Emergency single heal — FEEDS Litany (topped→Tide / caught-low→Brink)."},
-		{"name": "Mend", "key": "2  (L-click)", "cost": "16 mana · 2.6s · heal 95", "tag": "",
-			"body": "Efficient filler single heal — also feeds Litany. Your bread and butter."},
-		{"name": "Renew", "key": "3  (Sh+L)", "cost": "18 mana · instant HoT", "tag": "",
-			"body": "12/tick over 9s. Pre-cast before damage lands."},
-		{"name": "Ward", "key": "4  (Sh+R)", "cost": "20 mana · instant · 60 absorb · cd 6", "tag": "",
-			"body": "Shield to blunt a spike. Tidecaller's flywheel food — the hits it eats re-bank Reservoir."},
-		{"name": "Cascade", "key": "5  (Ct+L)", "cost": "40 mana · 2.0s · 3×45 smart", "tag": "",
-			"body": "Smart AoE — heals the 3 lowest. Spread raid damage."},
-		{"name": "Wellspring", "key": "6  (Ct+R)", "cost": "30 mana · instant · all ×90 · cd 30", "tag": "",
-			"body": "Raid-wide burst heal cooldown. Your 'oh no' button for AoE."},
-		{"name": "Dispel", "key": "Q  (M-click)", "cost": "10 mana · off-GCD · cd 8", "tag": "",
-			"body": "Cleanse a debuff. Off-GCD, and your class-signature skill (mints Tokens)."},
-		{"name": "Meditate", "key": "E", "cost": "free · off-GCD · +280 mana · cd 45", "tag": "",
-			"body": "Mana recovery in a lull — don't let the raid dip while you channel intent."},
-	],
-	"aspects": [
-		{"id": "tidecaller", "name": "TIDECALLER", "tint": "steel", "tagline": "Play AHEAD — keep every bar above the tide.",
-			"identity": "The proactive healer. You bank the OVERHEAL and pre-empt spikes with shields — win before the damage lands.",
-			"bar": "Litany lights when a flash/mend leaves the target ≥60% (topped AHEAD). RESERVOIR (0–520): overheal banks ×0.55. SURGE dumps the whole Reservoir as raid shields a beat AHEAD of a spike — and the FLYWHEEL re-banks 35% of what those shields absorb, so it re-arms out of the very hits it eats.",
-			"rotation": [
-				"Over-heal steadily (mend/flash), leaving targets ≥60% → bank overheal + light pips.",
-				"Pre-Ward the incoming spike.",
-				"Surge AHEAD of the AoE so shields are up when it lands.",
-				"Shields eat the hit → flywheel refills the Reservoir.",
-				"Cash the 5th pip Benediction; repeat a beat ahead of the boss.",
-			],
-			"branches": [
-				{"name": "Shield-flywheel", "via": "boons: Floodgate, Deep Reservoir, Undertow",
-					"body": "Surge also heals, Reservoir cap +200, +20% overheal banked. A self-refilling shield engine — spam Surge every spike."},
-				{"name": "Ward-tank", "via": "boons: Bulwark, Sanctified Ward (opus)",
-					"body": "Wards absorb +40%, and a fully-consumed Ward heals + cleanses. Pre-shield everything; damage barely touches HP."},
-			]},
-		{"id": "brinkwarden", "name": "BRINKWARDEN", "tint": "crimson", "tagline": "Play BEHIND — park them in the red.",
-			"identity": "The reactive gambler. You let allies ride low (where your heals are cheap AND huge) and cash it into Nerve — bloodied allies also hit harder.",
-			"bar": "Litany lights when a flash/mend CATCHES a target that was ≤40% (bloodied). Low-HP scaling makes those heals up to 2.5× and 45% cheaper. NERVE (0–100): +7/s per bloodied ally. LAST STAND spends most of it for a party DR window + a rolling HoT that deliberately KEEPS allies bloodied (so Nerve income + the damage buff survive the save).",
-			"rotation": [
-				"Let allies ride into the red (≤40%) — don't top them early.",
-				"CATCH with a big-scaled flash/mend (cheap + huge) → lights pips.",
-				"Accrue Nerve off the bloodied count.",
-				"Last Stand to survive a spike WHILE keeping allies bloodied.",
-				"Nerve keeps climbing across the save; cash pips into Benediction.",
-			],
-			"branches": [
-				{"name": "Nerve-engine", "via": "boons: Blood Pact, Steel Nerve",
-					"body": "Bloodied allies feed +50% Nerve, +3/s base. Last Stand comes up constantly — ride the edge with a safety net always charged."},
-				{"name": "Clutch-catch", "via": "boons: Second Wind (opus), + shared Overflow/Afterglow",
-					"body": "Last Stand also cleanses everything; catch-heals leave shields/HoTs. Let it get scary, then pull the whole raid back from the brink in one beat."},
-			]},
-	],
-	"gear": "CURIOS: Salt Vial makes Dispel also heal 25, LE CHAT's Bell gives +30 starting mana, Riftmaw Tooth pays mana on a denied self-heal, Swan Song blasts + heals allies on your death. Tokens mint off your Dispel count.",
-},
-# ============================================================ BLOOMWEAVER · HEALER
 "bloomweaver": {
 	"name": "THE BLOOMWEAVER", "role": "HEALER · ANTICIPATE", "accent": "verdance",
 	"verb": "No mana, no direct heals — plant HoTs & wards AHEAD, then BLOOM them on the spike.",
@@ -390,7 +261,7 @@ const DATA := {
 },
 }
 
-## The class guide for a char_class id (bulwark/twinfang/voidcaller/mender). {} if none.
+## The class guide for a char_class id (post-purge roster; the Well entry is still OWED). {} if none.
 static func entry(class_id: String) -> Dictionary:
 	return DATA.get(class_id, {})
 

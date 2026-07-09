@@ -27,16 +27,16 @@ const R_NODE := 24.0
 # NOTE: const can't hold Palette statics (UI-OVERHAUL gotcha) — static var it is
 static var KIND_COL := {
 	"fight": Palette.CRIMSON, "elite": Palette.RAGE, "boss": Palette.CRUSH,
-	"gate": Palette.GOLD_BRIGHT, "event": Palette.VOID, "choice": Palette.REACT,
+	"event": Palette.VOID, "choice": Palette.REACT,
 	"camp": Palette.FLOW, "cache": Palette.GOLD, "waystation": Palette.WIN,
 	"door": Palette.RELIC,
 }
 const KIND_GLYPH := {
-	"fight": "X", "elite": "*", "boss": "!", "gate": "1", "event": "?",
+	"fight": "X", "elite": "*", "boss": "!", "event": "?",
 	"choice": "%", "camp": "~", "cache": "+", "waystation": "^", "door": "#",
 }
 const KIND_TAG := {
-	"fight": "FIGHT", "elite": "ELITE", "boss": "THE CAPSTONE", "gate": "GATE — one steps through alone",
+	"fight": "FIGHT", "elite": "ELITE", "boss": "THE CAPSTONE",
 	"event": "EVENT", "choice": "A CHOICE — the zone remembers", "camp": "CAMP", "cache": "CACHE",
 	"waystation": "WAYSTATION", "door": "INSTANCE DOOR",
 }

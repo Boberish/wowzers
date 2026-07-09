@@ -1,5 +1,5 @@
 ## Raid Bloomweaver probe — proves the SECOND healer works in THE RIFT:
-##   [1] the default (no cls) raid still builds a Mender healer, byte-identical checksum.
+##   [1] the default (no cls) raid builds the Well healer (the post-purge default).
 ##   [2] classes={"healer":"bloomweaver"} builds a BloomweaverKit healer seat.
 ##   [3] a full AI fight with the Bloomweaver healer is deterministic (same seed → same
 ##       checksum + outcome) and beatable.
@@ -38,9 +38,9 @@ func _arm(s: CombatState, seed: int) -> void:
 	(s.seats[0].policy as RaidTankPolicy).rng = DetRng.new(seed * 2749 + 1337)
 	(s.seats[1].policy as TwinfangPolicy).latency_ticks = 4
 	(s.seats[1].policy as TwinfangPolicy).rng = DetRng.new(seed * 2749 + 2338)
-	(s.seats[2].policy as VoidcallerPolicy).latency_ticks = 4
-	(s.seats[2].policy as VoidcallerPolicy).rng = DetRng.new(seed * 2749 + 3339)
-	s.seats[3].policy.latency_ticks = 5   # Mender or Bloomweaver — both expose latency_ticks
+	(s.seats[2].policy as AlchemistPolicy).latency_ticks = 4
+	(s.seats[2].policy as AlchemistPolicy).rng = DetRng.new(seed * 2749 + 3339)
+	s.seats[3].policy.latency_ticks = 5   # Well or Bloomweaver — both expose latency_ticks
 
 func _bloom_state(seed: int, boss := "riftmaw") -> CombatState:
 	var s := RaidContent.make_state(seed, RaidContent.encounter_by_id(boss),
@@ -51,9 +51,9 @@ func _bloom_state(seed: int, boss := "riftmaw") -> CombatState:
 func _initialize() -> void:
 	print("RAID BLOOM PROBE")
 
-	# ---- [1] default raid = Mender healer, unchanged ----
+	# ---- [1] default raid = the Well healer (post-purge) ----
 	var sd := RaidContent.make_state(17, RaidContent.encounter_by_id("riftmaw"))
-	_check("default healer is Mender", _kit_name(sd.seats[3]) == "MenderKit",
+	_check("default healer is the Well", _kit_name(sd.seats[3]) == "WellKit",
 		"(%s)" % _kit_name(sd.seats[3]))
 
 	# ---- [2] class override builds a Bloomweaver healer ----

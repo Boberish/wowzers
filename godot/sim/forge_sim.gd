@@ -104,10 +104,10 @@ func _run_one(enc_id: String, seed: int, sk: Dictionary) -> Dictionary:
 	var bp := s.seats[1].policy as TwinfangPolicy
 	bp.latency_ticks = int(sk["lat"])
 	bp.rng = DetRng.new(seed * 2749 + 2338)
-	var cp := s.seats[2].policy as VoidcallerPolicy
+	var cp := s.seats[2].policy as AlchemistPolicy
 	cp.latency_ticks = int(sk["lat"])
 	cp.rng = DetRng.new(seed * 2749 + 3339)
-	var hp := s.seats[3].policy as MenderPolicy
+	var hp := s.seats[3].policy as WellPolicy
 	hp.latency_ticks = int(sk["hlat"])
 	var cap := int(TICK_CAP_SEC / s.dt)
 	while not s.over and s.tick < cap:

@@ -24,9 +24,9 @@ func _initialize() -> void:
 			out_dir = a.substr("--out=".length())
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	steps = [
-		{"name": "frames_mender_xl", "scene": "res://game/raid_main.tscn",
-			"setup": func(h): h._launch("healer", "tidecaller"),
-			"policy": func(): return MenderPolicy.new(),
+		{"name": "frames_well_xl", "scene": "res://game/raid_main.tscn",
+			"setup": func(h): h._launch("healer", "brim"),
+			"policy": func(): return WellPolicy.new(),
 			"ticks": 380, "pre": func(h): _stage_states(h)},
 		{"name": "frames_bloom_xl", "scene": "res://game/raid_main.tscn",
 			"setup": func(h): h._launch("healer", "wildgrove"),
