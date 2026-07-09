@@ -144,7 +144,7 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
   Seal alive**. Global progression inside the run's stakes. (Shard pity on wipe = open Q.)
 - **Raids:** personal loot per seat, rolled from the run seed — lockstep-safe, replay-verifiable.
 - Fallback knob if pure rolls whiff in playtests: roll-2-keep-1. Ship pure first.
-- Gear is run-scoped, ALWAYS: win or wipe, items evaporate; unlocks and banked schematics remain.
+- Gear is run-scoped, ALWAYS: win or wipe, the equipped items evaporate. **Unlock banking (Bill, 2026-07-09 — revises the old "unlocks remain"):** the **first-kill SIGNATURE checkmark banks ONLY on a run WIN** — you may equip the iconic piece the moment it drops (that's run-scoped), but the *permanent* row-unlock forfeits on a wipe, so runs carry real stakes (wipe late = lose the checkmark; next run the row is still locked, so the first-kill roll fires again). **OATHS are OPEN** — a kept oath banks the instant the deed completes, **win OR lose** (the always-some-progress layer: a lost run still advances your oaths). Banked schematics keep their reach-the-Seal-alive gate.
 
 #### ✅ CURIO ECONOMY v2 — amendment (Bill, 2026-07-05, from the Tempo-pilot curio pass)
 Playtest-derived fixes to the drop feel ("I unlock cool things then only get a small drop chance,
