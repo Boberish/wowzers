@@ -46,6 +46,9 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (S
 `FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `REFIT-PLAN.md` (structural audit v2 →
 the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
 loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·
+`SIM-PLAN.md` (the balance ladder — two-speed sims: quick gate + weekly SOAK/digest; S1–S5
+card-visibility rule · creed matrix · card delta · build sampler+lift · raid ablation; planned
+NOT built, triggers per rung, 2026-07-10) ·
 `archive/` (**frozen docs — 2026-07-10 cleanup**: `HISTORY.md` the milestone build-up M0→R2.5 ·
 `RAID-PLAN.md` netcode-era origin · `PORT-PLAN.md` / `rift-godot-port-brief.md` the port origins ·
 `UNLOCK-BRIEF.md` retired; see `archive/README.md` — never claim work from there) + `poc/`.

@@ -813,6 +813,36 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 01:00 · main (docs only) — **CLAIM: SLATE MACHINE row 2 — Tank·DUELIST challenger
+  slate** (fresh sweep → `research/duelist-sweep.md` → incumbent ladders restated as PITCH #0 +
+  challenger themes → 3 skeptics → `TANK-PLAN.md` new § 🟡, same verdict board as deck v1).
+  Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 00:57; claim line
+  rides another session's MASTER-PLAN commit — file was dirty)*
+
+- ☑ 2026-07-10 · main (docs only) · §TOOLING / `SIM-PLAN.md` (NEW) — **THE BALANCE LADDER
+  (Bill: "do nothing now, but plan how we balance the most possible within reason — a day-long
+  weekly desktop run + quick sims").** Born from a 3-agent audit of the real sim surface (the
+  honest findings are §0 of the doc): expert = perfect TIMING on a fixed hand-authored rotation
+  (latency never changes the ability script) · blade policy is CREED-BLIND (Alchemist is the
+  only creed-aware policy) · active-module verbs unplayed (Deathmark's gauge never spent) ·
+  raid_sim runs a BARE kit · only Alchemist has per-card ΔTTK · nothing samples drafted builds ·
+  no per-seat attribution in the 4-seat win rate. The plan: **two speeds** (quick gate = today's
+  bar; THE SOAK = weekly day-long pinned-worktree run → ranked DIGEST + week-over-week trend) ·
+  **ladder S0→S5** — S1 CARD-VISIBILITY RULE ("a card doesn't exist to the sim until the policy
+  can play it"; creed-aware branches + module verbs + a catalog coverage probe, shipped INSIDE
+  each rework) · S2 creed matrix (cheap) · S3 card-delta harness generalized from
+  `alchemist_sim._boon_ab()` · S4 **build sampler** (Monte Carlo through the REAL `draft.gd`
+  pipeline + per-card LIFT + shared-tag pair-lift + >~15% dominance flag — absorbs TEMPO-PLAN's
+  unbuilt EV-parity gate; the answer to "boon combos are too many" is sample-and-statistics,
+  never enumeration) · S5 raid attribution (per-seat meters + sloppy-one-seat ABLATION matrix →
+  carry index + seat-swap parity; lands with the tank/aggro rebaseline wave). §4 = the
+  soft-threshold table of what "balanced" MEANS per surface (skill gradient / creed spread /
+  card lift / build dominance / healer bite / carry index). Non-goals locked: no optimizer AIs,
+  no auto-tuning, no hard balance gates (determinism stays the only PASS/FAIL). Calibration
+  measured: ~1.6s/raid-fight single-core ⇒ ~400k fights/24h sharded = the soak envelope.
+  NOTHING BUILT — every rung has a trigger tied to roster/deck stability (ledger §G row).
+  *(sim-plan session)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `p4-rails`) — **CLAIM: REFIT P4 — THE INFRA
   RAILS (Bill's go-code this session: "turn the plan into code — the core stuff, no class/boon
   content; work around the others").** The non-class-facing P4 subset, serialized AWAY from the
