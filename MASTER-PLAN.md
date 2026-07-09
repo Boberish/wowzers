@@ -813,6 +813,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `p4-rails`) — **CLAIM: REFIT P4 — THE INFRA
+  RAILS (Bill's go-code this session: "turn the plan into code — the core stuff, no class/boon
+  content; work around the others").** The non-class-facing P4 subset, serialized AWAY from the
+  live `purge-oldgame` worktree: (1) **SAVE UNIFICATION** — one versioned Profile aggregate
+  (`game/profile.gd`, WorldSave's pattern) owning world/gear/prior/binds/roster behind the
+  existing store APIs (GearStore/LuckProfile/WellBinds/BloomweaverBinds/WorldSave become thin
+  facades; one-time legacy-file import; `mender_binds` deliberately untouched — the purge deletes
+  it); (2) **Commander roster persistence** (the party survives sessions; class/aspect ids
+  validated against the codex on load so the purge's roster cuts self-heal); (3) **reproducible
+  offline `run_seed`** (profile-persisted seed stream, per-run sub-seeds derived closed-form — a
+  whole descent replays from one recorded integer; unlocks replay/ghost-races); (4) **split-law
+  guard** (`make_spec` context — zone fights structurally refuse `seat_boons`). Class-facing P4
+  items (class registry · ClassBand/Gauge base · vuln stack · twinfang kit split) DEFERRED until
+  the purge merges — this same session loop picks them up after, one at a time. Gates: verify-all
+  green · NEW `sim/profile_probe.gd` · class sims byte-identical (zero engine touch). **RESUME
+  PROTOCOL: a session cron re-arms the build every tick; if THIS session dies, a fresh session
+  reads this claim + the `../wow-rails` worktree state (commit-before-stop law — the tree is
+  always committed) and continues; when the rails land, the loop watches for the purge merge,
+  then takes the deferred P4 items.** *(rails session)*
+
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §6 (NEW) + `research/warden-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 1: Tank·WARDEN branch slate — DONE, five themes AT BILL'S
   VERDICT.** Fresh sweep (Lies of P guard-regain · Bloodborne rally · MonHun guard-counter ·
