@@ -123,6 +123,18 @@ you out* and wanders (reuses the existing THREAT_DROP = "context-window shift" f
   peel** to another seat, **X rising as aggro falls**. **0%** → fully **random** targeting. A **TAUNT** is
   the hard override (grab it back a few seconds; everyone-has-a-taunt = a DPS can clutch-grab it, hot-potato
   curses force swaps).
+- **Flow moves on SKILL, never on hits (Bill, locked):** clean answers raise flow; **un-clean answers**
+  (miss / whiff / baited) drop it. **Taking damage NEVER lowers flow** — otherwise a tank under heavy fire
+  spirals (hit → lose flow → peel → more hits). Flow measures *your play*, not your luck.
+- **A peel is telegraphed to the person who catches it (Bill, locked):** a peeled attack rides the
+  **victim's OWN dodge bar** + a **warning cue** — so a stray hit is always dodgeable and never a surprise.
+  A **small fixed GRACE-DELAY** before a peeled hit lands is the reaction window: the new victim reads the
+  warning and dodges, AND the tank can **TAUNT it back before it lands** (the peel's recovery valve). It's
+  **determinism-safe** — a fixed tick offset (not wall-clock), one telegraph still, melee keeps ticking; it
+  just paces the fight a hair during peels. *(Does not break the scheduler.)*
+- **UI (Bill):** FLOW gets its **own dedicated bar** (tank only — it's the aggro driver). Everyone's aggro
+  shows in a **small shared "aggro box"** = the built party victim-frame extended (a pip/bar per seat, gold
+  = current target). Non-tanks have **no flow bar** (their aggro is passive) → no bar-bloat.
 - **Reuses the built threat engine wholesale** — `BossState.threat` (by seat index), `taunt_seat_i`,
   `_threat_target()`, `THREAT_DROP`, the victim gold-frame + aggro-lost banner. We only **change the tank's
   threat SOURCE from damage → flow**; non-tanks keep low passive threat (damage/heals).
@@ -149,23 +161,29 @@ consumed by role:
   in fixed order (`state.rng` inside `update()`, or a per-policy `DetRng` — never unseeded). Flow derives
   from deterministic clean-answer counts; checksums/lockstep stay correct for free.
 
-### §1d · RIPPLES from flow-aggro (consequences to work — none block the lock above)
-- **Non-tank survivability vs peeled attacks** — a slip can send a TARGETED big hit at a squishy
-  (normally tank-only). Must be **dodgeable + dangerous-not-instant** (anti-death-spiral); the peeled hit
-  still telegraphs to its new victim. Tune peel lethality.
-- **Healer follows the boss** — the healer duet now shifts target with aggro (heal whoever's peeled) →
-  more dynamic healing; a real consequence for healer design + the AI healer policy.
-- **AI tank reliability is load-bearing** — solo/backfill: the AI tank must hold flow (playing clean does
-  it) + be legible to its policy; a human squishy peeled by a dumb AI slip must not feel unfair.
-- **Raid/dungeon identity** — "aggro = raid-only" was a plank of that split; now universal. Raids keep
-  identity via intensity + the other raid-only bits. Revise [[raid-dungeon-identity-split]] + WORLD-PLAN.
+### §1d · RIPPLES from flow-aggro (consequences — status as of 2026-07-09)
+- **✅ Non-tank peel survivability — resolved in principle:** a peeled attack rides the **victim's own
+  dodge bar + a warning + the grace-delay** (§1c), so it's dodgeable and telegraphed. Remaining = tune
+  peel lethality (dangerous-not-instant).
+- **🔮 "Perfect tank = static?" — PARKED (Bill not worried):** a good tank holding aggro is the reward, not
+  a bug. If a raid ever feels too static, scale the flow **drop-off** harder / add authored "attention-
+  breaks" there — a **raid-tunable knob**, not a blocker. Don't over-engineer it now.
+- **Healer follows the boss** — the duet now shifts target with aggro (heal whoever's peeled) → more
+  dynamic healing; a real consequence for healer design + the AI healer policy. **Deferred (Bill): later.**
+- **Tank/healer kit updates** — both need a pass for flow-aggro. **Deferred (Bill): planning only for now.**
+- **AI tank reliability is load-bearing** — solo/backfill leans on the AI tank holding flow (playing clean
+  does it) + being legible to its policy; a human squishy peeled by a dumb AI slip must not feel unfair.
 - **Hold the Line (support)** overlaps the flow/aggro readout — reframe / key it off flow at the deck pass.
 - **Crucible module** (fills from damage TAKEN) fills slower while the boss is peeled away — note at the deck pass.
 - **Depth affix vocabulary** gains melee-tempo + peel-severity as intensity knobs (same TuningConfig spine).
-- **Single-target law (pillar #1)** unaffected — one stream, varying recipient (the built "Swing → Victim"
-  already does this); worth a clarifying line in WORLD-PLAN so it doesn't read as a violation.
-- **⏭ NEXT THREAD — the flow economy:** what each clean answer ADDS, what a slip SUBTRACTS, the decay
-  rate, and the flow→aggro% mapping (incl. the 30%/0% points). Nothing tunes until this is set.
+- **✅ Single-target law (pillar #1)** unaffected — one stream, varying recipient (revised note added to WORLD-PLAN).
+- **FLOW as a shared cross-class pattern (Bill's musing):** Twinfang·Tempo + a cascade healer already run a
+  "flow"-type clean-rhythm meter; the tank's is the same *family*, doing a role-appropriate job (blade →
+  damage, tank → aggro, healer → throughput). **Available where it fits, never forced** (Alchemist maybe
+  not — Rule #1 asymmetric content). A framework note for the class-reshape phase (DECK-LAYOUT).
+- **⏭ NEXT THREAD — the flow economy:** DECIDED so far = flow moves on skill only, its own bar, peel on the
+  victim's dodge bar + grace-delay. STILL OPEN = the exact numbers (what a clean answer ADDS, what a slip
+  SUBTRACTS, decay rate, the flow→aggro% curve incl. 30%/0%). Nothing tunes until these are set.
 
 - **⚠ CUT HISTORY (don't rebuild):** R2 THREE DOORS/lanes · R3 SHIELD CHARGE-&-PLANT WALL +
   circle-size + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 shared 3-move kit.
