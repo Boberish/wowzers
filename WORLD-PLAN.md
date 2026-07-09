@@ -42,8 +42,9 @@ map/lobby/lockstep architecture we already have.
 3. **THE WARBAND LAW.** You travel and fight as your 4-seat party EVERYWHERE — AI fills
    empty seats (Commander builds them), friends replace AI online. Every encounter in the
    game is tuned for exactly 4 seats ⇒ **no 1-to-x enemy scaling system, ever.** Solo
-   pressure still exists inside the 4-seat frame: GATE-style personal nodes, `rand_target`
-   personal beats, owned adds. (Bigger raid brackets = a someday decision, not v1.)
+   pressure still exists inside the 4-seat frame: `rand_target` personal beats (~~GATE
+   personal nodes + owned adds~~ — CUT 2026-07-10 THE PURGE; per-seat pressure ideas return
+   Forge-authored if wanted). (Bigger raid brackets = a someday decision, not v1.)
 4. **INTERRUPT-BY-ABILITY (Bill's design — replaces the cut Voidcaller's verb).** No
    dedicated kick button and no kicker class: **certain existing abilities carry the
    interrupt** — landing one inside a kickable cast's window stops the cast. Full spec in
@@ -270,7 +271,7 @@ on failure), not persistent-conquest zones — revisit at the raid retune.
 |---|---|---|---|---|
 | **Zone fight** | 1 authored/generated fight, 4 seats | 2–4 min | none (bare kit + unlocks) | no — conquest is permanent |
 | **World event** | 1–2 fight encounter at an event node | 5–10 min | event Ledger table roll | while the event is up |
-| **Personal gate** | 1v1 class exam (existing GATE tech) | 2–3 min | oath stage, table attach | as authored |
+| ~~**Personal gate**~~ | ~~1v1 class exam~~ **CUT 2026-07-10 (THE PURGE — MASTER §GAME SHAPE amendment):** GATE nodes + the recast exam bosses are deleted; future personal content = Forge-authored fresh (parked) | — | — | — |
 | **DUNGEON** | **1-floor Topology run** (seeded map, drafts, curios, Market, charge) → 1 Seal | 30–45 min | full run economy, compressed | **infinitely, "from scratch" — the roguelike core** |
 | **RAID** | multi-floor Ring descent (Realm 1 = the existing 3-Ring Takeover, unchanged) | 1.5–3 h | full economy + shard gates + charge + finale meta-payout | infinitely; **Depth** scalar = endgame |
 
@@ -666,8 +667,9 @@ before (the inert-mana fix rides this).
   nodes** (sizing formula in §ZONE QUESTS & DYNAMICS): a ~9-node spine (entry fight →
   Forge skirmishes → 1 ELITE mutator fight → event → quest camp → capstone named boss →
   waystation), cave side-chain w/ named miniboss ↔ direct-route fork, marsh side-chain
-  (event + elite + cache), quest chain (3–4 tickets incl. 1 door ticket), 1 personal
-  gate, 2–3 ZONE REMEMBERS choice moments, **DUNGEON DOOR** on the east edge.
+  (event + elite + cache), quest chain (3–4 tickets incl. 1 door ticket), ~~1 personal
+  gate~~ (gates CUT 2026-07-10 THE PURGE — the node re-payloads to an event/elite at the
+  W2 content pass), 2–3 ZONE REMEMBERS choice moments, **DUNGEON DOOR** on the east edge.
 - **DUNGEON 1 — "our Deadmines"**: 1-floor Topology, ~6–8 nodes, Forge skirmishes +
   1 recast mid-roster boss as its Seal, Versions dial at the door.
 - **THE RAID DOOR — Realm 1: The Takeover**, the existing 3-Ring descent verbatim,

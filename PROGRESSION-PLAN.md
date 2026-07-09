@@ -55,11 +55,13 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
    and event pools. Hour-40 runs are *richer* than hour-5 runs, not easier.
 3. **RANK (the endgame).** Trial Ladder versions per boss + Depth on raids. Your best
    version/Depth record IS your gear score — earnable only with reads, verifiable by seed.
-4. **BREADTH (the roster).** Five classes × two aspects. **Proof = clearing your class's
-   personal exams in the campaign** (Tier-1 GATE duels / designated exam encounters — amended
-   2026-07-03 per MASTER-PLAN §GAME SHAPE; was "solo gauntlet" pre-raid-only lock). The Proof
-   is **standing, never an entry gate** — a friend joining a lobby is never sent away to solo
-   first (AI-assist makes any seat playable; the crest shows who's proven).
+4. **BREADTH (the roster).** Per-class trees × aspects. ~~Proof = clearing your class's
+   personal exams (Tier-1 GATE duels)~~ — **⚠ AMENDED 2026-07-10 (THE PURGE, MASTER §GAME
+   SHAPE):** gates + exam bosses are CUT, so **Proof-by-exam retires**. Breadth's visible
+   growth now rides what already exists: per-class LEVELS (= unlock count, §UNLOCK), oaths
+   kept, and crests/standing. A per-class "proven" *moment* (if wanted) returns later as a
+   Forge-authored exam or an oath-chain — open, not designed. Still law: proof/standing is
+   **never an entry gate** — a friend joining a lobby is never sent away to solo first.
    A fresh class re-runs the first-kill unlock shower.
 
 ## The gear game (full spec)
@@ -113,16 +115,20 @@ never to sell power. Numbers die with the run; permanence buys **options and acc
      Pool Law holds and sandbagging is never correct. OATH BROKEN costs nothing (Blood Oaths
      excepted — their cost was paid in the handicap, still no post-fight penalty).
 - **Where tables live (raid-only amendment, 2026-07-03):** a boss's table attaches to it
-  **wherever it appears** — Seal fight, personal GATE node, owned add, split phase; a gate
-  clear is a kill, and the gate is the natural oath-swearing stage (you're alone; it's your
-  exam). **PROVING GROUNDS practice fights are unlock-inert** (no drops/oaths/Proofs) —
-  otherwise practice becomes the farm and the campaign hollows.
+  **wherever it appears** — Seal fight, adds, split phases (~~personal GATE node / owned
+  add as exam stages~~ — CUT 2026-07-10 THE PURGE; the boss-node swear screen is the oath
+  stage now). **Practice surfaces stay unlock-inert** (no drops/oaths) — otherwise practice
+  becomes the farm and the campaign hollows.
 
 ### Drops — the in-run layer
 - **Drops are EVENTS (ARMORY amendment, Bill 2026-07-03 — playtest verdict: a drop after
-  every fight killed the moment).** A roll fires only at: **Seal kills**, **gate exams**,
-  and **any kill whose SIGNATURE row is still locked** (preserves the StS first-kill
-  shower). Repeat skirmish kills pay ring-scaled **salvage Tokens** (1⏣/2⏣/3⏣ at Ring
+  every fight killed the moment).** A roll fires only at: **Seal kills**, ~~gate exams~~
+  (gates CUT 2026-07-10 THE PURGE — ELITE nodes are the natural replacement roll site,
+  settle at the purge merge), and **any kill whose SIGNATURE row is still locked**
+  (preserves the StS first-kill shower). **⚠ 2026-07-08/09 (🔒 `TEETH-PLAN.md` §REWARD
+  STACK): the boss-kill reward becomes BASE (personal, guaranteed: unlock-if-locked + a
+  run-scoped curio) + a contested need/greed BONUS roll on top** (random-rarity run-scoped
+  upgrade, AI allies roll & banter) — folds in here when its build claim lands. Repeat skirmish kills pay ring-scaled **salvage Tokens** (1⏣/2⏣/3⏣ at Ring
   3/2/0) with a toast, no ceremony. Scarcity is what makes the ceremony land; weights are
   retuned richer to match (~4–6 rolls/descent → each pays more; table in GEAR-CATALOG).
 - **Signature philosophy (ARMORY, replaces the all-Haiku "taste rows"):** the first-kill
@@ -208,10 +214,14 @@ armory design; revisit after this cadence ships feel.)*
 ## Pacing / early game
 
 First kills across the campaign roster = the StS front-loaded wave — 4 Seals + skirmish
-minibosses + the 15 exam bosses arriving as GATE nodes / owned adds (MASTER-PLAN §GAME SHAPE)
-— every early run ends in guaranteed unlocks, **no separate milestone system needed**. Oaths
+minibosses + Forge-named minibosses (~~the 15 exam bosses as GATE nodes / owned adds~~ — CUT
+2026-07-10 THE PURGE) — every early run ends in guaranteed unlocks, **no separate milestone
+system needed**. Oaths
 and versions carry the long tail. Nothing is timed, ever; the core loop must stand alone
-(Bill, locked). **⚠ AMENDED 2026-07-06/08 — the front-load is STRETCHED into the world's
+(Bill, locked). **The comeback loop is deliberately UNCLOCKED** (stated for the record,
+2026-07-10 loop audit): no dailies/lockouts exist by Law #4 — you return for the next zone,
+the next tree node, the next Depth push, your oath list; **RESTED** (🔒 TEETH-PLAN, designed
+not built) sweetens the return by multiplying *earned* event-XP, never by handing out unlocks. **⚠ AMENDED 2026-07-06/08 — the front-load is STRETCHED into the world's
 leveling journey: see §THE UNLOCK SYSTEM below.** (First-kill signatures still fire; the
 pacing of system/pool rollout now follows the tree / two-surface model.)
 
@@ -249,7 +259,7 @@ diagnosis (2026-07-08): *"you spend more time setting up your build than playing
 - **Max level = the full pool** = "just the time in between." Endgame stays
   Depth / Versions / leaderboards — skill, not level.
 - **XP sources are EVENTS ONLY** (unchanged): quest turn-ins, OATH KEPT, first kills, zone
-  conquest, gate proofs, instance clears. **No kill-grind XP.** Repeatable instance XP is
+  conquest, instance clears (~~gate proofs~~ — gates CUT 2026-07-10). **No kill-grind XP.** Repeatable instance XP is
   fine — max level is a finite cap; rushing buys breadth sooner, never power ⇒ sandbagging
   and grinding both stay non-strategies (Monotonic Pool Law extends to node boundaries —
   spot-check in sims).

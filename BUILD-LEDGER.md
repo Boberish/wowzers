@@ -71,7 +71,7 @@ and re-pin `ab-gate.sh` baselines right after each:
 |---|---|---|
 | Threat / aggro / taunt system | `threat_enabled` gate (`combat_state.gd:43`, default off) → `combat_core` (44) · `boss_state.gd:57-61` · `tuning_config.gd:56` · `bulwark_kit` Challenge · `raid_hud` T-CHALLENGE (25) · `raid_sim` (17) | **FLOW=AGGRO** (tank wave) — largest single collision surface |
 | Two-verb dodge (SPACE+F) | `combat_core.gd:83-114` elif · stale "SPACE/F" in `class_codex` + `raid_hud:2414` hint | **dodge-unify** — done for twinfang/alch/well; owed for bulwark*/mender/bloomweaver/reckoner/voidcaller, per rework |
-| Voidcaller (full class, wired) | `data/voidcaller/*` + `raid_hud` (15) + run_state/draft/gauge | **CUT from roster** — frozen caster seat until interrupt-by-ability rework |
+| Voidcaller (full class, wired) | `data/voidcaller/*` + `raid_hud` (15) + run_state/draft/gauge | ~~frozen until interrupt-by-ability~~ → **DELETED NOW (THE PURGE 2026-07-10, §A½)** — Mender + Reckoner + solo bosses/gates go with it |
 | `verdance_gauge.gd:19-20` DEPRECATED compat vars | Bloomweaver gauge | Dead surface — delete on next Bloomweaver touch |
 
 \* Bulwark's dodge migration is **moot** — the whole kit is being replaced by the new tank.
@@ -123,6 +123,14 @@ build-once seams that five separate class reworks and the endgame all need:
 | Interrupt-by-ability pillar | 🔒 | WORLD §PILLARS #3 | `AbilityRes.interrupts` flag, tight window, sim diag, HUD rune | Lands class-by-class w/ reworks (Tempo first). Replaces cut Voidcaller kick. Open Q: which Tempo ability carries. |
 | Aura-add / 2nd cast source | 🔴 | MASTER §BOSSES | engine 2nd telegraph source | Blocks R3 raid content; also eases the one-telegraph interrupt problem. |
 
+### A½. THE OLD-GAME PURGE (2026-07-10 — Bill; MASTER §GAME SHAPE amendment)
+
+| Item | St | Specced | Touches | Blocks on / note |
+|---|---|---|---|---|
+| **THE PURGE** — delete Voidcaller · Mender · Reckoner + the 15 solo bosses + the GATE node kind; defaults flip caster→Alchemist(brew) · healer→Well(brim) | 🔨 in flight (worktree `../wow-purge`) | MASTER §GAME SHAPE 07-10 amendment | `data/{voidcaller,mender,reckoner}/*` · `data/raid/gate_content.gd` · `run_map`/`map_content`/`map_screen`/`raid_hud` gate flow · `class_codex` · `raid_content` seat factories+defaults · `net_server`/`raid_net` (protocol bump) · policies/binds/gauges/rigs · `draft`/`armor_slots` · sims (`raid_sim` defaults · `raid_map_sim` re-baseline · `raid_healer_probe`/`raid_reckoner_probe`) · `verify-all.sh` | **Deliberate re-baseline** (maps regen w/o gates; comp flips; **NO-KICKER interim** until pillar #3). Keeps Twinfang Warden/Executioner as `twinfang_sim` training dummies only. ⚠ Collides with live `cask-policy` + `tempo-pilot` worktrees — merge main often. |
+| **Bulwark deletion** (the last fossil) | 🔒 | MASTER §GAME SHAPE 07-10 | `data/bulwark/*` · `raid_tank_policy` · `raid_hud` tank band · the old threat/taunt surface | **Dies in the SAME merge that ships the Duelist base kit (Wave 1) — never before**: it is the only tank in code. Supersedes "retire with the tank wave" phrasing in §0 (now a hard rule). |
+| Gate-sourced + dead-class GEAR rows re-home/cut | ⏳ | GEAR-CATALOG banner 07-10 | `game/gear.gd` tables · `gear_probe` | Per class-rework deck (CARD-TRACKING LAW). `gear_probe` re-scopes at the purge merge. |
+
 ### B. Tank rework + FLOW=AGGRO (Wave 1 — co-dependent)
 
 | Item | St | Specced | Touches | Blocks on / note |
@@ -170,7 +178,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Well — module gauges + AI spell-policy | ⏳ | MENDER | `well_gauge.gd`, `well_policy.gd` | Deck already built. AI can't use Meditate/Boiling Over yet. |
 | Well — Glint 3-tier ladder + tuning | 🟡 | MENDER §8 | `data/well/*` knobs | Built as 2-tier; full Good/Perfect/Bullseye at verdict. |
 | Well — balance at real fightlen bands | ⏳ | MENDER | `well_sim`, `raid_sim --healer` | Run at 3–5min/~10min, not 60–142s — closes the inert-healer finding. |
-| Dodge-unify migration (frozen classes) | ⏳ | DODGE-PLAN | `ClassKit.unified_dodge()`, drop F | Voidcaller/Mender/Bloomweaver/Reckoner, per rework. Bulwark moot. |
+| Dodge-unify migration (frozen classes) | ⏳ | DODGE-PLAN | `ClassKit.unified_dodge()`, drop F | **Bloomweaver only after THE PURGE** (Voidcaller/Mender/Reckoner deleted 2026-07-10; Bulwark moot — dies with Duelist). |
 | Commander AI-caster toggle | ⏳ | ALCH §6 | Commander party screen | Brew + Cask. |
 | Class names + puppets/art | ⏳ | ALCH/MENDER | class puppet art (voidcaller rig filler) | Filler-grade. Names are working titles. |
 

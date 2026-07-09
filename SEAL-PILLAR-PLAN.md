@@ -21,7 +21,10 @@ this is a cheap, reversible tuning nudge, not the boss rework. When in doubt, do
 - **OUT — do not touch:**
   - **Kick chains / verses** (`_verse`/`_empower_verse` content, cds, amounts): interrupt
     content retunes only when interrupt-by-ability lands with the class reworks
-    (WORLD-PLAN pillar 3). The frozen Voidcaller still plays the caster seat.
+    (WORLD-PLAN pillar 3). ~~The frozen Voidcaller still plays the caster seat.~~
+    **⚠ 2026-07-10 (THE PURGE): Voidcaller is DELETED; the Alchemist (brew) is the caster
+    default and carries NO kick** — verses go uncontested in the interim, so this pass
+    baselines against the post-purge alchemist-comp bands, not the old voidcaller bands.
   - **Double-Check** (`gem_check`) and any tank-string/tank-swing content — tanks keep
     dense footwork by design.
   - **ULTRATHINK** (`myth_ultra`) — 3 aoe beats, the raid's marquee moment. Whole. Its

@@ -1,5 +1,14 @@
 # GEAR CATALOG v1 — Realm 1 Ledger pages (items + oaths), design of record
 
+> **⚠ THE PURGE (2026-07-10, MASTER §GAME SHAPE amendment) hits this catalog:** rows sourced
+> from **gate exams** are dead (gates + the 15 exam bosses deleted; ELITE nodes are the
+> candidate replacement roll site) and rows designed for **Mender / Voidcaller / Reckoner**
+> are dead with their classes (Bulwark rows die with the Duelist merge). Dead rows stay below
+> as *reference for the class reworks* — re-home or cut them as each rework's deck lands
+> (CARD-TRACKING LAW applies to replacements). `gear_probe` re-scopes at the purge merge.
+> Note the doc was authored 2026-07-03 against the pre-Framework-v2 class-fun reworks —
+> treat class hooks below as historical until re-homed.
+
 **Owns:** the concrete item & oath designs for Realm 1's boss Ledger pages. System laws
 (lanes, slots, Monotonic Pool Law, drop machinery, oath purses) live in `PROGRESSION-PLAN.md` —
 this doc is the content that GEAR-1/2/3/4 implement. Written 2026-07-03 against the class-fun

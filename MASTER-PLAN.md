@@ -24,7 +24,7 @@
 | Area | State |
 |---|---|
 | Combat engine (pure reducer, strings, threat) | ✅ Solid, regression-gated |
-| Classes (Bulwark, Mender, Twinfang, Voidcaller, Bloomweaver) | ✅ All playable + verified |
+| Classes (post-purge 2026-07-10: Twinfang · Alchemist · Well active; Bulwark frozen-until-Duelist; Bloomweaver frozen; Voidcaller/Mender/Reckoner DELETED) | 🟢 Rework era — see §CLASS FRAMEWORK v2 + §GAME SHAPE purge amendment |
 | Bosses (15 solo + Vorathek raid) | ✅ Done, tuned bands |
 | Run loop + draft (all 5 classes) | ✅ Draft 2.0 everywhere — synergy slot, Haiku/Sonnet/Opus + pity, Tokens (merged 2026-07-02, see §SYSTEMS) |
 | UI (Gilded Reliquary overhaul) | ✅ Done |
@@ -64,6 +64,25 @@ away and these solo bosses come — each player has to finish theirs") via three
   and EVERY seat's personal boss manifests simultaneously; everyone finishes theirs or the raid
   dies. Needs parallel personal telegraph streams (real engine work; Mythos's Agentic Fan-Out
   is the primitive). Gets its own design doc when claimed — do not buy casually.
+
+**⚠ 2026-07-10 AMENDMENT — THE OLD-GAME PURGE (Bill): the solo-boss reintegration program is
+CUT.** The three tiers above are dead: **personal GATE nodes are REMOVED from the game** (the
+node kind, the 4 recast exams, `gate_content.gd`), Tier-2 owned-adds and the Tier-3 split phase
+are **cancelled unbuilt**, and the **15 solo exam bosses are DELETED from code** (git history is
+the attic) — Bill: remove *"any resemblance of that old single player game."* The casting pool
+is disbanded; if personal/exam content is ever wanted again it is **Forge-authored fresh**
+(parked idea, not a plan). Threaded consequences: Proof-by-exam dies (PROGRESSION §BREADTH
+amended) · gate-sourced gear rows die (GEAR-CATALOG banner) · Zone 1's personal-gate node
+re-payloads (WORLD-PLAN). **In the same purge, the frozen roster shrinks (Bill's calls,
+2026-07-10):** **Voidcaller · Mender · Reckoner are DELETED from code** — the **Alchemist
+(brew)** becomes the caster-seat default, the **Well (brim)** becomes the healer-seat default;
+**Bulwark stays as the frozen tank placeholder and dies in the same merge that ships the
+Duelist base** (it is the only tank in code — BUILD-LEDGER row pins it); **Bloomweaver stays
+frozen** (its rework is still owed). Twinfang's retired Warden/Executioner encounters survive
+ONLY as `twinfang_sim` training dummies (sim infra, not player-facing). ⚠ **Interim state:**
+with Voidcaller gone **no class carries a kick** until interrupt-by-ability (WORLD-PLAN pillar
+#3) lands — Seal verses go uncontested and bands re-baseline deliberately (recorded at the
+purge merge).
 
 **Killed:** solo campaign surface · solo maps ×5 (cancelled unspent) · new solo bosses ·
 solo-only features · the solo draft-run mode (drafts live in the Topology, where they already run).
@@ -586,10 +605,19 @@ nodes, not node kinds.
 > queued. Sim/dev focus = Twinfang; the byte-identical gate is relaxed for the reworked roster. The notes below
 > describe the *pre-rework* state — kept for reference until each class is redone.
 
-**Pre-rework state:** 6 classes built & verified (Bulwark, Twinfang, Voidcaller, Mender, Bloomweaver, Reckoner). Aspect pairs everywhere. Raid seats for all 4 roles.
-**Game-shape note (2026-07-03):** the per-class solo gauntlets are PRACTICE surfaces now (§GAME SHAPE) — class work targets the raid seats first. ~~kit changes still gate on the class sims~~ — sims deleted 2026-07-06 (fresh slate); rework-era gates = `twinfang_sim` + `raid_sim` + determinism on whatever's active.
+**Roster after THE PURGE (2026-07-10 — see the §GAME SHAPE amendment):** in code = **Twinfang**
+(Tempo + Fermata — the active pilot) · **Alchemist** (Brew + Cask — the caster-seat default) ·
+**Well** (Brim/Draw — the healer-seat default) · **Bulwark** (frozen tank placeholder — dies in
+the same merge as the Duelist base) · **Bloomweaver** (frozen, rework owed). **DELETED:
+Voidcaller · Mender · Reckoner** (+ the 15 solo exam bosses + GATE nodes; git history is the
+attic). **Rework queue:** the tank (Duelist/Warden, deck at Bill's verdict) is next; after it
+the order — Bloomweaver rework · a second caster class · the parked new-class ideas below — is
+UNDECIDED (Bill picks; recorded so nobody assumes).
+~~**Pre-rework state:** 6 classes built & verified~~ — the pre-purge roster notes below are
+reference only.
 **Next up (any agent can claim):**
-- **Draft parity**: Mender/Twinfang/Voidcaller/Bloomweaver have boon POOLS but only Bulwark has the full between-fight draft in its run loop. Port the draft loop to all classes (prereq for Draft 2.0 everywhere).
+- ~~**Draft parity**~~ — STALE, removed 2026-07-10: parity already existed when Draft 2.0
+  shipped (§SYSTEMS A, 2026-07-02).
 - **Theme banter pass per class** (ally callouts, tooltip jokes) — after Theme Bible lands.
 **Open ideas** (from Ascension research, parked until a 6th/7th class is wanted):
 - **THE ALCHEMIST ("The Brew") — 🟢 FULL CARD SLATE BUILT 2026-07-06** (`alch-cards`). The 7th class,
@@ -620,8 +648,12 @@ nodes, not node kinds.
 
 ## BOSSES & ENCOUNTERS
 
-**Now:** 15 solo bosses + Vorathek raid + Seals II–IV, all with M7.2 strings, tuned skill bands.
-**Game-shape note (2026-07-03):** the 15 solo bosses are the **personal-content casting pool** — promote on demand as Tier-1 GATE duels / Tier-2 owned adds / Tier-3 split-phase exams (§GAME SHAPE + the §REALMS identity table). No new solo-only bosses.
+**Now (post-purge 2026-07-10):** the 4 Seals (Vorathek/Riftmaw · MISTRAL · GEMINI · MYTHOS) +
+their adds + Forge-generated bodies. That's the whole boss roster in code.
+~~**Game-shape note (2026-07-03):** the 15 solo bosses are the **personal-content casting
+pool**~~ — **⚠ SUPERSEDED 2026-07-10 (THE PURGE, §GAME SHAPE amendment):** the casting pool is
+disbanded, the 15 solo bosses + GATE recasts are DELETED from code. Future personal/exam
+content, if wanted, is Forge-authored fresh (parked).
 **⚠ BOSS-REDO ERA (Bill, 2026-07-06):** the whole boss roster will be redone against the WORLD-PLAN
 combat pillars eventually — Bill isn't sure of the end state yet, so we do NOT redesign now. The
 15 solo bosses sit unsimmed (their sims were deleted in the fresh slate; they get re-verified when
@@ -645,9 +677,11 @@ tanks keep the densest; marquee moments survive.
    (Double-Check etc.) untouched. ⚠ M7.2's lesson runs in REVERSE here: removing beats un-freezes
    scheduler time and SOFTENS the boss — retune each Seal's other cadence to keep the pressure
    (don't let MYTHOS sloppy drift up from 43 to "free").
-3. **Interrupt content: HANDS OFF for now.** Kick chains stay tuned for the current kick verb (the
-   frozen Voidcaller still plays the caster seat); they retune when **interrupt-by-ability** lands
-   with the Framework-v2 reworks (WORLD-PLAN pillar 3 / W5) and "who carries kicks" actually exists.
+3. **Interrupt content: HANDS OFF for now.** Kick chains stay tuned for the old kick verb
+   (~~the frozen Voidcaller still plays the caster seat~~ — **DELETED 2026-07-10 THE PURGE; the
+   Alchemist default carries NO kick, so verses go uncontested in the interim**); they retune when
+   **interrupt-by-ability** lands with the Framework-v2 reworks (WORLD-PLAN pillar 3 / W5) and
+   "who carries kicks" actually exists.
 4. **Deliberate re-baseline:** bands WILL shift — that's the point, not a regression. Fresh
    300-seed bands per Seal recorded here; keep expert ≈100 and the MISTRAL→GEMINI→MYTHOS curve;
    loose tiers must still lose. Blade seat is mid-rework (Tempo), so treat exact percentages as
@@ -668,9 +702,9 @@ tanks keep the densest; marquee moments survive.
 **Phases (sequenced, each mergeable alone):**
 - **A. Draft 2.0 — ✅ DONE (merged 2026-07-02, branch `draft2`), ALL FIVE CLASSES at once** (draft parity already existed — the old "Bulwark-only" note was stale). ONE shared roll in `game/draft.gd` (per-class `*_boons.gd` are now data catalogs + `apply()` + `aspect_tags()`): offer slot 0 = **synergy slot** (guaranteed tag-match vs loadout ∪ owned boons ∪ aspect vocab), rarity **Haiku .70 / Sonnet .25 / Opus .05** as *frequency only* (no caps, no lockouts) with opus pity (+5pp/dry draft, hard-forced by draft 6 — proven worst drought = 5), **deterministic**: RunState carries `run_seed` + a draft-only `DetRng`; per-fight combat seeds are closed-form `fight_seed()` (spends can't shift combat) — whole runs now replay from `(run_seed, picks, spends)`, the Trial-Ladder leaderboard prerequisite. **6 new Opus transforms** (`retaliation`, `dancersgrace`, `nullbrand`, `voidfeast`, `sanctifiedward`, `evergreencycle`) + reclassified opus (`vindInterrupt`, `riposteChain`, `syncopation`, `contagion`, `secondwind`, `verdantsurge`), all `_b()`-gated. UI: `game/ui/draft_screen.gd` (shared screen: token plaque, UPSELL under each card, REROLL plate, ✦ RESONANT mark), RelicCard rarity frames (opus breathing ring), Palette HAIKU/SONNET/OPUS. Works inside the Topology map (salvage drafts pass a custom headline; mint runs in map mode).
 - **B. Slot-verbs — ✅ DONE, ALL FIVE VERBS (Bulwark PoC merged `7860efa`, port to the other four merged 2026-07-02 branch `slot-verbs-port`).** The port (same cross-product/no-lockouts pattern, ~8 pieces/class, kit-side proc engines, all `_b()`-gated): **Twinfang build-your-RHYTHM** (innate proc = PERFECT Strike; Ghost Step/Killing Tempo/Beat Dancer · Razor Echo/Quickblood/Red Harvest · Wide Tempo + opus **Twin Step** 2nd dodge charge) · **Voidcaller build-your-KICK** (innate = landed interrupt; Resonant Break/Starve the Choir/Void Step · Null Lash/Mind Siphon/Umbral Mending · Perfect Pitch + opus **Twin Void** 2nd kick charge) · **Mender build-your-TRIAGE** (innate = clutch heal on a sub-50% ally; Cleansing Rite/Aegis Echo/Graceful Step · Lightward/Deep Well/Lingering Grace · Swift Litany + opus **Benediction** every-5th-proc party bathe) · **Bloomweaver build-your-GARDEN** (innate = cashed Bloom; Barkward Echo/Seedsower/Rootstep · Bramble Burst/Sapwell/Petalfall · Quickening + opus **Deep Garden** payloads ×2 at 3+ Growths). `verb_summary()` renders the assembled verb in each class's verb tooltip (+ Grimoire tomes); Twin Step/Void pips ride the dodge/kick rune-sockets. **Port probes (`_prove_verb_mods`, 120 paired seeds @sloppy): rhythm 54.2→92.5 · kick 80.8→100 · triage 71.7→90.8 · garden 78.3→84.2, all deterministic.** Port gates: 6 sims byte-identical boonless · draft_sim ALL OK · 5 smokes · WSLg (tooltip + pips). ⚠ Port lesson (memory'd): `RunState` couples every class's content into every sim's compile graph — never edit ANY kit while ANY sim runs. The Bulwark PoC details: Build-your-Guard as **cross-product pieces, NO LOCKOUTS** (Bill-locked): **TRIGGER** cards add proc moments (`trigRead` feint READ · `trigThird` every 3rd guard · `trigBeat` PERFECT beat · `trigRiposte` landed Riposte, Warden pool; each carries a +4-rage built-in), **PAYLOAD** cards fire on EVERY proc moment — innate proc = any clean negate — (`payReflect` 35 · `payHeal` 30 · `payRage` 8 · `payExpose` 1.2s/+15% · `payCounter` Warden · `payMomentum` Jugg), **PROPERTY** cards reshape the verb (`propSwift` cd ×0.8 · `propWide` window ×1.3 · **opus `propCharge` "Twin Guard"** 2nd charge via post-press `defense_ready_tick` rewrite + `upkeep` recharge — riposteChain precedent). Kit-side proc engine (`BulwarkKit._guard_proc`/`_trigger_fire`), all `_b()`-gated; knobs = `BulwarkConfig.mod_*`; catalog entries carry `slot:`, guard-adjacent classics labeled `slot:"property"`. **LOCK · 1⏣ = hold-through-reroll** (Bill-locked): `Draft.lock` + `Draft.reroll_kept(run, offers, locked)` redraws only unlocked slots (locked ids excluded from redraw; empty locks ≡ classic reroll stream). UI within existing surfaces: slot captions on RelicCard ("OPUS · GUARD PROPERTY"), ◆ HELD banner + LOCK/RELEASE buttons on DraftScreen, YOUR GUARD assembled rules in the guard tooltip + the Grimoire tome's guard entry, Twin Guard charge pips on the rune-socket. **Proof (`_prove_guard_mods`, Duelist@loose, 120 paired seeds): boonless 74.2% → modded 92.5% win-rate, TTK 57.9s → 38.5s, 7.7 procs/run, modded determinism PASS** — two runs of the same class now build tangibly different verbs. Gates: 6 sims byte-identical boonless vs frozen baselines · draft_sim ALL OK (incl. 5-class LOCK matrix) · 5 smokes · WSLg shots. **Scoping rule for the port (still locked):** pools stay per-class; mods express through UI the class already has; cross-aspect bleed = rare spice only.
-- **C. Token economy — ✅ DONE (merged with A)**: kits bump class-signature skill signals into `seat.diag`/`state.diag` (`negate` / `perfect_strike` / `clean_kick` / `dispel` / `perfect_ward` — diag is never checksummed, so byte-identical sims held); `Draft.mint(state, class)` at fight end = footwork (PERFECT+READ per `mint_per_grades` 3) + signature (per `mint_per_signature` 4) + flawless bonus (no miss/bait/whiff), cap 3/fight (knobs on TuningConfig). Spends: REROLL 1⏣ / UPSELL 2⏣ ("lock a slot" waits for B). Refused spends consume no rng (test-proven).
+- **C. Token economy — ✅ DONE (merged with A)**: kits bump class-signature skill signals into `seat.diag`/`state.diag` (`negate` / `perfect_strike` / `clean_kick` / `dispel` / `perfect_ward` — diag is never checksummed, so byte-identical sims held); `Draft.mint(state, class)` at fight end = footwork (PERFECT+READ per `mint_per_grades` 3) + signature (per `mint_per_signature` 4) + flawless bonus (no miss/bait/whiff), cap 3/fight (knobs on TuningConfig). Spends: REROLL 1⏣ / UPSELL 2⏣ ("lock a slot" waits for B). Refused spends consume no rng (test-proven). **⚠ 2026-07-08 (🔒 `TEETH-PLAN.md`): REROLL leaves the Token economy** — it becomes a scarce earned/bought BANKED charge and LOCK retires with it; the record above is the as-built code until that claim lands (Tokens re-home to the Market).
 - **D. Feeds the Trial Ladder** (below).
-- **E. Persistent progression — design LOCKED 2026-07-03, decisions of record in `PROGRESSION-PLAN.md`.** The meta-game: in-run boss loot (2 slots, rarity-first pity rolls reusing Draft 2.0 machinery, scrap→Tokens, MARKET buys) + permanent unlocks by *event* only — first-kill signature rows, **sworn OATHS** (renamed from "armed feats/quests" 2026-07-03 — swear the deed on the boss's Ledger page → keep it → the row joins your drop pool forever; severity I–III + stakes-scaled re-swear purses; Realm-1 skin = SLA, Blood Oaths = PIP), Trial-version rows, carried-out map schematics. **Realm-1 item/oath content lives in `GEAR-CATALOG.md`** (per-boss pages synergized with the class-fun reworks). Four persistent tracks (World/Pools/Rank/Breadth), **Monotonic Pool Law** (an unlock may never make a run worse — rarity-first rolls + synergy weighting + auto-scrap token floor), lane rule (boons = verb/agency · gear = fortune/new-buttons). **CUT (superseded):** RAID-PLAN's material economy (essences/Embers/Sigils/Riftcores/crafting), use-based mastery, pre-run loadouts, daily/weekly content. **⚠ crafting cut briefly reversed 2026-07-08, then RE-CUT 2026-07-09 (Bill):** materials are redundant with kill=unlock (specific) or a grind (generic); the "earn a keystone" fantasy stays via kill→unlock + oath. Crafting stays CUT. See `TEETH-PLAN.md`. Phases GEAR-1…4 in the doc; **GEAR-1 MERGED 2026-07-03 (`866592f`, see Coordination Log)** — GEAR-2 (oaths + Ledger UI + purses) is the open follow-up. Gear noun locked: **CURIO** / Realm-1 **PERIPHERAL**.
+- **E. Persistent progression — design LOCKED 2026-07-03, decisions of record in `PROGRESSION-PLAN.md`.** The meta-game: in-run boss loot (2 slots, rarity-first pity rolls reusing Draft 2.0 machinery, scrap→Tokens, MARKET buys) + permanent unlocks by *event* only — first-kill signature rows, **sworn OATHS** (renamed from "armed feats/quests" 2026-07-03 — swear the deed on the boss's Ledger page → keep it → the row joins your drop pool forever; severity I–III + stakes-scaled re-swear purses; Realm-1 skin = SLA, Blood Oaths = PIP), Trial-version rows, carried-out map schematics. **Realm-1 item/oath content lives in `GEAR-CATALOG.md`** (per-boss pages synergized with the class-fun reworks). Four persistent tracks (World/Pools/Rank/Breadth), **Monotonic Pool Law** (an unlock may never make a run worse — rarity-first rolls + synergy weighting + auto-scrap token floor), lane rule (boons = verb/agency · gear = fortune/new-buttons). **CUT (superseded):** RAID-PLAN's material economy (essences/Embers/Sigils/Riftcores/crafting), use-based mastery, pre-run loadouts, daily/weekly content. **⚠ crafting cut briefly reversed 2026-07-08, then RE-CUT 2026-07-09 (Bill):** materials are redundant with kill=unlock (specific) or a grind (generic); the "earn a keystone" fantasy stays via kill→unlock + oath. Crafting stays CUT. See `TEETH-PLAN.md`. Phases GEAR-1…4 in the doc; **GEAR-1 MERGED 2026-07-03 (`866592f`)** and **GEAR-2 MERGED 2026-07-03 (`8d18685` — oaths/Ledger/purses live; stale "open follow-up" fixed 2026-07-10)** — the real open follow-ups are **GEAR-3 (Market stock + extraction schematics)** and GEAR-4 (raid personal loot + Seal tables). Gear noun locked: **CURIO** / Realm-1 **PERIPHERAL**.
 - **E.5 Drop-curation = OATH DEDICATION only (design LOCKED with Bill 2026-07-04 — the ONLY loot-steering lever; fine-tune/attune toggles REJECTED).** How players shape their luck toward gear they like, kept *deliberately* un-steerable: **no** favorite/attune toggle, **no** farmed "side resource" (that'd be a meta-currency — Forbidden, Law #4). The single lever is the **already-merged oath drop-bend (GEAR-2), extended with a beneficiary**: when you swear an oath you pick who its KEPT drop-roll bend lands on — **yourself OR a teammate**. Rules that keep it safe: the bend steers **rarity/consistency, not the specific item** (the loot MOMENT survives — the rarity roll stays a surprise; you only enrich a roll from a pool they *already* own → Monotonic-safe, can't gift an unearned row); cap = the existing **one sworn oath / seat / fight**, deed-gated (you must EXECUTE to earn it) → at most 4 bends/fight in a full raid, no stacking, no currency. **Gift cost (Bill-locked):** the swearer KEEPS the Tokens (paid for the deed) and GIFTS the luck (the bend points at the teammate) — a real choice with stakes, and it makes an already-geared veteran structurally useful to a new player (farm deeds → gift the rarity *downward* = the co-op stickiness). **Timing (Bill-locked):** the beneficiary is **swear-time locked** (commit when you sign, like the oath itself), not re-aimable mid-fight. Realm-1 skin (free — oaths already render as SLAs): dedicating to a teammate = signing a **cross-team SLA** / covering their on-call → "SLA MET — Kaelen's allocation upgraded." Solo / 1-human-+-3-AI raid: nobody to gift to → self-only (AI keep no gear); the gift shines in true online co-op. **Build (small extension of GEAR-2, not a system):** sworn-oath state gains `beneficiary_seat_i` (index-based, mirrors `taunt_seat_i` / HoT `caster_i` — RefCounted-safe), the swear UI gains the beneficiary pick, the KEPT pop names them; **byte-identical when nobody gifts** (default self). Depth ties in (see §MODES & ENDGAME power-model bullet): higher Depth = the curation capacity that scales, never hitting power. **Sequence:** after GEAR-2 (merged) — a natural GEAR-2.5, before/alongside the Trial-Ladder Depth work.
 **Acceptance (met + how to re-run):** `sim/draft_sim.gd` (determinism transcripts incl. spends, synergy guarantee, pity bound, spend legality, mint table + seeded-fight integration) ALL OK · all 5 class sims + raid sim **byte-identical stdout+CSV** vs pre-change baselines (diag-only kit touches; 300 seeds) · 5 UI smokes green · WSLg visual probe `sim/screenshot_draft.gd` (5 draft screens + end screen, pity-forced opus) rendered clean.
 
@@ -687,7 +721,7 @@ tanks keep the densest; marquee moments survive.
 **Now:** Gilded Reliquary 2D UI done; 3D stage = Bulwark slice (PoseRig procedural rigs, dais, VFX, reticle dial).
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
 **Next up:**
-- Wire the other 4 HUDs to CombatStage3D (~15 lines each, pattern documented in CLAUDE.md) + a rig per class.
+- ~~Wire the other 4 HUDs to CombatStage3D~~ — DEAD 2026-07-10 (loop audit): the solo HUDs + `stage3d/` were deleted in REFIT P1; stage work now targets the 2D raid stage rigs (per-body Forge rigs owed).
 - **Robot re-rig**: per-boss silhouettes as ROBOTS/COMPUTERS (theme!) — replaces the `variant()` stopgap and is easier than organic sculpts. CAPTCHA-9 = a turnstile with an eye; GEMINI = two identical chassis; OPUS = a server-cathedral.
 - Blender/GLTF pipeline later (art replaces rig subclasses; `act()`/`windup()` contracts stay).
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
@@ -695,9 +729,12 @@ tanks keep the densest; marquee moments survive.
 
 ## ONLINE (R2+)
 
-**IN FLIGHT — another session owns this** (`godot/net/` client/server/protocol, `server/` Docker+tunnel, `dist/web` export). Per `RAID-PLAN.md`: server-authoritative WebSocket, headless Godot server, browser WASM client.
-**Do not touch without checking the Coordination Log.** When it lands: netcode session should update this section + Overall Progress.
-**Queued behind it:** R3 raid content/economy (needs aura-add / parallel cast sources — see Bosses).
+~~IN FLIGHT — another session owns this~~ **✅ DONE since R2/R2.5 (stale header fixed
+2026-07-10, loop audit):** server-authoritative WebSocket lockstep + Docker/tunnel deploy kit +
+browser WASM client are LIVE (protocol v11; online descent MAP-3b; original brief:
+`archive/RAID-PLAN.md`). **Open online work:** W4 presence/events (WORLD-PLAN) · the §4 MMO
+shell extraction (REFIT-PLAN) · online spec-carry of reworked-class builds (BUILD-LEDGER §C).
+**Queued:** R3 raid content/economy (needs aura-add / parallel cast sources — see Bosses).
 
 ## TOOLING & INFRA
 
@@ -775,6 +812,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☐ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **CLAIM: THE
+  OLD-GAME PURGE + audit follow-ups (Bill).** (1) docs: record the purge decisions (GAME SHAPE
+  amendment · roster · casting-pool cut · BREADTH/gear consequences), fix the loop-audit drift +
+  stale blocks, archive retired docs → `archive/`, WORLD-PLAN §DUNGEON consolidation; (2) code:
+  DELETE Voidcaller + Mender + Reckoner + the 15 solo bosses + the GATE node kind wholesale;
+  defaults flip caster→Alchemist(brew) · healer→Well(brim); Bulwark stays (dies with the Duelist
+  base — ledger row); Bloomweaver stays frozen. Deliberate re-baseline (maps regen w/o gates,
+  comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
+  `tempo-pilot` worktrees — merging main often. *(this session)*
 
 - ☑ 2026-07-09 · main (docs only) · NEW `GAME-LOOPS.md` + CLAUDE.md index line + 2 drift banners —
   **core game-loop AUDIT (Bill) — DONE.** Read all 23 plan docs; **`GAME-LOOPS.md`** is the
