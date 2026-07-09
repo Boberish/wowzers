@@ -7,6 +7,15 @@
 > pass is §1, the laws are §2, the loop protocol is §3, per-target notes are §4.
 > **This is idea generation, not deck authoring** — deck builds (deck-creator skill, CARD-CATALOG
 > rows) happen per target AFTER Bill picks from its slate, as separate claims outside this loop.
+>
+> **⚠ CORRECTED 2026-07-10 00:35 (Bill).** A **branch is a build THEME inside the existing spec**
+> (the tank's Headsman/Ironside/Ghost precedent): a general category — *bleeds, fast attacks,
+> slow big finishers* — that cards/creeds/modules FEED so drafts synergize. **The base minigame
+> stays untouched; the spec's identity stays.** Branch pitches ADDRESS existing dials, never bend
+> them, add no buttons, and never hang the identity on a new gauge. The original Tempo §14 pass
+> over-shot into minigame-rewire pitches — those are re-homed as SPEC/ASPECT IDEAS (`TEMPO-PLAN.md`
+> §15 parking 🔮; Bill: keep as future spec ideas) and the **rewire-grade anatomy now applies to
+> `class slate` rows ONLY** (Bloomweaver). Tempo §14 is REDONE as the corrected worked reference.
 
 ## 0. THE QUEUE (the checklist — the loop's single source of truth)
 
@@ -20,7 +29,7 @@ reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 
 | # | Target | Kind | Slate lands in | Status | Claimed | Note |
 |---|---|---|---|---|---|---|
-| 0 | Twinfang · **Tempo** | branch slate | `TEMPO-PLAN.md` §14 | 🟡 | — | THE WORKED REFERENCE (6 pitches, 3 skeptics, 0 kills). Bill picks 2–3 → deck pass. |
+| 0 | Twinfang · **Tempo** | branch slate | `TEMPO-PLAN.md` §14 | 🔄 | 07-10 00:35 | REDO under the corrected definition (original session, Bill-directed). Old six rewire-pitches → §15 spec-idea parking 🔮. |
 | 1 | Tank · **Warden** | branch slate | `TANK-PLAN.md` new § | ⬜ | — | Block-wall kit locked, deck unstarted — slate feeds the owed deck pass. No dodge on this kit; dodge-law checks become BLOCK-law checks. |
 | 2 | Tank · **Duelist** | challenger slate | `TANK-PLAN.md` new § | ⬜ | — | Deck v1 (Headsman/Ironside/Ghost + Dancer) is AT BILL'S BOARD → it is **PITCH #0**; challengers must beat it. Flag clearly so it enriches, not muddies, the open verdict. |
 | 3 | **Bloomweaver** (whole class) | class slate | NEW `BLOOM-PLAN.md` | ⬜ | — | Only class with NO v2 design — pitch CORE MINIGAME candidates (3–4) + spec identities, not branches. The biggest pass in the queue. |
@@ -54,11 +63,19 @@ so a token-death loses little):
 4. **SYNTHESIS — 4 lenses, inline, sequential:** ① branch/sub-spec shapes · ② greed surfaces ·
    ③ the class's core-mechanic grammar (timing for rhythm kits, triage for healers, reads for
    tanks…) · ④ spectacle/party (warband space is unclaimed — probe ≥1 cross-seat idea).
-5. **PITCHES.** 4–6, each in the §14 anatomy: *name + tagline* · **the twist** · **what you're
-   for** · **dials** (which core-mechanic dials it leans/BENDS) · **example cards (illustrative,
-   3–4)** · **capstone keystone** (spectacle-grade) · **greed/comfort** · **sources** · **pillar
-   check**. Where an incumbent design exists (queue note), it is **PITCH #0** restated honestly in
-   the same anatomy and judged at the same bar.
+5. **PITCHES.** 4–6. **Anatomy depends on the row's Kind (corrected 2026-07-10):**
+   - **branch / challenger slate → THEME anatomy** (Tempo §14 = the worked reference): *name +
+     fantasy one-liner* · **what its cards DO** (the synergy spine in plain words) · **dials
+     ADDRESSED** (existing dials only — never bent, no new buttons, no identity-gauge) ·
+     **existing cards it absorbs** (name them — the filing is the point) · **example new cards,
+     3–4 illustrative, spread across creed/module/boons/keystone** · **greed/comfort + its EASE
+     knob** · **nearest neighbor + the distinction**. Slate-level: an **existing-pool filing
+     table** (every built card → which theme(s) it feeds, or "generic") proving the themes
+     organize the real deck. Where an incumbent exists (queue note), it is **PITCH #0** restated
+     in the same anatomy.
+   - **class slate → SPEC anatomy** (Bloomweaver only; the old §14-style rewire grade): *name +
+     tagline* · **the twist** · **what you're for** · **dials** (may lean/BEND — it's a core-
+     minigame pitch) · example cards · spectacle keystone · greed/comfort · sources · pillar check.
 6. **SKEPTICS ×3, inline, sequential** — three separate adversarial framings (e.g. "this is a
    repack of X" · "the engine/AI-policy cost is a lie" · "the fantasy dies in a 60s fight").
    Kill or fix every pitch; fold fixes; RANK by pick-tension; record kills/fix-count honestly
@@ -74,10 +91,13 @@ so a token-death loses little):
 ## 2. SLATE LAWS (every slate, every pitch)
 
 1. **Base ideas only** — example cards are ILLUSTRATIONS; no CARD-CATALOG rows until the deck pass.
-2. **Every branch changes the timing shape or what a press does — never just numbers** (Hades
-   aspect standard). A stat-lean pitch is dead on arrival.
-3. **Vary the meter's LAW, not the resource count** — bank vs decay vs reset an existing meter
-   beats inventing a new one.
+2. **A branch is a THEME, not a rewire (corrected 2026-07-10, Bill).** Base minigame untouched;
+   the spec's identity stays. Its cards ADDRESS dials, never bend them. A theme must still be a
+   real build direction with a payoff arc (creed→module→boons→keystone), not a stat pile — but
+   "changes the timing shape / what a press does" is now the bar for **class slates only**.
+3. **Vary the meter's LAW, not the resource count** *(class slates only)* — bank vs decay vs
+   reset an existing meter beats inventing a new one. Branch themes don't get new meters at all
+   (a module-tier tracker gauge is the ceiling, and it never defines the branch).
 4. **Different clocks** — no two branches in one slate peak on the same cadence (the FFXIV
    2-minute trap).
 5. **The entry creed carries the branch from run start; the module deepens it** — a branch that
