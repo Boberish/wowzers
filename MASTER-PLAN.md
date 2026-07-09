@@ -773,6 +773,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · §CLASSES / `TANK-PLAN.md §1b` — **TANK BASE-MINIGAME PASS — the
+  two specs sharpened (Bill).** Bill was "a bit lost on the difference between the 2 classes"; this pins
+  it. **Dodge tank** = DODGE (graded, PERFECT covers big) + PARRY (banks ◆) + new **WEAVE** (a flurry =
+  a burst of fast skinny bars, **dodge ALL or eat it all**, clean weave → free RIPOSTE); faces
+  UNAVOIDABLES (eats). **Shield tank** = BLOCK (tap small/normal/big) + BRACE=**HOLD** (long bars) + new
+  **small-only DODGE** (slow recover) + new **SHIELD SLAM** (timed release = counter + banks ◆, its
+  answer to having no parry); blocks everything (no unavoidables). **🛡 GUARD DROPPED** — both specs'
+  **◆ → DUMP = pure damage** (tanks are defense-rich/damage-poor); the defensive utility moves to the
+  **~1-min defensive signature CD** (`DECK-LAYOUT §5`, role-shaped as a wall). **Recovery rule:** fast on
+  your signature answer, slow on your off-tool. **Card fallout** (deferred, flagged in CARD-CATALOG):
+  Return to Sender / Cheap Iron / The Wall → 🔮 re-home to Warden; SPEND lane now DUMP-only. **OPEN:**
+  FLOW as a shared clean-streak → DUMP-damage lever (Bill "idk" — pending yes/no). Branches/deck reshape
+  come AFTER the minigame locks. *(tank base-minigame session)*
 - ☑ 2026-07-09 · main (docs only) · `CARD-CATALOG.md` — **THE CARD SLATE + STATUS CONSOLIDATION
   (Bill: "how do we track boons/cards/creeds — want something solid + localized, a rule/skill").**
   Diagnosis: card design was scattered across 4 plan docs in 4 formats while the built truth lived
@@ -987,7 +1000,8 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   slug **whether it lands or not** so you CAN'T spam it — you pick your moments; land = gut the hit +
   counter + **bank a ◆**; miss = you swung, ate most of it, no ◆). Just one attack, no big/small.
   He faces **UNAVOIDABLE** hits he must eat. Spend ◆ on **⚡ DUMP (offense)** OR **🛡 GUARD (a few
-  seconds of heavy damage-cut, defensive)** — your call. Skinny lines only.
+  seconds of heavy damage-cut, defensive)** — your call. Skinny lines only. **⚠ SUPERSEDED 2026-07-09:
+  GUARD DROPPED — ◆ → DUMP=damage only, defense moves to the ~1-min CD; + WEAVE added (see TANK-PLAN §1b).**
   **• THE WARDEN (heavy/endurance, def-only + off-cooldown):** **two defensive buttons, NO attack** —
   **BLOCK** (light tap, cheap; a **perfect block banks ◆**) + **BRACE** (heavy; and it's just the
   block **held** — hold it across the fat **HOLD bars** and **overlapping** pairs; drains fatigue

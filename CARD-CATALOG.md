@@ -101,10 +101,16 @@ Bulwark is the frozen placeholder, NOT this base. Names still open (class + fati
 Dials: THE READ / THE SWING / THE STEP / THE WIND / THE BANK / THE SPEND / THE DUET.
 Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · **Ghost** (footwork).
 
+> **⚠ BASE-MINIGAME PASS (2026-07-09, Bill — `TANK-PLAN.md §1b`):** GUARD is **dropped** from the
+> Duelist (◆ → DUMP = damage only; defensive utility moves to the ~1-min defensive CD). So the SPEND
+> lane's **Return to Sender** + **Cheap Iron** and the **The Wall** rig lose their premise here → **🔮
+> PARKED, re-home to the Warden** (shield-based). New base moves added: **WEAVE** (Duelist flurry answer)
+> + **SHIELD SLAM** / small-only dodge (Warden). Deck reshape deferred (branches after the minigame).
+
 ### Signature CD ⏱
 | Card (id) | Type | Rarity | Status | Effect |
 |---|---|---|---|---|
-| _(not yet designed — the Duelist's baseline ~1-min button)_ | — | — | 💡 IDEA | Owed per `DECK-LAYOUT.md §5`. Must amplify skill, not `button = damage`. |
+| **Defensive CD** _(unnamed — the tank's ~1-min "wall")_ | — | — | 💡 IDEA | Role-shaped defensive cooldown (a wall), per `DECK-LAYOUT.md §5`; carries the mitigation GUARD used to (◆ is damage-only now). Amplifies skill — line it up with a boss window — never `button = damage`. Both specs get one; shapes may differ. |
 
 ### Creeds (pick 1/run — curated)
 | Card (id) | Type | Rarity | Status | Effect |
@@ -149,8 +155,8 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 |---|---|---|---|---|
 | **Powder Keg** | POWER | haiku | 🟡 | Dump +20/30/40% per ◆ (CARRY). |
 | **All In** | GREED | haiku | 🟡 | Full-bank dump ×1.25/1.4/1.5; at full bank take +10%. |
-| **Return to Sender** | STRAT | haiku | 🟡 | Guard stores 40/55/70% of prevented damage, hurls it back as a bar when it drops. |
-| **Cheap Iron** | EASE | haiku | 🟡 | Guard 1◆; cut 45/50/55%. |
+| **Return to Sender** | STRAT | haiku | 🔮 | _Re-home to Warden (2026-07-09): GUARD dropped from Duelist._ Shield stores 40/55/70% of prevented damage, hurls it back as a bar when it drops. |
+| **Cheap Iron** | EASE | haiku | 🔮 | _Re-home to Warden (2026-07-09): GUARD dropped from Duelist._ Shield-raise cheaper; cut 45/50/55%. |
 
 ### Rig (WHEN → THEN)
 THENs: STRIKE 20 dmg · IRON 2s +20% DR · BREATH +2 wind · PIP +1◆ · BANNER 2.5s warband +5%.
@@ -158,7 +164,7 @@ THENs: STRIKE 20 dmg · IRON 2s +20% DR · BREATH +2 wind · PIP +1◆ · BANNER
 |---|---|---|---|---|
 | **The Tall Land** | STRAT | — | 🟡 | Parry a TALL bar (premium WHEN). |
 | **The Big Spend** | STRAT | — | 🟡 | Dump ≥4◆. |
-| **The Wall** | STRAT | — | 🟡 | Guard eats a hit ≥15% max HP (premium). |
+| **The Wall** | STRAT | — | 🔮 | _Re-home to Warden (2026-07-09): GUARD dropped from Duelist._ Shield eats a hit ≥15% max HP (premium). |
 | **The Read** | STRAT | — | 🟡 | Correctly ignore a feint. |
 
 ### Keystones (elite-only · pool 3 / run 1 · spectacle)
