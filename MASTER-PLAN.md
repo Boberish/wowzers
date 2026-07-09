@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 01:15 · main (docs only) — **CLAIM: SLATE MACHINE row 3 — BLOOMWEAVER class slate**
+  (the queue's one CLASS-grade pass: fresh sweep → `research/bloom-sweep.md` → 3–4 CORE-MINIGAME
+  candidates + spec identity seeds, rewire anatomy allowed → 3 skeptics → NEW `BLOOM-PLAN.md`
+  🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 01:12)*
+
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §7 (NEW) + `research/duelist-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 2: Tank·DUELIST challenger slate — DONE, three challengers
   join the LIVE §3 verdict board** (v1's Headsman/Ironside/Ghost restated as PITCH #0a/b/c at the
