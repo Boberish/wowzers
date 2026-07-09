@@ -933,16 +933,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   elite-node, stakes re-fiction). ⚠ Code lands AFTER `purge-oldgame` merges (GATE-cut overlap;
   recon confirmed gates still live on main). *(raid-rebuild session)*
 
-- ☐ 2026-07-10 · main (docs only) + session watcher loop — **CLAIM: THE DUNGEON REBUILD plan,
-  GATED on THE RAID REBUILD above (Bill).** A self-paced loop in this session watches that claim
-  (wake = `DESCENT-PLAN.md` present in HEAD; heartbeat ~25 min; STALL = workflow journal quiet
-  >45 min with no plan landed → THIS session executes that claim's RESUME PROTOCOL, so the raid
-  plan can't die silently). When the raid plan lands: run the SAME zoom-out structure pass for
-  the DUNGEON surface (the GAME-LOOPS §3 headline gap — no dungeon plan exists; inputs =
-  WORLD-PLAN §THE DUNGEON + the b2afbca raid/dungeon identity split [dungeons = the M+ Depth
-  push surface] + DESCENT-PLAN.md's raid verdicts as the frame to diff against, inline
-  multi-lens design not a Workflow) → NEW `DUNGEON-PLAN.md` at Bill's verdict + ledger rows,
-  then the loop stops. *(dungeon-watcher session)*
+- ☑ 2026-07-10 · main (docs only) — **THE DUNGEON REBUILD plan (Bill) — DONE, 🟡 AT BILL'S
+  VERDICT.** The watcher loop worked as claimed: woke the moment `DESCENT-PLAN.md` hit HEAD
+  (`cddc390`; no stall, the resume protocol never fired), then ran the same zoom-out structure
+  pass for the DUNGEON surface inline (time-first / economy-first / push-first lenses +
+  skeptic checks; no workflow). **NEW `DUNGEON-PLAN.md`** — DESCENT's twin, inheriting its
+  grammar wholesale (deltas only): ~29-min push lap / ~25 farm lap budget · `run_map` PRESET
+  (7 rows/~17 nodes/1 Seal — rides §I's ONE re-baseline, no second bang) · THE DOOR CONTRACT
+  (Version+Depth dials + affix preview, rendered-not-specced — the Depth thread stays owner) ·
+  node-slate deltas + the 8-string SKIN TABLE (resolves the takeover-names-vs-earnest-world
+  tension, V#2) · keystone-at-elite (AMENDs UNLOCK-2's "after the 1st boss" wording, V#3) ·
+  subset table v1 (D1 Creed-only · D2 Module-not-Creed) · Dungeon 1 = **THE UNDERGRANARY** +
+  **THE TALLYMAN** worked contract (node/boss authoring stays the W3 claim). **8 verdicts at
+  §V.** Satellites in the same commit: BUILD-LEDGER **§J** (6 rows; zero new `draft.gd`-queue
+  rows by design) · WORLD-PLAN §THE DUNGEON pointer · GAME-LOOPS L3 + gap-A sync · CLAUDE.md
+  index line. *(dungeon-watcher session)*
 
 - ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
   class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW

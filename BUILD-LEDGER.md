@@ -269,6 +269,22 @@ build-once seams that five separate class reworks and the endgame all need:
 | Map-seed-from-run-seed | 🟡 | DESCENT §2 | `run_map` seeding, `RunDirector` | Replay-stable floors, checkpoint restore, co-op shared maps. Coordinate w/ P4 offline `run_seed` (in flight). |
 | Resource verdicts (LUCK · STANDING demote · BACKUPS · REGENERATE · integrity kill) | 🟡 V#6/#8 | DESCENT §9 | header UI, `map_fx`, `map_check` breakdown rows | Governance: 3 meters max, retire-one-to-add-one. |
 
+### J. THE DUNGEON STRUCTURE (`DUNGEON-PLAN.md` — 🟡 the cluster at Bill's 8-verdict board §V, 2026-07-10)
+
+⚠ **Sequencing:** land AFTER the §I one-bang re-baseline (the dungeon is a `run_map` PRESET on the
+same inputs/invariants — piggyback its shape assert on that suite, no second baseline). Dungeon 1
+content authoring (nodes + THE TALLYMAN) stays the W3 claim (§D row) — this cluster de-risks it
+to content work. Adds **ZERO rows to the `draft.gd` claim queue** by design.
+
+| Item | St | Specced | Touches | Blocks on / note |
+|---|---|---|---|---|
+| Dungeon map preset (7 rows/~17 nodes/1 Seal + quota bag + invariants) | 🟡 V#1 | DUNGEON §2–3 | `run_map` inputs preset, map-sim invariants, `RunDirector` run-shape | Rides §I's re-baseline bang. Farm-lap ~25 / push-lap ~29 min budget. |
+| THE DOOR CONTRACT screen (Version+Depth dials · affix preview · best standing · subset banner) | 🟡 V#7 | DUNGEON §2 | `world_shell` door screen, `rift_world.cfg` per-door standing | Depth thread owns the scalar — this RENDERS its output. Endless door plugs in here later (don't fork). |
+| Keystone-at-elite (dungeon) + 1-life/ATTEMPTS wiring | 🟡 V#3 | DUNGEON §5/§7 | keystone grant site, loss-mode path, attempt-token spend | **AMENDs PROGRESSION §UNLOCK-2** "after the 1st boss" wording. Raid BACKUPS row (§D) shares the consumable. |
+| The skin table (~8 world-skin display strings) | 🟡 V#2 | DUNGEON §5 | one lookup fn over market/curse/skill-node/attempt strings | Realm doors keep DESCENT names; bound: ONE world column ever. |
+| Subset table config (per-dungeon system toggles) | 🟡 V#5 | DUNGEON §9 | run-spec subset flags, door banner | Creed-only first (D1) · Module-not-Creed (D2, W5). Byte-identical where a system is off. |
+| Dungeon Seal contract (6–7 min named boss) + QUEUE-lite board | 🟡 V#6/#8 | DUNGEON §4/§8 | (the boss pass) · ticket board reuse | Contract only — THE TALLYMAN kit + Versions ladder = W3/boss-pass work. DEED-weighted ticket mix. |
+
 ### H. Parking lot (💡 unclaimed — promote when claimed)
 
 | Item | Specced | Note |

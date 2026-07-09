@@ -374,6 +374,10 @@ self-rez trinket — so a healer-less warband isn't hard-locked. Capture only, n
 
 **Status: the design pieces are LOCKED across four docs; this section is the one front door**
 (each piece's owner keeps the rationale). **Content is NOT authored** — Dungeon 1 lands at W3.
+**→ Structure spec: `DUNGEON-PLAN.md` (2026-07-10, 🟡 at Bill's 8-verdict board)** — the DESCENT
+twin: time budget · map preset · THE DOOR CONTRACT (Version+Depth dials) · node-slate deltas +
+skin table · subset table v1 · Dungeon 1 (THE UNDERGRANARY) worked contract. It inherits this
+section's locks; on structure numbers it wins.
 
 - **Shape:** a 1-floor Topology run behind a zone door — seeded map, ~6–8 nodes, 30–45 min,
   the full run economy compressed, a **named boss as its Seal** (Forge body + authored soul —

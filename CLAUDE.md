@@ -33,7 +33,10 @@ warband), each with status + doc-of-record pointers; owning docs win any diff; +
 loop-audit findings**) · `DESCENT-PLAN.md` (**THE RAID REBUILD — the descent spec v1**: 4-floor
 time budget · fight ladder + Seal timer contract · node slate with printed contracts · PROMPT
 MARKET shop · JAILBREAK curses · minigame nodes · reward legibility/renames · one ticket grammar
-on two ledgers; 🟡 at Bill's 12-verdict board §V, 2026-07-10) · `WORLD-PLAN.md` (the world pivot +
+on two ledgers; 🟡 at Bill's 12-verdict board §V, 2026-07-10) · `DUNGEON-PLAN.md` (**THE FAST
+RUN — the dungeon structure spec v1**, DESCENT's twin: ~29-min push lap · map preset · THE DOOR
+CONTRACT (Version+Depth dials) · skin table · per-dungeon subset table · Dungeon 1 THE
+UNDERGRANARY worked contract; 🟡 at Bill's 8-verdict board §V, 2026-07-10) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
 signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE single source of truth for
 every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,

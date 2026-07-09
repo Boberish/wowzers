@@ -122,7 +122,7 @@ ghost races · co-op standing).
 | L0 beat | WORLD-PLAN §PILLARS | class plans · DODGE-PLAN | interrupt unbuilt |
 | L1 fight | WORLD-PLAN §PACING | DECK-LAYOUT §5 · SEAL-PILLAR · TANK §1c · class plans | signature CD unbuilt anywhere |
 | L2 node | MASTER §MAPS | WORLD-PLAN · PROGRESSION §Drops · TEETH | ceremony order = code-only |
-| L3 run | DECK-LAYOUT §1 | PROGRESSION §UNLOCK-2 · WORLD §INSTANCES/§STAKES · ASCENSION-STEAL · TEETH · MASTER §SYSTEMS | **no dungeon plan** |
+| L3 run | DECK-LAYOUT §1 | PROGRESSION §UNLOCK-2 · WORLD §INSTANCES/§STAKES · ASCENSION-STEAL · TEETH · MASTER §SYSTEMS · **DESCENT-PLAN (raid) / DUNGEON-PLAN (dungeon), both 🟡 07-10** | ~~no dungeon plan~~ closed — both run surfaces specced, at verdict |
 | L4 world | WORLD-PLAN | PROGRESSION §5 | — (healthy) |
 | L5 account | PROGRESSION-PLAN | GEAR-CATALOG · MASTER §MODES · TEETH | designed, unbuilt |
 | L6 warband | WORLD-PLAN | MASTER parking lot · REFIT §4 · RAID-PLAN | levers unclaimed |
@@ -159,6 +159,8 @@ that view; DECK-LAYOUT §1 is the closest in-doc statement.
 ### Genuine gaps — questions no doc answers *(status updated 2026-07-10)*
 - **A · THE DUNGEON has no plan** — ✅ **CLOSED 07-10:** consolidated as **WORLD-PLAN §THE
   DUNGEON** (shape · M+ identity · stakes · light stack · variety subsets · endless door);
+  **structure spec landed same day: `DUNGEON-PLAN.md`** (🟡 8-verdict board — budget · map
+  preset · door contract · subset table · UNDERGRANARY contract);
   content authoring (Dungeon 1's nodes + named boss) stays a W3 claim.
 - **B · The first 15 minutes.** Still open — "Zone 1 rolls out every system" is the whole
   onboarding spec; the beat-by-beat first-session script is W2/W3 authoring work.
