@@ -773,6 +773,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §1 (new RIG LAW block) + §6 — **THE RIG IS REQUIRED
+  (Bill).** Law-stated what the slot table implied: **every class deck ships a WHEN→THEN Rig** — a
+  reshape without one isn't done. Chassis identical on every class, WHENs/THENs class-authored
+  (earned minigame moments, never passive rolls; THENs = modest role-shaped payoffs). Mechanics
+  restated as law from `TEMPO-PLAN §5` (locked 2026-07-04): **ONE circuit/run** (wire after fight 1,
+  one free Floor-2 re-wire, never grows), **greed-dial payout** (`base × mult`, mult ≈
+  inverse-frequency × premium — rare WHENs pay a spike only if landed; built ref
+  `twinfang_rig.gd`), power = **side boost** (~10% of own output). **Stacking stays CUT** (the old
+  any-WHEN-fires-the-THEN-board model = "side-effect damage is killing the boss and I don't know
+  why"); only small capped banking *inside* one THEN (Killing Edge cap 3; Overcharge takes max,
+  never adds). No code change; no BUILD-LEDGER move (codifies existing scope — Duelist rig already
+  🟡, Twinfang/Alch/Well rigs already 🔨). *(this session)*
+
 - ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §1/§3/§4/§6 + CARD-CATALOG + deck-creator skill +
   ALCHEMIST-PLAN §2 + MASTER §1599 + BUILD-LEDGER §C — **MODULES = ADD-ONS, TRANSFORMER REQUIREMENT
   DROPPED + SUB-SPECS ARE THE DEPTH ENGINE (Bill).** Two linked steers: (1) a **module is a
