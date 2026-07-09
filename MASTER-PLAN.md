@@ -859,6 +859,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   from whatever phase is missing (cross-session resumeFromRunId does NOT work), then finish:
   write `DESCENT-PLAN.md`, tick this claim, ledger rows, commit. *(raid-rebuild session)*
 
+- ☐ 2026-07-10 · main (docs only) + session watcher loop — **CLAIM: THE DUNGEON REBUILD plan,
+  GATED on THE RAID REBUILD above (Bill).** A self-paced loop in this session watches that claim
+  (wake = `DESCENT-PLAN.md` present in HEAD; heartbeat ~25 min; STALL = workflow journal quiet
+  >45 min with no plan landed → THIS session executes that claim's RESUME PROTOCOL, so the raid
+  plan can't die silently). When the raid plan lands: run the SAME zoom-out structure pass for
+  the DUNGEON surface (the GAME-LOOPS §3 headline gap — no dungeon plan exists; inputs =
+  WORLD-PLAN §THE DUNGEON + the b2afbca raid/dungeon identity split [dungeons = the M+ Depth
+  push surface] + DESCENT-PLAN.md's raid verdicts as the frame to diff against, inline
+  multi-lens design not a Workflow) → NEW `DUNGEON-PLAN.md` at Bill's verdict + ledger rows,
+  then the loop stops. *(dungeon-watcher session)*
+
 - ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
   class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW
   **`SLATE-PLAN.md`** = the generalized pass (§1) + slate laws (§2) + **THE QUEUE** (§0: Warden →
