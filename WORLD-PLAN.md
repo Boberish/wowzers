@@ -370,6 +370,30 @@ back at 40 % HP, R-key on a fallen ally's frame. That's the *in-fight* answer to
 **boon/curio battle-rez** beyond the healer (Bill's "some boons with it") — an extra charge or a
 self-rez trinket — so a healer-less warband isn't hard-locked. Capture only, not designed.
 
+### THE DUNGEON — the fast-run surface (consolidated 2026-07-10; closes loop-audit gap A)
+
+**Status: the design pieces are LOCKED across four docs; this section is the one front door**
+(each piece's owner keeps the rationale). **Content is NOT authored** — Dungeon 1 lands at W3.
+
+- **Shape:** a 1-floor Topology run behind a zone door — seeded map, ~6–8 nodes, 30–45 min,
+  the full run economy compressed, a **named boss as its Seal** (Forge body + authored soul —
+  the named-miniboss rule; ~~a recast mid-roster boss~~ died with THE PURGE's casting pool).
+- **Identity (locked 2026-07-07, §RAID-vs-DUNGEON above):** the **M+ push surface** — Depth's
+  primary home (30–45 min is the push/farm cadence; Forge tiers + TICKETS mutators are the
+  affix vocabulary), with the **Versions dial at the door** (discrete authored mechanic-adds).
+- **Stakes (locked 2026-07-09, §STAKES MODEL):** honest default **1 life, from-scratch**;
+  attempt tokens can buy in defiance.
+- **In-run stack (locked 2026-07-08, PROGRESSION §UNLOCK-2):** Creed at start · the boon draft
+  loop · **ONE keystone after the 1st boss** · no-choice drops + Market as an *optional* node ·
+  oaths light. **Mobile-first** (the ABILITY LAW's touch-target ceiling binds here hardest).
+- **DUNGEON VARIETY (Bill, 2026-07-08):** each dungeon runs a **subset** of the in-run systems
+  (Dungeon A = Creed-only · B = Module-not-Creed · …) — dungeons become flavors; which dungeon
+  drops Creed is a tuning dial.
+- **The endless door (TEETH 🟡):** an Atlas node chaining floors at ratcheting Depth until the
+  wipe — a presentation layer on the Depth ladder, framed after the Depth-thread sync.
+- **OPEN (authoring work, W3):** Dungeon 1 ("our Deadmines") node list + its named boss · how
+  the Versions dial reads at the door · the per-dungeon subset table · the mobile layout check.
+
 ---
 
 ## WORLD EVENTS — the "big boss randomly pops" layer

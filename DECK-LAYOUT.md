@@ -41,6 +41,14 @@ Rig · every won fight → 1-of-3 boon draft · end of Floor 1 → pick 1 Module
 a keystone (1-of-2) · end of Floor 2 → re-wire the Rig (free). The **signature CD is always
 present** (baseline, never granted).
 
+**The post-fight ceremony ORDER (as built — recorded 2026-07-10, closes loop-audit gap C):**
+fight ends → campaign writeback (integrity · wounds · healer mana — `CampaignCore`, the one
+rulebook) → the sworn **OATH resolves** (KEPT / BROKEN) → **THE RECKONING** (fight recap:
+damage ranking + the fight's biggest hit) → the **loot beat** (⏣ mint from skill signals; a
+DROP ceremony only at drop *events* — Seal kills / a still-locked SIGNATURE — otherwise
+ring-scaled salvage ⏣) → the **1-of-3 boon draft** (REFORGE) → continue (map / floor
+elevation / campaign clear). Code truth: `raid_hud._on_end`.
+
 ### THE RIG LAW — required, single-circuit, no stacking (locked 2026-07-04 · law-stated 2026-07-09)
 
 Every class deck **ships a Rig** — a class reshape without one isn't done. One system, identical

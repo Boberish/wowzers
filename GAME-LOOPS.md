@@ -156,25 +156,21 @@ that view; DECK-LAYOUT §1 is the closest in-doc statement.
 9. MASTER §CLASSES draft-parity bullet — ✅ struck 07-10 (plus §SYSTEMS-E GEAR-2→GEAR-3 and the
    dead §GRAPHICS 3D-HUD bullet, found via BUILD-LEDGER §0's drift list).
 
-### Genuine gaps — questions no doc answers
-- **A · THE DUNGEON has no plan.** It is load-bearing (the fast loop · mobile-first · Depth's
-  *primary* push surface · the per-dungeon system-subset variety mechanism) yet its entire spec
-  is ~10 scattered lines; Dungeon 1 "our Deadmines" is one line in WORLD-PLAN §CONTENT-v1.
-  **Recommend: a DUNGEON section in WORLD-PLAN (or a DUNGEON-PLAN.md) before W3.**
-- **B · The first 15 minutes.** "Zone 1 rolls out every system" is the whole onboarding spec —
-  no beat-by-beat first-session script exists yet (W2/W3 authoring work, but it should be *on*
-  a list; it's on this one).
-- **C · The post-fight ceremony order** (mint → drop → draft → back to map) is documented
-  nowhere — code is the only truth. One paragraph in DECK-LAYOUT §1's run-flow would close it.
-- **D · The roster queue.** Which class reworks in which order after the tank (caster seat
-  end-state? Bloomweaver? Reckoner?) is implicit across four docs; one line in MASTER §CLASSES
-  would fix it.
-- **E · The comeback loop is documented by implication only** — deliberately NO timed content
-  (PROGRESSION law 4) + rested (TEETH) + zone conquest is the answer, but no doc *states* "why
-  log in tomorrow" as a designed surface. Fine if intentional; worth one sentence in PROGRESSION.
+### Genuine gaps — questions no doc answers *(status updated 2026-07-10)*
+- **A · THE DUNGEON has no plan** — ✅ **CLOSED 07-10:** consolidated as **WORLD-PLAN §THE
+  DUNGEON** (shape · M+ identity · stakes · light stack · variety subsets · endless door);
+  content authoring (Dungeon 1's nodes + named boss) stays a W3 claim.
+- **B · The first 15 minutes.** Still open — "Zone 1 rolls out every system" is the whole
+  onboarding spec; the beat-by-beat first-session script is W2/W3 authoring work.
+- **C · The post-fight ceremony order** — ✅ **CLOSED 07-10:** recorded in DECK-LAYOUT §1
+  (writeback → oath → Reckoning → mint/drop → draft → continue; code truth `raid_hud._on_end`).
+- **D · The roster queue** — ✅ **CLOSED 07-10:** MASTER §CLASSES now states it (tank next;
+  the order after it is UNDECIDED and recorded as Bill's pick, which is the honest answer).
+- **E · The comeback loop** — ✅ **stated 07-10** in PROGRESSION §Pacing (deliberately
+  unclocked by Law #4; rested sweetens returns, never mints).
 - **F · The signature CD** is mandated for every class (DECK-LAYOUT §1/§5), built for none, with
-  per-class shapes an open feel-verdict — flagged so it doesn't fall between the per-class
-  reshape claims.
+  per-class shapes an open feel-verdict — still flagged so it doesn't fall between the
+  per-class reshape claims (ledger row exists, §C).
 
 ### What's healthy (found and worth keeping)
 - **Zero live contradictions.** Every conflict found was a stale *echo* of a superseded state,
