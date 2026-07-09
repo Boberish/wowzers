@@ -28,7 +28,7 @@ reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 | # | Target | Kind | Slate lands in | Status | Claimed | Note |
 |---|---|---|---|---|---|---|
 | 0 | Twinfang · **Tempo** | branch slate | `TEMPO-PLAN.md` §14 | 🟡 | — | THE WORKED REFERENCE (corrected 2026-07-10): 6 THEMES — Wound · Finish · Swift · Edge · Punish · Band — + existing-pool filing table. Bill picks 2–3 → deck pass. Old rewire pitches → §15 parking 🔮. |
-| 1 | Tank · **Warden** | branch slate | `TANK-PLAN.md` new § | 🔄 | 07-10 00:44 | Block-wall kit locked, deck unstarted — slate feeds the owed deck pass. No dodge on this kit; dodge-law checks become BLOCK-law checks. |
+| 1 | Tank · **Warden** | branch slate | `TANK-PLAN.md` §6 | 🟡 | — | LANDED 07-10: 5 themes (Payload · Slam · Rampart · Bannerman · Thornback), 1 kill, ~11 fixes, filing table for the 🔮 trio + carries. Bill picks 2–3. |
 | 2 | Tank · **Duelist** | challenger slate | `TANK-PLAN.md` new § | ⬜ | — | Deck v1 (Headsman/Ironside/Ghost + Dancer) is AT BILL'S BOARD → it is **PITCH #0**; challengers must beat it. Flag clearly so it enriches, not muddies, the open verdict. |
 | 3 | **Bloomweaver** (whole class) | class slate | NEW `BLOOM-PLAN.md` | ⬜ | — | Only class with NO v2 design — pitch CORE MINIGAME candidates (3–4) + spec identities, not branches. The biggest pass in the queue. |
 | 4 | Alchemist · **Cask** | branch slate | `ALCHEMIST-PLAN.md` new § | ⬜ | — | Verb slices 1–2 built, cards owed (§7.7) — slate feeds the owed deck. |

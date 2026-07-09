@@ -1,7 +1,7 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
 **Status:** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
-VERDICT.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
+VERDICT; Warden BRANCH SLATE (§6, 5 themes) 🟡 AT VERDICT 2026-07-10.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
 universal, progressive peel (§1c)** · consequences worked/deferred (§1d). Flow-economy *numbers* are left
 to a live slice (Bill: "playtest for feel"). The round-5 minigame (tester v5) is the base; the Duelist deck
 is on the verdict board:
@@ -303,3 +303,225 @@ OPENED n/a (first deck; old Bulwark guard boons are the frozen placeholder's, no
 - Warden module candidates already named: the hold-all wall (old base, too strong) + dump variations.
 - Per-boss authored streams for the 4 Seals (encounter data) — with the build, not the deck.
 - Online spec-carry `(seed, spec)` — the shared debt every rework owes.
+
+## §6 · THE WARDEN BRANCH SLATE — five build-theme candidates 🟡 AT VERDICT (2026-07-10)
+
+**What this is** (SLATE-PLAN row 1; the corrected branch definition — TEMPO §14 is the worked
+reference). A branch = a **build THEME inside the locked Warden kit** (§1b): the base minigame
+(BLOCK tap · HELD SHIELD · SLAM · big slow wind pool · ◆→DUMP · FLOW=AGGRO · the DUET) is
+untouched — themes ADDRESS its dials, add no buttons (Warden stays 4 touch targets of the
+7-ceiling), and never hang identity on a new gauge. Pick **2–3**; the deck pass files the
+inherited cards + new cards into the winners. Example cards are ILLUSTRATIONS — no CARD-CATALOG
+rows this pass. **How it was made:** knowledge base re-mined through the shield lens (AtO
+Magnus/Bree · StS Barricade/Body-Slam · WoW Prot/Brewmaster · Hades Aegis) + fresh sweep
+`research/warden-sweep.md` (Lies of P guard-regain · Bloodborne rally · MonHun guard-counter ·
+For Honor superior block · Vermintide stamina economy) → 4 lenses → 5 themes → **3 adversarial
+skeptic passes (1 theme killed pre-slate, ~11 fixes folded)**.
+
+### The harvest (what the research says, Warden-sized)
+
+1. **"Defense chooses the offense" is the shield-fantasy's best loop** (MonHun Offensive Guard,
+   For Honor superior block, Lies of P perfect guard): the clean block is a PROMISE of a counter,
+   not a subtraction. The Warden's perfect-SLAM-hits-back core is already this — themes should
+   pay it forward (chains, windows, follow-ups), not re-invent it.
+2. **The pool is the real health bar** (Vermintide BCR/stamina-tanking): wind economy — drain,
+   recovery, brinkmanship — carries a whole build identity on its own.
+3. **Stored defense as ammunition is a proven archetype** (StS Barricade→Body-Slam; our parked
+   `Return to Sender` is the native seed): block accumulates, then fires, on the player's timing.
+4. **The wound-window converts loss into currency** (Bloodborne rally, LoP Guard Regain) — but
+   OUR law is no-self-heal, so the legal steal is a short post-leak window where a clean answer
+   banks ◆/wind, never HP ("answer the wound" — a boon shape, filed under themes 2/4).
+5. **Block-share is the co-op shield's unclaimed crown** (AtO Magnus): four seats + peels
+   (§1c) give us a clutch-save surface no solo game has — capped per class rule 5 (SAVE a
+   fight, never RUN one).
+6. **One-cadence trap check:** the five themes below peak on five clocks — self-set charge
+   cycles · the boss's big bars · whole-fight endurance · warband/aggro windows · stream density.
+
+### The Warden's dials (the lanes for this spec — §2 re-read through §1b)
+
+**THE READ** (block-or-shield-or-ignore; feints) · **THE TAP** (block grades/cost) · **THE HOLD**
+(the held shield + its drain — the Warden-only dial) · **THE SLAM** (main window, the perfect
+hit-back, ◆ income) · **THE WIND** (big pool/slow recharge) · **THE BANK** (◆) · **THE SPEND**
+(DUMP) · **THE LINE** (aggro/flow + the healer duet).
+
+### The theme candidates at a glance
+
+| # | Theme | In three words | Mostly |
+|---|---|---|---|
+| 1 | **THE PAYLOAD** | store it, return it | absorbs the 🔮 parked trio |
+| 2 | **THE SLAM** | counters that chain | new cards |
+| 3 | **THE RAMPART** | outlast everything | mixed (module seed exists) |
+| 4 | **THE BANNERMAN** | the warband's wall | absorbs the support (TEAM) |
+| 5 | **THE THORNBACK** | touch me, bleed | new cards (thin — honesty note) |
+
+---
+
+### THEME 1 — THE PAYLOAD · *your shield is a loaded weapon*
+
+**What its cards do:** prevented damage CHARGES the shield — a battery you hurl back on your own
+timing. The charge **decays if you sit on it** and a fumbled tap spills a chunk, so the greed is
+riding it big and cashing before it drains. Income is DEFENSE (what you stopped), not offense.
+**Dials addressed:** the hold (charging) · the spend (the hurl) · the bank. Nothing bends; the
+battery reads on the existing shield UI.
+**Absorbs:** **Return to Sender** (the seed card — verbatim) · **The Wall** rig WHEN (a stored
+hit ≥15% max HP = premium) · **Powder Keg** (carry, spend-side).
+**Example new cards:** creed *Ballast* — the battery is live from run start; capacity is modest
+until the module deepens it · module *The Coil* — the battery gauge + clean taps also feed 25% ·
+boon *Heavy Shipment* (GREED) — capacity +50%, decay +50% · keystone **THE SIEGE** — at full
+charge your next SLAM launches the stored total as ONE colossal returning bar across the gate;
+press it as it crosses = ×2. *(Skeptic-sharpened vs the Duelist's Avalanche: Avalanche is a
+per-◆ STRING of small returning bars; the Siege is one titan bar you spent a whole verse
+charging — different clock, different read.)*
+**Greed/comfort + EASE knob:** hold-the-charge greed, bite = decay/spill you authored; comfort =
+cash early and small. Knob: charge-decay grace.
+**Nearest neighbor:** Duelist·Headsman (bank-and-burst — but on ◆ from parries); StS Body-Slam
+(the archetype proof). The Payload banks *prevented damage* — a defense-reader, not a swing-reader.
+
+---
+
+### THEME 2 — THE SLAM · *the boss swings; you answer bigger*
+
+**What its cards do:** the guard-counter economy — clean SHIELD mains pay FORWARD. Slams chain:
+each perfect main makes the next answer friendlier (wind refunds, tap discounts, bigger
+counters); a graze breaks the chain. ◆ income concentrates on the main. The rotation is built ON
+the boss's tall bars — you want the big swings to come.
+**Dials addressed:** the slam · the bank · the wind (refund shapes). No bends.
+**Absorbs:** the "dump variations" module candidate (§5) becomes this theme's module space.
+**Example new cards:** creed *The Drumhead* — slam chains grant +1 wind per link from run start ·
+module *Aftershock* — a 2s window after every perfect SLAM where taps cost 0 · boon *Offensive
+Guard* (POWER, the MonHun steal by name) — after a perfect SHIELD your next DUMP +15/22/30% ·
+boon *Meet It Head-On* (GREED) — answering a small/normal bar with the MAIN (full wind price)
+banks ◆ — chosen per use, the chain-keeper's tax · keystone **BREAKWATER** — a perfect SLAM on a
+tall bar visibly SHOVES the next bar back down the lane (the boss's string staggered, on the same
+instrument — the For Honor superior-block steal).
+**Greed/comfort + EASE knob:** execution greed (main-on-small commits, chain stakes); comfort =
+tap the bread, slam only talls. Knob: slam-window width (tapers with power, Quick-Wrists idiom).
+**Nearest neighbor:** the Duelist PARRY (a knife-edge 60ms *swing economy*, priced per press) —
+the Slam theme is about CONSECUTIVE clean mains on a slow heavy clock; the payoff is chain-state,
+not a single counter number. Interrupt note: DUMP is the tank's pillar-#3 carrier — Aftershock
+windows make the deliberate kick-DUMP cheaper to line up (feeds the §4.6 flag, no new rule).
+
+---
+
+### THEME 3 — THE RAMPART · *outlast everything*
+
+**What its cards do:** the endurance engine — the wind pool is the real health bar (the
+Vermintide read). Cards buy hold-drain efficiency, cheaper raises, recovery-while-held, and
+winded brinkmanship; one boon-shape is the PUSH — pay wind NOW, chosen per use, to blunt the
+incoming bar (proactive defense as a move).
+**Dials addressed:** the hold · the wind · the read. No bends.
+**Absorbs:** **Cheap Iron** (verbatim — cheaper raises) · *Feather Step* carry (block-cost knob)
+· the **hold-all wall** module candidate (§5, the old too-strong base) becomes this theme's
+module, priced.
+**Example new cards:** creed *Deep Keel* — pool +20% but recharge unchanged (a bigger, heavier
+bar) from run start · module *The Bulwark Stance* — the priced hold-all wall: while held, ALL
+bars blockable, drain +40% (the old base, now a chosen identity) · boon *Second Wind* (STRAT) —
+a hold released above half-pool refunds 2 wind · boon *White Knuckles* (GREED) — below 25% wind
+your taps mitigate +15% but a whiff empties the pool: brinkmanship you opted into · keystone
+**THE IMMOVABLE** — survive a full flurry HOLD without dropping below a quarter pool and the
+shield ROOTS: ~4s where the stream visibly bends around you (bars shrink as they arrive), then
+the drain debt lands. Enterable only by a clean hold — never a toggle.
+**Greed/comfort + EASE knob:** over-hold greed (staying held through bars you could tap);
+comfort = tap-first, hold only the fat ones. Knob: hold-drain grace.
+**Nearest neighbor:** Fermata's hold (offense — charge-and-CASH on release; the Warden hold
+cashes nothing, it endures) · Vermintide stamina-tanking (the proof the pool carries a build).
+
+---
+
+### THEME 4 — THE BANNERMAN · *the wall the warband stands behind* (TEAM)
+
+**What its cards do:** the aggro/duet surface (§1c) becomes the build — flow-UPTIME payoffs,
+taunt riders, and capped clutch block-shares. You win by being unmoveable AND making the other
+three seats richer for it. Only a 4-seat game with AI backfill can print this theme.
+**Dials addressed:** the line · the bank. No bends; rides the aggro layer the base already owns.
+**Absorbs:** ✦ **Hold the Line** (the support card — reframed onto flow/aggro per the §1d note:
+uptime IS the buff) · TAUNT (base button) gains its riders here.
+**Example new cards:** creed *Standard Bearer* — Hold-the-Line-style warband pay from run start,
+smaller numbers · boon *Shield Brother* (STRAT, clutch-capped per class rule 5) — a charge:
+a peeled ally's incoming hit is blocked at YOUR shield's grade instead (the AtO Magnus
+block-share; cross-seat absorb idiom exists in code) · boon *Eyes Front* (GREED) — while aggro is
+PEGGED (≥95%), the boss swings +10% harder at you and the warband gains +damage: the ego-tax
+greed, chosen by playing clean enough to peg it · keystone **THE STANDARD** — plant it on a
+perfect SLAM: ~6s where your banner flies and every seat's answer windows widen a touch;
+anything landed under it pays together. *(Skeptic-capped: at most ONE passive-aura card in the
+theme; the theme is calls/uptime/clutches, not a stat cloud.)*
+**Greed/comfort + EASE knob:** donation/ego greed (your meter dips, the warband shines);
+comfort = plain uptime pay. Knob: line-grace (how long a slip stays forgiven before the
+uptime buff drops).
+**Nearest neighbor:** Tempo's BAND theme (groove-helps-everyone — rhythm-keyed); the Bannerman
+pays for AGGRO uptime and clutch saves. **Engine debts flagged honestly:** the raid buff-channel
+(already owed — Battle Hymn/Debilitator precedent) + a policy hook for share timing; peel-event
+hooks arrive with the §1c build regardless.
+
+---
+
+### THEME 5 — THE THORNBACK · *touch the wall, bleed* (the honesty-note theme)
+
+**What its cards do:** attrition reflect — but **only graded answers chip back** (good+ tap = a
+sliver, perfect = a real chip; sloppy blocks reflect NOTHING — the skeptics de-passived it:
+reflect is a REWARD for clean presses, never a stat that plays itself). One greed card windows
+it into a burst.
+**Dials addressed:** the tap · the line (the healer feels the steadier chip economy). No bends.
+**Absorbs:** nothing built — the one theme that pays THE TAP dial directly (the bread button
+everyone else treats as chores).
+**Example new cards:** creed *Barbed Rim* — graded taps chip from run start (small, capped) ·
+boon *Bristle* (STRAT) — after 4 consecutive graded taps the next reflect triples · boon *Let
+Them Come* (GREED) — reflects double while your wind is under half: invite the pressure ·
+keystone **QUILLSTORM** — a perfect HOLD through a full flurry fires every absorbed flurry-hit
+back as a visible needle-volley across the gate.
+**Greed/comfort + EASE knob:** pressure-greed (reflect scales when you're strained); comfort =
+small steady chips. Knob: reflect grade-threshold (good+ vs perfect-only).
+**Nearest neighbor:** Return to Sender/Payload (stores-and-hurls on YOUR timing, one big read) —
+the Thornback ticks per answered press, no extra button, constant clock. AtO's Bree proves the
+archetype carries a build.
+**⚠ Honesty note:** the skeptics ranked this last — a reflect build is damage-poor-tank comfort
+food and its ceiling is low. It stays in the slate because it's the only TAP-dial payer and the
+"the wall fights back" fantasy is real; it earns a pick only if that lands for you.
+
+---
+
+### The existing-pool filing table (proof the themes organize the real cards)
+
+| Card (state) | Files under |
+|---|---|
+| Return to Sender 🔮 | **PAYLOAD** (the seed) |
+| The Wall rig 🔮 | **PAYLOAD** (premium WHEN) / RAMPART |
+| Cheap Iron 🔮 | **RAMPART** |
+| Feather Step (carry) | **RAMPART** (block-cost knob) |
+| Deep Pockets (carry) | generic (BANK) |
+| Powder Keg (carry) | generic (SPEND) / PAYLOAD-adjacent |
+| ✦ Hold the Line (carry) | **BANNERMAN** (reframed onto flow, §1d) |
+| "hold-all wall" module candidate | **RAMPART** (priced as The Bulwark Stance) |
+| "dump variations" module candidate | **SLAM** module space |
+
+### SLATE-LEVEL CHECKS + the pick
+
+**Spread:** storage/GREED (Payload) · execution/counter (Slam) · endurance (Rampart) · TEAM
+(Bannerman) · attrition/TAP (Thornback) — five clocks, no shared cadence (harvest #6).
+**Skeptic record:** 3 passes · **1 pre-slate kill** (see skipped) · ~11 fixes folded (Siege≠
+Avalanche sharpened · slam-vs-parry distinction stated · Thornback de-passived + demoted ·
+Bannerman aura-capped + clutch-capped (rule 5) · entry-creed law applied to all five · Payload
+decay = self-authored bite · Immovable never-a-toggle).
+**Skeptic ranking (pick-tension, strongest→weakest):** Payload · Slam · Rampart · Bannerman ·
+Thornback.
+**Composition notes for a 2–3 pick:** Payload+Slam pair naturally (the Siege fires off a SLAM;
+both love tall bars) — but both concentrate on the MAIN, leaving taps plain (add Rampart or
+Thornback for tap texture). Rampart+Payload = the fortress (hold-heavy, slowest read). Slam+
+Bannerman = the captain (counters + banners — the loudest warband fantasy). Bannerman needs the
+buff-channel debt paid whichever pair it joins.
+**Engine debts:** Bannerman's buff channel + share hook (flagged above) · everything else rides
+existing surfaces (battery/chain/pool/reflect are kit-local state + existing instruments).
+**BLOCK-law check (the dodge-law analogue):** no theme makes defense free (partial-mit law
+holds; even Thornback's reflect leaves the sliver) · no self-heal anywhere (the rally steal was
+converted to ◆/wind at the boon shape) · the healer duet keeps its work in every theme.
+**AI-pilotable:** all five are threshold/timing policies (charge %, chain length, pool floor,
+aggro %, tap grade) — no theme needs the policy to read anything the sim doesn't already emit.
+**Skipped on purpose:** **the Wrecking Crew** (a ◆/DUMP burst theme — the skeptics' kill:
+Headsman in a heavier coat, failed the nearest-neighbor bar) · **the Vampire** (rally-as-heal —
+violates no-self-heal; its legal remnant is the "answer the wound" boon shape, filed) · **the
+Juggernaut** (eat-hits-on-purpose HP-mass — griefs the healer duet and Blood Price is the
+Duelist's; survives as at most one boon) · **the Pusher** (a full proactive-wind-spend theme —
+too thin alone; folded into Rampart as a boon shape).
+
+**Next:** Bill picks 2–3 → the Warden deck pass (§5 top item; SLATE-PLAN Phase 2 row D1 authors
+it around the winners — creeds/modules/boons/rig/keystones/EASE knobs + CARD-CATALOG rows).
