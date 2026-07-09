@@ -48,7 +48,8 @@ incoming load.
 | `core/combat_core.gd` (1148) | FLOW=AGGRO rewire (threat, 44 refs) · dodge-unify finish (`:83-114`) · interrupt-by-ability flag · `perform()` input surface | **#1.** Aggro + dodge + interrupt all edit the reducer. Serialize. Aggro is a *deliberate* checksum rebaseline. |
 | `game/raid_hud.gd` (4496) | Every class gauge · aggro box (25 refs) · voidcaller (15) · two-verb hint (`:2414`) · per-seat `_verb()` (`:2181`) · tank/dodge/drop UI | Land **ClassBand registry + shared Gauge base (REFIT-P4) FIRST**, or the per-class meter wave makes this unmaintainable. |
 | `data/raid/raid_content.gd` (626) | Seal beat data · `threat_enabled` (`:625`) · melee/telegraph split (`:8`) · Seal-pillar · aura-add · Trial-Ladder Versions | The whole boss wave edits this. Serialize claims; each shifts fight checksums **on purpose**. |
-| `game/draft.gd` (+ `draft_sim`) | Rarity tier-roll engine · rerolls-out · loot two-modes · curse cards · spells reweight · curio-pool v2 · EASE dial knob-roll | One draft/roll pipeline. Serialize claims; keep `draft_sim` green each merge. |
+| `game/draft.gd` (+ `draft_sim`) | Rarity tier-roll engine · rerolls-out/REGENERATE · loot two-modes · curse cards→JAILBREAK deals · spells reweight · curio-pool v2 · EASE dial knob-roll · Market stock + shared bank (§I) | One draft/roll pipeline. Serialize claims; keep `draft_sim` green each merge. |
+| **map layer**: `game/run_map.gd` · `game/map_content.gd` · `game/campaign_core.gd` · `sim/raid_map_sim.gd` | **THE DESCENT REBUILD (§I)**: 4-floor inputs · new node kinds (MARKET/JAILBREAK/CAPTCHA/BENCHMARK/SERVER ROOM/PATCH BAY/WILD) · GATE retirement · ticket shapes/re-price · seed-from-run-seed | **ONE deliberate re-baseline bang** (§I header). Land AFTER `purge-oldgame`. New kinds touch `to_dict`/`from_dict`/fingerprint/server-broadcast together; walker + `CampaignCore.ticket_at` move together (divergence trap). |
 | `net/net_server.gd` (798) · `net/raid_net.gd` (220) | Online `(seed,spec)` spec-carry · Depth `spec.depth` · §4 MMO extraction | Versioned protocol — rebuild+redeploy coupled. **Class registry (P4) gates spec-carry of arbitrary builds.** |
 | world save `rift_world.cfg` + Atlas screens | Unlock Tree · TICKETS v2 · Zone-Remembers · W3 front-door · W4 write-back | Interlocked — all serialize state onto one save + one Atlas UI. **Unlock System is the spine.** |
 | `core/boss_state.gd` (61) · `core/combat_state.gd` (73) · `data/tuning_config.gd` (70) | Threat state + master flags (`threat_enabled`, tuning) | The tank/aggro rework edits all three together. |
@@ -64,6 +65,7 @@ and re-pin `ab-gate.sh` baselines right after each:
 - Generic boss-vulnerability stack (REFIT-P4) — then TEAM-COMP + Depth + Well-glint ride it (one reset, not three).
 - FLOW=AGGRO rewire (tank wave).
 - Seal Pillar Pass v1 (dodge-ration nudge).
+- **THE DESCENT REBUILD map bang (§I)** — floors/quotas/kinds/seeding in ONE `raid_map_sim` re-baseline (post-purge).
 
 ### Stale / superseded code to RETIRE (not just add-around)
 
@@ -155,7 +157,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
 | Rarity tier-roll engine (H/S/O + runes) | 🔒 | TEMPO App-A, ALCH v3, CASK §7.4, FERMATA §7 | `game/draft.gd`, per-class boons, runes | **DESIGNED-NOT-BUILT.** Blocks real rarity for Tempo/Fermata/Brew/Cask/Well *simultaneously*. |
-| Topology elite-node type (keystone acquisition) | ⏳ | TEMPO A8, FERMATA §13.6, CASK §7.6 | new map node + 1-of-2 keystone reward | Blocks ALL keystone acquisition across classes. |
+| Topology elite-node type (keystone acquisition) | ⏳ | TEMPO A8, FERMATA §13.6, CASK §7.6 + **DESCENT §5** | new map node + 1-of-2 keystone reward | Blocks ALL keystone acquisition across classes. **Design settled in DESCENT (elective, pay-printed, post-purge drop-roll site; elective-vs-mandatory = DESCENT V#3) — build with §I.** |
 | raid_hud gauge/meter render pass | ⏳ | TEMPO/FERMATA/MENDER/CASK | `raid_hud` + per-class gauges | Do it on the **shared Gauge base** (P4). WSLg render. |
 | Online `(seed,spec)` spec-carry | ⏳ | TEMPO §13.7, ALCH §6, MENDER | `raid_net.gd` | One debt for all reworked classes. Class registry (P4) precondition for arbitrary builds. |
 | Raid buff-channel application | ⏳ | TEMPO App-A, FERMATA §7 | raid buff channel | Battle Hymn + Veil Warband + Cask "Round for the House". Debilitator/Shining Hour = precedent. |
@@ -200,7 +202,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Quest Board station (Bastion) | 🔒 | WORLD §MEWGENICS ② | Bastion station | W2. Needs TICKETS v2 grammar. |
 | THE RISK FORK | 🔒 | WORLD §MEWGENICS ③ | authored node beat | W2. Needs ELITE mutators. |
 | RESTED (real-time XP mult) | 🔒 | TEETH §RESTED | the one XP meter | Multiplies earned XP only, never hands out unlocks. |
-| GEAR-3 — Market + extraction | 🔒 | PROGRESSION §3, GEAR §Rollout | Market node, extraction schematics | **NEXT unclaimed.** The token sink rerolls-out needs. Curio-Economy-v2 reframe rides here. |
+| GEAR-3 — Market + extraction | 🔒→🟡 | PROGRESSION §3, GEAR §Rollout | Market node, extraction schematics | **ABSORBED into DESCENT §I** (PROMPT MARKET node + post-Seal phase; schematics at CACHE/SERVER ROOM; ≤1/act-vs-≥1/floor conflict resolved: 1/floor). Build via §I. |
 | GEAR-4 — raid personal loot + Seal tables | 🔒 | PROGRESSION §4 | per-seat seeded loot, Ledger pages | Crests/standing need accounts→later. VERSION rows need Trial Ladder. |
 | Universal Curio Pool v2 (~18 curios) | 🟡 | GEAR §POOL-v2 | `gear_catalog.gd` | Approved-not-final. Cut 10 welded, keep 6, add 18 cross-spec. |
 | Actives socket + paper active items | 🔒 | GEAR §Rollout | 1–2 sockets, G/H keys | Unlocks RELAY BATON/MUTE/ROLLBACK/UNPLUGGING etc. Some gated on Seal page (GEAR-4). |
@@ -208,19 +210,19 @@ build-once seams that five separate class reworks and the endgame all need:
 | Armor set presentation panel | 💡 | PROGRESSION §ARMORY | `armor_doll.gd` paper-doll | Presentation only; reads existing draft state. |
 | Unlock banking rule (win-only checkmark) | ⏳ | PROGRESSION §Drops | `rift_gear.cfg` persistence | First-kill checkmark banks on WIN; oaths bank win-or-lose. |
 | E.5 oath drop-dedication | 🔒 | MASTER §SYSTEMS-E.5 | `beneficiary_seat_i` on oath state | Byte-identical self-default. Ties to Depth curation-capacity. |
-| Raid wipe budget + floor checkpoint | 🔒 | WORLD §STAKES-MODEL | `RunState`/descent save-resume, `RunDirector`, raid loss-mode | Answers open-Q#6. Numbers→playtest. Needs descent-checkpoint plumbing. Dungeon stays 1-life. |
-| Attempt tokens (Death-Defiance consumable) | 🔒 | WORLD §STAKES-MODEL | budget counter, Market (GEAR-3), TICKETS node reward, `draft.gd` | +1 attempt, any surface. Token sink — rides GEAR-3 + TICKETS v2. |
+| Raid wipe budget + floor checkpoint | 🔒 | WORLD §STAKES-MODEL | `RunState`/descent save-resume, `RunDirector`, raid loss-mode | Answers open-Q#6. Numbers→playtest. Needs descent-checkpoint plumbing. Dungeon stays 1-life. **Kept verbatim in DESCENT, re-fictioned BACKUPS (§9) — build with §I.** |
+| Attempt tokens (Death-Defiance consumable) | 🔒 | WORLD §STAKES-MODEL | budget counter, Market (GEAR-3), TICKETS node reward, `draft.gd` | +1 attempt, any surface. Token sink — rides the PROMPT MARKET (§I) + the ticket turn-in fork (DESCENT §10). |
 | Boon/curio battle-rez layer | 💡 | WORLD §STAKES-MODEL | `gear_catalog`, existing `revive` ClassKit hook | Healer Rekindle already BUILT; extend beyond healer so healer-less comps aren't hard-locked. |
 
 ### E. Depth & Teeth (`game/draft.gd` + map + Depth)
 
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
-| Rerolls-out + Tokens→Market | 🔒 | TEETH §REROLLS | `draft.gd`, ASCENSION-STEAL | Reroll→earned charge; retires LOCK, keeps UPSELL. **Reframe Hot Reload + Hashgrinder curios.** Needs GEAR-3 sink. |
-| CONTEST primitive (skill-check node) | 🔒 | TEETH §CONTEST | new node + scoring over `strike_judge.gd` | Reuses CAPTCHA + lockstep (first slice). Open: scoring rule. Co-design w/ interrupt window. |
+| Rerolls-out + Tokens→Market | 🔒 | TEETH §REROLLS | `draft.gd`, ASCENSION-STEAL | Reroll→earned charge; retires LOCK, keeps UPSELL. **Reframe Hot Reload + Hashgrinder curios.** **Lands via DESCENT §I (REGENERATE charges + Market slot 3).** |
+| CONTEST primitive (skill-check node) | 🔒→🟡 | TEETH §CONTEST | new node + scoring over `strike_judge.gd` | **Lands via DESCENT §I as BENCHMARK** (scoring rule = DESCENT V#5; co-op + contest modes). Reuses CAPTCHA + lockstep. |
 | Loot two-modes (need/greed + AI banter-roll) | 🔒 | TEETH §LOOT | `raid_hud._after_drop` | Reuses rarity+pity roll. Solves AI-gear blocker (AI allies roll & banter). |
 | Spells & depth reweight (pilot one class) | 🔒 | TEETH §SPELLS | `type:"spell"` draft weight | Open: which class pilots. NOT a tank spec until tank lands. Folds into next rework. |
-| Curse cards (biting blessings) | 🔒 | TEETH §CURSE | welded-downside boons + poisoned-ability flag | Open: bite magnitudes. Pairs w/ rerolls-out. |
+| Curse cards (biting blessings) | 🔒→🟡 | TEETH §CURSE | welded-downside boons + poisoned-ability flag | **Lands via DESCENT §I as THE JAILBREAK** (design now exists: §7 bite vocabulary + no-run-long-timing hard rule; magnitudes = DESCENT V#4). |
 | Event-crafting (elite→extract→keystone unlock) | 🔒 | TEETH §crafting | event shape, oath-gated unlock | Partially reverses crafting-cut; counter-grind stays cut. |
 | Endless door | 🟡 | TEETH §ENDLESS | new Atlas node chaining Depth | **Do NOT fork Depth** — sync with the Depth thread, frame endless as its presentation. |
 
@@ -241,11 +243,31 @@ build-once seams that five separate class reworks and the endgame all need:
 | REFIT Phase 4 — SCALE RAILS | 🔨 in flight (worktree `../wow-rails`, infra subset) | REFIT §3 P4 | class registry · ClassBand+Gauge base · vuln stack · save unification (+roster) · offline `run_seed` · Split-law guard · twinfang kit split (1451L) | **Wave-0 rails.** Bill's go-code 2026-07-10 lifts the verdict hold for the INFRA subset: save unification + roster persistence + offline `run_seed` + split-law guard (in flight). DEFERRED until `purge-oldgame` merges: class registry · ClassBand+Gauge · vuln stack · kit split (§0 collision). Class registry gates net spec-carry. |
 | MMO SHELL (§4 server era) | 🔴 | REFIT §4/§5 | Gateway/Session · InstanceHost (extract `_tick_room`+`RaidNet.step`) · server CampaignEngine · Profile store move | After P4. Combat never notices (already `(seed,spec)` pure). Needs a netcode-era plan when claimed. |
 | Kill-Switch P3 (live UNPLUG + charge tuning) | ⏳ | MASTER §MAPS | `raid_marks.gd`, gear-picker for sacrifice path | P1/P2 merged (proto v11). Charge economy too generous (walker 40→96%) — needs a probe. |
-| MAP-2 depth (ELITE/MARKET/secret/events/art) | ⏳ | MASTER §MAPS | map content | MARKET needs GEAR-3; ELITE needs aura-add. |
+| MAP-2 depth (ELITE/MARKET/secret/events/art) | ⏳→🟡 | MASTER §MAPS | map content | **SUPERSEDED by DESCENT §I** — ELITE/MARKET/secret-room (SERVER ROOM)/legibility all land there; only the events content pass + map art remain here. |
 | Code-audit parked findings (grouped) | ⏳/💡 | MASTER §CODE-AUDIT, REFIT §2 | desync checksum coverage · `seat.casting`→`target_i` · WASM determinism cert probe · `net_server` hardening · boon×aspect sweep · Esc-teardown leak audit · save versioning | Several fold into P4/§4 — coordinate, don't double-build. |
 | Tooling loose ends (grouped) | ⏳ | MASTER §TOOLING, REFIT P3 | auto-post sim bands · replay files (leaderboards) · CSV home · **7 `screenshot_*` re-hosts onto `world_shell.tscn`** · state-ownership lift off `raid_hud` | Screenshot scripts error loudly until re-hosted. Replay files unlock ghost-races/bounty. |
 | SIM-PLAN balance ladder S1–S5 + THE SOAK | 🔴 | **SIM-PLAN.md** (2026-07-10) | per-class policies (creed branches + module verbs) · `sim_util.gd` card-delta harness · `draft.gd`-driven build sampler · raid per-seat meters/ablation · `scripts/soak.sh` + digest | **Triggered, not scheduled:** S1 rides EACH class rework (card-visibility rule) · S3 cheap-anytime · S2 after 2nd creed-aware policy · S5 with tank/aggro rebaseline · S4 per class after DECK-LAYOUT reshape · soak last. No hard balance gates ever (determinism stays the only PASS/FAIL). |
 | Graphics — robot re-rig + 2D art pass | 💡/⏳ | MASTER §GRAPHICS | per-boss silhouettes via `Actor2D.make()` factory | Give gauges a shared base + stable obs contract first (P4). Classic-parry-perfect payoff = byte-gate. |
+
+### I. THE DESCENT REBUILD (`DESCENT-PLAN.md` — 🟡 the whole cluster at Bill's 12-verdict board §V, 2026-07-10)
+
+⚠ **Sequencing:** land AFTER `purge-oldgame` merges (GATE-cut overlap). The map-layer changes are
+**ONE deliberate `raid_map_sim` re-baseline** — do the floor/quota/kind changes as one bang
+(walker + `CampaignCore.ticket_at` together · retire the one-gate assert · add elite/market-reachability
++ valley-band + no-stacked-spikes invariants · add a per-fight ttk column).
+
+| Item | St | Specced | Touches | Blocks on / note |
+|---|---|---|---|---|
+| 4-floor restructure (Vorathek→F1 Seal, Rings 3-2-1-0) | 🟡 V#1/#2 | DESCENT §1–2 | `raid_content.FLOORS`+`floor_fights`, `run_map` inputs, `_advance_floor` grant indices, oath stakes, salvage table | AMENDs WORLD-PLAN "3-Ring unchanged". ~5 ring-as-key sites. |
+| Node contracts + legibility UI pass | 🟡 V#6 | DESCENT §5/§9 | `map_screen`, `map_event_panel`, header meters/pips | Pay-on-the-door + fight-tier pips + both-legs check hints + renames (LUCK/STANDING/BACKUPS/REGENERATE). Kills raid integrity (ticket re-price rides here). |
+| PROMPT MARKET node + post-Seal market phase | 🟡 V#6/#11 | DESCENT §6 | new node kind, `draft.gd` bank, `raid_hud`, `gear_catalog` reframes | **= GEAR-3 absorbed** (§D row). 6-slot stock; `tokens@market` sim diag; serialization contract. |
+| THE JAILBREAK (printed curse deals) | 🟡 V#4 | DESCENT §7 | new node kind, `draft.gd` welded-downside, header curse pips, Cooling purge fork | **= TEETH curse-cards lands here** (§E row). No run-long timing curse — hard rule. |
+| Minigame nodes: CAPTCHA · BENCHMARK · SERVER ROOM · PATCH BAY (+2 reserved) | 🟡 V#5 | DESCENT §8 | new node kinds over `strike_judge`/lockstep, backdoor path | **BENCHMARK = TEETH CONTEST absorbed** (§E row). Bonus-tier pay only — always skippable. |
+| THE QUEUE + DEED/ESCORT ticket shapes + turn-in fork | 🟡 V#10 | DESCENT §10 | `map_content` tickets, `CampaignCore.ticket_at` + sim walker (divergence trap), `seat.diag` | One-grammar/two-ledgers verdict. ESCORT port inherits `escort-ticket` lane-law debt. SEV-1 parked v1.1. |
+| Packs on raid floors + enrage retighten (~1.6×) + the fight ladder | 🟡 V#2 | DESCENT §3 | `raid_content` packroll weights by floor, enrage configs | Deck-cycle law · 3-min trash cap. Rides the one re-baseline. |
+| Seal budget contract (5/7/9/12 min) | 🟡 V#12 | DESCENT §4 | (the later boss pass) | The contract the boss redo fills — structure beats, NEVER +HP. Not built by this cluster. |
+| Map-seed-from-run-seed | 🟡 | DESCENT §2 | `run_map` seeding, `RunDirector` | Replay-stable floors, checkpoint restore, co-op shared maps. Coordinate w/ P4 offline `run_seed` (in flight). |
+| Resource verdicts (LUCK · STANDING demote · BACKUPS · REGENERATE · integrity kill) | 🟡 V#6/#8 | DESCENT §9 | header UI, `map_fx`, `map_check` breakdown rows | Governance: 3 meters max, retire-one-to-add-one. |
 
 ### H. Parking lot (💡 unclaimed — promote when claimed)
 
@@ -254,7 +276,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | MMO-feel levers | MASTER §OPEN-IDEAS | warband lending · Bastion bounty board · ghost-replay races · co-op cosmetic standing. Needs P4 roster persistence + replay files + W4 presence. |
 | Future realms | MASTER §OPEN-IDEAS | Bureaucracy · Undercroft · Deep · Clockwork Court · Kaiju Weather Station (each = Seals ladder + map skin). |
 | New-class seeds | MASTER §CLASSES | redline self-brink DPS · over-defend tank layer · imposed-rhythm caster. |
-| 2nd Module slot at Ring 1/0 | WORLD §INSTANCES | for long raids; run-pacing plumbing. |
+| 2nd Module slot at Ring 1/0 | WORLD §INSTANCES | for long raids; run-pacing plumbing. **→ promoted to DESCENT V#7 (end of Floor 3).** |
 | Game title lock | MASTER §OPEN-IDEAS | UNPLUGGED / KILLSWITCH / Ctrl+Alt+DEFEAT / … |
 
 ---
@@ -263,6 +285,10 @@ build-once seams that five separate class reworks and the endgame all need:
 
 The 🟡 pull-list — open decisions that will rot the plan if left. Grouped:
 
+- **THE DESCENT REBUILD** — the whole 12-question board at DESCENT-PLAN §V (4-floor promotion ·
+  length dial · elective elites · curse bite · BENCHMARK scoring · names bundle · 2nd module ·
+  STANDING · WILD ration · SEV-1 timing · shop purse · interim ship). Subsumes the old Teeth
+  feel-verdicts for CONTEST scoring + curse magnitudes below.
 - **Tank·Duelist deck v1** — the whole slate is at your board (KEEP/TWEAK/CUT per card).
 - **Warden deck** — later pass, but confirm the frame after Duelist.
 - **Alchemist·Brew review** — 11 proposals (§8).

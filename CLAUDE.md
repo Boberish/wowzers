@@ -30,7 +30,10 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 each change touches; an INDEX not a spec, 2026-07-09**) · `GAME-LOOPS.md` (**the loop map — the
 read-optimized index of the game as its 7 player-facing loops (beat→fight→node→run→world→account→
 warband), each with status + doc-of-record pointers; owning docs win any diff; + the 2026-07-09
-loop-audit findings**) · `WORLD-PLAN.md` (the world pivot +
+loop-audit findings**) · `DESCENT-PLAN.md` (**THE RAID REBUILD — the descent spec v1**: 4-floor
+time budget · fight ladder + Seal timer contract · node slate with printed contracts · PROMPT
+MARKET shop · JAILBREAK curses · minigame nodes · reward legibility/renames · one ticket grammar
+on two ledgers; 🟡 at Bill's 12-verdict board §V, 2026-07-10) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
 signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE single source of truth for
 every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,
