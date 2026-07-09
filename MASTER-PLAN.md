@@ -813,6 +813,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
+  class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW
+  **`SLATE-PLAN.md`** = the generalized pass (§1) + slate laws (§2) + **THE QUEUE** (§0: Warden →
+  Duelist → Bloomweaver(class-level) → Cask → Brim → Draw → Brew → Fermata) + the loop protocol
+  (§3); NEW `.claude/skills/slate-loop/` = the restart entry point (the cron is SESSION-ONLY —
+  in a new session invoke `/slate-loop` to resume); BUILD-LEDGER §C row + CLAUDE.md index line.
+  Each pass: fresh WebSearches → `research/<target>-sweep.md` → 4-lens synthesis → 4–6 pitches
+  (incumbent deck = PITCH #0 where one exists) → 3 inline skeptics → slate lands **🟡 AT VERDICT**
+  in the target's plan doc. "Done" = slate at verdict — the loop does NOT wait for Bill's picks;
+  deck-creator passes are separate claims after each verdict. *(slate-machine session — the loop
+  runs here)*
+
 - ☐ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **CLAIM: THE
   OLD-GAME PURGE + audit follow-ups (Bill).** (1) docs: record the purge decisions (GAME SHAPE
   amendment · roster · casting-pool cut · BREADTH/gear consequences), fix the loop-audit drift +
