@@ -321,6 +321,54 @@ triaged against the laws — what survived is the *identity* split, not the gate
   open want (MASTER-PLAN parking lot: **MMO-feel levers**); it will be served by
   presence/social systems, never by content gates.
 
+### THE STAKES MODEL — wipe budget · attempt tokens · the difficulty contract (locked with Bill, 2026-07-09)
+
+**The tension:** WoW bosses can be complex *because* a wipe is cheap — res, run back, retry. A
+roguelike wipe is expensive — you lose the run. You can't have "learn-the-fight-by-wiping" AND
+"one wipe ends your hour"; the **retry cost IS your complexity budget.** So the two doors take
+two wipe rules, matching the identity split above.
+
+- **RAID — floor checkpoint + a finite WIPE BUDGET** (the WoW loop, made roguelike-honest). A
+  wipe does NOT end the descent: you res at the current **floor checkpoint** and re-pull the
+  boss, and **cleared floors stay cleared** — this is the answer to open-decision #6 (descent
+  save/resume = the floor checkpoint). But attempts are **finite**: a per-descent budget (start
+  **3** — playtest). Spend the last one and the descent ends. So a fight you genuinely can't
+  learn eventually costs you the run (roguelike stake intact), while a fight you *can* learn you
+  beat inside the budget (WoW learn-and-retry intact). Monster Hunter's carts, fused with our
+  economy.
+- **DUNGEON — lean by default (1 life; from-scratch is the point at 30–45 min).** The roguelike
+  core keeps its purity — a restart is fast, so no free checkpoint. Attempt tokens (below) can
+  *buy in* defiance for players who want it, but the honest default is one life.
+- **ATTEMPT TOKENS — the "paid strat" (our Death Defiance), spendable in ANY surface.** One
+  consumable = +1 attempt on your budget. Two sources, both real opportunity-cost, never a free
+  undo: **earned** at a node (a TICKETS reward you took *instead of* a curio) and **bought** at
+  the Market with Tokens (rides GEAR-3; a natural extra Token sink alongside reroll charges — see
+  PROGRESSION §Tokens). This is Bill's "earn a revive / shop auto-revive," reframed as a legible
+  resource — a route/build *choice* that adds strategy instead of cheapening death.
+- **Why it doesn't cheapen the roguelike.** A *free rewind* would; a *finite, earned/bought*
+  attempt doesn't — Hades' Death Defiance is a build choice, not a safety net, in one of the
+  most-loved roguelikes going. And the real anti-cheapening tool is already locked (PROGRESSION,
+  2026-07-09): **oaths bank win-or-lose**, so a wipe is never *nothing* — partial persistent
+  progress, never a rewind.
+
+**THE DIFFICULTY CONTRACT — base vs the ladders (revised with Bill, 2026-07-09).** The base
+fight is **not** "learnable in one session" — like the Spire, you lose runs learning it; it's a
+mountain mastered **over many runs** (the Mistral→Gemini→Mythos arc already is this). What base
+content does NOT do is pile on "20-mechanic mythic memorization." That infinite "study for an
+hour" tier is the **ladders**, already designed (MASTER §MODES): **Versions** (per-boss
+*authored* mechanic-adds — "each version ADDS MECHANICS, never +HP%"), **Depth** (the
+*procedural* window-compressing scalar), and the parked **Run modifiers** (the StS-Heat /
+Ascension stack). So: base = a learnable mountain; each +1 up a ladder adds a real mechanic;
+failing costs attempts, then the run. *(Numbers — budget size, dungeon 1-life vs small budget —
+are playtest, not blockers.)*
+
+**BATTLE-REZ — already built; a different layer (reconciliation).** The in-fight revive exists:
+the healer's **Rekindle** (the Well = 6 charges; the frozen Mender = 120 s CD), a 6 s channel,
+back at 40 % HP, R-key on a fallen ally's frame. That's the *in-fight* answer to one seat dying
+— a **combat** resource, separate from the run-loss wipe budget above. Open idea (💡): a
+**boon/curio battle-rez** beyond the healer (Bill's "some boons with it") — an extra charge or a
+self-rez trinket — so a healer-less warband isn't hard-locked. Capture only, not designed.
+
 ---
 
 ## WORLD EVENTS — the "big boss randomly pops" layer
@@ -694,5 +742,7 @@ determinism; UI smokes; WSLg visual probe for any new screen.
 3. Dodge beat budget numbers per tier (start 3–8/fight non-tank; tune in W5 audit).
 4. Which Tempo ability carries `interrupts` (lands in TEMPO-PLAN §10 content picks).
 5. Event cadence + event-table recurrence rule specifics (the no-FOMO law's numbers).
-6. Descent save/resume (raids are 1.5–3h — session checkpointing between floors?).
+6. ✅ **RESOLVED 2026-07-09** (§INSTANCES "THE STAKES MODEL"): raids **checkpoint between
+   floors** + a finite **wipe budget**; the save/resume plumbing = the descent-checkpoint build
+   item. Dungeon stays lean (1 life + optional attempt-token buy-in).
 7. Second Module slot at Ring 1/0 for long raids (TEMPO-PLAN, at the raid retune).

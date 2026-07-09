@@ -162,7 +162,7 @@ and drops land too late — 2nd + last Seal, and the final drop is wasted post-k
 - **Reroll = a BANKED consumable bought at the Market** (Bill): buy a reroll charge with Tokens, hold
   it, spend it on ANY later draft until used. This MOVES reroll off the draft-screen Token button and
   becomes the natural cap on build-control ("steer, don't solve" — you reroll as many times as you
-  bought, never infinitely). Tokens' spend = curios · reroll charges · wound repair · occasional boon.
+  bought, never infinitely). Tokens' spend = curios · reroll charges · **attempt tokens** (WORLD §STAKES-MODEL) · wound repair · occasional boon.
 - **Curio CONTENT direction (Tempo pilot, cross-spec):** curios are the *fortune/run-shaping* layer,
   **cross-spec** (never touch Flow/window/strike-hook/Marks — those are Creed/Module/rig territory).
   Led by **DRAFT-SHAPERS** (A/B Test = +1 draft option · Version Control = bank a passed boon ·

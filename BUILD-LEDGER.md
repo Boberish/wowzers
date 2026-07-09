@@ -193,6 +193,9 @@ build-once seams that five separate class reworks and the endgame all need:
 | Armor set presentation panel | 💡 | PROGRESSION §ARMORY | `armor_doll.gd` paper-doll | Presentation only; reads existing draft state. |
 | Unlock banking rule (win-only checkmark) | ⏳ | PROGRESSION §Drops | `rift_gear.cfg` persistence | First-kill checkmark banks on WIN; oaths bank win-or-lose. |
 | E.5 oath drop-dedication | 🔒 | MASTER §SYSTEMS-E.5 | `beneficiary_seat_i` on oath state | Byte-identical self-default. Ties to Depth curation-capacity. |
+| Raid wipe budget + floor checkpoint | 🔒 | WORLD §STAKES-MODEL | `RunState`/descent save-resume, `RunDirector`, raid loss-mode | Answers open-Q#6. Numbers→playtest. Needs descent-checkpoint plumbing. Dungeon stays 1-life. |
+| Attempt tokens (Death-Defiance consumable) | 🔒 | WORLD §STAKES-MODEL | budget counter, Market (GEAR-3), TICKETS node reward, `draft.gd` | +1 attempt, any surface. Token sink — rides GEAR-3 + TICKETS v2. |
+| Boon/curio battle-rez layer | 💡 | WORLD §STAKES-MODEL | `gear_catalog`, existing `revive` ClassKit hook | Healer Rekindle already BUILT; extend beyond healer so healer-less comps aren't hard-locked. |
 
 ### E. Depth & Teeth (`game/draft.gd` + map + Depth)
 

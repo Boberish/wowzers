@@ -773,6 +773,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · WORLD §INSTANCES + BUILD-LEDGER §D + PROGRESSION §Tokens —
+  **THE STAKES MODEL — how a wipe hurts + how hard bosses get (Bill: "bosses hard & complex like
+  WoW, wipe→run-back→retry — but here you lose your 1-hour run after ONE wipe? earn a revive?
+  does that cheapen the roguelike? maybe base mechanics lighter, save complexity for scaling up;
+  StS-Ascension adds a boss mechanic each +1?").** Resolved along the locked RAID-vs-DUNGEON
+  split: **retry cost = complexity budget**, so the two doors get two wipe rules. **RAID** = floor
+  checkpoint + a finite **WIPE BUDGET** (start 3; res at the floor, cleared floors stay cleared;
+  budget out → descent ends) = the WoW learn-and-retry loop kept roguelike-honest, and the answer
+  to WORLD open-Q#6 (descent save/resume = the floor checkpoint). **DUNGEON** = lean (1 life;
+  from-scratch is the point). **ATTEMPT TOKENS** = a Death-Defiance consumable (+1 attempt, any
+  surface), **earned** at nodes / **bought** at Market — Bill's "earn/shop a revive" as a legible
+  opportunity-cost resource, not a free undo (which alone would cheapen it; the locked "oaths bank
+  win-or-lose" is the real anti-cheapen). **DIFFICULTY CONTRACT** revised: base = a mountain
+  learned over *many* runs (NOT one session, NOT 20-mechanic memorization); the infinite
+  "study-for-an-hour" push = the already-designed ladders (Versions authored-adds / Depth
+  procedural / parked Run-modifiers = the StS-Heat stack). **Battle-rez already BUILT** (healer
+  Rekindle — Well 6 charges / Mender 120 s, 40 % HP, R-key) — the *in-fight* layer, distinct from
+  the run-loss budget; a boon/curio rez beyond the healer parked as an idea. Ledger rows added
+  (§D: 🔒 budget + 🔒 tokens + 💡 boon-rez); numbers = playtest. No code touched. **NEXT:** build
+  rides Wave-3/economy (needs descent-checkpoint plumbing + GEAR-3 Market); dungeon 1-life-vs-buy-in
+  default is a feel call. *(design session)*
+
 - ☑ 2026-07-09 · main (docs only) · NEW `BUILD-LEDGER.md` + CLAUDE.md index — **THE EXECUTION
   TRACKER (Bill: "~2 days of huge planning — quests/co-op minigames, curse cards, talent tree,
   new taunt, content layout, deck branches — track it all in one spot so executing code isn't
