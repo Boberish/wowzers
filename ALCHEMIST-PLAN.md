@@ -1,5 +1,8 @@
 # ALCHEMIST-PLAN — "The Brew" (the poison CLASS — split out of Twinfang 2026-07-06)
 
+> **2026-07-10:** the CASK BRANCH SLATE (§9) is 🟡 AT VERDICT — the locked §7 pool filed into 3
+> named ladders + three ADDITIVE theme pitches (Twin Casks · House Recipe · Taproom).
+
 **Status:** 🟢 **FULL CARD SLATE BUILT 2026-07-06** (`alch-cards` — all six slices coded on top of the base
 minigame: **4 Creeds · 3 Modules (incl. the ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons · 3 Spells**,
 the framework HUD generalized off the Twinfang-only gate, creed-aware offers wired). Every layer guarded →
@@ -507,3 +510,116 @@ archetypes clean.
 
 **On verdict:** fold KEEPs into §2–4 (hard-copy before build, per the playbook), then build as one
 guarded `brew-review` slice — byte-identical undrafted, sim A/B per layer, policy taught (rule #3).
+
+---
+
+## 9. THE CASK BRANCH SLATE — the filing pass + three additive themes 🟡 AT VERDICT (2026-07-10)
+
+**What this is** (SLATE-PLAN row 4; branch = build THEME, the corrected definition). **The §7
+card slate is LOCKED FOR BUILD and nothing here re-opens it** — this pass does the layer that
+didn't exist when the Cask was designed (DECK-LAYOUT §3 ladders, 2026-07-09): **①** it FILES the
+locked pool into named ladders (proof the deck already coalesces), and **②** it pitches THREE
+ADDITIVE themes — sub-specs-as-the-depth-engine material for the Phase-2 deck pass (row D4) and
+the owed §7.7 slices, each with illustrative cards only (no CARD-CATALOG rows, no verdict-board
+re-litigation). **How it was made:** locked pool re-read + `research/cask-sweep.md` (Potion
+Craft recipes · Overcooked pipelines · PoE flasks via KB) → 4 lenses → 3 pitches → **3 skeptic
+passes (1 kill, ~6 fixes folded)**.
+
+### 9.1 THE FILING TABLE — the ladders the locked cards already imply (naming, not changing)
+
+| Ladder (named here) | The fantasy | Locked cards that feed it |
+|---|---|---|
+| **THE BLEND LINE** — hold-or-cash compounding | one rolling masterwork | ⭐ The Blend · Slow Proof · Killing Vintage · The Solera · Long Echo |
+| **THE GAUNTLET** — one monstrous cask, strain-chained | the all-V deep pour | The Single Malt · Heavy Hand · Momentum Pour · Iron Wrist · Master's Measure · 👑 THE CENTURY CASK · rig: strain-×3 pour + 6-dose seal |
+| **THE TAP LIST** — banked bursts on chosen moments | the cellar door opens | The Cellar · The Overproofer · The Finisher · Overproof · A Round for the House · rig: dead-center tap |
+| Generic bread (feeds all) | — | Cooper's Ear · Breathe · Clean Break · Heavy Hand (dual-files) · The Copper Still (cook texture on any ladder) |
+
+Every locked card files somewhere; zero orphans — the locked deck was already a 3-ladder deck
+without the names. The deck pass (D4) inherits these names and the entry-creed mapping (Solera→
+Blend Line · Single Malt→Gauntlet · Overproofer→Tap List) — each ladder enterable from run start
+(§2 law 5 holds without a single card change).
+
+### 9.2 ADDITIVE THEME 1 — THE TWIN CASKS · *stack one while one cooks* (absorbs Double Barrel)
+
+**What its cards do:** the Overcooked pipeline — a second cask slot (the parked, unjudged
+*Double Barrel* candidate becomes this theme's module) turns the SPRINT→EXHALE→TAP wave into
+overlapping waves: stack cask B during cask A's cook; clean HANDOFFS (sealing one inside the
+other's cook) pay. The attention cost IS the greed.
+**Dials addressed:** the cook (as a scheduling window) · the seal · Proof. No new inputs (the
+existing multi-cask target priority already routes taps).
+**Example cards:** module *Double Barrel* — the second slot (the parked candidate, homed) ·
+boon *Clean Handoff* (STRAT) — sealing a cask while another cooks grants that cook +0.3s peak
+window · boon *Rolling Boil* (GREED) — while two casks are live, all pours +15% volume, all
+misses also taint the OTHER cask's quality −10% · keystone **THE BOTTLING LINE** — peak-tap two
+casks inside one 3s window and they pour as ONE doubled burst with both finishes stamped.
+**Greed/comfort + EASE knob:** overlap-greed (two clocks in the head); comfort = run one cask,
+cards stay dormant. Knob: cook-length grace while two casks live.
+**Nearest neighbor:** Bloomweaver core-A (arc phase management — HEALING arcs on allies, no
+dump stakes); the Twin Casks stagger SELF-owned batches where a MISS dumps everything — same
+skill family, different stakes; flagged in the distinctness ledger for the deck passes.
+
+### 9.3 ADDITIVE THEME 2 — THE HOUSE RECIPE · *your signature pour, perfected*
+
+**What its cards do:** repetition-mastery (the Potion Craft steal): re-brewing your EXACT last
+recipe (same doses, same order, same finish) builds HOUSE STYLE — but the echo only pays if the
+previous batch peak-tapped clean (skill-gated, not spam; the skeptics' fix). The fight's phases
+may want different recipes: commitment vs adaptation is the pick-tension.
+**Dials addressed:** the stack (recipe identity) · the tap (the clean-peak gate). Recipe-compare
+is a deterministic hash of the pour sequence — engine-trivial.
+**Example cards:** creed *The Signature* — your first sealed recipe each fight is the HOUSE
+recipe; repeats +8% (entry law satisfied) · boon *Practiced Hands* (STRAT) — house-recipe pours
+strain 20% softer (mastery reads as ease) · boon *Never Change* (GREED) — house-style stacks to
++30% but brewing OFF-recipe drops it all · keystone **THE DYNASTY POUR** — the 4th consecutive
+clean house-recipe batch pours as a legacy cask: the band freezes at your recipe's exact walk
+for one full stack (the game literally replays your signature).
+**Greed/comfort + EASE knob:** commitment-greed; comfort = ignore the house, brew what the
+fight wants. Knob: recipe-match tolerance (exact vs same-shape).
+**Nearest neighbor:** Tempo's FINISH theme (fewer-bigger presses — no memory); nothing else in
+the roster rewards REPEATING a sequence. The one theme only a recipe spec can print.
+
+### 9.4 ADDITIVE THEME 3 — THE TAPROOM · *a round for the house, literally* (TEAM)
+
+**What its cards do:** the service theme — the Cellar's bottles grow ally faces: bottled peaks
+THROWN to seats, applying on that ally's NEXT clean moment (their perfect/Opening — no new ally
+input, the skeptics' fix). Extends the locked support (*A Round for the House*) from a
+radius-buff into chosen, timed handoffs — the PoE-flask economy made co-op.
+**Dials addressed:** the tap (bottled instead of drunk) · the cook (brewing FOR someone). Rides
+the Cellar module; needs the raid buff-channel (the same already-owed debt as Battle Hymn /
+the Bannerman — flagged, not new).
+**Example cards:** boon *On the House* (TEAM) — a bottled peak thrown to an ally pays 70% of its
+burst as their damage buff on their next clean hit · boon *Private Reserve* (GREED) — bottles
+kept 6s+ before throwing gain +25%, but a second bottle can't shelve while one waits ·
+keystone **LAST CALL** — during a boss Opening, throw the whole shelf at once: every seat drinks,
+every clean answer inside the window pays the bottle's finish.
+**Greed/comfort + EASE knob:** patience-greed on the shelf; comfort = drink your own bottles
+(the Cellar unchanged). Knob: bottle apply-window length.
+**Nearest neighbor:** the Warden's Bannerman (aggro-uptime TEAM) and the parked Conductor
+(rhythm calls) — the Taproom hands over CONSUMABLES on ally timing; distinct shape, same
+buff-channel debt. Distinctness-ledger row flagged for the deck passes.
+
+### 9.5 SLATE-LEVEL CHECKS + the pick
+
+**Spread:** pipeline/attention (Twin Casks) · memory/commitment (House Recipe) · service/TEAM
+(Taproom) — three new clocks, none shared with the three incumbent ladders (compound-hold ·
+strain-chain · moment-bank).
+**Skeptic record:** 3 passes · **1 kill** (**the Storm Brewer** — pours-during-telegraphs greed:
+it prices playing NEAR danger while the F3 under-fire risk (§7.7) is still untested; pitching a
+theme on an unvalidated feel-surface is design debt — revisit ONLY after the first in-game
+playtest answers F3) · ~6 fixes folded (House-Recipe echo skill-gated on clean peaks · Taproom
+applies on ally's own clean moment, no ally input · Rolling Boil's bite made mutual ·
+Double Barrel homed as a MODULE so the base kit stays one-cask · entry-creed mapping stated for
+the incumbent ladders · Twin-Casks/Bloomweaver-A distinctness recorded).
+**Skeptic ranking (pick-tension, strongest→weakest):** House Recipe · Twin Casks · Taproom.
+**Composition notes:** any ONE additive theme + the three incumbent ladders is a full deck
+(D4's likely shape); Twin Casks + Copper Still is an attention stress-test (flagged, self-
+inflicted); Taproom needs the buff channel whichever pick it joins.
+**Engine debts:** Taproom = the shared buff-channel debt (not new) + per-ally bottle state ·
+Twin Casks = second-slot state (the tester toggle existed) · House Recipe = none.
+**Skipped on purpose:** **the Storm Brewer** (killed, above) · **challenger themes of any kind**
+(the §7 slate is Bill-locked; re-litigating 24 KEEPs is process vandalism) · **a tactile
+pour-minigame layer** (Potion Craft's charm is presentation — that's slice-3 HUD garnish, not
+cards).
+
+**Next:** Bill ranks/picks the additive themes (0–3 of them) → Phase-2 row D4 authors the full
+Cask deck: the 9.1 filing hard-copied + the picked themes' cards designed to CARD-CATALOG rows,
+inside the locked §7 verdicts.

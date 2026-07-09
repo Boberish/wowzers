@@ -180,6 +180,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Twinfang — Creed/Module wire TODO + killingEdge rig | 🔒 | `twinfang_content.gd:163` | twinfang kit | Only real actionable code TODO in repo. |
 | Fermata v5 — owed wiring (HUD meters · elite acq · spec-carry) | ⏳ | FERMATA-BRIEF | shared passes (gauges/elite/`raid_net`) | Verb + slate BUILT (`f5d5397`, grades by depth — stale "recode owed" corrected 2026-07-09); what remains rides the shared substrate rows above. |
 | Alchemist — Cask slices 2–5 | 🔒 | ALCH §7.7 | `AlchemistPolicy` + HUD + `data/alchemist` + `alchemist_sim` | Slice 1 built. Slate verdicted 24/6. Tune `cask_base`→Seal parity. |
+| **Cask — BRANCH SLATE (filing + 3 additive themes)** | 🟡 | ALCH §9 + `research/cask-sweep.md` | design only (deck pass = Phase-2 row D4) | Locked pool filed (Blend Line · Gauntlet · Tap List); additive: Twin Casks (homes parked Double Barrel) · House Recipe · Taproom (buff-channel debt). §7 verdicts NOT re-opened. Storm Brewer killed pending F3. |
 | Alchemist — Brew review pass (11 proposals) | 🟡 | ALCH §8 | one guarded slice, config knobs | Live deck untouched until verdict. |
 | Alchemist — open design calls F1/F2/F3/F20 | 🟡 | ALCH §OPEN | design; F3 would touch dodge/ClassKit | F3 (auto-evasion) gates Cask under-fire risk. |
 | Well — module gauges + AI spell-policy | ⏳ | MENDER | `well_gauge.gd`, `well_policy.gd` | Deck already built. AI can't use Meditate/Boiling Over yet. |

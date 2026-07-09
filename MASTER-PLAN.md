@@ -814,10 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 01:29 · main (docs only) — **CLAIM: SLATE MACHINE row 4 — Alchemist·CASK branch
-  slate** (fresh sweep → `research/cask-sweep.md` → build themes on the locked Cask verb →
-  3 skeptics → `ALCHEMIST-PLAN.md` new § 🟡; feeds the owed §7.7 slices 3–5 deck). Docs only;
-  no code, no CARD-CATALOG rows. *(slate-machine session, tick 01:27)*
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §9 (NEW) + `research/cask-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 4: Alchemist·CASK branch slate — DONE.** The §7 slate is
+  Bill-LOCKED (24/6), so this pass is the missing DECK-LAYOUT layer, not a challenger: **the
+  filing table** names the ladders the locked cards already form (**THE BLEND LINE** hold-or-cash
+  · **THE GAUNTLET** one-cask strain-chain · **THE TAP LIST** banked moments — zero orphans,
+  entry-creed mapping stated) + **three ADDITIVE themes** at verdict: **TWIN CASKS** (Overcooked
+  pipeline — homes the parked Double Barrel as a module) · **THE HOUSE RECIPE** (Potion-Craft
+  repetition mastery, echo skill-gated on clean peaks) · **THE TAPROOM** (TEAM — bottled peaks
+  thrown to allies, applies on their clean moment; shared buff-channel debt). 3 skeptic passes:
+  1 kill (**Storm Brewer** — parked until the F3 under-fire playtest), ~6 fixes. Ranking: House
+  Recipe · Twin Casks · Taproom. No CARD-CATALOG rows (deck = Phase-2 row D4). *(slate-machine
+  session, tick 01:27)*
 
 - ☑ 2026-07-10 · main (docs only) · `BLOOM-PLAN.md` (NEW) + `research/bloom-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 3: BLOOMWEAVER class slate — DONE, four core-minigame
