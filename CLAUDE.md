@@ -76,15 +76,18 @@ INDEX — design detail stays in the plan doc; its own upkeep rules live in `BUI
   were **DELETED 2026-07-07 (REFIT P1, ~6.5k lines** — git history has them). Never "port
   solo→raid"; every player-facing system lands on the one HUD, once. Esc outside combat
   goes to the HUD's HOME screen (`_show_home`), never to a scene change.
-- **ROSTER REWORK (Class Framework v2):** every class is being rebuilt one at a time onto
-  Creeds/Modules/WHEN-THEN (see `TEMPO-PLAN.md`). **Twinfang·Tempo is the active pilot**; the
-  rest (Bulwark, Mender, Bloomweaver, Reckoner) are FROZEN — playable in the raid on current
-  kits, balance not maintained. **Voidcaller is CUT from the roster plan** (stays in code as
-  the frozen caster-seat placeholder until that seat's rework); its interrupt moves to
-  **interrupt-by-ability** (WORLD-PLAN pillar #3). **THE SPLIT (2026-07-06):** the Brew /
-  Venom spec is now its OWN class (`ALCHEMIST-PLAN.md`, working name filler) — **base minigame
-  BUILT & playable same day** as the caster seat's second option (`--autostart=raid:caster:brew`;
-  voidcaller stays the default — byte-identical unless picked); creeds/modules/boons follow
+- **ROSTER REWORK (Class Framework v2) + THE PURGE (2026-07-10):** every class is being rebuilt
+  one at a time onto Creeds/Modules/WHEN-THEN (see `TEMPO-PLAN.md`); **Twinfang·Tempo is the
+  active pilot**. **THE PURGE (Bill, 2026-07-10 — MASTER §GAME SHAPE amendment): Voidcaller ·
+  Mender · Reckoner + the 15 solo exam bosses + GATE nodes are DELETED from code** (git history
+  is the attic). The roster in code: **Twinfang** (Tempo/Fermata) · **Alchemist** (Brew/Cask —
+  the caster default; ⚠ carries NO kick, so NOBODY kicks until **interrupt-by-ability**
+  [WORLD-PLAN pillar #3] lands — Seal verses go uncontested, by decision) · **the Well**
+  (Brim/Draw — the healer default; Bloomweaver stays the healer toggle) · **Bulwark** (frozen
+  tank placeholder — **dies in the same merge as the Duelist base**, BUILD-LEDGER §A½) ·
+  **Bloomweaver** (frozen, rework owed). **THE SPLIT (2026-07-06):** the Brew /
+  Venom spec is its OWN class (`ALCHEMIST-PLAN.md`, working name filler; `--autostart=raid:caster:brew`);
+  creeds/modules/boons follow
   Bill's live playtest. Twinfang owes a rhythm-variant second spec (TEMPO-PLAN §13) — the
   in-code poison-wheel Venom stays the frozen placeholder aspect until then.
 - **BOSS REDO INCOMING:** the 15 solo bosses are the casting pool (recast, never rebuilt);
@@ -142,7 +145,7 @@ INDEX — design detail stays in the plan doc; its own upkeep rules live in `BUI
 - **System probes (keep green when you touch their system):** `draft_sim` · `gear_probe` ·
   `commander_probe` · `map_sim` / `raid_map_sim` / `map_check_sim` + map probes ·
   `fight_seed_probe` · `menu_probe` · `meter_probe` · raid probes (`raid_probe`,
-  `raid_boon_probe`, `raid_healer_probe`, `raid_bloom_probe`, `raid_reckoner_probe`).
+  `raid_boon_probe`, `raid_bloom_probe` — the healer/reckoner probes died in THE PURGE).
 - **Smokes:** `ui_smoke_raid` (THE HUD) · `ui_smoke_map` (the RAID descent walked screen by
   screen — re-hosted onto raid_main in REFIT P1; the solo version died with the solo
   scenes) · `ui_smoke_world` · `net_smoke` / `net_map_smoke`
