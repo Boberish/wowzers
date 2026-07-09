@@ -24,7 +24,8 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 4. **Update `MASTER-PLAN.md` after the work** — status, what changed, what's next.
 
 **Plan-doc index:** `MASTER-PLAN.md` (living state) · `WORLD-PLAN.md` (the world pivot +
-COMBAT PILLARS — locked 2026-07-06) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
+COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
+signature CD · rules, consolidated 2026-07-09) · `TEMPO-PLAN.md` (Class Framework v2, Twinfang pilot) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, pair locked 2026-07-07) ·
 `TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·

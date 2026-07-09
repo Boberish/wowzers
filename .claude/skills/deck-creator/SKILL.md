@@ -23,7 +23,7 @@ history in MASTER-PLAN before writing a single card.
 | **Carries** | listed | Cross-spec cards that work VERBATIM on both specs | Verify each against the new core mechanic — no "mostly works" |
 
 Curios are the only cross-CLASS lane and never touch the core mechanic. Spell/extra-button lanes are
-dead ("I don't like flurry, or grace note, or coda") — new buttons need a class-law reason.
+dead ("I don't like flurry, or grace note, or coda") — new buttons need a class-law reason. **⚠ 2026-07-09 reconcile → `DECK-LAYOUT.md`:** the class-law bar is cleared by (a) the **signature ~1-min CD** (one sanctioned baseline button per class) and (b) a **broad-kit class** spending its budget on breadth (the healer's heals). `DECK-LAYOUT.md` is now the canonical anatomy (it adds the CD slot + the branches / 3-axes model) and wins on any diff with this table.
 
 ## 1 · THE PICK-TENSION LAW (the prime directive)
 

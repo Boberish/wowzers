@@ -140,6 +140,11 @@ proven. **Awaiting Bill's feel verdicts → W2 (Encounter Forge + TICKETS v2 con
 
 ## CLASS FRAMEWORK v2 — the Tempo-piloted ROSTER REWORK (locked with Bill, 2026-07-04)
 
+**⚙ CANONICAL DECK ANATOMY → `DECK-LAYOUT.md` (consolidated 2026-07-09):** the slots · the 3 axes
+every card sits on (dial-lane / ladder / card-type) · the 6 card-types · the soft branches · the
+signature CD · the spells reconcile — merged into one spec the deck-creator + every class reshape
+target. The 7 CLASS DESIGN RULES below stay canonical here.
+
 **The bold move:** every class gets re-thought from the ground up onto ONE new framework. Full spec:
 **`TEMPO-PLAN.md`**. This supersedes the ad-hoc per-class kits — the class-fun reworks + slot-verbs were the
 right instincts; this makes them a *system*. Each class becomes: a **core timing minigame** (the verb) →
@@ -762,6 +767,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · §CLASS FRAMEWORK / `DECK-LAYOUT.md` — **THE DECK LAYOUT
+  CONSOLIDATION (Bill: "merge all these ideas into a deck layout, then relook at classes").**
+  New `DECK-LAYOUT.md` = the canonical class-deck anatomy, merging what was scattered across
+  TEMPO-PLAN (meta-shape) · deck-creator SKILL (slots + 6 card-types) · MASTER (7 rules) ·
+  TANK-PLAN (ladders) · TEETH-PLAN (depth-pass). Adds/formalizes: the **signature ~1-min CD**
+  (one sanctioned baseline button/class — skill-amplifying, never button=damage) · the **3 axes**
+  every card sits on (DIAL-LANE structural / LADDER thematic / CARD-TYPE descriptor) · **soft
+  branches** (2 default, 3 when earned; attractors not cages; keystone-capped) · **EASE =
+  player-authored difficulty** (floor-up/ceiling-down, capped) · the **spells reconcile** ("new
+  buttons need a class-law reason" → the CD + broad-kit healer clear it; "spells lanes dead" stays
+  anti-filler) · keystone count reconciled (pool 2–3 authored, acquire 1/run from elite). Pointers
+  wired: CLAUDE.md index · deck-creator SKILL (spells line reconciled, defers to DECK-LAYOUT) ·
+  MASTER §CLASS FRAMEWORK. No code touched. **NEXT (Phase 2):** reshape each class onto the layout,
+  one at a time (deck-creator = the tool; tank + Well = templates). *(deck-layout session)*
 - ☑ 2026-07-08 · main (docs only) · §TEETH / `TEETH-PLAN.md` — **THE "MORE DEPTH & MORE
   TEETH" PASS (design session with Bill).** Triaged Bill's depth dump against the locked laws
   (WORLD pillars · PROGRESSION #1/#4 · Framework-v2 rules): 7 ideas ride existing tech, rerolls
