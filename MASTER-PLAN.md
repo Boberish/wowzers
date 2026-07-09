@@ -773,6 +773,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · NEW `BUILD-LEDGER.md` + CLAUDE.md index — **THE EXECUTION
+  TRACKER (Bill: "~2 days of huge planning — quests/co-op minigames, curse cards, talent tree,
+  new taunt, content layout, deck branches — track it all in one spot so executing code isn't
+  crazy; are we branching off / stale-code scattered?").** Diagnosis confirmed: the COORDINATION
+  LOG is a *chronological what-we-decided log*, the OVERALL PROGRESS table is high-level + partly
+  stale, and CARD-CATALOG tracks *cards only* — nothing collected the **systems-level
+  planned-but-unbuilt pile** into one forward-facing view. Built via a 5-scout parallel audit (3
+  reading the plan docs, 1 reading MASTER-PLAN, 1 reading the **code** for stale/flagged
+  surfaces). New `BUILD-LEDGER.md` = the one execution tracker: a **collision map** (which core
+  files each planned change touches + the deliberate-rebaseline cluster + stale-code to retire),
+  a **dependency spine** (rails-first → tank+aggro → class reshape → world/meta → depth/teeth →
+  bosses → MMO shell), the **full slate** by workstream (~70 items, status-glyphed), and an
+  **"awaiting Bill's verdict"** pull-list. Positioned as an INDEX (design stays in plan docs,
+  card status in CARD-CATALOG, history here) — NOT a 4th source of truth. **Key findings:**
+  FLOW=AGGRO + Duelist base kit land in the same files (must co-sequence); five class reworks
+  share the same unbuilt substrate (rarity engine / elite-node type / HUD gauge base / spec-carry
+  — build once); `combat_core.gd` + `raid_hud.gd` are the top hotspots; `bulwark_kit` sits at
+  both migrations (moot — retire with the tank); solo-HUD/stage3d deletion held clean. **6 doc-drift
+  fixes flagged** (GEAR-2-open line 670, roster "verified", dead §GRAPHICS line, Through-Line,
+  Reservoir, Well-deck-"not-authored"). No code touched. **NEXT:** keep it updated as planning
+  continues this week; back-fill/flip rows in the same commit as each decision. *(build-ledger session)*
 - ☑ 2026-07-09 · main (docs only) · §CLASSES + §MODES / `TANK-PLAN §1c-1d` + WORLD-PLAN + CARD-CATALOG —
   **AGGRO = FLOW, UNIVERSAL — big combat-system change (Bill).** The tank's clean-answer streak (**FLOW**)
   IS the aggro/threat meter: play clean → hold the boss; slip → it peels to the warband. Replaces the old

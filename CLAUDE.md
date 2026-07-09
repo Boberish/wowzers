@@ -23,7 +23,9 @@ CLAUDE.md keeps only the stable laws + run-book. Workflow for EVERY task:
 3. Verify against your section's acceptance bar (see ACTIVE VERIFICATION below), merge back.
 4. **Update `MASTER-PLAN.md` after the work** — status, what changed, what's next.
 
-**Plan-doc index:** `MASTER-PLAN.md` (living state) · `WORLD-PLAN.md` (the world pivot +
+**Plan-doc index:** `MASTER-PLAN.md` (living state) · `BUILD-LEDGER.md` (**the execution tracker
+— the one forward-facing list of planned-but-unbuilt work + the collision map of which core files
+each change touches; an INDEX not a spec, 2026-07-09**) · `WORLD-PLAN.md` (the world pivot +
 COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
 signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE single source of truth for
 every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,
