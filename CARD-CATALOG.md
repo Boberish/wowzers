@@ -89,10 +89,10 @@ support, spells). Every table has the same columns:
 | **Alchemist · Brew** | caster | 🔨 built | full slate 🔨; review-pass proposals 🟡 | `ALCHEMIST-PLAN.md` |
 | **Alchemist · Cask** | caster | 🔨 slices 1–2 | HUD/cards/balance owed | `ALCHEMIST-PLAN.md §7` |
 | **The Well** | healer | 🔨 built | **deck 🔮 not authored** | `MENDER-PLAN.md` |
-| **Mender** | healer | frozen | boons only in code | `MENDER-PLAN.md` |
 | **Tank · Duelist** | tank | 🟡 round-5 locked | **deck v1 🟡 AT VERDICT · 0 built** | [§ Tank](#tank-the-duelist) · `TANK-PLAN.md` |
 | **Tank · Warden** | tank | 🟡 locked | deck = later pass | `TANK-PLAN.md §5` |
-| Bulwark / Bloomweaver / Reckoner / Voidcaller | — | FROZEN | code slate only, not under active planning | code `data/<class>/` |
+| Bulwark / Bloomweaver | — | FROZEN | code slate only; Bulwark dies with the Duelist merge | code `data/<class>/` |
+| ~~Mender · Voidcaller · Reckoner~~ | — | ✂️ **DELETED (THE PURGE 2026-07-10)** | whole classes + card slates cut from code (git history is the attic) | MASTER §GAME SHAPE amendment |
 
 **Fill status of THIS doc:** the **Tank · Duelist** section below is the fully-populated worked
 reference (proves the format on a real slate). The other active classes are **stubs pending
@@ -217,8 +217,10 @@ _Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§7` (Cask) + `§8` (
 _Stub — back-fill from `MENDER-PLAN.md` "BOARD VERDICTS" export once the deck is authored +
 `godot/data/well/*.gd`._
 
-## MENDER + FROZEN CLASSES (Bulwark / Bloomweaver / Reckoner / Voidcaller)
-_Code slate only, not under active planning. Fill on demand from `godot/data/<class>/<class>_boons.gd`._
+## FROZEN CLASSES (Bulwark / Bloomweaver)
+_Code slate only, not under active planning. Fill on demand from `godot/data/<class>/<class>_boons.gd`.
+(Mender / Voidcaller / Reckoner were DELETED whole in THE PURGE 2026-07-10 — their card slates died
+with the classes; recover from git history if a future rework wants a reference.)_
 
 ---
 
