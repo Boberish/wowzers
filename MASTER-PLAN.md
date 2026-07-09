@@ -813,6 +813,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · main (docs only) + 2nd session cron — **CLAIM: SLATE MACHINE PHASE 2 — THE DECK
+  MACHINE (Bill).** SLATE-PLAN §5–§6 NEW: when every Phase-1 slate has landed, a second 15-min
+  loop (`4,19,34,49`) authors the **FULL DECK (design only, never code)** per target around its
+  slate's **top-3-ranked branches** (Bill's ✅ picks override) — deck-creator skill + DECK-LAYOUT
+  slots + coherence gates (dream-draft walkthroughs · offer-trio · overlap audits · anti-pattern
+  sweep · AI-pilotability) + a cross-deck DISTINCTNESS LEDGER (§5) + 3 inline skeptics → deck §
+  🟡 AT VERDICT + **CARD-CATALOG rows at 🟡**. Existing decks (Duelist v1 / Well / Brew / Fermata
+  v5) are handled as REVISIONS, absorb-don't-duplicate. Ledger §C row added; `slate-loop` skill
+  now re-arms BOTH crons. *(slate-machine session)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §14 REDONE + NEW §15 parking + SLATE-PLAN
   correction + BUILD-LEDGER row — **BRANCH = BUILD THEME, not a rewire (Bill's correction).**
   Bill clarified: a branch is a general CATEGORY inside the existing spec (bleeds / fast attacks /

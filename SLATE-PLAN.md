@@ -5,8 +5,10 @@
 > VERDICT. This doc GENERALIZES that pass to every class/spec and runs it as a QUEUE — one target
 > at a time, a 15-minute loop tick claiming the next target when the last one lands. The generic
 > pass is §1, the laws are §2, the loop protocol is §3, per-target notes are §4.
-> **This is idea generation, not deck authoring** — deck builds (deck-creator skill, CARD-CATALOG
-> rows) happen per target AFTER Bill picks from its slate, as separate claims outside this loop.
+> **The machine has TWO PHASES (Phase 2 added 2026-07-10, Bill):** Phase 1 (§0–§4) = the branch
+> slates, idea generation only. **Phase 2 (§5–§6) = THE DECK MACHINE** — once EVERY slate has
+> landed, a second loop authors the FULL DECK (design only, never code) for each target around
+> its **top-3-ranked branches** (Bill's ✅ picks override the ranking wherever he has verdicted).
 >
 > **⚠ CORRECTED 2026-07-10 00:35 (Bill).** A **branch is a build THEME inside the existing spec**
 > (the tank's Headsman/Ironside/Ghost precedent): a general category — *bleeds, fast attacks,
@@ -125,7 +127,8 @@ so a token-death loses little):
   finish that row; **(c)** else claim the first ⬜ and run THE PASS end-to-end; **(d)** no ⬜/🔄
   left → delete the cron job and report the queue drained. **One target per tick, never two.**
 - **"Done" = the slate lands 🟡 AT VERDICT.** The loop does NOT wait for Bill's verdicts — all
-  slates queue at his board; verdicts + deck passes are separate work outside this loop.
+  slates queue at his board. When Phase 1 drains, **Phase 2 (§5) takes over on its own cron** and
+  authors the decks from the top-3 branches per slate (Bill's picks override where present).
 - **Token exhaustion is expected.** A tick that hits the usage limit simply dies; the next tick
   retries in 15 min and keeps retrying until the window resets. The queue + commits carry ALL
   state — nothing lives only in a session.
@@ -154,3 +157,113 @@ so a token-death loses little):
   poison lines. Fold ALCHEMIST-PLAN §8's 11 live proposals in as incumbent material.
 - **Fermata:** hold/release rhythm — Thumper, charge-shot grammars, held-note mechanics in rhythm
   games. The Ramp & the Snap is LOCKED — branches bend it, never replace it.
+
+---
+
+## 5. PHASE 2 — THE DECK MACHINE (full decks from the top-3 branches)
+
+**The gate.** Phase 2 may not claim ANYTHING while any §0 row is ⬜ or 🔄. Its own cron
+(`4,19,34,49 * * * *`) ticks every 15 min; before the gate opens every tick is a one-line
+"⏳ slates not drained" no-op. After the gate opens it walks THIS queue exactly like §3 walks §0
+(claim-fresh / stale-salvage / first-⬜ / one-target-per-tick / drain→delete-cron).
+
+**Choosing the winners.** For each target: **Bill's ✅ picks win** wherever he has verdicted the
+slate; otherwise take the **top 3 of the slate's recorded skeptic pick-tension ranking**. Name
+the chosen 3 (and the ranking source line) at the top of the deck §. Bill re-verdicts the whole
+deck anyway — a "wrong" provisional pick costs one re-pass, never code.
+
+**Deck queue** (⬜ queued · 🔄 in flight · 🟡 deck AT VERDICT · ✅ approved · ⏭ skipped; a row is
+claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck too):
+
+| # | Target | Deck lands in | Status | Claimed | Note |
+|---|---|---|---|---|---|
+| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` | ⬜ | — | Waits on the §14 REDO (row 0). Fold A1–A9 ledger verdicts + Through-Line/On-the-Beat drift in. |
+| D1 | Tank · **Warden** | `TANK-PLAN.md` | ⬜ | — | Receives the 🔮 re-homed guard cards (ledger). No-dodge kit: EASE knobs live on BLOCK reads. |
+| D2 | Tank · **Duelist** | `TANK-PLAN.md` | ⬜ | — | Deck v1 already AT BILL'S BOARD — this pass is a **v2 REVISION** around the winning themes, not a parallel deck; carry v1 verdicts that exist by then. |
+| D3 | **Bloomweaver** | `BLOOM-PLAN.md` | ⬜ | — | Double-size: lock the top CORE-MINIGAME pitch first, then author that spec's deck. |
+| D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` | ⬜ | — | Pays the owed §7.7 slices 3–5 card design. |
+| D5 | Well · **Brim** | `MENDER-PLAN.md` | ⬜ | — | Deck exists in code — this is the RESHAPE onto branches (DECK-LAYOUT Phase 2), absorb-don't-duplicate. |
+| D6 | Well · **Draw** | `MENDER-PLAN.md` | ⬜ | — | Same; sibling-distinctness vs D5 is a hard gate. |
+| D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | ⬜ | — | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
+| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | ⬜ | — | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
+
+**Cross-deck DISTINCTNESS LEDGER** — each deck pass APPENDS its row here before writing cards,
+and checks its plans against every earlier row (the cheap cross-class overlap gate — no re-reading
+whole decks):
+
+| Target | The 3 themes | Keystone spectacle shapes | Greed bites (what the player risks) |
+|---|---|---|---|
+| *(first deck pass writes the first row)* | | | |
+
+## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
+
+Run every step INLINE, in order, no skipping — the gates are where the quality comes from.
+Three checkpoint commits (claim / mid-draft / final) so a token-death loses little.
+
+0. **Preflight + full read.** `git status` (stage only your own files). Then read, in this
+   order: **the `deck-creator` skill (INVOKE it — it is the playbook: slots, pick-tension law,
+   fun hierarchy, anti-pattern list, coherence rules)** · `DECK-LAYOUT.md` whole (slots · 3 axes ·
+   branches · card-type lenses · ABILITY LAW · signature CD · design rules) · MASTER-PLAN §CLASS
+   FRAMEWORK v2 rules 1–7 · the target's plan doc END TO END (kit, verdict ⚖ blocks, its Phase-1
+   slate §, open questions) · its CARD-CATALOG rows **including the Cut Ledger (never resurrect a
+   cut without cause)** · `research/<target>-sweep.md` + the knowledge-base STEAL sections ·
+   **the §5 distinctness ledger** (every earlier row) · GAME-LOOPS pointers for the class.
+1. **CLAIM (commit 1).** Flip the §5 row ⬜→🔄 + stamp; Coordination Log claim line.
+2. **WINNERS + DIALS FIRST.** State the 3 themes (per §5 rule) and then — before ANY card —
+   write the **DIALS LIST**: every dial of the core minigame a card may address (deck-creator §4).
+   The boon lanes ARE these dials. Then write the **budget line**: touch-target count vs the
+   ABILITY LAW ceiling, module count, boon count target (10–16), keystone pool (2–3).
+3. **APPEND THE DISTINCTNESS ROW (§5 table)** — themes, planned keystone spectacle shapes,
+   planned greed bites — and CHECK it against every earlier row + built decks in CARD-CATALOG:
+   a keystone spectacle shape, greed bite, or creed temperament that repeats another class's is
+   REDESIGNED NOW, before cards get written around it. (Convergent bread is fine; convergent
+   identity is not.)
+4. **AUTHOR THE DECK (commit 2 mid-way)** — every DECK-LAYOUT slot, every card in CARD-CATALOG
+   row format (id · type · rarity · one-line WHAT · the dial it addresses · the theme(s) it
+   feeds):
+   - **Creeds 3–5, pick 1:** one forgiving/crossover · one greed pole · one rhythm-changer ·
+     one WILD (Tutti-class, rewrites how the core mechanic is scored — the one sanctioned
+     rewire). **Each of the 3 themes must be ENTERABLE from run start via at least one creed**
+     (§2 law 5 — no dead-until-Floor-1 themes).
+   - **Modules 2–3, Floor-1 pick:** add-ons that EARN their pixels; no transformer requirement;
+     at most one gauge each, and a gauge never defines a theme's identity.
+   - **Boons 10–16 in dial-lanes:** each lane ≥1 greed, ≤1 insurance (dressed as a play, never a
+     pardon); every boon names its theme(s) or "bread" (bread ≤ 3); rarity = build-definingness
+     (Haiku/Sonnet/Opus), the H/S/O ladder designed per card, not scaled.
+   - **Rig 2–4 WHENs:** chooseable/earnable moments only, single circuit, no stacking (RIG LAW);
+     the WHENs should be moments the deck's own cards create.
+   - **Keystones 2–3 (elite-only):** spectacle-grade — each must visibly change how the
+     bar/minigame LOOKS in play, and light up 2–3 pool boons differently; per-theme where possible.
+   - **Support 1** (party-facing, keyed to the spec's core state) · **signature ~1-min CD** shape
+     (amplify skill, never button=damage) · **carries** verified VERBATIM against the core
+     mechanic · **EASE dial knob list** (one knob per theme minimum) · spells reconcile if the
+     class has a book.
+   - **Where a deck already EXISTS** (queue note): this is a REVISION — file every existing card
+     into a theme / bread / CUT-proposed table first; absorb, don't duplicate; carry Bill's prior
+     verdicts forward untouched unless a theme demands a change (then flag it loudly).
+5. **COHERENCE GATES (run all five, write the results into the doc — evidence, not claims):**
+   - **Archetype walkthroughs:** for each theme, the "dream draft" (creed → module → 4–6 boons →
+     keystone) written out with WHY each pick compounds the last — plus ONE cross-theme hybrid
+     that still works. A theme whose walkthrough reads as "number gets bigger" gets redesigned.
+   - **Offer-trio test:** deal 5 random 3-card offers per rarity tier from the finished pool; any
+     auto-pick → fix the trio; any auto-skip → cut or spice. Show 2–3 of the actual trios.
+   - **Overlap audit (in-deck):** no two cards address the same dial in the same direction at the
+     same slot — merge or differentiate. Each theme keeps ≥3 exclusive cards; shared cards listed.
+   - **Anti-pattern sweep:** every card checked against deck-creator §3 (passive wind-ups ·
+     passives wearing UI · stat keystones · one-time bonuses · oversized knobs · extra buttons ·
+     un-graspable rules · insurance stacking · luck wearing greed's clothes). List survivors of
+     each near-miss.
+   - **AI-pilotability note per theme:** one sentence on how a seeded policy expresses it at 3
+     skill tiers (class rule 3). If the policy sentence needs a paragraph, the theme is too clever.
+6. **SKEPTICS ×3, inline, sequential** — fresh framings for decks: ① the draft-table skeptic
+   (auto-picks, dead cards, trap trios) · ② the repack skeptic (is any theme another class's deck
+   in a costume? check the distinctness ledger again) · ③ the fight-clock skeptic (does the theme
+   pay off inside a 60s zone fight AND a 7-node run arc?). Kill or fix; fold; record honestly.
+7. **WRITE + TRACK (commit 3).** The deck § lands 🟡 AT VERDICT in the plan doc: *winners line* →
+   *dials list* → *the deck by slot* → *coherence-gate evidence* → *skeptic record* → *open
+   tension points for Bill* (the 3–6 calls only he can make, stated as questions with your lean).
+   Same commit: **CARD-CATALOG rows for every card at 🟡** (CARD-TRACKING LAW — the catalog owns
+   status; keep ids code-shaped) · §5 queue row 🔄→🟡 · distinctness-ledger row finalized ·
+   BUILD-LEDGER §C row flip (LEDGER LAW) · Coordination Log tick.
+8. **STOP.** Design only — no `.gd` files, no code edits, no sims, no second target. Reply with
+   a short human summary: the 3 themes, the headline cards, the open tension points, where to read.
