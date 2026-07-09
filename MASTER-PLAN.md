@@ -814,10 +814,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 01:15 · main (docs only) — **CLAIM: SLATE MACHINE row 3 — BLOOMWEAVER class slate**
-  (the queue's one CLASS-grade pass: fresh sweep → `research/bloom-sweep.md` → 3–4 CORE-MINIGAME
-  candidates + spec identity seeds, rewire anatomy allowed → 3 skeptics → NEW `BLOOM-PLAN.md`
-  🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 01:12)*
+- ☑ 2026-07-10 · main (docs only) · `BLOOM-PLAN.md` (NEW) + `research/bloom-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 3: BLOOMWEAVER class slate — DONE, four core-minigame
+  candidates AT BILL'S VERDICT** (the queue's one rewire-grade pass; do-not-merge lock honored;
+  one-instrument law from Atomicrops applied to all four). **A · THE ORCHARD CLOCK** (ripeness
+  arcs + phase management — Wildfrost timers, the RIPEN heir; specs Orchard/Meadow) · **B · THE
+  TRELLIS** (seats-as-lanes, heals RACE incoming spikes + PvZ sap economy; specs Sower/Courier;
+  HUD lift flagged) · **C · THE BRIAR** (planted arming wards + graded SNAP — the Thornveil
+  heir; specs Briar/Balm) · **D · THE PRUNING** (auto-growing garden, graded CUTS redirect it —
+  healing by subtraction; specs Topiary/Wildwood; rule-4 death-clause stated). 3 skeptic passes:
+  1 kill (Pollinators = timers in a costume), ~9 fixes. Skeptic ranking A·B·C·D. 2 new buttons
+  per core (narrow-kit budget). No CARD-CATALOG rows (deck = Phase-2 row D3 after Bill picks the
+  core). *(slate-machine session, tick 01:12; tracking edits ride other sessions' commits —
+  shared docs were dirty)*
 
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §7 (NEW) + `research/duelist-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 2: Tank·DUELIST challenger slate — DONE, three challengers

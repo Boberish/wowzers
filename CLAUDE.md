@@ -46,6 +46,7 @@ strict idea→verdict→approved→built→cut lifecycle; wins any diff with a p
 Tempo-§14-style pass + the 15-min loop protocol; restart via the `slate-loop` skill, 2026-07-10) ·
 `ALCHEMIST-PLAN.md` (the Brew — poison class split OUT of Twinfang 2026-07-06; was `VENOM-PLAN.md`) ·
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, pair locked 2026-07-07) ·
+`BLOOM-PLAN.md` (the Bloomweaver v2 — garden-healer class slate, 4 core candidates 🟡 at verdict 2026-07-10) ·
 `TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (Seal pillar pass) ·
