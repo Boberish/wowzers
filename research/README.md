@@ -24,6 +24,7 @@ EASE dial · rig WHEN→THEN · keystones · signature CD).
 | `warden-sweep.md` | fresh sweep (Lies of P · BB rally · MonHun lance · For Honor · Vermintide) | Tank·Warden branch-slate fuel — block/hold/counter economies (2026-07-10) |
 | `duelist-sweep.md` | fresh sweep (Sekiro streaks · SF6 Drive/burnout · Punch-Out bait puzzle · Nine Sols) | Tank·Duelist challenger-slate fuel — read/weave/blood economies (2026-07-10) |
 | `bloom-sweep.md` | fresh sweep (PvZ economy/lanes · Wildfrost timers · Atomicrops' warning) | Bloomweaver class-slate fuel — garden-as-instrument grammars (2026-07-10) |
+| `cask-sweep.md` | fresh sweep (Potion Craft recipes · Overcooked pipelines · PoE flasks via KB) | Alchemist·Cask branch-slate fuel — filing + additive themes on a LOCKED deck (2026-07-10) |
 
 ## The uniform template (every file follows it)
 
