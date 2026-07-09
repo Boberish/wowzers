@@ -22,6 +22,8 @@ EASE dial · rig WHEN→THEN · keystones · signature CD).
 | `expedition-33.md` | Clair Obscur: Expedition 33 | per-character unique battle minigames + timing parry grammar |
 | `wildcards.md` | the wider net | rhythm-combat + build-craft standouts (Hi-Fi Rush, NecroDancer, Sekiro, Balatro, PoE, …) |
 | `warden-sweep.md` | fresh sweep (Lies of P · BB rally · MonHun lance · For Honor · Vermintide) | Tank·Warden branch-slate fuel — block/hold/counter economies (2026-07-10) |
+| `duelist-sweep.md` | fresh sweep (Sekiro streaks · SF6 Drive/burnout · Punch-Out bait puzzle · Nine Sols) | Tank·Duelist challenger-slate fuel — read/weave/blood economies (2026-07-10) |
+| `bloom-sweep.md` | fresh sweep (PvZ economy/lanes · Wildfrost timers · Atomicrops' warning) | Bloomweaver class-slate fuel — garden-as-instrument grammars (2026-07-10) |
 
 ## The uniform template (every file follows it)
 
