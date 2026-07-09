@@ -413,7 +413,8 @@ nodes, not node kinds.
 **Phases:**
 - **MAP-1 (solo PoC, Bulwark) — ✅ DONE, merged 2026-07-02 (`fd62f7b`).** `game/run_map.gd` (seeded 6-row × 3-lane DAG; quota'd kinds; one locked 401 backdoor + key on a feeder lane; locks gate only optional edges) · `game/map_content.gd` (Realm-1 skin: GPU Shrine caches, water-guzzling Cooling Stations, SIX authored events — careers fair / reservoir / allocation queue / alignment office / severance floor / captcha checkpoint) · `game/ui/map_screen.gd` (circuit-board render, 401→200 OK lock stamps, integrity readout) · `game/ui/map_event_panel.gd` · RunState +map/inventory/hp_frac (persistent integrity: fights start at run HP; events bruise, floor 5%) · Bulwark boss-select "THE TOPOLOGY" entry. **Verified:** `sim/map_sim.gd` determinism/structure/walker ALL PASS (300 seeds; avg 5.9 nodes · 3.65 fights · 28 backdoor runs); `sim/ui_smoke_map.gd` full loop PASS; classic `ui_smoke` PASSED + bulwark_sim determinism PASS ×3 (classic untouched). *Pending:* a WSLg GUI glance at the custom `_draw` (headless can't render it) — screenshot probe is a MAP-2 nicety.
 - **MAP-2 (depth) — 🟢 PARTLY DONE (tickets + ring identity + events, `d2e51ea`); ELITE/MARKET/secret-rooms/art still open.** All map depth lands on the RAID floors (the Bulwark solo map stays a practice fossil). **DONE (raid-richness):** **TICKETS** — pickup→turn-in quests (`RunMap` `n_tickets`/`tickets[]` + `ticket_open`/`ticket_close` payloads, all guarded off = byte-identical solo map) resolved in `raid_hud._ticket_at` with rewards in the wound-attrition economy (repair-sector / integrity / refuel / patch, reused `_apply_map_fx`) + a **SPRINT-RETRO** bonus for closing every ticket on a floor; placed same-lane-forward so closeable by construction (`raid_map_sim._prove_tickets`: placement-det + closeable 40/40·80/80·80/80 PASS). Per-floor counts in `RaidContent.FLOORS` (R3:1/R2:2/R0:2). **Ring identity** — `MapContent.realm_title/sub(ring)` (user space → middleware → root), ring-aware `MapScreen` header + open-ticket list + toast + ticket node badges. **Expanded events** — +5 (helpdesk / model graveyard / prompt injection / rollback daemon / overtime daemon); the SOLO pool is FROZEN at the original 6 via `event_ids()` (pool size shifts rng draws → byte-identity), raid floors pull `raid_event_ids()` (all 11). Verified: raid_map_sim all floors PASS; solo map_sim byte-identical (5.90 nodes/20 keys/6 backdoor); ui smokes green; combat untouched. **STILL OPEN:** secret rooms, **ELITE** nodes, **MARKET** (needs GEAR loot to stock), 10+ events, map art pass, route-agnostic objectives.
-- **GATE nodes (Tier 1 personal exams, §GAME SHAPE) — ✅ DONE, merged 2026-07-03.**
+- **GATE nodes (Tier 1 personal exams, §GAME SHAPE) — ✅ merged 2026-07-03 → ✂️ REMOVED
+  2026-07-10 (THE PURGE, §GAME SHAPE amendment; the block below is history).**
   Every Ring-3 map now carries ONE **GATE** node ("SECURITY CHECKPOINT / AUTH GATE / THE
   TURNSTILE", gold pad, glyph `1`): YOUR seat steps through ALONE and fights its class exam —
   the solo teaching boss recast to its Realm-1 identity, display-fields only (ids canonical):
@@ -813,11 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 01:00 · main (docs only) — **CLAIM: SLATE MACHINE row 2 — Tank·DUELIST challenger
-  slate** (fresh sweep → `research/duelist-sweep.md` → incumbent ladders restated as PITCH #0 +
-  challenger themes → 3 skeptics → `TANK-PLAN.md` new § 🟡, same verdict board as deck v1).
-  Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 00:57; claim line
-  rides another session's MASTER-PLAN commit — file was dirty)*
+- ☑ 2026-07-10 · main (docs only) · TANK-PLAN §7 (NEW) + `research/duelist-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 2: Tank·DUELIST challenger slate — DONE, three challengers
+  join the LIVE §3 verdict board** (v1's Headsman/Ironside/Ghost restated as PITCH #0a/b/c at the
+  same bar; Bill still picks 2–3 ladders TOTAL). **THE MATADOR** (the read/bait economy —
+  Punch-Out grammar; insight from reads + late answers; absorbs Read the Room) · **THE
+  STORMWEAVE** (the unpaid weave→riposte instrument; scoped to weave events so the Ghost keeps
+  generic footwork) · **THE SCARLET TRADE** (the blood ledger — assembles Blood Price/Overreach;
+  floors everywhere, healer-duet pricing flagged). Fresh sweep: Sekiro streaks · SF6
+  Drive/burnout (→ Ironside boon material) · Punch-Out bait puzzle · Nine Sols (its
+  plant-and-detonate = the skeptics' kill: Mark/Wound/Payload triple-collision). 3 skeptic
+  passes, 1 kill, ~8 fixes. No CARD-CATALOG rows (deck revision = Phase-2 row D2).
+  *(slate-machine session, tick 00:57)*
 
 - ☑ 2026-07-10 · main (docs only) · §TOOLING / `SIM-PLAN.md` (NEW) — **THE BALANCE LADDER
   (Bill: "do nothing now, but plan how we balance the most possible within reason — a day-long
@@ -900,25 +908,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   its theme / EASE-fold / generic; zero orphans) + inline skeptic checks. Poison excluded
   (Alchemist's lane). Bill picks 2–3 themes → deck pass. *(this session)*
 
-- ☐ 2026-07-10 · main (docs only) — **CLAIM: THE RAID REBUILD plan (Bill) — zoom-out redesign of
-  the raid run structure.** Bill's brief: raid is "all over the place" — decide total run length
-  (STS2-scale OK, but the rhythm game is taxing) → boss timer budget → time left for trash/elites
-  (fights scale in length as the deck grows) → the node-type slate (SHOP wanted · CURSES wanted ·
-  events thin = content-later) → a legible reward-type system (the ticket/keys/random-% layer
-  reads as confusing — explain/reskin) → verdict on the raid TICKETS vs zone TICKETS-v2 quest
-  systems (mix / merge / keep separate). Bosses stay (recast later — nothing set in stone).
-  Deliverable: NEW `DESCENT-PLAN.md` at Bill's verdict (multi-agent workflow: recon → 3-angle
-  design panel → judged synthesis) + ledger rows. Docs only, no code. **Also in the brief
-  (addendum):** literal NEW minigame/puzzle node types (structure now, content later) + fold in
-  the parked MASTER-PLAN ideas (PROMPT MARKET merchant · CAPTCHA micro-skill-checks · secret
-  rooms · TEETH CONTEST nodes). **RESUME PROTOCOL (Bill's order: retry rate limits, survive
-  token-end):** workflow run `wf_7a379a0b-44a`; a 6-min session cron babysits it. If THIS session
-  dies before `DESCENT-PLAN.md` lands: in a fresh session read the workflow journal
-  `~/.claude/projects/-home-bill-projects-Wowzers/55c10657-7a29-4b99-a894-35ed79e1d42b/subagents/workflows/wf_7a379a0b-44a/journal.jsonl`
-  (every finished agent's output — recon digests / designs / judge reports / synth are all there;
-  the script sits next to it under `…/workflows/scripts/`), hand-author a continuation workflow
-  from whatever phase is missing (cross-session resumeFromRunId does NOT work), then finish:
-  write `DESCENT-PLAN.md`, tick this claim, ledger rows, commit. *(raid-rebuild session)*
+- ☑ 2026-07-10 · main (docs only) — **THE RAID REBUILD plan (Bill) — DONE, 🟡 AT BILL'S VERDICT.**
+  Bill's zoom-out brief ("the raid is all over the place — rebuild it from the ground up, keep
+  the bosses for now" + mid-brief addendum: literal new minigame/puzzle node types + fold in the
+  parked merchant/master-plan ideas) → NEW **`DESCENT-PLAN.md`** (the descent spec v1 + the
+  12-question verdict board §V). Headlines: **4-floor promotion** (Vorathek → Floor 1's Seal;
+  Rings count 3-2-1-0) · **time budget ~2h25 clean / ~3h lived** (floors 23/34/39/49 min, floor
+  boundary = the blessed suspend) · **fight ladder** (deck-cycle law, 3-min trash cap, packs ON
+  raid floors, enrage retighten; Seal budget contract 5/7/9/12 min for the later boss pass) ·
+  **node slate** with printed one-line contracts + fight-tier pips (PROMPT MARKET 6-slot shop +
+  post-Seal market phase · THE JAILBREAK printed curse deals · CAPTCHA/BENCHMARK/SERVER
+  ROOM/PATCH BAY minigame nodes + 2 reserved · ▚WILD ~4%) · **reward legibility** (3 header
+  meters ⏣⚡⏻; renames LUCK/STANDING/BACKUPS/REGENERATE/DEPRECATE; raid integrity KILLED;
+  currency governance rule) · **quest verdict: one grammar, two ledgers** (THE QUEUE +
+  ROUTE/DEED/ESCORT shapes; zone TICKETS v2 untouched world-side). Built by a 14-agent workflow
+  (7 recon incl. MEASURED Seal timings via raid_sim → 3 architects time/economy/quest-first → 3
+  adversarial judges → judged synthesis; run `wf_7a379a0b-44a`, journal in the session dir).
+  Ledger: NEW §I rows + absorbed-row pointers (GEAR-3 Market, TEETH curse/CONTEST/rerolls-out,
+  elite-node, stakes re-fiction). ⚠ Code lands AFTER `purge-oldgame` merges (GATE-cut overlap;
+  recon confirmed gates still live on main). *(raid-rebuild session)*
 
 - ☐ 2026-07-10 · main (docs only) + session watcher loop — **CLAIM: THE DUNGEON REBUILD plan,
   GATED on THE RAID REBUILD above (Bill).** A self-paced loop in this session watches that claim
