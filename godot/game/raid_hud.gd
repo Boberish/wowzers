@@ -161,15 +161,48 @@ func _sync_caster_cls() -> void:
 
 ## COMMANDER: make _d.party cover exactly the three seats the human doesn't occupy.
 ## Defaults = the verified comp RaidNet.make_spec would fill in anyway; prior picks
-## survive a seat change between descents (only the vacated/claimed seats reset).
+## survive a seat change between descents (only the vacated/claimed seats reset) —
+## and, since REFIT P4, across SESSIONS: the first call seeds from the Profile roster.
 func _ensure_party() -> void:
 	if _d.party.has(_seat_key):
 		_d.party.erase(_seat_key)
+	if not _roster_seeded:
+		_roster_seeded = true
+		var stored := Profile.current().roster()
+		for key in RaidNet.SEAT_KEYS:
+			if key == _seat_key or _d.party.has(key):
+				continue
+			var e = stored.get(key)
+			if _roster_entry_valid(key, e):
+				_d.party[key] = {"cls": String(e["cls"]), "aspect": String(e["aspect"])}
 	for key in RaidNet.SEAT_KEYS:
 		if key == _seat_key or _d.party.has(key):
 			continue
 		var cls := String(SEAT_CLASS.get(key, "bulwark"))
 		_d.party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
+
+## ROSTER PERSISTENCE (REFIT P4): a stored raider is only adopted if its class/aspect
+## still exist for that seat in the LIVE tables — a roster saved before a class cut
+## self-heals to defaults instead of crashing. A class is "known" for a seat iff it is
+## the seat's native class or default_aspect() resolves it away from the seat default
+## (the polymorphic pairs) — no separate class table to drift (registry comes with P4).
+func _roster_entry_valid(key: String, e) -> bool:
+	if not (e is Dictionary and e.has("cls") and e.has("aspect")):
+		return false
+	var cls := String(e["cls"])
+	var known: bool = cls == String(SEAT_CLASS.get(key, "")) \
+		or RaidNet.default_aspect(key, cls) != String(RaidNet.DEFAULT_ASPECT.get(key, ""))
+	if not known:
+		return false
+	for a in _lobby_aspects(key, cls):
+		if String(a["id"]) == String(e["aspect"]):
+			return true
+	return false
+
+## Persist the commanded warband (called when the party screen CONFIRMS — edits you
+## back out of are not committed). Headless keeps this memory-only (disk-inert).
+func _save_roster() -> void:
+	Profile.current().set_roster(_d.party)
 
 ## COMMANDER: the full 4-seat spec cfg — your seat + the commanded AI raiders. With
 ## no party overrides this emits exactly the defaults make_spec fills in for missing
@@ -223,6 +256,7 @@ var _shell: Control = null   ## the WorldShell above us (null = standalone probe
 ## The offline descent STATE (P3.1b): the HUD renders _d, CampaignCore steps it.
 ## Everything that used to be ~30 _map_*/run/party/oath members lives on it now.
 var _d := RunDirector.new()
+var _roster_seeded := false        ## Profile roster folded into _d.party once per boot
 
 # Topology raid floor (MAP-3a, offline): map-run state lives HERE, not in RunState —
 # the raid never uses the solo run machinery (and draft2 owns run_state.gd right now).

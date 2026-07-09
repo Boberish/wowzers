@@ -338,7 +338,12 @@ func _show_party_setup() -> void:
 	go.custom_minimum_size = Vector2(260, 52)
 	go.add_theme_font_size_override("font_size", 19)
 	go.add_theme_color_override("font_color", Palette.GOLD_BRIGHT)
-	go.pressed.connect(_show_bastion if hud._party_ctx == "bastion" else hud._start_map_run)
+	go.pressed.connect(func():
+		hud._save_roster()   # ROSTER PERSISTENCE (REFIT P4): confirm = commit the warband
+		if hud._party_ctx == "bastion":
+			_show_bastion()
+		else:
+			hud._start_map_run())
 	var goc := CenterContainer.new()
 	goc.add_child(go)
 	box.add_child(goc)
