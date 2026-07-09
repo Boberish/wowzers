@@ -98,10 +98,17 @@ the blocked hit and return it) rather than just subtract. If you catch yourself 
 2. Draft the slate per the quotas above. Tag every card with exactly ONE **TYPE** from the
    shared vocabulary (same meaning across every class — Bill classifies at a glance):
    **POWER** (just bigger numbers — the bread) · **GREED** (risk more for more; bites when you
-   overreach) · **STRAT** (rewards a specific plan or clever play) · **EASE** (more forgiving /
-   less twitchy — Bill likes this lane; watch it doesn't soften too far, and count your EASE
-   cards per deck) · **RULE** (changes a rule of the minigame — ⭐transformers and keystones
+   overreach) · **STRAT** (rewards a specific plan or clever play) · **EASE** (**the difficulty
+   dial** — see below) · **RULE** (changes a rule of the minigame — ⭐transformers and keystones
    live here) · **TEAM** (helps the whole warband — the one support card).
+   **EASE = the difficulty dial (redesigned 2026-07-09).** Do NOT author a stack of flat "wider
+   window / slower beat" comfort cards (easy to write, dull to draft, floods the pool). Author
+   **one dial archetype**: on drop it **rolls 2–3 of the class's knobs**; the player takes ONE and
+   slides it **COMFORT** (wider/slower/more grace, **damage-neutral** — free, cost is the slot) or
+   **BITE** (tighter/faster/less grace, **+damage** that only pays if they can hit it — a real
+   whiff-gamble, GREED-adjacent). The roll sets *which knobs are offered*; the *direction is always
+   chosen* (so it never trips "luck wearing greed's clothes"). Comfort still caps (diminishing
+   returns) and tapers with power. Full spec: `DECK-LAYOUT.md §4`.
    Finer intent words (speed, control, comeback, build-around…) go in the WHY text, not pills.
 3. Self-audit: anti-pattern list (§3), offer-trio test (§1), archetype check (§4),
    BROKE/FADED/DEAD/OPENED if the core mechanic moved.

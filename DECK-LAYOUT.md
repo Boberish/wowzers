@@ -91,19 +91,39 @@ at a glance). Verbatim:
 - **POWER** — just bigger numbers (the bread).
 - **GREED** — risk more for more; bites when you overreach.
 - **STRAT** — rewards a specific plan or clever play.
-- **EASE** — more forgiving / less twitchy. *(See the difficulty note below.)*
+- **EASE** — **the difficulty dial**: tune one of the class's own minigame knobs softer for
+  comfort *or* harder for +damage. *(See the dial note below.)*
 - **RULE** — changes a rule of the minigame (⭐ transformers and keystones live here). *(Bill's
   "weird" cards.)*
 - **TEAM** — helps the whole warband (the one Support card). *(Bill's "support" card.)*
 
-**EASE = player-authored difficulty (the lane Bill likes, with its guardrail).** Stacking
-EASE-tagged cards makes the minigame more forgiving — for the player who wants to *live in the
-execution* over juggling spells. It stays honest because **it's a trade, not a free
-difficulty-drop: floor up, ceiling down.** Picks spent on comfort aren't spent on spikes, so an
-EASE build peaks below a POWER/greed build; window-widening has a **cap** (diminishing returns) so
-even full-EASE still asks for *some* execution; and you **count the EASE cards per deck** so a
-class can't drift soft. It self-selects — pushers ignore it, learners and relaxers lean in. No
-menu, no persistent power.
+**EASE = the difficulty dial (redesigned 2026-07-09, Bill).** An EASE card no longer just makes
+the minigame softer — it's a **two-way dial** on the class's own knobs (perfect-window size, beat
+speed, dodge grace, …). On drop it **rolls 2–3 of the class's knobs**; you **take one** and slide
+it either way:
+- **← COMFORT** — wider / slower / more grace, **damage-neutral**. Free on the card; you pay only
+  the opportunity cost (a draft slot, and the bite bonus you passed up).
+- **BITE →** — tighter / faster / less grace, **+damage** (rarity-scaled). A *real gamble*, not
+  free power: the tighter version makes a less-skilled player fall OUT of perfect more often and
+  lose more than the bonus. You only profit if you can genuinely hit it — self-honest difficulty,
+  no separate penalty needed. This is why the bite face reads **GREED-adjacent**, and why nobody
+  auto-skips the card — the learner turns it down, the pusher turns it up.
+
+**Why a dial, not a stack of flat comfort cards.** It **de-floods the pool** (one rolled archetype
+replaces the dozen "Wider Window / Slower Beat" stats that were easy to author and dull to draft —
+the actual pain that started this), puts a **decision on every drop** (which knob + which way), and
+lets you **flip a knob mid-run** (comfort while you're learning the fight → bite once you've
+mastered it — self-authored difficulty that tracks your growth). It's Hades' Pact-of-Punishment,
+expressed through *our* timing dials (the "borrow the grammar, innovate the sentence" filter passes:
+a difficulty slider that pays out per perfect is a thing only our timing-combat engine has).
+
+**Guardrails (kept).** Comfort widening still **caps** (diminishing returns → even full-comfort
+asks for *some* execution) and **tapers with power** (helps the cold player, not the hot one); the
+roll only sets *which knobs are on offer* — **you** choose the direction, so the greed stays
+*chosen per build*, never a lottery ("luck wearing greed's clothes", §deck-creator anti-patterns).
+Lives **in the boon draft** as the EASE-type card (competing there is what keeps free comfort
+honest — a slot spent on comfort isn't spent on a spike). It self-selects: pushers crank bite,
+learners and relaxers crank comfort. No menu, no persistent power.
 
 ---
 
@@ -141,7 +161,10 @@ must be fun BARE; (7) comp-variant content is parked.
 **Added this session (2026-07-09):**
 - **Borrow the grammar, innovate the sentence** (the next-level filter): every borrowed system
   must do something only our timing-combat or deterministic-AI engine could — else it's a repack.
-- **EASE is a trade** (floor up / ceiling down), never a free difficulty-drop.
+- **EASE is a two-way dial** (redesigned 2026-07-09) — one card, one knob, slide it COMFORT
+  (wider/slower, damage-neutral) or BITE (tighter/faster, +damage-as-a-gamble). De-floods the flat
+  comfort cards into one rolled archetype; the direction is always *chosen*, never a lottery.
+  Supersedes the old "floor up / ceiling down" framing. See §4.
 - **Branches are soft** — attractors, not cages; hard-gating is the only thing that shoehorns.
 - **The CD amplifies skill** — never `button = damage`.
 

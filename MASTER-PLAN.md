@@ -773,6 +773,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §4/§6 + deck-creator skill + CARD-CATALOG —
+  **EASE → THE DIFFICULTY DIAL (Bill's idea).** EASE was going to get skipped (less "fun") and was
+  flooding the pool (flat comfort cards are easy to author). Fix, locked with Bill (3 forks, all
+  recommended): the EASE type is no longer a stack of flat comfort stats — it's **one rolled
+  two-way dial** boon. On drop it **rolls 2–3 of the class's minigame knobs** (window / speed /
+  grace); you **take one** and slide it **← COMFORT** (wider/slower, **damage-neutral**) or
+  **BITE →** (tighter/faster, **+damage** that only pays if you can actually hit the harder version
+  — a real whiff-gamble, GREED-adjacent). Lives **in the boon draft** (opportunity cost keeps free
+  comfort honest); comfort still caps + tapers with power; the roll only sets *which* knobs are
+  offered so the **direction is always chosen** (dodges the "luck wearing greed's clothes" trap).
+  Wins for both audiences (learner turns it down, pusher turns it up), **de-floods** the pool (one
+  archetype replaces the dozen flat comfort cards), a decision on every drop, and you can **flip a
+  knob mid-run** as you master a fight. = Hades' Pact-of-Punishment routed through *our* timing
+  dials. Landed: `DECK-LAYOUT.md §4` (full spec) + §6 law · `.claude/skills/deck-creator/SKILL.md`
+  (authors dials, not flat comfort, going forward) · `CARD-CATALOG.md` (type-field note; flat-EASE
+  boons Quick Wrists/Roll With It fold into the tank dial at reshape, forgiving *creed* The Veteran
+  stays). No code (a Phase-2 reshape builds the per-class dial + its knob pool). *(this session)*
 - ☑ 2026-07-09 · main (docs only) · WORLD §INSTANCES + BUILD-LEDGER §D + PROGRESSION §Tokens —
   **THE STAKES MODEL — how a wipe hurts + how hard bosses get (Bill: "bosses hard & complex like
   WoW, wipe→run-back→retry — but here you lose your 1-hour run after ONE wipe? earn a revive?

@@ -64,6 +64,11 @@ support, spells). Every table has the same columns:
 
 - **Card (id)** — display name, with the **code id** in `code font` (or a proposed slug if unbuilt).
 - **Type** — one of the 6 (`POWER` / `GREED` / `STRAT` / `EASE` / `RULE` / `TEAM`), per `DECK-LAYOUT.md §4`.
+  ⚠ **EASE is the difficulty dial now (2026-07-09, `DECK-LAYOUT.md §4`)** — one rolled two-way dial
+  (COMFORT ↔ BITE), **not** a stack of flat comfort stats. Existing flat-EASE *boons* (e.g. the
+  Duelist's **Quick Wrists** / **Roll With It**) **fold into their class's dial at deck reshape**;
+  don't author new flat comfort boons. Forgiving *creeds* (e.g. **The Veteran**) are a whole-run
+  temperament, not comfort stats — they stay as creeds and keep their EASE flavor.
 - **Rarity** — draft frequency `haiku`/`sonnet`/`opus` for boons; `—` for creeds/modules/rig/signature.
 - **Status** — a lifecycle glyph from above.
 - **Effect** — plain language (no jargon), with the **H/S/O ladder inline** where the card scales

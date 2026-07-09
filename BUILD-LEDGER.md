@@ -48,7 +48,7 @@ incoming load.
 | `core/combat_core.gd` (1148) | FLOW=AGGRO rewire (threat, 44 refs) · dodge-unify finish (`:83-114`) · interrupt-by-ability flag · `perform()` input surface | **#1.** Aggro + dodge + interrupt all edit the reducer. Serialize. Aggro is a *deliberate* checksum rebaseline. |
 | `game/raid_hud.gd` (4496) | Every class gauge · aggro box (25 refs) · voidcaller (15) · two-verb hint (`:2414`) · per-seat `_verb()` (`:2181`) · tank/dodge/drop UI | Land **ClassBand registry + shared Gauge base (REFIT-P4) FIRST**, or the per-class meter wave makes this unmaintainable. |
 | `data/raid/raid_content.gd` (626) | Seal beat data · `threat_enabled` (`:625`) · melee/telegraph split (`:8`) · Seal-pillar · aura-add · Trial-Ladder Versions | The whole boss wave edits this. Serialize claims; each shifts fight checksums **on purpose**. |
-| `game/draft.gd` (+ `draft_sim`) | Rarity tier-roll engine · rerolls-out · loot two-modes · curse cards · spells reweight · curio-pool v2 | One draft/roll pipeline. Serialize claims; keep `draft_sim` green each merge. |
+| `game/draft.gd` (+ `draft_sim`) | Rarity tier-roll engine · rerolls-out · loot two-modes · curse cards · spells reweight · curio-pool v2 · EASE dial knob-roll | One draft/roll pipeline. Serialize claims; keep `draft_sim` green each merge. |
 | `net/net_server.gd` (798) · `net/raid_net.gd` (220) | Online `(seed,spec)` spec-carry · Depth `spec.depth` · §4 MMO extraction | Versioned protocol — rebuild+redeploy coupled. **Class registry (P4) gates spec-carry of arbitrary builds.** |
 | world save `rift_world.cfg` + Atlas screens | Unlock Tree · TICKETS v2 · Zone-Remembers · W3 front-door · W4 write-back | Interlocked — all serialize state onto one save + one Atlas UI. **Unlock System is the spine.** |
 | `core/boss_state.gd` (61) · `core/combat_state.gd` (73) · `data/tuning_config.gd` (70) | Threat state + master flags (`threat_enabled`, tuning) | The tank/aggro rework edits all three together. |
@@ -131,7 +131,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Duelist guarded base kit | 🔒 | TANK §4 | new guarded tank seat, bespoke PARRY+DODGE (no `unified_dodge`/ration) | Numbers→playtest. **Wait for Bill's verdict export blob.** A/B vs Bulwark default. |
 | Peel mechanics (progressive + grace-delay) | 🔒 | TANK §1c | aggro-% shape, victim dodge bar, TAUNT hard-override | Part of FLOW=AGGRO. Grace-delay = fixed tick offset (det-safe). |
 | Tank defensive signature CD ("the wall") | 💡 | TANK §1b, DECK-LAYOUT §5 | new ~1-min CD, carries dropped GUARD | Not yet designed. Both specs get one. |
-| Duelist deck v1 | 🟡 | TANK §3, CARD-CATALOG | kit-local layers, `_fw()` dispatch (Well idiom) | **Whole slate at Bill's board.** GUARD-drop fallout: 3 rig cards 🔮→Warden. |
+| Duelist deck v1 | 🟡 | TANK §3, CARD-CATALOG | kit-local layers, `_fw()` dispatch (Well idiom) | **Whole slate at Bill's board.** GUARD-drop fallout: 3 rig cards 🔮→Warden. **EASE-dial fallout: flat EASE boons (Quick Wrists/Roll With It) fold into one dial** (DECK-LAYOUT §4); The Veteran creed stays. |
 | FLOW module (aggro→damage upgrade) | 💡 | TANK §1b | new STRAT module | Competes for Floor-1 module slot. Reconcile at deck reshape. |
 | Duelist sims + carry | 🔒 | TANK §4.4 | new `duelist_sim`, `raid_sim --tank=` | After base + deck. |
 | Duelist HUD slice | 🔒 | TANK §4.5 | `raid_hud` timing instrument, own FLOW bar, shared aggro box | WSLg screenshot (headless can't `_draw`). Non-tanks get no flow bar. |
@@ -151,6 +151,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Raid buff-channel application | ⏳ | TEMPO App-A, FERMATA §7 | raid buff channel | Battle Hymn + Veil Warband + Cask "Round for the House". Debilitator/Shining Hour = precedent. |
 | DECK-LAYOUT Phase 2 program | 🔒 | DECK-LAYOUT §7 | every `data/<class>/*.gd` + CARD-CATALOG | Program locked; per-class feel-verdicts open (CD shape, 2-vs-3 branches, keystone generic-vs-category). |
 | Signature CD per class (baseline) | 🔒 | DECK-LAYOUT §5 | new baseline button per class | Schema locked; per-class shapes open. Amplify skill, never button=damage. |
+| EASE difficulty-dial (rolled comfort↔bite knob) | 🔒 | DECK-LAYOUT §4 | `draft.gd` knob-roll · per-class minigame knobs (window/speed/grace) · `raid_hud` dial card-face | Replaces flat comfort boons pool-wide (built per-class at reshape). **Rides the rarity tier-roll engine** (bite +dmg is rarity-scaled). **Same knobs Depth/Seal-pillar compress from the boss side — coordinate the caps** (two writers). Tank folds Quick Wrists/Roll With It in. |
 | CARD-CATALOG back-fill (stub classes) | ⏳ | CARD-CATALOG | doc only | Tank fully populated; Twinfang/Alchemist/Well/Mender/frozen = stubs. `dump-cards.sh` deferred. |
 
 **Per-class reshape work:**
