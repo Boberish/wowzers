@@ -44,9 +44,9 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (S
 `FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `REFIT-PLAN.md` (structural audit v2 →
 the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
 loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·
-`RAID-PLAN.md` (netcode-era reference) ·
-`HISTORY.md` (frozen milestone build-up M0→R2.5 + PoC notes — the old CLAUDE.md status list) ·
-`PORT-PLAN.md` / `rift-godot-port-brief.md` / `poc/` (origins, historical).
+`archive/` (**frozen docs — 2026-07-10 cleanup**: `HISTORY.md` the milestone build-up M0→R2.5 ·
+`RAID-PLAN.md` netcode-era origin · `PORT-PLAN.md` / `rift-godot-port-brief.md` the port origins ·
+`UNLOCK-BRIEF.md` retired; see `archive/README.md` — never claim work from there) + `poc/`.
 
 **⚙ CARD-TRACKING LAW (2026-07-09):** every card — creed/module/boon/rig/keystone/support/spell,
 any class — is tracked in **`CARD-CATALOG.md`**, one row, one status glyph (💡 idea → 🟡 at verdict →
@@ -117,7 +117,7 @@ INDEX — design detail stays in the plan doc; its own upkeep rules live in `BUI
   global-class cache, or `--script` runs can't resolve `class_name`s).
 - Play: `godot --path godot` (add `--rendering-driver opengl3` if WSLg struggles).
   Debug jump-ins: `--autostart=raid[:seat[:aspect[:boss]]]` · `raidmap[:seat[:aspect]]` ·
-  `gate[:seat[:aspect]]` (more idioms in HISTORY.md).
+  ~~`gate[:seat[:aspect]]`~~ (gates deleted 2026-07-10 THE PURGE; more idioms in `archive/HISTORY.md`).
 - Online: `./server/serve-local.sh`, client PLAY ONLINE. ⚠ Protocol is versioned — rebuild +
   redeploy the server together with clients (old versions rejected at handshake by design).
 
@@ -209,6 +209,6 @@ parameter (latency/accuracy).
 
 ## History
 The full verified build-up (M0 walking skeleton → classes → strings → Gilded Reliquary →
-stages → R0–R2.5 online → maps) lives in **`HISTORY.md`** — debug jump-ins, engine notes,
+stages → R0–R2.5 online → maps) lives in **`archive/HISTORY.md`** — debug jump-ins, engine notes,
 and per-milestone gotchas. Its verify commands may name sims deleted in the 2026-07-06
 fresh slate; git history has them.

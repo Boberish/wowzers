@@ -1,4 +1,11 @@
-# RAID-PLAN — Project Rift goes co-op (M2 reborn)
+# RAID-PLAN — Project Rift goes co-op (M2 reborn) — ❄ FROZEN 2026-07-10
+
+> **This doc is ARCHIVED REFERENCE** (frozen at the 2026-07-10 doc cleanup, per the loop
+> audit). Its netcode architecture record (server-authoritative WS lockstep, deploy kit,
+> protocol rules) remains the origin reference; its **economy vocabulary was superseded
+> 2026-07-03** (`PROGRESSION-PLAN.md` — the material economy is CUT) and its solo-Trials
+> framing died with the RAID-ONLY lock + THE PURGE (MASTER §GAME SHAPE). Current online
+> state: MASTER-PLAN §ONLINE. Nothing below is a live plan — do not claim work from here.
 
 The game's original fantasy — MMO trinity combat, live, multiple real players on one boss,
 shared timers, taunts, cross-class interplay — was always the destination. The solo game we

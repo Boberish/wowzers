@@ -35,8 +35,9 @@ dodge (active roster). Interrupts ride existing abilities in a tight window (the
 - **Owners:** `WORLD-PLAN.md` §COMBAT PILLARS (the laws) · each class plan (the spec's grade
   bands + minigame) · `DODGE-PLAN.md` (the one dodge) · MASTER-PLAN §GRAPHICS (StrikeJudge UI).
 - **Status:** ✅ built for the active roster (Twinfang · Alchemist · Well); tank minigame locked
-  at deck-verdict; interrupt-by-ability **unbuilt** (lands with the reworks); frozen classes
-  keep the old two-verb dodge.
+  at deck-verdict; interrupt-by-ability **unbuilt** (lands with the reworks — ⚠ post-PURGE
+  interim: NO class carries a kick). After THE PURGE (2026-07-10) the only frozen kits left are
+  Bulwark (dies with the Duelist) + Bloomweaver — they keep the old two-verb dodge.
 
 ### L1 · THE FIGHT (~2–12 min) — run the rotation, hit the moments
 The class minigame loop (build/spend) + the boss's authored beats (dodge ration ~3–8 non-tank) +
@@ -53,8 +54,9 @@ the tank's minigame, universal (design). Fight length ×2.5 BAKED; structure bea
 
 ### L2 · THE NODE (~30 s–5 min) — pick a door, resolve a screen
 One map step: route choice → the node's payload — a fight · an INFERENCE-CHECK event (build-read
-dice, ⚡ nudge, wagers, branches) · cache / cooling / market / ticket / personal GATE exam / Seal —
-→ post-fight ceremonies (⏣ mint → drop roll *if the kill is event-worthy* → 1-of-3 boon draft).
+dice, ⚡ nudge, wagers, branches) · cache / cooling / market / ticket / Seal (~~personal GATE
+exam~~ — cut 2026-07-10 THE PURGE) — → post-fight ceremonies (⏣ mint → drop roll *if the kill is
+event-worthy* → 1-of-3 boon draft).
 - **Owners:** MASTER-PLAN §MAPS (the as-built truth: DAG gen · tickets · checks · gates · shard
   gates) · `WORLD-PLAN.md` §THE WORLD MODEL (zone nodes) · `PROGRESSION-PLAN.md` §Drops
   (drops-are-EVENTS) · `TEETH-PLAN.md` (CONTEST node · curse events — unbuilt).
@@ -107,7 +109,7 @@ events with open lobbies + offline parity (W4) → the parked MMO-feel levers (l
 ghost races · co-op standing).
 - **Owners:** `WORLD-PLAN.md` (events · guest-world · presence) · MASTER-PLAN parking lot
   (MMO-feel levers — wants, none claimed) · `REFIT-PLAN.md` §4 (the shell architecture that
-  hosts it) · `RAID-PLAN.md` (netcode reference — half-frozen, §3 stale 7).
+  hosts it) · `archive/RAID-PLAN.md` (netcode origin — frozen 2026-07-10).
 - **Status:** the moat is built (lockstep, AI seats, online descent); the *feel* layer (presence,
   events, levers) is all W4+.
 
@@ -137,26 +139,22 @@ that view; DECK-LAYOUT §1 is the closest in-doc statement.
 ### Drift — decisions locked but not yet folded into their doc-of-record
 *(all already tracked in TEETH §WHERE EACH LANDS — listed so nobody trusts a stale page)*
 1. **Rerolls-out 🔒** (TEETH) is not in `ASCENSION-STEAL-PLAN.md` or MASTER §SYSTEMS-C — both
-   still read "REROLL 1⏣ / LOCK" as current. *(⚠ banner added to ASCENSION-STEAL this commit;
-   fold lands with the build claim.)*
-2. **Loot need/greed B-half revival + the boss-kill reward stack** (TEETH 🔒) not yet in
-   PROGRESSION §Drops (its declared home).
+   still read "REROLL 1⏣ / LOCK" as current — ✅ **breadcrumbed 07-09/10** (ASCENSION-STEAL
+   banner + MASTER §SYSTEMS-C); the real fold lands with the build claim.
+2. **Loot need/greed B-half revival + the boss-kill reward stack** (TEETH 🔒) — ✅
+   **breadcrumbed 07-10** into PROGRESSION §Drops; folds at the build claim.
 3. **Curse cards → "biting blessings"** (MASTER §MAPS Phase 2/3) — still a name with no design.
 4. `TEMPO-PLAN.md` §4's module language predates the 07-09 "modules are add-ons, not
    transformers" demotion — DECK-LAYOUT wins by its own rule; harmless, noted for the reshape.
 5. ASCENSION-STEAL's *"Rift in one line"* describes the pre-world game (aspect → chain 5 bosses →
    draft; no creeds/world/two surfaces) — a stale summary at the top of an active doc-of-record.
 
-### Stale blocks in otherwise-live docs
-6. MASTER §MAPS INFERENCE-CHECK's **"NEXT (unclaimed)" list is entirely shipped** (P3 branches /
-   wager+mulligan / seat-picker / online-Prior — the merged bullets sit right above it; the
-   progress table says FEATURE-COMPLETE). *(⚠ stale-banner added this commit.)*
-7. `RAID-PLAN.md` is half-superseded (its material economy is CUT with inline notes; the netcode
-   sections remain the reference) — candidate for a HISTORY-style freeze banner at top.
-8. MASTER §ONLINE still opens "IN FLIGHT — another session owns this" (netcode has been DONE
-   since R2.5) — stale header, fix next time someone edits the section.
-9. MASTER §CLASSES "Next up: draft parity" — §SYSTEMS-A recorded parity as already-existing in
-   2026-07-02; the bullet survived it.
+### Stale blocks in otherwise-live docs — ✅ ALL FIXED 2026-07-09/10
+6. MASTER §MAPS' shipped "NEXT (unclaimed)" list — ✅ stale-banner 07-09.
+7. `RAID-PLAN.md` — ✅ frozen + moved to `archive/` 07-10.
+8. MASTER §ONLINE "IN FLIGHT" header — ✅ fixed 07-10.
+9. MASTER §CLASSES draft-parity bullet — ✅ struck 07-10 (plus §SYSTEMS-E GEAR-2→GEAR-3 and the
+   dead §GRAPHICS 3D-HUD bullet, found via BUILD-LEDGER §0's drift list).
 
 ### Genuine gaps — questions no doc answers
 - **A · THE DUNGEON has no plan.** It is load-bearing (the fast loop · mobile-first · Depth's
@@ -208,11 +206,14 @@ BUILD-LEDGER did it for "what's unbuilt," CARD-CATALOG for "what cards exist," t
 "what IS the game." Do **not** consolidate 23 docs into fewer, bigger ones: MASTER-PLAN at
 ~2,300 lines is where all the stale blocks live — big files rot faster than pointed ones.
 
-**Recommended follow-ups** (small; Bill verdicts, none blocking):
-1. ✅ *(this commit)* ⚠ drift banners on ASCENSION-STEAL + MASTER §MAPS' stale NEXT block;
-   GAME-LOOPS.md added to the CLAUDE.md plan-doc index.
-2. Freeze `RAID-PLAN.md` with a HISTORY-style top banner (netcode reference intact).
-3. Author the DUNGEON spec (gap A) before W3 — the one real content hole the audit found.
-4. Fix the MASTER §ONLINE / §CLASSES stale headers opportunistically (findings 8–9).
-5. Fold TEETH's locked decisions into their home docs as their build claims open (TEETH already
-   plans this; drift items 1–3 are the checklist).
+**Follow-up status (updated 2026-07-10 — Bill greenlit the fixes + THE PURGE):**
+1. ✅ drift banners (ASCENSION-STEAL, MASTER §MAPS) + CLAUDE.md index line.
+2. ✅ RAID-PLAN frozen → `archive/` (with PORT-PLAN · port brief · UNLOCK-BRIEF · HISTORY;
+   see `archive/README.md`).
+3. ✅ DUNGEON spec — consolidated as WORLD-PLAN §THE DUNGEON (07-10); content authoring = W3.
+4. ✅ stale headers fixed (§ONLINE · §CLASSES · §SYSTEMS-E · §GRAPHICS).
+5. ⏳ TEETH folds land with their build claims (breadcrumbs point both ways).
+6. **THE PURGE (2026-07-10, Bill)** — the audit's biggest downstream: Voidcaller/Mender/Reckoner
+   + the 15 solo bosses + GATE nodes deleted from code; Alchemist/Well become seat defaults;
+   Bulwark dies with the Duelist; old-game docs archived. Record: MASTER §GAME SHAPE amendment
+   + BUILD-LEDGER §A½.
