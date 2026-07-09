@@ -78,8 +78,10 @@ Every boon has three coordinates. They're **orthogonal — don't conflate them:*
    spec.** How builds are **themed and named** ("the thorns build"). Soft and mix-friendly: a card
    feeds **≥1** ladder, ladders **cross-feed**, each ladder ends in a keystone. This layer
    **cross-cuts** the dial-lanes.
-3. **CARD-TYPE — the descriptor.** One of the **6 universal types** (Part 4). How Bill reads a
-   card at a glance; same meaning on every class.
+3. **CARD-TYPE — the descriptor.** A **best-fit tag** from the 6-word vocabulary (Part 4) — a
+   reading aid + per-deck coverage checklist, **not a strict taxonomy** (lenses-not-law,
+   2026-07-09). The other two axes do the real categorizing; this one has no structural
+   consequence.
 
 > *Worked example (tank):* **Deep Pockets** is filed in the **BANK** dial-lane (structural), feeds
 > **both** the Headsman and Ironside ladders (thematic — soft membership), and is tagged **STRAT**
@@ -117,10 +119,31 @@ when the fantasy fills it" — a rich spec earns a third sub-spec; a lean one st
 
 ---
 
-## PART 4 — THE 6 CARD-TYPES (the universal vocabulary)
+## PART 4 — THE 6 CARD-TYPES (lenses, not a law — demoted 2026-07-09, Bill)
 
-Every card is tagged with **exactly one** type — same meaning across every class (Bill classifies
-at a glance). Verbatim:
+**What the types are FOR — the two jobs they were invented to do, both authoring-time:**
+1. **Spread** — de-flood the pool: a deck shouldn't be fourteen POWER cards in a row.
+2. **Coverage** — a checklist so no *kind* of good card gets forgotten: did this deck get a greed
+   card? a weird rule-bender? the difficulty dial? the team card?
+
+**What they are NOT (Bill, 2026-07-09 — "to be strict removes a ton of freedom"):** a strict
+taxonomy. The old law *"every card is tagged with exactly one type"* is **dropped**. Nothing
+mechanical reads the type (verified: no code path, no draft weighting — the only code presence is
+an inert `ctype` label on the Well's boon dicts); the axes that categorize *with consequences* are
+**dial-lanes** (structural) and **ladders/sub-specs** (thematic) — Part 2. So:
+
+- **Tag each card with its best-fit type** — a reading aid for Bill, nothing more. A card that
+  honestly straddles two (a greedy card that rewards a plan) takes its dominant flavor; **never
+  contort a design to fit a box**, and a card that fits no box is fine — these are ideas to start
+  from, not walls.
+- **Apply the checklist per DECK, not per card** — at authoring/audit time, walk the two jobs
+  above (coverage + spread) against the whole slate.
+- **Two "types" are really other things** and keep their own laws regardless of this demotion:
+  **EASE** is a designed card archetype (the rolled two-way difficulty dial, below) and **TEAM**
+  is the Support slot (Part 1) wearing a tag; **RULE** mostly means "keystone," which has its own
+  slot laws.
+
+The vocabulary (same meaning across every class):
 
 - **POWER** — just bigger numbers (the bread).
 - **GREED** — risk more for more; bites when you overreach.
@@ -209,6 +232,10 @@ must be fun BARE; (7) comp-variant content is parked.
 - **Sub-specializations are the depth engine** (2026-07-09, Bill) — deepen a class by adding/filling
   a branch (its own boons + module + keystone), not by stacking flat boons; EASE-dial de-bloat +
   sub-spec depth = more cards that matter, fewer that don't. See §3.
+- **Card-types are lenses, not a law** (2026-07-09, Bill) — the 6-word vocabulary is an authoring
+  checklist (spread + coverage, applied **per deck**) plus a best-fit reading tag; *"exactly one
+  type per card"* is dropped and no design is ever contorted to fit a box. EASE (the dial
+  archetype) and TEAM (the Support slot) keep their own laws independent of the tags. See §4.
 - **The Rig is REQUIRED** (2026-07-09, Bill) — every class deck ships the single-circuit WHEN→THEN
   rig (see §1's RIG LAW): class-authored earned WHENs, greed-dial payout (`base × mult`), wire after
   fight 1 + one free Floor-2 re-wire. **The stackable multi-proc model stays CUT** — no THEN-board,

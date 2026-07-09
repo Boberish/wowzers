@@ -773,6 +773,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §2/§4/§6 + CARD-CATALOG (Type field) + deck-creator
+  skill — **CARD-TYPES DEMOTED: LENSES, NOT A LAW (Bill).** Bill questioned the 6 card-types
+  ("to be strict removes a ton of freedom… these are some ideas to start off"). Verified first:
+  **nothing mechanical reads the type** — no code path, no draft weighting; only an inert `ctype`
+  label on the Well's boon dicts. The taxonomy had also already betrayed itself (EASE became a
+  designed archetype — the dial; TEAM is the Support slot wearing a tag; RULE ≈ keystone). Fix:
+  the law *"every card is tagged with exactly one type"* is **dropped**. The 6 words stay as the
+  shared vocabulary doing the two jobs they were invented for, both authoring-time: **spread**
+  (de-flood — no 14-POWER decks) + **coverage** (a checklist so no *kind* of good card gets
+  forgotten), now applied **per DECK, not per card**. Cards take a **best-fit** tag (straddlers
+  pick the dominant flavor; never contort a design to fit a box). Dial-lanes + ladders/sub-specs
+  remain the axes that categorize with consequences. EASE-the-dial + TEAM-the-slot keep their own
+  laws independent of the tags. No code; **no BUILD-LEDGER move** (relaxes an authoring rule — no
+  planned-work rows or file-touch sets change). *(this session)*
+
 - ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §1 (new RIG LAW block) + §6 — **THE RIG IS REQUIRED
   (Bill).** Law-stated what the slot table implied: **every class deck ships a WHEN→THEN Rig** — a
   reshape without one isn't done. Chassis identical on every class, WHENs/THENs class-authored

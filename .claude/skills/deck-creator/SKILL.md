@@ -95,8 +95,12 @@ the blocked hit and return it) rather than just subtract. If you catch yourself 
 ## 6 · Process (design → verdict → build)
 
 1. Read the plan doc + the verdict history. List the core mechanic's dials. Note standing laws.
-2. Draft the slate per the quotas above. Tag every card with exactly ONE **TYPE** from the
-   shared vocabulary (same meaning across every class — Bill classifies at a glance):
+2. Draft the slate per the quotas above. Tag every card with its best-fit **TYPE** from the
+   shared vocabulary (same meaning across every class — Bill classifies at a glance).
+   **Lenses, not a law (2026-07-09, Bill):** the types are an authoring checklist applied per
+   DECK — does the slate have greed? a rule-bender? the dial? the team card? is any one type
+   flooding? — not a strict per-card taxonomy. A straddler takes its dominant flavor; never
+   contort a design to fit a box; a card that fits no box is fine. The vocabulary:
    **POWER** (just bigger numbers — the bread) · **GREED** (risk more for more; bites when you
    overreach) · **STRAT** (rewards a specific plan or clever play) · **EASE** (**the difficulty
    dial** — see below) · **RULE** (changes a rule of the minigame — keystones live here, and an

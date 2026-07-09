@@ -63,7 +63,10 @@ support, spells). Every table has the same columns:
 > `| Card (id) | Type | Rarity | Status | Effect |`
 
 - **Card (id)** — display name, with the **code id** in `code font` (or a proposed slug if unbuilt).
-- **Type** — one of the 6 (`POWER` / `GREED` / `STRAT` / `EASE` / `RULE` / `TEAM`), per `DECK-LAYOUT.md §4`.
+- **Type** — best-fit tag from the 6-word vocabulary (`POWER` / `GREED` / `STRAT` / `EASE` / `RULE` /
+  `TEAM`), per `DECK-LAYOUT.md §4`. ⚠ **Lenses, not a law (2026-07-09, Bill):** the type is a reading
+  aid + a per-deck coverage/spread checklist, not a strict taxonomy — nothing mechanical reads it.
+  Tag the dominant flavor; never contort a card to fit a box.
   ⚠ **EASE is the difficulty dial now (2026-07-09, `DECK-LAYOUT.md §4`)** — one rolled two-way dial
   (COMFORT ↔ BITE), **not** a stack of flat comfort stats. Existing flat-EASE *boons* (e.g. the
   Duelist's **Quick Wrists** / **Roll With It**) **fold into their class's dial at deck reshape**;
