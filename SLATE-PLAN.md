@@ -14,6 +14,10 @@ Status: ⬜ queued · 🔄 in flight (claim stamp) · 🟡 slate AT VERDICT · �
 unlocked) · ⏭ skipped by Bill. **Flip status in the same commit as the event.** Rows may be
 reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 
+> ⏸ **HOLD (Bill, 2026-07-10 00:16):** do NOT claim a new row before **00:42 today** — a tick
+> firing earlier replies "⏸ on hold until 00:42" and stops. The first tick at/after 00:42
+> DELETES this hold block in its claim commit and proceeds normally.
+
 | # | Target | Kind | Slate lands in | Status | Claimed | Note |
 |---|---|---|---|---|---|---|
 | 0 | Twinfang · **Tempo** | branch slate | `TEMPO-PLAN.md` §14 | 🟡 | — | THE WORKED REFERENCE (6 pitches, 3 skeptics, 0 kills). Bill picks 2–3 → deck pass. |
