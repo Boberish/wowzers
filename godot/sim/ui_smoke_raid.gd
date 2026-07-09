@@ -28,7 +28,6 @@ func _process(_delta: float) -> bool:
 	# TEMPO REWORK framework plumbing: SWEAR A CREED → INSTALL A MODULE → fold into the blade kit.
 	hud._seat_key = "blade"
 	hud._aspect = "tempo"
-	hud._sync_blade_cls()
 	hud._d.run = hud._make_run()
 	assert(hud._d.run.char_class == "twinfang", "blade run should be twinfang")
 	var flags := {"creed": false, "mod": false, "skip": false}   # dict = by-ref so lambdas can mutate it

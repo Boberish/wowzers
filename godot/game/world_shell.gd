@@ -86,8 +86,6 @@ func drive_autostart(args: PackedStringArray) -> void:
 			hud._seat_key = wspec[1] if wspec.size() > 1 and hud.SEAT_IDX.has(wspec[1]) else "tank"
 			hud._aspect = wspec[2] if wspec.size() > 2 else String((hud.ASPECTS[hud._seat_key][0] as Dictionary)["id"])
 			hud._sync_healer_cls()
-			hud._sync_blade_cls()
-			hud._sync_caster_cls()
 			_show_atlas()
 		elif a.begins_with("--autostart=zone"):
 			# --autostart=zone[:seat[:aspect]]  → straight into ZONE 1 (the Gildfields)
@@ -95,8 +93,6 @@ func drive_autostart(args: PackedStringArray) -> void:
 			hud._seat_key = zspec[1] if zspec.size() > 1 and hud.SEAT_IDX.has(zspec[1]) else "tank"
 			hud._aspect = zspec[2] if zspec.size() > 2 else String((hud.ASPECTS[hud._seat_key][0] as Dictionary)["id"])
 			hud._sync_healer_cls()
-			hud._sync_blade_cls()
-			hud._sync_caster_cls()
 			hud._zone_id = WorldContent.ZONE1
 			if hud._world == null:
 				hud._world = WorldSave.load_save()
@@ -122,7 +118,6 @@ func _show_home() -> void:
 	hud._zone_live = false
 	hud._zone_id = ""
 	hud._party_ctx = ""
-	hud._gate_live = false
 	hud._online_map = false
 	hud._d.run = null                       # no descent = no boon run (fresh one per descent)
 	hud._d.ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
@@ -203,8 +198,6 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	if hud._world_pending:              # THE WORLD (W1): the aspect ceremony opens the Atlas
 		hud._world_pending = false
 		hud._sync_healer_cls()
-		hud._sync_blade_cls()
-		hud._sync_caster_cls()
 		_show_atlas()
 		return
 	_screen = "raidpick"
