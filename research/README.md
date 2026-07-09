@@ -21,6 +21,7 @@ EASE dial · rig WHEN→THEN · keystones · signature CD).
 | `across-the-obelisk.md` | Across the Obelisk | 4-player co-op deckbuilder — party synergy at our exact seat count |
 | `expedition-33.md` | Clair Obscur: Expedition 33 | per-character unique battle minigames + timing parry grammar |
 | `wildcards.md` | the wider net | rhythm-combat + build-craft standouts (Hi-Fi Rush, NecroDancer, Sekiro, Balatro, PoE, …) |
+| `warden-sweep.md` | fresh sweep (Lies of P · BB rally · MonHun lance · For Honor · Vermintide) | Tank·Warden branch-slate fuel — block/hold/counter economies (2026-07-10) |
 
 ## The uniform template (every file follows it)
 
