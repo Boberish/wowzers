@@ -1,7 +1,9 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
-**Status:** 🟡 **DESIGN — Duelist deck v1 AT BILL'S VERDICT (2026-07-08).** The round-5 minigame
-(tester v5) is the locked base; the Duelist's full deck is designed and on the verdict board:
+**Status:** 🟡 **DESIGN — base minigame being sharpened (2026-07-09); Duelist deck v1 AT BILL'S VERDICT.**
+Latest locks: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter, universal, progressive
+peel (§1c)** · consequences flagged (§1d). The round-5 minigame (tester v5) is the base; the Duelist deck
+is on the verdict board:
 https://claude.ai/code/artifact/cf273dd1-4169-45e2-b990-47000941d417 — interactive KEEP/TWEAK/CUT,
 export blob comes back here. **Nothing is built yet.** Old Bulwark = frozen placeholder, NOT the base.
 The Warden's deck is a LATER pass (after the Duelist proves the frame).
@@ -97,10 +99,73 @@ Owed, not yet designed. **⚠ Card fallout:** the guard cards (Return to Sender,
 re-home to the Warden; SPEND lane is now DUMP-only. Deferred per Bill (branches after the minigame) —
 flagged in `CARD-CATALOG.md`.
 
-**FLOW = a MODULE for now (Bill, 2026-07-09):** the clean-answer streak → **ramps your DUMP damage** (the
-lever "lots of dodge, not much dmg" is asking for), built as a **draftable module**, not base. Both specs
-can take it. *"If we really like it we can add it normal [to the base]."* Keep the *slow-mo* flavor to the
-Ghost keystone (Borrowed Time) so it doesn't double up.
+**FLOW = the AGGRO meter, BASE — see §1c (2026-07-09, Bill).** Supersedes the earlier "flow = a module":
+the clean-answer streak is now **base on every tank** and IS the boss's-attention/threat meter. The **FLOW
+module** is repurposed as the *upgrade* — "your flow ALSO ramps your DUMP damage" (the aggro-hold becomes a
+damage engine). Keep the *slow-mo* flavor to the Ghost keystone (Borrowed Time) so it doesn't double up.
+
+### §1c · THE AGGRO SYSTEM — FLOW is the boss's attention (2026-07-09, Bill) — **UNIVERSAL**
+**The reframe:** the tank's clean-answer streak, **FLOW**, IS the aggro/threat meter. Play clean → you
+hold the boss's attention; slip → it drifts to the warband. Aggro stops being a damage-threat rotation
+(the old "babysit" model Bill parked to raid-land) and becomes a **skill readout on the minigame you
+already play**. Lore skin (the takeover): high flow = you hold the boss's *context*; a slip = it *compacts
+you out* and wanders (reuses the existing THREAT_DROP = "context-window shift" flavor, MASTER-PLAN §255).
+
+- **FLOW is BASE, not a module** (supersedes the same-day "flow = module" call): every tank always has the
+  flow/aggro meter. The **FLOW module** becomes the *upgrade* — flow ALSO ramps your DUMP damage.
+- **Universal — one rule everywhere (REVISES the "aggro = raid-only" lock `b2afbca`):** aggro works
+  identically in overworld / dungeon / raid — **one habit, learned once**. Only the *ambient numbers*
+  (boss damage/HP, via the Depth spine) scale by content — **never how aggro works**. A peel in the open
+  world just hurts less; you never relearn it. The full coordination *expression* (tank-swaps, hot-potato
+  curses) blooms at raid intensity because the numbers are brutal there, not because the rule changed.
+- **The progressive peel (Bill's model):** aggro is a **%** (the tank's normalized flow). **≥ 30%** → the
+  boss is locked on the top-threat seat (the tank). **< 30%** → each incoming attack has an **X% chance to
+  peel** to another seat, **X rising as aggro falls**. **0%** → fully **random** targeting. A **TAUNT** is
+  the hard override (grab it back a few seconds; everyone-has-a-taunt = a DPS can clutch-grab it, hot-potato
+  curses force swaps).
+- **Reuses the built threat engine wholesale** — `BossState.threat` (by seat index), `taunt_seat_i`,
+  `_threat_target()`, `THREAT_DROP`, the victim gold-frame + aggro-lost banner. We only **change the tank's
+  threat SOURCE from damage → flow**; non-tanks keep low passive threat (damage/heals).
+- **No tank? it just degrades (Bill's "crazy stuff" for free):** aggro is universal, but **only the tank
+  DRIVES it high** (via the flow minigame). Remove the tank → nobody drives it → aggro sits low → the peel
+  goes random → everyone shares the incoming, all dodging hard. "3 DPS, no tank" = emergent hard-mode, not
+  a special case. **Don't** bolt flow=aggro onto every class (a healer "holding the boss by healing
+  cleanly" is off-fantasy) — aggro-% is the universal layer; flow is the tank's driver on top.
+
+**The stream reconciliation (melee vs telegraph) — this IS the built architecture** (`raid_content.gd:8`
+"melee chip + Crush/Talon → the TANK parries; Void Volley aoe string → EVERYONE dodges"). One boss stream,
+consumed by role:
+- **Melee** = the constant, **un-freezable** chip on the aggro-holder (`enc.melee {every,min,max}`) → the
+  tank's **skinny small/normal bars** (the SECONDARY dodges/blocks). Only the aggro-holder eats it.
+- **Targeted DEFENSIBLE telegraphs** (aimed at the victim) → the **tall bars** (the MAIN parries/shields) =
+  the "big hits"; the *same* attack a peeled squishy must dodge.
+- **AoE telegraph strings** → the **flurries** (WEAVE / HOLD); everyone dodges each beat on their ration.
+- Tank sees melee + every telegraph (dense = "densest footwork"); non-tanks see only what's aimed at them
+  (sparse). **Tuning coupling is mild:** melee is *3 scalars* (tempo + damage band), not an authored
+  pattern — class tuning (windows/mit/flow) is done ONCE vs a standard melee tempo; each boss authors its
+  telegraphs + turns the ONE melee-tempo knob (the difficulty dial, cranked at Gemini/Mythos). They
+  **layer** (melee un-freezable; a telegraph freezes ability timers) — one legible seam, not a tangle.
+- **Determinism (build constraint):** the peel roll + the 0%-random target MUST draw from a seeded stream
+  in fixed order (`state.rng` inside `update()`, or a per-policy `DetRng` — never unseeded). Flow derives
+  from deterministic clean-answer counts; checksums/lockstep stay correct for free.
+
+### §1d · RIPPLES from flow-aggro (consequences to work — none block the lock above)
+- **Non-tank survivability vs peeled attacks** — a slip can send a TARGETED big hit at a squishy
+  (normally tank-only). Must be **dodgeable + dangerous-not-instant** (anti-death-spiral); the peeled hit
+  still telegraphs to its new victim. Tune peel lethality.
+- **Healer follows the boss** — the healer duet now shifts target with aggro (heal whoever's peeled) →
+  more dynamic healing; a real consequence for healer design + the AI healer policy.
+- **AI tank reliability is load-bearing** — solo/backfill: the AI tank must hold flow (playing clean does
+  it) + be legible to its policy; a human squishy peeled by a dumb AI slip must not feel unfair.
+- **Raid/dungeon identity** — "aggro = raid-only" was a plank of that split; now universal. Raids keep
+  identity via intensity + the other raid-only bits. Revise [[raid-dungeon-identity-split]] + WORLD-PLAN.
+- **Hold the Line (support)** overlaps the flow/aggro readout — reframe / key it off flow at the deck pass.
+- **Crucible module** (fills from damage TAKEN) fills slower while the boss is peeled away — note at the deck pass.
+- **Depth affix vocabulary** gains melee-tempo + peel-severity as intensity knobs (same TuningConfig spine).
+- **Single-target law (pillar #1)** unaffected — one stream, varying recipient (the built "Swing → Victim"
+  already does this); worth a clarifying line in WORLD-PLAN so it doesn't read as a violation.
+- **⏭ NEXT THREAD — the flow economy:** what each clean answer ADDS, what a slip SUBTRACTS, the decay
+  rate, and the flow→aggro% mapping (incl. the 30%/0% points). Nothing tunes until this is set.
 
 - **⚠ CUT HISTORY (don't rebuild):** R2 THREE DOORS/lanes · R3 SHIELD CHARGE-&-PLANT WALL +
   circle-size + THE DUEL/balance/TOPPLE/guard-break + hard phase breaks · R4 shared 3-move kit.

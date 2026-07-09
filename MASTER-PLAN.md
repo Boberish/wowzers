@@ -773,6 +773,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-09 · main (docs only) · §CLASSES + §MODES / `TANK-PLAN §1c-1d` + WORLD-PLAN + CARD-CATALOG —
+  **AGGRO = FLOW, UNIVERSAL — big combat-system change (Bill).** The tank's clean-answer streak (**FLOW**)
+  IS the aggro/threat meter: play clean → hold the boss; slip → it peels to the warband. Replaces the old
+  damage-threat "babysit" taunt. **Locks:** (1) FLOW is **base** (the aggro meter) — supersedes the same-day
+  "flow = module"; the module becomes the damage-ramp *upgrade*. (2) **Universal — REVISES the "aggro =
+  raid-only" lock `b2afbca`**: one rule in all content (overworld/dungeon/raid), only ambient numbers scale;
+  raids keep identity via intensity. (3) **Progressive peel:** aggro is a % (the tank's flow); ≥30% = boss
+  on tank, <30% = X% chance to peel (X rises as aggro falls), 0% = random. TAUNT = hard override
+  (everyone-has-a-taunt). (4) **Reuses the built threat engine** — just rewire the tank's threat SOURCE
+  damage→flow; non-tanks stay low passive threat. (5) **No tank = graceful chaos** (nobody drives aggro →
+  random) — "3 DPS no tank" for free; don't bolt flow=aggro onto every class. (6) **Stream reconcile:** melee
+  = the tank's skinny filler (aggro-holder only); targeted telegraphs = the tall "big hits" (= what a peeled
+  squishy dodges); AoE strings = the flurries — the built melee/telegraph split (`raid_content.gd:8`), one
+  seam = melee tempo. Determinism: peel roll uses seeded rng. **Consequences flagged (`§1d`):** non-tank
+  peel-survivability, healer-follows-boss, AI-tank reliability, raid/dungeon identity, Hold-the-Line +
+  Crucible overlap, Depth affix vocab, single-target-law clarify. **NEXT:** the flow economy (what raises/
+  lowers it, decay, the %→aggro map). *(tank aggro session)*
 - ☑ 2026-07-09 · main (docs only) · §CLASSES / `TANK-PLAN.md §1b` — **TANK BASE-MINIGAME PASS — the
   two specs sharpened (Bill).** Bill was "a bit lost on the difference between the 2 classes"; this pins
   it. **The specs now MATCH: 2 buttons each — a MAIN + a SECONDARY**, one rating rule (SECONDARY = small
@@ -1143,9 +1160,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - ☑ 2026-07-07 · main (docs only) · §MODES & ENDGAME / `WORLD-PLAN.md` §INSTANCES /
   `PROGRESSION-PLAN.md` §Laws — **RAID vs DUNGEON identity split (Bill, design session).**
   Bill's WoW-classic instinct (raid daily lockout + humans-only raids + aggro-only-in-raids +
-  M+ dungeons) triaged against the laws. **LOCKED:** aggro/threat = **raid-only grammar**
-  (formalizes the existing `threat_enabled` per-fight guard as content law — dungeons/zones/
-  events/gates never enable it; raids double down on coordination mechanics); **dungeons =
+  M+ dungeons) triaged against the laws. **LOCKED:** ~~aggro/threat = raid-only grammar~~ **⚠
+  REVISED 2026-07-09 → aggro is now UNIVERSAL** (the tank rework makes aggro = FLOW, a skill
+  readout not a rotation — fun enough to live everywhere; one rule in all content, only ambient
+  numbers scale; raids keep identity via intensity. `TANK-PLAN §1c`, WORLD-PLAN §INSTANCES);
+  **dungeons =
   the M+ push surface** (the 07-04 Depth ladder gets the dungeon door as its primary home —
   30–45 min = the push cadence, Forge tiers + mutators = affixes; raids keep the dial as the
   long-form flex). **CUT (recorded so we don't re-derive):** humans-only raids (breaks the

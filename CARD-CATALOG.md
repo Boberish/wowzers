@@ -129,7 +129,7 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 | ⭐ **The Crucible** | RULE | — | 🟡 | TRANSFORMER. Damage TAKEN fills it → IGNITES ~6s WHITE STEEL (parries cost 0 wind, lands bank ◆◆, counters ×1.5) → crash (regen dead 4s, gauge empty). Ignite timing is the decision. |
 | **The Scales** | STRAT | — | 🟡 | Balance pan: parries tip crimson, dodges tip blue; near-BALANCE grows an edge (→ +12% dealt / −12% taken); pegging a side kills it until re-centred. Anti-autopilot. |
 | **The Whetstone** | GREED | — | 🟡 | Each banked ◆ sharpens over 4s (sharp pip ×1.5 in a dump); an unanswered real hit dulls your sharpest pip. Hold-vs-spend with teeth. |
-| **Flow** _(both specs)_ | STRAT | — | 💡 | Clean-answer streak → **ramps your DUMP damage** (the "lots of dodge, not much dmg" lever). `TANK-PLAN §1b`, Bill 2026-07-09: a **module for now** — promote to base if loved. Competes for the Floor-1 module slot; reconcile at deck reshape. |
+| **Flow** _(the module)_ | STRAT | — | 💡 | **Reframed 2026-07-09:** base FLOW is now the **AGGRO meter** (`TANK-PLAN §1c`) — always on. This MODULE is the *upgrade*: your flow ALSO **ramps your DUMP damage** (aggro-hold → damage engine, the "lots of dodge, not much dmg" lever). Competes for the Floor-1 module slot; reconcile at deck reshape. |
 
 ### Boons — LANE: THE SWING
 | Card (id) | Type | Rarity | Status | Effect |

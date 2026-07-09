@@ -292,11 +292,16 @@ on failure), not persistent-conquest zones — revisit at the raid retune.
 Bill's WoW-classic instinct ("raids: lockout + humans-only + aggro; dungeons: M+ farm")
 triaged against the laws — what survived is the *identity* split, not the gates:
 
-- **Aggro is raid grammar.** Threat/taunt (`threat_enabled`) fires ONLY behind raid
-  doors — dungeons, zone fights, events, and gates never enable it. Already true in code
-  (per-fight flag, every call site guarded — `combat_core.gd`); now a content LAW. Raids
-  double down on coordination-shaped boss mechanics (threat drops, tank swaps, split
-  soaks) — the mechanics theater.
+- **⚠ REVISED 2026-07-09 (Bill) — aggro is now UNIVERSAL, not raid-only.** The old lock
+  quarantined aggro to raids because the *threat-meter* taunt was clunky. The tank rework
+  replaces it with **aggro = FLOW** (a skill readout on the tank's minigame, not a rotation),
+  so it's fun enough to live everywhere (`TANK-PLAN §1c`). **One rule in all content** —
+  overworld / dungeon / raid — so players never relearn it; only the *ambient numbers* scale
+  by content (the Depth spine), never the aggro rule. **Raids keep their identity via
+  intensity** — the full coordination *expression* (tank-swaps, hot-potato curses, split
+  soaks) blooms only at raid numbers. Single-target law holds: one boss stream, the recipient
+  varies (the built "Swing → Victim"). `threat_enabled` stays the engine flag but is now on by
+  default in group content, feeding off flow.
 - **Dungeons are the M+ push surface.** The infinite Depth ladder (`spec.depth` numeric
   spine + affix breakpoints — design locked 2026-07-04, MASTER-PLAN §MODES & ENDGAME)
   gets the DUNGEON door as its **primary home**: 30–45 min runs are the natural
