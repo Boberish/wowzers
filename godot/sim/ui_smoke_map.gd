@@ -34,7 +34,7 @@ func _process(_delta: float) -> bool:
 		var fl: Dictionary = RaidContent.FLOORS[0]
 		hud._d.map = RunMap.generate(MAP_SEED, hud._d.fights.size(),
 			MapContent.raid_event_ids(),
-			{RunMap.KIND_GATE: 1, RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
+			{RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
 			int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
 		hud._d.node = -1
 		hud._show_map()
