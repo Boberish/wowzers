@@ -773,6 +773,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-09 · main (docs only) · NEW `GAME-LOOPS.md` + CLAUDE.md index line — **CLAIM: core
+  game-loop AUDIT (Bill).** Idea-level (not code): read every plan doc, map the full loop stack
+  (moment→run→session→meta), where each loop is defined, gaps/contradictions/fragmentation, and a
+  verdict on whether the many-.md structure is the right store. Output = one consolidated loop-map
+  doc + recommendation. No design changes, no card/ledger rows. *(this session)*
+
 - ☐ 2026-07-09 · main (docs only) · TEMPO-PLAN (new branch-slate section) + `research/` (NEW dir) +
   BUILD-LEDGER §2 — **CLAIM: Twinfang·Tempo deck rebuild, Phase A (Bill).** Ground-up reshape onto
   DECK-LAYOUT, Bill's scope: Tempo first (Fermata pass later), **base ideas only this pass** —
