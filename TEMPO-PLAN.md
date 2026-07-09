@@ -703,6 +703,308 @@ Owed same-as-Tempo wiring: HUD gauges · elite acquisition (A8) · online spec-c
 
 ---
 
+## 14. THE TEMPO BRANCH SLATE — six sub-spec base ideas 🟡 AT VERDICT (2026-07-09)
+
+**What this is.** The ground-up Tempo deck rebuild starts here (Bill, 2026-07-09): six candidate
+BRANCHES (sub-specializations, `DECK-LAYOUT.md §3`) — pick 2–3, then the full deck gets authored
+around the winners. **Base ideas only:** every example card below is an ILLUSTRATION of how the
+branch could work, not a proposed card (no CARD-CATALOG rows until the deck-build pass).
+
+**How it was made:** researched from 6 games into `research/` (WoW retail · StS 1+2 · Hades 1+2 ·
+Across the Obelisk · Expedition 33 · a 12-game wildcards sweep) → four synthesis lenses (branch
+shapes · greed · timing grammar · spectacle/party) → pitches → **3 adversarial skeptics (0 kills,
+~17 fixes — all folded below)**.
+
+### The harvest (what the research says, one page)
+
+1. **Sub-specs everywhere are "same buttons, different engine."** WoW's three rogues share
+   Energy+CP but own different fight-phases; Hades' memorable weapon aspects REWIRE what a press
+   means, and its stat-lean aspects are forgotten. Rule adopted: every branch changes the timing
+   shape or what a press does — never just numbers.
+2. **The meter's LAW is the identity.** Bank it (StS2 Regent) vs decay it (Hellsinger Fury) vs
+   reset it (NecroDancer groove) — one "clean play fills a meter," three completely different
+   feels. The branches below give Flow-adjacent meters different laws instead of five new resources.
+3. **Defense-feeds-offense is the decade's best melee loop** (Sekiro posture, Nioh ki pulse, E33
+   parry) — rerouted here through THE OPENING and through PRESERVING streaks, because our dodge is
+   defensive by law.
+4. **Greed must be chosen per use, with a bite you authored yourself** (Pact of Punishment, StS
+   boss relics, Balatro skips). A reward keyed to a roll you didn't influence is a lottery ticket.
+5. **The one-cadence trap** (FFXIV's 2-minute meta): branches that peak on the same clock
+   homogenize. The six below trigger on six different rhythms — ramp clock, self-set burns, boss
+   events, ally windows, whole-fight streak, constant density.
+6. **Warband duos are unclaimed space.** Hades/StS/E33 are solo or parallel-co-op; nobody has
+   cross-SEAT build payoffs on one shared telegraph stream. Four seats + AI backfill = ours.
+
+### Slate rules (stated once, apply to all six)
+
+- **The entry CREED carries the branch identity from run start; the module deepens it** (the
+  DECK-LAYOUT chain, and the skeptics' recurring fix — a branch that only exists after the Floor-1
+  module pick is dead cards for half a run).
+- **Every branch contributes KNOBS to the EASE dial's roll — never flat comfort cards.**
+  (Motif → resolve-beat width · Redline → burn rate · Counterpoint → chain-entry width ·
+  Conductor → cue window · Soloist → rank-drop grace · Polyrhythm → ghost-pip size.)
+- Touch targets at full build: 5 everywhere except Redline (6 of 7 — IGNITE via the module door).
+- Three keystones touch beat-speed in different ways (True Redline accelerates · Crescendo locks ·
+  Tempo Spike aligns) — acknowledged so the pick is made knowingly.
+
+---
+
+### PITCH 1 — THE MOTIF · *write the kill before you play it*
+
+**The twist:** your damage becomes a promissory note. Clean strikes inscribe WOUNDS on the boss —
+a visible stack that does nothing yet. Pressing Eviscerate ON a downbeat *resolves* the stack:
+a clean resolve cashes everything; a fumbled resolve press **burns half the stack**. Land the
+resolve inside an Opening and it counts double. Patience → one number that dwarfs the fight.
+
+**What you're for:** the ramp player. You stop caring about per-hit damage; you care about stack
+count and when to cash. Verses (inscribe) and a chorus (resolve) — and the chorus itself is a
+graded press with real stakes.
+
+**Dials:** THE GRADE (only Bullseye/Perfect inscribe) · the downbeat (the resolve press) · the
+OPENING (the doubler, not the gate). Wounds live from run start on the entry creed; the module
+adds the deepening layer. No core dial bend.
+
+**Example cards (illustrative):** *Deep Cuts* (STRAT) — Bullseyes inscribe 2 wounds. ·
+*Let It Deepen* (GREED) — unresolved wounds grow +8%/beat, cap +50%; a fumbled dodge tears 3 off.
+· *Resolving Chord* (POWER) — resolved wounds hit 25% harder. · *Second Verse* (RULE) — after a
+resolve, your next 3 strikes auto-inscribe (even Goods).
+
+**Capstone keystone — THE CATALYST CHORD:** a resolve landed on an Opening's Peak doesn't just
+cash — the stack ERUPTS across the next 3 beats as a chained detonation and the blast staggers
+the boss, stretching the window. The minigame visibly changes: three beats of fireworks you earned
+over a whole verse.
+
+**Greed/comfort:** hold-the-stack greed; the bite is burning wounds on a fumbled resolve or losing
+them to a phase change. Comfort face: cash early and often, smaller but safe.
+
+**Not the Alchemist, not Fermata's Mark:** nothing ticks, nothing poisons — wounds are inert until
+your press; and where Fermata's Mark cashes its brands freely, the Motif's identity IS the growth
+clock plus a stake-carrying graded resolve.
+
+**Sources:** WoW Assassination's ramp identity · StS Catalyst · AtO Dark-detonation.
+**Pillar check:** single-target native · no new buttons (5 targets) · dodge untouched ·
+meta-taste ADMITTED (ramp→spend) but the graded, stake-carrying resolve press exists only here.
+
+---
+
+### PITCH 2 — REDLINE · *light the furnace; it only burns while you feed it*
+
+**The twist:** the energy bar — dead weight today — becomes FUEL. While the furnace is lit, every
+strike hits harder but every beat burns energy faster than it regenerates; the fire dying dry is a
+hard crash. The escape hatch is skill: after a finisher while lit, a **reclaim pip** flashes on
+the beat lane — nail it to claw energy back, and the tighter the tap, the bigger the refund.
+
+**What you're for:** engine management. Choose ignition windows, ride as long as you dare,
+reclaim-tap to extend, douse on a downbeat to bank a clean exit. Sustain greed, entirely self-set.
+
+**Dials:** BENDS the ENERGY dial (inert → the branch's fuel economy) + adds the reclaim micro-beat
+(rides the existing lane). The entry creed seeds a weak auto-lit state (auto-ignites during
+Openings, so the branch plays from fight 1); the module adds IGNITE — the chosen-ignition button —
+through the one sanctioned module-button door (6 of 7 targets; its WHEN is the ignition read).
+
+**Example cards (illustrative):** *Stoked Blades* (POWER) — lit strikes +20%. · *Flashpoint*
+(STRAT) — igniting as an Opening starts refunds 30 energy. · *Oil the Fire* (GREED) — the fire
+burns 30% hotter and 30% thirstier. · *Backdraft* (RULE) — dousing on a Bullseye banks 2 combo
+points (the exit is a move, not a pardon).
+
+**Capstone keystone — TRUE REDLINE:** keep one burn alive past 10s and the beat accelerates past
+its normal floor, the ring glows red-hot, every strike echoes. The longest burn you've ever held,
+visible and audible.
+
+**⚠ Absorbs Overdrive:** the FEVER→crash cycle becomes the furnace's life cycle — this branch
+REPLACES Tempo's only built module, so the other picks must supply the 2–3 module slots.
+
+**Greed/comfort:** duration greed; the bite is the dry crash, chosen at every ignition. Comfort:
+short controlled burns.
+
+**Sources:** Frost DK Breath of Sindragosa · Nioh Ki Pulse/Flux (the research's single most
+transferable steal) · Hellsinger decay.
+**Pillar check:** single-target · dodge untouched · one button via the legal door with a real
+WHEN · trivially AI-pilotable (ignite near an Opening at high energy, reclaim on schedule).
+
+---
+
+### PITCH 3 — COUNTERPOINT · *the boss's swing is your best weapon*
+
+**The twist:** the Opening stops being a one-tap bonus. Every boss telegraph becomes a STRING you
+play through — answer its beats in tempo and a Pressure meter climbs, converting the punish window
+into an escalating burst. And this branch carries the kick: a dump pressed **Perfect-or-better**
+inside a cast's kick-window IS the interrupt; a Bullseye-grade kick pays extra on top.
+
+**What you're for:** you live for the boss's turns. Modest groove between telegraphs; when the
+boss winds up, you lean in while everyone else leans away.
+
+**Dials:** BENDS THE OPENING (one tap → a multi-beat answer-chain with a Pressure bar that lives
+only inside the window); leans the GRADE and Coup. The keystone adds a boss-side bar.
+
+**Example cards (illustrative):** *Answering Blade* (POWER) — Opening hits +20%. · *Perfect
+Rebuttal* (STRAT) — a Bullseye-grade kick opens a private 3s Opening only you can punish. ·
+*Last Word* (GREED) — enter an answer-chain at Flow 6 and its final beat counts double Pressure,
+but any fumble inside the chain slips 2 Flow. (The draft's skip-a-dodge card was CUT by the
+skeptics — nothing here ever prices eating a hit.)
+
+**Capstone keystone — DEATHBLOW:** a boss POISE bar only your chain-answers and clean kicks fill
+(it recovers faster at high boss HP — no turtling). Break it inside an Opening: the boss staggers
+to its knees and the telegraph stream freezes for a private massacre window — yours; the warband
+gets a short rider, not the crown (that's the Conductor's).
+
+**Interrupt angle (feeds the open §10 verdict):** proposes COUP DE GRÂCE as Tempo's carrier —
+Perfect-or-better to kick keeps deliberate-vs-accidental falling out of the grade itself, tuned to
+clear the pillar's >85%-deliberate bar at good-tier.
+
+**Greed/comfort:** execution greed (Last Word); the bite is fumbling mid-chain, never damage taken.
+
+**Sources:** Sekiro posture/deflect-chains · E33 Break bar + parry-strings · WoW interrupt
+rotations.
+**Pillar check:** answer-chains are STRIKE presses — the dodge stays purely defensive · a
+multi-beat string is ONE telegraph to the scheduler (safe) · no new buttons (5 targets) ·
+meta-taste ADMITTED (riposte) but a graded answer-string on a deterministic telegraph stream
+exists nowhere else. Engine debt flagged: the poise bar + stagger state.
+
+---
+
+### PITCH 4 — THE CONDUCTOR · *the warband keeps your time*
+
+**The twist:** the first support-rogue. Your rhythm is a resource the other three seats ride —
+and the spine is ACTIVE: you *call* windows (choose the moment, choose the beneficiary), you
+don't radiate a passive aura. Hades and StS literally cannot build this; we have four seats and
+AI backfill.
+
+**What you're for:** keep your own clean groove, and spend it on calls: a Bullseye inside an
+Opening CUES the warband — everyone hits the note you called.
+
+**Dials:** leans FLOW (the fuel for calls) and THE OPENING (the call moments). No core dial bend.
+Flagged honestly: needs the cross-seat plumbing (the already-owed raid buff channel + one new
+policy hook; the cross-seat credit idiom exists in code).
+
+**Example cards (illustrative):** *The Downbeat* (TEAM) — your Bullseye inside an Opening extends
+the window half a beat for every seat (once per Opening). · *Section Leader* (STRAT) — while your
+Flow ≥4, the AI seats play tighter (their policies gain timing accuracy). The band follows the
+leader — only a game with AI raiders can print this card. · *Give Them the Beat* (GREED) — donate
+2 Flow to double your next call; your own damage dips while they shine. · *Encore Call* (RULE) —
+after your finisher, the next ally's big hit echoes 30% of it. (The draft's always-on aura was
+demoted by the skeptics — at most one boon carries a passive aura; the branch is the calls.)
+
+**Capstone keystone — THE TEMPO SPIKE:** for 6 seconds every seat sees YOUR ring overlaid on
+their kit — their windows widen, and anything landed on your downbeat pays out together. Four
+kits visibly answering one rhythm — without re-clocking anyone's minigame (the skeptics priced
+the full re-clock out; this overlay keeps the fantasy at a tenth the engine cost).
+
+**Signature-CD note:** this branch's fantasy doubles as the strongest CD-shape candidate for
+Tempo (a group tempo-call you line up with a boss window).
+
+**Greed/comfort:** donation greed — give your power away and win on warband speed; the ego tax
+(your meter looks worse) is real and chosen.
+
+**Sources:** WoW Bloodlust + Augmentation's buff-donation · E33 shared Gradient · AtO cross-seat
+setter/spender.
+**Pillar check:** warband-law native · single-target · no new buttons (5 targets) · flagged: sim
+work to prove AI seats ride the calls + the buff-channel debt + the policy-accuracy hook.
+
+---
+
+### PITCH 5 — THE SOLOIST · *the song grows as you go untouched*
+
+**The twist:** a performance rank — D → C → B → A → S — where **each rank visibly ADDS an accent
+pip to your beat lane**: the song literally gets richer as you perform. Accent pips pay bonus
+damage/Flow when hit. Eat an answerable telegraph and you drop a rank — and the lane audibly,
+visibly loses a voice. Rank climbs on clean beats; clean dodges and correctly-ignored feints
+PRESERVE it (the dodge never deals damage — law intact); only answerable hits strip it.
+
+**What you're for:** whole-fight streak tension where the stakes are the music itself. At S the
+lane is full, the spotlight finds you, and one eaten swing silences a voice you spent minutes
+earning.
+
+**Dials:** leans the DODGE BEATS (as stakes, never as offense) + the beat lane (accents are new
+pips on the existing lane). The rank is one overlay gauge; no core dial bend.
+
+**Example cards (illustrative):** *Stage Presence* (POWER) — finishers +6% per rank. · *Encore of
+Nerves* (GREED) — at rank A/S the windows tighten 15% but Bullseyes pay double Flow: bite you
+opted into, exactly when you're proudest. · *Intermission* (STRAT) — dropping a rank grants 3
+beats of double Flow gain: the comeback verse is a play, not a pardon. · *The Held Note* (STRAT) —
+correctly ignoring a feint counts as a clean beat for the rank.
+
+**Capstone keystone — THE CRESCENDO:** hold S for 10 seconds and enter the Solo: ~8s where the
+beat locks at full speed, every tap counts Bullseye-tier, Flow can't decay. Enterable only by
+flawless play — never a toggle.
+
+**Greed/comfort:** defense-greed; the bite keys ONLY to answerable telegraphs (chip you couldn't
+answer never drops rank). Comfort knob: rank-drop grace.
+
+**⚠ Honesty note:** the skeptics ranked this pitch weakest even after its fixes — the accent-lane
+rework is what keeps it in the slate (a plain no-hit multiplier was judged a rank costume on a
+stat). It's here because the fantasy is strong; it earns a pick only if the growing-song hook
+lands for you.
+
+**Sources:** E33 Verso Perfection Rank · DMC style meter · NecroDancer groove · Hades
+Thanatos-Mortality shape.
+**Pillar check:** dodge preserves, never grants (Bill's rework cut ALL dodge-feeds-offense —
+honored) · single-target · no new buttons (5 targets) · distinct from Flourish (taps missed) —
+this bets on hits taken.
+
+---
+
+### PITCH 6 — POLYRHYTHM · *two blades, two beats, one finger*
+
+**The twist:** the dual-blade fantasy made literal — as rhythm, not buttons. Optional GHOST NOTES
+appear between main beats at high Flow: an expert doubles the rhythm, a casual never has to (a
+whiff inside a lit ghost pip is a no-slip grace — stated law, so Flourish can't crash you for
+trying). The capstone splits the lane into two interleaved rings — left blade, right blade —
+**both riding the ONE Strike key**: the split lives in the alternating cadence you read, not in a
+second button (the skeptics killed the extra input; this is better anyway — it's pure reading
+skill, and the phone layout doesn't change).
+
+**What you're for:** the expression branch — you find Flow 6 comfortable and want a 16th-note
+ceiling. Raises the ceiling; never touches the floor.
+
+**Dials:** BENDS THE BEAT — the opt-in ghost-note sublane (zero new buttons, zero new gauges; pips
+live on the existing lane). No touch-target change (5).
+
+**Example cards (illustrative):** *Grace Note* (STRAT) — ghost notes grant +1 combo point (no
+Flow). · *Syncopate* (RULE) — hitting a ghost note makes your next main beat visibly slower: you
+reshape your own song mid-fight. · *Double Stop* (GREED) — ghost + main back-to-back Bullseyes
+form a CHORD (+30% on the pair); attempting the chord and missing the main beat slips Flow.
+
+**Capstone keystone — THE TWO-HANDED SONG:** the lane splits into two interleaved rings, one per
+blade, alternating; each keeps its own mini-groove and matching both fills chord finishers. The
+minigame looks like a different instrument — the aspect-grade rewire of the slate.
+
+**Greed/comfort:** density greed — the bite is attention overload, entirely opt-in (skip the
+ghosts, keep the floor). Comfort knob: ghost-pip size.
+
+**Sources:** Hi-Fi Rush subdivisions · NecroDancer lanes · Monoco's deterministic wheel · Hades'
+transformative-aspect standard.
+**Pillar check:** single-target · dodge untouched · zero new buttons after the skeptic fix ·
+Fermata-distinct (taps, never holds) · AI-pilotable (policy gains optional extra taps).
+
+---
+
+### SLATE-LEVEL CHECKS + the pick
+
+**Spread:** GREED ×2 on orthogonal surfaces (Redline = fuel · Soloist = streak) · ramp/STRAT
+(Motif) · boss-answer (Counterpoint) · TEAM (Conductor) · expression/RULE (Polyrhythm). Six
+different clocks — no shared cadence.
+**Skeptic ranking (pick-tension, strongest→weakest):** Conductor · Redline · Counterpoint ·
+Polyrhythm · Motif · Soloist. Zero kills; ~17 fixes folded above.
+**Composition notes for a 2–3 pick:** Motif + Counterpoint both want Opening seconds (eased by the
+Motif fix — its resolve is any downbeat now) · Redline + Polyrhythm together is an attention
+stress-test (soft branches make it self-inflicted, but flagged) · Soloist + Counterpoint conflict
+DISSOLVED by the fixes (nothing prices eating hits anymore).
+**Engine debts (priced by skeptic 2):** Counterpoint's poise/stagger state · Conductor's
+cross-seat channel + policy-accuracy hook (buff channel already owed) · everything else rides
+existing surfaces.
+**Skipped on purpose:** the Gambler (every version drifted into luck-wearing-greed's clothes) ·
+the Executioner (stock meta, failed the twist bar — execute riders can be boons inside
+Motif/Redline) · the Hoarder/Star Bank (branch-scale banking brushed Fermata's hold-for-more;
+survives as a signature-CD shape: bank the CD by nailing marked phrase beats) · the Pendulum
+(Eclipse-style mode flip — good, but didn't beat any of the six; fold-able later as a module).
+
+**Next:** Bill picks 2–3 → full deck authored around the winners (deck-creator pass: creeds,
+modules, 10–16 boons in lanes, rig WHENs, keystones, EASE knob list, CARD-CATALOG rows, verdict
+artifact).
+
+---
+
 ## APPENDIX A — THE TEMPO CARD LEDGER (v2 · Bill's ledger verdicts 2026-07-06 folded)
 
 > ### ✅ THE WHOLE PLAN IS NOW CODED — merged to main `67f5efc` (2026-07-06)

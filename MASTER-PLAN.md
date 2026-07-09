@@ -789,15 +789,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   verdicts): freeze RAID-PLAN · author the DUNGEON spec before W3 · §ONLINE/§CLASSES stale-header
   fixes. No design changes, no card/ledger rows. *(this session)*
 
-- ☐ 2026-07-09 · main (docs only) · TEMPO-PLAN (new branch-slate section) + `research/` (NEW dir) +
-  BUILD-LEDGER §2 — **CLAIM: Twinfang·Tempo deck rebuild, Phase A (Bill).** Ground-up reshape onto
-  DECK-LAYOUT, Bill's scope: Tempo first (Fermata pass later), **base ideas only this pass** —
-  (1) build `research/` — a reusable game-design knowledge base, 6 files (WoW retail · StS2 ·
-  Hades 1+2 · Across the Obelisk · Expedition 33 · wildcards sweep) researched by Opus agents;
-  (2) 4-lens synthesis over it; (3) **5–6 branch/sub-spec BASE-IDEA pitches for Tempo** (fun/twist
-  bar, dials may bend, ability-law doors for identity buttons) → small adversarial pass → Bill's
-  talk-through verdict. No cards proposed, no code, CARD-CATALOG untouched this pass. *(this
-  session)*
+- ☑ 2026-07-09 · main (docs only) · TEMPO-PLAN §14 (NEW) + `research/` (NEW dir, 7 files) +
+  BUILD-LEDGER §C — **Twinfang·Tempo deck rebuild, Phase A: DONE — six branch pitches AT BILL'S
+  VERDICT.** Ground-up reshape onto DECK-LAYOUT, Tempo first (Fermata pass later), base ideas only.
+  **(1) `research/` knowledge base built** (~2.1k lines, 6 Opus agents: WoW retail Midnight-era ·
+  StS 1+2 · Hades 1+2 · Across the Obelisk · Expedition 33 · 12-game wildcards sweep — permanent,
+  reusable for every future class/deck pass). **(2) 4-lens synthesis** (branch shapes · greed ·
+  timing grammar · spectacle/party). **(3) SIX PITCHES in TEMPO-PLAN §14** — the Motif
+  (wound-stack → graded resolve) · Redline (energy=fuel furnace + reclaim tap; absorbs Overdrive) ·
+  Counterpoint (Opening answer-chains + Coup-as-interrupt) · the Conductor (support-rogue calls,
+  TEAM) · the Soloist (rank grows accent beats on the lane) · Polyrhythm (ghost notes + two-ring
+  keystone, one button). **3 Fable-skeptic adversarial pass: 0 kills, ~17 fixes folded** (entry-
+  creed filing · no second button · Perfect-or-better kick · no hit-eating cards · aura→calls).
+  Killed on purpose: Gambler (luck-as-greed) · Executioner (stock meta) · Hoarder (Fermata brush) ·
+  Pendulum. Also reconciled two stale Fermata ledger rows (built `f5d5397`, was "design owed").
+  No cards proposed, no code, CARD-CATALOG untouched. **NEXT: Bill picks 2–3 → full deck pass.**
+  *(this session)*
 
 - ☑ 2026-07-09 · main (docs only) · DECK-LAYOUT §5/§6 + deck-creator skill + BUILD-LEDGER §C —
   **THE ABILITY LAW: the button budget (Bill).** The signature CD existed but no rules governed

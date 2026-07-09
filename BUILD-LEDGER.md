@@ -159,10 +159,11 @@ build-once seams that five separate class reworks and the endgame all need:
 
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
-| Twinfang — Through-Line + On the Beat cards | 🔒 / 🟡 | TEMPO A1/A6 | `twinfang_boons.gd` | Through-Line "design owed" despite build banner (drift). On the Beat at verdict. |
-| Twinfang — 2nd rhythm-variant spec | 🔴 | TEMPO §13 | new spec | Design owed. |
+| **Twinfang·Tempo — deck rebuild: BRANCH SLATE (6 pitches)** | 🟡 | TEMPO §14 + `research/` | design only this pass (deck-build pass later touches `data/twinfang/*` · `draft.gd` EASE knobs · `raid_hud` gauges) | Ground-up reshape Phase A (2026-07-09). Bill picks 2–3 branches → full deck pass (creeds/modules/boons/rig/keystones/EASE knob list + CARD-CATALOG rows). 3-skeptic audited, 0 kills. Redline pitch would ABSORB Overdrive; Counterpoint proposes Coup as the interrupt carrier (feeds §3 verdicts). |
+| Twinfang — Through-Line + On the Beat cards | 🔒 / 🟡 | TEMPO A1/A6 | `twinfang_boons.gd` | Through-Line "design owed" despite build banner (drift). On the Beat at verdict. **Both fold into the deck-rebuild pass above.** |
+| Twinfang — 2nd rhythm-variant spec (FERMATA) | 🔨 `f5d5397` | TEMPO §13, FERMATA-BRIEF | fermata kit + slate | Built & merged (verb + deck v5). Stale "design owed" corrected 2026-07-09; residual wiring on the row below. |
 | Twinfang — Creed/Module wire TODO + killingEdge rig | 🔒 | `twinfang_content.gd:163` | twinfang kit | Only real actionable code TODO in repo. |
-| Fermata v5 — verb recode + slate | ⏳ | FERMATA-BRIEF | fermata kit + boons | Recode owed; grades centre. HUD meters (shared pass). |
+| Fermata v5 — owed wiring (HUD meters · elite acq · spec-carry) | ⏳ | FERMATA-BRIEF | shared passes (gauges/elite/`raid_net`) | Verb + slate BUILT (`f5d5397`, grades by depth — stale "recode owed" corrected 2026-07-09); what remains rides the shared substrate rows above. |
 | Alchemist — Cask slices 2–5 | 🔒 | ALCH §7.7 | `AlchemistPolicy` + HUD + `data/alchemist` + `alchemist_sim` | Slice 1 built. Slate verdicted 24/6. Tune `cask_base`→Seal parity. |
 | Alchemist — Brew review pass (11 proposals) | 🟡 | ALCH §8 | one guarded slice, config knobs | Live deck untouched until verdict. |
 | Alchemist — open design calls F1/F2/F3/F20 | 🟡 | ALCH §OPEN | design; F3 would touch dodge/ClassKit | F3 (auto-evasion) gates Cask under-fire risk. |
