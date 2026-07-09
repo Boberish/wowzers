@@ -813,6 +813,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §14 REDONE + NEW §15 parking + SLATE-PLAN
+  correction + BUILD-LEDGER row — **BRANCH = BUILD THEME, not a rewire (Bill's correction).**
+  Bill clarified: a branch is a general CATEGORY inside the existing spec (bleeds / fast attacks /
+  slow big ones — the tank-ladder precedent), a filing system so cards/creeds/mods synergize —
+  the spec's minigame and identity stay. The 2026-07-09 six rewire-pitches were the wrong
+  altitude → **re-homed to TEMPO §15 as SPEC/ASPECT IDEA PARKING 🔮** (Bill: cool as future spec
+  ideas). **SLATE-PLAN.md fixed BEFORE the 00:42 hold lift** (761fbcc): theme anatomy for
+  branch/challenger rows, rewire anatomy reserved for class slates (Bloomweaver), laws 2–3
+  rewritten — so the cron loop doesn't repeat the mistake across 8 targets. **§14 redone as the
+  corrected worked reference: six THEME candidates 🟡 AT VERDICT** — THE WOUND (bleed→cash) ·
+  THE FINISH (combo weight, names the evis/coup lanes + Largo) · SWIFT (frequency/energy,
+  doubleTime capstone) · THE EDGE (names the A7 crit package) · THE PUNISH (Opening-fed) ·
+  THE BAND (TEAM texture, flagged thin) — with the existing-pool FILING TABLE (every built card →
+  its theme / EASE-fold / generic; zero orphans) + inline skeptic checks. Poison excluded
+  (Alchemist's lane). Bill picks 2–3 themes → deck pass. *(this session)*
+
 - ☐ 2026-07-10 · main (docs only) — **CLAIM: THE RAID REBUILD plan (Bill) — zoom-out redesign of
   the raid run structure.** Bill's brief: raid is "all over the place" — decide total run length
   (STS2-scale OK, but the rhythm game is taxing) → boss timer budget → time left for trash/elites
