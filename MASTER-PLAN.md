@@ -829,6 +829,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · main (docs only) · §CLASSES — **CLAIM: THE ABILITY PASS ×2 (Bill's direct ask) —
+  DUELIST + WELL·DRAW onto the Tempo §17.10/§17.11 setup** (transforms-not-buttons · doors gating
+  sub-boons · +1/ceiling-6 law · top-3 ladders refined): Duelist around Headsman·Ironside·Ghost
+  (TANK-PLAN §10 NEW — 3 transforms + the owed signature CD designed) · Draw around
+  Vigil·Rapids·Eddy (MENDER-PLAN §13 NEW — 3 cast transforms + **the missing-heal cast** per
+  Bill's playtest gap: a small proactive not-a-HoT/not-an-absorb, Bloom's lane untouched; the
+  8-cap trim stays parked per Bill). CARD-CATALOG rows 🟡 + ledger rows same commit.
+  *(ability-pass session)*
+
 - ☐ 2026-07-10 · worktree `../wow-stats` (branch `stats-page`) · §SYSTEMS/§GRAPHICS — **CLAIM: STATS
   PAGE v2 — the full post-fight report (Bill's direct ask; per-fight only, run recap deferred).**
   Audit found ~80% already engine-truth (`state.meter` per-source, `seat.diag` grades, the shipped
