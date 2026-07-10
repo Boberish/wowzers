@@ -1165,6 +1165,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
+- ☐ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **CLAIM: DESCENT SLICE 4 —
+  THE JAILBREAK (printed curse deals)** (DESCENT §7, V#4 mixed-lean-gentle; BUILD-LEDGER §I). Flip
+  `RunMap.JAILBREAK_LIVE`; the node offers **two deals, both halves printed** (a strong good + a
+  printed bite in a DIFFERENT currency). The CURSE SYSTEM: active curses (cap 2, header pips — the
+  row map_screen reserved in slice 2), bounded-duration bites that tick per fight. Bite vocab
+  (V#4): **ECONOMY TAX** (mint halved / market +⏣ — I own Draft.mint + _market_price from slice 3),
+  **HP TAX** (temporary corrupted sector), **TIMING TAX** + **DECK TAX** (combat integration —
+  recon scoping whether buildable now vs deferred). Exits: **Market DEPRECATE-curse** (wires the
+  slice-3 deferred slot) + **Cooling purge fork**. HARD RULE: no run-long timing curse ever.
+  Welded-downside draft boons (② door) + event-curse legs (③) = extensions, scope per recon.
+  Touches `run_map`/`raid_hud`/`draft.gd`/`map_content`/`map_screen`/`campaign_core` + a curse
+  probe. ⚠ hot files — merge main often. Offline-first (online = follow-up like slice 3). Recon
+  running. *(raid-rebuild session)*
+
 - ☑ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **DESCENT SLICE 3 — THE
   PROMPT MARKET + PER-SEAT WALLETS: MERGED to main (`fd8b895`), 3 commits.** Built via a 6-reader
   recon (buildable-vs-deferred scope). **3a per-seat wallets (V#11):** `Draft.mint_diag(diag,cfg,
