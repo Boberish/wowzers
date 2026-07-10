@@ -19,7 +19,7 @@ const BODIES := ["swarm", "stalker", "chanter", "brute"]
 ## lightweight the pack quota-roll has waited for — a swarm·swarm·brute trio lands
 ## mid-fight-sized, not Seal-sized.
 const BODY := {
-	"swarm":   {"hp": 4600, "melee": {"every": 0.9, "min": 16.0, "max": 24.0}, "enrage": 140.0},
+	"swarm":   {"hp": 4600, "melee": {"every": 1.1, "min": 22.0, "max": 30.0, "rhythm": 0.55}, "enrage": 140.0},   # §3½ pilot: THE RHYTHM (visible dodgeable stream — cadence eased, per-hit raised, most of it answerable)
 	"stalker": {"hp": 7200, "melee": {"every": 1.3, "min": 26.0, "max": 36.0}, "enrage": 165.0},
 	"chanter": {"hp": 6800, "melee": {"every": 1.5, "min": 22.0, "max": 30.0}, "enrage": 170.0},
 	"brute":   {"hp": 9600, "melee": {"every": 1.7, "min": 40.0, "max": 54.0}, "enrage": 190.0},
@@ -118,11 +118,18 @@ static func _moves(body: String, tk: Dictionary, rng: DetRng) -> Array:
 	var dmg := float(tk["dmg"])
 	var xb := int(tk["beats"])
 	match body:
-		"swarm": return [
-			_string(&"f_nip", "Nipping Cloud", 30.0 * dmg, 1.7 * cast, 7.5 * cd, rng, 3 + xb, 0.30, false),
-			_nova(&"f_scatter", "Chaff Burst", 26.0 * dmg, 1.5 * cast, 9.0 * cd),
-			_swing(&"f_harry", "Harrying Bites", AbilityRes.Size.LIGHT, 34.0 * dmg, 1.1 * cast, 6.0 * cd, false, false),
-		]
+		"swarm":
+			# §3½ pilot: + the BIG parry bar the body was missing (the parry half of the
+			# tank minigame must exist in fight 1) and its FAKE-BIG twin at tier >= 2.
+			var sw: Array = [
+				_string(&"f_nip", "Nipping Cloud", 30.0 * dmg, 1.7 * cast, 7.5 * cd, rng, 3 + xb, 0.30, false),
+				_nova(&"f_scatter", "Chaff Burst", 26.0 * dmg, 1.5 * cast, 9.0 * cd),
+				_swing(&"f_harry", "Harrying Bites", AbilityRes.Size.LIGHT, 34.0 * dmg, 1.1 * cast, 6.0 * cd, false, false),
+				_swing(&"f_snap", "Carapace Snap", AbilityRes.Size.CRUSH, 74.0 * dmg, 1.6 * cast, 11.0 * cd, true, false),
+			]
+			if xb >= 1:
+				sw.append(_swing(&"f_bluff", "Chitin Bluff", AbilityRes.Size.CRUSH, 58.0 * dmg, 1.4 * cast, 9.0 * cd, false, true))
+			return sw
 		"stalker": return [
 			_swing(&"f_feint", "Scythe Feint", AbilityRes.Size.HEAVY, 52.0 * dmg, 1.3 * cast, 8.0 * cd, false, true),
 			_swing(&"f_lunge", "Hedge Lunge", AbilityRes.Size.HEAVY, 60.0 * dmg, 1.5 * cast, 9.5 * cd, true, false),

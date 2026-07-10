@@ -48,7 +48,7 @@ static func make_dense() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"dense"; e.name = "The Sparring Golem"; e.hp = 9000
 	e.intro = "Dense footwork: constant chip, frequent swings. Dodge the stream, parry the big ones."
-	e.melee = {"every": 1.0, "min": 20.0, "max": 28.0}
+	e.melee = {"every": 1.0, "min": 20.0, "max": 28.0, "rhythm": 0.55}   # §3½: the class's own stream is THE RHYTHM now
 	e.enrage_at = 150.0
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.5; p1.mult = 1.15; p1.speed = 1.1
@@ -69,7 +69,7 @@ static func make_spike() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"spike"; e.name = "The Siege Ram"; e.hp = 8400
 	e.intro = "Big, slow, telegraphed. Read the swing, commit the parry, hit back."
-	e.melee = {"every": 1.5, "min": 12.0, "max": 18.0}
+	e.melee = {"every": 1.5, "min": 12.0, "max": 18.0, "rhythm": 0.6}   # §3½: sparser, lazier bars between the spikes
 	e.enrage_at = 165.0
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.4; p1.mult = 1.25; p1.speed = 1.12
