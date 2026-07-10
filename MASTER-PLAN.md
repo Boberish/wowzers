@@ -814,6 +814,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 03:39 · main (docs only) — **CLAIM: DECK MACHINE row D4 — the Cask deck
+  assembly** (the §7 slate is LOCKED — the pass hard-copies it into CARD-CATALOG at ✅ per the
+  CARD-TRACKING LAW, integrates the §9 additive themes at 🟡, runs gates on the combined pool)
+  → ALCHEMIST-PLAN §11 + the catalog Cask section. Design only. *(slate-machine session, deck
+  tick 03:34)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `vuln-stack`) — **CLAIM: GENERIC BOSS-VULNERABILITY
   STACK (REFIT P4; ledger §A row "build FIRST — TEAM-COMP + Depth + Well-glint ride it").**
   ⚠ DELIBERATE REBASELINE (ledger §0 cluster). Build: `boss_state.vulns` window list

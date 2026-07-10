@@ -177,7 +177,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D1 | Tank · **Warden** | `TANK-PLAN.md` §8 | 🟡 | — | LANDED 07-10: DECK v1 around Payload·Slam·Rampart — 5 creeds (incl. MONOLITH wild) · 3 modules · 12 boons (🔮 trio re-homed 🟡) · 3 keystones · THE GATE CD. 1 kill (Iron Reserves), 5 tension points. |
 | D2 | Tank · **Duelist** | `TANK-PLAN.md` §9 | 🟡 | — | LANDED 07-10: v1.1 reconcile (EASE fold · FLOW 4th module · aggro re-keys) + 3 pre-authored SWAP KITS (M/S/W, catalog rows 🟡) — any verdict outcome = ready deck, no re-pass. v1 board stays the gating event. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` §4 | 🟡 | — | LANDED 07-10: ORCHARD CLOCK DECK v0 — PROVISIONAL on core A (Bill's core pick → free re-run): 4 creeds (WILD ROWS wild) · Almanac/Cider Press modules · 11 boons · 2 keystones · THE SEASON CD. Meadow = sibling pass after core locks. |
-| D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` | ⬜ | — | Pays the owed §7.7 slices 3–5 card design. |
+| D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` | 🔄 | 07-10 03:39 | Pays the owed §7.7 slices 3–5 card design. |
 | D5 | Well · **Brim** | `MENDER-PLAN.md` | ⬜ | — | Deck exists in code — this is the RESHAPE onto branches (DECK-LAYOUT Phase 2), absorb-don't-duplicate. |
 | D6 | Well · **Draw** | `MENDER-PLAN.md` | ⬜ | — | Same; sibling-distinctness vs D5 is a hard gate. |
 | D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | ⬜ | — | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
