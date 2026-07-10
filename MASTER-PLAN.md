@@ -814,6 +814,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · main (docs only) · §SYSTEMS GEAR / `GEAR-CATALOG.md` — **CLAIM: CURIO ARMORY
+  v3 — the universal BIG SLATE (Bill's direct ask).** Mine `research/` (Hades · StS · AtO ·
+  WoW · E33 · wildcards) → a big narrowable list of GENERIC (never class-based) curios for the
+  boss-drop pool: chase-tier hard unlocks that are loud/powerful + plain fun ones. Every row
+  passes the v2 THREE HARD RULES and must name its felt MOMENT (Bill: drops should be *felt*
+  "even the lower weaker ones"). Design-only, 🟡 at verdict; no code. *(curio-slate session)*
+
 - ☑ 2026-07-10 · `kit-hoists` → main (`94b1147`) — **CLASSKIT HOISTS: BUILT & MERGED (REFIT P4,
   byte-identical DRY; the rails session's FINAL item — Bill's stop order).** `var boons`/`var
   modules` + `_b()`/`_m()`/`_tt()` hoisted to the `ClassKit` base; 21 duplicated blocks deleted
