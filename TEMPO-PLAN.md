@@ -1301,7 +1301,11 @@ Fork · The Set List · Curtain Call.
 07-04 audit: Riposte · Dancer's Grace · Ghost Step · Beat Dancer · Quickblood · Red Harvest · Twin
 Step · Virtuoso. 07-05 playtest: Ambush · Rude Interruption. **07-06 ledger pass (Bill): Opportunist
 ("wind-ups is meh") · Held Note · Flurry · Grace Note · Coda · The Edge module (→Largo creed) · The
-Deathmark module.** Parked: All In (I8). Dead plumbing in kit (inert): `_tf_trigger`/`_rhythm_proc`/
+Deathmark module.** Parked: All In (I8). **07-10 ability-audit pass 2 (Bill: "the abilities are not
+great… i dont want button bloat"): Sforzando (spell) · The Pickup (spell) + their doors
+Fortissimo/Marcato — cut as buttons; the Rondo survives REBORN as a Coup TRANSFORM (§17.11, no
+button); The Count-In parked 🔮 as the +1 slot's standing candidate; Uptempo (creed) → absorbed by
+the EASE dial (proposed, §17.11 v4).** Dead plumbing in kit (inert): `_tf_trigger`/`_rhythm_proc`/
 `tfTrig*`/`mod_*` — sweep later.
 
 ### A6 · Open build-slice (v2)
@@ -1736,12 +1740,106 @@ speed cards stop differing there (dead deltas at the top).
   BAND — don't branch it** (take the Count-In spell + Battle Hymn instead; the slate already
   flagged it thinnest).
 
-**Verdict points (Bill):** ① which spells enter the pool (lean **Sforzando + Rondo**; Count-In if
-you want the team texture; Pickup only if SWIFT stays) · ② interaction model = **DOORS**? ·
-③ set bonuses: none / **resonance (lean)** / resonance + duo · ④ SWIFT: **governor + Double Time
-v2 (lean)** or swap → EDGE / PUNISH · ⑤ the kick carriers: **Evis standard + Coup premium**?
-Catalog rows landed 🟡/💡 this pass (CARD-TRACKING LAW); the BUILD-LEDGER D0 row + pillar-#3 row
-are amended in the same commit (LEDGER LAW).
+**Verdict points (Bill):** ~~① which spells enter~~ **(superseded by §17.11 — spells rejected,
+transforms in)** · ② interaction model = DOORS **(✅ affirmed — "it unlocks the sub boons")** ·
+③ set bonuses: none / resonance / resonance + duo **(still open)** · ~~④ SWIFT governor-or-swap~~
+**(superseded by §17.11's v4 proposal)** · ⑤ the kick carriers **(still open)**.
+
+### 17.11 ABILITY AUDIT — PASS 2: TRANSFORMS, NOT BUTTONS + the v4 branch proposal 🟡 (2026-07-10)
+
+**Bill's verdicts on §17.10:** the 4 spell candidates are *"not great"*, and +2 buttons is too
+much — *"i dont want button bloat… lets do 1 extra ability max instead of 2, and lets make it more
+impactful."* **THE LAW CHANGED: allowance +2 → +1, ceiling 7 → 6** (`DECK-LAYOUT.md §5` amended
+this commit; ripple flagged there — the Alchemist reshape now trims to ONE allowance slot). The
+freshness budget moves to Bill's own idea: **upgrade / replace / change the abilities you already
+have** — *"you have sig: evis, and you have coup. boons can buff them etc, but we can alter how it
+works to keep it fresh without button bloat. lets do 3 for this class, and it unlocks the sub
+boons."* His layer-count worry (keystones + modules + MORE abilities?) is answered structurally:
+**transforms REPLACE the spell layer for Tempo, they don't stack on it** — the draft pool stops
+offering buttons entirely, and per run you still hold exactly 1 creed · 1 module · 1 rig wire ·
+≤1 transform · 1 keystone. Ceremony count unchanged; freshness moved from button COUNT to button
+BEHAVIOR.
+
+**THE TRANSFORM SYSTEM (Tempo pilots it — DECK-LAYOUT §5 carries the pointer):**
+- A **TRANSFORM** is a drafted card that REWRITES how one existing ability works — the Hades
+  Daedalus-hammer steal (`research/hades.md` steal #2: moveset rule-changers in their own reward
+  moment, mutually exclusive, un-rerollable), at ability scale.
+- **≤1 transformed ability per run.** Proposed acquisition: **1-of-3 at the Floor-2 elevation**
+  (pairs with the rig re-wire — the existing "change it up for the finale" ceremony; the
+  Descent's market node becomes the alternate source later). Open point ③ below.
+- **Every transform is a DOOR** (§17.10 B, affirmed): taking it gates its 2 sub-boons into later
+  offers — never dead cards — and the transform itself is never a new touch target.
+
+**THE THREE (Coup-weighted — the audit began at "nothing about coup"):**
+1. **CADENZA `cadenza` (Coup transform)** — Coup unlocks from max-Flow: press at **Flow ≥ 2**,
+   consuming whatever you have; damage scales steeply with Flow consumed (a full-Flow Cadenza =
+   today's Coup — the ceiling never rises). The fixed jackpot becomes a flexible spender: cash
+   small before a phase you fear, or ride to max — F12's cash-out tension made a live per-press
+   decision. Doors 💡: *Dal Segno* (a Cadenza spending 4+ Flow seeds +1 — absorbs Da Capo's job) ·
+   *Bravura* (a full-Flow Cadenza inside an Opening +25%).
+2. **THE RONDO `rondo` (Coup transform — §17.10's spell reborn, the button deleted)** — after
+   your Coup, the next 4 beats are THE RETURN: each Perfect-or-better re-strikes 15% of that Coup
+   (a Bullseye 25%). The crash valley becomes the payoff's second act; rebuild play gets teeth.
+   Doors 💡: *Second Theme* (the return % up a tier) · **Da Capo un-parks here** (+1 Flow seed,
+   verbatim — *da capo*, "repeat from the top," was always this card).
+3. **TREMOLO `tremolo` (Evis transform)** — Eviscerate becomes a STRING: up to 3 presses in one
+   phrase, each spending 2 combo, each graded on its own beat; land all three Perfect-or-better
+   and the final hit pays +40%. One big press vs a graded burst string — the player's cadence
+   choice. **Boon-math law:** the string counts as ONE finisher (Grand Pause / Heavy Ink read the
+   FIRST press); grade math is per press. Doors 💡: *Triplet* (an all-Bullseye string: the final
+   hit pays +40% more, capped) · *Rolled Chord* (string windows pad ENTRY-side — the widener law).
+
+**The +1 slot: TEMPO LEAVES IT EMPTY.** Nothing this pass earns a new button. **CUT (→ A5):
+Sforzando · The Pickup** (+ their doors Fortissimo/Marcato). **PARKED 🔮: The Count-In** (+ doors
+Section Leader/Tutti Chord) — the slot's standing candidate if the team texture is ever wanted.
+*Second Theme* survives under the Rondo transform.
+
+**CRIT vs SPEED — the answer + THE v4 BRANCH PROPOSAL (WOUND · EDGE · FINISH) 🟡:**
+Bill: crit has the ramp he loves (*"1st card helps a bit, end build huge dmg"*) but *"it's called
+tempo and speed is core"*; likes dots and finishers; his idea — speed becomes GENERAL boon stuff
+(it mixes with everything), crit takes the branch slot. His worry: *"or is this just having 4 sub
+specs hiding as 3?"*
+- **No — and here is the honest test: a branch is a LADDER** (entry creed → module → boons →
+  capstone, DECK-LAYOUT §3). Demoted speed keeps **no rungs**: **Uptempo → absorbed by the EASE
+  dial** (beat-speed is already on the deck's EASE knob list — the BITE face of that knob IS
+  Uptempo; the creed was an EASE card in a creed costume) · **Quickstep + Through-Line → STRIKE
+  generics** (governor-clamped) · **Double Time v2 → class-generic keystone** (Syncopation's
+  shelf, not a branch capstone) · the SWIFT resonance never gets authored. Speed becomes
+  seasoning every build drafts into its own plan — like the FLOW lane and the wideners always
+  were. It only becomes a hidden 4th branch if we ever re-grow its chain. Don't.
+- **Speed is the CHASSIS, not a branch** — the accelerando IS speed, Flow IS the speed ramp;
+  SWIFT-as-a-branch was double-selling the base identity (the §14 filing already confessed it:
+  "mostly names existing cards… some stay generic").
+- **THE EDGE enters as the third branch.** The ramp shape Bill named is exactly its arc, and it's
+  the cheapest branch in the shop (2 new cards; the rest is BUILT A7):
+  **entry creed WHETSTONE `whetstone` 🟡** — *your Bullseyes can crit from run start* (small %,
+  ×2). The creed IS the opt-in, so the A7 law ("base Tempo has NO crits") holds — and the branch
+  exists from fight 1, honoring the entry-creed law (§15 slate rule: a branch that only exists
+  after an elite drop is dead cards for half a run). →
+  **module THE STROP `strop` 🟡** — consecutive Perfect-or-better strikes stack **KEEN** (visible
+  whet-gauge, cap 5); your next CRIT consumes all KEEN for +8%/stack. Crit-timing becomes a
+  per-moment decision (spend the meter on a strike, or hold it for a dump into the Opening);
+  earns its pixels. →
+  **boons** Heartseeker · Serrated Fate · Assassin's Note (BUILT — the A7 package, already
+  offer-gated on "any crit source" exactly as this needs) →
+  **capstone HONE** (elite, unchanged — the EDGE meter, the huge end of the ramp).
+- **v4 pool math:** creeds = Drumline · Flourish · Largo [Finish] · Open Veins [Wound] ·
+  Whetstone [Edge] — quota 5 ✓ (Uptempo → EASE; the Held Breath park stands; still no WILD creed
+  — tension point 1 stays unforced). Modules = Overdrive ⭐ · Hemorrhage [Wound] · The Strop
+  [Edge] — 3 ✓. Keystones = Exsanguinate [Wound] · Hone [Edge] · The Coda [Finish] +
+  class-generic Syncopation · Double Time v2 — pool 5 ✓, theme-weighted elite offers stand.
+  Base boon pool ≈16 with the standing parks; the A7 three + the 6 transform doors sit OUTSIDE
+  the base count (door-gated cards never flood open drafts — the quota fight resolves by
+  door-accounting).
+- **The SPEED GOVERNOR stands regardless** (§17.10 D) — speed generics still stack, and the wall
+  is the engine's (30 Hz), not a build's.
+
+**Verdict points v2 (Bill):** ① the TRANSFORM system + the three (Cadenza · Rondo · Tremolo)? ·
+② the +1 law (landed in DECK-LAYOUT — veto reverts) + Tempo leaves its slot empty, Count-In
+parked? · ③ transform acquisition: Floor-2 ceremony 1-of-3 (lean) / the Descent market node /
+Opus-rarity drafts? · ④ the v4 branches: SWIFT → generics + EASE, THE EDGE in (Whetstone + The
+Strop new)? · ⑤ carried from §17.10, still open: resonance/duo · the kick carriers (Evis
+standard + Coup premium). Catalog flips land this commit; ledger rows amended.
 
 ---
 

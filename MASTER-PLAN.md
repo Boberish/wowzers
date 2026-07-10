@@ -727,6 +727,22 @@ tanks keep the densest; marquee moments survive.
 - ~~Wire the other 4 HUDs to CombatStage3D~~ — DEAD 2026-07-10 (loop audit): the solo HUDs + `stage3d/` were deleted in REFIT P1; stage work now targets the 2D raid stage rigs (per-body Forge rigs owed).
 - **Robot re-rig**: per-boss silhouettes as ROBOTS/COMPUTERS (theme!) — replaces the `variant()` stopgap and is easier than organic sculpts. CAPTCHA-9 = a turnstile with an eye; GEMINI = two identical chassis; OPUS = a server-cathedral.
 - Blender/GLTF pipeline later (art replaces rig subclasses; `act()`/`windup()` contracts stay).
+- **TWINFANG ART PASS v1 — CLAIMED 2026-07-10 (branch `tempo-art`), the first real character-art
+  slice.** Foundation review done with Bill (Spine vs native vs code — StS2 is literally Godot 4 +
+  Spine, so the ceiling is same-engine): **verdict = painted layers on the EXISTING `PoseRig2D`
+  code-driven skeleton** (agents can author/tune it; Godot's Bone2D-modification layer is
+  half-abandoned; the `Actor2D` contract keeps **Spine Pro ($369) as a per-actor upgrade door**
+  later — same layer cuts rig straight in). Art = **AI-generated AtO-cel** (prompts specced),
+  generated NOW with THEME-PLAN re-skin risk accepted (regen cheap, re-cut ≈ half-day). Scope:
+  Twinfang ships regardless — autos (strike) + 2 signatures (eviscerate, coup). Slices: **① juice
+  pass** (wire the dormant `screen_post.gdshader` shockwave/aberration/wash + stage-local hit-stop
+  [never on plain strikes — the idle bounce IS the beat reference] + dagger smears + coup
+  afterimages + lunge-slides + boss flash_all + coup/finisher damage-number styles) → **② skin
+  rig** (`tex` Limb kind in `pose_rig_2d.gd`, `TwinfangSkinRig2D` same-joint-tree override,
+  factory parts-dir check, scarf spring, cut/align the PNGs) → **③ flipbook FX** (AI-generated
+  4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
+  trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
+  `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -816,6 +832,50 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-tempo-art` (branch `tempo-art`, docs on main) · §GRAPHICS —
+  **CLAIM: TWINFANG ART PASS v1.** Foundation review locked with Bill: painted layers on the
+  existing `PoseRig2D` skeleton (native, $0, agent-authorable; **Spine Pro = per-actor upgrade
+  door** behind `Actor2D` — StS2 is literally Godot 4 + Spine, so the ceiling is same-engine);
+  AtO-cel AI art generated now (THEME re-skin risk accepted). Slices: ① juice pass (screen_post
+  wire + stage hit-stop + smears + lunge) ② painted skin rig (`tex` limbs + `TwinfangSkinRig2D`)
+  ③ flipbook FX + strike/evis/coup polish. Spec block in §GRAPHICS; ledger row §G. Touches
+  `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
+  the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
+  session)*
+
+- ☐ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **CLAIM: DESCENT SLICE 1
+  — THE MAP BANG (Bill's go).** The one deliberate `raid_map_sim` re-baseline (DESCENT-PLAN §2/§3/
+  §5 + ledger §I): 4-floor FLOORS (Vorathek→F1 Seal, Rings 3-2-1-0) · rows 6/8/8/9 + FINAL quota
+  bags with the new node kinds (ELITE live · MARKET/JAILBREAK/MINIGAME flag-stubbed to honest
+  fallback kinds so map rng locks ONCE — interiors land in slices 3–5 · WILD live ~10%) · GATE
+  leftovers swept · map-seed-from-run-seed · gen invariants (market+elite reachability · pre-Seal
+  valley band · elite-not-beside-Seal) · grant ladder (module end F1 · re-wire end F2 · keystone
+  1-of-2 at first ELITE, guarded per class pool · oaths every Seal · NO 2nd module V#7) · ring-key
+  sites (salvage `1:` · oath stakes · filler clampi) · V#8 Prior term OUT of `map_check` +
+  `luck_profile.gd` deleted · then same-branch: packs-on-floors + enrage ~1.6× + fight ladder
+  (raid_sim re-baseline rides the same bang). Touches the §0 map-layer hotspot (`run_map` ·
+  `map_content` · `campaign_core` · `raid_map_sim`) + `raid_content` + `raid_hud` map region —
+  ⚠ `class-bands` worktree shares `raid_hud`: merge main often, stay out of the gauge region.
+  *(raid-rebuild session)*
+
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.11 (NEW) + **DECK-LAYOUT §5 LAW CHANGE** +
+  CARD-CATALOG flips + ledger rows + artifact D0 tab — **TEMPO ABILITY AUDIT PASS 2 (Bill's
+  verdicts on §17.10) — DONE, 🟡 AT BILL'S BOARD.** His steers: pass-1 spells *"not great"*,
+  +2 = button bloat → **ABILITY LAW tightened +2→+1 allowance, ceiling 6** (DECK-LAYOUT §5;
+  ripple: Alchemist reshape trims to ONE slot — Wave-2 note added); freshness moves to his idea —
+  **ABILITY TRANSFORMS** (drafted cards that REWRITE Evis/Coup, ≤1 transformed ability/run,
+  Floor-2 1-of-3 lean, each a DOOR gating 2 sub-boons; Hades-hammer steal, Tempo pilots): 
+  **CADENZA** (Coup at any Flow ≥2, scales with Flow spent) · **THE RONDO** (post-Coup 4-beat
+  return phrase — the spell reborn, button deleted) · **TREMOLO** (Evis becomes a ≤3-press graded
+  string). Tempo leaves its +1 slot EMPTY (Count-In parked 🔮; Sforzando/Pickup ✂️ → A5).
+  **Crit-vs-speed answered (v4 branch proposal 🟡): WOUND · EDGE · FINISH** — speed is the
+  CHASSIS, so SWIFT demotes to generics with NO ladder rungs (Uptempo → the EASE dial's
+  beat-speed BITE face · Quickstep/Through-Line → STRIKE generics · Double Time v2 → class
+  keystone) = NOT a hidden 4th branch; THE EDGE enters at 2 new cards (Whetstone entry creed —
+  Bullseyes-can-crit IS the A7 opt-in · The Strop KEEN-gauge module; A7 boons + Hone stand).
+  Governor stands regardless. 5 v2 verdict points on the artifact. *(ability-audit session,
+  pass 2)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.10 (NEW) + CARD-CATALOG D0 addendum + ledger
   rows (D0 + pillar-#3) + the Slate-Machine artifact D0 tab — **TEMPO ABILITY AUDIT (Bill's D0
   pass) — DONE, 🟡 AT BILL'S VERDICT.** His four asks answered: **① the +2 button slots** — 4
@@ -833,17 +893,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   PUNISH pairs with Coup-as-kick · BAND = the Count-In, not a branch). 5 verdict points on the
   artifact D0 tab. *(ability-audit session)*
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLAIM: CLASSBAND REGISTRY +
-  SHARED GAUGE BASE (REFIT P4 — the LAST big rail; collision-map rule: land this BEFORE any
-  per-class meter wave).** Bill resumed the build (morning). Plan: per-class BAND objects
-  (`game/ui/bands/*.gd`, the gauge-script pattern) owning build/render/input for their seat —
-  the HUD's seat-matches route to a band instance from a registry keyed off `ClassRegistry`;
-  the ~25 per-class nullable members migrate onto their bands (raid_hud shrinks). Then a shared
-  Gauge base under the 5 gauge scripts (common place/panel/idle shell — retheme once, not 5×).
-  Sliced: tank band → blade → caster → healer(well+bloom) → gauge base; ui_smoke_raid + WSLg
-  `screenshot_*` PNG diffs per slice (headless can't render `_draw`). Byte-identical logic bar:
-  sims untouched by construction (view layer); smokes green each slice. *(rails session v2 —
-  after: TuningConfig sweep · twinfang kit split)*
+- ◐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLASSBAND REGISTRY: BUILT &
+  MERGED (`b4e8d26`); shared Gauge base = the remaining slice of this claim.** THE BANDS:
+  `game/ui/bands/` — ClassBand base (shared orb/rune-rail/guard shell + `for_hud` picker keyed
+  off `_seat_cls_now`, the view twin of ClassRegistry) · TankBand · BladeBand (Tempo+Fermata
+  incl. the coil hold-release) · BrewBand (ALEMBIC + brew holds) · HealerBand (click-cast +
+  shared castbar) · WellBand (DRAW's tap-tap/hold-release grammars) · BloomBand. **raid_hud
+  sheds ~630 lines** — ~25 per-class widget members → ONE `_band`; the 4-way match on
+  build/render/keys/mouse/events → band routing; adding a class = one band file + one for_hud
+  arm. **Also fixed: BOTH glint indicators (target-bar + raid-frame pips) were DEAD since the
+  vuln-stack merge** (`855ac2f` missed these two `seat.vars` readers — a truncated grep; now on
+  `CombatCore.vuln_until`). ⚠ pure BASE plumbing, zero class-content change (Bill's mid-rework
+  carve-out honored — reworks land INTO band slots). GATES: ui_smoke_raid ALL OK · verify-all
+  **ALL GREEN (40 scripts)** · **WSLg visual pass 5/5 bands** (33 PNGs, scratchpad/bands/ —
+  Alembic/Well-window/Verdance/rune rails all pixel-right, GLINT tag live again). NEXT SLICE:
+  the shared Gauge base under the 5 gauge scripts (retheme-once seam, REFIT §4 art-era prereq).
+  *(rails session v2 — after: TuningConfig sweep · twinfang kit split)*
 
 - ☑ 2026-07-10 · main (docs only) · §REALMS/WORLD · `THEME-PLAN.md` (NEW) — **THE SETTING
   riff v0**: the world fiction born — **the Gilded Age → the Binding → the Quiet → the
@@ -1266,8 +1331,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   recon confirmed gates still live on main). **First verdict in — V#11 ✅ (Bill, 07-10): shop
   purse = PER-SEAT EARNED WALLETS** (shared pot rejected as not-fun; your clean play mints YOUR
   ⏣ — the skill mint routes to the earning seat; the Draft-2.0 shared bank retires, UPSELL
-  spends your own; AI seats: player-directed shopping or AUTO default). 11 of 12 still open.
-  *(raid-rebuild session)*
+  spends your own; AI seats: player-directed shopping or AUTO default). **ALL 12 VERDICTS IN
+  (Bill, 07-10) → v1 LOCKED, ledger §I flipped 🔒:** V1–V6/V10/V12 at the recommendations ·
+  V7 NO 2nd module · V8 STANDING/Prior DELETED entirely (no fold — "messes up an otherwise
+  fresh run"; luck_profile/rift_prior.cfg/check-term die) · V9 WILD bumped ~10% (2/floor F2–4,
+  out of EVENT quota). WORLD-PLAN amend banners placed (4-floor instances row + Seal band
+  5/7/9/12). Build = post-purge, one map bang. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · main (docs only) — **THE DUNGEON REBUILD plan (Bill) — DONE, 🟡 AT BILL'S
   VERDICT.** The watcher loop worked as claimed: woke the moment `DESCENT-PLAN.md` hit HEAD

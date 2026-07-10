@@ -273,7 +273,7 @@ on failure), not persistent-conquest zones — revisit at the raid retune.
 | **World event** | 1–2 fight encounter at an event node | 5–10 min | event Ledger table roll | while the event is up |
 | ~~**Personal gate**~~ | ~~1v1 class exam~~ **CUT 2026-07-10 (THE PURGE — MASTER §GAME SHAPE amendment):** GATE nodes + the recast exam bosses are deleted; future personal content = Forge-authored fresh (parked) | — | — | — |
 | **DUNGEON** | **1-floor Topology run** (seeded map, drafts, curios, Market, charge) → 1 Seal | 30–45 min | full run economy, compressed | **infinitely, "from scratch" — the roguelike core** |
-| **RAID** | multi-floor Ring descent (Realm 1 = the existing 3-Ring Takeover, unchanged) | 1.5–3 h | full economy + shard gates + charge + finale meta-payout | infinitely; **Depth** scalar = endgame |
+| **RAID** | multi-floor Ring descent — ⚠ **SUPERSEDED 2026-07-10 (`DESCENT-PLAN.md` wins):** now a **4-floor** descent, Vorathek promoted to Floor 1's Seal, Rings 3-2-1-0 (was "the existing 3-Ring Takeover, unchanged") | ~2h25 clean / ~3 h lived | full economy + shard gates + charge + finale meta-payout | infinitely; **Depth** scalar = endgame |
 
 - **Dungeons are the Versions surface**: the door itself carries the version dial
   (v1/v2/v3 + fake patch notes) — the Trial Ladder gets a physical home instead of a menu.
@@ -602,7 +602,11 @@ item for the SEAL-PILLAR pass / healer retune — the entry Seal probably should
 wall for sloppy. Original targets (zone skirmish
 60–90s · pack/elite 2–4 min · capstone 4–6 min · dungeon Seal 5–8 min · raid Seal 8–12
 min · world boss 5–10 min) now read against the baked baseline; the zone spine stays
-skirmish-weight so route-to-door holds the 30–45 min attunement budget.
+skirmish-weight so route-to-door holds the 30–45 min attunement budget. ⚠ **Raid-Seal band
+AMENDED 2026-07-10 (`DESCENT-PLAN.md` §4 wins):** with FOUR Seals and
+fight-length-scales-with-deck, the raid Seal ladder is **5 / 7 / 9 / 12 min**
+(Vorathek→Mythos) — early Seals sit deliberately below the old 8–12 band; the ramp is the
+feature. Filled by structure beats, never +HP.
 
 **How shapes are ASSIGNED (locked 2026-07-07, Bill's "how do they get decided?"):**
 authored in the permanence layer, seeded-within-quotas in the variance layer, always
@@ -703,8 +707,8 @@ before (the inert-mana fix rides this).
   W2 content pass), 2–3 ZONE REMEMBERS choice moments, **DUNGEON DOOR** on the east edge.
 - **DUNGEON 1 — "our Deadmines"**: 1-floor Topology, ~6–8 nodes, Forge skirmishes +
   1 recast mid-roster boss as its Seal, Versions dial at the door.
-- **THE RAID DOOR — Realm 1: The Takeover**, the existing 3-Ring descent verbatim,
-  standing at the region's far end as the capstone.
+- **THE RAID DOOR — Realm 1: The Takeover** (⚠ now the 4-floor DESCENT-PLAN shape,
+  2026-07-10), standing at the region's far end as the capstone.
 - **WORLD EVENT — VORATHEK, the Riftmaw**, wandering the region (W4; offline cadence too).
 - Casting pool feeds everything: 15 solo bosses + Seal adds — recast, never rebuilt.
 
