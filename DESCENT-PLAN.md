@@ -782,3 +782,15 @@ ledgers.
   ability-poison — the `perform()` gate is one line but the spec-threading offline+online is the
   cost) · welded-downside boons · event-curse legs · online (no-op, NO protocol bump). ⏳ nightly:
   raid_map_sim run-trace + statistical re-baseline · full verify-all · net_map_smoke.
+- 2026-07-10 — **THE DECK TAX (offline) BUILT & MERGED `7e5397f`** (the slice-4 deferred bite).
+  A DECK deal poisons ONE ability slot **run-length** — it fizzles in combat until you pay the
+  Market to DEPRECATE it (the one curse that never expires on its own — which is what gives
+  DEPRECATE teeth). `class_kit.poisoned` id-set + a **one-line gate** in `combat_core` perform()'s
+  ability branch (fizzle + diag + an `ability_poisoned` view event) — **byte-identical when empty**
+  (ab-gate `twinfang_sim` PASS), so every sim + online is unaffected. `run_director.poisoned`
+  (persistent); `raid_hud` injects the piloted seat's kit poison at each build (AI/sims/online carry
+  none), a dynamic `_deck_deal` bets a named un-poisoned loadout slot, `_purge_curse` (DEPRECATE
+  prefers the DECK curse) clears curse+poison, `_expire_curses` keeps run-length curses. `curse_
+  probe` §G covers it. **Online DECK deferred** with the online curse system (spec-thread + protocol
+  bump). Polish owed: an in-combat grey/flash on the poisoned slot (the header pip ships now).
+  Landed across the tank-w1 merge (Duelist added / Bulwark deleted — clean).

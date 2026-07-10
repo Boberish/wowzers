@@ -1233,15 +1233,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
-- ☐ 2026-07-10 · worktree `../wow-deck-tax` (branch `deck-tax`) — **CLAIM: DECK TAX (offline) —
-  the JAILBREAK run-length ability-poison curse** (DESCENT §7; the slice-4 deferred bite). Offline
-  only (online rides the deferred online-curse-system + protocol bump). Build: `class_kit.poisoned`
-  id-set + a 1-line gate in `combat_core.gd:132` (before `on_action`, byte-identical when empty) ·
-  `run_director.poisoned` (persistent) · `raid_hud._launch_map_fight` injects the human seat's kit
-  poison · a dynamic DECK deal in `_show_jailbreak` (poisons a named loadout slot) · `_add_curse`
-  sets the poison, DEPRECATE/Cooling purge clears it · `_expire_curses` guard so the run-length
-  DECK curse persists · header pip · curse_probe extension. ⚠ touches `combat_core` — the tank-w1
-  merge is pending on that file; keep the gate minimal, merge promptly. *(raid-rebuild session)*
+- ☑ 2026-07-10 · worktree `../wow-deck-tax` (branch `deck-tax`) — **THE DECK TAX (offline) — the
+  JAILBREAK run-length ability-poison: MERGED to main (`7e5397f`).** The slice-4 deferred bite,
+  offline. A DECK deal poisons ONE ability slot run-length; it fizzles in combat until you pay the
+  Market to DEPRECATE it — the one curse that never expires on its own (giving DEPRECATE its teeth).
+  `class_kit.poisoned` id-set + a **one-line gate** in `combat_core` perform()'s ability branch
+  (fizzle + `poisoned_fizzle` diag + an `ability_poisoned` view event; empty set = **byte-identical**,
+  proven by ab-gate `twinfang_sim` PASS) · `run_director.poisoned` (persistent) ·
+  `raid_hud._launch_map_fight` injects the piloted seat's kit poison (AI/sims/online carry none) ·
+  a dynamic `_deck_deal` bets a named un-poisoned loadout slot · `_add_curse` sets the poison,
+  `_purge_curse` (DEPRECATE prefers the DECK curse, Cooling vents oldest) clears curse+poison ·
+  `_expire_curses` KEEPS run-length curses (they never tick) · `curse_probe` §G. **Merged the
+  tank-w1 landing mid-flight** (Duelist added / Bulwark+gear_probe deleted — clean auto-merge across
+  class_kit/combat_core/raid_hud; also dropped the dangling `gear_probe` the tank left in verify-all).
+  **Deferred:** online DECK (spec-thread the poisoned set through make_spec/RaidNet.build + a
+  protocol bump — rides the online curse system) · polish: an in-combat grey/flash on the poisoned
+  slot (the `ability_poisoned` event is emitted for it; the map header pip ships now). Verify:
+  import clean · `curse_probe` ALL OK · ab-gate `twinfang_sim` BYTE-IDENTICAL · `market_probe`/
+  `commander_probe` ALL OK · `ui_smoke_map` ALL PASS. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **DESCENT SLICE 4 — THE
   JAILBREAK (printed curse deals): MERGED to main (`a22c1ec`), 2 commits.** Built via a 5-reader
