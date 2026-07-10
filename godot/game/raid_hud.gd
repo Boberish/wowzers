@@ -2140,7 +2140,7 @@ func _build_combat(s: CombatState) -> void:
 	# the raid meter — right rail: all four raiders ranked, engine-truth accounting;
 	# M cycles ranking / your spells / hidden. Works identically offline and online
 	# (it only READS state — the lockstep replica never notices it).
-	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg")
+	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", false, _d.fight_log)
 	UiKit.place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(_meter)
 
@@ -3277,7 +3277,7 @@ func _show_fight_recap(done: Callable) -> void:
 	box.add_child(cont)
 	_report_button(box, func(): _show_fight_recap(done))
 	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
-	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true, _d.fight_log)
 	UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(rmeter)
 
@@ -3310,7 +3310,7 @@ func _show_end(won: bool) -> void:
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 		# the meter's recap: the raid ranked, click a raider for their spells
-		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true, _d.fight_log)
 		UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 		_ui.add_child(rmeter)
 	var again := Button.new()
@@ -3365,6 +3365,14 @@ func _show_stats_page(back: Callable) -> void:
 ## THEN the normal end flow (draft / end screen / map) runs. Headless runs
 ## (smokes, sims) skip the beat entirely.
 func _on_end_moment(won: bool) -> void:
+	# METER L3 — snapshot this fight's meter into the run history (once per fight, win or loss,
+	# headless too). Keyed on run_seed so a new descent auto-clears the log.
+	if _d != null and _ctrl != null and _ctrl.state != null:
+		if _d.fight_log_seed != _d.run_seed:
+			_d.fight_log.clear()          # clear in place — the meter holds this same array by ref
+			_d.fight_log_seed = _d.run_seed
+		var enc = _ctrl.state.encounter
+		_d.fight_log.append(MeterPanel.snapshot(_ctrl.state, enc.name if enc != null else "Fight"))
 	if _screen != "combat" or DisplayServer.get_name() == "headless":
 		_on_end(won)
 		return
