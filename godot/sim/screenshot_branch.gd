@@ -15,7 +15,7 @@ func _initialize() -> void:
 		if a.begins_with("--out="):
 			out_dir = a.substr("--out=".length())
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	ctx = MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.9, 10, 3, 0, {}, {}, 0)
+	ctx = MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.9, 3, 0, {}, {}, 0)
 
 func _process(_d: float) -> bool:
 	if frames > 0:

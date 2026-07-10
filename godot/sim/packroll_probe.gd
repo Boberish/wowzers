@@ -21,7 +21,7 @@ func _process(_d: float) -> bool:
 	step += 1
 	if step < 2:
 		return false
-	hud._d.floor_i = 0                     # RING 3 — fillers must come out t1
+	hud._d.floor_i = 0                     # RING 3 — fillers must come out t1 (FLOORS tier 1)
 	hud._d.map = RunMap.generate(90210, 8, MapContent.raid_event_ids(), {}, 0, 0, 8)
 	hud._d.fights = RaidContent.floor_fights(3)
 	var enc: EncounterRes = hud._d.fights[2]
@@ -58,12 +58,27 @@ func _process(_d: float) -> bool:
 	var fs := 100.0 * solo / 400.0
 	var fd := 100.0 * duo / 400.0
 	var ft := 100.0 * trio / 400.0
-	_ck(absf(fs - 30.0) < 10.0, "solo share ≈30%% (got %.0f%%)" % fs)
-	_ck(absf(fd - 45.0) < 10.0, "duo share ≈45%% (got %.0f%%)" % fd)
-	_ck(absf(ft - 25.0) < 10.0, "trio share ≈25%% (got %.0f%%)" % ft)
-	print("quota over 400 nodes: solo %.0f%% · duo %.0f%% · trio %.0f%%" % [fs, fd, ft])
-	# tier rides the ring: the ROOT floor's walk-ins come out t3
-	hud._d.floor_i = 2
+	# THE FIGHT LADDER (DESCENT-PLAN §3): floor 0 rolls the F1 teaching weights
+	# (packroll [0.55, 0.90] → ~55/35/10) — the deep-floor trio ramp is asserted below.
+	_ck(absf(fs - 55.0) < 10.0, "F1 solo share ≈55%% (got %.0f%%)" % fs)
+	_ck(absf(fd - 35.0) < 10.0, "F1 duo share ≈35%% (got %.0f%%)" % fd)
+	_ck(ft < 20.0, "F1 trio share ≤~10%% (got %.0f%%)" % ft)
+	print("F1 quota over 400 nodes: solo %.0f%% · duo %.0f%% · trio %.0f%%" % [fs, fd, ft])
+	# F4 (ROOT) leans trio: packroll [0.15, 0.60] → ~15/45/40
+	hud._d.floor_i = 3
+	var solo4 := 0; var duo4 := 0; var trio4 := 0
+	for node_id in range(3, 403):
+		hud._d.node = node_id
+		var p4: Array = hud._roll_map_pack(2, enc)
+		if p4.is_empty(): solo4 += 1
+		elif p4.size() == 2: duo4 += 1
+		elif p4.size() == 3: trio4 += 1
+	_ck(absf(100.0 * trio4 / 400.0 - 40.0) < 10.0, "F4 trio share ≈40%% (got %.0f%%)" % (100.0 * trio4 / 400.0))
+	print("F4 quota over 400 nodes: solo %.0f%% · duo %.0f%% · trio %.0f%%" % [100.0 * solo4 / 400.0, 100.0 * duo4 / 400.0, 100.0 * trio4 / 400.0])
+	hud._d.floor_i = 0
+	# tier rides the FLOOR (FLOORS "tier"): the ROOT floor's walk-ins come out t3
+	# (THE DESCENT REBUILD: floor_i 3 = RING 0 — floor_i 2 is Gemini's Ring 1 now)
+	hud._d.floor_i = 3
 	hud._d.node = _first_packed_node(enc)
 	var pr: Array = hud._roll_map_pack(2, enc)
 	_ck(":3:" in String(pr[0]), "Ring 0 walk-in is t3 (got %s)" % String(pr[0]))

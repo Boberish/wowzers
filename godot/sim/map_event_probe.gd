@@ -48,7 +48,7 @@ func _process(_d: float) -> bool:
 func _setup() -> void:
 	# a caster with two interrupt boons at the terminal — the HACK check should read high
 	var ctx := MapCheck.build_ctx([["interrupt"], ["interrupt"]], [], "disruptor", "caster",
-		1.0, 0, 2, 0, {}, {}, 0)
+		1.0, 2, 0, {}, {}, 0)
 	var ev := MapContent.event("helpdesk")
 	var raw: Array = ev["choices"]
 	var descs: Array = []
@@ -79,8 +79,8 @@ func _setup() -> void:
 
 ## The prompt_injection badge choice is gated on the API KEY — without it, greyed.
 func _test_gate() -> void:
-	var no_key := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, 0, {}, {}, 0)
-	var have := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, 0, {"api_key": true}, {}, 0)
+	var no_key := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, {}, {}, 0)
+	var have := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, {"api_key": true}, {}, 0)
 	var badge: Dictionary = (MapContent.event("prompt_injection")["choices"] as Array)[0]
 	var gate: Dictionary = badge["gate"]
 	_ok("prompt_injection badge gated without API KEY", not MapCheck.gate_ok(gate, no_key))

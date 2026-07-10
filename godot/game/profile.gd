@@ -2,7 +2,6 @@
 ## Every persistent player-side domain lives here, behind the existing store facades:
 ##   world  — the overworld permanence layer (WorldSave's json dict)
 ##   gear   — the Ledger's permanent unlocks (GearStore)
-##   prior  — 📁 YOUR PRIOR, the across-run luck file (LuckProfile)
 ##   binds  — click-cast layouts keyed by class id (WellBinds / BloomweaverBinds)
 ##   roster — the Commander party: seat_key -> {cls, aspect} (survives sessions)
 ##   runs   — the offline run-seed stream: root/counter/last_seed, so a whole descent
@@ -10,7 +9,7 @@
 ##
 ## Disk: ONE canonical-JSON blob in user://rift_profile.cfg (WorldSave's idiom). The
 ## first load imports the legacy save files (rift_world.cfg / rift_gear.cfg /
-## rift_prior.cfg / well_binds.json / bloomweaver_binds.json) once; the legacy files
+## well_binds.json / bloomweaver_binds.json) once (rift_prior.cfg died with V#8); the legacy files
 ## stay on disk as inert backups — every reader routes through here now.
 ## (mender_binds.json is deliberately NOT imported — the class is leaving the roster.)
 ##
@@ -31,7 +30,6 @@ var data: Dictionary = {
 	"version": VERSION,
 	"world": {},
 	"gear": {},
-	"prior": 0,
 	"binds": {},
 	"roster": {},
 	"runs": {"root": 0, "counter": 0, "last_seed": -1},
@@ -86,9 +84,6 @@ func _adopt(parsed: Dictionary) -> void:
 		var v = parsed.get(key)
 		if v is Dictionary:
 			data[key] = v
-	var pv = parsed.get("prior")
-	if pv is int or pv is float:
-		data["prior"] = int(pv)
 	var runs: Dictionary = data["runs"]
 	for rk in ["root", "counter", "last_seed"]:
 		var dflt := -1 if rk == "last_seed" else 0
@@ -109,9 +104,6 @@ func _import_legacy() -> void:
 		for boss in gcf.get_section_keys("unlocks"):
 			unlocks[boss] = Array(gcf.get_value("unlocks", boss, []))
 		data["gear"] = unlocks
-	var pcf := ConfigFile.new()
-	if pcf.load("user://rift_prior.cfg") == OK:
-		data["prior"] = int(pcf.get_value("prior", "value", 0))
 	for cls in [["well", "user://well_binds.json"], ["bloomweaver", "user://bloomweaver_binds.json"]]:
 		if FileAccess.file_exists(String(cls[1])):
 			var f := FileAccess.open(String(cls[1]), FileAccess.READ)
@@ -137,14 +129,6 @@ func gear_unlocks() -> Dictionary:
 
 func set_gear_unlocks(unlocks: Dictionary) -> void:
 	data["gear"] = unlocks.duplicate(true)
-	save_to_disk()
-
-## prior — the raw stored integer (LuckProfile owns the caps).
-func prior() -> int:
-	return int(data["prior"])
-
-func set_prior(v: int) -> void:
-	data["prior"] = int(v)
 	save_to_disk()
 
 ## binds — chord -> spell id, per class. Validation (which chords/spells are legal)

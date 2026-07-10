@@ -732,7 +732,7 @@ func _show_lobby() -> void:
 			var cb := Button.new()
 			cb.text = "CLAIM"
 			cb.custom_minimum_size = Vector2(110, 34)
-			cb.pressed.connect(func(): hud._net.send({"t": "claim", "seat": key, "prior": hud._my_prior()}))
+			cb.pressed.connect(func(): hud._net.send({"t": "claim", "seat": key}))
 			row.add_child(cb)
 		elif claimant == me:
 			if key == "healer":     # toggle the healer CLASS (Well ⇄ Bloomweaver)

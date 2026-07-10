@@ -322,8 +322,6 @@ func _fx_hint(fx: Dictionary) -> String:
 	if int(fx.get("entropy", 0)) != 0 or int(fx.get("refund_entropy", 0)) != 0:
 		var e := int(fx.get("entropy", 0)) + int(fx.get("refund_entropy", 0))
 		bits.append("%s⚡%d" % [("+" if e > 0 else "−"), abs(e)])
-	if int(fx.get("prior", 0)) != 0:
-		bits.append("+📁%d" % int(fx["prior"]))
 	if bool(fx.get("key", false)):
 		bits.append("+ %s" % MapContent.KEY_NAME)
 	if bool(fx.get("shard", false)):
