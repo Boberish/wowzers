@@ -137,8 +137,8 @@ func _run(s: CombatState, wcfg: WellConfig) -> Dictionary:
 					and not (ev["seat"] as Seat).alive():
 				deaths += 1
 		var glinted := false
-		for u in s.seats:
-			if s.tick < int(u.vars.get("glint_until", -1)):
+		for i in s.seats.size():   # GLINT rides the vulnerability stack now (REFIT P4)
+			if CombatCore.vuln_until(s, i, &"glint") >= 0:
 				glinted = true
 				break
 		if glinted:

@@ -31,7 +31,7 @@ PROBES=(
   draft_sim gear_probe commander_probe map_sim raid_map_sim map_check_sim
   map_advance_probe map_branch_probe map_charge_probe map_event_probe
   map_mark_probe map_wager_probe map_check_online_probe
-  fight_seed_probe menu_probe meter_probe profile_probe splitlaw_probe integrity_probe
+  fight_seed_probe menu_probe meter_probe profile_probe splitlaw_probe integrity_probe vuln_probe
   raid_probe raid_boon_probe raid_bloom_probe
   fermata_input_check fightlen_probe pack_probe packroll_probe world_probe shell_probe
 )

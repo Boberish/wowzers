@@ -9,16 +9,24 @@ var hp_max: float = 0.0
 ## balance sim (how much a DPS-check boss actually clawed back); ignored by the view.
 var heal_total: float = 0.0
 
-## Caster (Voidcaller) boss modifiers. Defaults are no-ops for every other class.
+## Boss modifiers. Defaults are no-ops for every fight that doesn't feed them.
 ##  - silenced: while `tick < silenced_until_tick` the boss can't START interruptible
 ##    casts (pulses/channels still fire).
 ##  - dmg_buff: permanent self-empower — scales the boss's OUTGOING damage (cap in core).
-##  - exposed: while active the PLAYER deals `1 + expose_amt` more to the boss (read by
-##    the class kit, which routes its damage through it — the core stays generic).
 var silenced_until_tick: int = -1
-var exposed_until_tick: int = -1
-var expose_amt: float = 0.0
 var dmg_buff: float = 0.0
+
+## THE VULNERABILITY STACK (REFIT P4): every windowed "boss takes MORE" effect lives
+## here — ONE list, ONE fold point (`CombatCore.vuln_mult`, applied in `damage_boss`
+## and the stat-block ally path). Entry: {seat_i:int, mult:float, until:int(tick),
+## src:StringName}; seat_i -1 = the whole raid, else only that attacker's hits.
+## Same (seat_i, src) REFRESHES (never self-stacks); distinct sources multiply;
+## expired entries prune lazily inside the fold (tick-driven — deterministic).
+## Empty list = 1.0 = byte-identical for every fight without a vuln user. The Well's
+## GLINT rides here; TEAM-COMP school amps + Depth affixes get their fold slot here.
+## (The old boss-level exposed_until_tick/expose_amt died here — their one reader
+## was the purged Voidcaller; per-seat Exposed lives on seat.vars in bulwark_kit.)
+var vulns: Array = []
 ## SUNDER — the tank's break meter (Bulwark only feeds it; 0 for everyone else, so all
 ## other content is byte-identical). Every won mitigation read cracks the boss a little;
 ## while sunder > 0 the boss takes (1 + sunder * config.sunder_k) MORE from ALL sources

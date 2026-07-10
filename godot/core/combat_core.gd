@@ -716,6 +716,46 @@ static func meter_taken(s: CombatState, seat: Seat, src: StringName, amt: float,
 # Damage
 # --------------------------------------------------------------------------
 
+# --- THE VULNERABILITY STACK (REFIT P4) ------------------------------------------
+# The one generic "boss takes MORE" window. Effects feed windows via add_vuln; BOTH
+# damage paths (damage_boss + the stat-block ally contrib) fold them at vuln_mult.
+# The Well's GLINT rides here today; TEAM-COMP school amps and Depth affix windows
+# get this same fold slot instead of hand-rolling new BossState fields.
+
+## Add or REFRESH a window. Same (seat_i, src) overwrites — a source never stacks
+## with itself (re-applying refreshes strength + deadline); distinct sources multiply.
+## seat_i -1 = the whole raid; else only that attacker's hits. `until_tick` absolute.
+static func add_vuln(s: CombatState, seat_i: int, mult: float, until_tick: int,
+		src: StringName) -> void:
+	for v in s.boss.vulns:
+		if int(v["seat_i"]) == seat_i and StringName(v["src"]) == src:
+			v["mult"] = mult
+			v["until"] = until_tick
+			return
+	s.boss.vulns.append({"seat_i": seat_i, "mult": mult, "until": until_tick, "src": src})
+
+## The live deadline a source already holds on a seat (-1 if none) — lets an effect
+## EXTEND a window instead of resetting it (the Well's keptLight idiom).
+static func vuln_until(s: CombatState, seat_i: int, src: StringName) -> int:
+	for v in s.boss.vulns:
+		if int(v["seat_i"]) == seat_i and StringName(v["src"]) == src and s.tick < int(v["until"]):
+			return int(v["until"])
+	return -1
+
+## Fold every live window that applies to this attacker (raid-wide + personal),
+## lazily pruning expired entries — driven by s.tick only, deterministic.
+static func vuln_mult(s: CombatState, seat_i: int) -> float:
+	var m := 1.0
+	var i := s.boss.vulns.size() - 1
+	while i >= 0:
+		var v: Dictionary = s.boss.vulns[i]
+		if s.tick >= int(v["until"]):
+			s.boss.vulns.remove_at(i)
+		elif int(v["seat_i"]) < 0 or int(v["seat_i"]) == seat_i:
+			m *= float(v["mult"])
+		i -= 1
+	return m
+
 ## Outgoing damage from a seat's ability to the boss. Returns damage dealt.
 ## `src` is the meter's source label (ability id); it also rides the boss_hit
 ## event as `kind` so HUD damage numbers can colour by source.
@@ -728,6 +768,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 		mult *= 1.0 + s.boss.sunder * s.config.sunder_k
 	if s.boss.debilitate > 0.0:                 # DEBILITATE: the corroded boss takes MORE from the whole raid
 		mult *= 1.0 + s.boss.debilitate * s.config.debilitate_k
+	if not s.boss.vulns.is_empty():             # THE VULNERABILITY STACK (empty = byte-identical)
+		mult *= vuln_mult(s, s.seats.find(seat))
 	if s.party_out_mult != 1.0:                 # OVERCLOCK DMG-amp prime (default 1.0 → byte-neutral)
 		mult *= s.party_out_mult
 	var d := roundf(raw * mult)
@@ -870,11 +912,10 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			if f < 0.0:
 				f = f_hp(seat.hp_frac(), s.config)                 # default curve
 			var contrib := seat.dps * f
-			# THE GLINT (Well healer): a glinted ally's blade cuts deeper for a window.
-			# Guarded on seat.vars → absent glint_until (-1) leaves contrib untouched =
-			# byte-identical for every non-Well fight (mirrors the s.raid_dr idiom).
-			if s.tick < int(seat.vars.get("glint_until", -1)):
-				contrib *= float(seat.vars.get("glint_mult", 1.0))
+			# THE VULNERABILITY STACK: raid-wide windows + this ally's personal ones
+			# (the Well's GLINT lives here now). Empty stack = 1.0 = byte-identical.
+			if not s.boss.vulns.is_empty():
+				contrib *= vuln_mult(s, s.seats.find(seat))
 			# THE SHINING HOUR (Well support boon): while the whole party is topped, the
 			# warband deals more. Same guarded idiom — absent well_hour_until (-1) = no-op.
 			if s.tick < int(seat.vars.get("well_hour_until", -1)):
@@ -963,11 +1004,10 @@ static func _pack_advance(s: CombatState) -> void:
 	b.hp_max = float(enc.hp)
 	b.heal_total = 0.0
 	b.silenced_until_tick = -1
-	b.exposed_until_tick = -1
-	b.expose_amt = 0.0
 	b.dmg_buff = 0.0
 	b.sunder = 0.0
 	b.debilitate = 0.0
+	b.vulns = []                            # windows die with the member (fresh wall, fresh cracks)
 	b.last_curse_tick = -999999
 	b.melee_timer = 1000000
 	b.ability_timer = {}

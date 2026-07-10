@@ -11,8 +11,8 @@
 ##   timing — CLEAN (final draw_band) → +CURRENT · STILL POINT (dead-centre) → +CURRENT
 ##   + GLINT · UNDERCOOK (early) → weak heal + breaks Current · OVERRUN (never released)
 ##   → plain full heal, Current untouched.
-## GLINT is personal: the healed ally's seat.vars glint_mult/glint_until, read by the
-##   engine's group-damage step (guarded → byte-identical when unset).
+## GLINT is personal: a per-ally window on the boss's VULNERABILITY STACK (REFIT P4),
+##   folded into BOTH damage paths (guarded → byte-identical when no window lives).
 ##
 ## THE DECK (MENDER-PLAN §2-5) layers on top, EACH GUARDED so an empty creed + no modules
 ## + no rig + no boons reproduce the base numbers exactly (the sim's byte-identical gate):
@@ -109,16 +109,21 @@ func _glint_mult() -> float:
 	return m
 
 # --- THE GLINT (personal — the healed ally) ------------------------------------
+## Rides the generic VULNERABILITY STACK (REFIT P4): one window per ally, src
+## &"glint" — refresh semantics for free, and a glinted FULL-fidelity blade (human
+## or policy-driven) now cuts deeper too, not just the stat-block contrib.
 func _glint(s: CombatState, target: Seat, extra_mult: float = 0.0, extra_secs: float = 0.0) -> void:
 	if target == null or not target.alive():
 		return
 	var dur := cfg.glint_dur + (2.0 if _b("keptLight") else 0.0) + extra_secs
+	var ti := s.seats.find(target)
 	var until := s.tick + _tt(s, dur)
 	# KEPT LIGHT: pouring on an already-lit ally EXTENDS the light instead of resetting it.
-	if _b("keptLight") and s.tick < int(target.vars.get("glint_until", -1)):
-		until = int(target.vars["glint_until"]) + _tt(s, dur)
-	target.vars["glint_mult"] = _glint_mult() + extra_mult
-	target.vars["glint_until"] = until
+	if _b("keptLight"):
+		var live := CombatCore.vuln_until(s, ti, &"glint")
+		if live >= 0:
+			until = live + _tt(s, dur)
+	CombatCore.add_vuln(s, ti, _glint_mult() + extra_mult, until, &"glint")
 	CombatCore._emit(s, {"t": "well_glint", "seat": target})
 
 ## The persistent (seat-state) heal multiplier — FORESIGHT stacks. Per-cast timing bonuses
