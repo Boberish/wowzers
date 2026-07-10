@@ -17,10 +17,10 @@ const ROW_C := 24.0            # compact row
 const ROW_D := 31.0            # detail row (name line + dim stat line)
 const FOOT := 18.0
 
-const MODES: Array = ["dmg", "heal", "shield", "taken", "amp"]
+const MODES: Array = ["dmg", "heal", "shield", "taken", "amp", "disc"]
 const MODE_NAMES := {"dmg": "DAMAGE DONE", "heal": "HEALING DONE",
-	"shield": "SHIELDING DONE", "taken": "DAMAGE TAKEN", "amp": "AMPLIFY ⚡"}
-const MODE_RATE := {"dmg": "DPS", "heal": "HPS", "shield": "SPS", "taken": "DTPS", "amp": "AMP"}
+	"shield": "SHIELDING DONE", "taken": "DAMAGE TAKEN", "amp": "AMPLIFY ⚡", "disc": "DISCIPLINE 🎯"}
+const MODE_RATE := {"dmg": "DPS", "heal": "HPS", "shield": "SPS", "taken": "DTPS", "amp": "AMP", "disc": "CLEAN"}
 
 ## AMPLIFY — boon-impact display names. Mirrors StatsPage.BOON_NAMES, kept local so the meter
 ## widget never depends on the stats page (avoids a class-name reference cycle).
@@ -148,6 +148,51 @@ func _amp_label(s: CombatState, key: int) -> String:
 func _amp_accent(s: CombatState, key: int) -> Color:
 	return Palette.EXPOSE if key < 0 else _accent(s.seats[key])
 
+# ---------------------------------------------------------------- DISCIPLINE data
+## DISCIPLINE — a seat's clean-answer %: boss telegraphs answered cleanly (perfect/good/graze/
+## read) vs eaten (miss/baited/whiff). -1 = fewer than 3 answers (not enough signal to grade).
+## Mirrors StatsPage._pct_defense so the live read and the post-fight grade agree.
+static func _disc_clean(d: Dictionary) -> float:
+	var clean := int(d.get("perfect", 0)) + int(d.get("good", 0)) + int(d.get("graze", 0)) + int(d.get("read", 0))
+	var bad := int(d.get("miss", 0)) + int(d.get("baited", 0)) + int(d.get("whiff", 0))
+	var tot := clean + bad
+	return (100.0 * float(clean) / float(tot)) if tot >= 3 else -1.0
+
+## DISCIPLINE — ranked [[seat_i, clean_pct], ...] over full-fidelity seats. Stat-block AI has no
+## timed inputs to grade, so it is skipped. Ungradeable seats (<3 answers, pct -1) sort last.
+static func _disc_ranking(s: CombatState) -> Array:
+	var out: Array = []
+	for i in s.seats.size():
+		var seat: Seat = s.seats[i]
+		if seat.fidelity == "statblock":
+			continue
+		out.append([i, _disc_clean(seat.diag)])
+	out.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
+	return out
+
+static func _disc_letter(p: float) -> String:
+	if p >= 92.0: return "S"
+	if p >= 82.0: return "A"
+	if p >= 70.0: return "B"
+	if p >= 55.0: return "C"
+	return "D"
+
+func _disc_col(p: float) -> Color:
+	if p >= 82.0: return Palette.GOLD_BRIGHT
+	if p >= 70.0: return Palette.GOLD
+	if p >= 55.0: return Palette.STEEL
+	return Palette.CRIMSON
+
+## DISCIPLINE — a seat's fault tally for the compact hint: times hit (from the taken meter) and
+## stray hits taken off the tank (raid non-tanks). Returns [times_hit, strays].
+func _disc_faults(s: CombatState, i: int) -> Array:
+	var taken_n := 0
+	var by: Dictionary = (s.meter.get(i, {}) as Dictionary).get("taken", {})
+	for src in by:
+		taken_n += int(by[src]["n"])
+	var strays := int((s.seats[i].diag as Dictionary).get("stray_hit", 0))
+	return [taken_n, strays]
+
 static func _fmt(x: float) -> String:
 	if x >= 100000.0:
 		return "%.0fk" % (x / 1000.0)
@@ -238,10 +283,19 @@ func _draw() -> void:
 		return
 
 	var is_amp := mode == "amp"
-	var rk := (_amp_ranking(s) if is_amp else _ranking(s, mode))
+	var is_disc := mode == "disc"
+	var rk: Array
+	if is_amp:
+		rk = _amp_ranking(s)
+	elif is_disc:
+		rk = _disc_ranking(s)
+	else:
+		rk = _ranking(s, mode)
 	var detail := (_frozen_detail if frozen else view_state == 1)
 	if is_amp:
 		detail = _amp_focused(s)               # amp uses amp_focus, not the M-cycle
+	elif is_disc:
+		detail = false                         # disc is a compact-only scoreboard
 	elif rk.size() <= 1:
 		detail = true                          # solo duel: the ranking IS you — skip to spells
 	var fi := _focus_seat_i(s)
@@ -250,6 +304,8 @@ func _draw() -> void:
 	var rows: int
 	if is_amp:
 		rows = maxi((_amp_sources(s, amp_focus).size() if detail else rk.size()), 1)
+	elif is_disc:
+		rows = maxi(rk.size(), 1)
 	else:
 		rows = (_sources(s, fi, mode).size() if detail else rk.size())
 	var row_h := ROW_D if (detail and not is_amp) else ROW_C
@@ -283,6 +339,8 @@ func _draw() -> void:
 	var y := HDR + 2.0
 	if is_amp:
 		y = _draw_amp(s, rk, y)
+	elif is_disc:
+		y = _draw_disc(s, rk, y)
 	elif detail:
 		y = _draw_detail(s, fi, rk, y)
 	else:
@@ -482,5 +540,52 @@ func _draw_amp_detail(s: CombatState, y: float) -> float:
 	if srcs.is_empty():
 		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, y + 14), "· nothing yet ·",
 			HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"], Palette.TEXT_DIM)
+		y += ROW_C
+	return y
+
+## DISCIPLINE: a live "who's playing clean" scoreboard. One row per gradeable seat, ranked by
+## clean-answer %, colored by grade (S..D). Bar ∝ clean%; the dim tail shows the fault count
+## (times hit · strays off the tank). Reads seat.diag + the taken meter — the live twin of STATS
+## PAGE v2's DEFENSE/DISCIPLINE grades (full grade breakdown lives on that page).
+func _draw_disc(s: CombatState, rk: Array, y: float) -> float:
+	if rk.is_empty():
+		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, y + 14), "· no timed inputs to grade ·",
+			HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"], Palette.TEXT_DIM)
+		return y + ROW_C
+	for ri in rk.size():
+		var r: Array = rk[ri]
+		var i := int(r[0])
+		var pct := float(r[1])
+		var seat: Seat = s.seats[i]
+		var graded := pct >= 0.0
+		var col := _disc_col(pct) if graded else Palette.TEXT_DIM
+		var rr := Rect2(8, y + 2, size.x - 16, ROW_C - 5)
+		if seat.is_player:
+			draw_rect(Rect2(0, y, size.x, ROW_C), Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.055))
+		if graded:
+			draw_rect(Rect2(rr.position, Vector2(rr.size.x * (pct / 100.0), rr.size.y)),
+				Color(col.r, col.g, col.b, 0.22))
+			draw_rect(Rect2(rr.position, Vector2(2.5, rr.size.y)), col)
+		var by := y + ROW_C - 8.0
+		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(10, by), str(ri + 1),
+			HORIZONTAL_ALIGNMENT_LEFT, 16.0, UiKit.SIZE["MICRO"],
+			Palette.GOLD if (ri == 0 and graded) else Palette.TEXT_DIM)
+		var name_col := Palette.GOLD_BRIGHT if seat.is_player else Palette.TEXT
+		if not seat.alive():
+			name_col = Palette.TEXT_DIM
+		UiKit.text_shadowed(self, UiKit.body(600), Vector2(26, by),
+			_seat_name(seat) + (" ◆" if seat.is_player else ""),
+			HORIZONTAL_ALIGNMENT_LEFT, size.x - 132.0, UiKit.SIZE["CAPTION"], name_col)
+		# fault tail (dim): times hit · strays
+		var f := _disc_faults(s, i)
+		var fault := "%d hit" % int(f[0])
+		if int(f[1]) > 0:
+			fault += " · %d stray" % int(f[1])
+		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, by), fault,
+			HORIZONTAL_ALIGNMENT_RIGHT, size.x - 78, UiKit.SIZE["MICRO"], Palette.TEXT_DIM)
+		# grade: letter + clean% (or — when ungradeable)
+		var grade := ("%s %d%%" % [_disc_letter(pct), int(round(pct))]) if graded else "—"
+		UiKit.text_shadowed(self, UiKit.display(650), Vector2(0, by), grade,
+			HORIZONTAL_ALIGNMENT_RIGHT, size.x - 12, UiKit.SIZE["CAPTION"], col)
 		y += ROW_C
 	return y
