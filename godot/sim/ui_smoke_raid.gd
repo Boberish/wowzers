@@ -437,7 +437,7 @@ func _drive(s: CombatState, seat_key: String) -> int:
 						if (i % 48) == 0:
 							hud._cast("lifesurge")
 						elif (i % 40) == 0:
-							hud._bloomweaver_key(KEY_7)          # the aspect signature
+							hud._band.key_pressed(KEY_7)         # the aspect signature (band-routed since P4)
 						elif (i % 16) == 0:
 							hud._cast_on(s.seats[0], "bark")     # ward the tank (chord path)
 						elif (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):

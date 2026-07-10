@@ -250,37 +250,20 @@ var _shake_root: Control
 var _shake_amt: float = 0.0
 var _dmg_i: int = 0                 # rotating spawn-lane counter for damage numbers
 
-# class-band widgets (only the active seat's set is built)
-var _hp_orb: LiquidOrb
-var _res_orb: LiquidOrb            ## rage / energy / focus / mana
-var _runes: Array = []
-var _rune_ids: Array = []
-var _guard: AbilityRune
-var _challenge: AbilityRune        ## tank only
-var _spec: SpecGauge               ## tank
-var _tf_gauge: TwinfangGauge       ## blade
-var _rhythm: RhythmBar             ## blade
-var _opening: OpeningBar           ## blade — THE OPENING (punish the boss's swing)
-var _strike_idx: int = -1
+# THE CLASS BAND (REFIT P4): the human seat's combat instrument cluster. Build /
+# render / keys / mouse / gauge events all route to it — the ~25 per-class widget
+# members and the 4-way match per surface that used to live here are the band's
+# problem now (game/ui/bands/*.gd; ClassBand.for_hud picks by _seat_cls_now()).
+var _band: ClassBand = null
 var _pcast: PlayerCastBar          ## caster
-var _castbar: CastChannel          ## healer
-var _bcfg: BloomweaverConfig       ## healer (Bloomweaver)
-var _verd: VerdanceGauge           ## healer (Bloomweaver spec gauge)
-var _wcfg: WellConfig              ## healer (the Well — reworked direct-cast)
-var _well_gauge: WellGauge         ## the Well's charge vessel + Current + graded window
-var _well_hold_key: int = -1       ## Well/DRAW: which heal key owns the live hold-release
-var _well_hold_ms: int = 0         ## Well/DRAW: when the hold began (tap vs hold threshold)
-var _well_mouse_ms: int = 0        ## Well/DRAW: when a mouse-started cast began (hold-release)
+var _bcfg: BloomweaverConfig       ## healer (Bloomweaver) — read by _hspells/_cast_on + the band
+var _wcfg: WellConfig              ## healer (the Well) — read by _hspells/_cast_on + the band
+var _acfg: AlchemistConfig         ## the Alchemist's config (set in _make_loadout when the caster brews)
 var _healer_cls: String = "well" ## which class fills the healer seat: well | bloomweaver
 var _blade_cls: String = "twinfang" ## the blade seat's class (Twinfang only, post-purge)
 var _caster_cls: String = "alchemist" ## the caster seat's class (Alchemist only, post-purge)
-var _acfg: AlchemistConfig            ## the Alchemist's config (set in _make_loadout when the caster brews)
-var _brew_gauge: BrewGauge            ## the Alchemist's ALEMBIC instrument (vial/reservoirs/chamber)
-var _binds: Dictionary = {}        ## healer mouse chords
 var _hover_seat: Seat = null
 var _focus_seat: Seat = null
-var _brew_hold_key: int = -1       ## Alchemist: which key (1/2) owns the live brew hold
-var _coil_held: bool = false       ## FERMATA: the Strike coil is being held (key 1 or the slot-0 rune)
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -312,6 +295,7 @@ func _clear() -> void:
 	if _shell != null:
 		_shell._clear_shell_ui()   # instance screens replace shell screens (leaf call)
 	TransitionVeil.flash_on(self)   # screens settle in, never snap
+	_band = null                    # its widgets die with _ui below
 	_hover_seat = null
 	_focus_seat = null
 	_stage2d = null
@@ -2180,15 +2164,8 @@ func _build_combat(s: CombatState) -> void:
 	UiKit.place(_aggro_warn, 0.5, 0, 0.5, 0, -360, 106, 360, 130)
 	_shake_root.add_child(_aggro_warn)
 
-	match _seat_key:
-		"tank":
-			_build_band_tank()
-		"blade":
-			_build_band_blade()
-		"caster":
-			_build_band_caster()
-		"healer":
-			_build_band_healer()
+	_band = ClassBand.for_hud(self)   # the class's instrument cluster (REFIT P4)
+	_band.build()
 
 	_fx = Control.new()
 	_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2238,291 +2215,6 @@ func _hint_line(text: String) -> void:
 	UiKit.place(hint, 0.5, 1, 0.5, 1, -330, -70, 330, -46)
 	_shake_root.add_child(hint)
 
-func _add_runes(row: HBoxContainer, ids: Array, accent = null) -> void:
-	_runes = []
-	_rune_ids = []
-	for i in ids.size():
-		var id: String = ids[i]
-		var rune := AbilityRune.new()
-		rune.label = ABILITY_NAMES.get(id, id)
-		rune.key_num = i + 1
-		rune.icon_id = id
-		if accent != null:
-			rune.accent = accent
-		# FERMATA: the slot-0 Strike rune is a HOLD (press = coil, release = strike). Every other
-		# rune, and every other seat, stays a tap. Mirrors the keyboard hold in _fermata_key/_input.
-		if i == 0 and _seat_key == "blade" and _aspect == "fermata" and id == "strike":
-			rune.held.connect(func():
-				if _screen == "combat" and not _coil_held:
-					_coil_held = true
-					_ctrl.human({"type": "ability", "id": "coil"}))
-			rune.released.connect(func():
-				if _screen == "combat" and _coil_held:
-					_coil_held = false
-					_ctrl.human({"type": "ability", "id": "release"}))
-		else:
-			rune.pressed.connect(_use_ability.bind(i))
-		row.add_child(rune)
-		_runes.append(rune)
-		_rune_ids.append(id)
-
-# ---- per-seat bands ----
-func _build_band_tank() -> void:
-	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
-	_res_orb = _orb(Palette.RAGE, "RAGE", true)
-	_spec = SpecGauge.new()
-	_spec.aspect = _aspect
-	UiKit.place(_spec, 0.5, 1, 0.5, 1, -200, -245, 200, -180)
-	_shake_root.add_child(_spec)
-	var row := _rune_row(-380.0, 380.0)
-	_guard = AbilityRune.new()
-	_guard.label = _verb().capitalize()
-	_guard.key_label = "SPC"
-	_guard.icon_id = "guard"
-	_guard.accent = Palette.STEEL
-	_guard.tooltip_text = "Your defensive verb — own cooldown, off-GCD."
-	_guard.pressed.connect(func(): _ctrl.human({"type": "defense"}))
-	row.add_child(_guard)
-	_challenge = AbilityRune.new()
-	_challenge.label = "Challenge"
-	_challenge.key_label = "T"
-	_challenge.icon_id = "shockwave"
-	_challenge.accent = Palette.CRIMSON
-	_challenge.tooltip_text = "Taunt — force the boss onto you and seize top threat. 8s cd, off-GCD."
-	_challenge.pressed.connect(func(): _ctrl.human({"type": "ability", "id": "challenge"}))
-	row.add_child(_challenge)
-	var sep := Control.new()
-	sep.custom_minimum_size = Vector2(14, 0)
-	row.add_child(sep)
-	_add_runes(row, _loadout)
-	_hint_line("SPACE — %s    ·    F — DODGE beats    ·    T — CHALLENGE (taunt)" % _verb())
-
-func _build_band_blade() -> void:
-	_rhythm = RhythmBar.new()
-	# YOUR metronome sits in your own column — the boss's Judgment Channel owns
-	# the line under the reticle on the right
-	UiKit.place(_rhythm, 0.35, 0, 0.35, 0, -360, 646, 360, 746)
-	_shake_root.add_child(_rhythm)
-	# THE OPENING — the offense-side vulnerability gauge, stacked above your metronome:
-	# read the boss's swing and slam your dumps into the molten sweet spot.
-	_opening = OpeningBar.new()
-	_opening.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiKit.place(_opening, 0.35, 0, 0.35, 0, -360, 548, 360, 636)
-	_shake_root.add_child(_opening)
-	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
-	_res_orb = _orb(Palette.ENERGY, "ENERGY", true)
-	_tf_gauge = TwinfangGauge.new()
-	_tf_gauge.aspect = _aspect
-	UiKit.place(_tf_gauge, 0.5, 1, 0.5, 1, -300, -302, 300, -172)
-	_shake_root.add_child(_tf_gauge)
-	var row := _rune_row(-360.0, 360.0)
-	_guard = AbilityRune.new()
-	_guard.label = "DODGE"
-	_guard.key_label = "SPC"
-	_guard.icon_id = "dodge"
-	_guard.accent = Palette.FLOW
-	_guard.tooltip_text = "Dodge the swing aimed at YOU — a landed hit wipes your Flow."
-	_guard.pressed.connect(func(): _ctrl.human({"type": "defense"}))
-	row.add_child(_guard)
-	var sep := Control.new()
-	sep.custom_minimum_size = Vector2(14, 0)
-	row.add_child(sep)
-	_add_runes(row, _loadout)
-	_strike_idx = _rune_ids.find("strike")
-	_hint_line("SPACE — DODGE (negate a swing OR answer beats; protects Flow)    ·    hold aggro low — the boss eats loose blades")
-
-## The Alchemist's band: HP + POTENCY orbs and THE ALEMBIC — the brew instrument
-## (hold-zones + vial + reaction chamber + potency strip). The brew itself is the
-## whole bar: HOLD 1/2 (or the reservoirs) to charge, release to pour, 3 (or tap
-## the chamber) to Rupture. No rune rail — the instrument IS the kit.
-func _build_band_caster() -> void:
-	_hp_orb = _orb(Palette.BLOOD, "HEALTH", false)
-	_res_orb = _orb(Palette.REACT, "POTENCY", true)
-	_brew_gauge = BrewGauge.new()
-	# THE ALEMBIC: 780×316, shifted into the player's column (the Forge idiom) so the
-	# boss's Judgment Channel + telegraph rail under the reticle stay clear of it.
-	UiKit.place(_brew_gauge, 0.5, 1, 0.5, 1, -550, -486, 230, -170)
-	_shake_root.add_child(_brew_gauge)
-	_brew_gauge.brew_pressed.connect(func(side: String):
-		_ctrl.human({"type": "ability", "id": "brew_" + side}))
-	_brew_gauge.brew_released.connect(func():
-		_ctrl.human({"type": "ability", "id": "pour"}))
-	_brew_gauge.rupture_tapped.connect(func():
-		_ctrl.human({"type": "ability", "id": "rupture"}))
-	var row := _rune_row(-360.0, 360.0)
-	_guard = AbilityRune.new()
-	_guard.label = "DODGE"
-	_guard.key_label = "SPC"
-	_guard.icon_id = "dodge"
-	_guard.accent = Palette.REACT
-	_guard.tooltip_text = "Dodge the swing aimed at YOU — the brew keeps cooking through your footwork."
-	_guard.pressed.connect(func(): _ctrl.human({"type": "defense"}))
-	row.add_child(_guard)
-	_runes = []
-	_rune_ids = []
-	# The module's active button + any drafted spells get their own runes (only when owned —
-	# read from the campaign run, which _inject_boons folds into this fight's kit).
-	var extras := "3 — RUPTURE"
-	if _d.run != null and _d.run.modules.has("third_reagent"):
-		row.add_child(_alch_rune("catalyst", "CATALYST", "4", "flash", Palette.GOLD_BRIGHT,
-			"Drop the Third Reagent — amplify the reaction for a few seconds. Best while potency is high."))
-		extras += " · 4 — CATALYST"
-	var spell_runes := [
-		["spitfire", "SPITFIRE", "5", "bolt", "An instant off-brew acid dart — free filler between pours."],
-		["decant", "DECANT", "6", "cascade", "Pour the fuller poison into the emptier — a cd-gated snap toward balance."],
-		["reduction", "REDUCTION", "7", "surge", "Boil VOLUME into POWER — trade brew for a slug of Potency before a Rupture."],
-	]
-	for sp in spell_runes:
-		if _d.run != null and (String(sp[0]) in _d.run.loadout or _d.run.boons.has(String(sp[0]))):
-			row.add_child(_alch_rune(String(sp[0]), String(sp[1]), String(sp[2]), String(sp[3]),
-				Palette.REACT, String(sp[4])))
-			extras += " · %s — %s" % [String(sp[2]), String(sp[1])]
-	_hint_line("HOLD 1 — VENOM · HOLD 2 — ROT (release = POUR) · %s · SPACE — DODGE (swing or beats)" % extras)
-
-## One Alchemist ability rune (catalyst / a drafted spell) wired to send its action.
-func _alch_rune(id: String, label: String, key: String, icon: String, accent: Color, tip: String) -> AbilityRune:
-	var r := AbilityRune.new()
-	r.label = label
-	r.key_label = key
-	r.icon_id = icon
-	r.accent = accent
-	r.tooltip_text = tip
-	r.pressed.connect(func(): _ctrl.human({"type": "ability", "id": id}))
-	return r
-
-func _build_band_healer() -> void:
-	if _healer_cls == "bloomweaver":
-		_build_band_bloomweaver()
-		return
-	_build_band_well()
-
-## The Well's band — built on the SHARED healer surfaces: click-cast chords (WellBinds),
-## the healer CastChannel (extended with DRAW's release window, always-visible track,
-## tap-to-release), and the WellGauge (charges + Current + the big TARGET bar Brim aims
-## on). No mana orb — the Well IS the resource, in the gauge.
-func _build_band_well() -> void:
-	_binds = WellBinds.load_binds()
-	# the shared healer cast bar; DRAW marks the release window on it (and wears the
-	# Well's water blue — spec color identity), clicking the channel is a release press.
-	# The idle track keeps the window readable between casts. Added BEFORE the gauge:
-	# the gauge's verdict banner rises over the channel, so it must draw on top.
-	_castbar = CastChannel.new()
-	if _aspect == "draw":
-		_castbar.accent = Palette.WATER
-		_castbar.zone_lo = 1.0 - _wcfg.draw_band
-		var sp_c := 1.0 - _wcfg.draw_band * 0.5
-		_castbar.mark_lo = sp_c - _wcfg.still_point * 0.5
-		_castbar.mark_hi = sp_c + _wcfg.still_point * 0.5
-		_castbar.show_idle_track = true
-		_castbar.tapped.connect(func(): _ctrl.human({"type": "ability", "id": "release"}))
-	# the Well's channel is placed TALL — the shared CastChannel scales its whole
-	# instrument with height, so this one bar is the big AAA read (classic healers
-	# keep their 60-tall placement).
-	UiKit.place(_castbar, 0.5, 1, 0.5, 1, -330, -420, 330, -304)
-	_shake_root.add_child(_castbar)
-	_well_gauge = WellGauge.new()
-	_well_gauge.aspect = _aspect
-	UiKit.place(_well_gauge, 0.5, 1, 0.5, 1, -330, -300, 330, -166)
-	_shake_root.add_child(_well_gauge)
-	var row := _rune_row(-380.0, 380.0)
-	_runes = []
-	_rune_ids = []
-	for id in _loadout:
-		var sp: Dictionary = _wcfg.book.get(id, {})
-		var rune := AbilityRune.new()
-		rune.label = String(sp.get("name", id)).split(" ")[0]
-		rune.key_label = String(sp.get("key", "")).to_upper()
-		rune.icon_id = id
-		rune.custom_minimum_size = Vector2(62, 62)
-		rune.pressed.connect(_cast.bind(String(id)))
-		row.add_child(rune)
-		_runes.append(rune)
-		_rune_ids.append(id)
-	_hint_line(_well_hint())
-
-func _well_hint() -> String:
-	var verb := "click/tap to heal — LAND it in the gold band (no spill) = POUR" if _aspect == "brim" \
-		else "click/tap starts the cast — click/tap AGAIN (or hold & release) in the window = CLEAN"
-	return "Hover an ally · L flash · R mend · Mid cascade · Sh+L spring · Sh+R dispel · 1-4 keys · %s · SPACE dodge" % verb
-
-func _render_band_well(s: CombatState, p: Seat, obs: Dictionary) -> void:
-	var g := _well_gauge
-	if g == null:
-		return
-	g.seat_ref = p
-	g.aspect = _aspect
-	g.charges = int(obs.get("charges", 0))
-	g.charges_max = int(obs.get("charges_max", 12))
-	g.current = int(obs.get("current", 0))
-	g.current_max = int(obs.get("current_max", 5))
-	# the SHARED cast channel (with DRAW's release window baked in at build)
-	var casting: Dictionary = obs.get("casting", {})
-	if _castbar != null:
-		if casting.is_empty():
-			_castbar.active = false
-		else:
-			_castbar.active = true
-			_castbar.frac = clampf(float(s.tick - int(casting.get("start_tick", 0)))
-				/ maxf(float(casting.get("dur_ticks", 1)), 1.0), 0.0, 1.0)
-			var ct: Seat = casting.get("target")
-			_castbar.target = ct.unit_name if ct != null else ""
-			_castbar.spell_id = String(casting.get("id", ""))
-			_castbar.label = String(_wcfg.book.get(_castbar.spell_id, {}).get("name", _castbar.spell_id))
-	# THE TARGET BAR: the cast's target while casting, else the hovered/focused ally.
-	# Brim aims the pour here (band + the in-flight heal's ghost landing).
-	var tgt: Seat = casting.get("target") if not casting.is_empty() else null
-	if tgt == null:
-		tgt = _hover_seat if _hover_seat != null else _focus_seat
-	if tgt != null and tgt.alive():
-		g.t_show = true
-		g.t_name = tgt.unit_name
-		g.t_frac = tgt.hp_frac()
-		g.t_hp = int(round(tgt.hp))
-		g.t_hpmax = int(round(tgt.hp_max))
-		g.t_band = _wcfg.brim_band if _aspect == "brim" else -1.0
-		g.t_glint = s.tick < int(tgt.vars.get("glint_until", -1))
-		g.t_ghost = -1.0
-		if not casting.is_empty() and casting.get("target") == tgt:
-			var wsp: Dictionary = _wcfg.book.get(String(casting.get("id", "")), {})
-			if wsp.has("heal"):
-				g.t_ghost = clampf(tgt.hp_frac() + float(wsp.get("heal", 0.0)) / maxf(tgt.hp_max, 1.0), 0.0, 1.0)
-	else:
-		g.t_show = false
-
-## The SECOND healer's band: Sap orb + Blooming Medallion (Verdance) + benediction cast
-## channel + the Growth/ward rune rail. No mana, no Reservoir/Nerve strip — the whole
-## class is planted AHEAD and bloomed on the spike (click-cast the frames, same grammar).
-func _build_band_bloomweaver() -> void:
-	_binds = BloomweaverBinds.load_binds()
-	_hp_orb = _orb(Palette.SAP.darkened(0.2), "SAP", false)   # Sap — Bloomweaver has no mana
-	_verd = VerdanceGauge.new()
-	_verd.aspect = _aspect
-	_verd.verdance_max = _bcfg.verdance_max
-	_verd.min_spend = _bcfg.verd_min_spend
-	UiKit.place(_verd, 0.5, 1, 0.5, 1, -300, -298, 300, -168)
-	_shake_root.add_child(_verd)
-	_castbar = CastChannel.new()
-	_castbar.accent = Palette.VERDANCE
-	UiKit.place(_castbar, 0.5, 1, 0.5, 1, -240, -358, 240, -298)
-	_shake_root.add_child(_castbar)
-	var row := _rune_row(-320.0, 320.0)
-	_runes = []
-	_rune_ids = []
-	for id in _loadout:
-		var sp: Dictionary = _bcfg.spells.get(id, {})
-		var rune := AbilityRune.new()
-		rune.label = String(sp.get("name", id)).split(" ")[0]
-		rune.key_label = String(sp.get("key", "")).to_upper()
-		rune.icon_id = id
-		if sp.has("spec"):
-			rune.accent = Palette.VERDANCE if _aspect == "wildgrove" else Palette.THORN
-		rune.custom_minimum_size = Vector2(62, 62)
-		rune.pressed.connect(_cast.bind(String(id)))
-		row.add_child(rune)
-		_runes.append(rune)
-		_rune_ids.append(id)
-	_hint_line(_healer_hint())
-
 ## DEV TOOL: an instant-WIN button to test the post-fight flow (drops, floor advance,
 ## ring elevation, campaign clear) without grinding each fight. Debug/source builds
 ## only, and OFFLINE only — killing the boss locally in an online lockstep fight would
@@ -2545,6 +2237,15 @@ func _dev_win() -> void:
 	# overkill the boss (and any active add) — the normal update loop then resolves
 	# the win exactly like a real kill, so drops/floor-advance run unchanged.
 	CombatCore.damage_boss(s, s.seats[0], s.boss.hp + s.boss.hp_max + 1.0)
+
+## The healer's spellbook for the current class (Well charge-book / Bloomweaver Sap).
+func _hspells() -> Dictionary:
+	if _healer_cls == "bloomweaver":
+		return _bcfg.spells if _bcfg != null else {}
+	return _wcfg.book if _wcfg != null else {}
+
+func _signature() -> String:
+	return "wildbloom" if _aspect == "wildgrove" else "briarheart"
 
 ## The player's assembled verb, in the class's own words (build-your-verb boons).
 const VERB_LABEL := {"tank": "GUARD", "blade": "RHYTHM", "caster": "KICK", "healer": "TRIAGE"}
@@ -2716,16 +2417,6 @@ func _owned_boon_labels() -> Array:
 					"rarity": b.get("rarity", "haiku"), "type": b.get("type", "")})
 	return out
 
-func _healer_hint() -> String:
-	var chords: Array = BloomweaverBinds.CHORDS
-	var shorts: Dictionary = BloomweaverBinds.CHORD_SHORT
-	var parts: Array = []
-	for chord in chords:
-		var id := String(_binds.get(chord, "none"))
-		if id != "none":
-			parts.append("%s=%s" % [shorts.get(chord, chord), id.capitalize()])
-	return "Hover a frame + click:  " + "  ·  ".join(parts) + "    ·    SPACE/F — dodge beats"
-
 # ============================================================ INPUT
 ## The raid panel is MOVABLE: drag its ≡ header anywhere (clamped on-screen, saved
 ## per layout size to user://rift_ui.cfg); double-click the header to snap back.
@@ -2825,189 +2516,19 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_M and _meter != null:
 			_meter.cycle()
 			return
-		match _seat_key:
-			"healer":
-				_healer_key(event.keycode)
-			"blade":
-				if _aspect == "fermata":
-					_fermata_key(event.keycode)          # the hold-release blade
-				else:
-					_twinfang_key(event.keycode)
-			"caster":
-				_alchemist_key(event.keycode)
-			_:
-				_martial_key(event.keycode)
+		if _band != null:
+			_band.key_pressed(event.keycode)   # the class's key map lives on its band
 		return
-	# the Alchemist's hold-release verb: releasing the held brew key POURS the vial.
-	# (Key releases are otherwise unused — every other kit is tap-driven.)
+	# hold-release verbs (Alchemist pour / FERMATA release / Well DRAW): key-ups
+	# route to the band — a band that owns a release grammar consumes them.
 	if event is InputEventKey and not event.pressed and _pause == null \
-			and _screen == "combat" and _seat_key == "caster" and _caster_cls == "alchemist":
-		if event.keycode == _brew_hold_key:
-			_brew_hold_key = -1
-			_ctrl.human({"type": "ability", "id": "pour"})
-		return
-	# FERMATA's hold-release Strike: releasing key 1 RELEASES the coil (resolves the strike).
-	if event is InputEventKey and not event.pressed and _pause == null \
-			and _screen == "combat" and _seat_key == "blade" and _aspect == "fermata":
-		if event.keycode == KEY_1 and _coil_held:
-			_coil_held = false
-			_ctrl.human({"type": "ability", "id": "release"})
-		return
-	# the Well/DRAW hold-release: a heal key HELD past the tap threshold pours on key-up.
-	# A quick TAP leaves the cast running — tap/click again to pour (the two-click style).
-	if event is InputEventKey and not event.pressed and _pause == null and _screen == "combat" \
-			and _seat_key == "healer" and _healer_cls == "well" and _aspect == "draw":
-		if event.keycode == _well_hold_key:
-			var held := Time.get_ticks_msec() - _well_hold_ms
-			_well_hold_key = -1
-			if held >= 250 and not _ctrl.player().casting.is_empty():
-				_ctrl.human({"type": "ability", "id": "release"})
-		return
-	# the Well/DRAW mouse release: a bound chord pressed WHILE CASTING = the release
-	# (click-click), and a mouse button held past the threshold releases on button-up.
-	if _pause == null and _screen == "combat" and _seat_key == "healer" \
-			and _healer_cls == "well" and _aspect == "draw" and event is InputEventMouseButton:
-		if event.pressed and not _ctrl.player().casting.is_empty() \
-				and String(_binds.get(_mouse_chord(event), "none")) != "none":
-			_well_mouse_ms = 0
-			_ctrl.human({"type": "ability", "id": "release"})
+			and _screen == "combat" and _band != null:
+		if _band.key_released(event):
 			return
-		if not event.pressed and _well_mouse_ms > 0:
-			var mheld := Time.get_ticks_msec() - _well_mouse_ms
-			_well_mouse_ms = 0
-			if mheld >= 300 and not _ctrl.player().casting.is_empty():
-				_ctrl.human({"type": "ability", "id": "release"})
-				return
-	# healer click-cast (all healer classes): hover a frame, click a chord
-	if _pause == null and _seat_key == "healer" and _screen == "combat" \
-			and event is InputEventMouseButton and event.pressed and _hover_seat != null:
-		var id := String(_binds.get(_mouse_chord(event), "none"))
-		if id == "signature":
-			id = _signature()
-		if id != "none" and _hspells().has(id):
-			_focus_seat = _hover_seat
-			_cast_on(_hover_seat, id)
-
-func _martial_key(code: int) -> void:
-	match code:
-		KEY_SPACE:
-			_ctrl.human({"type": "defense"})
-		KEY_F:
-			_ctrl.human({"type": "dodge"})
-		KEY_T:
-			if _seat_key == "tank":
-				_ctrl.human({"type": "ability", "id": "challenge"})
-		KEY_1: _use_ability(0)
-		KEY_2: _use_ability(1)
-		KEY_3: _use_ability(2)
-		KEY_4: _use_ability(3)
-		KEY_5: _use_ability(4)
-
-## Twinfang (Tempo/Venom): SPACE is THE ONE DODGE — it negates a single swing aimed
-## at you OR answers a barrage beat (whichever is live). F retired (DODGE-PLAN.md).
-func _twinfang_key(code: int) -> void:
-	match code:
-		KEY_SPACE:
-			_ctrl.human({"type": "defense"})
-		KEY_1: _use_ability(0)
-		KEY_2: _use_ability(1)
-		KEY_3: _use_ability(2)
-		KEY_4: _use_ability(3)
-		KEY_5: _use_ability(4)
-
-## FERMATA: the Strike is a HOLD — key 1 DOWN coils into shadow, key 1 UP (in _input) releases.
-## The dumps (Eviscerate/Kick/Coup, keys 2-4) stay instant taps at base — same as Tempo.
-func _fermata_key(code: int) -> void:
-	match code:
-		KEY_SPACE:
-			_ctrl.human({"type": "defense"})   # THE ONE DODGE
-		KEY_1:
-			if not _coil_held:
-				_coil_held = true
-				_ctrl.human({"type": "ability", "id": "coil"})
-		KEY_2: _use_ability(1)
-		KEY_3: _use_ability(2)
-		KEY_4: _use_ability(3)
-		KEY_5: _use_ability(4)
-
-## The healer's spellbook for the current class (Well charge-book / Bloomweaver Sap).
-func _hspells() -> Dictionary:
-	if _healer_cls == "bloomweaver":
-		return _bcfg.spells if _bcfg != null else {}
-	return _wcfg.book if _wcfg != null else {}
-
-## The Well's keys. BRIM taps 1-4 (grades on landing). DRAW holds 1-4 to cast and
-## RELEASES the key to pour (the release branch in _input sends the "release" action).
-## Q dispel · R rekindle (hover a fallen ally) · SPACE/F dodge (cancels a cast).
-func _well_key(code: int) -> void:
-	match code:
-		KEY_SPACE:
-			_ctrl.human({"type": "dodge"})   # THE ONE DODGE (healers face only barrage beats)
-		KEY_1, KEY_2, KEY_3, KEY_4:
-			# DRAW does BOTH release styles: a press while casting = the release (tap-tap),
-			# and a key HELD past the tap threshold releases on key-up (hold-release).
-			if _aspect == "draw" and not _ctrl.player().casting.is_empty():
-				_well_hold_key = -1
-				_ctrl.human({"type": "ability", "id": "release"})
-				return
-			var id: String = {KEY_1: "flash", KEY_2: "mend", KEY_3: "cascade", KEY_4: "spring"}[code]
-			if _aspect == "draw":
-				_well_hold_key = code
-				_well_hold_ms = Time.get_ticks_msec()
-			_cast(id)
-		KEY_Q: _cast("dispel")
-		KEY_R: _cast("rekindle")
-
-func _healer_key(code: int) -> void:
-	if _healer_cls == "bloomweaver":
-		_bloomweaver_key(code)
-		return
-	_well_key(code)
-
-func _bloomweaver_key(code: int) -> void:
-	match code:
-		KEY_SPACE, KEY_F:
-			_ctrl.human({"type": "dodge"})
-		KEY_1: _cast("growth")
-		KEY_2: _cast("bark")
-		KEY_3: _cast("overgrowth")
-		KEY_4: _cast("bloom")
-		KEY_5: _cast("lash")
-		KEY_Q: _cast("saprot")
-		KEY_E: _cast("lifesurge")
-		KEY_7: _cast(_signature())
-
-## The Alchemist's keys: HOLD 1 = brew Venom · HOLD 2 = brew Rot (the RELEASE pours —
-## see the release branch in _input) · 3/R = Rupture · SPACE = dodge · F = dodge beats.
-func _alchemist_key(code: int) -> void:
-	match code:
-		KEY_SPACE:
-			_ctrl.human({"type": "defense"})   # THE ONE DODGE
-		KEY_1:
-			if _brew_hold_key == -1:
-				_brew_hold_key = KEY_1
-				_ctrl.human({"type": "ability", "id": "brew_venom"})
-		KEY_2:
-			if _brew_hold_key == -1:
-				_brew_hold_key = KEY_2
-				_ctrl.human({"type": "ability", "id": "brew_rot"})
-		KEY_3, KEY_R:
-			_ctrl.human({"type": "ability", "id": "rupture"})
-		KEY_4:
-			_ctrl.human({"type": "ability", "id": "catalyst"})   # MODULE (Third Reagent): drop it in
-		KEY_5:
-			_ctrl.human({"type": "ability", "id": "spitfire"})   # SPELL (drafted): filler dart
-		KEY_6:
-			_ctrl.human({"type": "ability", "id": "decant"})     # SPELL (drafted): snap-to-balance
-		KEY_7:
-			_ctrl.human({"type": "ability", "id": "reduction"})  # SPELL (drafted): volume→power
-
-func _use_ability(i: int) -> void:
-	if _screen == "combat" and i >= 0 and i < _rune_ids.size():
-		_ctrl.human({"type": "ability", "id": _rune_ids[i]})
-
-func _signature() -> String:
-	return "wildbloom" if _aspect == "wildgrove" else "briarheart"
+	# mouse grammar (healer click-cast, the Well/DRAW release styles) — band-owned.
+	if _pause == null and _screen == "combat" and _band != null \
+			and event is InputEventMouseButton:
+		_band.mouse(event)
 
 func _mouse_chord(e: InputEventMouseButton) -> String:
 	var mods := ""
@@ -3062,8 +2583,8 @@ func _cast_on_well(seat: Seat, id: String) -> void:
 		fr.flash(Palette.GOLD if ready else Palette.TEXT_DIM)
 	if ready:
 		_ctrl.human({"type": "ability", "id": id, "target": seat if bool(sp.get("target", false)) else null})
-		if _aspect == "draw" and float(sp.get("cast", 0.0)) > 0.0:
-			_well_mouse_ms = Time.get_ticks_msec()   # arm mouse hold-release for this cast
+		if _aspect == "draw" and float(sp.get("cast", 0.0)) > 0.0 and _band is WellBand:
+			(_band as WellBand).mouse_ms = Time.get_ticks_msec()   # arm mouse hold-release for this cast
 
 ## Bloomweaver click-cast: mirror the Sap/Verdance/garden gates for the gold/dim flash.
 func _cast_on_bloom(seat: Seat, id: String) -> void:
@@ -3136,15 +2657,8 @@ func _process(delta: float) -> void:
 	_bar.enrage_in = (s.encounter.enrage_at - float(s.tick) * s.dt) if s.encounter.enrage_at > 0.0 else INF
 	_render_dial(s, obs)
 	_render_frames(s, obs)
-	match _seat_key:
-		"tank":
-			_render_band_tank(s, p, obs)
-		"blade":
-			_render_band_blade(s, p, obs)
-		"caster":
-			_render_band_caster(s, p, obs)
-		"healer":
-			_render_band_healer(s, p, obs)
+	if _band != null:
+		_band.render(s, p, obs)
 
 	if _stage2d != null:
 		_stage2d.sync(s)
@@ -3243,7 +2757,7 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		fr.incoming_dmg_frac = 0.0
 		fr.incoming_lethal = false
 		fr.ripe = false                      # Bloomweaver drives this per-frame below
-		fr.glint = s.tick < int(seat.vars.get("glint_until", -1))   # Well: this ally is glinting
+		fr.glint = CombatCore.vuln_until(s, s.seats.find(seat), &"glint") >= 0   # Well: this ally is glinting (rides the vuln stack since 855ac2f)
 		# Well/BRIM: the pour window lives on EVERY frame, always (the aim IS the party bars)
 		fr.brim_line = _wcfg.brim_band if (_seat_key == "healer" and _healer_cls == "well" \
 			and _aspect == "brim" and _wcfg != null) else 0.0
@@ -3359,211 +2873,12 @@ func _cd_frac(p: Seat, s: CombatState, id: String, cd_sec: float) -> float:
 		return 0.0
 	return clampf(float(left) / float(CombatCore.to_ticks(cd_sec, s.config.fixed_hz)), 0.0, 1.0)
 
-# ---- per-seat band renders ----
-func _render_band_tank(s: CombatState, p: Seat, obs: Dictionary) -> void:
-	_hp_orb.set_values(p.hp, p.hp_max)
-	_res_orb.set_values(p.resource, p.resource_max)
-	_spec.counter = int(obs.get("counter", 0))
-	_spec.momentum = int(obs.get("momentum", 0))
-	_spec.momentum_max = int(obs.get("momentum_max", 10))
-	_spec.riposte = bool(obs.get("riposte_active", false))
-	var gcd_ticks := float(CombatCore.to_ticks(1.0, s.config.fixed_hz))
-	var rage := float(obs.get("rage", 0.0))
-	for i in _runes.size():
-		var afford := true
-		match _rune_ids[i]:
-			"rampage": afford = rage >= 40.0
-			"fortify": afford = rage >= 30.0
-			"vindicate": afford = int(obs.get("counter", 0)) >= 1
-			"avalanche": afford = rage >= 20.0 and int(obs.get("momentum", 0)) >= 1
-		_runes[i].affordable = afford
-		_runes[i].usable = bool(obs.get("gcd_ready", false))
-		_runes[i].cd_frac = clampf(float(p.gcd_until_tick - s.tick) / gcd_ticks, 0.0, 1.0)
-	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.2)), s.config.fixed_hz)))
-	_guard.usable = bool(obs.get("defense_ready", false))
-	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
-	if _challenge != null:             # absent at a GATE exam (raid verb)
-		var ch := int(p.cooldowns.get("challenge", 0))
-		_challenge.usable = s.tick >= ch
-		_challenge.cd_frac = clampf(float(ch - s.tick) / float(CombatCore.to_ticks(8.0, s.config.fixed_hz)), 0.0, 1.0)
-
-func _render_band_blade(s: CombatState, p: Seat, obs: Dictionary) -> void:
-	_hp_orb.set_values(p.hp, p.hp_max)
-	_res_orb.set_values(float(obs.get("energy", 0.0)), float(obs.get("energy_max", 100.0)))
-	_rhythm.since = int(obs.get("since_strike", 0))
-	_rhythm.swing_min = int(obs.get("swing_min_ticks", 13))
-	_rhythm.perfect_lo = int(obs.get("perfect_lo", 18))
-	_rhythm.perfect_hi = int(obs.get("perfect_hi", 29))
-	_rhythm.bull_frac = float(obs.get("grade_bull_frac", 0.18))       # GRADED WINDOW (§2c) zones
-	_rhythm.perfect_frac = float(obs.get("grade_perfect_frac", 0.55))
-	_rhythm.scale_ticks = int(obs.get("rhythm_scale", 33))   # fixed ruler → accelerando visible
-	var _asp := String(obs.get("aspect", ""))
-	_rhythm.flow = int(obs.get("flow", 0)) if (_asp == "tempo" or _asp == "fermata") else 0
-	_rhythm.flow_max = int(obs.get("flow_max", 6))
-	# FERMATA: feed the coil (hold-release) state so the bar shows the charge ring + coil cues.
-	_rhythm.fermata = _asp == "fermata"
-	_rhythm.coiling = bool(obs.get("coiling", false))
-	var _cmin := maxi(1, int(obs.get("coil_min_ticks", 11)))
-	_rhythm.coil_charge = clampf(float(obs.get("coil_ticks", 0)) / float(_cmin), 0.0, 1.0)
-	_rhythm.coil_sharp = bool(obs.get("coil_sharp", false))
-	# FERMATA · THE RAMP & THE SNAP — feed the depth bands + the lip (the cliff) for the ramp draw.
-	_rhythm.ramp = bool(obs.get("fermata_ramp", false))
-	_rhythm.ramp_good_frac = float(obs.get("ramp_good_frac", 0.45))
-	_rhythm.ramp_perfect_frac = float(obs.get("ramp_perfect_frac", 0.37))
-	_rhythm.lip = int(obs.get("lip_ticks", 0))
-	_rhythm.dance_no_snap = bool(obs.get("dance_no_snap", false))
-	_tf_gauge.combo = int(obs.get("cp", 0))
-	_tf_gauge.combo_max = int(obs.get("cp_max", 5))
-	_tf_gauge.flow = int(obs.get("flow", 0))
-	_tf_gauge.flow_max = int(obs.get("flow_max", 6))
-	_tf_gauge.flow_mult = float(obs.get("flow_mult", 1.0))
-	_tf_gauge.tier = int(obs.get("tier", 0))
-	_tf_gauge.venom = obs.get("venom", {"V": 0, "F": 0, "C": 0, "syn_ramp": 1.0, "syn_active": false})
-	if _opening != null:
-		# THE OPENING — the boss's vulnerability window; armed = a dump is ready to punish it
-		_opening.now_tick = int(obs.get("tick", 0))
-		_opening.from_tick = int(obs.get("open_from", -1))
-		_opening.peak_tick = int(obs.get("open_peak", -1))
-		_opening.to_tick = int(obs.get("open_to", -1))
-		_opening.core_ticks = int(obs.get("open_core_ticks", 3))
-		_opening.bonus_now = float(obs.get("open_bonus_now", 0.0))
-		_opening.active = int(obs.get("open_to", -1)) >= _opening.now_tick
-		_opening.armed = int(obs.get("cp", 0)) >= 1 or bool(obs.get("coup_ready", false)) \
-			or bool(obs.get("rupture_ready", false)) or float(obs.get("energy", 0.0)) >= 28.0
-	var energy := float(obs.get("energy", 0.0))
-	var cpn := int(obs.get("cp", 0))
-	var in_green: bool = _rhythm.since >= _rhythm.perfect_lo and _rhythm.since <= _rhythm.perfect_hi
-	for i in _runes.size():
-		var id: String = _rune_ids[i]
-		var afford := true
-		var usable := true
-		var cd := 0.0
-		match id:
-			"strike":
-				afford = energy >= 12.0
-				if _aspect == "fermata":
-					# THE DRAW: the coil button is live whenever you're not staggered — while
-					# holding it's "usable" once sharp (release-ready), idle it's always startable.
-					usable = (bool(obs.get("coil_sharp", false)) if bool(obs.get("coiling", false))
-						else not bool(obs.get("strike_locked", false)))
-				else:
-					usable = _rhythm.since >= _rhythm.swing_min
-			"eviscerate", "envenom":
-				afford = energy >= 25.0
-				usable = cpn >= 1
-			"flurry":
-				afford = energy >= 28.0
-			"kick":
-				afford = energy >= 10.0
-				cd = _cd_frac(p, s, "kick", 7.0)
-				usable = cd <= 0.0
-			"coupdegrace":
-				afford = energy >= 30.0
-				cd = _cd_frac(p, s, "coupdegrace", 5.0)
-				usable = cd <= 0.0 and int(obs.get("flow", 0)) >= int(obs.get("flow_max", 6))
-			"rupture":
-				afford = energy >= 22.0
-				cd = _cd_frac(p, s, "rupture", 3.5)
-				usable = cd <= 0.0 and int(obs.get("venom_total", 0)) >= 1
-		_runes[i].affordable = afford
-		_runes[i].usable = usable
-		_runes[i].cd_frac = cd
-		if i == _strike_idx:
-			_runes[i].accent = Palette.PERFECT if in_green else Palette.GOLD
-	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
-	_guard.usable = bool(obs.get("defense_ready", false))
-	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
-
-## THE ALEMBIC eats the whole observe() surface — the instrument renders everything.
-func _render_band_caster(s: CombatState, p: Seat, obs: Dictionary) -> void:
-	_hp_orb.set_values(p.hp, p.hp_max)
-	_res_orb.set_values(float(obs.get("potency", 0.0)) * 100.0, 100.0)
-	var g := _brew_gauge
-	g.venom = float(obs.get("venom", 0.0))
-	g.rot = float(obs.get("rot", 0.0))
-	g.cap = float(obs.get("cap", 12.0))
-	g.charging = String(obs.get("charging", ""))
-	g.charge = float(obs.get("charge", 0.0))
-	g.charge_max = float(obs.get("charge_max", 1.30))
-	g.fizzle_below = float(obs.get("fizzle_below", 0.45))
-	g.sweet_lo = float(obs.get("sweet_lo", 0.70))
-	g.sweet_hi = float(obs.get("sweet_hi", 0.98))
-	g.overflow_at = float(obs.get("overflow_at", 1.0))
-	g.balance = float(obs.get("balance", 0.0))
-	g.potency = float(obs.get("potency", 0.0))
-	g.pot_mult = float(obs.get("pot_mult", 1.0))
-	g.react_dps = float(obs.get("react_dps", 0.0))
-	g.ripe_glow = float(obs.get("ripe_glow", 0.0))
-	g.brew_min = float(obs.get("brew_min", 0.0))
-	# MODULES (slice B): the equipped one lights a compact gauge on the instrument.
-	g.mod_third_reagent = bool(obs.get("mod_third_reagent", false))
-	g.mod_fermentation = bool(obs.get("mod_fermentation", false))
-	g.mod_reaction_vessel = bool(obs.get("mod_reaction_vessel", false))
-	g.mod_reagent = float(obs.get("reagent", 0.0))
-	g.mod_reagent_active = bool(obs.get("reagent_active", false))
-	g.mod_ferment = float(obs.get("ferment", 0.0))
-	g.mod_vessel = float(obs.get("vessel", 0.0))
-	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", 2.4)), s.config.fixed_hz)))
-	_guard.usable = bool(obs.get("defense_ready", false))
-	_guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
-
-func _render_band_healer(s: CombatState, p: Seat, obs: Dictionary) -> void:
-	if _healer_cls == "bloomweaver":
-		_render_band_bloomweaver(s, p, obs)
-		return
-	_render_band_well(s, p, obs)
-
-func _render_band_bloomweaver(s: CombatState, p: Seat, obs: Dictionary) -> void:
-	_hp_orb.set_values(p.resource, _bcfg.sap_max)
-	_verd.verdance = float(obs.get("verdance", 0.0))
-	_verd.flourish = bool(obs.get("flourish", false))
-	_verd.flourish_hi = bool(obs.get("flourish_hi", false))
-	_verd.garden = int(obs.get("garden", 0))
-	_verd.total_seeds = int(obs.get("total_seeds", 0))
-	_verd.flourish_lo = int(_bcfg.flourish_seeds_lo)
-	_verd.thorns = int(float(p.vars.get("stat_thorns", 0.0)))
-	_verd.thorn_charge = int(obs.get("thorn_charge", 0))
-	_verd.thorn_charge_max = int(obs.get("thorn_charge_max", 5))
-	_verd.thorns_pct = float(obs.get("thorns_pct", 0.45))
-	var casting: Dictionary = obs.get("casting", {})
-	if casting.is_empty():
-		_castbar.active = false
-	else:
-		_castbar.active = true
-		_castbar.frac = clampf(float(s.tick - int(casting.get("start_tick", 0))) / maxf(float(casting.get("dur_ticks", 1)), 1.0), 0.0, 1.0)
-		var ct: Seat = casting.get("target")
-		_castbar.target = ct.unit_name if ct != null else ""
-		_castbar.spell_id = String(casting.get("id", ""))
-		_castbar.label = String(_bcfg.spells.get(_castbar.spell_id, {}).get("name", _castbar.spell_id))
-	var gcd_ticks := float(CombatCore.to_ticks(_bcfg.gcd, s.config.fixed_hz))
-	for i in _runes.size():
-		var id: String = _rune_ids[i]
-		var sp: Dictionary = _bcfg.spells[id]
-		var offgcd := bool(sp.get("offgcd", false))
-		var afford: bool = p.resource >= float(sp.get("sap", 0.0))
-		if sp.has("spec"):
-			afford = afford and float(obs.get("verdance", 0.0)) >= _bcfg.verd_min_spend
-		var cd_until := int(p.cooldowns.get(id, 0))
-		var gcd_block: bool = (not offgcd) and s.tick < p.gcd_until_tick
-		var cd_block: bool = s.tick < cd_until
-		_runes[i].affordable = afford
-		_runes[i].usable = not gcd_block and not cd_block
-		if cd_block:
-			_runes[i].cd_frac = clampf(float(cd_until - s.tick) / maxf(1.0, float(CombatCore.to_ticks(float(sp.get("cd", 1.0)), s.config.fixed_hz))), 0.0, 1.0)
-		elif gcd_block:
-			_runes[i].cd_frac = clampf(float(p.gcd_until_tick - s.tick) / gcd_ticks, 0.0, 1.0)
-		else:
-			_runes[i].cd_frac = 0.0
-
-# ============================================================ JUICE
 func _handle_event(ev: Dictionary) -> void:
 	var mine := bool(ev.get("player", false))
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
-	if _brew_gauge != null and mine:
-		_brew_gauge.on_event(ev)   # THE ALEMBIC: pour verdicts / rupture burst / history
-	if _well_gauge != null:
-		_well_gauge.on_event(ev)   # THE WELL: pour/still/clean/under/spill verdicts + history
+	if _band != null:
+		_band.on_event(ev, mine)   # gauge juice (ALEMBIC / WELL verdict banners + history)
 	RecapPanel.track(_recap_stats, ev)
 	match String(ev.get("t", "")):
 		"pack_next":
@@ -3667,14 +2982,12 @@ func _handle_event(ev: Dictionary) -> void:
 		"add_down":
 			_big_text("%s TERMINATED — THE SEAL RETURNS" % String(ev.get("name", "IT")), Palette.GOLD_BRIGHT, 32)
 			_add_shake(6.0)
-		# ---- class extras (only fire for the class that emits them) ----
+		# ---- class extras (only fire for the class that emits them; the band
+		# flashes its own widgets via _band.on_event — the HUD adds the body) ----
 		"strike":
-			# GRADED WINDOW (§2c): flash the rhythm bar + pop the graded verdict.
-			if mine and _rhythm != null:
-				var res := String(ev.get("result", ""))
-				# FERMATA ramp: pass the real grade so the DEPTH verdict reads; Tempo folds bull→perfect.
-				_rhythm.show_result(res if _rhythm.ramp else ("perfect" if (res == "perfect" or res == "bullseye") else res))
-				match res:
+			# GRADED WINDOW (§2c): the band flashes the rhythm bar; the HUD pops the verdict.
+			if mine:
+				match String(ev.get("result", "")):
 					"bullseye":
 						_big_text("BULLSEYE!", Palette.GOLD_BRIGHT, 38)
 						_add_shake(5.0)
@@ -3684,8 +2997,7 @@ func _handle_event(ev: Dictionary) -> void:
 						_big_text("good", Palette.TEXT_DIM, 22, 0.42)
 		"snap":
 			# FERMATA (EDGE): rode past the lip — the note broke and Flow crashed.
-			if mine and _rhythm != null:
-				_rhythm.show_result("snap")
+			if mine:
 				_big_text("SNAPPED!", Palette.CRIMSON, 36)
 				_add_shake(9.0)
 		"perfect":
@@ -3725,12 +3037,9 @@ func _handle_event(ev: Dictionary) -> void:
 				_big_text("%s +%d" % [tn, int(ev.get("mag", 0))], Palette.REACT, 22, 0.5)
 		"opening":
 			# THE OPENING — a dump landed in the boss's vulnerability window
-			if mine and _opening != null:
-				var g := String(ev.get("grade", ""))
-				_opening.show_result(g)
-				if g == "peak":
-					_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
-					_add_shake(4.0)
+			if mine and String(ev.get("grade", "")) == "peak":
+				_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
+				_add_shake(4.0)
 		"kick_whiff", "int_whiff":
 			if mine:
 				_big_text("whiff", Palette.TEXT_DIM, 20, 0.5)
