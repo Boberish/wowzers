@@ -814,6 +814,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `vuln-stack`) — **CLAIM: GENERIC BOSS-VULNERABILITY
+  STACK (REFIT P4; ledger §A row "build FIRST — TEAM-COMP + Depth + Well-glint ride it").**
+  ⚠ DELIBERATE REBASELINE (ledger §0 cluster). Build: `boss_state.vulns` window list
+  ({seat_i·mult·until·src}, seat_i −1 = raid-wide) + `CombatCore.add_vuln/vuln_mult/vuln_until`
+  — ONE fold point in `damage_boss` + `_apply_group_damage` (lazy tick-driven prune, det-safe).
+  Migrations: Well GLINT off ad-hoc `seat.vars` onto the stack (closes the co-op gap — a glinted
+  FULL-fidelity/human blade now benefits, not just stat-block allies; keptLight extends via
+  `vuln_until`); RETIRE the dead boss-level `exposed_until_tick`/`expose_amt` (only reader was
+  the purged Voidcaller). NOT migrated: sunder/debilitate (decaying scalars, already at the same
+  funnel — not windows) · bulwark payExpose (dies with the tank wave) · Shining Hour (conditional
+  state, not a window). TEAM-COMP + Depth get their fold slot here later. Gates: NEW
+  `sim/vuln_probe.gd` · ab-gate BYTE-IDENTICAL for twinfang/alchemist sims (no glint user) ·
+  well_sim/raid_sim = the deliberate shift, re-pin baselines after · full verify-all. *(rails
+  session — queue: class registry → ClassBand+Gauge → hoists)*
+
 - ☑ 2026-07-10 · main (docs only) · BLOOM-PLAN §4 (NEW) + CARD-CATALOG Bloomweaver section
   (NEW) + ledger row — **DECK MACHINE row D3: THE ORCHARD CLOCK DECK v0 — DONE, 🟡
   PROVISIONAL.** Core unpicked, so the deck is authored on **A (the slate's #1)** to make the
