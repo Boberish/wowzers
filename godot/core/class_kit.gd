@@ -125,3 +125,9 @@ func observe(_s: CombatState, _seat: Seat) -> Dictionary:
 ## kit file. Default [] = a kit with nothing spec-specific to add. Pure / read-only.
 func recap_spec(_s: CombatState, _seat: Seat) -> Array:
 	return []
+
+## MeterPanel / band chrome — the class's accent colour. Returned as a built-in Color so the
+## data layer never imports game/ui (Palette); a new kit self-colours the meter the day it
+## merges, no MeterPanel edit. Default steel = a kit with no identity yet. Pure / read-only.
+func accent() -> Color:
+	return Color(0.56, 0.72, 0.88)   # generic steel
