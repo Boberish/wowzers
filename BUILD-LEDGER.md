@@ -272,7 +272,7 @@ build-once seams that five separate class reworks and the endgame all need:
 |---|---|---|---|---|
 | 4-floor restructure (Vorathek→F1 Seal, Rings 3-2-1-0) | 🟡 V#1/#2 | DESCENT §1–2 | `raid_content.FLOORS`+`floor_fights`, `run_map` inputs, `_advance_floor` grant indices, oath stakes, salvage table | AMENDs WORLD-PLAN "3-Ring unchanged". ~5 ring-as-key sites. |
 | Node contracts + legibility UI pass | 🟡 V#6 | DESCENT §5/§9 | `map_screen`, `map_event_panel`, header meters/pips | Pay-on-the-door + fight-tier pips + both-legs check hints + renames (LUCK/STANDING/BACKUPS/REGENERATE). Kills raid integrity (ticket re-price rides here). |
-| PROMPT MARKET node + post-Seal market phase | 🟡 V#6/#11 | DESCENT §6 | new node kind, `draft.gd` bank, `raid_hud`, `gear_catalog` reframes | **= GEAR-3 absorbed** (§D row). 6-slot stock; `tokens@market` sim diag; serialization contract. |
+| PROMPT MARKET node + post-Seal market phase | 🟡 V#6 (**V#11 ✅ per-seat wallets**, Bill 07-10) | DESCENT §6 | new node kind, `draft.gd` wallets (shared bank→per-seat, mint routes to earner, UPSELL spends own), `raid_hud` (AI shop director + AUTO default), `gear_catalog` reframes | **= GEAR-3 absorbed** (§D row). 6-slot stock; `tokens@market` sim diag; serialization contract. |
 | THE JAILBREAK (printed curse deals) | 🟡 V#4 | DESCENT §7 | new node kind, `draft.gd` welded-downside, header curse pips, Cooling purge fork | **= TEETH curse-cards lands here** (§E row). No run-long timing curse — hard rule. |
 | Minigame nodes: CAPTCHA · BENCHMARK · SERVER ROOM · PATCH BAY (+2 reserved) | 🟡 V#5 | DESCENT §8 | new node kinds over `strike_judge`/lockstep, backdoor path | **BENCHMARK = TEETH CONTEST absorbed** (§E row). Bonus-tier pay only — always skippable. |
 | THE QUEUE + DEED/ESCORT ticket shapes + turn-in fork | 🟡 V#10 | DESCENT §10 | `map_content` tickets, `CampaignCore.ticket_at` + sim walker (divergence trap), `seat.diag` | One-grammar/two-ledgers verdict. ESCORT port inherits `escort-ticket` lane-law debt. SEV-1 parked v1.1. |
@@ -313,10 +313,11 @@ to content work. Adds **ZERO rows to the `draft.gd` claim queue** by design.
 
 The 🟡 pull-list — open decisions that will rot the plan if left. Grouped:
 
-- **THE DESCENT REBUILD** — the whole 12-question board at DESCENT-PLAN §V (4-floor promotion ·
-  length dial · elective elites · curse bite · BENCHMARK scoring · names bundle · 2nd module ·
-  STANDING · WILD ration · SEV-1 timing · shop purse · interim ship). Subsumes the old Teeth
-  feel-verdicts for CONTEST scoring + curse magnitudes below.
+- **THE DESCENT REBUILD** — 11 of 12 still open at DESCENT-PLAN §V (4-floor promotion · length
+  dial · elective elites · curse bite · BENCHMARK scoring · names bundle · 2nd module · STANDING ·
+  WILD ration · SEV-1 timing · interim ship). **V#11 shop purse ✅ DECIDED 07-10: per-seat earned
+  wallets + player-directed AI shopping w/ AUTO default.** Subsumes the old Teeth feel-verdicts
+  for CONTEST scoring + curse magnitudes below.
 - **Tank·Duelist deck v1** — the whole slate is at your board (KEEP/TWEAK/CUT per card).
 - **Warden deck** — later pass, but confirm the frame after Duelist.
 - **Alchemist·Brew review** — 11 proposals (§8).

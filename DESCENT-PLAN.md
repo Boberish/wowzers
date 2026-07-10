@@ -113,13 +113,14 @@ GAME-LOOPS L2/L3 stanzas update when verdicts land.
     plumbing (cross-map state), and the QUEUE + three ticket shapes already give floor-to-floor
     thread. Prove the base, then add the long arc.
 
-11. **THE SHOP PURSE IN CO-OP**
-    *Question:* One shared party token bank at the Market (like drafts today), or per-seat
-    wallets?
-    *Options:* (a) Shared bank. (b) Per-seat wallets.
-    *Recommendation:* **(a).** It matches the draft economy you already have, keeps AI-seat
-    auto-shopping simple (they spend from the pool with banter), and "arguing about the party
-    purse" is co-op flavor, not friction, at your table size.
+11. **THE SHOP PURSE IN CO-OP — ✅ DECIDED (Bill, 2026-07-10): PER-SEAT EARNED WALLETS.**
+    Shared-pot rejected ("we all share the same money — not fun"). The rule: **you keep what
+    your own play mints** — the skill mint already pays more ⏣ for clean play; it now pays into
+    YOUR wallet instead of a party pot. **AI seats:** the player directs their market buys
+    (flip through their wallets and shop for them) **or hits AUTO** — AI spends its own wallet
+    with banter; AUTO is the default for players who don't care. Consequence (one pooling rule
+    for one currency): the Draft-2.0 shared token bank flips to per-seat everywhere — UPSELL
+    spends YOUR wallet too. This edits the §12 KEEP line for Draft 2.0 accordingly.
 
 12. **INTERIM ACCEPTANCE**
     *Question:* Ship this structure now at ~2 h (bosses still at today's 2–3 minute lengths,
@@ -373,9 +374,16 @@ Verdict #6.)
 | 5 | **PATCH** (repair one corrupted sector) / mana refuel | 5⏣ |
 | 6 | **DEPRECATE** — pay to have LESS: purge a curse or scrap a drafted boon (half back in ⏣). Price escalates each use. | 5⏣ |
 
+**The purse (V#11 ✅ decided):** **per-seat earned wallets** — each seat's skill mint pays into
+its OWN wallet (clean play = more ⏣, personally). At the market the player shops for the AI
+seats from their wallets, or hits **AUTO** (default) and they spend their own with banter. One
+pooling rule everywhere: draft UPSELL spends your wallet too (the Draft-2.0 shared bank
+retires).
+
 **The scarcity audit (re-run at 21 fights, per the judges):** faucets mint ~15–23⏣/floor (skill
 mint ~3⏣ × ~5 fights + salvage + oath purse + scrap) vs ~35–40⏣ of stock → **you afford ~2 of 6
-slots.** Real triage, no vendor trash. Add a `tokens@market` diagnostic to `raid_map_sim` beside
+slots** — now per seat, so a sloppy seat window-shops while a clean seat splurges. Real triage,
+no vendor trash. Add a `tokens@market` diagnostic to `raid_map_sim` beside
 the charge one. UPSELL at drafts BUILT-KEEP; per-draft REROLL/LOCK **CUT** (§11). Curio reframes
 at build time: Hashgrinder Rig → "market prices −1⏣ (floor 1⏣)"; Hot Reload → "grants 2
 REGENERATE charges."
@@ -433,7 +441,7 @@ stream, exactly 4 seats, everything rides `(seed,spec)`: pillar-clean by constru
 
 | Resource | Verdict | New face |
 |---|---|---|
-| ⏣ Tokens | **BUILT-KEEP** | "⏣ TOKENS — spend at the PROMPT MARKET & drafts." A real sink at last. |
+| ⏣ Tokens | **BUILT-KEEP → per-seat (V#11 ✅)** | "⏣ TOKENS — YOUR clean play mints them; spend at the PROMPT MARKET & drafts." Wallet per seat; the shared party pot retires. |
 | ⚡ Entropy | **BUILT-RESKIN → ⚡ LUCK** | Same math (nudge +8%/pip max 3, mulligan 2⚡ max 3). The stats-nerd name dies. |
 | 📁 Prior | **BUILT-RESKIN + demote → STANDING** | Off the header. Shown twice: run start ("your file precedes you: +2⚡") and the bank toast ("TRAINING SIGNAL RECORDED — STANDING 12. Grows when you show mercy."). |
 | ⏻ Charge | **BUILT-KEEP** | Legend line + one-shot first-gain tooltip: "⏻ feeds THE KILL SWITCH — cash it at this floor's Seal." Faucet curve retuned (the walker's sloppy-96% generosity is a known flag). |
@@ -567,8 +575,9 @@ ledgers.
   floors, unchanged in kind.
 - **THE STAKES MODEL verbatim**: floor checkpoints, wipe budget 3, cleared-stays-cleared, finale
   pays META, oaths bank win-or-lose, suspend-don't-pause.
-- **Draft 2.0**: 1-of-3, rarity-as-frequency + pity, synergy tags, UPSELL, the shared token
-  bank, skill mint (`Draft.mint`), AI-seat drafts in seat order.
+- **Draft 2.0**: 1-of-3, rarity-as-frequency + pity, synergy tags, UPSELL, skill mint
+  (`Draft.mint`), AI-seat drafts in seat order. *(One amendment rides V#11 ✅: the shared token
+  bank becomes per-seat wallets — the mint math and everything else keeps.)*
 - **The drop ceremony**: two-step rarity-first roll, pity, EQUIP/REPLACE/SCRAP, first-kill
   signature banks on a WIN only, oath purses (Sev × stakes).
 - **The PACK engine** (heat-carry, walk-in valleys) and the Forge (id-is-recipe bodies/tiers) —
@@ -593,7 +602,8 @@ ledgers.
 - **`draft.gd` claim queue** (BUILD-LEDGER §0 hotspot): REGENERATE charges, ⚠ welded-downside
   boons, elite curio rolls, Market stock + the already-queued rarity tier-roll engine / loot
   two-modes / EASE dial all land on the one roll pipeline — serialize claims, keep `draft_sim`
-  green.
+  green. **V#11 ✅ adds:** the shared token bank → per-seat wallets (mint routes to the earning
+  seat; UPSELL spends the seat's own wallet; AI market spend = player-directed or AUTO).
 - The Depth/endless parallel thread owns Depth — this plan deliberately does not touch it.
 - The ESCORT port depends on the unmerged zone slice (branch `escort-ticket`,
   `ESCORT_PREVIEW`) which still owes its lane-law reward — the raid port inherits that debt.

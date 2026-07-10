@@ -1201,7 +1201,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   adversarial judges → judged synthesis; run `wf_7a379a0b-44a`, journal in the session dir).
   Ledger: NEW §I rows + absorbed-row pointers (GEAR-3 Market, TEETH curse/CONTEST/rerolls-out,
   elite-node, stakes re-fiction). ⚠ Code lands AFTER `purge-oldgame` merges (GATE-cut overlap;
-  recon confirmed gates still live on main). *(raid-rebuild session)*
+  recon confirmed gates still live on main). **First verdict in — V#11 ✅ (Bill, 07-10): shop
+  purse = PER-SEAT EARNED WALLETS** (shared pot rejected as not-fun; your clean play mints YOUR
+  ⏣ — the skill mint routes to the earning seat; the Draft-2.0 shared bank retires, UPSELL
+  spends your own; AI seats: player-directed shopping or AUTO default). 11 of 12 still open.
+  *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · main (docs only) — **THE DUNGEON REBUILD plan (Bill) — DONE, 🟡 AT BILL'S
   VERDICT.** The watcher loop worked as claimed: woke the moment `DESCENT-PLAN.md` hit HEAD
