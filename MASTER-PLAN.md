@@ -860,11 +860,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   mult: kindergarten wide → exam tight) · **the press is free** (early press = normal dump, no
   penalty — the tax is having your dump armed) · **missing = the raid's costliest single
   mistake** (ladder: Mistral biggest-blast → Gemini permanent EMPOWER stacks → Mythos
-  boss-HEAL) · counts modest (V 0 · M one 2-chain · G one 3-chain · MY CoT+Hotfix). E8 engine
-  addendum (kick-window slice + castbar lit-slice + verse sim table); note METER's parked
-  per-seat kick counter (entry below) — E8's verse table is the sim-side half. V#11 asks: does
-  the teacher Seal get one gentle chant back, or do kicks enter at Mistral (rec). *(boss-rework
-  session, pass 2)*
+  boss-HEAL) · counts modest (V one un-chained Chant · M one 2-chain · G one 3-chain · MY
+  CoT+Hotfix). E8 engine addendum (kick-window slice + castbar lit-slice + verse sim table);
+  note METER's parked per-seat kick counter (entry below) — E8's verse table is the sim-side
+  half. **V#11 ✅ DECIDED (Bill, 2026-07-10): (b) YES — "add one to Vorathek"** — the teacher
+  returns ONE gentle un-chained Devouring Chant as the floor-1 kick kindergarten (widest window,
+  ~2 casts, miss = boss heals a chunk — the gentle rehearsal for Mythos's Hotfix; ramp reads
+  single-kick→first-chain→chain+empower→exam). BOSS-PLAN §V#11/§1½/§3/§6 flipped. *(boss-rework
+  session, pass 2 + V#11)*
 
 - ☑ 2026-07-10 · `meter-l2` → main (`c502d36`→`88553af`) · §SYSTEMS/§GRAPHICS · **METER 🎯DISCIPLINE
   MODE — BUILT & MERGED (Bill: "continue").** The L2-tail follow-up to L1+AMPLIFY. A 6th
