@@ -54,7 +54,9 @@ Tempo-§14-style pass + the 15-min loop protocol; restart via the `slate-loop` s
 `BOSS-PLAN.md` (**THE SEAL REWORK — the 4-boss redo v1**: fill the DESCENT §4 timer contract
 5/7/9/12 with structure never +HP · **TAUNT BUTTON REMOVED, aggro all-passive flow** · SealTune
 tuning spine · answer-density ramp · per-Seal scripts THE AXE/THE EXPERTS/THE TWINS/THE THREE
-ACTS · steal catalog; supersedes SEAL-PILLAR-PLAN; 🟡 at Bill's 10-verdict board §V, 2026-07-10) ·
+ACTS · steal catalog · **§1½ THE KICK CONTRACT** (all-but-healer carriers · warn-early/short-
+window · big miss consequences); supersedes SEAL-PILLAR-PLAN; 🟡 at Bill's 11-verdict board §V,
+2026-07-10) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (superseded by
 BOSS-PLAN 2026-07-10; Phase A absorbed) ·
@@ -136,8 +138,11 @@ INDEX — design detail stays in the plan doc; its own upkeep rules live in `BUI
    the two-verb split byte-identical (opt-in `ClassKit.unified_dodge()`) until reworked —
    every new/reworked kit ships on the one dodge.
 3. **INTERRUPT-BY-ABILITY** — no kick button, no kicker class: flagged existing abilities
-   (ideally dumps — the *interrupt tax*) kick inside a TIGHT window; per-class carrier
-   counts (2/1/0) are comp texture. Sims measure accidental vs deliberate kick rates.
+   (dumps — the *interrupt tax*) kick inside a TIGHT window. **⚠ AMENDED 2026-07-10
+   (`BOSS-PLAN §1½`): EVERY class except healers carries ONE kick on its dump** (the old
+   2/1/0 spread is retired — the warband fields 3 kickers); warn = the whole castbar,
+   window = a small absolute slice at cast end (~0.6 s, SealTune knob); **missing a kick
+   is the raid's costliest single mistake**. Sims measure accidental vs deliberate rates.
 4. **WARBAND LAW** — every fight is tuned for exactly 4 seats (AI backfill). No 1-to-x
    enemy scaling system exists, ever.
 5. **OVERWORLD POWER RULE** — zone/event fights = bare kit + persistent unlocks; boons /

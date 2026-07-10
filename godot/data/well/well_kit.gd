@@ -32,6 +32,9 @@ var rig: Dictionary = {}               ## the ONE Combo rig — {"when": id, "th
 var _grading: bool = false
 var _grading_over: float = 0.0
 
+func accent() -> Color:
+	return Color("4fc3e8")   # Palette.WATER — the Well's spring blue
+
 func _init(_aspect: String, _cfg: WellConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg

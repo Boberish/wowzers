@@ -26,6 +26,9 @@ const RESIDUE_LANDINGS := 6
 const FUME_SEC := 2.0
 const EMULSION_SEC := 4.0     ## Emulsion WHEN fires per this many seconds of unbroken ≥0.9 balance
 
+func accent() -> Color:
+	return Color("ff7a33")   # Palette.VENOM_BREW — the Brew's ember orange
+
 func _init(_aspect: String, _cfg: AlchemistConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
