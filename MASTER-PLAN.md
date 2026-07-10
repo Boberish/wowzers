@@ -832,6 +832,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `tuning-sweep`) — **CLAIM: TUNINGCONFIG LITERALS
+  SWEEP (REFIT P4's split-out follow-up; determinism law #5: no hard-coded balance literals).**
+  The sweep is SMALL — earlier passes moved most tuning; six real literals remain in
+  `combat_core.gd`: the fight-opening ability stagger (base 2.0 / step 1.5 / jitter 0.3 —
+  duplicated at create_state + pack entry, gets a shared helper), the silenced-cast re-check
+  (0.4s), the chained-target splash (0.28), the EMPOWER dmg_buff cap (0.55), the
+  taunt-answers-curse window (2.0s). All → `TuningConfig` @exports with identical defaults.
+  Encounter-data fallbacks (melee every/max) stay — they're data defaults, not engine balance.
+  BYTE-IDENTICAL bar: ab-gate raid_sim + twinfang_sim. *(rails session v2 — the twinfang kit
+  split remains the last P4 item after this)*
+
 - ☐ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW).** Bill's
   go (2026-07-10): the 4-Seal boss redo begins — fill the DESCENT §4 timer contract (5/7/9/12 min)
   with STRUCTURE (phases · adds · dialogue breaks), never +HP; update the Seals to the post-overhaul
