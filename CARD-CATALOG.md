@@ -306,7 +306,7 @@ below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
 | **Arterial Note** | `arterialNote` | GREED | H/S/O | 🟡 | Bleeds +30/40/55% harder, expire 1 beat sooner. |
 | **Through-Line** | `throughline` | STRAT | H/S/O | 🟡 | AUTHORED (was design-owed): consecutive Perfect+ +2%/stack cap 5, reset on Miss. |
 | **Quickstep** | `quickstep` | GREED | H/S/O | 🟡 | Each Perfect speeds AND tightens (~8%) your next window; floor-clamped, taper law. |
-| **Grand Pause** | `grandPause` | STRAT | H/S/O | 🟡 | Eviscerate at EXACTLY max combo +25/30/35%. |
+| **Grand Pause** | `grandPause` | STRAT | H/S/O | 🟡 | A full-combo (5/5) Eviscerate hits +25/30/35% (reworded 07-10 — Bill: "so just full?" Yes; Overkill's over-cap bank is a separate pot). |
 | **Heavy Ink** | `heavyInk` | GREED | H/S/O | 🟡 | Combo pts >3 add +10% each to the next finisher; one decays per missed beat. |
 | **THE CODA** (keystone) | `theCoda` | RULE | elite | 🟡 | Max-combo Evis inside an Opening echoes as a second free finisher. |
 | **EXSANGUINATE** (keystone) | `exsanguinate` | RULE | elite | 🟡 | Evis consuming 5+ bleeds erupts as a 3-beat chained blood-burst (engine-free; no boss stagger). |
@@ -334,14 +334,23 @@ The Rondo (spell) → REBORN below as a Coup TRANSFORM (id kept, button deleted)
 | The Return (rig WHEN) | `returnWhen` | — | — | 💡 | WHEN my Rondo phrase returns ≥ half the Coup (~×6.0) — Rondo door. |
 | **Whetstone** (creed) | `whetstone` | STRAT | curated | 🟡 | v4 EDGE entry: your Bullseyes can crit from run start (small %, ×2) — the creed IS the A7 opt-in. |
 | **The Strop** (module) | `strop` | STRAT | — | 🟡 | v4 EDGE module: Perfect+ strikes stack KEEN (gauge, cap 5); your next crit consumes all KEEN for +8%/stack. |
-| **Resonance** (system) | — | RULE | — | 🟡 | 3 cards of one theme auto-light that theme's ONE authored perk — rotational, tiny, 1/theme, never stacks (stat set-bonuses rejected). Still open (§17.10 ③). |
-| Blood Coda (duo) | `bloodCoda` | RULE | H/S/O | 💡 | Wound+Finish duo: an Evis cashing 4+ bleeds at exactly max combo pays both ×1.25. Still open. |
+| **Resonance** (system) | — | RULE | — | ✅ | **APPROVED 07-10** ("yeah, no set bonus"): 3 cards of one theme auto-light that theme's ONE rotational perk — Wound: after-tick · Edge: a crit steadies the beat · Finish: phrase-mark. Brief slice S2. |
+| **THE DUO** (system) | — | RULE | — | ✅ | **APPROVED 07-10** ("yes we need this, make this rich and nice"): armed at ≥2 drafted cards from EACH of two themes → enters Opus offers, two-tone frame; rewards MIXING (resonance rewards depth — opposed pulls by design). Brief S3. |
+| **Blood Coda** (duo) | `bloodCoda` | RULE | H/S/O | 🟡 | Wound×Finish: an Evis cashing 4+ live bleeds at full combo pays both ×1.15/1.25/1.4 — the burst paints the phrase-mark red. |
+| **The Red Edge** (duo) | `redEdge` | RULE | H/S/O | 🟡 | Wound×Edge: every CRIT pulses ALL live bleeds one immediate extra tick — crit-fish while the pot is fat, against expiry. |
+| **Grand Finale** (duo) | `grandFinale` | RULE | H/S/O | 🟡 | Edge×Finish: a full-combo finisher with the crit build hot is a GUARANTEED crit +50% crit dmg; the screen holds a half-beat on the number. |
+| **The Reprise** (duo) | `reprise` | RULE | H/S/O | 🟡 | Rondo-transform×Wound: during the Return, each re-strike re-opens one expired bleed — transforms join the duo grammar. |
 | **DOUBLE TIME v2** (keystone) | `doubleTime` | RULE | elite | 🟡 | v1 beat-doubling CUT at the governor wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. **v4 re-slots it CLASS-generic** (Syncopation's shelf, not a branch capstone). |
 
 **v4 branch proposal (🟡, §17.11): WOUND · EDGE · FINISH; SWIFT demoted to generics** — Uptempo
 (creed) 🟡→✂️ absorbed by the EASE dial (beat-speed knob, BITE face) · Quickstep + Through-Line
 stay as generic STRIKE boons (governor-clamped) · the A7 three (Heartseeker/Serrated/Assassin's
 Note) become EDGE's ladder boons unchanged (already offer-gated on a crit source).
+**PASS-3 verdicts folded (07-10, Bill's artifact notes — §17.12):** SPEED GOVERNOR ✅ ("good",
+a law — tracked in ledger/brief S0) · Resonance ✅ · Duo system ✅ + the rich slate above 🟡 ·
+Pickup cut CONFIRMED · **NO-SINGLE-NEXT-HIT LAW** → `fencersLine` 🔨→REWORK 🟡 ("a Bullseye
+widens your windows for the next 3 strikes") · `killingEdge` fallback → "next 3 strikes" ·
+Count-In's parked text → the call covers 4 beats. **Build brief on main: `TEMPO-D0-BRIEF.md`.**
 **Standing proposals (unchanged):** Momentum 🔨→🔮 · Efficiency 🔨→🔮 (or keep, park Encore) ·
 Held Breath 🔨→🔮 · On the Beat stays 🟡. **Role flag (still open):** Evis = standard interrupt
 carrier + Coup = premium kick — pillar-#3 proposal 🟡.

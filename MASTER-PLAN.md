@@ -829,6 +829,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.12 (NEW) + `TEMPO-D0-BRIEF.md` (NEW, root) +
+  CARD-CATALOG flips + ledger D0 row + CLAUDE.md index + artifact D0 tab — **TEMPO ABILITY AUDIT
+  PASS 3: Bill's artifact notes folded + THE BUILD BRIEF.** Verdicts: **GOVERNOR ✅ · RESONANCE ✅
+  · THE DUO ✅** ("make this rich and nice" → 4-duo slate 🟡: Blood Coda W×F · The Red Edge W×E ·
+  Grand Finale E×F · The Reprise Rondo×W; armed at ≥2 cards from EACH theme — mixing's jackpot vs
+  resonance's depth) · Pickup cut confirmed · **NEW LAW — NO-SINGLE-NEXT-HIT** (from his
+  Sforzando/Count-In notes: Tempo-pace riders must cover X seconds or X hits, never "the next
+  strike"; next-DUMP + Fermata-hold exempt) → built-card sweep: `fencersLine` REWORK 🟡 (next 3
+  strikes) · `killingEdge` fallback → 3-strike · Count-In parked text → 4-beat call · Grand
+  Pause reworded ("full combo (5/5)" — his "so just full?" = yes). **⚒ `TEMPO-D0-BRIEF.md` = the
+  implementation plan he asked for** ("let me know and ill start it"): S0 governor + S5 law
+  reworks buildable NOW; S1 deck-data → S2 resonance → S3 duos gated on the v4 lock + trim; S4
+  transforms on the trio verdict; S6 Set Piece deferrable. *(ability-audit session, pass 3)*
+
 - ☑ 2026-07-10 · main (docs only) · §CLASSES — **THE ABILITY PASS ×2 — DONE, both 🟡 AT BILL'S
   BOARD.** Duelist (`TANK-PLAN §10`): button audit (4 of 6, +1 slot EMPTY; DUMP named the
   storyless press) · ⏱ **EN GARDE** designed (the owed "wall" CD — invite/halved-leaks/double-flow
