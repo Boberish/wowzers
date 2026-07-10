@@ -69,6 +69,10 @@ loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-0
 `SIM-PLAN.md` (the balance ladder — two-speed sims: quick gate + weekly SOAK/digest; S1–S5
 card-visibility rule · creed matrix · card delta · build sampler+lift · raid ablation; planned
 NOT built, triggers per rung, 2026-07-10) ·
+`METER-PLAN.md` (**the live combat meter leveled up** — Recount-nice: L1 de-stale/polish (accent
+bug + `ClassKit` label/accent hooks) · L2 new modes from existing data (⚡AMPLIFY/DISCIPLINE/
+sparklines) · L3 segments+run-history · L4 window chrome · L5 teaching layer; the live twin of
+STATS PAGE v2, nearly all view-only/diag-family; 🟡 at Bill's verdict, 2026-07-10) ·
 `archive/` (**frozen docs — 2026-07-10 cleanup**: `HISTORY.md` the milestone build-up M0→R2.5 ·
 `RAID-PLAN.md` netcode-era origin · `PORT-PLAN.md` / `rift-godot-port-brief.md` the port origins ·
 `UNLOCK-BRIEF.md` retired; see `archive/README.md` — never claim work from there) + `poc/`.

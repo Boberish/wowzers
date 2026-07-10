@@ -829,6 +829,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · §SYSTEMS/§GRAPHICS · **METER-PLAN.md (NEW) — the live meter
+  leveled up (Bill's direct ask: "make it nice like Recount, see more details, plan the next
+  level up").** Audit found the meter (`meter_panel.gd`, `5a6e4ad`) is already a real Recount
+  (4 modes · ranked bars · per-source drilldown · NOW · frozen recap), and STATS PAGE v2 left
+  the accounting deep (`boon_meter`/`series`/`seat.diag` all captured but **unread by the live
+  view**). Plan = a 5-level roadmap, nearly all **view-only / diag-family** (byte-free gate):
+  **L1** de-stale + polish (⚠ live bug — Alchemist+Well, the two default seats, have NO accent;
+  `PRETTY` labels stale → move accent/labels to `ClassKit` hooks) · **L2** new modes from
+  existing data (⚡AMPLIFY = boon_meter "who enables the raid" · DISCIPLINE from diag · row
+  sparklines) · **L3** segments/run-history (consumes the deferred run-recap accumulator,
+  BUILD-LEDGER `:270`) · **L4** window chrome (drag/resize/2-windows/export/compare-band) ·
+  **L5** teaching layer (live missed-ops nudge · grade-tint · boon-lift callouts · school_of
+  hook). **Recommended first slice: L1 + AMPLIFY** (fixes the accent bug + the most on-brand
+  feature, data already reconciled by `meter_probe [8]`). BUILD-LEDGER §G row added; NOT built,
+  at Bill's verdict. *(meter-plan session)*
+
 - ☑ 2026-07-10 · main (docs only) · **`DUELIST-BRIEF.md` (NEW, root) — THE WAVE-1 BUILD BRIEF**
   (Bill: *"make a plan to implement the new dodge tank class… when ready I'll start you with
   Opus to do the code"*) + ledger §B pointer/row updates + CLAUDE.md index. The whole ledger
