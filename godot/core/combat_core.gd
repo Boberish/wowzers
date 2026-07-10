@@ -30,14 +30,20 @@ static func create_state(enc: EncounterRes, cfg: TuningConfig, seed: int) -> Com
 	s.boss = BossState.new()
 	s.boss.hp = float(enc.hp)
 	s.boss.hp_max = float(enc.hp)
-	var i := 0
-	for ab in enc.abilities:
-		var stagger := 2.0 + float(i) * 1.5 + s.rng.next_float() * (ab.cd * 0.3)
-		s.boss.ability_timer[ab.id] = to_ticks(stagger, cfg.fixed_hz)
-		i += 1
+	_stagger_abilities(s.boss, enc, cfg, s.rng)
 	if not enc.melee.is_empty():
 		s.boss.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), cfg.fixed_hz)
 	return s
+
+## Arm a boss body's ability timers with the staggered opening spread — create_state
+## and every pack-member entry share this ONE spread (knobs on TuningConfig).
+static func _stagger_abilities(boss: BossState, enc: EncounterRes, cfg: TuningConfig, rng: DetRng) -> void:
+	var i := 0
+	for ab in enc.abilities:
+		var stagger := cfg.open_stagger_base + float(i) * cfg.open_stagger_step \
+			+ rng.next_float() * (ab.cd * cfg.open_stagger_jitter)
+		boss.ability_timer[ab.id] = to_ticks(stagger, cfg.fixed_hz)
+		i += 1
 
 # --------------------------------------------------------------------------
 # The tick  (canonical order — see PORT-PLAN.md)
@@ -254,7 +260,7 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 		s.boss.ability_timer[ab.id] = int(s.boss.ability_timer[ab.id]) - 1
 		if int(s.boss.ability_timer[ab.id]) <= 0:
 			if silenced and ab.response == AbilityRes.Response.INTERRUPTIBLE:
-				s.boss.ability_timer[ab.id] = to_ticks(0.4, s.config.fixed_hz)
+				s.boss.ability_timer[ab.id] = to_ticks(s.config.silence_recheck, s.config.fixed_hz)
 				continue
 			if best == null or (ab.danger and not best.danger):
 				best = ab
@@ -385,7 +391,7 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 				t2 = _random_dps(s)
 			if t2 != null:
 				t2.heal_absorb += amt
-				_damage(s, t2, roundf(amt * 0.28), ab.id, ab.size)
+				_damage(s, t2, roundf(amt * s.config.chain_splash), ab.id, ab.size)
 		AbilityRes.Effect.HEAL_BOSS:
 			# Don't resurrect a boss a player burst already killed THIS tick: damage is
 			# applied at step 1 (inputs) but death isn't checked until step 7 (_check_end),
@@ -399,7 +405,7 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 					_emit(s, {"t": "boss_heal", "amt": int(healed)})
 		AbilityRes.Effect.EMPOWER_BOSS:
 			# Uninterrupted empower cast: the boss permanently hits harder (capped).
-			s.boss.dmg_buff = minf(0.55, s.boss.dmg_buff + s.telegraph.ability.buff)
+			s.boss.dmg_buff = minf(s.config.dmg_buff_cap, s.boss.dmg_buff + s.telegraph.ability.buff)
 			_emit(s, {"t": "empower", "amt": s.telegraph.ability.buff})
 		AbilityRes.Effect.THREAT_DROP:
 			# Raid: the boss forgets its grudge against the top-threat unit — it turns
@@ -809,7 +815,7 @@ static func taunt(s: CombatState, seat: Seat, dur: float = -1.0) -> void:
 	s.boss.taunt_until_tick = s.tick + to_ticks(dur, s.config.fixed_hz)
 	# GEAR-2: a taunt within 2s of a THREAT_DROP answers the curse (deed detector).
 	# Capped at one answer per drop so re-taunts can't outpace curse_dropped.
-	if s.tick - s.boss.last_curse_tick <= to_ticks(2.0, s.config.fixed_hz) \
+	if s.tick - s.boss.last_curse_tick <= to_ticks(s.config.curse_answer_window, s.config.fixed_hz) \
 			and int(seat.diag.get("curse_answered", 0)) < int(seat.diag.get("curse_dropped", 0)):
 		_bump_diag(s, seat, "curse_answered")
 	var top := 0.0
@@ -1019,11 +1025,7 @@ static func _pack_advance(s: CombatState) -> void:
 	b.taunt_seat_i = -1
 	b.taunt_until_tick = -1
 	b.entered_tick = s.tick                 # walk-in grace + per-member enrage key off this
-	var i := 0
-	for ab in enc.abilities:
-		var stagger := 2.0 + float(i) * 1.5 + s.rng.next_float() * (ab.cd * 0.3)
-		b.ability_timer[ab.id] = to_ticks(stagger, s.config.fixed_hz)
-		i += 1
+	_stagger_abilities(b, enc, s.config, s.rng)
 	if not enc.melee.is_empty():
 		b.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
 	_emit(s, {"t": "pack_next", "i": s.pack_i, "n": s.pack.size(), "name": enc.name})
