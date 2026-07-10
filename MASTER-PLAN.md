@@ -814,6 +814,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `net-integrity`) — **CLAIM: NET-LAYER INTEGRITY
+  HASH (audit 07-03 checksum-coverage finding, option b — the recommended additive path; REFIT §5
+  disposition).** The desync detector only sees boss HP + tick (`combat_core.gd:72`); seat
+  HP/resources/absorb and `rng._state` drift invisibly until it reaches boss HP. Build: read-only
+  `DetRng.state_hash()` + pure `RaidNet.integrity(state)` (tick · boss · per-seat scalars · rng
+  state) → server sends `ih` beside `cs` on the same 30-tick cadence → replica compares both →
+  `NetProtocol.VERSION` 13→14 (rebuild+redeploy coupled, by design). Engine checksum UNTOUCHED —
+  every sim baseline stays byte-identical. NEW `sim/integrity_probe.gd` + verify-all row. Gates:
+  both net smokes checksum-identical · full verify-all. NO class/boon content. *(rails session —
+  P4 queue continues: vuln stack ⚠ rebaseline → class registry → ClassBand+Gauge → hoists)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17 (NEW) + CARD-CATALOG D0 rows + ledger §C —
   **DECK MACHINE row D0: THE TEMPO DECK v3 — DONE, 🟡 AT BILL'S VERDICT.** Winners = **WOUND ·
   SWIFT · FINISH** (no ranking was recorded in the corrected §14, so the pass took Bill's own
