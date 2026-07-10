@@ -829,6 +829,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-tempo-d0` (branch `tempo-d0`) · TEMPO D0 BUILD · **building
+  `TEMPO-D0-BRIEF.md` — S0 governor → S5 law reworks → S1 deck data → S2 resonance → S4
+  transforms** (deferred shelf S3 duos · S6 Set Piece · kick carriers left untouched). Kit-local
+  + guarded; byte-identical gate = `ab-gate.sh raid_sim --blade=tempo` (bare tempo blade, no
+  boons); twinfang_sim re-baselines on speed cells (accepted — S0 deletes per-source clamps).
+  Catalog rows flip ✅→🔨+SHA per merged slice; ledger D0 row ticked per slice. *(the D0 build)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO §17.12 GO record + `TEMPO-D0-BRIEF.md` §0 + catalog
   flips + ledger D0 row → ✅ — **THE D0 GO (Bill: "1 yes… yes tri[m] and yes transform trio").**
   All three gates OPEN: **v4 LOCKED (Wound · Edge · Finish** — Uptempo ✂️→EASE knob, Whetstone/
