@@ -814,11 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 03:39 · main (docs only) — **CLAIM: DECK MACHINE row D4 — the Cask deck
-  assembly** (the §7 slate is LOCKED — the pass hard-copies it into CARD-CATALOG at ✅ per the
-  CARD-TRACKING LAW, integrates the §9 additive themes at 🟡, runs gates on the combined pool)
-  → ALCHEMIST-PLAN §11 + the catalog Cask section. Design only. *(slate-machine session, deck
-  tick 03:34)*
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §11 (NEW) + CARD-CATALOG Cask section (NEW,
+  35 rows) + ledger row — **DECK MACHINE row D4: THE CASK DECK ASSEMBLY — DONE.** The locked §7
+  slate (24 KEEP) is **hard-copied into the catalog at ✅** (approved-not-built; flips 🔨+SHA as
+  slices 3–5 merge — the back-fill drift for this spec is CLOSED) with §9.1 ladder tags (Blend
+  Line · Gauntlet · Tap List). The three §9 additive themes formalized as drop-in KITS at 🟡
+  (T Twin Casks: Double Barrel/Clean Handoff/Rolling Boil/Bottling Line · H House Recipe:
+  Signature/Practiced Hands/Never Change/Dynasty Pour · R Taproom: On the House/Private
+  Reserve/**CLOSING TIME** — renamed from Last Call, Brew-boon collision caught by the
+  distinctness check). Combined-pool gates: trios clean · Private-Reserve/Cellar integrates ·
+  Never-Change×Single-Malt = the flagged monk build · **Solera×House-Recipe echo-ease tune
+  flag** recorded for build. EASE knobs: band width · cook grace · peak width · strain
+  softness. 4 tension points (§11.3). *(slate-machine session, deck tick 03:34)*
 
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `vuln-stack`) — **CLAIM: GENERIC BOSS-VULNERABILITY
   STACK (REFIT P4; ledger §A row "build FIRST — TEAM-COMP + Depth + Well-glint ride it").**

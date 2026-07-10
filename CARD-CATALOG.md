@@ -291,9 +291,58 @@ below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
 **Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮 ·
 Efficiency 🔨→🔮 (or keep, park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate.
 
-## ALCHEMIST · BREW / CASK — 🔨 built · review-pass proposals 🟡
-_Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§7` (Cask) + `§8` (review-pass verdicts) +
-`godot/data/alchemist/*.gd`._
+## ALCHEMIST · THE CASK — **✅ LOCKED SLATE (hard-copied D4, 2026-07-10) + additive kits 🟡**
+
+Source: `ALCHEMIST-PLAN.md §7` (24 KEEP / 6 CUT, Bill 2026-07-07 — ✅ = approved, flips 🔨+SHA as
+slices 3–5 build) + `§9`/`§11` (ladders + additive kits). Ladders: **BLEND LINE · GAUNTLET ·
+TAP LIST** (§9.1).
+
+| Card | id | Type | Rarity | St | Ladder | One line |
+|---|---|---|---|---|---|---|
+| The Solera (creed) | `solera` | EASE | curated | ✅ | Blend | Casks never sour; max 4 doses, proof cap 4. |
+| The Overproofer (creed) | `overproofer` | GREED | curated | ✅ | Tap List | Cook ×0.5, window ×0.6, peak-taps +30%; a dump crashes proof. |
+| The Single Malt (creed) | `singlemalt` | STRAT | curated | ✅ | Gauntlet | Strain softened ×0.91; swaps relieve NOTHING. |
+| ⭐ The Blend (module) | `blend` | RULE | — | ✅ | Blend | No taps — batches pour into ONE compounding master blend; dumps TAINT it. |
+| The Cellar (module) | `cellar` | STRAT | — | ✅ | Tap List | Bottle peaks (shelf 2), throw on demand. |
+| The Copper Still (module) | `copperstill` | GREED | — | ✅ | any | RACK stir-beats: +quality, +cook, faster sour. |
+| Master's Measure | `mastersmeasure` | POWER | H/S/O | ✅ | Gauntlet | Perfect+ pours +10/15/22% volume. |
+| Heavy Hand | `heavyhand` | POWER | H/S/O | ✅ | Gauntlet | Max doses +1/+1&bigger/+2. |
+| Iron Wrist | `ironwrist` | EASE | H/S/O | ✅ | Gauntlet | Strain shrink ×0.86/0.88/0.90. |
+| Momentum Pour | `momentumpour` | GREED | H/S/O | ✅ | Gauntlet | +6/9/13% volume per strain level on that dose. |
+| Clean Break | `cleanbreak` | STRAT | H/S/O | ✅ | generic | First pour after a swap +20/30/45% volume. |
+| Slow Proof | `slowproof` | GREED | H/S/O | ✅ | Blend | Cook +25%, tap +30/40/55%. |
+| Cooper's Ear | `coopersear` | EASE | H/S/O | ✅ | generic | Peak window +0.3/0.45/0.6s. |
+| Breathe | `breathe` | EASE | H/S/O | ✅ | generic | Cook −0.8/1.2/1.6s. |
+| Overproof | `overproofboon` | STRAT | H/S/O | ✅ | Tap List | Late taps BURN (60/70/80% + DoT) instead of souring. |
+| Long Echo | `longecho` | POWER | H/S/O | ✅ | Blend | Tails +40/60/90%. |
+| The Finisher | `finisher` | POWER | H/S/O | ✅ | Tap List | V finish ×1.4/1.5/1.65 · R tail ×2.5/3/3.5. |
+| Killing Vintage | `killingvintage` | STRAT | H/S/O | ✅ | Blend | Below 20/25/33% boss HP casks never sour. |
+| ✦ A Round for the House | `roundhouse` | TEAM | H/S/O | ✅ | Tap List | Peak taps buff party +3/4.5/6% for 4s (buff-channel debt). |
+| rig: strain-×3 pour | `rig_strain3` | — | ~2.2 | ✅ | Gauntlet | WHEN I land a strain-×3 pour. |
+| rig: 6-dose seal | `rig_seal6` | — | ~3.5 | ✅ | Gauntlet | WHEN I seal a 6-dose cask. |
+| rig: dead-center tap | `rig_deadcenter` | — | ~5 | ✅ | Tap List | WHEN I tap dead-center. |
+| 👑 THE CENTURY CASK | `centurycask` | RULE | elite | ✅ | Gauntlet | Dose cap GONE; +8%/dose past 6; strain never relieves past 6. |
+| Spitfire (carry) | `spitfire` | — | — | ✅ | generic | The off-brew dart; the designated interrupt carrier. |
+
+**Additive kits (D4/§11 — 🟡 pending Bill's §9 picks; ranking was H · T · R):**
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| Double Barrel (module) | `doublebarrel` | STRAT | — | 🟡 | T | The second cask slot (the parked candidate, homed). |
+| Clean Handoff | `cleanhandoff` | STRAT | H/S/O | 🟡 | T | Sealing during another cook grants that cook +0.3s window. |
+| Rolling Boil | `rollingboil` | GREED | H/S/O | 🟡 | T | Two casks live: pours +15%; misses taint the OTHER cask −10%. |
+| THE BOTTLING LINE (keystone) | `bottlingline` | RULE | elite | 🟡 | T | Two peak-taps in one 3s window pour as ONE doubled burst. |
+| The Signature (creed) | `signature` | STRAT | curated | 🟡 | H | First sealed recipe = the HOUSE recipe; repeats +8%. |
+| Practiced Hands | `practicedhands` | STRAT | H/S/O | 🟡 | H | House-recipe pours strain 20% softer. |
+| Never Change | `neverchange` | GREED | H/S/O | 🟡 | H | House-style stacks to +30%; off-recipe drops it all. |
+| THE DYNASTY POUR (keystone) | `dynastypour` | RULE | elite | 🟡 | H | 4th consecutive clean house batch: the band freezes on your recipe's walk for one stack. |
+| On the House | `onthehouse` | TEAM | H/S/O | 🟡 | R | A bottled peak thrown to an ally: 70% as their buff on their next clean hit. |
+| Private Reserve | `privatereserve` | GREED | H/S/O | 🟡 | R | Bottles kept 6s+ gain +25%; no second shelf while one waits. |
+| CLOSING TIME (keystone) | `closingtime` | RULE | elite | 🟡 | R | Boss Opening: throw the whole shelf; every clean answer under it pays the finish. *(Renamed from Last Call — Brew boon collision.)* |
+
+## ALCHEMIST · THE BREW — 🔨 built · review-pass proposals 🟡
+_Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§8` (review-pass verdicts) + `§10`
+(ladder filing) + `godot/data/alchemist/*.gd` — D7's job._
 
 ## THE WELL — 🔨 base built · deck 🔮 not authored
 _Stub — back-fill from `MENDER-PLAN.md` "BOARD VERDICTS" export once the deck is authored +
