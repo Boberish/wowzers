@@ -21,6 +21,9 @@ var cfg: BloomweaverConfig
 var flourish: bool = false      ## Wildgrove garden bonus, recomputed each tick in upkeep
 var flourish_hi: bool = false   ## …and the field is LUSH (upgraded bonus)
 
+func accent() -> Color:
+	return Color("5fd6a3")   # Palette.VERDANCE — the garden-healer's living jade
+
 func _init(_aspect: String, _cfg: BloomweaverConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg

@@ -17,6 +17,9 @@ var rig: Dictionary = {}               ## TEMPO §5: the run's ONE Combo rig —
 # TEMPO REWORK · GRADED WINDOW (§2c): one landing zone, four tiers by centredness.
 enum { G_MISS = 0, G_GOOD = 1, G_PERFECT = 2, G_BULL = 3 }
 
+func accent() -> Color:
+	return Color("57c7e0")   # Palette.FLOW — the rhythm cyan
+
 func _init(_aspect: String, _cfg: TwinfangConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
