@@ -727,6 +727,22 @@ tanks keep the densest; marquee moments survive.
 - ~~Wire the other 4 HUDs to CombatStage3D~~ — DEAD 2026-07-10 (loop audit): the solo HUDs + `stage3d/` were deleted in REFIT P1; stage work now targets the 2D raid stage rigs (per-body Forge rigs owed).
 - **Robot re-rig**: per-boss silhouettes as ROBOTS/COMPUTERS (theme!) — replaces the `variant()` stopgap and is easier than organic sculpts. CAPTCHA-9 = a turnstile with an eye; GEMINI = two identical chassis; OPUS = a server-cathedral.
 - Blender/GLTF pipeline later (art replaces rig subclasses; `act()`/`windup()` contracts stay).
+- **TWINFANG ART PASS v1 — CLAIMED 2026-07-10 (branch `tempo-art`), the first real character-art
+  slice.** Foundation review done with Bill (Spine vs native vs code — StS2 is literally Godot 4 +
+  Spine, so the ceiling is same-engine): **verdict = painted layers on the EXISTING `PoseRig2D`
+  code-driven skeleton** (agents can author/tune it; Godot's Bone2D-modification layer is
+  half-abandoned; the `Actor2D` contract keeps **Spine Pro ($369) as a per-actor upgrade door**
+  later — same layer cuts rig straight in). Art = **AI-generated AtO-cel** (prompts specced),
+  generated NOW with THEME-PLAN re-skin risk accepted (regen cheap, re-cut ≈ half-day). Scope:
+  Twinfang ships regardless — autos (strike) + 2 signatures (eviscerate, coup). Slices: **① juice
+  pass** (wire the dormant `screen_post.gdshader` shockwave/aberration/wash + stage-local hit-stop
+  [never on plain strikes — the idle bounce IS the beat reference] + dagger smears + coup
+  afterimages + lunge-slides + boss flash_all + coup/finisher damage-number styles) → **② skin
+  rig** (`tex` Limb kind in `pose_rig_2d.gd`, `TwinfangSkinRig2D` same-joint-tree override,
+  factory parts-dir check, scarf spring, cut/align the PNGs) → **③ flipbook FX** (AI-generated
+  4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
+  trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
+  `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -815,6 +831,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☐ 2026-07-10 · worktree `../wow-tempo-art` (branch `tempo-art`, docs on main) · §GRAPHICS —
+  **CLAIM: TWINFANG ART PASS v1.** Foundation review locked with Bill: painted layers on the
+  existing `PoseRig2D` skeleton (native, $0, agent-authorable; **Spine Pro = per-actor upgrade
+  door** behind `Actor2D` — StS2 is literally Godot 4 + Spine, so the ceiling is same-engine);
+  AtO-cel AI art generated now (THEME re-skin risk accepted). Slices: ① juice pass (screen_post
+  wire + stage hit-stop + smears + lunge) ② painted skin rig (`tex` limbs + `TwinfangSkinRig2D`)
+  ③ flipbook FX + strike/evis/coup polish. Spec block in §GRAPHICS; ledger row §G. Touches
+  `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
+  the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
+  session)*
 
 - ☐ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **CLAIM: DESCENT SLICE 1
   — THE MAP BANG (Bill's go).** The one deliberate `raid_map_sim` re-baseline (DESCENT-PLAN §2/§3/
