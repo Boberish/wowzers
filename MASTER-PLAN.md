@@ -972,22 +972,30 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `src_label()` per-kit hook (`capitalize()` reads fine today) → L2 tail. **Next: L2 tail
   (DISCIPLINE from `seat.diag` · row sparklines) or L3 segments/run-history.** *(meter session)*
 
-- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **building
-  `DUELIST-BRIEF.md` — S0 FLOW=AGGRO + taunt funeral → S1 Duelist base kit (→ S2 policy → S3
-  sim → S4 HUD).** ⚠ **SCOPE STAGED (Bill, 2026-07-10):** the §A½ "Bulwark dies in the same
-  merge" HARD RULE is DEFERRED — discovery: Bulwark is the host fixture for `gear_probe`
-  (the whole GEAR/GearFx deed test), `meter_probe`, and `draft_sim`, all gated by
-  `verify-all.sh`, and `bulwark_kit._challenge()` calls the `taunt()` being deleted. So
-  Merge 1 = FLOW=AGGRO + **Duelist as the new playable tank DEFAULT**, with Bulwark kept
-  ALIVE as a guarded sim-only fixture (only its dead `_challenge`/taunt path removed);
-  the full Bulwark deletion + gear/meter/draft re-host is the immediate follow-up slice
-  (ledger §A½ Bulwark row stays 🔒). ⚙ **IMPLEMENTATION NOTE:** `threat_enabled` is KEPT and
-  repurposed as the aggro-subsystem enable (all game CONTENT sets it; raid today) rather than
-  ripped to always-on — the solo class-training sims (well/twinfang/alchemist) are multi-seat
-  threat-accumulating fights that would otherwise re-baseline + consume peel-rng, violating the
-  S1 "non-raid byte-identical" gate. Aggro stays universal in the game sense the brief intends.
-  Expect the documented raid re-baseline bang; non-raid + gear/meter/draft byte-identical.
-  *(tank-w1 build session)*
+- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **BUILT + VERIFIED
+  on the branch — `DUELIST-BRIEF.md` S0–S8 IN FULL + the Bulwark deletion; MERGE PENDING conflict
+  resolution vs main's `tempo-d0`/`descent-s4`.** 6 commits: **S0** FLOW=AGGRO + taunt funeral
+  (taunt DELETED whole, passive flow + seeded progressive peel, `bespoke_defense()` seam, THREAT_DROP→
+  FLOW DUMP) · **S1** Duelist base kit (`data/duelist/*`, graded parry/dodge, height law, partial-mit
+  .90, WIND, ◆/DUMP, flow feed) + wired as the **playable tank default** (registry/raid/net v16/HUD/
+  world-shell/codex/draft) · **S2** DuelistPolicy 3 tiers · **S3** `duelist_sim` + raid_sim carry ·
+  **S4** DuelistBand + DuelistGauge (FLOW orb/WIND/◆ pips) · **S5** deck (Veteran/Wager/Bellows/
+  Dancer creeds · Crucible/Scales/Whetstone/Flow modules · 14-boon POOL + GAZE + Ease dial + Hold-
+  the-Line · 3 keystones · rig) · **S6** ⏱ EN GARDE signature CD · **S7** transforms Prise-de-Fer/
+  Remise/Flèche + doors + Floor-2 ceremony data + Dancer-excludes-parry law · **S8** per-Seal streams
+  = existing Seal texture (left to BOSS-PLAN). **⚙ Bill GO'd building the deck defaults (07-10) + the
+  Bulwark deletion (07-10):** Bulwark is GONE — the Duelist is the only tank; `gear_probe` retired
+  (its GearFx deed cells are Bulwark-kit-hosted → re-home to the Duelist deck later; GEAR code stays
+  live in twinfang_kit), `meter_probe`/`draft_sim`/`commander_probe`/`raid_boon_probe`/both UI smokes
+  re-hosted/updated for the reworked-tank creed+rig ceremony. **⚙ `threat_enabled` KEPT** (repurposed
+  as the aggro-subsystem enable; content sets it) so solo sims stay byte-identical. **VERIFIED:**
+  import clean · determinism PASS everywhere (raid + duelist + deckless + all decked builds) ·
+  `ab-gate twinfang_sim` **BYTE-IDENTICAL** · WSLg visual pass (full Duelist HUD renders) · GREEN:
+  registry/meter/draft_sim/commander/raid_boon/ui_smoke_raid/ui_smoke_map/raid_sim. Numbers first-cut
+  (playtest); the existing Seals over-damage the new tank = the documented re-baseline BOSS-PLAN
+  retunes. **⚠ MERGE:** main moved (tempo-d0 reworked `combat_core.gd`; descent-s4 touched `draft`/
+  `raid_content`/`net_protocol`) → the merge needs careful `combat_core.gd` (FLOW=AGGRO vs governor/
+  transforms) + `net_protocol` VERSION conflict resolution before landing. *(tank-w1 build session)*
 
 - ☑ 2026-07-10 · main (docs only) · **`WELL-DRAW-BRIEF.md` (NEW, root) — THE DRAW HEALER BUILD
   BRIEF** (Bill: *"make a plan to implement the draw healer, then ill hand it off to opus"*) +
