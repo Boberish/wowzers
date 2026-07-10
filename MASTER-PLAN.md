@@ -935,12 +935,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   on it). Statuses untouched (no decisions taken). Next: Bill starts the Opus build session on
   the brief. *(draw-brief session)*
 
-- ☐ 2026-07-10 · worktree `../wow-well-draw` (branch `well-draw`) · DRAW HEALER BUILD · **building
-  `WELL-DRAW-BRIEF.md` — S0 SKIN → S1 D6 deck data → S2 ⭐Vigil module → S4 policy+sims** (S3
-  transforms DEFERRED: blocked on the `wow-tempo-d0` merge — no Floor-2 ceremony to reuse yet;
-  S5 render polish deferred). Kit-local + guarded; byte-identical gate = `ab-gate.sh well_sim`
-  + `ab-gate.sh raid_sim` for S0–S2; S4 is the ONE sanctioned re-baseline (skin casting + hold
-  releases in the policy). Catalog rows flip 🟡→🔨+SHA per merged slice; ledger §C rows ticked.
+- ☑ 2026-07-10 · `well-draw` → main (`ed358aa`) · DRAW HEALER BUILD · **`WELL-DRAW-BRIEF.md`
+  S0+S1+S2+S4 BUILT & MERGED** (Bill: *"okay go for it build it"*). **S0 SKIN** — the missing-heal
+  film: a guarded per-victim defer pool in `combat_core` (`_tick_skin` drains a share of each hit
+  as late damage over ~3s; never absorbs/heals; graded Draw / plain Brim; 1 charge; `SPELL_CAP`
+  8→9). **S1 D6 reshape** — 10 new Draw boons across VIGIL·RAPIDS·EDDY (whitewater · shootGap ·
+  eddyline · **flume** · secondHand · rideTremble · **loosedAtLast** · currentReading · deepEddy ·
+  **glassRiver**), Millrace DEMOTED (opus→sonnet, Flume crowned), Skim pair (looseGrip/shortPour)
+  parked. **S2 ⭐Vigil module** — the Patient-Hand hold generalized (`_hold_armed()` = creed OR
+  module), Draw-only offer (new `WellModules.offer_ids(aspect)` + aspect-gated `_fw_module_offer_ids`).
+  **S4 policy+sims** — the AI now films the tank ahead of danger telegraphs + banks/releases a
+  held heal on the spike; `well_sim --build=vigil|rapids|eddy` cells + skin metrics. **Gates:**
+  determinism PASS (well base+loaded+3 builds · raid 4 Seals · twinfang) · **twinfang byte-identical
+  to the pinned baseline** — proof the shared `combat_core` touch is guarded-neutral for other
+  classes · well/raid re-baseline is the SANCTIONED default-comp shift (Well·Brim now casts skin) ·
+  no crashes. **DEFERRED:** S3 transforms (Cupped Hand · Deep Draw · Braid + doors — 🟡, blocked on
+  the `wow-tempo-d0` Floor-2 ceremony, still docs-only) · S5 render polish (Vigil tremble / skin
+  film / flume-frozen chrome — states already exposed in `observe`) · balance @ real fightlen
+  (Bill's lever, owed row). Catalog Draw rows + ledger §C flipped 🔨. ⚠ the full `ab-gate.sh
+  well_sim/raid_sim` couldn't run (parallel A+B OOMs the 7 GB box; testing removed mid-build) —
+  byte-neutrality proven instead via the twinfang-vs-baseline checksum match + guard-by-construction.
   *(the Draw build)*
 
 - ☑ 2026-07-10 · main (docs only) · §SYSTEMS/§GRAPHICS · **METER-PLAN.md (NEW) — the live meter

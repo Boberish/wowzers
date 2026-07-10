@@ -12,6 +12,17 @@
 > the `wow-tempo-d0` merge — reuses its Floor-2 ceremony) → S4 policy+sims (the one deliberate
 > re-baseline) → S5 render polish. The §12.5/§13.6 leans = the build defaults; Bill starting
 > the build = GO, per-line veto cheap.
+> **🔨 BUILT & MERGED 2026-07-10 (`ed358aa`, branch `well-draw`): S0+S1+S2+S4.** SKIN (the
+> water's film — a guarded defer pool in `combat_core`, byte-identical unlit) · the D6 reshape
+> (10 new boons across VIGIL/RAPIDS/EDDY + ⭐Vigil module Draw-only + Millrace demote + Skim
+> pair parked) · the skin-casting/hold-piloting policy + `well_sim --build=` cells. **Gates:**
+> determinism PASS (well base+loaded+all 3 builds · raid 4 Seals · twinfang) · **twinfang
+> byte-identical to baseline** (the shared engine touch is guarded-neutral) · well/raid
+> re-baseline is the sanctioned default-comp shift (Well·Brim now films). **S3 transforms
+> (Cupped Hand · Deep Draw · Braid) DEFERRED** — no Floor-2 ceremony exists yet (`tempo-d0`
+> is still docs-only); build after it merges. **S5 render polish** (Vigil tremble, skin film,
+> flume/frozen chrome — states exposed in observe) deferred. **Balance @ real fightlen = Bill's
+> lever** (owed row). See `WELL-DRAW-BRIEF.md §4` status flow + the Coordination Log entry.
 
 **Status:** 🟢 **BASE BUILT & MERGED 2026-07-07** (branch `mender-rework` → main). The reworked
 healer ships as a guarded class **`well`** (codename — Bill's name pick open) on the healer seat,
