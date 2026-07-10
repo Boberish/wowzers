@@ -84,7 +84,7 @@ support, spells). Every table has the same columns:
 
 | Class (spec) | Seat | Base | Deck status | Full slate |
 |---|---|---|---|---|
-| **Twinfang · Tempo** | rogue | 🔨 built | boons mostly 🔨, keystones/2nd-spec owed | [§ Twinfang](#twinfang) · `TEMPO-PLAN.md` |
+| **Twinfang · Tempo** | rogue | 🔨 v4 built (`63d4308`) | D0 slate + governor + resonance + transforms 🔨; duos/Set Piece deferred | [§ Twinfang](#twinfang) · `TEMPO-PLAN.md` |
 | **Twinfang · Fermata** | rogue | 🔨 built (`f5d5397`) | v5 pool 🔨 cataloged · v6 kits 🟡 (D8) | `FERMATA-V5-BRIEF.md` + `TEMPO-PLAN.md §16/§18` |
 | **Alchemist · Brew** | caster | 🔨 built | full slate 🔨; review-pass proposals 🟡 | `ALCHEMIST-PLAN.md` |
 | **Alchemist · Cask** | caster | 🔨 slices 1–2 | HUD/cards/balance owed | `ALCHEMIST-PLAN.md §7` |
@@ -289,28 +289,38 @@ picks swap cheap). Dials: READ / TAP / **HOLD** / SLAM / WIND / BANK / SPEND / L
 (Cheap Iron owns the Warden's block-cost knob — tension point 3). Killed in-pass: Iron Reserves
 (bread flooding).
 
-## TWINFANG · TEMPO — 🔨 mostly built · **DECK v4 (D0) ✅ GO 2026-07-10** (build brief `TEMPO-D0-BRIEF.md`; duos + Set Piece deferred)
-_Built pool: back-fill from `TEMPO-PLAN.md` Appendix A (code-linked ids + SHAs) +
-`godot/data/twinfang/*.gd` still owed. **The D0 deck pass (`TEMPO-PLAN.md §17`) proposes the rows
-below** — themes **WOUND · EDGE · FINISH (v4 LOCKED, §17.12 GO record)**; every built card filed in §17.3._
+## TWINFANG · TEMPO — 🔨 v4 BUILT & MERGED 2026-07-10 (`63d4308`) · **DECK v4 (D0)** (build brief `TEMPO-D0-BRIEF.md`; duos + Set Piece deferred)
+_Themes **WOUND · EDGE · FINISH (v4 LOCKED, §17.12 GO record)**; every card filed in `TEMPO-PLAN.md §17.3`._
 
-**New / changed cards (D0 · ✅ GO 2026-07-10 — flip 🔨+SHA per merged brief slice):**
+**⚒ D0 BUILT & MERGED 2026-07-10 (`63d4308`) — the SHAs the 🔨 rows below carry:**
+- **S0 governor + S5 law reworks** `e9e83ae` — the one asymptotic speed wall (`beat_rate_cap`/`window_min`);
+  `fencersLine` → next 3 strikes; `killingEdge` A3 rework (Edge or next-3-strikes crit).
+- **S1 deck data (v4)** `8906d84` — the Wound pot · KEEN meter · ghost-note Double Time v2 · trim
+  (Momentum/Efficiency/Held Breath parked; Da Capo → Rondo door; On the Beat left out).
+- **S2 resonance** `8389695` — 3-of-a-theme lights one rotational perk (Wound after-tick · Edge
+  no-tighten-after-crit · Finish phrase-mark).
+- **S4 transforms** `45f4d27` — Cadenza · Rondo · Tremolo + the Floor-2 1-of-3 ceremony + the 6 doors +
+  the Return rig WHEN.
+- **Owed:** balance/gate sims (deferred per Bill 07-10) · HUD render of the new gauges (view-only fields
+  landed) · live-raid RaidNet spec-carry of creed/modules/rig/transform (the standing class debt).
+
+**Cards (🔨 = built+merged this D0; 🟡 = deferred shelf — Set Piece · the 4 duos · Duo-system code):**
 
 | Card | id | Type | Rarity | St | One line |
 |---|---|---|---|---|---|
 | **Uptempo** (creed) | `uptempo` | GREED | curated | ✂️ | CUT at the v4 lock — absorbed by the EASE dial (beat-speed knob, BITE face). |
-| **Open Veins** (creed) | `openVeins` | STRAT | curated | ✅ | Bullseyes inscribe a 2-beat BLEED from run start — THE WOUND's entry; no UI at creed level. |
-| **Hemorrhage** (module) | `hemorrhage` | STRAT | — | ✅ | The wound counter on the boss frame; bleeds +1 beat; Eviscerate may CASH the pot (+10%/bleed consumed). Builds the unbuilt data. |
-| **Lacerate** | `lacerate` | STRAT | H/S/O | ✅ | Perfects also inscribe (half/⅔/full-value bleeds). |
-| **Slow Bleed** | `slowBleed` | POWER | H/S/O | ✅ | Bleeds +1/+2/+2 beats & +10% tick (cap 5 beats). |
-| **Arterial Note** | `arterialNote` | GREED | H/S/O | ✅ | Bleeds +30/40/55% harder, expire 1 beat sooner. |
-| **Through-Line** | `throughline` | STRAT | H/S/O | ✅ | AUTHORED (was design-owed): consecutive Perfect+ +2%/stack cap 5, reset on Miss. |
-| **Quickstep** | `quickstep` | GREED | H/S/O | ✅ | Each Perfect speeds AND tightens (~8%) your next window; floor-clamped, taper law. |
-| **Grand Pause** | `grandPause` | STRAT | H/S/O | ✅ | A full-combo (5/5) Eviscerate hits +25/30/35% (reworded 07-10 — Bill: "so just full?" Yes; Overkill's over-cap bank is a separate pot). |
-| **Heavy Ink** | `heavyInk` | GREED | H/S/O | ✅ | Combo pts >3 add +10% each to the next finisher; one decays per missed beat. |
-| **THE CODA** (keystone) | `theCoda` | RULE | elite | ✅ | Max-combo Evis inside an Opening echoes as a second free finisher. |
-| **EXSANGUINATE** (keystone) | `exsanguinate` | RULE | elite | ✅ | Evis consuming 5+ bleeds erupts as a 3-beat chained blood-burst (engine-free; no boss stagger). |
-| **The Deep Cash** (rig WHEN) | `deepcash` | — | — | ✅ | WHEN I consume 4+ bleeds in one Evis (~×4.5). |
+| **Open Veins** (creed) | `openVeins` | STRAT | curated | 🔨 | Bullseyes inscribe a 2-beat BLEED from run start — THE WOUND's entry; no UI at creed level. |
+| **Hemorrhage** (module) | `hemorrhage` | STRAT | — | 🔨 | The wound counter on the boss frame; bleeds +1 beat; Eviscerate may CASH the pot (+10%/bleed consumed). Builds the unbuilt data. |
+| **Lacerate** | `lacerate` | STRAT | H/S/O | 🔨 | Perfects also inscribe (half/⅔/full-value bleeds). |
+| **Slow Bleed** | `slowBleed` | POWER | H/S/O | 🔨 | Bleeds +1/+2/+2 beats & +10% tick (cap 5 beats). |
+| **Arterial Note** | `arterialNote` | GREED | H/S/O | 🔨 | Bleeds +30/40/55% harder, expire 1 beat sooner. |
+| **Through-Line** | `throughline` | STRAT | H/S/O | 🔨 | AUTHORED (was design-owed): consecutive Perfect+ +2%/stack cap 5, reset on Miss. |
+| **Quickstep** | `quickstep` | GREED | H/S/O | 🔨 | Each Perfect speeds AND tightens (~8%) your next window; floor-clamped, taper law. |
+| **Grand Pause** | `grandPause` | STRAT | H/S/O | 🔨 | A full-combo (5/5) Eviscerate hits +25/30/35% (reworded 07-10 — Bill: "so just full?" Yes; Overkill's over-cap bank is a separate pot). |
+| **Heavy Ink** | `heavyInk` | GREED | H/S/O | 🔨 | Combo pts >3 add +10% each to the next finisher; one decays per missed beat. |
+| **THE CODA** (keystone) | `theCoda` | RULE | elite | 🔨 | Max-combo Evis inside an Opening echoes as a second free finisher. |
+| **EXSANGUINATE** (keystone) | `exsanguinate` | RULE | elite | 🔨 | Evis consuming 5+ bleeds erupts as a 3-beat chained blood-burst (engine-free; no boss stagger). |
+| **The Deep Cash** (rig WHEN) | `deepcash` | — | — | 🔨 | WHEN I consume 4+ bleeds in one Evis (~×4.5). |
 | **THE SET PIECE** (signature CD) | `setPiece` | STRAT | baseline | 🟡 | ~1-min CD: marks a 4-beat PHRASE; all Perfect+ = a build-scaled flourish. The DECK-LAYOUT §5 slot's first shape. |
 
 **Ability audit — PASS 2 (`TEMPO-PLAN.md §17.11`, Bill's steer 2026-07-10 — transforms, not
@@ -322,25 +332,25 @@ The Rondo (spell) → REBORN below as a Coup TRANSFORM (id kept, button deleted)
 
 | Card | id | Type | Rarity | St | One line |
 |---|---|---|---|---|---|
-| **CADENZA** (Coup transform) | `cadenza` | RULE | 1-of-3 pick | ✅ | Coup castable at Flow ≥2, damage scales with Flow consumed (full-Flow = today's ceiling) — the flexible cash. |
-| **THE RONDO** (Coup transform) | `rondo` | RULE | 1-of-3 pick | ✅ | After a Coup, the next 4 beats RETURN: each Perfect+ re-strikes 15% of it (Bullseye 25%). The valley becomes act two. |
-| **TREMOLO** (Evis transform) | `tremolo` | RULE | 1-of-3 pick | ✅ | Evis becomes a string: ≤3 presses, 2 combo each, graded per beat; all Perfect+ = final hit +40%. String = ONE finisher for boon math. |
-| Dal Segno | `dalSegno` | STRAT | H/S/O | ✅ | Cadenza door: a Cadenza spending 4+ Flow seeds +1 (absorbs Da Capo's job). |
-| Bravura | `bravura` | GREED | H/S/O | ✅ | Cadenza door: a full-Flow Cadenza inside an Opening +25%. |
-| Second Theme | `secondTheme` | POWER | H/S/O | ✅ | Rondo door: the return % up a tier. |
-| Da Capo (un-park) | `daCapo` | POWER | H/S/O | ✅ | Rondo door: +1 Flow seed, verbatim — parks from the open pool, returns behind this door. |
-| Triplet | `triplet` | GREED | H/S/O | ✅ | Tremolo door: an all-Bullseye string pays the final hit +40% more (capped). |
-| Rolled Chord | `rolledChord` | EASE | H/S/O | ✅ | Tremolo door: string windows pad ENTRY-side only (the widener law). |
-| The Return (rig WHEN) | `returnWhen` | — | — | ✅ | WHEN my Rondo phrase returns ≥ half the Coup (~×6.0) — Rondo door. |
-| **Whetstone** (creed) | `whetstone` | STRAT | curated | ✅ | v4 EDGE entry: your Bullseyes can crit from run start (small %, ×2) — the creed IS the A7 opt-in. |
-| **The Strop** (module) | `strop` | STRAT | — | ✅ | v4 EDGE module: Perfect+ strikes stack KEEN (gauge, cap 5); your next crit consumes all KEEN for +8%/stack. |
-| **Resonance** (system) | — | RULE | — | ✅ | **APPROVED 07-10** ("yeah, no set bonus"): 3 cards of one theme auto-light that theme's ONE rotational perk — Wound: after-tick · Edge: a crit steadies the beat · Finish: phrase-mark. Brief slice S2. |
+| **CADENZA** (Coup transform) | `cadenza` | RULE | 1-of-3 pick | 🔨 | Coup castable at Flow ≥2, damage scales with Flow consumed (full-Flow = today's ceiling) — the flexible cash. |
+| **THE RONDO** (Coup transform) | `rondo` | RULE | 1-of-3 pick | 🔨 | After a Coup, the next 4 beats RETURN: each Perfect+ re-strikes 15% of it (Bullseye 25%). The valley becomes act two. |
+| **TREMOLO** (Evis transform) | `tremolo` | RULE | 1-of-3 pick | 🔨 | Evis becomes a string: ≤3 presses, 2 combo each, graded per beat; all Perfect+ = final hit +40%. String = ONE finisher for boon math. |
+| Dal Segno | `dalSegno` | STRAT | H/S/O | 🔨 | Cadenza door: a Cadenza spending 4+ Flow seeds +1 (absorbs Da Capo's job). |
+| Bravura | `bravura` | GREED | H/S/O | 🔨 | Cadenza door: a full-Flow Cadenza inside an Opening +25%. |
+| Second Theme | `secondTheme` | POWER | H/S/O | 🔨 | Rondo door: the return % up a tier. |
+| Da Capo (un-park) | `daCapo` | POWER | H/S/O | 🔨 | Rondo door: +1 Flow seed, verbatim — parks from the open pool, returns behind this door. |
+| Triplet | `triplet` | GREED | H/S/O | 🔨 | Tremolo door: an all-Bullseye string pays the final hit +40% more (capped). |
+| Rolled Chord | `rolledChord` | EASE | H/S/O | 🔨 | Tremolo door: string windows pad ENTRY-side only (the widener law). |
+| The Return (rig WHEN) | `returnWhen` | — | — | 🔨 | WHEN my Rondo phrase returns ≥ half the Coup (~×6.0) — Rondo door. |
+| **Whetstone** (creed) | `whetstone` | STRAT | curated | 🔨 | v4 EDGE entry: your Bullseyes can crit from run start (small %, ×2) — the creed IS the A7 opt-in. |
+| **The Strop** (module) | `strop` | STRAT | — | 🔨 | v4 EDGE module: Perfect+ strikes stack KEEN (gauge, cap 5); your next crit consumes all KEEN for +8%/stack. |
+| **Resonance** (system) | — | RULE | — | 🔨 | **APPROVED 07-10** ("yeah, no set bonus"): 3 cards of one theme auto-light that theme's ONE rotational perk — Wound: after-tick · Edge: a crit steadies the beat · Finish: phrase-mark. Brief slice S2. |
 | **THE DUO** (system) | — | RULE | — | ✅ | **APPROVED 07-10** ("yes we need this, make this rich and nice"): armed at ≥2 drafted cards from EACH of two themes → enters Opus offers, two-tone frame; rewards MIXING (resonance rewards depth — opposed pulls by design). Brief S3. |
 | **Blood Coda** (duo) | `bloodCoda` | RULE | H/S/O | 🟡 | Wound×Finish: an Evis cashing 4+ live bleeds at full combo pays both ×1.15/1.25/1.4 — the burst paints the phrase-mark red. |
 | **The Red Edge** (duo) | `redEdge` | RULE | H/S/O | 🟡 | Wound×Edge: every CRIT pulses ALL live bleeds one immediate extra tick — crit-fish while the pot is fat, against expiry. |
 | **Grand Finale** (duo) | `grandFinale` | RULE | H/S/O | 🟡 | Edge×Finish: a full-combo finisher with the crit build hot is a GUARANTEED crit +50% crit dmg; the screen holds a half-beat on the number. |
 | **The Reprise** (duo) | `reprise` | RULE | H/S/O | 🟡 | Rondo-transform×Wound: during the Return, each re-strike re-opens one expired bleed — transforms join the duo grammar. |
-| **DOUBLE TIME v2** (keystone) | `doubleTime` | RULE | elite | ✅ | v1 beat-doubling CUT at the governor wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. **v4 re-slots it CLASS-generic** (Syncopation's shelf, not a branch capstone). |
+| **DOUBLE TIME v2** (keystone) | `doubleTime` | RULE | elite | 🔨 | v1 beat-doubling CUT at the governor wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. **v4 re-slots it CLASS-generic** (Syncopation's shelf, not a branch capstone). |
 
 **v4 branches ✅ LOCKED (GO, §17.12): WOUND · EDGE · FINISH; SWIFT demoted to generics** — Uptempo
 (creed) ✂️ absorbed by the EASE dial (beat-speed knob, BITE face) · Quickstep + Through-Line

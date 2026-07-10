@@ -1006,12 +1006,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   NEW seed salt (byte-exact-history rule). Statuses untouched (no decisions taken — catalog
   stays 🟡). Next: Bill starts the build session on the brief. *(tank-brief session)*
 
-- ☐ 2026-07-10 · worktree `../wow-tempo-d0` (branch `tempo-d0`) · TEMPO D0 BUILD · **building
-  `TEMPO-D0-BRIEF.md` — S0 governor → S5 law reworks → S1 deck data → S2 resonance → S4
-  transforms** (deferred shelf S3 duos · S6 Set Piece · kick carriers left untouched). Kit-local
-  + guarded; byte-identical gate = `ab-gate.sh raid_sim --blade=tempo` (bare tempo blade, no
-  boons); twinfang_sim re-baselines on speed cells (accepted — S0 deletes per-source clamps).
-  Catalog rows flip ✅→🔨+SHA per merged slice; ledger D0 row ticked per slice. *(the D0 build)*
+- ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED to main `63d4308`** · **TEMPO D0 BUILT** —
+  `TEMPO-D0-BRIEF.md` slices **S0 governor + S5 laws `e9e83ae` · S1 deck data (v4) `8906d84` ·
+  S2 resonance `8389695` · S4 transforms `45f4d27`**. The one asymptotic speed wall
+  (`beat_rate_cap`/`window_min`, per-source clamps deleted); the WOUND pot + KEEN meter + ghost
+  Double Time v2; the v4 slate (WOUND·EDGE·FINISH themes, new creeds/modules/keystones/boons,
+  trim applied); 3-of-a-theme resonance; the Cadenza/Rondo/Tremolo transforms + the Floor-2
+  1-of-3 ceremony + 6 doors + the Return rig WHEN. All kit-local + guarded (transform/creed/module
+  gated → boonless byte-identical; the checksum is boss-HP+tick only). Parse-clean (`godot --import`).
+  Catalog rows → 🔨, ledger D0 row → 🔨. **DEFERRED (untouched): S3 duos · S6 Set Piece · kick
+  carriers · On the Beat. OWED: balance/gate sims (Bill paused testing 07-10) · HUD render of the
+  new gauges (view-only observe fields landed) · live-raid RaidNet spec-carry of creed/modules/rig/
+  transform (the standing class debt — unblocks the Well Draw ceremony §above).** *(the D0 build)*
 
 - ☑ 2026-07-10 · main (docs only) · TEMPO §17.12 GO record + `TEMPO-D0-BRIEF.md` §0 + catalog
   flips + ledger D0 row → ✅ — **THE D0 GO (Bill: "1 yes… yes tri[m] and yes transform trio").**
