@@ -836,6 +836,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
+  hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
+  BOSS-PLAN made buildable: **S0** sim instrumentation (byte-identical, claimable NOW) → **S1**
+  engine addenda E1–E9 (all guarded; E9 pips + E1 `featured` added to BOSS-PLAN §7 this pass) →
+  **S2–S5** the four fights (first-cut numbers table: hp 56k/95k/85k/92k · per-Seal
+  kick-window mults V×1.5→MY×0.85 · interim-vs-final miss costs) → **S6** sweep+record → **S7**
+  kick re-tune (rides the first class `interrupts` flag). Gate status verified in-repo:
+  **① descent map bang ✅ MERGED** (`a59ffa4`/`cf3f8d9` in `raid_content.gd` history;
+  descent-s2/s3 don't own Seal data) · **② Wave-1 `wow-tank-w1` IN FLIGHT** (owns
+  combat_core/raid_sim churn — S1+ waits on its merge; this build consumes flow/peels, never
+  builds them; V#9 flow-spike knob flagged to DUELIST-BRIEF S0) · **③ V1–V10 recs = build
+  defaults**, one-sentence go opens content. Ledger §F row → 🟡→🔒 + brief pointer; CLAUDE.md
+  index. Builder claims worktree `wow-seals`/`seal-rework`. *(boss-rework session, pass 3)*
+
 - ☑ 2026-07-10 · `meter-l3` → main (`9a6f6c0`→`7ee55b2`) · §SYSTEMS/§GRAPHICS · **METER L3
   SEGMENTS / RUN HISTORY — BUILT & MERGED (Bill: "continue to L3 now").** Recount's
   Current/Overall/per-pull dropdown, and it built the deferred run-recap accumulator in the same

@@ -233,7 +233,7 @@ numbers ship *loose*.
 | `break_len[]` | dialogue-break durations in ticks | Gemini · Mythos |
 | `beats_scale` | barrage beat-counts (3→2 etc, the last-resort lever) | §3 |
 | `peel {grace_ticks, curve, lethality}` · `flow {gain, loss, decay, spike}` | the §1 economy, per-Seal overridable | all |
-| `kick_window` (+ per-Seal mult) | the lit kick slice at cast end, ABSOLUTE seconds (§1½; first cut ~0.6 s) | Mistral ×1.3 · Gemini ×1.0 · Mythos ×0.85 |
+| `kick_window` (+ per-Seal mult) | the lit kick slice at cast end, ABSOLUTE seconds (§1½; first cut ~0.6 s) | **Vorathek ×1.5 (the kindergarten, V#11b)** · Mistral ×1.25 · Gemini ×1.0 · Mythos ×0.85 |
 | `verse_miss_mult` | the missed-kick consequence sizes (blast / EMPOWER / heal amounts, §1½ ladder) | re-tuned when the flag lands |
 | `enrage_at` · `enrage_visible` | the wall + whether the countdown banner shows | all |
 | `re_stagger` | post-break/act re-arm stagger (kills the banked burst-train, §7 gotcha) | all |
@@ -461,6 +461,7 @@ seam — boss logic is central in `CombatCore` off pure data. Hence:
 | E6 | **Deny-race empower** | EMPOWER/act-mult amount scales down with damage taken during its own cast | one hook at resolve; powers S10 + makes future empowers denyable. |
 | E7 | **Input-draws-counter window** *(V#7-gated)* | `boss.listening_until`: ability/dump inputs during it queue a telegraphed personal counter on the presser | AI policies read it from `observe()` (a `hold` flag) — policy work rides the slice. |
 | E8 | **Kick-window slice** (§1½) | `AbilityRes.kick_window` (absolute s): an INTERRUPTIBLE cast accepts the kick ONLY inside its final slice; castbar renders the lit slice; sim gains the landed/missed/uncovered verse table | boss-side half of pillar 3 — the class-side `interrupts` flag lands with the reworks (BUILD-LEDGER §A); early presses fire as normal dumps (no state). |
+| E9 | **Charge-counter pips** (S4 steal — Batch Job) | `AbilityRes.pips`: PERFECT grades anywhere during the windup decrement `telegraph.pips_left`; resolve fires only the remaining beats (or scales amount); banner renders pip chips | grades are already deterministic state — no RNG; 0 ⇒ no-op. *(added at the BRIEF pass, 2026-07-10 — E1 also grew a `featured` gate key for Gemini's promotion.)* |
 
 **Consumed, not built here:** flow-aggro + peel roll + taunt removal (Wave 1, BUILD-LEDGER §B)
 · Duelist/Warden kits · interrupt-by-ability (pillar 3). **Explicitly NOT built:** a second
@@ -474,11 +475,15 @@ seat (no stacking debuff mechanics without engine work).
 
 ## 8 · BUILD ORDER (after Bill's §V verdicts — sequencing is the law here)
 
-**Hard gates before ANY content slice:** ① `wow-descent-map` merges (it owns `raid_content.gd`
-live — fight-ladder bang rides it) ② Wave-1 flow-aggro + Duelist base merges (bosses author
-against peels + the real tank grammar; Bulwark + taunt die there). Slice 0 can start now-ish
-(sim-side only). This pass = the **5th deliberate re-baseline** (BUILD-LEDGER §0 cluster) —
-one bang per slice, fresh 300-seed bands recorded here, `ab-gate.sh` re-pinned after each.
+**➡ THE BUILD BRIEF: `BOSS-BRIEF.md`** (2026-07-10 — the hand-off doc: slice-by-slice touch
+sets, E1–E9 implementation specs, first-cut numbers table, gates; recs = build defaults).
+**Hard gates before ANY content slice:** ① ~~`wow-descent-map` merges~~ **✅ CLEARED 2026-07-10**
+(map bang + fight ladder in main — `a59ffa4`/`cf3f8d9`) ② Wave-1 flow-aggro + Duelist base
+merges (**in flight in `wow-tank-w1`** — bosses author against peels + the real tank grammar;
+Bulwark + taunt die there) ③ Bill's V1–V10 verdicts or a one-sentence "build the recs".
+Slice 0 can start now-ish (sim-side only). This pass = the **5th deliberate re-baseline**
+(BUILD-LEDGER §0 cluster) — one bang per slice, fresh 300-seed bands recorded here,
+`ab-gate.sh` re-pinned after each.
 
 | Slice | What | Gate |
 |---|---|---|
