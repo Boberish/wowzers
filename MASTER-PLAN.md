@@ -1196,19 +1196,34 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
-- ☐ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **CLAIM: DESCENT SLICE 4 —
-  THE JAILBREAK (printed curse deals)** (DESCENT §7, V#4 mixed-lean-gentle; BUILD-LEDGER §I). Flip
-  `RunMap.JAILBREAK_LIVE`; the node offers **two deals, both halves printed** (a strong good + a
-  printed bite in a DIFFERENT currency). The CURSE SYSTEM: active curses (cap 2, header pips — the
-  row map_screen reserved in slice 2), bounded-duration bites that tick per fight. Bite vocab
-  (V#4): **ECONOMY TAX** (mint halved / market +⏣ — I own Draft.mint + _market_price from slice 3),
-  **HP TAX** (temporary corrupted sector), **TIMING TAX** + **DECK TAX** (combat integration —
-  recon scoping whether buildable now vs deferred). Exits: **Market DEPRECATE-curse** (wires the
-  slice-3 deferred slot) + **Cooling purge fork**. HARD RULE: no run-long timing curse ever.
-  Welded-downside draft boons (② door) + event-curse legs (③) = extensions, scope per recon.
-  Touches `run_map`/`raid_hud`/`draft.gd`/`map_content`/`map_screen`/`campaign_core` + a curse
-  probe. ⚠ hot files — merge main often. Offline-first (online = follow-up like slice 3). Recon
-  running. *(raid-rebuild session)*
+- ☑ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **DESCENT SLICE 4 — THE
+  JAILBREAK (printed curse deals): MERGED to main (`a22c1ec`), 2 commits.** Built via a 5-reader
+  recon whose key find corrected my prior: **TIMING is buildable** — `make_config()` returns a
+  FRESH TuningConfig per fight and every grade reads its windows live, so a `window_tighten` mark
+  scaling `s.config.strike_*` is a real windows−10% tax with ZERO per-boss work. **4a the curse
+  engine (byte-identical when dormant):** `RaidMarks` gains two guarded keys on the proven
+  carry→mark channel — `seat_hp_cut` (HP tax; auto-repairs because a mark clears each fight) +
+  `window_tighten` (TIMING tax); `RunDirector.curses` (cap 2) + `deprecate_uses` (NOT in cp_view —
+  read directly like tokens, offline-only this slice); the `raid_hud` curse core (`_add_curse` w/
+  CAP 2 + the HARD RULE *no run-long TIMING curse*, `_curse_pips`, `_apply_curse_marks` fold+tick
+  at launch, ECONOMY hooks — mint-halve in `_mint_seats`, price surcharge in `_market_price`,
+  `_apply_map_fx` routes curse/regenerate/purge keys, the **DEPRECATE** market slot [the slice-3
+  deferred slot, escalating price] + the **Cooling purge** fork, `ms.curses` feed, descent-start
+  reset); `map_event_panel._fx_hint` prints the bite + charge/regenerate goods; new `curse_probe`
+  (in verify-all). **4b the node LIVE:** `JAILBREAK_LIVE=true`, KIND_JAILBREAK dispatch →
+  `_show_jailbreak` — two deals rolled on a (map_seed,node) rng via the proven `_map_stop` panel,
+  both halves printed, WALK AWAY free, cap-2 "cell full" (no free-good exploit); a 5-deal gentle
+  pool (V#4); `raid_map_sim` KIND_JAILBREAK walker case (sanctioned re-baseline). **Merged main
+  mid-build** (SEAL-REWORK S0 + tempo — raid_hud auto-merged clean). **Deferred:** DECK tax
+  (run-length ability-poison — the `perform()` gate is one line but the offline+online spec-thread
+  is the cost) · welded-downside DRAFT boons (② door) · event-curse legs (③) · online (safe no-op,
+  **NO protocol bump**). **Verify:** import clean · `curse_probe` ALL OK (engine + node
+  end-to-end: cap-2/HARD-RULE, ECONOMY+HP+TIMING bites, both exits, ticking, a deal grants
+  good+bite) · `market_probe`/`commander_probe`/`draft_sim` ALL OK · `ui_smoke_map` ALL PASS ·
+  `raid_map_sim` map-gen determinism PASS (the walker case is deterministic by construction). ⏳
+  **Deferred to a nightly run** (OOM-prone under concurrent load): `raid_map_sim` run-trace +
+  statistical re-baseline · full `verify-all` · `net_map_smoke`. **Next:** slice 5 (minigames:
+  CAPTCHA/BENCHMARK + extraction schematics) + the DECK-tax follow-up. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **DESCENT SLICE 3 — THE
   PROMPT MARKET + PER-SEAT WALLETS: MERGED to main (`fd8b895`), 3 commits.** Built via a 6-reader
