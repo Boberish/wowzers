@@ -829,6 +829,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `meter-l2` → main (`c502d36`→`88553af`) · §SYSTEMS/§GRAPHICS · **METER 🎯DISCIPLINE
+  MODE — BUILT & MERGED (Bill: "continue").** The L2-tail follow-up to L1+AMPLIFY. A 6th
+  header-cycle mode: a live "who's playing clean" scoreboard — one row per gradeable seat, ranked
+  by **clean-answer %** (perfect/good/graze/read vs miss/baited/whiff), colored by grade S..D,
+  bar ∝ clean%, with a dim fault tail (times hit · strays off the tank). Stat-block AI skipped
+  (no timed inputs); <3 answers → "—". `_disc_clean` mirrors STATS PAGE v2's `_pct_defense` so the
+  live read and the post-fight grade agree; compact-only (the full grade breakdown stays on the
+  stats page). ⚠ interrupts aren't per-seat in state (HUD-side tally) → DISCIPLINE grades answers
+  + strays, not kicks (a per-seat kick counter = small engine field, parked). View-only /
+  diag-family; project imports clean (byte gate + `screenshot_meter` skipped — the sim/verify bar
+  is paused, `2ee8325`). Ledger §G → 🔨 `88553af`; METER-PLAN L2 DISCIPLINE ticked. **Next
+  L2-tail: per-row sparklines from `series`. Then L3 segments/run-history.** *(meter session)*
+
 - ☑ 2026-07-10 · `meter` → main (`0859b2b`→`cce7c92`) · §SYSTEMS/§GRAPHICS · **METER L1 + ⚡AMPLIFY
   — BUILT & MERGED (Bill: "go ahead").** The live meter's first level-up. **L1:** killed the
   fragile class-accent switch → new `ClassKit.accent()` hook (built-in Color, no Palette import

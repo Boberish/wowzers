@@ -109,11 +109,17 @@ The richest untapped seams. Each is a new header-cycle mode reading existing sta
   AMPS** row for the −1 pool (Sunder/Glint/Debilitate — the engine credits these raid-wide, not
   to the applier, so the row is honest as "raid" not mis-attributed); drill a row → per-boon
   "≈ +X dmg/heal". Answers Bill's *why* directly. The live twin of STATS PAGE v2's BOON IMPACT.
-- ⏳ **🎯 DISCIPLINE mode.** Reads `seat.diag`: interrupts landed · casts let finish
-  (`kick_open_missed`) · times-hit · aggro strays · dodge/parry grade mix. Recount's Interrupts
-  + a "are they playing clean?" scoreboard, in one column. **Next candidate.**
+- ✅ **🎯 DISCIPLINE mode — BUILT `88553af`.** A live "who's playing clean" scoreboard: one row
+  per gradeable seat, ranked by clean-answer % (perfect/good/graze/read vs miss/baited/whiff),
+  colored by grade S..D, bar ∝ clean%; the dim tail shows the fault count (times hit · strays
+  off the tank). Stat-block AI is skipped (no timed inputs); <3 answers shows "—". `_disc_clean`
+  mirrors STATS PAGE v2's `_pct_defense` so live and post-fight grades agree. Compact-only
+  (non-interactive) — the full grade breakdown stays on the stats page. **Note:** interrupts
+  aren't per-seat in state (they're a HUD-side tally), so DISCIPLINE grades answers + strays,
+  not kicks — a per-seat interrupt counter would be a small engine field (L2-tail follow-up).
 - ⏳ **Per-row sparkline.** A tiny live DPS trace per compact row from `series` — the shape of
-  the fight at a glance.
+  the fight at a glance. **Next candidate** (the last L2-tail view-only item; series row layout
+  is `[tick, hp%, dmg0..3, taken0..3]`, differentiate for per-second like STATS PAGE's graph).
 - **Verify:** same as L1 (all diag-family). **Files:** `meter_panel.gd` only. **Size: S–M.**
 
 ### L3 — SEGMENTS & RUN HISTORY — Recount's killer feature (needs the deferred accumulator)
