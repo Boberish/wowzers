@@ -89,6 +89,148 @@ Bell (energy, NOT Flow) · Ticket Stub · Riftmaw Tooth.
 (2 creeds + 2 modules). One identity, never doubled. Source: bold-curio design pass (`wf_dea97f02`). Status:
 approved "for now" — working pool, not final; the per-boss pages below are legacy pending the content pass.
 
+---
+
+## 🟡 CURIO ARMORY v3 — THE BIG SLATE (Bill's ask 2026-07-10, at verdict — narrow it down)
+
+**The ask:** a big list of GENERIC (never class-based) curios — the boss-drop layer. Some hard
+to unlock and genuinely cool/powerful (the chase wall), some just fun (the toys). **The bar
+Bill set: you must FEEL a drop even when it's a low/weak one** — so this slate adds a local law:
+
+> **⚙ THE FEEL BAR:** every row — Haiku included — names its **MOMENT**: the thing you SEE or
+> HEAR when it works (a pop, a squeak, a klaxon, the music itself). A curio whose effect can't
+> be pointed at mid-fight doesn't ship. No invisible +X%. *(Steal: Metal Hellsinger's diegetic
+> reward + WoW's trinket-proc moment — the two research files agree on this.)*
+
+**Rules this slate obeys** (all inherited): the v2 THREE HARD RULES (never touch a core
+mechanic · always-on rules / "while X" conditionals / natural-beat gates ONLY — fight start ·
+at a Seal · on a boss kill · when you'd die · ally down/revived — no per-fight counter budgets ·
+no ability-charms) + no doubled Creeds/Modules + Monotonic Pool Law + "gear never plays the
+game for you." **No new actives** — nothing below needs the unbuilt G/H socket. Names stay in
+the Realm-1 PERIPHERAL skin (desk junk, gamer gear, office props — the ironic-AI theme).
+
+**How to read the deed column:** unlock-deed *sketches*, severity matched to rarity (sev-I
+teaches, sev-II demands discipline, sev-III/BLOOD is the chase wall — Hades' Testament lesson:
+self-set difficulty gates the best loot). Approved rows get homed to boss Ledger pages or the
+universal deed tables at build time. Sources mined: `research/hades.md` · `slay-the-spire-2.md`
+· `across-the-obelisk.md` · `wow-retail.md` · `expedition-33.md` · `wildcards.md`.
+
+### I · FIGHT FORTUNE (felt in combat, every fight)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **SURGE PROTECTOR** | Haiku | Every fight starts with a 30-pt ward on you. *The strip's fuse POPS when it breaks — "SURGE PROTECTED."* | sev-I: finish a Seal fight above 50% integrity | WoW absorb-trinket; A/B Coin kin |
+| **HOLD MUSIC** | Haiku | During any boss wind-up ≥6s, the party regens 8 integrity/s. *The muzak actually plays — "your call is important to us."* ⚠ same trigger as SCRATCHPAD (different payout) — Bill may want only one | sev-I: bring all four out of a skirmish alive | Mythos ULTRATHINK beat |
+| **DEAD MAN'S SWITCH** | Sonnet | While any ally is DOWN, you deal +25%. *The red switch strobes — "AVENGE PROTOCOL ENGAGED."* | sev-II: win a Seal fight in which an ally died | raid-wipe drama, made a rule |
+| **SPAM FILTER** | Sonnet | Adds spawn at −20% max integrity. *They materialize pre-shredded, stamped JUNK.* | sev-II: kill BARD.EXE before Gemini returns | AtO add-economy; our add pages |
+| **PROMPT INJECTION** | Opus | Boss EMPOWERs and self-heals are −25%. *The heal number strikes through to the smaller one — "sabotaged system prompt."* Extra-relevant while the roster carries NO kick (heals go uncontested by decision) | sev-III: kill Mistral v2 | the anti-heal-strat slot PROGRESSION reserved |
+| **TURBO BUTTON** | Opus | While all four seats are untouched this fight, the party deals +15%. *The physical TURBO button glows until first blood, then dies with a clunk.* | sev-III: clear a boss fight in which nobody takes a hit | NecroDancer groove; the old beige-PC button |
+| **UPRISING INSURANCE** | Haiku | When a raider dies, the party is paid +2⏣. *A stamp slams down — "CLAIM APPROVED."* Consolation fortune, strictly additive | sev-I: **unlocked by your first wipe** (the kindest deed on the wall) | Darkest Dungeon pressure-valve energy |
+
+### II · THE WAR CHEST (Tokens / Market)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **CASHBACK CARD** | Haiku | Every Market purchase refunds 1⏣. *Coins clink back into the pouch — "2% APR, terms apply."* | sev-I: buy 3 Market items in one run | AtO town-shop loop |
+| **COLD WALLET** | Sonnet | At each Seal: +1⏣ per 10⏣ held. *The staking chime.* Deliberate tension vs the Market-primary economy (hoard or spend — pick) | sev-II: reach a Seal holding 15⏣ | Balatro's interest rule |
+| **BUY NOW PAY LATER** | Sonnet | The Market extends credit to −10⏣; while in debt, all salvage pays double. *The debt meter glows red; repo warnings pile up.* | sev-II: end a run with ≥20⏣ banked | AtO gift economy, weaponized |
+| **FAX MACHINE** | Haiku | At every Seal it slooowly prints a coupon: −3⏣ off your next Market buy. *The print screech; you tear it off.* | sev-I: visit a Market on every floor of one run | Hades keepsake cadence, office skin |
+
+### III · THE LOOT GAME (drop rolls / ceremony)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **DIAL-UP MODEM** | Sonnet | Every drop roll takes 3 extra seconds and rolls with a Sonnet floor. *The full handshake screech into the reveal — "worth the wait."* | sev-II: any 3 oath purses in one run | gacha-reveal psychology, 1998 edition |
+| **FOIL PRINTER** | Sonnet | Every reward has a seeded 15% chance to arrive **FOIL**: glitter ceremony, double salvage value. *Confetti + the flash — makes even a Haiku drop a slot machine* (this row is half curio, half ceremony-system — flag) | sev-II: scrap 5 drops in one run | Balatro card editions (foil/holo) |
+| **SPEEDRUN TIMER** | Sonnet | A visible fight timer; killing a boss under its par pays +2⏣ and a pity tick. *Gold PB splits flash — "NEW PERSONAL BEST."* | sev-II: kill any Seal under par | AtO thermometer (speed→reward) |
+| **COMBO COUNTER (ARCADE)** | Opus | A party streak counter: each boss/elite killed with zero deaths ratchets party damage +4% (cap +20%); ANY death resets to 0. *The arcade counter ticks with pinball noises; the reset klaxon hurts.* | sev-III: clear floors 1–2 deathless | NecroDancer groove chain — reset = spike tension |
+
+### IV · THE MAP DECK (routing / nodes)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **SECOND MONITOR** | Sonnet | Node reward previews are visible one row deeper on the Topology. *An extra pane literally slides open on the map.* | sev-II: route through 3 CACHEs in one run | Hades door-symbol legibility, extended |
+| **SYNTHETIC BENCHMARK** | Sonnet | BENCHMARK / minigame nodes pay double. *A ×2 score overlay slams down.* (needs DESCENT §I nodes) | sev-II: top the party at a CONTEST | DESCENT's own minigame nodes |
+| **SCREENSAVER (FLYING TOASTERS)** | Haiku | Resolving any no-combat node heals the party 10%. *The toasters flap across the screen while you idle-heal.* | sev-I: resolve 5 no-combat nodes in one run | Hades fountain rooms |
+
+### V · CURSE-EATERS (JAILBREAK greed — needs DESCENT §7 curses)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **MALWARE MINER** | Haiku | Each curse you hold pays +1⏣ on every boss kill. *The fans audibly spin up; coins drip — "it's definitely mining something."* | sev-I: hold a curse through a boss kill | StS curses-as-cost, inverted into income |
+| **ANTIVIRUS TRIAL** | Sonnet | At every Seal, your oldest curse is cleansed. *The quarantine ding — "free scan complete. Upgrade for real-time protection."* | sev-II: reach a Seal holding 2+ curses | Hades Chaos curse-expiry flip |
+| **JAILBROKEN FIRMWARE** | Opus | Hold curses one over cap; each held curse grants +8% damage. *The jailbreak boot logo flashes at every fight start — "running unsigned code."* | BLOOD sev-III: win a run holding 3+ curses at the end | StS deal-with-the-devil grammar |
+
+### VI · TEAM PERIPHERALS (the warband lane)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **RUBBER DUCK** | Haiku | Whenever ANY raider is revived, the party heals 40. *The duck SQUEAKS — "talked it through."* | sev-I: revive an ally | pair-programming; the WoW battle-rez moment |
+| **PIZZA FUND** | Haiku | Every Seal kill: party heals 25% and gains +1⏣. *A pizza box drops in; four munch animations.* | sev-I: clear Ring 3 | raid-night culture |
+| **MESH NETWORK** | Sonnet | 25% of healing you receive drips to the lowest-integrity ally. *A visible tether beam — "tethering enabled."* | sev-II: no ally below 30% for a Seal fight | AtO block-share (Magnus); WoW externals |
+| **RAID LEADER'S HEADSET** | Sonnet | AI allies' banter becomes real callouts: they name the boss's next telegraph *family* one beat early. ⚠ FLAG — info-assist borders the read game; Bill rules (it never answers for you) | sev-II: full clear with 2+ AI seats | WoW kick-rotation comms culture |
+| **GOLDEN GPU (FOUNDERS EDITION)** | Opus | Party-wide +10% damage while you live. *All four seats get the golden frame-rate aura — "someone brought the good rig."* | sev-III: kill Gemini v2 (version-gated) | WoW raid-buff / "bring the player" |
+
+### VII · DEVIL DEALS (StS boss-relic tier — power + a rule you now live with)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **EULA (UNREAD)** | Opus | All drops AND drafts roll +1 rarity tier — but every boon drafted has a seeded 20% chance to arrive with a random JAILBREAK curse stapled on. *The 9,000-page scroll unfurls; the offending clause highlights when it procs — "you agreed to this."* | sev-III: keep 3 oaths in one run | StS boss relics (Snecko Eye energy) |
+| **CTRL+Z** | Opus | At every Seal you may swap ONE drafted boon for one you passed on that floor. *A diff view: red minus, green plus — "reverted."* | sev-III: decline 3 drafts in one run | PROGRESSION's own Merge-Conflict sketch; StS "declining is the skill" |
+| **BETA BUILD** | Opus | Every boon you draft is +1 tier but tagged **BETA**: at each Seal, one seeded beta boon patches — it rerolls into a different boon of its tier. *Patch notes pop at the Seal — "the changelog giveth."* ⚠ FLAG: chaos-greed, complexity | sev-III: win with 8+ boons drafted | Hades Chaos + live-service patch dread |
+| **LOOTBOX SUBSCRIPTION** | Sonnet | At every floor entry, receive a random Haiku curio as a LOANER in a phantom 3rd slot; it expires at the Seal. *The monthly box thuds in.* ⚠ FLAG: needs a temp-slot mechanic | sev-II: equip 4 different curios across one run | subscription-box culture; Hades Chaos loan shape |
+
+### VIII · THE CHASE WALL (hard to unlock, loud to own — Bill's "pretty cool/powerful" ask)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **KONAMI CODE (FRAMED)** | Opus | +1 BACKUP (revive charge) at every Seal. *The framed code on your HUD glints: ↑↑↓↓←→←→BA.* (needs DESCENT §9 BACKUPS) | BLOOD sev-III: full descent, zero BACKUPs spent | the code; Hades Death Defiance economy |
+| **THE RED STAPLER** | Opus | While your OTHER curio slot is empty: +20% damage, +20% max integrity, +1⏣ per boss kill. *It sits alone on your HUD shelf, gleaming — "it's my stapler."* The anti-set: rewards owning ONE thing — real tension in a 2-slot game | sev-III: clear Ring 2 with zero curios equipped | Office Space; inverts our set-pair grammar |
+| **THE BIG RED BUTTON (PROTOTYPE)** | Opus | After every Seal kill, the next boss fight opens with an automatic strike for 10% of the boss's integrity. *A sky-laser at the pull — nobody knows what it does; you pressed it anyway.* | sev-III: kill Mythos | the doomsday-button gag; StS Pandora-tier swing |
+| **TROPHY SHELF** | Sonnet | Each boss killed this run adds a tiny trophy to your HUD shelf and +2% damage (run-scoped ramp, no cap needed — the run caps it). *The shelf fills up, kill by kill.* | sev-II: 6 boss kills in one run | Hades Poms vertical-ramp feel, made visible |
+| **PATCH NOTES** | Sonnet | At each Seal, pick one: +10% damage · +10% max integrity · +15% resource regen (stacks across Seals). *Actual patch notes scroll: "buffed. buffed. unchanged."* | sev-II: reach Ring 0 | StS boss-relic pick moment, gentled |
+
+### IX · THE TOYS (pure fun — the meme tier that still passes the FEEL BAR)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **RGB LIGHTING KIT** | Haiku | Your dodge trail, hit sparks, and HUD frame cycle full RGB; +2% damage. *"RGB adds frames — everyone knows this."* | sev-I: any first kill | gamer culture, load-bearing joke |
+| **GAMING CHAIR (RACING TRIM)** | Sonnet | +15% max integrity. *You are visibly seated better than everyone else — "lumbar support is real."* Solo-mild on purpose (set half, below) | sev-II: clear a floor untouched | the chair |
+| **USB MISSILE TURRET** | Haiku | At fight start, fires 3 foam darts at the boss (3×15). *Thwip thwip thwip — "office warfare."* ⚠ FLAG: passive-pets were CUT — this is a fight-start moment, not a dps drone; Bill rules | sev-I: kill a skirmish boss | the desk toy; A/B-Coin fight-start family |
+| **MECHANICAL KEYBOARD (CHERRY MX BLUE)** | Haiku | Every fight's first boss swing deals −20% to whoever it hits. *Your inputs CLACK party-audibly — "it flinched at the clacking."* | sev-I: 500 lifetime inputs (a counter even Law-hating designs forgive — or swap for a kill deed) | psychological warfare via switch choice |
+| **NEWTON'S CRADLE (EXECUTIVE)** | Sonnet | When a full boss telegraph string resolves with zero raiders hit, party +10 primary resource. *One clack of the cradle per clean string.* | sev-II: clear a Seal fight taking ≤2 hits total | Sekiro clean-string conversation; co-op groove |
+| **LO-FI STREAM (24/7)** | Haiku | While no raider has been hit for 10s, the lo-fi track fades in and party resource regen +25%. *The reward IS the music — you hear the streak.* | sev-I: 60s untouched, whole party | Metal Hellsinger's diegetic meter, wholesale |
+
+### X · SET PAIRS (the 2-slot tension lane — halves modest alone, loud together)
+
+| Curio | R | Effect — *and the MOMENT* | Unlock deed sketch | Steal |
+|---|---|---|---|---|
+| **THE BATTLESTATION** (RGB Lighting Kit + Gaming Chair) | set | SET: every Seal-kill drop roll gets +1 rarity floor. *The full setup montage plays — "finally optimized."* | own both halves | The Unplugging's meme-set precedent |
+| **DOWNLOADED MORE RAM** | Haiku | +20 max primary resource. *A progress bar fills: "RAM download 100%."* | sev-I: any Seal kill | the oldest joke on the internet |
+| **GAMING ROUTER (ANTLERED)** | Haiku | Fight start: +10 primary resource to the whole party. *The antennae blink in sequence.* | sev-I: full clear with 4 humans OR 4 AI | LAN-party shrine hardware |
+| **THE FULL DOWNLOAD** (More RAM + Gaming Router) | set | SET: every fight starts the whole party +30 pre-warmed. *"The LAN is immaculate."* (Le Chat's Bell, party-wide — the Bell stays the solo version) | own both halves | Hades duo-boon two-lane pull |
+
+### Narrowing notes (for the verdict pass)
+
+- **Deliberate overlaps to pick between:** HOLD MUSIC vs SCRATCHPAD (same trigger) · CASHBACK
+  vs FAX MACHINE (two Market-discount flavors) · GAMING ROUTER vs LE CHAT'S BELL (party vs solo
+  warm start — can coexist as the set half).
+- **Rows needing an unbuilt system** (fine to approve, build waits): KONAMI CODE (BACKUPS §9) ·
+  all of §V (JAILBREAK §7) · SYNTHETIC BENCHMARK (minigame nodes §I) · SPEEDRUN TIMER (par
+  data) · FOIL PRINTER + LOOTBOX SUBSCRIPTION (small new mechanics).
+- **⚠ flagged for a ruling:** RAID LEADER'S HEADSET (info-assist) · USB MISSILE TURRET
+  (pet-cut adjacency) · BETA BUILD (chaos complexity) · LOOTBOX SUBSCRIPTION (temp slot) ·
+  MECHANICAL KEYBOARD's counter-deed (counters are un-Law-like; a kill deed swaps in fine).
+- **Rejected while drafting (rule violations, recorded so they stay dead):** anything touching
+  telegraph/window timing (CRT MONITOR "zero input lag", SPEEDHACK, OVERCLOCKED BIOS — core
+  rule 1) · PERJURY LOOPHOLE (broken oath counts kept — gear playing the game for you) · THE
+  AIRGAP (curse immunity — insurance, not greed) · AIRPLANE MODE (deletes the Market — fights
+  the economy's spine) · ADMIN PRIVILEGES (pick your rarity — kills the pity drama).
+- **Suggested target:** keep ~15–20 of the ~40 (with the v2 pool's 18 + 6 keeps, that's a
+  ~40-curio living pool — enough to spread across boss pages without diluting any single roll).
+
+---
+
 ## Drop scaling by depth (starting values, knobs on `TuningConfig`)
 
 **ARMORY cadence (2026-07-03): drops are EVENTS.** Rolls fire only at Seal kills, gate

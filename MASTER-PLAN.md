@@ -814,12 +814,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 · main (docs only) · §SYSTEMS GEAR / `GEAR-CATALOG.md` — **CLAIM: CURIO ARMORY
-  v3 — the universal BIG SLATE (Bill's direct ask).** Mine `research/` (Hades · StS · AtO ·
-  WoW · E33 · wildcards) → a big narrowable list of GENERIC (never class-based) curios for the
-  boss-drop pool: chase-tier hard unlocks that are loud/powerful + plain fun ones. Every row
-  passes the v2 THREE HARD RULES and must name its felt MOMENT (Bill: drops should be *felt*
-  "even the lower weaker ones"). Design-only, 🟡 at verdict; no code. *(curio-slate session)*
+- ☑ 2026-07-10 · main (docs only) · §SYSTEMS GEAR / `GEAR-CATALOG.md` §ARMORY-v3 (NEW) —
+  **CURIO ARMORY v3 — the universal BIG SLATE: DONE, ~40 rows AT BILL'S NARROWING VERDICT
+  (keep ~15–20).** Mined `research/` (Hades · StS · AtO · WoW · E33 · wildcards) into 10
+  groups: FIGHT FORTUNE (Surge Protector · Turbo Button · Prompt Injection — the anti-heal
+  slot) · WAR CHEST (Cold Wallet Balatro-interest · Buy Now Pay Later) · LOOT GAME (Dial-Up
+  Modem slow-reveal · Foil Printer · Speedrun Timer thermometer · Combo Counter groove-chain) ·
+  MAP DECK · CURSE-EATERS (Malware Miner / Antivirus Trial / Jailbroken Firmware — rides
+  DESCENT §7) · TEAM PERIPHERALS (Rubber Duck · Pizza Fund · Golden GPU) · DEVIL DEALS (EULA
+  Unread · CTRL+Z — the StS boss-relic tier) · THE CHASE WALL (Konami Code · Red Stapler
+  anti-set · Big Red Button — brutal sev-III/BLOOD deeds per Hades Testaments) · THE TOYS
+  (RGB Kit · Lo-Fi Stream · Mechanical Keyboard) · 2 new SET PAIRS. **NEW local law: THE FEEL
+  BAR** — every row (Haiku included) names its visible/audible MOMENT, per Bill's "want to
+  feel them even the lower weaker ones." All rows pass the v2 THREE HARD RULES; no G/H
+  actives; 5 rows ⚠ flagged for rulings; rejected-by-rule list recorded so the dead stay
+  dead. Ledger §D row + §3 verdict entry added. **NEXT:** Bill narrows → survivors get real
+  deed homes (boss pages vs universal tables) → build joins the v2 pool work in
+  `gear_catalog.gd`. *(curio-slate session)*
 
 - ☑ 2026-07-10 · `kit-hoists` → main (`94b1147`) — **CLASSKIT HOISTS: BUILT & MERGED (REFIT P4,
   byte-identical DRY; the rails session's FINAL item — Bill's stop order).** `var boons`/`var

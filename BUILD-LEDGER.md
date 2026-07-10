@@ -217,6 +217,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | GEAR-3 — Market + extraction | 🔒→🟡 | PROGRESSION §3, GEAR §Rollout | Market node, extraction schematics | **ABSORBED into DESCENT §I** (PROMPT MARKET node + post-Seal phase; schematics at CACHE/SERVER ROOM; ≤1/act-vs-≥1/floor conflict resolved: 1/floor). Build via §I. |
 | GEAR-4 — raid personal loot + Seal tables | 🔒 | PROGRESSION §4 | per-seat seeded loot, Ledger pages | Crests/standing need accounts→later. VERSION rows need Trial Ladder. |
 | Universal Curio Pool v2 (~18 curios) | 🟡 | GEAR §POOL-v2 | `gear_catalog.gd` | Approved-not-final. Cut 10 welded, keep 6, add 18 cross-spec. |
+| CURIO ARMORY v3 — the big slate (~40 rows) | 🟡 | GEAR §ARMORY-v3 | `gear_catalog.gd` (+ per row: BACKUPS §9 · JAILBREAK §7 · BENCHMARK §I · foil/temp-slot micro-mechanics) | At Bill's narrowing verdict (target keep ~15–20). Adds the FEEL BAR (every row names its MOMENT). Additive to v2 pool; obeys v2 hard rules; no G/H actives. |
 | Actives socket + paper active items | 🔒 | GEAR §Rollout | 1–2 sockets, G/H keys | Unlocks RELAY BATON/MUTE/ROLLBACK/UNPLUGGING etc. Some gated on Seal page (GEAR-4). |
 | Escort/volatile tickets follow-up | ⏳ | WORLD §MEWGENICS ① | burden flavor, lane-law reward | Slice built (`ESCORT_PREVIEW`). Burden flavor needs interrupt pillar. |
 | Armor set presentation panel | 💡 | PROGRESSION §ARMORY | `armor_doll.gd` paper-doll | Presentation only; reads existing draft state. |
@@ -325,6 +326,7 @@ The 🟡 pull-list — open decisions that will rot the plan if left. Grouped:
 - **Well** — Glint 3-tier ladder vs built 2-tier.
 - **Twinfang** — "On the Beat" card.
 - **Curio Pool v2** — approved-but-not-final (~18 curios).
+- **CURIO ARMORY v3** — the ~40-row big slate at GEAR-CATALOG §ARMORY-v3 (keep ~15–20; 5 rows carry ⚠ flags needing a ruling).
 - **Teeth feel-verdicts** — CONTEST scoring rule · curse magnitudes · spells-reweight pilot class · Endless framing (Depth coordination).
 - **Deck-reshape (per class)** — CD shape · 2-vs-3 branches · keystone generic-vs-category · map reward-legibility mix · curse-card × EASE interplay.
 - **Interrupt-by-ability** — which Tempo ability carries the kick.
