@@ -829,6 +829,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · **`WELL-DRAW-BRIEF.md` (NEW, root) — THE DRAW HEALER BUILD
+  BRIEF** (Bill: *"make a plan to implement the draw healer, then ill hand it off to opus"*) +
+  ledger §C pointers + MENDER banner + CLAUDE.md index. The two 🟡 Draw passes sliced: **S0
+  SKIN** (base cast + the one guarded engine touch — a victim-seat defer pool, the absorb
+  idiom, byte-identical unlit) → **S1 D6 deck data** (theme tags · 7 boons · 3 keystones as
+  opus-rarity · MILLRACE demote · Skim pair parked) → **S2 ⭐THE VIGIL module** (the Patient-
+  Hand machinery generalized + the tremble read; Draw-only module offer) → **S3 transforms**
+  (Cupped Hand · Deep Draw · Braid + doors + rig WHENs — ⚠ WAITS on the `wow-tempo-d0` merge,
+  reuses its Floor-2 ceremony/door-gating) → **S4 policy+sims** (the ONE deliberate
+  re-baseline: skin casting · spike-hold releases · transform piloting · theme/build cells;
+  re-pin ab-gates after) → S5 render polish (deferrable). Scope-gate honesty: all catalog rows
+  stay 🟡 — the brief names each doc'd lean as the build default (winners Vigil·Rapids·Eddy ·
+  Millrace demote · SKIN base-book Draw-graded/Brim-plain · trio as designed · 8-cap trim
+  stays PARKED); **Bill starting the build session = GO on the defaults**, per-line veto cheap.
+  Found + noted in the brief: the eddy drift is per-cast STATIC (`well_kit.gd:263` — Current
+  Reading grades band-entry, NOT mid-cast movement) · the Deep-Draw-vs-hold overrun order rule
+  (deep band first, the hold catches the miss) · Loosed-at-Last needs a per-seat last-hit-tick
+  field (diag-family) · the default comp contains an AI Well·Brim since THE PURGE (gates lean
+  on it). Statuses untouched (no decisions taken). Next: Bill starts the Opus build session on
+  the brief. *(draw-brief session)*
+
 - ☑ 2026-07-10 · main (docs only) · §SYSTEMS/§GRAPHICS · **METER-PLAN.md (NEW) — the live meter
   leveled up (Bill's direct ask: "make it nice like Recount, see more details, plan the next
   level up").** Audit found the meter (`meter_panel.gd`, `5a6e4ad`) is already a real Recount

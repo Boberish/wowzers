@@ -7,6 +7,11 @@
 > 3 cast transforms (Cupped Hand · Deep Draw · the Braid, per TEMPO §17.11) + **SKIN**, the
 > missing-heal base cast (the water's film — defers damage, never absorbs/heals; Bloom's HoT
 > lane untouched).
+> **⚒ Same day, latest: `WELL-DRAW-BRIEF.md` (root) — the DRAW BUILD BRIEF** (Bill's hand-off
+> to the build session): S0 SKIN → S1 D6 deck data → S2 ⭐Vigil module → S3 transforms (after
+> the `wow-tempo-d0` merge — reuses its Floor-2 ceremony) → S4 policy+sims (the one deliberate
+> re-baseline) → S5 render polish. The §12.5/§13.6 leans = the build defaults; Bill starting
+> the build = GO, per-line veto cheap.
 
 **Status:** 🟢 **BASE BUILT & MERGED 2026-07-07** (branch `mender-rework` → main). The reworked
 healer ships as a guarded class **`well`** (codename — Bill's name pick open) on the healer seat,
