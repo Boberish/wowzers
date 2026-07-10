@@ -814,6 +814,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 03:54 · main (docs only) — **CLAIM: DECK MACHINE row D5 — the Well·BRIM deck
+  reshape** (top-3 = Low Catch · Overflow · Glintsmith per MENDER §9; built pool filed via
+  §10.7; BROKE/FADED/DEAD/OPENED sweep; catalog back-fill for shared+Brim built cards at 🔨) →
+  MENDER-PLAN §11 🟡 + catalog Well section. Design only. *(slate-machine session, deck tick
+  03:49)*
+
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §11 (NEW) + CARD-CATALOG Cask section (NEW,
   35 rows) + ledger row — **DECK MACHINE row D4: THE CASK DECK ASSEMBLY — DONE.** The locked §7
   slate (24 KEEP) is **hard-copied into the catalog at ✅** (approved-not-built; flips 🔨+SHA as
