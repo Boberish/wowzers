@@ -27,7 +27,7 @@ const PLAN := [
 	[19, "door"],      # UNDERMILL GATE — the RUSH: door before the capstone
 	[6, "event"],      # MILLWATCH RISE
 	[5, "fight"],      # THE GRANARY STEPS — a PACK pull (smalls → captain, one battle)
-	[18, "gate"],      # THE THRESHOLD — the personal exam, alone
+	[18, "elite"],     # THE THRESHOLD — the warden-stone elite (gates died in THE PURGE)
 	[7, "fight"],      # THE OLD MILL — the capstone (boss kind launches like a fight)
 	[8, "waystation"], # GILDWATCH BEACON — the flight path opens
 ]
@@ -122,8 +122,6 @@ func _process(_d: float) -> bool:
 				_check(u.gear == null or (u.gear is Array and (u.gear as Array).is_empty()),
 					"bare kit: no gear on %s" % u.unit_name)
 				_check(absf(u.hp - u.hp_max) < 0.01, "full HP in: %s" % u.unit_name)
-			if String(PLAN[plan_i][1]) == "gate":
-				_check(hud._gate_live, "gate exam flagged (fought alone)")
 			hud._on_end(true)
 			_check(hud._screen == "recap", "won pull → the Reckoning")
 		"recap":

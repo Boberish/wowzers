@@ -11,7 +11,7 @@
 ## Node = plain Dictionary (authored, id == index):
 ##   {id, kind, name, sub, pos: Vector2, edges: [ids], fight: enc_id, event: id,
 ##    spine: bool, variants: {"flag=value": {overrides…}}}
-## kind: "fight" | "elite" | "boss" | "gate" | "event" | "choice" | "camp" | "cache"
+## kind: "fight" | "elite" | "boss" | "event" | "choice" | "camp" | "cache"
 ##       | "waystation" | "door"
 class_name WorldContent
 
@@ -111,8 +111,9 @@ static func _gildfields_nodes() -> Array:
 		"a shrine to the harvest that was; travelers left tokens — and warnings", {}))
 	N.append(_n(17, "camp", "OLD BOUNDARY STONE", Vector2(330, 740),
 		"the zone's oldest marker. Someone has chiselled the mill's sigil OVER the old runes.", {}))
-	N.append(_n(18, "gate", "THE THRESHOLD", Vector2(1250, 420),
-		"a proving stone of the old wardens — one of you steps through ALONE", {}))
+	N.append(_n(18, "elite", "THE THRESHOLD", Vector2(1250, 420),
+		"a proving stone of the old wardens — what still stands guard here does not step aside",
+		{"fight": "forge:gildfields:stalker:2:118"}))
 	N.append(_n(19, "door", "UNDERMILL GATE", Vector2(1660, 700),
 		"under the mill: stairs, worked stone, and the smell of wet grain going DOWN — the delve waits",
 		{}))
@@ -124,7 +125,7 @@ static func _gildfields_nodes() -> Array:
 	_e(N, 15, 19)                                              # the smugglers' path: RUSH the door
 	_e(N, 4, 16); _e(N, 16, 5)                                 # shrine cut
 	_e(N, 0, 17)                                               # dead-end lore
-	_e(N, 6, 18)                                               # the personal gate
+	_e(N, 6, 18)                                               # the threshold elite
 	_e(N, 7, 19)                                               # the mill guards the door
 	return N
 
@@ -261,5 +262,4 @@ const CACHE_TEXT := {
 
 const WAYSTATION_TEXT := "The brazier atop Gildwatch takes the flame. A FLIGHT PATH opens: from the Atlas, the warband can now travel here on the sky roads, instantly, forever."
 const DOOR_TEXT := "Stairs under the mill: worked stone older than the fields, and the smell of wet grain going DOWN. This is where the harvest goes. This is where the answers are.\n\nTHE UNDERMILL — a delve for another day (the door opens at W3). Mark it. You've earned the route."
-const GATE_TEXT := "The wardens' proving stone. Its law is older than the warband: ONE steps through, ALONE, and is measured."
 const BOSS_INTRO := "The sails turn with no wind, and now you know why: something under the mill DRINKS — water, harvest, land. Tonight it surfaces. The warband forms up at the doors.\n\n(W1 stand-in: the Riftmaw answers for the mill — the W2 Forge casts the zone's own terrors.)"

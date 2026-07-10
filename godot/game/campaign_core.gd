@@ -89,21 +89,6 @@ static func writeback(cp: Dictionary, s: CombatState) -> void:
 	for i in s.seats.size():
 		writeback_seat(cp, s.seats[i], i)
 
-## GATE-exam variant: the VERDICT is the key, not the pulse — a lost exam reboots
-## your slot even if its fail state left you standing (e.g. the healer's patient
-## dying), and only your one raid slot carries in or out.
-static func writeback_exam(cp: Dictionary, u: Seat, i: int, won: bool) -> void:
-	var fracs: Array = cp["fracs"]
-	if i < 0 or i >= fracs.size():
-		return
-	if won:
-		fracs[i] = clampf(u.hp / maxf(1.0, u.hp_max), 0.0, 1.0)
-	else:
-		fracs[i] = REBOOT_FRAC
-		cp["wounds"][i] = minf(WOUND_CAP, float(cp["wounds"][i]) + WOUND_STEP)
-	if u.role == "healer":
-		cp["mana"] = clampf(u.resource / maxf(1.0, u.resource_max), MANA_FLOOR, 1.0)
-
 ## THE KILL SWITCH: scavenge ⏻ from a cleared SKIRMISH (not a Seal — you cash out there).
 static func skirmish_scavenge(cp: Dictionary) -> void:
 	cp["charge"] = mini(100, int(cp["charge"]) + MapFx.SKIRMISH_CHARGE)

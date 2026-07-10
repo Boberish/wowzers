@@ -53,7 +53,8 @@ func win() -> void: pass
 # ============================================================ factory
 ## Build the actor for a role. USER ART WINS: if res://game/art/actors/<id>.tscn
 ## exists it is wrapped in a SpriteActor2D; otherwise the built-in placeholder
-## puppet is used. `id`: bulwark|twinfang|voidcaller|mender|riftmaw|executioner
+## puppet is used. `id`: bulwark|twinfang|voidcaller|mender|riftmaw — the voidcaller/
+## mender rigs stay as the caster/healer seat PLACEHOLDER puppets (per-class art owed)
 static func make(id: String, aspect := "") -> Actor2D:
 	var art := "res://game/art/actors/%s.tscn" % id
 	if ResourceLoader.exists(art):
@@ -67,7 +68,5 @@ static func make(id: String, aspect := "") -> Actor2D:
 			return VoidcallerRig2D.new(aspect)
 		"mender":
 			return MenderRig2D.new(aspect)
-		"executioner":
-			return ExecutionerRig2D.new()
 		_:
 			return RiftmawRig2D.new()

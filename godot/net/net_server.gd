@@ -296,8 +296,8 @@ func _claim(id: int, seat: String) -> void:
 		if String(room["players"][opid]["seat"]) == seat:
 			return
 	room["players"][id]["seat"] = seat
-	# the healer seat has two classes; claim it as the default Mender (toggle in lobby)
-	var cls := "mender" if seat == "healer" else ""
+	# the healer seat has two classes; claim it as the default Well (toggle in lobby)
+	var cls := "well" if seat == "healer" else ""
 	room["players"][id]["cls"] = cls
 	room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
 	_broadcast_room(room)
@@ -321,18 +321,14 @@ func _aspect(id: int, a: String) -> void:
 		room["players"][id]["aspect"] = a
 		_broadcast_room(room)
 
-## Toggle the healer seat's CLASS (Mender / Bloomweaver). Resets the aspect to the new
+## Toggle the healer seat's CLASS (Well / Bloomweaver). Resets the aspect to the new
 ## class's default so the pair shown in the lobby always matches the class.
 func _class(id: int, cls: String) -> void:
 	var room := _room_of(id)
 	if room.is_empty() or room["phase"] != "lobby":
 		return
 	var seat := String(room["players"][id].get("seat", ""))
-	if seat == "healer" and (cls == "mender" or cls == "bloomweaver"):
-		room["players"][id]["cls"] = cls
-		room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
-		_broadcast_room(room)
-	elif seat == "blade" and (cls == "twinfang" or cls == "reckoner"):
+	if seat == "healer" and (cls == "well" or cls == "bloomweaver"):
 		room["players"][id]["cls"] = cls
 		room["players"][id]["aspect"] = RaidNet.default_aspect(seat, cls)
 		_broadcast_room(room)
@@ -358,9 +354,9 @@ func _boss_pick(id: int, enc: String) -> void:
 func _valid_aspects(seat: String, cls: String = "") -> Array:
 	match seat:
 		"tank": return ["warden", "juggernaut"]
-		"blade": return ["colossus", "berserker"] if cls == "reckoner" else ["tempo", "venomancer"]
-		"caster": return ["disruptor", "silencer"]
-		_: return ["wildgrove", "thornveil"] if cls == "bloomweaver" else ["tidecaller", "brinkwarden"]
+		"blade": return ["tempo", "venomancer"]
+		"caster": return ["brew", "cask"]
+		_: return ["wildgrove", "thornveil"] if cls == "bloomweaver" else ["brim", "draw"]
 
 func _join(id: int, msg: Dictionary) -> void:
 	if int(msg.get("ver", -1)) != NetProtocol.VERSION:
@@ -693,14 +689,14 @@ func _map_ctx_srv(room: Dictionary, seat: String) -> Dictionary:
 	var cp: Dictionary = room["campaign"]
 	var cfg: Dictionary = (room.get("seat_cfg", {}) as Dictionary).get(seat, {})
 	var aspect := String(cfg.get("aspect", ""))
-	var cls := String(SEAT_CLASS.get(seat, String(cfg.get("cls", "mender"))))
+	var cls := String(SEAT_CLASS.get(seat, String(cfg.get("cls", "well"))))
 	var boons: Dictionary = (cp.get("boons", {}) as Dictionary).get(seat, {})
 	var boon_tags := MapCheck.tags_for_boons(MapCheck.catalog_for(cls), aspect, boons)
 	return MapCheck.build_ctx(boon_tags, [], aspect, seat,
 		_avg_frac_srv(cp["fracs"]), int(cfg.get("prior", 0)), int(cp["entropy"]),
 		int(cp["check_fails"]), cp["inv"], cp["flags"], 0)
 
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller"}
+const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist"}
 
 func _avg_frac_srv(fracs: Array) -> float:
 	if fracs.is_empty():

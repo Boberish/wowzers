@@ -15,11 +15,11 @@ const _NAMES := [
 	"cleave", "rampage", "fortify", "vindicate", "avalanche", "bloodthirst", "shockwave", "guard",
 	# shared interrupt
 	"kick",
-	# Mender (healer)
+	# healer spell icons (shared ids — the Well's book reuses them)
 	"flash", "mend", "renew", "ward", "cascade", "well", "dispel", "medit", "surge", "laststand",
 	# Twinfang (melee dps)
 	"strike", "eviscerate", "envenom", "coupdegrace", "rupture", "flurry", "dodge",
-	# Voidcaller (caster dps)
+	# legacy caster icons (kept: shared ability/rune ids)
 	"bolt", "fracture", "barrier", "overload", "quietus", "silence", "counterspell",
 	# Bloomweaver (healer #2)
 	"growth", "bark", "overgrowth", "lash", "saprot", "lifesurge", "wildbloom", "briarheart",
