@@ -40,6 +40,12 @@ static func start(aspect: String, seed_v: int = -1) -> RunState:
 	r.encounters = BulwarkContent.run_encounters()
 	return r
 
+static func start_duelist(aspect: String, seed_v: int = -1) -> RunState:
+	var r := _base("duelist", aspect, seed_v)
+	r.loadout = ["dump"]
+	r.encounters = DuelistContent.run_encounters()
+	return r
+
 static func start_bloomweaver(aspect: String, seed_v: int = -1) -> RunState:
 	var r := _base("bloomweaver", aspect, seed_v)
 	r.loadout = BloomweaverConfig.new().order(aspect)

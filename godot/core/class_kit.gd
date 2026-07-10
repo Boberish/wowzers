@@ -40,6 +40,16 @@ func on_defense_press(_s: CombatState, _seat: Seat) -> void:
 func unified_dodge() -> bool:
 	return false
 
+## BESPOKE DEFENSE (TANK-PLAN §1a, DUELIST-BRIEF S1): the tank runs its OWN graded parry +
+## dodge instead of the shared dodge ration / binary negate. When true, CombatCore routes
+## this seat's "defense" (PARRY main) and "dodge" (DODGE secondary) presses straight to the
+## kit (on_defense_press / on_dodge_press — the kit owns wind + its own answer windows), and
+## does NOT binary-negate a DEFENSIBLE swing aimed here: the hit flows through to _damage so
+## the kit's modify_incoming applies GRADED PARTIAL mitigation (the partial-mit law, cap .90 —
+## even a perfect leaks a sliver). Default false keeps every other class byte-identical.
+func bespoke_defense() -> bool:
+	return false
+
 ## A DEFENSIBLE swing was negated by a well-timed press. Default = pure negate
 ## (no extra effect); Warden overrides to reflect + bank Counter + open Riposte.
 func on_negate(_s: CombatState, _seat: Seat, _ability: AbilityRes) -> void:

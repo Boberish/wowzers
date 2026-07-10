@@ -7,7 +7,7 @@
 extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -72,7 +72,7 @@ func _seat_cls_now() -> String:
 	if _seat_key == "healer": return _healer_cls
 	if _seat_key == "blade": return _blade_cls
 	if _seat_key == "caster": return _caster_cls
-	return String(SEAT_CLASS.get(_seat_key, "bulwark"))
+	return String(SEAT_CLASS.get(_seat_key, "duelist"))
 
 ## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
 ## right kit + the lobby/sim/net all agree). Non-polymorphic seats keep their native class.
@@ -110,7 +110,7 @@ func _ensure_party() -> void:
 	for key in RaidNet.SEAT_KEYS:
 		if key == _seat_key or _d.party.has(key):
 			continue
-		var cls := String(SEAT_CLASS.get(key, "bulwark"))
+		var cls := String(SEAT_CLASS.get(key, "duelist"))
 		_d.party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
 
 ## ROSTER PERSISTENCE (REFIT P4): a stored raider is only adopted if its class/aspect
@@ -1235,7 +1235,7 @@ func _apply_map_fx(fx: Dictionary) -> void:
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 
 ## Which class this seat key plays (gear rows are class-marked by class name).
-const SEAT_CLS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 
 ## The human seat carries the run's equipped curios into a fight (offline map runs
 ## only — the seat starts each pull with fresh per-fight gear bookkeeping).
@@ -2766,10 +2766,10 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 	var aggro_me := bool(obs.get("aggro_me", false))
 	match _seat_key:
 		"tank":
-			_aggro_warn.text = "IT TURNS ON YOUR RAID  —  CHALLENGE IT BACK  (T)"
+			_aggro_warn.text = "IT DRIFTS TO YOUR RAID  —  PLAY CLEAN, IT COMES BACK"
 			_aggro_warn.visible = not aggro_me and not s.over
 		"blade", "caster":
-			_aggro_warn.text = "IT'S HUNTING YOU  —  SURVIVE UNTIL THE TAUNT"
+			_aggro_warn.text = "IT'S HUNTING YOU  —  DODGE!"
 			_aggro_warn.visible = aggro_me and not s.over
 		_:
 			_aggro_warn.visible = false
@@ -2942,13 +2942,11 @@ func _handle_event(ev: Dictionary) -> void:
 				_big_text("KICK!", Palette.KICK, 34)
 			_dial.react("stagger")
 			_add_shake(5.0)
-		"taunt":
+		"duel_counter":                       # FLOW=AGGRO: the perfect-parry hit-back (the tank's "look at me")
 			if mine:
-				_big_text("CHALLENGED — IT'S YOURS!", Palette.GOLD_BRIGHT, 38)
-				_add_shake(5.0)
-				_dial.react("impact", 30.0)
-			elif _seat_key != "tank":
-				_big_text("taunted back", Palette.STEEL, 22, 0.5)
+				_big_text("COUNTER!", Palette.GOLD_BRIGHT, 34)
+				_add_shake(4.0)
+				_dial.react("impact", 24.0)
 		"threat_drop":
 			if mine:
 				_big_text("IT FORGETS YOU!" if _seat_key == "tank" else "ITS GAZE FALLS ON YOU!", Palette.CRIMSON, 42)

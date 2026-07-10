@@ -384,9 +384,9 @@ func _fight(fight_seed: int, fi: int, carry: Dictionary, sk: Dictionary) -> Dict
 	# consume a pending fight-mark (KILL SWITCH cash-out / curse) via the SHARED applier
 	RaidMarks.apply(s, carry.get("marks", {}))
 	carry["marks"] = {}
-	var tp := s.seats[0].policy as RaidTankPolicy
-	tp.reaction_slack = float(sk["slack"])
-	tp.rng = DetRng.new(fight_seed * 2749 + 1337)
+	var tp := s.seats[0].policy as DuelistPolicy
+	tp.latency_ticks = int(sk["lat"])
+	tp.rng = DetRng.new(fight_seed * 2749 + 6737)
 	var bp := s.seats[1].policy as TwinfangPolicy
 	bp.latency_ticks = int(sk["lat"])
 	bp.rng = DetRng.new(fight_seed * 2749 + 2338)

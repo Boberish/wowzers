@@ -106,6 +106,7 @@ func _accent(seat: Seat) -> Color:
 	var scr: Script = seat.kit.get_script()
 	match (String(scr.get_global_name()) if scr != null else ""):
 		"BulwarkKit": return Palette.GOLD
+		"DuelistKit": return Palette.STEEL
 		"TwinfangKit": return Palette.FLOW
 		"BloomweaverKit": return Palette.VERDANCE
 		_: return Palette.STEEL.darkened(0.15)

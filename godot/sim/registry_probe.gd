@@ -9,13 +9,13 @@ func _initialize() -> void:
 
 	# [1] the table covers the post-purge roster, one seat each
 	_chk(fails, "healer pool", ClassRegistry.classes_for_seat("healer") == ["well", "bloomweaver"])
-	_chk(fails, "tank pool", ClassRegistry.classes_for_seat("tank") == ["bulwark"])
+	_chk(fails, "tank pool", ClassRegistry.classes_for_seat("tank") == ["duelist"])
 	_chk(fails, "blade pool", ClassRegistry.classes_for_seat("blade") == ["twinfang"])
 	_chk(fails, "caster pool", ClassRegistry.classes_for_seat("caster") == ["alchemist"])
 	_chk(fails, "seat_of unknown = ''", ClassRegistry.seat_of("voidcaller") == "")
 
 	# [2] policy seed salts are BYTE-EXACT history (lockstep law — never drift)
-	var salts := {"bulwark": 1337, "twinfang": 2338, "alchemist": 3339, "well": 5531}
+	var salts := {"duelist": 6737, "twinfang": 2338, "alchemist": 3339, "well": 5531}
 	for cls in salts:
 		var p := ClassRegistry.make_policy(String(cls), 42)
 		var want := DetRng.new(42 * 2749 + int(salts[cls])).state_hash()
@@ -23,7 +23,7 @@ func _initialize() -> void:
 	_chk(fails, "bloomweaver no-rng quirk", ClassRegistry.make_policy("bloomweaver", 42) is BloomweaverPolicy)
 
 	# [3] RaidNet.make_policy seat-fallback semantics (the exact old ladder)
-	_chk(fails, "tank default", RaidNet.make_policy("tank", 7) is RaidTankPolicy)
+	_chk(fails, "tank default", RaidNet.make_policy("tank", 7) is DuelistPolicy)
 	_chk(fails, "healer bloom", RaidNet.make_policy("healer", 7, "bloomweaver") is BloomweaverPolicy)
 	_chk(fails, "healer default", RaidNet.make_policy("healer", 7) is WellPolicy)
 	_chk(fails, "wrong-seat cls falls back", RaidNet.make_policy("healer", 7, "alchemist") is WellPolicy)

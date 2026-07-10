@@ -274,19 +274,11 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 ## Challenge (raid-only taunt): force the boss onto you and jump the threat table.
 ## Off-GCD with its own cooldown, WoW-style. No solo loadout/policy ever presses it,
 ## and CombatCore.taunt() no-ops unless threat is enabled — solo stays byte-identical.
-func _challenge(s: CombatState, seat: Seat) -> bool:
-	if not s.threat_enabled:
-		return false
-	if s.tick < int(seat.cooldowns.get("challenge", 0)):
-		return false
-	CombatCore.taunt(s, seat)
-	seat.cooldowns["challenge"] = s.tick + _tt(s, cfg.challenge_cd)
-	seat.vars["taunts"] = int(seat.vars.get("taunts", 0)) + 1   # raid-sim diagnostic
-	# GEAR-2: Sticky Note — answering the curse fast refunds the taunt's rage.
-	if GearFx.has(seat, &"sticky_note") and s.tick - s.boss.last_curse_tick <= _tt(s, 2.0):
-		_gain_rage(seat, 15.0)
-		GearFx.pop(s, seat, &"sticky_note")
-	return true
+## Challenge (the old raid taunt) is DEAD — FLOW=AGGRO deleted the taunt button (BOSS-PLAN §1);
+## aggro is passive now. The Bulwark survives ONLY as a sim / gear-probe FIXTURE (the Duelist is
+## the playable tank), so this is a no-op, kept just so the fixture + its RaidTankPolicy compile.
+func _challenge(_s: CombatState, _seat: Seat) -> bool:
+	return false
 
 func _generic(s: CombatState, seat: Seat, id: String) -> bool:
 	var ab: Dictionary = cfg.abilities.get(id, {})

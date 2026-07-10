@@ -83,7 +83,9 @@ static func update(s: CombatState) -> void:
 static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 	match String(action.get("type", "")):
 		"defense":
-			if seat.kit != null and seat.kit.unified_dodge():
+			if seat.kit != null and seat.kit.bespoke_defense():
+				seat.kit.on_defense_press(s, seat)   # the tank's graded PARRY (main) — kit owns wind + window
+			elif seat.kit != null and seat.kit.unified_dodge():
 				_unified_dodge(s, seat)          # the ONE dodge (Twinfang/Alchemist/Well)
 			elif s.tick >= seat.defense_ready_tick:
 				var active := _def_active(s, seat)
@@ -109,7 +111,9 @@ static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 			# M7 universal dodge — every class has it, separate from the class
 			# defensive verb (guard/kick untouched). Short recovery between presses;
 			# grading against the live string happens in _answer_strike.
-			if seat.kit != null and seat.kit.unified_dodge():
+			if seat.kit != null and seat.kit.bespoke_defense():
+				seat.kit.on_dodge_press(s, seat)   # the tank's graded DODGE (secondary) — kit owns wind + window
+			elif seat.kit != null and seat.kit.unified_dodge():
 				_unified_dodge(s, seat)
 			elif s.tick >= seat.dodge_ready_tick:
 				seat.dodge_ready_tick = s.tick + to_ticks(s.config.dodge_recovery, s.config.fixed_hz)
@@ -233,7 +237,9 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 		while s.boss.melee_timer <= 0:
 			var mn := float(melee.get("min", 10.0))
 			var mx := float(melee.get("max", 15.0))
-			var mtgt := _tank_target(s)
+			var mtgt := _aggro_peel(s, _tank_seat(s)) if s.threat_enabled else _tank_target(s)
+			if mtgt == null:
+				mtgt = _tank_target(s)
 			_damage(s, mtgt, s.rng.next_range(mn, mx), &"melee")
 			if s.threat_enabled:                   # STATS PAGE v2 — aggro / stray-shot accounting
 				_note_melee_victim(s, mtgt)
@@ -416,17 +422,15 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 			s.boss.dmg_buff = minf(0.55, s.boss.dmg_buff + s.telegraph.ability.buff)
 			_emit(s, {"t": "empower", "amt": s.telegraph.ability.buff})
 		AbilityRes.Effect.THREAT_DROP:
-			# Raid: the boss forgets its grudge against the top-threat unit — it turns
-			# on whoever is next on the table until the tank taunts it back.
+			# FLOW DUMP (TANK-PLAN §1c / BOSS-PLAN §1): the "context-window shift" curse ZEROES
+			# the tank's flow — rebuild it by playing clean. No taunt-back exists (aggro is passive).
 			if s.threat_enabled:
-				var top := _threat_target(s)
-				var ti := s.seats.find(top)
-				if ti >= 0:
-					s.boss.threat[ti] = 0.0
-					# GEAR-2: stamp the curse + deed counter (diag-family, never checksummed)
+				var tk := _tank_seat(s)
+				if tk != null:
+					tk.vars["flow"] = 0.0
 					s.boss.last_curse_tick = s.tick
-					_bump_diag(s, top, "curse_dropped")
-					_emit(s, {"t": "threat_drop", "seat": top, "player": top.is_player})
+					_bump_diag(s, tk, "curse_dropped")
+					_emit(s, {"t": "threat_drop", "seat": tk, "player": tk.is_player})
 	if not _advance_chain(s):          # a resolved chain verse flows into the next
 		s.telegraph = null
 
@@ -869,8 +873,6 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 		s.boss.add_hp = maxf(0.0, s.boss.add_hp - d)   # an add holds the field — it eats the hit
 	else:
 		s.boss.hp = maxf(0.0, s.boss.hp - d)
-	if s.threat_enabled and seat != null and d > 0.0:
-		_add_threat(s, seat, d * (s.config.threat_tank_mult if seat.role == "tank" else 1.0))
 	if d > 0.0:
 		meter_dmg(s, seat, src, d, crit)
 		_emit(s, {"t": "boss_hit", "amt": int(d), "seat": seat, "kind": String(src), "crit": crit})
@@ -879,59 +881,63 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 	return d
 
 # --------------------------------------------------------------------------
-# Raid threat (threat_enabled fights only — every call site is guarded, so solo
-# content never touches these paths; see RAID-PLAN.md §R0). The table is keyed by
-# seats[] INDEX, never Seat refs (RefCounted-cycle + future-serialization safety).
+# FLOW=AGGRO (threat_enabled fights only — every call site is guarded, so solo content
+# stays byte-identical; TANK-PLAN §1c / BOSS-PLAN §1). The tank's FLOW (seat.vars["flow"],
+# 0..1) IS the boss's attention. No threat table, no taunt — the boss locks on the tank while
+# flow ≥ config.flow_lock_floor, else each attack has a rising chance to PEEL to a random other
+# seat. Flow is FED by the tank kit (clean answers up, un-clean down); the engine only reads it.
 # --------------------------------------------------------------------------
 
-static func _add_threat(s: CombatState, seat: Seat, amt: float) -> void:
-	var i := s.seats.find(seat)
-	if i >= 0:
-		s.boss.threat[i] = float(s.boss.threat.get(i, 0.0)) + amt
+## The living tank seat (role "tank"), or null — the flow driver.
+static func _tank_seat(s: CombatState) -> Seat:
+	for seat in s.seats:
+		if seat.role == "tank" and seat.alive():
+			return seat
+	return null
 
-## Public taunt entry for ClassKits (Bulwark "Challenge"): force the boss onto
-## `seat` for taunt_dur and jump its threat to the table top × taunt_threat_bonus.
-static func taunt(s: CombatState, seat: Seat, dur: float = -1.0) -> void:
-	if not s.threat_enabled or seat == null:
-		return
-	var i := s.seats.find(seat)
-	if i < 0:
-		return
-	if dur < 0.0:
-		dur = s.config.taunt_dur
-	s.boss.taunt_seat_i = i
-	s.boss.taunt_until_tick = s.tick + to_ticks(dur, s.config.fixed_hz)
-	# GEAR-2: a taunt within 2s of a THREAT_DROP answers the curse (deed detector).
-	# Capped at one answer per drop so re-taunts can't outpace curse_dropped.
-	if s.tick - s.boss.last_curse_tick <= to_ticks(2.0, s.config.fixed_hz) \
-			and int(seat.diag.get("curse_answered", 0)) < int(seat.diag.get("curse_dropped", 0)):
-		_bump_diag(s, seat, "curse_answered")
-	var top := 0.0
-	for t in s.boss.threat.values():
-		top = maxf(top, float(t))
-	s.boss.threat[i] = maxf(float(s.boss.threat.get(i, 0.0)), top * s.config.taunt_threat_bonus)
-	_emit(s, {"t": "taunt", "seat": seat, "player": seat.is_player})
+## The tank's normalized flow (0 if no living tank) — the aggro percentage.
+static func _flow_aggro(s: CombatState) -> float:
+	var tk := _tank_seat(s)
+	if tk == null:
+		return 0.0
+	return clampf(float(tk.vars.get("flow", 0.0)), 0.0, 1.0)
 
-## The boss's current victim under threat rules: an active taunt wins; else the
-## highest-threat living targetable seat (ties: earliest in seat order — deterministic).
+## The boss's current FOCUS — a pure read of flow, NO rng (safe to call many times a tick; the
+## HUD/stage victim highlight + observe(aggro_me) read it). While flow ≥ the lock floor the tank
+## holds it; below, the focus wanders to the last seat the boss actually hit, else the tank, else
+## the primary. The per-ATTACK peel roll lives in _aggro_peel (rng), never here.
 static func _threat_target(s: CombatState) -> Seat:
-	if s.boss.taunt_seat_i >= 0 and s.tick < s.boss.taunt_until_tick \
-			and s.boss.taunt_seat_i < s.seats.size():
-		var forced: Seat = s.seats[s.boss.taunt_seat_i]
-		if forced.alive():
-			return forced
-	var best: Seat = null
-	var best_t := -1.0
-	for i in s.seats.size():
-		var seat: Seat = s.seats[i]
-		if seat.alive() and _targetable(seat):
-			var t := float(s.boss.threat.get(i, 0.0))
-			if t > best_t:
-				best = seat
-				best_t = t
-	if best != null:
-		return best
+	var tk := _tank_seat(s)
+	if tk != null and _flow_aggro(s) >= s.config.flow_lock_floor:
+		return tk
+	var lv := s.boss.last_melee_victim_i
+	if lv >= 0 and lv < s.seats.size():
+		var v: Seat = s.seats[lv]
+		if v.alive() and _targetable(v):
+			return v
+	if tk != null:
+		return tk
 	return _primary_target(s)
+
+## THE PROGRESSIVE PEEL (per incoming attack — draws state.rng in fixed order, guarded so a
+## single-targetable-seat fight never rolls → byte-identical). `base` is the intended victim
+## (the tank). flow ≥ floor → locked, no roll. Below → peel chance rises as flow falls (0 flow
+## = fully random); a peel strays to a random OTHER targetable living seat. base == null (no
+## living tank) → always random among targetable (the "no tank = emergent hard-mode" case).
+static func _aggro_peel(s: CombatState, base: Seat) -> Seat:
+	var aggro := _flow_aggro(s)
+	if base != null and aggro >= s.config.flow_lock_floor:
+		return base
+	var pool: Array = []
+	for seat in s.seats:
+		if seat.alive() and _targetable(seat) and seat != base:
+			pool.append(seat)
+	if pool.is_empty():
+		return base
+	var chance := (s.config.flow_lock_floor - aggro) / maxf(0.0001, s.config.flow_lock_floor)
+	if base == null or s.rng.next_float() < chance:
+		return pool[s.rng.next_u32() % pool.size()]
+	return base
 
 ## STATS PAGE v2 — aggro accounting (raid only). A melee that lands on a NON-tank while no
 ## taunt forces it means the tank lost threat: count the stray hit on the victim, and emit
@@ -941,8 +947,7 @@ static func _note_melee_victim(s: CombatState, victim: Seat) -> void:
 	if victim == null:
 		return
 	var i := s.seats.find(victim)
-	var taunting := s.boss.taunt_seat_i >= 0 and s.tick < s.boss.taunt_until_tick
-	if victim.role != "tank" and not taunting:
+	if victim.role != "tank":
 		_bump_diag(s, victim, "stray_hit")
 		if i != s.boss.last_melee_victim_i:
 			_bump_diag(s, victim, "aggro_pulled")
@@ -1034,8 +1039,6 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 			meter_dmg(s, seat, &"attack", contrib * dt, false, false)
 			if not s.boss.vulns.is_empty():        # STATS PAGE v2 — vuln amps on stat-block chip
 				_credit_amps(s, s.seats.find(seat), contrib * dt, false, false)
-			if s.threat_enabled:
-				_add_threat(s, seat, contrib * dt)
 	if s.boss.add_i >= 0:
 		s.boss.add_hp = maxf(0.0, s.boss.add_hp - total * dt)
 	else:
@@ -1127,9 +1130,6 @@ static func _pack_advance(s: CombatState) -> void:
 	b.add_hp = 0.0
 	b.add_hp_max = 0.0
 	b.adds_spawned = {}
-	b.threat = {}
-	b.taunt_seat_i = -1
-	b.taunt_until_tick = -1
 	b.entered_tick = s.tick                 # walk-in grace + per-member enrage key off this
 	var i := 0
 	for ab in enc.abilities:
@@ -1174,8 +1174,6 @@ static func heal_unit(s: CombatState, target: Seat, amt: float, caster: Seat,
 	var eff := minf(missing, amt)
 	var over := amt - eff
 	target.hp += eff
-	if s.threat_enabled and caster != null and eff > 0.0:
-		_add_threat(s, caster, eff * s.config.threat_heal_factor)
 	if caster != null and caster.kit != null:
 		caster.kit.on_overheal(s, caster, target, over)
 		caster.kit.on_heal(s, caster, target, eff, over)
@@ -1232,6 +1230,11 @@ static func _pick_target(s: CombatState, ab: AbilityRes) -> Seat:
 	match ab.effect:
 		AbilityRes.Effect.MARK_NUKE, AbilityRes.Effect.HEAL_ABSORB:
 			return _random_dps(s)
+		AbilityRes.Effect.DMG_TARGET:
+			var base := _tank_seat(s)   # FLOW=AGGRO: a tank buster may PEEL to a squishy (dodged on its own bar)
+			if base == null:
+				return _tank_target(s)
+			return _aggro_peel(s, base) if s.threat_enabled else base
 		_:
 			return _tank_target(s)
 
