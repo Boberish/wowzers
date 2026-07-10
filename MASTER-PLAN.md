@@ -829,13 +829,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 · main (docs only) · §CLASSES — **CLAIM: THE ABILITY PASS ×2 (Bill's direct ask) —
-  DUELIST + WELL·DRAW onto the Tempo §17.10/§17.11 setup** (transforms-not-buttons · doors gating
-  sub-boons · +1/ceiling-6 law · top-3 ladders refined): Duelist around Headsman·Ironside·Ghost
-  (TANK-PLAN §10 NEW — 3 transforms + the owed signature CD designed) · Draw around
-  Vigil·Rapids·Eddy (MENDER-PLAN §13 NEW — 3 cast transforms + **the missing-heal cast** per
-  Bill's playtest gap: a small proactive not-a-HoT/not-an-absorb, Bloom's lane untouched; the
-  8-cap trim stays parked per Bill). CARD-CATALOG rows 🟡 + ledger rows same commit.
+- ☑ 2026-07-10 · main (docs only) · §CLASSES — **THE ABILITY PASS ×2 — DONE, both 🟡 AT BILL'S
+  BOARD.** Duelist (`TANK-PLAN §10`): button audit (4 of 6, +1 slot EMPTY; DUMP named the
+  storyless press) · ⏱ **EN GARDE** designed (the owed "wall" CD — invite/halved-leaks/double-flow
+  amplifier, never a taunt costume) · 3 transforms w/ doors (**PRISE DE FER** parry-seize ·
+  **REMISE** prime/commit · **FLÈCHE** dump-loads-onto-perfect-answer) · top-3 ladders refit w/
+  v1.1 adopted (Dancer excludes parry transforms from the offer). Draw (`MENDER-PLAN §13`):
+  **SKIN** — the missing-heal base cast (graded film, DEFERS a share of each hit into a ~3s drip;
+  never absorbs/heals — not Ward, not Bloom's HoT; Bill's playtest gap closed) · 3 cast
+  transforms w/ doors (**CUPPED HAND** Flash-from-the-Current · **DEEP DRAW** Mend's second band ·
+  **THE BRAID** Cascade as a graded string) · 8-cap trim parked per Bill (counted 10→11, rides
+  the compliance-trims ledger row). Catalog rows 🟡 (2 tables) · ledger rows (2 new + CD row 💡→🟡
+  + trims note) same commit. Both acquisition rules ride Bill's Tempo verdict ③.
   *(ability-pass session)*
 
 - ☐ 2026-07-10 · worktree `../wow-stats` (branch `stats-page`) · §SYSTEMS/§GRAPHICS — **CLAIM: STATS

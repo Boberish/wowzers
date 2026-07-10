@@ -121,7 +121,7 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 ### Signature CD ⏱
 | Card (id) | Type | Rarity | Status | Effect |
 |---|---|---|---|---|
-| **Defensive CD** _(unnamed — the tank's ~1-min "wall")_ | — | — | 💡 IDEA | Role-shaped defensive cooldown (a wall), per `DECK-LAYOUT.md §5`; carries the mitigation GUARD used to (◆ is damage-only now). Amplifies skill — line it up with a boss window — never `button = damage`. Both specs get one; shapes may differ. |
+| ⏱ **EN GARDE** (`engarde`) | STRAT | baseline | 🟡 | _(Was the unnamed "wall" 💡 — designed 2026-07-10, `TANK-PLAN §10.2`.)_ ~1-min challenge, ~4s: melee tempo at you +25% (the invitation), your leaks/slivers HALVED (the old GUARD's mitigation re-homed), clean answers pay DOUBLE flow, a perfect MAIN banks ◆◆; two slips break it early. Never touches targeting — the post-taunt clutch as an AMPLIFIER, never an override. |
 
 ### Creeds (pick 1/run — curated)
 | Card (id) | Type | Rarity | Status | Effect |
@@ -231,6 +231,25 @@ Feather Step (block cost = same knob) · Deep Pockets · Powder Keg · ✦ Hold 
 **v1.1 errata (fold on verdict):** Quick Wrists + Roll With It → the EASE dial (leave pool) ·
 FLOW module = 4th Floor-1 candidate · Hold the Line re-keys onto FLOW · GUARD trio resolved to
 the Warden (§8) · absorbs: Read the Room→Kit M · Blood Price/Overreach→Kit S (double-filed).
+
+### DUELIST · ABILITY TRANSFORMS (`TANK-PLAN §10` — 🟡 2026-07-10 · ≤1/run, Floor-2 ceremony 1-of-3, each a DOOR gating its 2 sub-boons; never a touch target)
+
+| Card | id | Type | Rarity | St | Ladder | One line |
+|---|---|---|---|---|---|---|
+| **PRISE DE FER** (transform: PARRY) | `prisedefer` | RULE | ceremony | 🟡 | Ironside | A perfect parry SEIZES the bar (hold ≤1.2s, wind drains) → release THROWS it back; scales w/ bar power + hold (cap ≈ counter ×1.5). |
+| **Disarm** (door) | `disarm` | STRAT | H/S/O | 🟡 | Ironside | A full-length seize downgrades the boss's next bar one size. |
+| **Wrenched Steel** (door) | `wrenchedsteel` | GREED | H/S/O | 🟡 | Ironside | Seize drains wind ×2; the throw +40%. |
+| **REMISE** (transform: PARRY) | `remise` | RULE | ceremony | 🟡 | Ghost | Parry = two half-presses: PRIME (~1/3 wind, primed-miss leaks −30%) + COMMIT in-window (rest of cost, full parry+counter). A primed feint costs only the prime. |
+| **Second Intention** (door) | `secondintention` | STRAT | H/S/O | 🟡 | Ghost | A committed remise (both presses landed) banks +1◆. |
+| **Beat Parry** (door) | `beatparry` | POWER | H/S/O | 🟡 | Ghost | The prime alone deflects harder (−30%→−45% leak). |
+| **FLÈCHE** (transform: DUMP) | `fleche` | RULE | ceremony | 🟡 | Headsman | DUMP loads onto your blade (~2.5s); your next PERFECT answer releases it +25%. Expired load: half the ◆ return, rest fizzles. |
+| **Running Edge** (door) | `runningedge` | POWER | H/S/O | 🟡 | Headsman | Flèche damage +15/22/30%. |
+| **Point in Line** (door) | `pointinline` | STRAT | H/S/O | 🟡 | Headsman | A flèche released on a TALL-bar land staggers the stream half a beat. |
+
+**Rig WHENs added by the doors (wiring-board entries, priced inverse-frequency):** *full-seize
+throw* ~×5 · *remise committed on a tall bar* ~×4.5 · *flèche off a perfect answer* ~×5.
+**Dancer law:** under the Dancer creed (no parry button) the two parry transforms leave the
+Floor-2 offer (`TANK-PLAN §10.4`).
 
 ## TANK · THE WARDEN — **DECK v1 (D1) 🟡 AT VERDICT 2026-07-10** · base locked, 0 built
 
@@ -500,6 +519,25 @@ land now. Shared + Brim below; Draw rows arrive with D6.)*
 | **Current Reading** | `currentreading` | STRAT | H/S/O | 🟡 | Eddy | First-third drift tags grant +1 Current (the bridge). |
 | **Deep Eddy** | `deepeddy` | GREED | H/S/O | 🟡 | Eddy | Drift range doubles; Still-Point tags ×1.5. |
 | **THE GLASS RIVER** (keystone) | `glassriver` | RULE | elite | 🟡 | Eddy | Three moving Still-Point tags freeze the water ~5s. |
+
+**DRAW ABILITY PASS rows (`MENDER-PLAN §13` — 🟡 2026-07-10 · transforms ≤1/run via Floor-2
+ceremony, each a DOOR gating its 2 sub-boons; SKIN = the one counted new cast):**
+
+| Card | id | Type | Rarity | St | Theme | One line |
+|---|---|---|---|---|---|---|
+| **SKIN** (base cast) | `skin` | — | base book | 🟡 | shared book | Quick cast, 1 ◍, graded release: ~6s the ally wears the water's skin — a share of each hit DEFERS into a ~3s drip (clean 35% · plain 20% · Still Point 45% + Glint). Never absorbs, never heals — re-times damage so your cast bar can arrive. No stacking; recast refreshes. Brim grading open (`§13.6` pt 4). |
+| **CUPPED HAND** (transform: Flash) | `cuppedhand` | RULE | ceremony | 🟡 | Rapids | Flash may be thrown FROM the Current: spend 1 stack → lands instantly, ungraded (plain, never clean/Glint), no cast bar. Never feeds the Current. |
+| **Handful After Handful** (door) | `handfulafter` | POWER | H/S/O | 🟡 | Rapids | Cupped flashes +15/22/30%. |
+| **Return to the River** (door) | `returnriver` | STRAT | H/S/O | 🟡 | Rapids | A clean release within ~2s of a cupped flash restores the spent stack. |
+| **THE DEEP DRAW** (transform: Mend) | `deepdraw` | RULE | ceremony | 🟡 | Vigil | Mend gains a second band past clean: catch the DEEP band = ×1.6; past it = GUTTER (charge+cast lost — the free overrun is surrendered by drawing past). ⭐Vigil held: a missed deep band becomes a plain HELD heal instead. *(Name-family check: built `deepwell`/`deepstill`/`deepeddy` are distinct ids; the Long Draw creed is the run-long temperament, this is the per-cast gamble — recorded.)* |
+| **Pearl Diver** (door) | `pearldiver` | GREED | H/S/O | 🟡 | Vigil | Deep band −30% size, pays ×2. |
+| **Came Up Singing** (door) | `cameupsinging` | STRAT | H/S/O | 🟡 | Vigil | A caught deep band grants +2 Current (the Vigil↔Rapids bridge). |
+| **THE BRAID** (transform: Cascade) | `braid` | RULE | ceremony | 🟡 | Eddy | Cascade's 3 arcs become 3 graded releases (one band each); all-clean → 3rd arc +40%. ONE cast for boon/charge math; grades per press; Current gain caps +1/string. |
+| **Tight Braid** (door) | `tightbraid` | GREED | H/S/O | 🟡 | Eddy | Arc bands −25%; all-clean bonus +40%→+70%. |
+| **Crossing Streams** (door) | `crossingstreams` | STRAT | H/S/O | 🟡 | Eddy | Each arc re-aims at release to the current lowest ally. |
+
+**Rig WHENs added by the doors:** *cupped flash lands on an ally <30%* ~×4.5 · *deep band
+caught* ~×4 · *all-clean braid* ~×5.
 
 ## BLOOMWEAVER — **ORCHARD CLOCK DECK v0 (D3) 🟡 PROVISIONAL 2026-07-10** · core unpicked
 
