@@ -836,6 +836,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ◐ 2026-07-10 · worktree `../wow-seals` (branch `seal-rework`) — **CLAIM: THE SEAL REWORK
+  BUILD (`BOSS-BRIEF.md`).** Bill's go ("implement these bosses like the brief says"). **S0
+  (sim instrumentation) IN PROGRESS — the one slice unblocked today.** ⚠ Gate ② is NOT clear:
+  `wow-tank-w1` (Wave-1 FLOW=AGGRO/Duelist) is still IN FLIGHT (unmerged, at its S4 — main
+  still has `threat_enabled`/`taunt_seat_i`, no `seat.vars["flow"]`). Per the brief, **S1+
+  (engine addenda E1–E9) and S2–S5 (content) HARD-BLOCK on the tank-w1 merge** — they edit the
+  same reducer tank-w1 rewrites, and the content authors against flow/peels/Compaction-flow-dump
+  that don't exist in main yet. So this session builds **S0 only** (byte-identical, sim-side:
+  beat-budget + cast-source + TTK-vs-contract + valley/timeline + verse tables in `raid_sim.gd`)
+  and stops at the gate — S1+ resumes when tank-w1 lands. *(boss-build session)*
+
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
   BOSS-PLAN made buildable: **S0** sim instrumentation (byte-identical, claimable NOW) → **S1**
