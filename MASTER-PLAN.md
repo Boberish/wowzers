@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 02:54 · main (docs only) — **CLAIM: DECK MACHINE row D1 — the Tank·WARDEN full
+  deck pass** (top-3 = Payload · Slam · Rampart per TANK §6 ranking; from-scratch authoring +
+  the 🔮 re-homed trio + carries; coherence gates + distinctness check + 3 skeptics → TANK-PLAN
+  §8 🟡 + CARD-CATALOG Warden rows 🟡). Design only. *(slate-machine session, deck tick 02:49)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `net-integrity`) — **CLAIM: NET-LAYER INTEGRITY
   HASH (audit 07-03 checksum-coverage finding, option b — the recommended additive path; REFIT §5
   disposition).** The desync detector only sees boss HP + tick (`combat_core.gd:72`); seat
