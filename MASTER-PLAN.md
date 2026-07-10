@@ -1048,19 +1048,35 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
-- ☐ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **CLAIM: DESCENT SLICE 2 —
-  THE LEGIBILITY UI PASS** (BUILD-LEDGER §I row / DESCENT §5·§9·§11). Deliverables: one-line
-  reward CONTRACT text + fight-tier ▮ pips on every node door · BOTH-LEGS check hints (`% · on
-  win/on loss`) on all check/wager buttons · display RENAMES (Entropy→**LUCK** ⚡ · attempts→
-  **BACKUPS** · rerolls→**REGENERATE** · remove-cost→**DEPRECATE**) — display-only, ids frozen ·
-  **THE RAID INTEGRITY KILL** (§11 cut #2 — dead-integrity ticket payloads re-priced to live
-  goods, overtime_daemon bluff-stake retired, integrity check-row dropped) · header 3-meter
-  legend (⏣ ⚡ ⏻) + wound/curse pips + first-⏻ tooltip. **Byte-identical law:** renames are
-  DISPLAY-ONLY; map rng / node kinds / fx ids frozen so `raid_map_sim` stays checksum-identical.
-  Touches `map_screen`/`map_event_panel`/`map_check`/`map_content`/`campaign_core`/`raid_hud`
-  (MAP region — ⚠ coordinating with `tempo-art` which owns the combat region of the same file) +
-  sim/probe updates (integrity_probe re-scope). Flag: if integrity rides the netcode protocol,
-  a protocol bump is in scope (recon confirming). *(raid-rebuild session)*
+- ☑ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **DESCENT SLICE 2 — THE
+  LEGIBILITY UI PASS: MERGED to main (`1f5e051`), 2 commits, ZERO file collisions with the
+  tuning-sweep merge landing alongside.** Built via a 6-reader recon workflow (the one that
+  disambiguated the THREE unrelated "integrity"s — see below). **2a display (byte-identical):**
+  node doors print a one-line reward CONTRACT (on hover + tooltip; WILD stays sealed) + fight-tier
+  ▮ pips (normal/elite/Seal, drawn as pip rects) · header restructured into the 3 meters
+  (⏣ TOKENS · ⚡ LUCK · ⏻ CHARGE) + per-seat wound pips + a reserved curse-pip row + a one-shot
+  first-⏻ teach + a currency legend, kind legend de-GATE'd, ⏣ moved off the peripherals line ·
+  check/wager buttons print BOTH legs pre-commit ("on ✓ … · on ✗ nothing lost") via new
+  `win_fx`/`lose_fx` descriptor fields folded with the wager stake (offline + online) · display
+  renames (⚡"entropy"→"LUCK", "eligibility base"→"base odds", "feed ⚡ to bias"→"spend ⚡ LUCK…",
+  fx-hint "integrity"→"party HP", THE ENTROPY→THE LUCK DAEMON) · §9.8 "REROLL THE FLOOR"
+  flavor-lie reworded to what it does · orphan `luck_profile.gd.uid` deleted (§11 #14 tail).
+  **2b THE RAID INTEGRITY KILL (§11 #2):** `map_check` integrity/desperation check-row deleted ·
+  overtime "Bill it" wager stake integrity→tokens · rollback `catch` orphan `"integrity":"steady"`
+  removed · the 5 tickets + SPRINT RETRO + Ticket Stub re-priced (drop dead heal/patch, KEEP
+  repair/mana, pay ⏣) · `map_wager_probe` decoupled from content to a synthetic tokens wager.
+  **Recon verdict that shaped it:** three things share the word — (A) `RaidNet.integrity()` net
+  desync hash (frame "ih", untouched — `integrity_probe` stays green), (B) the campaign HP-frac
+  carry (already retired-for-combat, §12 KEEP), (C) the currency (the kill). **NO PROTOCOL BUMP.**
+  Tokens-primary re-price → raid_map_sim FIGHT checksums unchanged (repair/mana held; ⏣ is
+  sim-carry-invisible), only the retired-integrity/fracs REPORT column shifts. Names BACKUPS/
+  REGENERATE/DEPRECATE **reserved only** (mechanics = slices 3–5; the draft REROLL economy is
+  untouched — that cut would shift `draft_sim`). **Verify:** 2a byte-identical proven (ab-gate
+  `map_check_sim` + `map_check_online_probe`); light green (import · `map_wager_probe` ALL OK ·
+  `ui_smoke_map` ALL PASS · `map_check_sim` ALL PASS · merged-tree parse + smoke). ⏳ **Heavy
+  verify DEFERRED to a nightly run per Bill** (OOM-prone under concurrent box load): `raid_map_sim`
+  2b baseline re-record · full `verify-all` · `net_map_smoke`. **Next:** slice 3 (PROMPT MARKET +
+  per-seat wallets). *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **DESCENT SLICE 1 — THE
   MAP BANG: MERGED to main (`ee18e05`), verify-all 40/40 GREEN ×2 (branch + merged tree).** The
