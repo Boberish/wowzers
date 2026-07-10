@@ -288,30 +288,38 @@ below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
 | **The Deep Cash** (rig WHEN) | `deepcash` | — | — | 🟡 | WHEN I consume 4+ bleeds in one Evis (~×4.5). |
 | **THE SET PIECE** (signature CD) | `setPiece` | STRAT | baseline | 🟡 | ~1-min CD: marks a 4-beat PHRASE; all Perfect+ = a build-scaled flourish. The DECK-LAYOUT §5 slot's first shape. |
 
-**Ability-audit additions (`TEMPO-PLAN.md §17.10`, Bill's D0 pass 2026-07-10 — spells fill the
-ABILITY-LAW +2 slots; "door" boons only enter offers while their ability is held):**
+**Ability audit — PASS 2 (`TEMPO-PLAN.md §17.11`, Bill's steer 2026-07-10 — transforms, not
+buttons; the ABILITY-LAW allowance is now +1 and Tempo leaves its slot EMPTY).** Pass-1 spell
+flips: Sforzando 🟡→✂️ · The Pickup 🟡→✂️ (+ doors Fortissimo/Marcato ✂️ — all to TEMPO A5) ·
+The Count-In 🟡→🔮 (+ doors Section Leader/Tutti Chord 🔮 — the +1 slot's standing candidate) ·
+The Rondo (spell) → REBORN below as a Coup TRANSFORM (id kept, button deleted) · The Accent WHEN
+✂️ (died with Sforzando) · The Return WHEN survives under the transform.
 
 | Card | id | Type | Rarity | St | One line |
 |---|---|---|---|---|---|
-| **Sforzando** (spell) | `sforzando` | STRAT | H/S/O | 🟡 | Arm: your NEXT strike is the accent — Perfect+ = ×1.6/1.9/2.2 + the build's currency; slip = fizzle. ~12s cd. ⚠ rhyme-flag vs Set Piece. |
-| **The Rondo** (spell) | `rondo` | STRAT | H/S/O | 🟡 | Post-Coup valley only (~6s): replay the Coup at 40/55/70%, graded by the beat you land it on. |
-| **The Count-In** (spell) | `countIn` | TEAM | H/S/O | 🟡 | Call a beat during a boss wind-up: warband windows +~20%, ally hits on the call echo your Flow. Buff-channel debt. |
-| **The Pickup** (spell) | `pickup` | GREED | H/S/O | 🟡 | Pull your next window ~40% earlier & ~20% tighter — chosen per press, governor-clamped. SWIFT-gated. |
-| Fortissimo | `fortissimo` | GREED | H/S/O | 💡 | Sforzando door: accent window −20%, payoff +30%. |
-| Marcato | `marcato` | STRAT | H/S/O | 💡 | Sforzando door: a Bullseye accent stretches the Opening half a beat. |
-| Second Theme | `secondTheme` | POWER | H/S/O | 💡 | Rondo door: the echo % up a tier. |
-| Section Leader | `sectionLeader` | TEAM | H/S/O | 💡 | Count-In door: AI seats play tighter during your call. |
-| Tutti Chord | `tuttiChord` | GREED | H/S/O | 💡 | Count-In door: all four seats land the call → boss +8% one beat. |
-| **Resonance** (system) | — | RULE | — | 🟡 | 3 cards of one theme auto-light that theme's ONE authored perk — rotational, tiny, 1/theme, never stacks (stat set-bonuses rejected). |
-| Blood Coda (duo) | `bloodCoda` | RULE | H/S/O | 💡 | Wound+Finish duo: an Evis cashing 4+ bleeds at exactly max combo pays both ×1.25. |
-| **DOUBLE TIME v2** (keystone rework) | `doubleTime` | RULE | elite | 🟡 | v1 beat-doubling CUT at the speed governor's wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. |
-| The Accent (rig WHEN) | `accentWhen` | — | — | 💡 | WHEN I land Sforzando's accent (~×5.5) — Sforzando door. |
-| The Return (rig WHEN) | `returnWhen` | — | — | 💡 | WHEN my Rondo lands ≥ half the Coup (~×6.0) — Rondo door. |
+| **CADENZA** (Coup transform) | `cadenza` | RULE | 1-of-3 pick | 🟡 | Coup castable at Flow ≥2, damage scales with Flow consumed (full-Flow = today's ceiling) — the flexible cash. |
+| **THE RONDO** (Coup transform) | `rondo` | RULE | 1-of-3 pick | 🟡 | After a Coup, the next 4 beats RETURN: each Perfect+ re-strikes 15% of it (Bullseye 25%). The valley becomes act two. |
+| **TREMOLO** (Evis transform) | `tremolo` | RULE | 1-of-3 pick | 🟡 | Evis becomes a string: ≤3 presses, 2 combo each, graded per beat; all Perfect+ = final hit +40%. String = ONE finisher for boon math. |
+| Dal Segno | `dalSegno` | STRAT | H/S/O | 💡 | Cadenza door: a Cadenza spending 4+ Flow seeds +1 (absorbs Da Capo's job). |
+| Bravura | `bravura` | GREED | H/S/O | 💡 | Cadenza door: a full-Flow Cadenza inside an Opening +25%. |
+| Second Theme | `secondTheme` | POWER | H/S/O | 💡 | Rondo door: the return % up a tier. |
+| Da Capo (un-park) | `daCapo` | POWER | H/S/O | 🔮→💡 | Rondo door: +1 Flow seed, verbatim — parks from the open pool, returns behind this door. |
+| Triplet | `triplet` | GREED | H/S/O | 💡 | Tremolo door: an all-Bullseye string pays the final hit +40% more (capped). |
+| Rolled Chord | `rolledChord` | EASE | H/S/O | 💡 | Tremolo door: string windows pad ENTRY-side only (the widener law). |
+| The Return (rig WHEN) | `returnWhen` | — | — | 💡 | WHEN my Rondo phrase returns ≥ half the Coup (~×6.0) — Rondo door. |
+| **Whetstone** (creed) | `whetstone` | STRAT | curated | 🟡 | v4 EDGE entry: your Bullseyes can crit from run start (small %, ×2) — the creed IS the A7 opt-in. |
+| **The Strop** (module) | `strop` | STRAT | — | 🟡 | v4 EDGE module: Perfect+ strikes stack KEEN (gauge, cap 5); your next crit consumes all KEEN for +8%/stack. |
+| **Resonance** (system) | — | RULE | — | 🟡 | 3 cards of one theme auto-light that theme's ONE authored perk — rotational, tiny, 1/theme, never stacks (stat set-bonuses rejected). Still open (§17.10 ③). |
+| Blood Coda (duo) | `bloodCoda` | RULE | H/S/O | 💡 | Wound+Finish duo: an Evis cashing 4+ bleeds at exactly max combo pays both ×1.25. Still open. |
+| **DOUBLE TIME v2** (keystone) | `doubleTime` | RULE | elite | 🟡 | v1 beat-doubling CUT at the governor wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. **v4 re-slots it CLASS-generic** (Syncopation's shelf, not a branch capstone). |
 
-**Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮
-**(§17.10 amends: un-parks as a Rondo-door boon if the Rondo enters)** · Efficiency 🔨→🔮 (or keep,
-park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate. **Role flag (not a card,
-§17.10):** Evis = standard interrupt carrier + Coup = premium kick — pillar-#3 proposal 🟡.
+**v4 branch proposal (🟡, §17.11): WOUND · EDGE · FINISH; SWIFT demoted to generics** — Uptempo
+(creed) 🟡→✂️ absorbed by the EASE dial (beat-speed knob, BITE face) · Quickstep + Through-Line
+stay as generic STRIKE boons (governor-clamped) · the A7 three (Heartseeker/Serrated/Assassin's
+Note) become EDGE's ladder boons unchanged (already offer-gated on a crit source).
+**Standing proposals (unchanged):** Momentum 🔨→🔮 · Efficiency 🔨→🔮 (or keep, park Encore) ·
+Held Breath 🔨→🔮 · On the Beat stays 🟡. **Role flag (still open):** Evis = standard interrupt
+carrier + Coup = premium kick — pillar-#3 proposal 🟡.
 
 ## TWINFANG · FERMATA — 🔨 v5 BUILT (`f5d5397`) · **v6 KITS (D8) 🟡 2026-07-10**
 

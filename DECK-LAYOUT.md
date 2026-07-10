@@ -215,25 +215,35 @@ and every kit must fit a phone. Four rules:
    play-proven; it scales to 7: 2 left, 5 right.)
 2. **The chassis is free: core 2–3 + dodge + signature CD = 4–5 targets.** Every class gets this
    without justification (Tempo today: strike · evis · coup + dodge, + the CD owed).
-3. **The allowance: +2 above the chassis · HARD CEILING 7 — and extra buttons enter only through
-   doors that already exist:** drafted spells (`type:"spell"`, earned in-run — the fight-1 kit
-   stays lean and learnable; you *earn* buttons 6 and 7 mid-run) and **at most one module button**
-   (the Alchemist's catalyst is the precedent). **Boons, creeds, and the rig NEVER add buttons** —
-   they change what existing buttons do. Interrupts ride existing buttons (pillar #3 set the
-   pattern: a new *need* doesn't get a new *button*).
+3. **The allowance: +1 above the chassis · HARD CEILING 6 — and the extra button enters only
+   through doors that already exist** *(tightened from +2/7 — Bill, 2026-07-10, Tempo ability
+   audit: "i dont want button bloat"; the freshness budget moves to ABILITY TRANSFORMS, below)*:
+   a drafted spell (`type:"spell"`, earned in-run — the fight-1 kit stays lean and learnable) OR
+   **one module button** (the Alchemist's catalyst is the precedent) — one or the other, not both.
+   **Boons, creeds, and the rig NEVER add buttons** — they change what existing buttons do.
+   Interrupts ride existing buttons (pillar #3 set the pattern: a new *need* doesn't get a new
+   *button*). A class may leave the slot EMPTY (Tempo does).
    **The one exception — the broad-kit class: the Well, ceiling 8.** Breadth is its fantasy (Rule
    #2: budget where the fantasy is), and it's legal because its casts share ONE grammar (all pours
    on one timing system), so more buttons doesn't mean more things to track.
+   **ABILITY TRANSFORMS (Tempo-piloted, 2026-07-10 — Bill: "upgrade/replace/change ability instead
+   of new"):** the sanctioned way to keep abilities fresh without bloat — a drafted TRANSFORM card
+   REWRITES how one existing ability works (Coup castable at any Flow · Evis becomes a graded
+   string…). **≤1 transformed ability per run**, a ceremony pick, never a new touch target; each
+   transform is a DOOR that gates its sub-boons into later offers. Spec: `TEMPO-PLAN.md §17.11`
+   (generalize per class at reshape, like everything else in this doc).
 4. **Every button must carry a WHEN, not just a WHAT.** This is the rule that actually protects
    "optimize the rotation" — the ceilings are just the fence. If the optimal play is "press it on
    cooldown, every time," it is not a button: make it a passive, a rig THEN, or fold it into an
    existing press. The freed movement budget buys **deeper timing on few buttons**, not more
    buttons.
 
-**Compliance (current kits, counted honestly):** Twinfang 4 (+CD = 5, room to draft to 7) ·
-Alchemist fully drafted = 8 (+CD = 9 — **over**; at reshape the catalyst module button + the 3
-drafted spells compete for the 2 allowance slots) · the Well loaded = 10 (**over even its 8** —
-the book gets a trim/fold at its reshape). The per-class `SPELL_CAP` in code (5 on
+**Compliance (current kits, counted honestly — re-run at the +1 law):** Twinfang 4 (+CD = 5;
+**Tempo elects to leave its +1 slot EMPTY** — transforms carry the freshness, TEMPO §17.11; the
+Count-In parks as the slot's standing candidate) · Alchemist fully drafted = 8 (+CD = 9 —
+**over**; at reshape the catalyst module button + the 3 drafted spells now compete for **ONE**
+allowance slot — a deeper trim than before) · the Well loaded = 10 (**over even its 8** — the
+book gets a trim/fold at its reshape). The per-class `SPELL_CAP` in code (5 on
 Twinfang/Alchemist/Voidcaller, 8 on the Well) is just the draft-machinery knob — retune each
 class's knob to whatever its ceiling leaves free. The old "bar cap 5" note below was quoting that
 knob; this law supersedes it.
@@ -281,12 +291,14 @@ must be fun BARE; (7) comp-variant content is parked.
   checklist (spread + coverage, applied **per deck**) plus a best-fit reading tag; *"exactly one
   type per card"* is dropped and no design is ever contorted to fit a box. EASE (the dial
   archetype) and TEAM (the Support slot) keep their own laws independent of the tags. See §4.
-- **THE ABILITY LAW** (2026-07-09, Bill) — the button budget, counted in **touch targets** (mobile
-  is the binding wall): chassis free (core 2–3 + dodge + signature CD), **+2 allowance** entering
-  only via existing doors (drafted spells · ≤1 module button), **hard ceiling 7** (the Well, the
-  one sanctioned broad-kit, gets 8). Boons/creeds/rig never add buttons; interrupts ride existing
-  buttons. **Every button needs a WHEN, not just a WHAT** — press-on-cooldown is a passive in a
-  button costume. See §5.
+- **THE ABILITY LAW** (2026-07-09, Bill · tightened 2026-07-10) — the button budget, counted in
+  **touch targets** (mobile is the binding wall): chassis free (core 2–3 + dodge + signature CD),
+  **+1 allowance** entering only via existing doors (a drafted spell OR one module button — not
+  both), **hard ceiling 6** (the Well, the one sanctioned broad-kit, gets 8). Boons/creeds/rig
+  never add buttons; interrupts ride existing buttons. **Every button needs a WHEN, not just a
+  WHAT** — press-on-cooldown is a passive in a button costume. Freshness beyond the budget comes
+  from **ABILITY TRANSFORMS** (rewrite an existing button, ≤1/run, Tempo-piloted), never more
+  buttons. See §5.
 - **The Rig is REQUIRED** (2026-07-09, Bill) — every class deck ships the single-circuit WHEN→THEN
   rig (see §1's RIG LAW): class-authored earned WHENs, greed-dial payout (`base × mult`), wire after
   fight 1 + one free Floor-2 re-wire. **The stackable multi-proc model stays CUT** — no THEN-board,
