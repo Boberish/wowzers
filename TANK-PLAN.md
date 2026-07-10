@@ -830,3 +830,92 @@ commit pricing · Rampart = pool-floor management (the §6 note holds: all thres
 
 **Next:** your verdicts → CARD-CATALOG statuses flip → the Warden build claim (§5 top item)
 codes it guarded after the Duelist base proves the frame (Wave-1 order unchanged).
+
+## §9 · THE DUELIST DECK v2 — the reconcile + the swap kits 🟡 AT VERDICT (2026-07-10, Phase-2 D2)
+
+**What this is** (SLATE-PLAN row D2). Deck v1 (§3) is at your LIVE board with no verdicts in
+yet — so this pass does NOT re-author it. It ships the two things a v2 owes: **①** the **v1.1
+RECONCILE** — errata for everything that moved under v1 since it was written (flow=aggro went
+BASE · the EASE-dial law · the GUARD fallout · §1d ripples), and **②** three **SWAP KITS** —
+the §7 challengers pre-authored to card level, so WHATEVER 2–3 ladders you pick, the deck is
+ready without another design pass. Incumbents (Headsman · Ironside · Ghost) stay the default
+top-3. Design only; catalog rows land 🟡.
+
+### 9.1 THE v1.1 RECONCILE (errata to §3 — fold on verdict, none change a card you've rated)
+
+1. **FLOW=AGGRO is BASE now (§1c)** — v1 predates the lock. The repurposed **FLOW module**
+   ("your flow ALSO ramps DUMP damage") becomes the **4th Floor-1 candidate** next to
+   Crucible/Scales/Whetstone. Modules quota is 2–3 → **tension point: offer 3-of-4 rolled, or
+   cut one** (lean: 3-of-4 rolled — the Floor-1 pick gets pick-tension for free).
+2. **EASE-dial fold (standing law, DECK-LAYOUT §4):** **Quick Wrists** and **Roll With It**
+   leave the boon pool; the ONE EASE dial card replaces them (knobs rolled from: parry-window
+   width · dodge-grade grace · wind-regen · The Veteran creed stays curated). Pool 15 → 13 + dial.
+3. **✦ Hold the Line** re-keys its uptime read onto FLOW (aggro-visible — §1d; same errata as
+   the Warden's copy).
+4. **GUARD fallout cross-ref:** Return to Sender · Cheap Iron · The Wall now live in the
+   WARDEN deck (§8, 🟡) — the 🔮 park is resolved; v1's SPEND lane stays DUMP-only.
+5. **Crucible note (§1d):** fills slower while the boss is peeled away — a natural aggro-skill
+   coupling, stated on the card at build.
+6. **Interrupt flag (§4.6):** ⚡DUMP is the tank's pillar-#3 carrier — no card change, noted.
+
+### 9.2 THE SWAP KITS (each = a ladder-shaped drop-in: entry creed + boons + keystone)
+
+**Swap rule:** picking a challenger REPLACES one incumbent ladder's exclusive cards; generics
+(Deep Pockets · Powder Keg · breads) stay. Kits are sized to the ladder they'd replace.
+
+**KIT M — THE MATADOR** *(natural swap: the Ghost, or a 4th ladder if you expand)*
+- creed **Cold Blood** [STRAT] — reads build INSIGHT from run start; feint tells read louder.
+- boon **The Late Answer** [GREED] — a parry landed in the window's last slice counts double
+  insight; a whiff there costs 2 (H/S/O: ×2/×2+1 wind/×3).
+- boon **Toro** [STRAT] — a BAITED feint spends 1 insight to forgive the wind loss — the
+  cape-flick, a play not a pardon (≤1 forgiveness in the kit ✓).
+- absorbs **Read the Room** (from the Ghost lane — its natural home).
+- keystone **LA ESTOCADA** — at full insight your next perfect parry is THE KILL READ: the
+  stream holds its breath one beat, then the counter lands ×3. *(⚠ rhyme recorded: the Cold
+  Hand's Reckoning Stroke (TEMPO §17) also freeze-frames — two still-beat finishers in the
+  roster; tension point 3.)*
+
+**KIT S — THE SCARLET TRADE** *(natural pair/swap: the Ironside — both monetize the bleed)*
+- creed **Red Ledger** [STRAT] — unavoidables bank ◆ (small) from run start.
+- boon **Paid in Iron** [STRAT] — below 60% HP your counters +12/18/25%.
+- boon **The Deep Cut** [GREED] — once per bank-cycle, voluntarily eat a normal bar unanswered:
+  banks ◆◆ +3 wind; never below 25% HP (the self-cut, chosen per use).
+- absorbs **Blood Price** + **Overreach** (double-filed from v1 lanes).
+- keystone **CRIMSON DIVIDEND** — a full-bank dump under 40% HP pays ×2, the gate floods red,
+  and the healer's refill of that dip visibly pours into your next bank (the duet spectacular).
+  *(Healer-workload pricing flagged for the build, per §7.)*
+
+**KIT W — THE STORMWEAVE** *(natural swap: the Ghost — same dial, flagged in §7)*
+- creed **Storm Footing** [STRAT] — clean weaves refund +1 wind from run start.
+- boon **Eye of the Storm** [STRAT] — a clean weave's riposte also banks ◆.
+- boon **Thread the Needle** [GREED] — weave windows tighten 15%, clean-weave ripostes ×1.5.
+- boon **Rolling Thunder** [POWER · NEW] — riposte damage +20/30/40% (the kit's bread rung).
+- keystone **THE TEMPEST ANSWER** — a clean weave through a full flurry mirrors it back: your
+  riposte comes out as the SAME bar-string reflected across the gate, each press graded.
+
+### 9.3 GATES + SKEPTICS (delta-scope — v1's own audit stands untouched)
+
+**Trios:** each kit internally trio-clean (1 creed + 3–4 boons never share an offer with 3
+breads) ✓. **Overlap:** Kit W + Ghost = the flagged same-dial pile (the swap rule makes it
+moot — W REPLACES Ghost unless you deliberately run both) · Kit S + Crucible = the bleed-fuel
+supermerge (legal, rich, healer-priced — stated). **Anti-patterns:** all §7 fixes carried
+(floors, opt-ins, ≤1 forgiveness); Rolling Thunder is the only new card this pass and it's
+honest bread. **Distinctness:** Estocada/Reckoning-Stroke freeze-beat rhyme RECORDED (tension
+point); Tempest-Answer vs Avalanche/Siege — mirrored STRING vs ◆-string vs titan-bar: three
+returning shapes, all different reads, ledger row updated. **AI:** insight/HP-floor/weave-entry
+thresholds — all 3-tier expressible (per §7).
+
+### 9.4 TENSION POINTS (Bill's calls)
+
+1. **The module question:** 3-of-4 rolled Floor-1 offer (Crucible/Scales/Whetstone/FLOW), or
+   cut one? (Lean: 3-of-4.)
+2. **The EASE fold** (Quick Wrists + Roll With It → the dial) — accept? (Lean: yes, standing law.)
+3. **The freeze-beat rhyme** — LA ESTOCADA vs the Reckoning Stroke: keep both (different
+   classes, similar drama) or re-skin one? (Lean: keep both, different enough in play.)
+4. **Swap semantics** — challengers REPLACE a ladder vs EXPAND to 4 ladders? (Lean: replace;
+   ~13-card pool can't feed 4 deep ladders.)
+5. Your v1 board verdicts remain the gating event — this § folds into §3 the moment the export
+   blob lands.
+
+**Next:** your picks (2–3 ladders total across the six) → fold: winning kits' rows flip 🟡→✅,
+losing kits park 🔮 with their slate; the build claim proceeds per §4 order unchanged.
