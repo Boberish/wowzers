@@ -65,6 +65,10 @@ BOSS-PLAN 2026-07-10; Phase A absorbed) ·
 `DUELIST-BRIEF.md` (**the Wave-1 build brief** — the dodge tank: FLOW=AGGRO/taunt-funeral ·
 base kit+Bulwark deletion · policy/sims/HUD · deck · EN GARDE · transforms, slices S0–S8 +
 gates ①②, 2026-07-10) ·
+`BOSS-BRIEF.md` (**the Seal-rework build brief** — BOSS-PLAN made buildable: slices S0–S7
+(instrument · E1–E9 addenda · Vorathek/Mistral/Gemini/Mythos v2 · sweep · kick re-tune) +
+first-cut numbers + gates (① descent bang ✅ merged · ② tank-w1 in flight · ③ recs=defaults),
+2026-07-10) ·
 `WELL-DRAW-BRIEF.md` (**the Draw build brief** — the SPEED healer finish: SKIN · D6 deck
 data · ⭐Vigil module · Cupped-Hand/Deep-Draw/Braid transforms (after tempo-d0) · policy
 re-baseline, slices S0–S5, leans = defaults, 2026-07-10) ·

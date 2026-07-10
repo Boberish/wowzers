@@ -85,6 +85,21 @@ const CREEDS := {
 		"flow_value": 1.0,
 		"tutti": true,            # TwinfangKit._tutti / _dump_beat_bonus
 	},
+	# --- D0 S1 · v4 branch entry creeds (Tempo) — the WOUND + EDGE temperaments ---
+	"openVeins": {
+		"name": "Open Veins", "kicker": "Bleed",
+		"blurb": "Your Bullseyes inscribe a BLEED on the boss from run start (~2 beats, a modest tick). No counter at creed level - the pot just ticks; the Hemorrhage module adds the gauge and the cash. THE WOUND's entry.",
+		"slip": "flow_loss", "slip_amt": 2, "lock_sec": 0.0, "flow_value": 1.0,
+		"theme": "wound",
+		"open_veins": true,       # TwinfangKit: a Bullseye inscribes a wound
+	},
+	"whetstone": {
+		"name": "The Whetstone", "kicker": "Edge",
+		"blurb": "Your Bullseyes can CRIT (x2) from run start - a small chance, the opt-in base Tempo never has. THE EDGE's entry: the crit build exists from fight one.",
+		"slip": "flow_loss", "slip_amt": 2, "lock_sec": 0.0, "flow_value": 1.0,
+		"theme": "edge",
+		"whetstone": true,        # TwinfangKit._roll_crit: Bullseyes roll a small crit chance
+	},
 }
 
 const DEFAULT := "drumline"
@@ -95,9 +110,10 @@ static func get_creed(id: String) -> Dictionary:
 static func ids() -> Array:
 	return CREEDS.keys()
 
-## The v1 shipping set (Flourish + Drumline = the clean risk/safe pair; Held Breath later).
+## The Tempo creed offer pool (v4, GO §17.12): Drumline · Flourish · Largo [Finish] · Open Veins
+## [Wound] · Whetstone [Edge] — quota 5. Held Breath stays parked 🔮 (defined, not offered).
 static func v1_ids() -> Array:
-	return ["flourish", "drumline", "largo"]
+	return ["drumline", "flourish", "largo", "openVeins", "whetstone"]
 
 ## The FERMATA creed pool (§13.2) — the coil temperaments, offered on the fermata aspect.
 static func fermata_ids() -> Array:

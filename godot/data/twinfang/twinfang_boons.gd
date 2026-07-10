@@ -10,45 +10,52 @@ extends RefCounted
 
 ## SHARED — both aspects can draft these (spells + universal utility). Kept small so the
 ## Venomancer draft (frozen, being redone) isn't flooded with Tempo-only Flow cards.
-const SHARED := [
-	{"id": "strikeEnergy", "type": "upgrade", "rarity": "sonnet", "tags": ["perfect", "energy"], "title": "Efficiency", "desc": "Perfect Strikes refund 6 energy — sustain the rhythm longer."},
-]
+## D0 S1 TRIM (GO §17.12): Efficiency PARKED 🔮 (Encore kept — base refunds already self-fuel);
+## the `strikeEnergy` kit path stays dormant (no card offers it). Pool now empty.
+const SHARED := []
 
-## TEMPO — the reworked address-organized slate (STRIKE · WINDOW · FLOW · EVISCERATE · COUP).
-## Every card names the button or dial it touches (the legibility rule). Numbers = base;
+## TEMPO — the v4 deck (D0: WOUND · EDGE · FINISH branches + generics + keystones). `theme`
+## tags the branch a card serves (generics untagged) — Resonance (S2) counts them. Numbers = base;
 ## the tier ladder (Slice 2) scales them per instance. VENOM below is frozen (redone later).
 const TEMPO := [
-	# --- STRIKE — the crit + read package ---
-	{"id": "heartseeker", "type": "relic", "rarity": "sonnet", "tags": ["crit", "bullseye", "strike"], "title": "Heartseeker", "desc": "BULLSEYE Strikes (dead centre of the window) are guaranteed crits."},
-	{"id": "hone", "type": "relic", "rarity": "opus", "tags": ["crit", "strike", "keystone"], "title": "Hone", "desc": "KEYSTONE: unlocks the EDGE meter. A Perfect hones +1, a Bullseye +2, a slip dulls −3. While Edge is up, ALL your hits carry crit chance (~4.5% per point, x2 damage) — nothing is spent, so a whiffed dump wastes nothing. Hone the blade with clean rhythm."},
-	{"id": "assassinsNote", "type": "relic", "rarity": "sonnet", "tags": ["crit", "opening", "strike"], "title": "Assassin\u2019s Note", "desc": "Crits landed inside the Opening deal +50% more — time the dump into the window with a honed blade."},
+	# --- THE WOUND (v4 branch - bleed, then cash) ---
+	{"id": "lacerate", "type": "upgrade", "rarity": "haiku", "tags": ["wound", "perfect", "bleed"], "theme": "wound", "title": "Lacerate", "desc": "Perfect Strikes also inscribe a BLEED (half-value) - widen the pot's income past just Bullseyes."},
+	{"id": "slowBleed", "type": "upgrade", "rarity": "haiku", "tags": ["wound", "bleed"], "theme": "wound", "title": "Slow Bleed", "desc": "Your bleeds last longer and tick +10% (capped ~5 beats). A fatter, slower pot."},
+	{"id": "arterialNote", "type": "relic", "rarity": "sonnet", "tags": ["wound", "bleed", "greed"], "theme": "wound", "title": "Arterial Note", "desc": "Bleeds tick +30% harder but expire a beat sooner - a hotter, shorter pot you must cash in rhythm."},
+	# --- THE EDGE (v4 branch - cleanliness becomes crits; the A7 package, offer-gated on a crit source) ---
+	{"id": "heartseeker", "type": "relic", "rarity": "sonnet", "tags": ["crit", "bullseye", "strike"], "theme": "edge", "title": "Heartseeker", "desc": "BULLSEYE Strikes (dead centre of the window) are guaranteed crits."},
+	{"id": "assassinsNote", "type": "relic", "rarity": "sonnet", "tags": ["crit", "opening", "strike"], "theme": "edge", "title": "Assassin's Note", "desc": "Crits landed inside the Opening deal +50% more - time the dump into the window with a honed blade."},
+	{"id": "serrated", "type": "upgrade", "rarity": "haiku", "tags": ["crit", "strike"], "theme": "edge", "title": "Serrated Fate", "desc": "Your crits deal 40% more damage."},
+	# --- STRIKE - generics (governor-clamped; no theme, they season every build) ---
 	{"id": "throughline", "type": "upgrade", "rarity": "haiku", "tags": ["strike", "perfect"], "title": "Through-Line", "desc": "Consecutive Perfects escalate your Strike damage +2% per stack (cap 5); a Miss resets the line. Reward the unbroken run."},
-	{"id": "serrated", "type": "upgrade", "rarity": "haiku", "tags": ["crit", "strike"], "title": "Serrated Fate", "desc": "Your crits deal 40% more damage."},
-	{"id": "pressAdvantage", "type": "relic", "rarity": "sonnet", "tags": ["strike", "opening"], "title": "Press the Advantage", "desc": "Your basic Strikes landed inside the Opening — the boss’s vulnerability window — deal +30%. Keep drumming through the punish; don’t just wait for the dump."},
-	{"id": "coldOpen", "type": "upgrade", "rarity": "haiku", "tags": ["strike", "flow"], "title": "Cold Open", "desc": "While your Flow is 2 or less, your Strikes deal +25% — rebuild from a crash with teeth."},
-	{"id": "understudy", "type": "relic", "rarity": "sonnet", "tags": ["defense", "flow"], "title": "Understudy", "desc": "An understudy steps in: the next swing that would crash your Flow is shrugged off (Flow kept). Recharges ~25s. Defence only — it guards your groove, never feeds offence."},
-	# --- THE WINDOW — where the green sits ---
+	{"id": "quickstep", "type": "relic", "rarity": "sonnet", "tags": ["strike", "perfect", "speed", "greed"], "title": "Quickstep", "desc": "Each Perfect speeds AND tightens your next window ~8% - self-bite for pace. The governor keeps it readable; a slip resets the ride."},
+	{"id": "pressAdvantage", "type": "relic", "rarity": "sonnet", "tags": ["strike", "opening"], "title": "Press the Advantage", "desc": "Your basic Strikes landed inside the Opening deal +30%. Keep drumming through the punish; don't just wait for the dump."},
+	{"id": "coldOpen", "type": "upgrade", "rarity": "haiku", "tags": ["strike", "flow"], "title": "Cold Open", "desc": "While your Flow is 2 or less, your Strikes deal +25% - rebuild from a crash with teeth."},
+	{"id": "understudy", "type": "relic", "rarity": "sonnet", "tags": ["defense", "flow"], "title": "Understudy", "desc": "An understudy steps in: the next swing that would crash your Flow is shrugged off (Flow kept). Recharges ~25s. Defence only - it guards your groove, never feeds offence."},
+	# --- THE WINDOW - where the green sits ---
 	{"id": "wideTempo", "type": "upgrade", "rarity": "haiku", "tags": ["window"], "title": "Wide Tempo", "desc": "Your Perfect window is 15% wider on each side."},
-	{"id": "fencersLine", "type": "relic", "rarity": "sonnet", "tags": ["window", "bullseye"], "title": "Fencer's Line", "desc": "A Bullseye widens your NEXT window by 25% — nail one, the next comes easier."},
-	{"id": "rubato", "type": "relic", "rarity": "sonnet", "tags": ["window"], "title": "Rubato", "desc": "The Perfect window sits earlier — same skill, a faster song."},
-	# --- FLOW — the greed dial ---
-	{"id": "flowCap", "type": "upgrade", "rarity": "haiku", "tags": ["flow"], "title": "Momentum", "desc": "Flow cap +2 — a higher ceiling for every Flow bonus."},
-	{"id": "tightrope", "type": "relic", "rarity": "sonnet", "tags": ["flow"], "title": "Tightrope", "desc": "While at MAX Flow, your damage is +15% — living on the edge pays."},
-	{"id": "battleHymn", "type": "relic", "rarity": "opus", "tags": ["flow", "support"], "title": "Battle Hymn", "desc": "SUPPORT: while you hold high Flow, the whole warband rides your tempo — a haste aura that scales with your Flow tier and blinks off the instant you crash. Your uptime IS the raid buff."},
+	{"id": "fencersLine", "type": "relic", "rarity": "sonnet", "tags": ["window", "bullseye"], "title": "Fencer's Line", "desc": "A Bullseye widens your windows for the next 3 strikes (+25%) - nail one, the run comes easier."},
+	{"id": "rubato", "type": "relic", "rarity": "sonnet", "tags": ["window"], "title": "Rubato", "desc": "The Perfect window sits earlier - same skill, a faster song."},
+	# --- FLOW - the greed dial (Momentum/flowCap PARKED, GO trim) ---
+	{"id": "tightrope", "type": "relic", "rarity": "sonnet", "tags": ["flow"], "title": "Tightrope", "desc": "While at MAX Flow, your damage is +15% - living on the edge pays."},
+	{"id": "battleHymn", "type": "relic", "rarity": "opus", "tags": ["flow", "support"], "title": "Battle Hymn", "desc": "SUPPORT: while you hold high Flow, the whole warband rides your tempo - a haste aura that scales with your Flow tier and blinks off the instant you crash. Your uptime IS the raid buff."},
 	{"id": "encore", "type": "upgrade", "rarity": "sonnet", "tags": ["flow"], "title": "Encore", "desc": "The double-hit (Flow Tier 1) kicks in at Flow 2 instead of 3."},
 	{"id": "shatterfall", "type": "relic", "rarity": "sonnet", "tags": ["flow", "crash"], "title": "Shatterfall", "desc": "When a slip crashes your Flow from 4+, the shattered tempo detonates for 25 per point lost."},
-	{"id": "doubleTime", "type": "relic", "rarity": "opus", "tags": ["flow"], "title": "Double Time", "desc": "SIGNATURE: at max Flow the accelerando never stops — each further Perfect tightens the window AND adds +4% damage, stacking until you crash."},
-	# --- EVISCERATE — the dump ---
-	{"id": "eviPlus", "type": "upgrade", "rarity": "haiku", "tags": ["eviscerate", "combo"], "title": "Deep Cuts", "desc": "Eviscerate deals +8 damage per combo point.", "req": "eviscerate"},
-	{"id": "execute", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "execute"], "title": "Finish It", "desc": "Below 35% boss HP, your Eviscerate deals +35% — hold combo for the kill.", "req": "eviscerate"},
-	{"id": "overkill", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "combo"], "title": "Overkill", "desc": "Combo built past the cap banks (up to 3) into your next Eviscerate for +6 each.", "req": "eviscerate"},
-	{"id": "staccato", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "crash"], "title": "Staccato Fury", "desc": "After a Flow crash, your next Eviscerate is FREE and deals +50%.", "req": "eviscerate"},
-	# --- COUP DE GRÂCE ---
-	{"id": "crescendo", "type": "upgrade", "rarity": "haiku", "tags": ["flow", "coupdegrace"], "title": "Crescendo", "desc": "Coup de Grâce hits 40% harder."},
-	{"id": "syncopation", "type": "relic", "rarity": "opus", "tags": ["flow", "energy"], "title": "Syncopation", "desc": "SIGNATURE: at max Flow your Strikes cost no energy, and a GOOD grades up to Perfect — ride the solo forever."},
-	{"id": "daCapo", "type": "relic", "rarity": "sonnet", "tags": ["flow", "coupdegrace"], "title": "Da Capo", "desc": "Coup leaves you +1 Flow seed — come back from the top, not from walking pace."},
-	# On the Beat (§13 verdict pass, Bill's idea) — the Tempo mirror of Fermata's TUTTI creed.
-	{"id": "onTheBeat", "type": "relic", "rarity": "sonnet", "tags": ["opening", "eviscerate", "coupdegrace"], "title": "On the Beat", "desc": "Dumps fired INSIDE your Strike window take the window's grade multiplier — a Bullseye-timed Eviscerate hits far harder. Time your finishers to the beat, not just the Opening."},
+	# --- THE FINISH (v4 branch - fewer, bigger hits) ---
+	{"id": "eviPlus", "type": "upgrade", "rarity": "haiku", "tags": ["eviscerate", "combo"], "theme": "finish", "title": "Deep Cuts", "desc": "Eviscerate deals +8 damage per combo point.", "req": "eviscerate"},
+	{"id": "execute", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "execute"], "theme": "finish", "title": "Finish It", "desc": "Below 35% boss HP, your Eviscerate deals +35% - hold combo for the kill.", "req": "eviscerate"},
+	{"id": "overkill", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "combo"], "theme": "finish", "title": "Overkill", "desc": "Combo built past the cap banks (up to 3) into your next Eviscerate for +6 each.", "req": "eviscerate"},
+	{"id": "staccato", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "crash"], "theme": "finish", "title": "Staccato Fury", "desc": "After a Flow crash, your next Eviscerate is FREE and deals +50%.", "req": "eviscerate"},
+	{"id": "grandPause", "type": "upgrade", "rarity": "haiku", "tags": ["eviscerate", "combo"], "theme": "finish", "title": "Grand Pause", "desc": "A full-combo (5/5) Eviscerate hits +25% - cash the whole hand (you cannot hold more than max; Overkill's over-cap bank is a separate pot).", "req": "eviscerate"},
+	{"id": "heavyInk", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "combo", "greed"], "theme": "finish", "title": "Heavy Ink", "desc": "Combo points above 3 each add +10% to your next finisher; one drips off per missed beat. Hold the fat hand in rhythm.", "req": "eviscerate"},
+	# --- COUP DE GRACE (Da Capo parked from the open pool -> returns as the Rondo door, S4) ---
+	{"id": "crescendo", "type": "upgrade", "rarity": "haiku", "tags": ["flow", "coupdegrace"], "title": "Crescendo", "desc": "Coup de Grace hits 40% harder."},
+	# --- KEYSTONES (elite; theme-weighted 1-of-2 elite offers, the offer rule) ---
+	{"id": "hone", "type": "relic", "rarity": "opus", "tags": ["crit", "strike", "keystone"], "theme": "edge", "title": "Hone", "desc": "KEYSTONE: unlocks the EDGE meter. A Perfect hones +1, a Bullseye +2, a slip dulls -3. While Edge is up, ALL your hits carry crit chance (~4.5% per point, x2 damage) - nothing is spent, so a whiffed dump wastes nothing. Hone the blade with clean rhythm."},
+	{"id": "exsanguinate", "type": "relic", "rarity": "opus", "tags": ["wound", "eviscerate", "keystone"], "theme": "wound", "title": "Exsanguinate", "desc": "KEYSTONE: an Eviscerate consuming 5+ live bleeds ERUPTS - the pot detonates as a chained blood-burst across the next 3 beats."},
+	{"id": "theCoda", "type": "relic", "rarity": "opus", "tags": ["finish", "eviscerate", "opening", "keystone"], "theme": "finish", "title": "The Coda", "desc": "KEYSTONE: a max-combo Eviscerate inside an Opening ECHOES as a second, free finisher - the double-hit fills the screen."},
+	{"id": "doubleTime", "type": "relic", "rarity": "opus", "tags": ["flow", "speed", "keystone"], "title": "Double Time", "desc": "KEYSTONE (class-generic): sustained max-Flow clean play opens ~8s of GHOST half-beats - each Perfect+ also lands a free ghost strike (no Flow risk). Twice the notes, never a faster beat."},
+	{"id": "syncopation", "type": "relic", "rarity": "opus", "tags": ["flow", "energy", "keystone"], "title": "Syncopation", "desc": "KEYSTONE (class-generic): at max Flow your Strikes cost no energy - ride the solo forever."},
 ]
 
 ## FERMATA (§13) — the hold-release aspect's own slate, keyed off the coil STATE (COIL / VEIL /
@@ -92,6 +99,42 @@ const VENOM := [
 	{"id": "debilitate", "type": "relic", "rarity": "sonnet", "tags": ["poison"], "title": "Debilitate", "desc": "Crippling stacks reduce the boss's damage to you (up to 30%)."},
 	{"id": "lingerVenom", "type": "relic", "rarity": "sonnet", "tags": ["rupture", "poison"], "title": "Lingering Venom", "desc": "Rupture becomes a SIP: a smaller detonation that keeps HALF your cocktail + Synergy warm. Sustain the brew instead of cratering it."},
 ]
+
+## D0 S4 · TRANSFORMS — the Floor-2 1-of-3 pick (≤1 per run). Each REWRITES an existing ability
+## (the Hades Daedalus-hammer steal at ability scale) and is never a new touch target. Taking one
+## gates its 2 sub-boons (below) into later offers. Kit reads `transform`; "" = the vanilla path.
+const TRANSFORMS := [
+	{"id": "cadenza", "ability": "coup", "title": "Cadenza", "kicker": "Coup, unlocked",
+		"desc": "Coup casts from Flow >= 2, consuming whatever you have; damage scales steeply with Flow spent (full-Flow = today's Coup). Cash small before a phase you fear, or ride to max.",
+		"doors": ["dalSegno", "bravura"]},
+	{"id": "rondo", "ability": "coup", "title": "The Rondo", "kicker": "Coup's second act",
+		"desc": "After your Coup, the next 4 beats are THE RETURN: each Perfect+ re-strikes 15% of it (a Bullseye 25%). The crash valley becomes the payoff's second act.",
+		"doors": ["secondTheme", "daCapo"]},
+	{"id": "tremolo", "ability": "eviscerate", "title": "Tremolo", "kicker": "Eviscerate, a string",
+		"desc": "Eviscerate becomes a STRING: up to 3 presses, each spending 2 combo, each graded on its own beat; land all three Perfect+ and the final hit pays +40%.",
+		"doors": ["triplet", "rolledChord"]},
+]
+
+## The 6 transform DOOR boons — offered ONLY while their transform is held (door-gated by the
+## raid draft). Kit hooks live in TwinfangKit (dalSegno/bravura/secondTheme/daCapo/triplet/rolledChord).
+const TRANSFORM_DOORS := [
+	{"id": "dalSegno", "type": "upgrade", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "door": "cadenza", "title": "Dal Segno", "desc": "A Cadenza spending 4+ Flow seeds +1 (absorbs Da Capo's job)."},
+	{"id": "bravura", "type": "relic", "rarity": "sonnet", "tags": ["coupdegrace", "opening", "greed"], "door": "cadenza", "title": "Bravura", "desc": "A full-Flow Cadenza inside an Opening +25%."},
+	{"id": "secondTheme", "type": "upgrade", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "door": "rondo", "title": "Second Theme", "desc": "The Rondo return re-strikes a tier harder (+10%)."},
+	{"id": "daCapo", "type": "relic", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "door": "rondo", "title": "Da Capo", "desc": "Coup leaves you +1 Flow seed - come back from the top, not from walking pace."},
+	{"id": "triplet", "type": "upgrade", "rarity": "sonnet", "tags": ["eviscerate", "bullseye", "greed"], "door": "tremolo", "title": "Triplet", "desc": "An all-Bullseye Tremolo string pays the final hit +40% more."},
+	{"id": "rolledChord", "type": "upgrade", "rarity": "haiku", "tags": ["eviscerate", "window"], "door": "tremolo", "title": "Rolled Chord", "desc": "Tremolo string windows pad ENTRY-side (the widener law)."},
+]
+
+## The door boons unlocked by a held transform (for the draft to fold into later offers). "" = none.
+static func doors_for(transform_id: String) -> Array:
+	var out: Array = []
+	if transform_id == "":
+		return out
+	for d in TRANSFORM_DOORS:
+		if String(d.get("door", "")) == transform_id:
+			out.append(d)
+	return out
 
 const SPELL_CAP := 5
 

@@ -92,6 +92,14 @@ func _tempo(obs: Dictionary, energy: float) -> Dictionary:
 			return _ab("eviscerate")
 		return _tempo_strike(obs, energy)
 
+	# D0 S4 · TREMOLO transform: keep the Eviscerate string going — press on the beat while combo
+	# lasts (each press spends 2), hold off the beat, rebuild with strikes when the hand runs dry.
+	if String(obs.get("transform", "")) == "tremolo":
+		var tp := int(obs.get("trem_presses", 0))
+		if tp > 0 and tp < 3 and int(obs.get("cp", 0)) >= 2 and energy >= 15.0:
+			if int(obs.get("since_strike", 0)) >= int(float(obs.get("perfect_lo", 18)) * 0.9):
+				return _ab("eviscerate")   # press on the beat (graded)
+			return {}                      # combo's ready — hold this tick for the window
 	var ofire := _open_fire(obs)   # 1 = punish NOW · 0 = hold for the opening · -1 = no opening
 	# Coup: spend max Flow INTO the opening for the spike; else cash it in the execute window.
 	if bool(obs.get("coup_ready", false)) and energy >= 42.0:

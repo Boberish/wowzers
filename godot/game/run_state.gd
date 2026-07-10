@@ -14,6 +14,7 @@ var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
 var creed: String = ""            ## run-start risk temperament (TwinfangCreeds id); "" = default
 var modules: Dictionary = {}      ## equipped UI Modules id -> true (picked at Floor-1 elevation)
 var rig: Dictionary = {}          ## the ONE Combo rig (TEMPO §5): {"when": id, "then": id}; wired at draft 1
+var transform: String = ""        ## D0 S4: the ONE ability transform (cadenza/rondo/tremolo); picked at Floor 2; "" = none
 var enc_index: int = 0
 var encounters: Array = []        ## Array[EncounterRes]
 

@@ -14,6 +14,10 @@ extends RefCounted
 ## WHEN moments — the payout `mult` bakes in inverse-frequency + the rarity premium (Riff = 1.0
 ## anchor). Numbers are illustrative; sim/playtest tunes them so totals land ~480 (Riff) → ~690 (Coup).
 const WHENS := {
+	# D0 S1 · THE DEEP CASH (v4 WOUND WHEN) — the pot's earned moment; only fires with Hemorrhage built.
+	"deepcash": {"name": "The Deep Cash", "mult": 4.5, "tier": "rare",   "blurb": "consuming 4+ bleeds in one Eviscerate - the Wound's earned moment (only fires with the pot built)."},
+	# D0 S4 · THE RETURN (Rondo transform door) — fires when the Rondo phrase pays back >= half the Coup.
+	"returnWhen": {"name": "The Return", "mult": 6.0, "tier": "rare",   "blurb": "your Rondo phrase returns >= half the Coup - the transform's own rig moment."},
 	"riff":     {"name": "Riff",     "mult": 1.0, "tier": "frequent", "blurb": "every 3rd Perfect Strike — the steady drumbeat."},
 	"bullseye": {"name": "Bullseye", "mult": 1.9, "tier": "medium",   "blurb": "a dead-centre Strike — rewards precision."},
 	"finale":   {"name": "Finale",   "mult": 4.4, "tier": "medium",   "blurb": "a full 5-combo Eviscerate — rewards holding combo."},
@@ -31,7 +35,7 @@ const WHENS := {
 const THENS := {
 	"echo":        {"name": "Echo",         "base": 12.0, "kind": "damage",  "blurb": "a delayed phantom slash for bonus damage."},
 	"secondwind":  {"name": "Second Wind",  "base": 5.0,  "kind": "energy",  "blurb": "refund energy — keep the rhythm hot."},
-	"edge":        {"name": "Killing Edge", "base": 0.5,  "kind": "crit", "cap": 3, "blurb": "bank guaranteed-crit charges for your next Strikes."},
+	"edge":        {"name": "Killing Edge", "base": 0.5,  "kind": "crit", "cap": 3, "blurb": "with the Edge meter up, sharpen it; else your next 3 Strikes crit."},
 	"bloodletter": {"name": "Bloodletter",  "base": 8.0,  "kind": "bleed",   "blurb": "open a small bleed on the boss."},
 	"overcharge":  {"name": "Overcharge",   "base": 6.0,  "kind": "empower", "blurb": "your NEXT dump hits harder (Coup build-up bait)."},
 	"expose":      {"name": "Expose",       "base": 3.0,  "kind": "expose",  "blurb": "the boss takes +% damage for 2s."},
