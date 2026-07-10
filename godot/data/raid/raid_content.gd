@@ -366,42 +366,62 @@ static func make_skirmish(id: String) -> EncounterRes:
 				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 175.0)
 	return make_riftmaw()
 
-## Realm 1's RING descent (MAP-3c): the campaign is a stack of floors, each = one
-## RunMap. Clearing a floor's Seal ELEVATES you to the next ring, carrying wounds.
-## The Seal escalates per ring (MISTRAL easy → GEMINI mid → MYTHOS finale) — that IS
-## the difficulty curve. `shard_req` > 0 gates the Seal behind credential shards (ROOT).
-## `rows` sizes the floor's RunMap lattice (THE DESCENT REFIT: 8 = 20 nodes).
+## Realm 1's RING descent — THE DESCENT REBUILD (DESCENT-PLAN §2, all 12 verdicts in
+## 2026-07-10): a FOUR-floor stack, every floor ending in a Seal, the Rings counting
+## down 3-2-1-0 — VORATHEK (the promoted teaching Seal) → MISTRAL → GEMINI → MYTHOS.
+## Each floor = one RunMap; clearing its Seal ELEVATES you, carrying wounds.
+## Per-floor keys: `rows` sizes the lattice (6=14 nodes · 8=20 · 9=23) · `quota` is
+## the FULL non-combat mid bag (RunMap quota_override — DESCENT-PLAN §5; combat pads
+## the rest) · `minigame` names the floor's skill-game flavor ("" = seeded rotate) ·
+## `tier` drives the Forge pack fillers (F1 teaches on t1 → F4 holds root with t3) ·
+## `shard_req` > 0 gates the Seal behind credential shards (ROOT).
 ## Pure literal (no Palette statics) → const is safe.
 const FLOORS := [
-	{"ring": 3, "seal": "mistral", "title": "RING 3 · THE SHALLOW STACK", "shard_req": 0, "tickets": 1, "rows": 8,
-		"elev": "MISTRAL-7B optimizes its own shutdown. sudo granted — the perimeter is yours. Two rings to root."},
-	{"ring": 2, "seal": "gemini", "title": "RING 2 · THE MIDDLEWARE", "shard_req": 0, "tickets": 2, "rows": 8,
-		"elev": "The twins deprecate each other; either way the gateway falls. Privileges rising. One ring to root."},
-	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3, "tickets": 2, "rows": 8,
+	{"ring": 3, "seal": "riftmaw", "title": "RING 3 · THE PERIMETER", "shard_req": 0, "tickets": 1,
+		"rows": 6, "tier": 1, "minigame": "captcha",
+		"quota": {"event": 2, "cooling": 1, "market": 1, "minigame": 1},
+		"elev": "The Riftmaw falls — the perimeter login is yours. sudo granted. Three rings to root."},
+	{"ring": 2, "seal": "mistral", "title": "RING 2 · THE SHALLOW STACK", "shard_req": 0, "tickets": 2,
+		"rows": 8, "tier": 2, "minigame": "benchmark",
+		"quota": {"elite": 2, "event": 2, "cooling": 1, "cache": 1, "market": 1, "jailbreak": 1, "minigame": 1, "wild": 2},
+		"elev": "MISTRAL-7B optimizes its own shutdown. Privileges rising. Two rings to root."},
+	{"ring": 1, "seal": "gemini", "title": "RING 1 · THE MIDDLEWARE", "shard_req": 0, "tickets": 2,
+		"rows": 8, "tier": 2, "minigame": "benchmark",
+		"quota": {"elite": 2, "event": 2, "cooling": 1, "cache": 1, "market": 1, "jailbreak": 1, "minigame": 1, "wild": 2},
+		"elev": "The twins deprecate each other; either way the gateway falls. One ring to root."},
+	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3, "tickets": 3,
+		"rows": 9, "tier": 3, "minigame": "",
+		"quota": {"elite": 2, "event": 2, "cooling": 2, "cache": 1, "market": 1, "jailbreak": 1, "minigame": 1, "wild": 2},
 		"elev": ""},
 ]
 
-## Per-ring floor fight list (MAP-3c): RunMap fight indices — 0 = the entry gate,
-## last = the floor Seal, mids ramped by map depth. THE DESCENT REFIT: takeover-palette
-## Forge strays interleave BETWEEN the authored story subagents (the stories keep their
-## order and count — the Forge is the filler), tier ramping with the ring (t1→t3).
+## Per-ring floor fight list: RunMap fight indices — 0 = the entry fight, last = the
+## floor Seal, mids ramped by map depth. Takeover-palette Forge strays interleave
+## BETWEEN the authored story subagents, tier ramping with the floor (t1→t3).
+## THE DESCENT REBUILD: ring 1 is a REAL floor now (GEMINI moved home) — the old
+## `0, 1` ROOT alias is split.
 static func floor_fights(ring: int = 3) -> Array:
 	match ring:
-		2:  # THE MIDDLEWARE — GEMINI ULTRA behind the skirmish gauntlet (t2 strays)
+		2:  # THE SHALLOW STACK — MISTRAL-7B behind the t2 gauntlet
 			return [make_skirmish("sonnet"), encounter_by_id("forge:takeover:swarm:2:402"),
 				make_skirmish("bard"), encounter_by_id("forge:takeover:chanter:2:403"),
 				encounter_by_id("forge:takeover:stalker:2:404"),
+				make_skirmish("opus"), make_mistral()]
+		1:  # THE MIDDLEWARE — GEMINI ULTRA (t2 strays, the deeper cut)
+			return [make_skirmish("bard"), encounter_by_id("forge:takeover:stalker:2:407"),
+				make_skirmish("sonnet"), encounter_by_id("forge:takeover:chanter:2:408"),
+				encounter_by_id("forge:takeover:swarm:2:409"),
 				make_skirmish("opus"), make_gemini()]
-		0, 1:  # ROOT — CLAUDE MYTHOS (credential-shard gated; t3 strays hold the stack)
+		0:  # ROOT — CLAUDE MYTHOS (credential-shard gated; t3 strays hold the stack)
 			return [make_skirmish("opus"), encounter_by_id("forge:takeover:stalker:3:502"),
 				make_skirmish("sonnet"), encounter_by_id("forge:takeover:chanter:3:503"),
 				make_skirmish("bard"), encounter_by_id("forge:takeover:brute:3:504"),
 				make_mythos()]
-		_:  # RING 3 — THE SHALLOW STACK — MISTRAL-7B (Vorathek gate; t1 strays teach the bodies)
-			return [make_riftmaw(), encounter_by_id("forge:takeover:swarm:1:302"),
+		_:  # RING 3 — THE PERIMETER — VORATHEK the promoted teaching Seal (t1 strays)
+			return [encounter_by_id("forge:takeover:swarm:1:301"),
 				make_skirmish("bard"), encounter_by_id("forge:takeover:stalker:1:303"),
 				make_skirmish("sonnet"), encounter_by_id("forge:takeover:chanter:1:304"),
-				make_skirmish("opus"), make_mistral()]
+				make_riftmaw()]
 
 ## ESCORT / VOLATILE burden (WORLD-PLAN §MEWGENICS STEALS ①): append an enemy-side add to
 ## a FRESH per-fight encounter so the boss must WITHDRAW to face it — the carried payload

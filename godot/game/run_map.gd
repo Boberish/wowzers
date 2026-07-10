@@ -10,8 +10,12 @@
 ## Node = plain Dictionary (serializable for the net layer later):
 ##   {id, kind, row, lane, name, fight, event, key, next: [ids], locked_next: [ids]}
 ## kind: "combat" | "event" | "cache" | "cooling" | "seal"
-## (the old "gate" kind died in THE PURGE 2026-07-10 — raid floors
-## request it via `extra_quota`; the solo map never does, so its maps are untouched.)
+##   + THE DESCENT REBUILD kinds (DESCENT-PLAN §5, raid floors only — enter via
+##   `quota_override`, so the solo map never draws them): "elite" | "market" |
+##   "jailbreak" | "minigame" | "wild". A WILD node's real payload is rolled at
+##   generation (`wild_kind` + fight/event fields) and revealed on entry; its
+##   fight tier still prints (the one rationed mystery, V#9).
+## (the old "gate" kind died in THE PURGE 2026-07-10.)
 class_name RunMap
 extends RefCounted
 
@@ -22,6 +26,14 @@ const KIND_EVENT := "event"
 const KIND_CACHE := "cache"
 const KIND_COOLING := "cooling"
 const KIND_SEAL := "seal"
+const KIND_ELITE := "elite"          ## DESCENT: mutator fight — keystone 1-of-2 + curio roll
+const KIND_MARKET := "market"        ## DESCENT: THE PROMPT MARKET (stubbed → cache until live)
+const KIND_JAILBREAK := "jailbreak"  ## DESCENT: printed curse deals (stubbed → event until live)
+const KIND_MINIGAME := "minigame"    ## DESCENT: CAPTCHA / BENCHMARK (stubbed → event until live)
+const KIND_WILD := "wild"            ## DESCENT: the sealed envelope — payload rolled at gen
+
+## kinds that resolve as a FIGHT (tier pips print; the deck-cycle ladder applies)
+const FIGHT_KINDS := [KIND_COMBAT, KIND_ELITE]
 
 ## mid-grid kind quota (LANES * 4 mid slots = 12): the rest fill with combat
 const QUOTA := {KIND_COOLING: 2, KIND_CACHE: 1, KIND_EVENT: 4}
@@ -43,13 +55,21 @@ var tickets: Array = []        ## MAP-2: ticket ids placed on this map (pickup�
 ## `rows` sizes the lattice (THE DESCENT REFIT): raid floors pass 8 (= 6 mid rows,
 ## 20 nodes); the default keeps every classic 6-row call byte-identical. Min 6 —
 ## the backdoor's fixed grid rows (1→3) need at least 4 mid rows to exist.
+## `quota_override` (THE DESCENT REBUILD): a non-empty dict REPLACES the base QUOTA
+## as the whole non-combat bag (raid floors pass their FLOORS "quota" verbatim —
+## DESCENT-PLAN §5); combat still pads to fill. {} = classic behavior, byte-identical.
+## Passing it also arms the descent constraint passes (pre-Seal valley band ·
+## elite placement rules · market/elite mid-lane reachability).
+## `minigame` names the floor's MINIGAME flavor ("captcha"/"benchmark"); "" with a
+## minigame in the bag = a seeded coin flip (the F4 "rotate").
 static func generate(map_seed: int, n_fights: int, event_ids: Array,
 		extra_quota: Dictionary = {}, shard_req: int = 0, n_tickets: int = 0,
-		rows: int = ROWS) -> RunMap:
+		rows: int = ROWS, quota_override: Dictionary = {}, minigame: String = "") -> RunMap:
 	var m := RunMap.new()
 	m.seed = map_seed
 	var rng := DetRng.new(map_seed)
-	m._build(rng, n_fights, event_ids, extra_quota, shard_req, n_tickets, maxi(rows, ROWS))
+	m._build(rng, n_fights, event_ids, extra_quota, shard_req, n_tickets, maxi(rows, ROWS),
+		quota_override, minigame)
 	return m
 
 func node(id: int) -> Dictionary:
@@ -70,14 +90,44 @@ func reachable(from_id: int, inventory: Dictionary) -> Array:
 		out = out.filter(func(x): return x != seal_id)
 	return out
 
+## THE DESCENT stub layer (DESCENT-PLAN §5): unbuilt interiors resolve as an HONEST
+## existing kind until their slice lands, WITHOUT touching generation — flipping a
+## flag never re-rolls a map. market → cache (free loot, no lying storefront);
+## jailbreak/minigame → their stub event (a real authored event rides every such
+## node); wild → its rolled payload on reveal. HUD, server, and sims all resolve
+## through this ONE mapping.
+const MARKET_LIVE := false      ## slice 3 (PROMPT MARKET + per-seat wallets)
+const JAILBREAK_LIVE := false   ## slice 4 (THE JAILBREAK printed deals)
+const MINIGAME_LIVE := false    ## slice 5 (CAPTCHA / BENCHMARK)
+
+static func effective_kind(n: Dictionary) -> String:
+	match String(n.get("kind", "")):
+		KIND_MARKET:
+			return KIND_MARKET if MARKET_LIVE else KIND_CACHE
+		KIND_JAILBREAK:
+			return KIND_JAILBREAK if JAILBREAK_LIVE else KIND_EVENT
+		KIND_MINIGAME:
+			return KIND_MINIGAME if MINIGAME_LIVE else KIND_EVENT
+		KIND_WILD:
+			# the reveal: a wild IS its rolled payload once entered
+			return String(n.get("wild_kind", KIND_CACHE))
+	return String(n.get("kind", ""))
+
 ## Stable serialization — the determinism check hashes this.
+## New-kind fields print only when set, so classic (solo) maps hash to the exact
+## pre-descent string — their byte-identity gate holds.
 func fingerprint() -> String:
 	var parts: Array = ["seed=%d;sreq=%d" % [seed, seal_shard_req]]
 	for n in nodes:
-		parts.append("%d:%s:r%d:l%d:f%d:e%s:k%s:s%s:to%s:tc%s:n%s:x%s" % [n["id"], n["kind"], n["row"],
+		var extra := ""
+		if String(n.get("wild_kind", "")) != "":
+			extra += ":w%s" % String(n["wild_kind"])
+		if String(n.get("minigame", "")) != "":
+			extra += ":m%s" % String(n["minigame"])
+		parts.append("%d:%s:r%d:l%d:f%d:e%s:k%s:s%s:to%s:tc%s:n%s:x%s%s" % [n["id"], n["kind"], n["row"],
 			n["lane"], n["fight"], n["event"], str(n["key"]), str(n.get("shard", false)),
 			String(n.get("ticket_open", "")), String(n.get("ticket_close", "")),
-			str(n["next"]), str(n["locked_next"])])
+			str(n["next"]), str(n["locked_next"]), extra])
 	return "|".join(parts)
 
 # ============================================================ serialization (MAP-3b)
@@ -110,6 +160,8 @@ static func from_dict(d: Dictionary) -> RunMap:
 			"name": String(n.get("name", "")), "fight": int(n.get("fight", -1)),
 			"event": String(n.get("event", "")), "key": bool(n.get("key", false)),
 			"shard": bool(n.get("shard", false)),
+			"wild_kind": String(n.get("wild_kind", "")),
+			"minigame": String(n.get("minigame", "")),
 			"ticket_open": String(n.get("ticket_open", "")),
 			"ticket_close": String(n.get("ticket_close", "")),
 			"next": [], "locked_next": [], "visited": bool(n.get("visited", false)),
@@ -124,7 +176,8 @@ static func from_dict(d: Dictionary) -> RunMap:
 # ============================================================ generation
 
 func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionary = {},
-		shard_req: int = 0, n_tickets: int = 0, rows: int = ROWS) -> void:
+		shard_req: int = 0, n_tickets: int = 0, rows: int = ROWS,
+		quota_override: Dictionary = {}, minigame: String = "") -> void:
 	nodes.clear()
 	# entry (row 0) and the mid grid (rows 1..rows-2), then the Seal (row rows-1)
 	entry_id = _add(KIND_COMBAT, 0, 1)
@@ -155,13 +208,18 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 		_link(grid[grid.size() - 1][l], seal_id)
 
 	# ---- kinds: shuffle the quota bag over the mid slots (Fisher-Yates, seeded)
+	# THE DESCENT REBUILD: a non-empty quota_override IS the whole non-combat bag
+	# (FLOORS "quota" verbatim); classic callers keep base QUOTA + extra_quota.
+	var descent := not quota_override.is_empty()
 	var bag: Array = []
-	for kind in QUOTA:
-		for i in QUOTA[kind]:
+	var src: Dictionary = quota_override if descent else QUOTA
+	for kind in src:
+		for i in src[kind]:
 			bag.append(kind)
-	for kind in extra_quota:           # raid-floor extras; {} = identical bag
-		for i in extra_quota[kind]:
-			bag.append(kind)
+	if not descent:
+		for kind in extra_quota:       # raid-floor extras; {} = identical bag
+			for i in extra_quota[kind]:
+				bag.append(kind)
 	while bag.size() < grid.size() * LANES:
 		bag.append(KIND_COMBAT)
 	_shuffle(bag, rng)
@@ -173,9 +231,42 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 			n["kind"] = bag.pop_front()
 			if n["kind"] == KIND_COMBAT:
 				# difficulty ramps with depth: mid rows map onto fights 1..n-2
-				n["fight"] = 1 + mini(n_fights - 3, int(float(gi) / float(grid.size() - 1) * float(n_fights - 3) + 0.5))
+				n["fight"] = _ramp_fight(gi, grid.size(), n_fights)
 			elif n["kind"] == KIND_EVENT and not ev_pool.is_empty():
 				n["event"] = ev_pool.pop_front()
+			elif n["kind"] == KIND_JAILBREAK or n["kind"] == KIND_MINIGAME:
+				# a STUB event id rides along so the flag-off fallback (→ event) is a
+				# fully real node today; the live interiors (slices 4–5) ignore it
+				if not ev_pool.is_empty():
+					n["event"] = ev_pool.pop_front()
+				if n["kind"] == KIND_MINIGAME:
+					n["minigame"] = minigame if minigame != "" \
+						else ("captcha" if rng.next_u32() % 2 == 0 else "benchmark")
+			elif n["kind"] == KIND_WILD:
+				# the sealed envelope: payload rolled NOW (deterministic, serialized,
+				# server-agreeable), revealed on entry. Fight tier still prints (V#9).
+				var r := rng.next_float()
+				if r < 0.40:
+					n["wild_kind"] = KIND_COMBAT   # fight index set in the ramp pass below
+				elif r < 0.75 and not ev_pool.is_empty():
+					n["wild_kind"] = KIND_EVENT
+					n["event"] = ev_pool.pop_front()
+				else:
+					n["wild_kind"] = KIND_CACHE
+
+	# ---- THE DESCENT constraint passes (DESCENT-PLAN §2/§3 — deterministic, rng-free):
+	# pre-Seal valley band · elite placement laws · market/elite mid-lane reachability;
+	# then the fight ramp recomputed post-swap (elites + wild-combats included).
+	if descent:
+		_descent_pass(grid)
+		for gi in grid.size():
+			for l in LANES:
+				var n: Dictionary = nodes[grid[gi][l]]
+				if n["kind"] == KIND_COMBAT or n["kind"] == KIND_ELITE \
+						or (n["kind"] == KIND_WILD and String(n.get("wild_kind", "")) == KIND_COMBAT):
+					n["fight"] = _ramp_fight(gi, grid.size(), n_fights)
+				else:
+					n["fight"] = -1
 
 	# ---- the backdoor: one locked edge row2 → row4 (skips row 3), key placed on a
 	# row-1 node that actually leads to the backdoor's mouth.
@@ -240,10 +331,125 @@ func _build(rng: DetRng, n_fights: int, event_ids: Array, extra_quota: Dictionar
 	for n in nodes:
 		n["name"] = MapContent.name_for(n, rng)
 
+## difficulty ramps with depth: mid rows map onto fights 1..n-2
+static func _ramp_fight(gi: int, grid_rows: int, n_fights: int) -> int:
+	return 1 + mini(n_fights - 3, int(float(gi) / float(grid_rows - 1) * float(n_fights - 3) + 0.5))
+
+# ------------------------------------------------ THE DESCENT constraint passes
+## All rng-free (pure swaps + forced edges), so they run AFTER the seeded draws and
+## never disturb the stream. Invariants delivered (DESCENT-PLAN §2/§3, proven in
+## raid_map_sim): (a) the last mid row always offers a non-fight option (the pre-Seal
+## valley band); (b) no ELITE in the last mid row (never adjacent to the Seal);
+## (c) no two ELITEs on one edge (no stacked spikes); (d) the MARKET and the first
+## ELITE sit in the MIDDLE lane with both adjacent crossings forced in, so every
+## route can reach them (the same-lane spine + an adjacent crossing covers all lanes).
+func _descent_pass(grid: Array) -> void:
+	var last: int = grid.size() - 1
+	# (a) pre-Seal valley band: ≥1 non-fight kind in the last mid row
+	var has_valley := false
+	for l in LANES:
+		if not _fighty(nodes[grid[last][l]]):
+			has_valley = true
+	if not has_valley:
+		for gi in range(last - 1, -1, -1):
+			var done := false
+			for l in LANES:
+				if not _fighty(nodes[grid[gi][l]]) and String(nodes[grid[gi][l]]["kind"]) != KIND_MARKET:
+					_swap_payload(nodes[grid[gi][l]], nodes[grid[last][1]])
+					done = true
+					break
+			if done:
+				break
+	# (b) no ELITE in the last mid row — swap each out with an earlier combat
+	for l in LANES:
+		if String(nodes[grid[last][l]]["kind"]) == KIND_ELITE:
+			for gi in range(last - 1, -1, -1):
+				var moved := false
+				for l2 in LANES:
+					if String(nodes[grid[gi][l2]]["kind"]) == KIND_COMBAT:
+						_swap_payload(nodes[grid[last][l]], nodes[grid[gi][l2]])
+						moved = true
+						break
+				if moved:
+					break
+	# (c) no two ELITEs sharing an edge — move the deeper one onto a combat slot
+	for pass_i in 3:
+		var moved_any := false
+		for gi in grid.size():
+			for l in LANES:
+				var a: Dictionary = nodes[grid[gi][l]]
+				if String(a["kind"]) != KIND_ELITE:
+					continue
+				for nid in a["next"]:
+					var b: Dictionary = nodes[nid]
+					if String(b["kind"]) != KIND_ELITE:
+						continue
+					# relocate b to the first combat node not touching an elite
+					for gj in grid.size():
+						var placed := false
+						for l3 in LANES:
+							var c: Dictionary = nodes[grid[gj][l3]]
+							if String(c["kind"]) == KIND_COMBAT and gj != last \
+									and not _touches_elite(c):
+								_swap_payload(b, c)
+								placed = true
+								moved_any = true
+								break
+						if placed:
+							break
+		if not moved_any:
+			break
+	# (d) MARKET + first ELITE: centre to the middle lane, force both crossings in
+	_centre_and_join(grid, KIND_MARKET)
+	_centre_and_join(grid, KIND_ELITE)
+
+func _fighty(n: Dictionary) -> bool:
+	var k := String(n["kind"])
+	return k == KIND_COMBAT or k == KIND_ELITE \
+		or (k == KIND_WILD and String(n.get("wild_kind", "")) == KIND_COMBAT)
+
+func _touches_elite(n: Dictionary) -> bool:
+	for nid in n["next"]:
+		if String(nodes[nid]["kind"]) == KIND_ELITE:
+			return true
+	for other in nodes:
+		if (other["next"] as Array).has(n["id"]) and String(other["kind"]) == KIND_ELITE:
+			return true
+	return false
+
+## Move the first node of `kind` into lane 1 of its row (payload swap), then force
+## the two adjacent-lane crossings into it, so the same-lane spine reaches it from
+## every lane. Rows are node-rows here; grid[gi] sits at node-row gi+1.
+func _centre_and_join(grid: Array, kind: String) -> void:
+	for gi in grid.size():
+		for l in LANES:
+			var n: Dictionary = nodes[grid[gi][l]]
+			if String(n["kind"]) != kind:
+				continue
+			var target: Dictionary = nodes[grid[gi][1]]
+			if l != 1:
+				_swap_payload(n, target)
+			# force crossings from the previous row's side lanes (entry already fans
+			# to every lane of grid row 0, so gi == 0 needs nothing)
+			if gi > 0:
+				_link(grid[gi - 1][0], grid[gi][1])
+				_link(grid[gi - 1][2], grid[gi][1])
+			return
+	# kind absent on this floor (e.g. F1 has no elite) — nothing to do
+
+## Exchange everything that makes a node "what it is" — position-bound payloads
+## (key/shard/tickets) are placed AFTER this pass, and fight indices are recomputed
+## after it, so only the kind-identity fields travel.
+func _swap_payload(a: Dictionary, b: Dictionary) -> void:
+	for f in ["kind", "event", "wild_kind", "minigame"]:
+		var t = a.get(f, "")
+		a[f] = b.get(f, "")
+		b[f] = t
+
 func _add(kind: String, row: int, lane: int) -> int:
 	var id := nodes.size()
 	nodes.append({"id": id, "kind": kind, "row": row, "lane": lane, "name": "",
-		"fight": -1, "event": "", "key": false, "shard": false,
+		"fight": -1, "event": "", "key": false, "shard": false, "wild_kind": "", "minigame": "",
 		"ticket_open": "", "ticket_close": "", "next": [], "locked_next": []})
 	return id
 
