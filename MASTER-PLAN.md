@@ -829,6 +829,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **building
+  `DUELIST-BRIEF.md` — S0 FLOW=AGGRO + taunt funeral → S1 Duelist base kit (→ S2 policy → S3
+  sim → S4 HUD).** ⚠ **SCOPE STAGED (Bill, 2026-07-10):** the §A½ "Bulwark dies in the same
+  merge" HARD RULE is DEFERRED — discovery: Bulwark is the host fixture for `gear_probe`
+  (the whole GEAR/GearFx deed test), `meter_probe`, and `draft_sim`, all gated by
+  `verify-all.sh`, and `bulwark_kit._challenge()` calls the `taunt()` being deleted. So
+  Merge 1 = FLOW=AGGRO + **Duelist as the new playable tank DEFAULT**, with Bulwark kept
+  ALIVE as a guarded sim-only fixture (only its dead `_challenge`/taunt path removed);
+  the full Bulwark deletion + gear/meter/draft re-host is the immediate follow-up slice
+  (ledger §A½ Bulwark row stays 🔒). ⚙ **IMPLEMENTATION NOTE:** `threat_enabled` is KEPT and
+  repurposed as the aggro-subsystem enable (all game CONTENT sets it; raid today) rather than
+  ripped to always-on — the solo class-training sims (well/twinfang/alchemist) are multi-seat
+  threat-accumulating fights that would otherwise re-baseline + consume peel-rng, violating the
+  S1 "non-raid byte-identical" gate. Aggro stays universal in the game sense the brief intends.
+  Expect the documented raid re-baseline bang; non-raid + gear/meter/draft byte-identical.
+  *(tank-w1 build session)*
+
 - ☑ 2026-07-10 · main (docs only) · **`WELL-DRAW-BRIEF.md` (NEW, root) — THE DRAW HEALER BUILD
   BRIEF** (Bill: *"make a plan to implement the draw healer, then ill hand it off to opus"*) +
   ledger §C pointers + MENDER banner + CLAUDE.md index. The two 🟡 Draw passes sliced: **S0
