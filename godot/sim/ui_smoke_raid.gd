@@ -171,11 +171,16 @@ func _process(_delta: float) -> bool:
 	hud._d.party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
 	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._d.party)])
 	var cpd := _press(hud, "⚔")               # DESCEND
-	assert(cpd and String(hud._screen) == "map" and hud._d.ai_runs.size() == 3,
+	if hud._d.map == null:   # reworked player: descent opens on the creed ceremony — complete it
+		hud._d.run.creed = hud._fw_creed_ids(hud._fw())[0]
+		hud._build_floor()
+	assert(cpd and hud._d.map != null and hud._d.ai_runs.size() == 3,
 		"DESCEND didn't start the commanded descent")
 	print("commander descent: ok blade=%s healer=%s" % [
 		String((hud._d.ai_runs["blade"] as RunState).aspect),
 		String((hud._d.ai_runs["healer"] as RunState).char_class)])
+	if hud._d.run.rig.is_empty():   # reworked player: pre-wire the rig so the chain skips the rig-wire
+		hud._d.run.rig = {"when": hud._fw_rig_when_table(hud._fw()).keys()[0], "then": hud._fw_rig_then_table(hud._fw()).keys()[0]}
 	hud._show_boon_draft(hud._show_map)       # the chain: you, then each AI raider
 	var ctakes := 0
 	while String(hud._screen) == "draft" and ctakes < 8:
@@ -194,8 +199,11 @@ func _process(_delta: float) -> bool:
 	# Topology raid floor (MAP-3a): map screen -> entry fight -> back on the map,
 	# node fx (raid patch, refuel, wound repair), the privilege-elevated screen
 	hud._seat_key = "tank"
-	hud._aspect = "warden"
+	hud._aspect = "duelist"
 	hud._start_map_run()
+	if hud._d.map == null:   # the reworked Duelist tank opens on the creed ceremony — complete it
+		hud._d.run.creed = hud._fw_creed_ids(hud._fw())[0]
+		hud._build_floor()
 	print("raid map screen: ok (nodes=%d screen=%s)" % [hud._d.map.nodes.size(), hud._screen])
 	hud._enter_node(hud._d.map.entry_id)
 	# GEAR-2: the boss's Ledger page interposes — swear the first oath, then pull
