@@ -814,14 +814,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `kit-hoists`) — **CLAIM: CLASSKIT HOISTS (REFIT
-  P4, byte-identical DRY).** `var boons`/`var modules` + `_b()`/`_m()`/`_tt()` are byte-identical
-  copies across all 5 kits → hoist to the `ClassKit` base, delete the 10+ duplicates (subclass
-  redeclaration is a parse error, so the deletes are mandatory with the hoist). NOT hoisted:
-  `_has_payloads()` — bodies differ per class (it's content, not plumbing); the TuningConfig
-  literals sweep SPLITS OUT to its own later claim (judgment-heavy, not mechanical). Gates:
-  ab-gate twinfang_sim byte-identical · full verify-all. *(rails session — ClassBand+Gauge base
-  remains the last big P4 item, needs a WSLg visual pass)*
+- ☑ 2026-07-10 · `kit-hoists` → main (`94b1147`) — **CLASSKIT HOISTS: BUILT & MERGED (REFIT P4,
+  byte-identical DRY; the rails session's FINAL item — Bill's stop order).** `var boons`/`var
+  modules` + `_b()`/`_m()`/`_tt()` hoisted to the `ClassKit` base; 21 duplicated blocks deleted
+  across all 5 kits (−47 lines). NOT hoisted: `_has_payloads()` — bodies differ per class (it's
+  content, not plumbing). GATES: **ab-gate twinfang_sim + well_sim BYTE-IDENTICAL PASS** ·
+  **verify-all ALL GREEN (40 scripts)**. **RAILS SESSION CLOSED (Bill: "finish current task then
+  stop") — P4 remainder for a future claim: ClassBand registry + shared Gauge base (the raid_hud
+  refactor; needs a WSLg visual pass) · TuningConfig literals sweep (split out — judgment-heavy)
+  · twinfang per-spec kit split. The night's rails: `b17ff52` (Profile/roster/run_seed/split-law)
+  · `4779f59` (net integrity hash, protocol v14) · `855ac2f` (vulnerability stack, rebaseline) ·
+  `fcee675` (class registry) · `94b1147` (kit hoists).** *(rails session — ENDED)*
 
 - ☑ 2026-07-10 · `class-registry` → main (`fcee675`) — **CLASS REGISTRY: BUILT & MERGED (REFIT
   P4 — `class_id → factory`; the seam that gates net spec-carry of arbitrary builds).** NEW

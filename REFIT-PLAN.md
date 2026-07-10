@@ -286,6 +286,10 @@ Each its own worktree/claim, in this order:
 - **ClassBand registry** in the HUD (build/render/key strategy per class) — deletes the
   if/elif ladders + ~30 nullable members; add a shared Gauge base for the common shell.
 - **ClassKit hoists** (`_b`/`_tt`/`_has_payloads`) + TuningConfig literals sweep.
+  **✅ HOISTS BUILT 2026-07-10 (`94b1147`):** `boons`/`modules`/`_b`/`_m`/`_tt` up to the
+  ClassKit base (−47 duplicated lines, 5 kits); `_has_payloads` stays per-kit (bodies are
+  class content). twinfang+well ab-gates BYTE-IDENTICAL. **TuningConfig sweep still open**
+  (split to its own claim — judgment-heavy).
 - **Generic boss-vulnerability stack** (sunder/debilitate/expose → one funnel) + route
   Well's glint through a proper hook (deliberate rebaseline — checksums shift).
   **✅ BUILT 2026-07-10 (`855ac2f`):** `boss_state.vulns` windows + `CombatCore.add_vuln/
