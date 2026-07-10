@@ -816,6 +816,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLAIM: CLASSBAND REGISTRY +
+  SHARED GAUGE BASE (REFIT P4 — the LAST big rail; collision-map rule: land this BEFORE any
+  per-class meter wave).** Bill resumed the build (morning). Plan: per-class BAND objects
+  (`game/ui/bands/*.gd`, the gauge-script pattern) owning build/render/input for their seat —
+  the HUD's seat-matches route to a band instance from a registry keyed off `ClassRegistry`;
+  the ~25 per-class nullable members migrate onto their bands (raid_hud shrinks). Then a shared
+  Gauge base under the 5 gauge scripts (common place/panel/idle shell — retheme once, not 5×).
+  Sliced: tank band → blade → caster → healer(well+bloom) → gauge base; ui_smoke_raid + WSLg
+  `screenshot_*` PNG diffs per slice (headless can't render `_draw`). Byte-identical logic bar:
+  sims untouched by construction (view layer); smokes green each slice. *(rails session v2 —
+  after: TuningConfig sweep · twinfang kit split)*
+
 - ☑ 2026-07-10 · main (docs only) · §REALMS/WORLD · `THEME-PLAN.md` (NEW) — **THE SETTING
   riff v0**: the world fiction born — **the Gilded Age → the Binding → the Quiet → the
   Return** (a new generation *chooses* the dive: gold-rush on the grandparents' locked
