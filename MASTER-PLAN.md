@@ -850,6 +850,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   on it). Statuses untouched (no decisions taken). Next: Bill starts the Opus build session on
   the brief. *(draw-brief session)*
 
+- ☐ 2026-07-10 · worktree `../wow-well-draw` (branch `well-draw`) · DRAW HEALER BUILD · **building
+  `WELL-DRAW-BRIEF.md` — S0 SKIN → S1 D6 deck data → S2 ⭐Vigil module → S4 policy+sims** (S3
+  transforms DEFERRED: blocked on the `wow-tempo-d0` merge — no Floor-2 ceremony to reuse yet;
+  S5 render polish deferred). Kit-local + guarded; byte-identical gate = `ab-gate.sh well_sim`
+  + `ab-gate.sh raid_sim` for S0–S2; S4 is the ONE sanctioned re-baseline (skin casting + hold
+  releases in the policy). Catalog rows flip 🟡→🔨+SHA per merged slice; ledger §C rows ticked.
+  *(the Draw build)*
+
 - ☑ 2026-07-10 · main (docs only) · §SYSTEMS/§GRAPHICS · **METER-PLAN.md (NEW) — the live meter
   leveled up (Bill's direct ask: "make it nice like Recount, see more details, plan the next
   level up").** Audit found the meter (`meter_panel.gd`, `5a6e4ad`) is already a real Recount
