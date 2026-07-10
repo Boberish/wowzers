@@ -745,3 +745,59 @@ this round dilutes the verdict).
 **Next:** Bill picks additive themes (0–3) alongside his §8 verdicts → Phase-2 row D7 authors
 the Brew deck pass: the 10.1 filing hard-copied, §8 winners slotted into their ladders, picked
 themes' cards designed to CARD-CATALOG rows.
+
+---
+
+## 11. THE CASK DECK — the assembly (locked slate + additive integration) 🟡/✅ (2026-07-10, Phase-2 D4)
+
+**What this is** (SLATE-PLAN row D4). The Cask's deck was DESIGNED AND LOCKED in §7 (24 KEEP /
+6 CUT, your verdicts 2026-07-07) — this pass doesn't author it again. It does the three things
+still owed: **① the CARD-CATALOG hard-copy** (the locked slate never landed in the catalog —
+it's there now at ✅ per the CARD-TRACKING LAW, closing that drift), **② the additive
+integration** (the §9 themes formalized to card rows at 🟡, sized as drop-in kits like the
+Duelist's), and **③ the combined-pool gates** (do the additive cards sit cleanly next to the
+locked ones). One rename came out of the distinctness check: the Taproom keystone **LAST CALL →
+CLOSING TIME** (the Brew already owns a boon named Last Call — collision caught).
+
+### 11.1 The assembly record
+
+- **Locked slate → CARD-CATALOG at ✅** (approved-not-built; flips 🔨+SHA as §7.7 slices 3–5
+  merge): 3 creeds · 3 modules · 13 boons · 3 rig WHENs · Century Cask · Spitfire carry.
+  The §9.1 ladder filing (Blend Line · Gauntlet · Tap List) rides as the `ladder` note per row.
+- **Additive kits → catalog at 🟡** (your §9 picks decide which enter the pool):
+  **KIT T — TWIN CASKS:** module *Double Barrel* · *Clean Handoff* [STRAT] · *Rolling Boil*
+  [GREED] · keystone *THE BOTTLING LINE*. **KIT H — HOUSE RECIPE:** creed *The Signature* ·
+  *Practiced Hands* [STRAT] · *Never Change* [GREED] · keystone *THE DYNASTY POUR*.
+  **KIT R — TAPROOM:** *On the House* [TEAM] · *Private Reserve* [GREED] · keystone *CLOSING
+  TIME* (renamed). Swap semantics: kits ADD (the Cask's 3 ladders stay; a kit is a 4th lane),
+  per §9's additive law.
+- **EASE dial knobs (the owed list):** band width · cook-length grace · peak-window width ·
+  strain-shrink softness. (Solera stays a curated creed, not a dial casualty.)
+- **Keystone pool** grows to 4 (Century Cask + one per kit picked) — same theme-weighted
+  1-of-2 elite offer rule proposed for Tempo (D0 tension point 4) applies here.
+
+### 11.2 Combined-pool gates (delta scope — the locked cards are not re-audited)
+
+**Trios:** each kit internally clean; cross-checks — (Clean Handoff | Slow Proof | Cooper's
+Ear): two locked cook cards + one new handoff = build-dependent, no auto-pick ✓ · (Never Change
+| Momentum Pour | Brimming*) three greeds three surfaces ✓ (*if the §8 P9 lands).
+**Overlap:** *Private Reserve* extends the Cellar's shelf rules (integrates, doesn't duplicate)
+✓ · *Never Change* vs *Single Malt* — both commitment, different axes (recipe-shape vs
+poison-side); composition note: together they're the monk build (one recipe, one poison) —
+legal, flagged spicy ✓ · **Solera × House Recipe interaction flagged for build-tune:** held
+peaks make clean echoes easier — the echo's clean-peak gate may need a dead-center requirement
+under Solera (knob exists; tune-at-build, not a design change).
+**Anti-patterns:** all §9 fixes carried (echo skill-gated · bottle applies on ally's clean
+moment · Rolling Boil's mutual bite); no pardons anywhere in the additive set ✓.
+**Distinctness ledger:** row updated — Bottling Line (two-cask chord) vs FULL BLOOM
+(whole-garden chord) recorded at D3; CLOSING TIME rename logged.
+
+### 11.3 Tension points (Bill)
+
+1. **Which kits enter** (0–3 of T/H/R — your §9 ranking was House Recipe · Twin Casks · Taproom).
+2. **The Solera×Recipe tune flag** (build-time knob, noted so it isn't rediscovered).
+3. **Keystone offer rule** (theme-weighted 1-of-2 — same call as Tempo's).
+4. Taproom still rides the shared buff-channel debt (unchanged, just restated).
+
+**Next:** your kit picks → rows flip · §7.7 slices 3–5 build the locked slate + winners (the
+cards slice was always the plan's step 4; it now has its complete card list waiting).
