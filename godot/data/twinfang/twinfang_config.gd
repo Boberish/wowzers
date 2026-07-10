@@ -289,6 +289,19 @@ extends Resource
 @export var triplet_bonus: float = 0.40     ## TRIPLET door: an all-Bullseye string pays the final hit +this MORE
 @export var rolled_chord_pad: float = 0.15  ## ROLLED CHORD door: the string's grade window pads ENTRY-side this much
 
+# --- D0 S3 · THE DUOS (cross-theme capstones — armed at >=2 drafted cards from EACH theme; Opus) ---
+@export var blood_coda_mult: float = 1.15   ## BLOOD CODA (Wound×Finish): a full-combo Evis cashing 4+ bleeds pays both ×this
+@export var grand_finale_bonus: float = 0.50 ## GRAND FINALE (Edge×Finish): a full-combo finisher with crit hot = guaranteed crit +this crit dmg
+
+# --- D0 S6 · THE SET PIECE (signature CD, DECK-LAYOUT §5 — the first signature-CD build game-wide):
+#     press to MARK the next `setpiece_phrase` strikes as a phrase; land them ALL Perfect+ and cash a
+#     build-scaled flourish (flow-scaled damage + bleeds pulse + combo refund + a Flow-lock). ---
+@export var setpiece_enabled: bool = true    ## master A/B (off = classic Tempo, no signature — byte-identical baseline)
+@export var setpiece_phrase: int = 4         ## strikes to nail across the phrase (the one knob)
+@export var setpiece_flourish: float = 140.0 ## the flourish's base damage (flow-scaled)
+@export var setpiece_refund_cp: int = 2      ## the flourish refunds this combo (the FINISH flavor)
+@export var setpiece_flowlock_sec: float = 2.0 ## the flourish locks Flow (no decay) this long
+
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap
@@ -310,12 +323,18 @@ extends Resource
 	# TEMPO REWORK · draftable spells (new buttons; fill bar slots 5+)
 	"gracenote":   {"name": "Grace Note",    "key": "6", "energy": 18.0, "dmg": 14.0, "cd": 2.0},
 	"coda":        {"name": "Coda",          "key": "7", "energy": 25.0, "cd": 10.0},
+	# D0 S6 · THE SET PIECE — the signature CD (DECK-LAYOUT §5 slot). Arming is free; the phrase is the cost.
+	"setpiece":    {"name": "Set Piece",     "key": "5", "energy": 0.0, "cd": 60.0, "sig": true},
 }
 
-## The four-slot bar for an Aspect (signature appended last). Draft spells fill 5+.
+## The bar for an Aspect (signature appended last). Draft spells fill 5+. D0 S6: the Set Piece
+## signature CD joins the Tempo/Fermata bar (guarded by setpiece_enabled — off = no signature).
 func loadout(aspect: String) -> Array:
 	if aspect == "tempo" or aspect == "fermata":   # Fermata IS Tempo's kit — the strike just COILS
-		return ["strike", "eviscerate", "kick", "coupdegrace"]
+		var bar := ["strike", "eviscerate", "kick", "coupdegrace"]
+		if setpiece_enabled:
+			bar.append("setpiece")
+		return bar
 	return ["strike", "envenom", "kick", "rupture"]
 
 # Phase B slot-verb RHYTHM mods (build-your-Rhythm; entries with `slot` in TwinfangBoons).

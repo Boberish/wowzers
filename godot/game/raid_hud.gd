@@ -162,7 +162,7 @@ func _seat_boons_now() -> Dictionary:
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
 	"strike": "Strike", "eviscerate": "Eviscerate", "kick": "Kick", "envenom": "Envenom",
-	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry",
+	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry", "setpiece": "Set Piece",
 	"bolt": "Bolt", "fracture": "Fracture", "barrier": "Barrier", "overload": "Overload",
 	"quietus": "Quietus", "silence": "Silence", "counterspell": "Counterspell",
 }
@@ -2623,7 +2623,7 @@ func _owned_boon_labels() -> Array:
 		return []
 	var pools: Array = []
 	match _seat_key:
-		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM, TwinfangBoons.TRANSFORM_DOORS]
+		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM, TwinfangBoons.TRANSFORM_DOORS, TwinfangBoons.DUOS]
 		"caster": pools = [AlchemistBoons.SHARED, AlchemistBoons.BREW]
 		"healer":
 			if _healer_cls == "bloomweaver":
