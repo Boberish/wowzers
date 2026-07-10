@@ -799,6 +799,8 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"still_point": _still_width(),
 		"held": bool(seat.casting.get("held", false)),
 		"held_start": int(seat.casting.get("held_start", -1)),   # tremble read (S5 render)
+		"held_until": int(seat.casting.get("held_until", -1)),   # the gutter clock (AI hold-release)
+		"hold_armed": _hold_armed(),                             # Patient Hand creed OR ⭐Vigil module
 		"blindfold": _b("blindfold"),
 		"flume": s.tick < int(seat.vars.get("flume_until", -1)),       # RAPIDS: white water
 		"frozen": s.tick < int(seat.vars.get("glassriver_until", -1)), # EDDY: still water
