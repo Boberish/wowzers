@@ -279,6 +279,10 @@ Each its own worktree/claim, in this order:
 
 ### Phase 4 — SCALE RAILS (before the roster/content wave; each independent)
 - **Class registry** (`class_id → factory`) breaking the RunState/RaidContent fan-out.
+  **✅ BUILT 2026-07-10 (`fcee675`):** `data/class_registry.gd` — lazy-init table (seat ·
+  aspects · seat factory · starter · policy factory w/ byte-exact seed salts · kit name);
+  RaidContent dispatchers / RaidNet.make_policy / _make_seat_run / the healer toggle all
+  read it. raid_sim ab-gate BYTE-IDENTICAL; `registry_probe` locks the salts.
 - **ClassBand registry** in the HUD (build/render/key strategy per class) — deletes the
   if/elif ladders + ~30 nullable members; add a shared Gauge base for the common shell.
 - **ClassKit hoists** (`_b`/`_tt`/`_has_payloads`) + TuningConfig literals sweep.
