@@ -12,9 +12,9 @@ const RARITIES := ["haiku", "sonnet", "opus"]
 const WEIGHTS := {"haiku": 0.70, "sonnet": 0.25, "opus": 0.05}
 const OPUS_PITY_STEP := 0.05      ## +5pp effective opus weight per opus-less draft
 const OPUS_PITY_HARD := 5         ## the draft after this many opus-less ones forces an opus offer
-const REROLL_COST := 1
 const UPSELL_COST := 2
-const LOCK_COST := 1
+## REROLL_COST + LOCK_COST retired (§11 #3, rerolls-out): the reroll spends a banked
+## REGENERATE charge (run.regenerate), not a Token; LOCK is gone entirely.
 ## The class-signature skill counter each kit bumps into diag (see Draft.mint).
 const SIG_KEY := {"bulwark": "negate", "twinfang": "perfect_strike",
 	"bloomweaver": "perfect_ward",
@@ -140,62 +140,15 @@ static func roll_offers(run, extra: int = 0) -> Array:
 		run.pity_opus += 1
 	return offers
 
-## Pay 1 Token, redraw the whole offer row (same rules, synergy guarantee holds again).
-## CURIO Hot Reload: `free` skips the Token cost/gate entirely.
-static func reroll(run, free: bool = false) -> Array:
-	if not free:
-		if run.tokens < REROLL_COST:
-			return []
-		run.tokens -= REROLL_COST
+## Spend ONE banked REGENERATE charge to redraw the whole offer row (rerolls-out §11 #3
+## — the 1⏣ reroll + per-card LOCK are gone; the synergy guarantee holds again on the new
+## row). No charge ⇒ no reroll (returns [] unchanged). Consumes `run.draft_rng` exactly as
+## before, so a spent-charge redraw is the same rng draw the old token reroll produced.
+static func reroll(run) -> Array:
+	if run.regenerate <= 0:
+		return []
+	run.regenerate -= 1
 	return roll_offers(run)
-
-## Pay LOCK_COST to hold a card through rerolls. Pure economy — consumes no rng.
-static func lock(run) -> bool:
-	if run.tokens < LOCK_COST:
-		return false
-	run.tokens -= LOCK_COST
-	return true
-
-## Pay REROLL_COST, keep the LOCKED offer indices verbatim, redraw only the rest
-## (a locked id can't reappear in a redrawn slot). Empty `locked` delegates to the
-## classic reroll — the rng draw sequence of lock-free runs is untouched. The synergy
-## filter applies to slot 0 only when slot 0 itself is redrawn; the opus pity RAMP
-## still applies to redrawn slots (the hard slot-2 force is a roll_offers-only rule).
-static func reroll_kept(run, offers: Array, locked: Array, free: bool = false) -> Array:
-	if locked.is_empty():
-		return reroll(run, free)
-	if not free:
-		if run.tokens < REROLL_COST:
-			return []
-		run.tokens -= REROLL_COST
-	var avail := offerable(run)
-	var bt := build_tags(run)                # once, reused by the synergy-slot filter below
-	var out: Array = []
-	for i in offers.size():
-		out.append(offers[i] if i in locked else null)
-	for i in offers.size():
-		if out[i] != null:
-			continue
-		var rest: Array = []
-		for b in avail:
-			if not _in_offers(out, b):
-				rest.append(b)
-		if rest.is_empty():
-			out[i] = offers[i]              # pool exhausted — the old card stands
-			continue
-		if i == 0:
-			var syn: Array = []
-			for b in rest:
-				if _matches_tags(b, bt):
-					syn.append(b)
-			if not syn.is_empty():
-				rest = syn
-		out[i] = _draw(run, rest)
-	if _has_opus(out):
-		run.pity_opus = 0
-	elif not _of_tier(avail, "opus").is_empty():
-		run.pity_opus += 1
-	return out
 
 ## Can slot i be transmuted into a strictly higher tier?
 static func can_upsell(run, offers: Array, i: int) -> bool:
@@ -231,9 +184,15 @@ static func take(run, b: Dictionary) -> void:
 ## Called by the HUD at fight end (state.over): deterministic Tokens from state.diag —
 ## footwork (PERFECT dodges + held feints) + the class-signature verb (SIG_KEY), plus a
 ## flawless bonus for a sheet with no miss/bait/whiff. Rates live on TuningConfig.
+## Reads the is_player mirror `state.diag` — kept BYTE-IDENTICAL (delegates to mint_diag),
+## so solo play + draft_sim are unchanged.
 static func mint(state, char_class: String) -> int:
-	var cfg = state.config
-	var d: Dictionary = state.diag
+	return mint_diag(state.diag, state.config, char_class)
+
+## PER-SEAT MINT (V#11): the same formula off ANY seat's own diag + the run's config.
+## The raid credits each of the 4 seats' wallets from its own `seat.diag` (combat_core
+## tracks grades per seat), so a clean AI raider mints its own ⏣ — nobody shares a pot.
+static func mint_diag(d: Dictionary, cfg, char_class: String) -> int:
 	var t := int(d.get("perfect", 0) + d.get("read", 0)) / maxi(1, cfg.mint_per_grades)
 	t += int(d.get(String(SIG_KEY.get(char_class, "")), 0)) / maxi(1, cfg.mint_per_signature)
 	if int(d.get("miss", 0)) == 0 and int(d.get("baited", 0)) == 0 and int(d.get("whiff", 0)) == 0:
@@ -271,7 +230,7 @@ static func _of_tier(list: Array, tier: String) -> Array:
 
 static func _in_offers(offers: Array, b: Dictionary) -> bool:
 	for o in offers:
-		if o != null and o["id"] == b["id"]:   # null-tolerant: reroll_kept builds sparse rows
+		if o != null and o["id"] == b["id"]:   # null-tolerant (defensive; callers pass full rows)
 			return true
 	return false
 

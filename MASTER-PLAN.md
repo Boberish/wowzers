@@ -836,6 +836,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ◐ 2026-07-10 · worktree `../wow-seals` (branch `seal-rework`) — **CLAIM: THE SEAL REWORK
+  BUILD (`BOSS-BRIEF.md`).** Bill's go ("implement these bosses like the brief says"). **S0
+  (sim instrumentation) IN PROGRESS — the one slice unblocked today.** ⚠ Gate ② is NOT clear:
+  `wow-tank-w1` (Wave-1 FLOW=AGGRO/Duelist) is still IN FLIGHT (unmerged, at its S4 — main
+  still has `threat_enabled`/`taunt_seat_i`, no `seat.vars["flow"]`). Per the brief, **S1+
+  (engine addenda E1–E9) and S2–S5 (content) HARD-BLOCK on the tank-w1 merge** — they edit the
+  same reducer tank-w1 rewrites, and the content authors against flow/peels/Compaction-flow-dump
+  that don't exist in main yet. So this session builds **S0 only** (byte-identical, sim-side:
+  beat-budget + cast-source + TTK-vs-contract + valley/timeline + verse tables in `raid_sim.gd`)
+  and stops at the gate — S1+ resumes when tank-w1 lands. *(boss-build session)*
+
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
   BOSS-PLAN made buildable: **S0** sim instrumentation (byte-identical, claimable NOW) → **S1**
@@ -1154,18 +1165,48 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
-- ☐ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **CLAIM: DESCENT SLICE 3 —
-  THE PROMPT MARKET + PER-SEAT WALLETS** (DESCENT §6, V#11; BUILD-LEDGER §I). Core: **per-seat
-  wallets** (`run_state` `tokens`→per-seat, `Draft.mint` `state.diag`→`seat.diag` deposit-to-
-  earner so AI seats START EARNING, UPSELL spends own wallet) · **the MARKET node interior**
-  (flip `RunMap.MARKET_LIVE`; 6-slot printed-price shop; buildable slots = CURIO×2 / PATCH+refuel
-  / DEPRECATE-boon / REGENERATE charge [builds the rerolls-out charge system]; **+1 BACKUP
-  DEFERRED** if the wipe budget isn't in code, **curse-purge DEFERRED** to Jailbreak slice 4) ·
-  **AI director + AUTO** shop spend · **post-Seal MARKET PHASE** (recovery-only) · **curio
-  reframes** (Hashgrinder→prices−1⏣, Hot Reload→2 REGENERATE) · `tokens@market` sim diag. ⚠
-  Touches the `draft.gd` + `raid_hud.gd` hotspots (coordinating w/ live tempo/tank/cask/well
-  worktrees — merge main often). rerolls-out is a SANCTIONED `draft_sim` re-baseline. Recon
-  workflow scoping buildable-vs-deferred now. *(raid-rebuild session)*
+- ☐ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **CLAIM: DESCENT SLICE 4 —
+  THE JAILBREAK (printed curse deals)** (DESCENT §7, V#4 mixed-lean-gentle; BUILD-LEDGER §I). Flip
+  `RunMap.JAILBREAK_LIVE`; the node offers **two deals, both halves printed** (a strong good + a
+  printed bite in a DIFFERENT currency). The CURSE SYSTEM: active curses (cap 2, header pips — the
+  row map_screen reserved in slice 2), bounded-duration bites that tick per fight. Bite vocab
+  (V#4): **ECONOMY TAX** (mint halved / market +⏣ — I own Draft.mint + _market_price from slice 3),
+  **HP TAX** (temporary corrupted sector), **TIMING TAX** + **DECK TAX** (combat integration —
+  recon scoping whether buildable now vs deferred). Exits: **Market DEPRECATE-curse** (wires the
+  slice-3 deferred slot) + **Cooling purge fork**. HARD RULE: no run-long timing curse ever.
+  Welded-downside draft boons (② door) + event-curse legs (③) = extensions, scope per recon.
+  Touches `run_map`/`raid_hud`/`draft.gd`/`map_content`/`map_screen`/`campaign_core` + a curse
+  probe. ⚠ hot files — merge main often. Offline-first (online = follow-up like slice 3). Recon
+  running. *(raid-rebuild session)*
+
+- ☑ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **DESCENT SLICE 3 — THE
+  PROMPT MARKET + PER-SEAT WALLETS: MERGED to main (`fd8b895`), 3 commits.** Built via a 6-reader
+  recon (buildable-vs-deferred scope). **3a per-seat wallets (V#11):** `Draft.mint_diag(diag,cfg,
+  cls)` mints each seat off its OWN `seat.diag` — `mint(state,cls)` delegates so it stays
+  BYTE-IDENTICAL (draft_sim green); `raid_hud._mint_seats` credits all 4 wallets post-fight; the
+  AI-draft shared-bank mirror is deleted → **AI raiders START EARNING** (before, `Draft.mint` read
+  only the is_player mirror, so AI minted nothing); `commander_probe` re-pointed to per-seat
+  independence. **3b rerolls-out (§11 #3):** `run.regenerate` charges are the ONLY reroll —
+  `Draft.reroll` spends a charge (same draft_rng draw), `lock`/`reroll_kept`/`REROLL_COST`/`LOCK_
+  COST` deleted, `draft_screen` shows "REGENERATE (n)" + drops LOCK, Hot Reload → +2 charges;
+  `draft_sim` `_test_lock`→`_test_regenerate`. fight_seed never touches draft_rng → NO fight
+  shift, only draft_sim's transcript re-baselines. **3c THE MARKET:** `RunMap.MARKET_LIVE=true`;
+  new `MarketScreen` (THE SCRAPER); `_show_market` rolls a (map_seed,node)-seeded stock — CURIO ×2
+  (unlocked pool, priced 6/8/10 by rarity) · REGENERATE (4⏣) · PATCH (5⏣), ~+30%/floor; per-seat
+  BUY + **AUTO** (AI spend own wallets, banter); KIND_MARKET branch (mandatory, no-default=
+  soft-lock); post-Seal recovery MARKET PHASE; Hashgrinder reframed (×2 income → market −1⏣);
+  `raid_map_sim` KIND_MARKET case + `tokens@market` diag + a flat mint estimate (sanctioned
+  re-baseline); new `market_probe` (in verify-all) drives the real HUD end-to-end. **Merged main
+  twice mid-build** (tuning/meter/tempo-d0 — the tempo `run_state.transform` + `draft.offerable`
+  doors auto-merged clean with my `regenerate`/`reroll`). **Deferred (dependency absent):** +1
+  BACKUP (no wipe budget — printed SOON) · DEPRECATE (curse-purge=slice 4, boon-scrap=follow-up) ·
+  online market/wallets (server has no purse — a safe no-op fallthrough, **NO protocol bump**).
+  **Verify:** import clean · `market_probe`/`draft_sim`/`commander_probe`/`gear_probe` ALL OK ·
+  `ui_smoke_map` ALL PASS · `raid_map_sim` determinism (seed1==seed1 + descent invariants) PASS on
+  main. ⏳ **Deferred to a nightly run** (OOM-prone under concurrent load): the `draft_sim` +
+  `raid_map_sim` STATISTICAL re-baselines (rerolls-out transcript + the live-market walk are the
+  sanctioned shifts) · full `verify-all` · `net_map_smoke`. **Next:** slice 4 (THE JAILBREAK
+  printed curse deals). *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **DESCENT SLICE 2 — THE
   LEGIBILITY UI PASS: MERGED to main (`1f5e051`), 2 commits, ZERO file collisions with the

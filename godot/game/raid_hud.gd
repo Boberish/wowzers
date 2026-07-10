@@ -177,6 +177,7 @@ var _online: bool = false
 var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
 var _map_is_leader: bool = false   ## MAP-3b: am I the route-picker (server host)?
 var _charge_taught: bool = false   ## §9.7: the one-shot "⏻ feeds THE KILL SWITCH" teach has fired
+var _market_auto: bool = true      ## §6: AI raiders auto-spend their own wallets on LEAVE (V#11 default)
 var _room: Dictionary = {}
 var _my_ready: bool = false
 var _net_status: Label = null
@@ -632,7 +633,6 @@ func _on_net_draft() -> void:
 	_clear()
 	var ds := DraftScreen.new(_d.run, picks, "REFORGE — the kill reshapes your kit",
 		"Take one. Your raid is drafting too.", [], Palette.GOLD)
-	ds.free_reroll = _d.gear.has("hot_reload")  # CURIO Hot Reload
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_d.run, boon)
 		_d.taken_boons.append(boon)
@@ -974,6 +974,8 @@ func _resolve_node(n: Dictionary) -> void:
 				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)",
 					"fx": CampaignCore.CACHE_FX.merged({"result": MapContent.CACHE_RESULT})}],
 				Palette.GOLD, _show_map)
+		RunMap.KIND_MARKET:
+			_show_market(int(n["id"]), _show_map, false)
 
 ## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
 ## choice (a check computes its % + breakdown; a gated choice greys if unmet), and hands
@@ -1282,9 +1284,31 @@ func _arm_gear(u: Seat) -> void:
 ## Tokens are ONE currency: scrap + oath purses feed the same purse the REFORGE
 ## boon draft spends (raid-boons' `_d.run.tokens`). `_d.tokens` stays only as the
 ## fallback bank for runless dev paths.
+## PER-SEAT MINT (V#11): after a won fight, credit EACH of the 4 seats' wallets from
+## its own combat diag — the human's via _gain_tokens (Hashgrinder ×2 applies to the seat
+## you pilot), each AI seat's straight into its own run wallet. This is why AI seats START
+## EARNING: `Draft.mint` used to read only the is_player mirror (state.diag), so AI raiders
+## minted nothing; now each reads `seat.diag`.
+func _mint_seats() -> void:
+	if _ctrl == null or _ctrl.state == null:
+		return
+	var st = _ctrl.state
+	for key in RaidNet.SEAT_KEYS:
+		var i: int = SEAT_IDX[key]
+		if i >= st.seats.size():
+			continue
+		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
+		if run == null:
+			continue
+		var minted := Draft.mint_diag(st.seats[i].diag, st.config, run.char_class)
+		if key == _seat_key:
+			_gain_tokens(minted)          # your seat — Hashgrinder ×2 lives here
+		else:
+			run.tokens += minted          # the AI raider banks its own clean play
+
 func _gain_tokens(n: int) -> void:
-	if n > 0 and _d.gear.has("hashgrinder"):   # CURIO Hashgrinder: all Token income doubled
-		n *= 2
+	# CURIO Hashgrinder reframed (§6): no longer doubles income — it discounts the MARKET
+	# (prices −1⏣, applied in _market_price). Income is the honest mint now.
 	if _d.run != null:
 		_d.run.tokens += n
 	else:
@@ -1292,6 +1316,142 @@ func _gain_tokens(n: int) -> void:
 
 func _tokens_now() -> int:
 	return _d.run.tokens if _d.run != null else _d.tokens
+
+# ---------------------------------------------------------------- THE PROMPT MARKET (§6)
+## THE SCRAPER's shop (DESCENT §6, = GEAR-3): the human shops a printed-price stock from
+## YOUR wallet; AI raiders auto-spend their own ⏣ on LEAVE (V#11 per-seat wallets). The
+## stock rolls on a market rng seeded from (map_seed, node) → replay-stable + co-op-shared.
+## Live slots: CURIO ×2 (from your unlocked pool) · REGENERATE charge · PATCH (repair+refuel).
+## DEFERRED (dependency not in code): +1 BACKUP (no wipe budget) · DEPRECATE (curse-purge =
+## Jailbreak slice 4; boon-scrap = a follow-up). Prices scale ~+30%/floor; Hashgrinder −1⏣.
+const MARKET_CURIO_PRICE := {"haiku": 6, "sonnet": 8, "opus": 10}
+
+func _market_price(base: int) -> int:
+	var p := int(round(float(base) * (1.0 + 0.30 * float(_d.floor_i))))
+	if _d.gear.has("hashgrinder"):        # CURIO Hashgrinder reframed (§6): prices −1⏣ (floor 1)
+		p = maxi(1, p - 1)
+	return p
+
+## Up to `n` curios from YOUR unlocked pool (flattened across bosses), class-fitting and not
+## already equipped, drawn on a replay-stable market rng.
+func _market_curios(n: int, rng: DetRng) -> Array:
+	if _d.run == null:
+		return []
+	var seen := {}
+	var pool: Array = []
+	for boss in _d.gear_unlocks:
+		for id in (_d.gear_unlocks[boss] as Array):
+			var sid := String(id)
+			if seen.has(sid) or _d.gear.has(sid) or not Gear._fits(sid, _d.run.char_class):
+				continue
+			seen[sid] = true
+			pool.append(sid)
+	pool.sort()                            # deterministic order before the rng pick
+	var out: Array = []
+	for _k in n:
+		if pool.is_empty():
+			break
+		out.append(pool.pop_at(int(rng.next_u32() % pool.size())))
+	return out
+
+## The 4-seat wallet strip (per-seat wallets, V#11) — read live each refresh.
+func _market_wallets() -> Array:
+	var out: Array = []
+	for key in RaidNet.SEAT_KEYS:
+		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
+		out.append({"name": String(key).to_upper(), "tokens": run.tokens if run != null else 0,
+			"mine": key == _seat_key})
+	return out
+
+## THE MARKET stop. `recovery_only` = the post-Seal MARKET PHASE (no curios — repairs/refuel/
+## REGENERATE only, the exhale). `done` = where LEAVE goes.
+func _show_market(node_id: int, done: Callable, recovery_only: bool) -> void:
+	_screen = "market"
+	_clear()
+	var mseed: int = _d.map.seed if _d.map != null else 12345
+	var rng := DetRng.new((mseed * 1000003 + (node_id + 1) * 7919 + (7 if recovery_only else 3)) & 0x7FFFFFFF)
+	var stock: Array = []
+	if not recovery_only:
+		for gid in _market_curios(2, rng):
+			var it := GearCatalog.item(gid)
+			var rar := String(it.get("rarity", "haiku"))
+			stock.append({"kind": "curio", "gid": gid,
+				"title": "CURIO · %s" % String(it.get("name", gid)),
+				"desc": "%s peripheral — equip it" % rar,
+				"price": _market_price(int(MARKET_CURIO_PRICE.get(rar, 8))),
+				"disabled": _d.gear.size() >= Gear.SLOTS, "disabled_text": "SLOTS FULL"})
+	stock.append({"kind": "regenerate", "title": "REGENERATE charge",
+		"desc": "bank one draft redraw", "price": _market_price(4)})
+	stock.append({"kind": "patch", "title": "PATCH",
+		"desc": "repair corrupted sectors + refuel reserves", "price": _market_price(5)})
+	# printed-but-owed (§6): the slots whose systems land in later slices, honest not hidden
+	stock.append({"kind": "backup", "title": "+1 BACKUP",
+		"desc": "an extra attempt — arrives with the wipe budget", "price": _market_price(10),
+		"disabled": true, "disabled_text": "SOON"})
+
+	var buy := func(i: int) -> bool: return _market_buy(stock, i)
+	var leave := func() -> void:
+		if _market_auto:
+			_market_ai_autospend()
+		done.call()
+	var set_auto := func(on: bool) -> void: _market_auto = on
+	var sub := "THE SCRAPER packs up between rings — recovery goods only. The blessed exhale." \
+		if recovery_only else ""
+	var ms := MarketScreen.new(stock, buy, _market_wallets, set_auto, leave, _market_auto, sub)
+	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(ms)
+
+## Apply a purchase from YOUR wallet. Returns true when bought (the screen marks it SOLD).
+func _market_buy(stock: Array, i: int) -> bool:
+	if _d.run == null or i < 0 or i >= stock.size():
+		return false
+	var s: Dictionary = stock[i]
+	var price := int(s.get("price", 0))
+	if _d.run.tokens < price:
+		return false
+	match String(s.get("kind", "")):
+		"curio":
+			if _d.gear.size() >= Gear.SLOTS:
+				return false
+			_gear_equip(String(s["gid"]), -1)
+			_toast_add("🛒  bought %s" % String(GearCatalog.item(String(s["gid"])).get("name", "a curio")))
+		"regenerate":
+			_d.run.regenerate += 1
+			_toast_add("🛒  +1 REGENERATE charge")
+		"patch":
+			_apply_map_fx({"repair": true, "mana": 1.0})
+			_toast_add("🛒  PATCH — sectors repaired, reserves topped")
+		_:
+			return false
+	_d.run.tokens -= price
+	return true
+
+## AUTO (V#11 default): each AI raider spends its OWN wallet — banks up to 2 REGENERATE
+## charges for its drafts, with banter. Runs on LEAVE when AUTO is on.
+func _market_ai_autospend() -> void:
+	var price := _market_price(4)
+	for key in RaidNet.SEAT_KEYS:
+		if key == _seat_key:
+			continue
+		var run: RunState = _d.ai_runs.get(key) as RunState
+		if run == null:
+			continue
+		var bought := 0
+		while run.tokens >= price and run.regenerate < 2:
+			run.tokens -= price
+			run.regenerate += 1
+			bought += 1
+		if bought > 0:
+			_toast_add("🛒  %s banks %d REGENERATE — \"%s\"" % [
+				String(key).to_upper(), bought, _market_banter(key)])
+
+func _market_banter(key: String) -> String:
+	match key:
+		"tank": return "stocking up. no refunds, no regrets."
+		"blade": return "buy low, stab high."
+		"caster": return "for science. and rerolls."
+		"healer": return "one for me, none for the printer on fire."
+	return "shopping."
 
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 
@@ -1590,6 +1750,9 @@ func _gear_equip(id: String, replace_i: int) -> void:
 	var it := GearCatalog.item(id)
 	if bool(it.get("active", false)):
 		_d.gear_charges[id] = int(it.get("charges", 1))
+	# CURIO Hot Reload — reframed (§6): grants 2 REGENERATE charges on equip (was free rerolls)
+	if id == "hot_reload" and _d.run != null:
+		_d.run.regenerate += 2
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
@@ -1628,7 +1791,7 @@ func _show_boon_draft(done: Callable) -> void:
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
-		_gain_tokens(Draft.mint(_ctrl.state, _d.run.char_class))  # routes through Hashgrinder ×2
+		_mint_seats()                                             # V#11: every seat mints its OWN ⏣
 	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
 	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
 	var chain := done
@@ -1644,16 +1807,14 @@ func _show_boon_draft(done: Callable) -> void:
 	_show_seat_draft(_seat_key, chain)
 
 ## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
-## AI drafts spend the SHARED ⏣ bank: Draft's economy reads run.tokens, so the bank
-## is mirrored into the AI run for the screen and the remainder banked back out.
+## PER-SEAT WALLETS (V#11): each seat spends its OWN `run.tokens` — the AI raider drafts
+## against the ⏣ it earned itself (the old shared-bank mirror is gone).
 func _show_seat_draft(key: String, done: Callable) -> void:
 	var mine: bool = key == _seat_key
 	var run: RunState = _d.run if mine else (_d.ai_runs.get(key) as RunState)
 	if run == null:
 		done.call()
 		return
-	if not mine and _d.run != null:
-		run.tokens = _d.run.tokens
 	# CURIO Expansion Bus (your seat only): +1 slot → a 1-of-4 draft.
 	var picks := Draft.roll_offers(run, 1 if (mine and _d.gear.has("expansion_bus")) else 0)
 	if picks.is_empty():
@@ -1662,8 +1823,8 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	_screen = "draft"
 	_clear()
 	var extras: Array = []
-	if run.tokens > 0:
-		extras.append("%d Tokens banked — REROLL / LOCK a card." % run.tokens)
+	if run.tokens > 0 or run.regenerate > 0:
+		extras.append("%d ⏣ · %d REGENERATE — UPSELL a card or redraw the row." % [run.tokens, run.regenerate])
 	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
 		else String(SEAT_NAMES.get(key, "RAIDER"))
 	var headline := "REFORGE — the kill reshapes your kit" if mine \
@@ -1671,7 +1832,6 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	var flavor := "Take one — every piece forges into your set." if mine \
 		else "You command the build — the AI only drives the rotation."
 	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
-	ds.free_reroll = mine and _d.gear.has("hot_reload")  # CURIO Hot Reload (your seat only)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(run, boon)
 		if mine:
@@ -1682,8 +1842,6 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
 				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
 		else:
-			if _d.run != null:
-				_d.run.tokens = run.tokens   # bank the remainder back to the shared pool
 			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
@@ -2067,7 +2225,9 @@ func _show_floor_cleared() -> void:
 	descend.text = "DESCEND TO %s" % String(nxt["title"])
 	descend.custom_minimum_size = Vector2(380, 52)
 	descend.add_theme_font_size_override("font_size", 18)
-	descend.pressed.connect(_advance_floor)
+	# §6 MARKET PHASE: the post-Seal town beat — a recovery-only Scraper stop (AI auto-spend),
+	# THE macro exhale, then descend. (After Mythos there's no market — see _show_campaign_cleared.)
+	descend.pressed.connect(func(): _show_market(-1, _advance_floor, true))
 	box.add_child(descend)
 	var leave := Button.new()
 	leave.text = "BANK & LEAVE TO THE RIFT"

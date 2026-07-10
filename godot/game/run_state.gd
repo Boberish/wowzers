@@ -22,6 +22,8 @@ var encounters: Array = []        ## Array[EncounterRes]
 var run_seed: int = 0             ## seeds fights (closed-form) and the draft stream
 var draft_rng: DetRng = null      ## draft/economy stream — never state.rng, never the global RNG
 var tokens: int = 0               ## skill-minted draft currency ("spend them responsibly")
+var regenerate: int = 0           ## banked REGENERATE charges — the ONLY reroll (rerolls-out §11#3):
+                                  ## earned/bought/Hot-Reload-granted, spent to redraw a draft row
 var pity_opus: int = 0            ## drafts since an opus was OFFERED while one was offerable
 
 # ---- Topology map mode (MASTER-PLAN §MAPS; map == null ⇒ classic linear run, untouched)

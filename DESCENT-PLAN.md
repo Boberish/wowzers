@@ -1,7 +1,7 @@
 # DESCENT-PLAN — THE RAID REBUILD (the descent spec v1)
 
-**Status: 🔨 SLICES 1–2 BUILT & MERGED (`ee18e05` · `1f5e051`, 2026-07-10) — the map bang + the
-legibility pass are live.** All 12
+**Status: 🔨 SLICES 1–3 BUILT & MERGED (`ee18e05` · `1f5e051` · `fd8b895`, 2026-07-10) — the map
+bang, the legibility pass, and the PROMPT MARKET + per-seat wallets are live.** All 12
 verdicts in (V1–V6/V10/V12 at the recommendations · **V7 NO second module** · **V8
 STANDING/Prior DELETED entirely** — shipped, 14 files · **V9 WILD ~10%** — shipped · V11
 per-seat wallets — lands with slice 3). The 4-floor descent GENERATES AND PLAYS: Vorathek
@@ -21,8 +21,22 @@ unchanged; only the retired-integrity report column moves). 2a proven byte-ident
 (ab-gate map_check_sim + online-probe); light verify green (import · map_wager_probe · ui_smoke_map
 · map_check_sim). ⏳ **Deferred to a nightly run** (OOM-prone under concurrent box load):
 raid_map_sim baseline re-record for 2b · full verify-all · net_map_smoke.
-**Next: slice 3 (PROMPT MARKET + per-seat wallets) → Jailbreak → minigames → QUEUE** — ledger §I
-is the tracker. The zoom-out rebuild of the raid run structure
+**SLICE 3 (`fd8b895`) — THE PROMPT MARKET + PER-SEAT WALLETS:** V#11 per-seat wallets ship
+(`Draft.mint_diag` mints each seat from its OWN combat diag → **AI raiders start earning**; the
+shared bank retires); **rerolls-out** (§11 #3 — the 1⏣ REROLL + LOCK die, a banked REGENERATE
+charge redraws; Hot Reload → +2 charges); and **THE MARKET node goes live** (`RunMap.MARKET_LIVE`)
+as THE SCRAPER's shop — a printed-price stock (CURIO ×2 from your unlocked pool · REGENERATE ·
+PATCH), a 4-seat wallet strip, per-seat BUY, and **AUTO** (AI raiders spend their own ⏣ with
+banter); plus the post-Seal **MARKET PHASE** (recovery-only), the Hashgrinder reframe (→ market
+−1⏣), and a `tokens@market` sim diagnostic. **Deferred (dependency absent):** +1 BACKUP (no wipe
+budget yet — printed SOON) · DEPRECATE (curse-purge = slice 4; boon-scrap = a follow-up) · online
+market/wallets (server has no purse — a safe no-op, NO protocol bump). Verify: import clean ·
+`market_probe`/`draft_sim`/`commander_probe`/`gear_probe` ALL OK · `ui_smoke_map` ALL PASS ·
+`raid_map_sim` determinism (seed1==seed1 + descent invariants) PASS. ⏳ **Deferred to a nightly
+run:** the `draft_sim` + `raid_map_sim` statistical re-baselines (rerolls-out + the live-market
+walk are sanctioned shifts) · full `verify-all` · `net_map_smoke`.
+**Next: slice 4 (THE JAILBREAK printed curse deals) → slice 5 (minigames) → slice 6 (QUEUE)** —
+ledger §I is the tracker. The zoom-out rebuild of the raid run structure
 Bill asked for ("the raid is all over the place — rebuild it from the ground up; keep the bosses
 for now"). Produced by a 14-agent workflow: 7 recon readers (as-built map code · quest-confusion
 audit · measured sim timings · zone TICKETS v2 · reward economy · genre references · parked
@@ -715,3 +729,23 @@ ledgers.
   probe` stays green). Names BACKUPS/REGENERATE/DEPRECATE reserved only (mechanics = slices 3-5;
   draft REROLL economy untouched). ⏳ heavy verify (raid_map_sim re-baseline · verify-all ·
   net_map_smoke) deferred to a nightly run per Bill (OOM-prone under concurrent box load).
+- 2026-07-10 — **SLICE 3 (PROMPT MARKET + per-seat wallets) BUILT & MERGED `fd8b895`**, three
+  commits behind a 6-reader recon (which disambiguated buildable-vs-deferred + the online scope).
+  **3a per-seat wallets (V#11):** `Draft.mint_diag(diag,cfg,cls)` mints each seat from its OWN
+  `seat.diag` (the human's mint unchanged — `mint` delegates → byte-identical); `raid_hud._mint_
+  seats` credits all 4 wallets post-fight; the AI-draft shared-bank mirror is deleted (AI drafts
+  spend their own ⏣); `commander_probe` re-pointed to per-seat independence. **AI seats START
+  EARNING** (before, `Draft.mint` read only the is_player mirror). **3b rerolls-out (§11 #3):**
+  `run.regenerate` charges are the only reroll — `Draft.reroll` spends a charge (same draft_rng
+  draw), `lock`/`reroll_kept`/`REROLL_COST`/`LOCK_COST` deleted, `draft_screen` shows "REGENERATE
+  (n)" + drops LOCK, Hot Reload → +2 charges on equip; `draft_sim` `_test_lock`→`_test_regenerate`.
+  fight_seed never touches draft_rng → NO fight shift, only draft_sim's transcript re-baselines.
+  **3c THE MARKET:** `RunMap.MARKET_LIVE=true`; new `MarketScreen` (THE SCRAPER's shop); `_show_
+  market` rolls stock on a (map_seed,node) rng — CURIO ×2 (unlocked pool, rarity-priced 6/8/10) ·
+  REGENERATE (4⏣) · PATCH (5⏣), ~+30%/floor; per-seat BUY + AUTO (AI spend own wallets, banter);
+  KIND_MARKET branch (mandatory, no-default=soft-lock); post-Seal recovery MARKET PHASE; Hash-
+  grinder reframed (×2 income → market −1⏣); `raid_map_sim` KIND_MARKET case + `tokens@market`
+  diag + flat mint estimate (sanctioned re-baseline); new `market_probe` (in verify-all) drives
+  the real HUD end-to-end. **Deferred:** +1 BACKUP (no wipe budget — printed SOON) · DEPRECATE
+  (curse=slice 4, boon-scrap=follow-up) · online market (safe no-op, NO protocol bump). ⏳ nightly:
+  the draft_sim/raid_map_sim statistical re-baselines · full verify-all · net_map_smoke.
