@@ -697,22 +697,26 @@ today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief
 beat-source map + 3–8 budget + ULTRATHINK carve-out stay canon). Steal catalog (Hades II ·
 StS1/2 · AtO · Punch-Out/Furi/Sekiro genre) in BOSS-PLAN §5; research run 2026-07-10 (7 agents).
 
-**S0 BASELINE — built & gate-clean on `seal-rework` (`d8bc675`, 2026-07-10, NOT yet merged —
-holds behind tank-w1 to dodge a `raid_sim.gd` conflict).** The pre-rework instrumentation
-(byte-identical to main: 24-row checksum diff clean, determinism PASS ×4) reads today's Seals
-at **good tier, 25 seeds** — this is the gap the rework fills:
+**S0 BASELINE — built & gate-clean; union merge DONE (`cd421be` on `seal-rework`, 2026-07-10).**
+S0 instrumentation is **byte-identical on the union base** (main-vs-S0 checksum diff clean 24
+rows, det PASS ×4). Two baselines now exist — the comp changed underneath the Seals:
 
-| Seal | TTK now | Contract | Gap | Non-tank beats now | Target | Read |
-|---|---|---|---|---|---|---|
-| VORATHEK | 160 s | 300 s | **−47%** | ~18 (blade/caster) | 3–5 | over budget (SEAL-PILLAR's finding, confirmed) + 7-mechanic overload |
-| MISTRAL | 122 s | 420 s | **−71%** | ~4 | 4–6 | shortest Seal, biggest relative gap (matches §4) |
-| GEMINI | 168 s | 540 s | **−69%** | ~8–9 (+6 tank feints) | 5–7 | mid; Double-Check feints already register |
-| MYTHOS | 203 s | 720 s | **−72%** | ~15 | 6–8 | finale most under-filled + over dodge-budget |
+*Old comp (Bulwark+taunt, good tier, pre-union — the gap the rework's LENGTH fills):*
+V 160 s · M 122 s · G 168 s · MY 203 s vs contract 300/420/540/720 (all −47…−72%); non-tank
+beats V ~18 / M ~4 / G ~8–9 / MY ~15 (V+MY over the 3–8 ration).
 
-Every Seal is far under the clock AND (V/MY) over the dodge ration — the rework adds *length*
-via structure while *cutting* the raw dodge load. S1+ (engine addenda, then the four fights)
-resumes when `wow-tank-w1` merges (flow/peels/taunt-delete land there; the boss build consumes
-them). Fresh 300-seed bands land per content slice.
+**⚠ NEW — union comp (Duelist + FLOW=AGGRO, the live comp) shifts the baseline HARD:** at
+**expert** tier the Duelist **DIES to 3 of 4 Seals** — VORATHEK 0% (`tank_death` 19/20) ·
+MISTRAL 85% (TTK 170 s, `tank_death` 3) · GEMINI 0% (20/20) · MYTHOS 0% (20/20). The Seals'
+Crush/tank-string damage was tuned for the beefier Bulwark; the squishier Duelist can't survive
+it. **This is a Duelist-vs-Seal balance signal for the Wave-1 verify pass, AND it means the boss
+rework's job is now dual — lengthen (structure) AND rebalance Seal tank-damage DOWN for the
+Duelist (via SealTune, S2–S5).** Tuning Seals against the Duelist should follow the Duelist's
+own survivability settling (don't tune against a moving target). Non-tank dodge load already
+dropped on the union (peels route hits differently: blade/caster ~3 presented now).
+
+S1 (engine addenda, guarded/byte-identical — balance-independent) proceeds now; S2–S5 content +
+tuning land per slice with fresh bands, coordinated with the Duelist's final numbers.
 
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
@@ -891,6 +895,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `raid_content` delta is party-naming only, so S2–S5 content is conflict-free once the union
   exists. **Turnkey after tank-w1 lands:** rebase seal-rework → re-apply S0 → S1–S5. *(pass 2 —
   recon + verdicts)*
+  **↳ pass 3 (2026-07-10, Bill: "tank is on main, merge with main"):** tank-w1 LANDED in main
+  (`62cc09e` — Duelist + FLOW=AGGRO + deck + Bulwark deletion). **Merged main → `seal-rework`
+  (`cd421be`); the ONE conflict (`raid_sim.gd` `taunts→peels` vs S0) reconciled; S0 re-verified
+  BYTE-IDENTICAL on the union (24 rows), det PASS ×4, import clean.** Union baseline captured →
+  **the Duelist DIES to V/G/MY even at expert** (§BOSSES) = a Wave-1 verify signal + the rework
+  now also rebalances Seal tank-damage for the Duelist. **S1 (engine addenda E1–E9, guarded/
+  byte-identical) is now unblocked and building next** — balance-independent, so it proceeds
+  ahead of the Duelist-tuning question. *(pass 3 — union merge)*
+  **↳ pass 4 (2026-07-10) — S1 ENGINE ADDENDA BUILT & gate-clean on `seal-rework` (`43d70b0`).**
+  The seven guarded primitives the fights build on, every default a no-op: **E1** gated ability
+  sets (`AbilityRes.gate` {phase_from/until·stance·featured} + `_ability_eligible`/`_phase_index`
+  + pick-loop skip) · **E2** stance cycler (`Effect.STANCE_SHIFT` + `EncounterRes.stance_count` +
+  `BossState.stance`) · **E3** BREAK curtain (`Effect.BREAK` + `script_lines`, re-staggers) ·
+  **E4** SealTune (`EncounterRes.tune` + `RaidContent._apply_tune` build scalars) · **E6**
+  deny-race empower (`deny_denom/floor` + `deny_dmg` accrual + resolve clamp) · **E8** kick_window
+  (field; honor rides the class interrupts flag) · **E9** pips (field + `Telegraph.pips_left`).
+  Enum values appended (ordinals never shift). **Gates: raid_sim byte-identical vs main (32 rows,
+  all 4 Seals) · determinism PASS ×4 · raid_probe ALL OK (+12 new E1/E2/E3/E4/E6 asserts) ·
+  ui_smoke_raid ALL OK.** E5/E7 (mark relay / LISTENING) land at S5. **NEXT: S2 (Vorathek v2) —
+  the first content re-baseline** (needs the recs, all decided). *(pass 4 — S1)*
 
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
