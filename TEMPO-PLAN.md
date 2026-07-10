@@ -1455,7 +1455,7 @@ row D8 authors the v6 revision around the winners, inside the v5 verdicts.
 
 ---
 
-## 17. THE TEMPO DECK v3 — full deck around WOUND · SWIFT · FINISH 🟡 AT VERDICT (2026-07-10, Phase-2 D0)
+## 17. THE TEMPO DECK v3→v4 — WOUND · EDGE · FINISH ✅ GO (2026-07-10 · Phase-2 D0 — the §17.12 GO record is the verdict of record; the v3 text below predates the v4 branch swap)
 
 **What this is** (SLATE-PLAN row D0 — the first DECK MACHINE pass; deck-creator playbook
 followed end-to-end; design only, no code). **The winners:** no skeptic ranking was recorded in
@@ -1885,6 +1885,20 @@ S1 deck data → S2 resonance → S3 duos → S4 transforms (→ S6 Set Piece, d
 files, knobs, gates, and the verification matrix. **Pressing locks before the gated slices
 (§0 there):** ① the v4 branches (his own proposal — unblocks S1–S3 fully) · ② the trim table ·
 ③ the transform trio + Floor-2 acquisition. S0 + S5 are approved and buildable immediately.
+
+**✅ THE GO RECORD (Bill, 2026-07-10 evening — "1 yes… and yes tri[m] and yes transform trio"):**
+- **Gate ① OPEN — v4 LOCKED:** branches = **WOUND · EDGE · FINISH**. SWIFT demoted for real:
+  Uptempo ✂️ (→ the EASE dial's beat-speed BITE face) · Quickstep + Through-Line = generic
+  STRIKE boons · Double Time v2 = class-generic keystone. Whetstone + The Strop ✅ to build.
+- **Gate ② OPEN — trim CONFIRMED:** Momentum 🔨→🔮 · Held Breath 🔨→🔮 · **Efficiency 🔨→🔮,
+  Encore KEPT** (the stated lean, taken — veto is cheap) · Da Capo → the Rondo door.
+- **Gate ③ OPEN — transforms ✅:** Cadenza · The Rondo · Tremolo + the Floor-2 1-of-3 ceremony,
+  doors included.
+- **DUOS: approved, DEFERRED** ("we want duos but we can save that for later") — the system ✅
+  stands, the 4 cards stay 🟡 at the board; brief slice S3 moves to the deferred shelf with S6.
+- **Build order now: S0 governor → S5 law reworks → S1 deck data (v4) → S2 resonance → S4
+  transforms.** Deferred: S3 duos · S6 Set Piece · kick carriers (pillar #3) · On the Beat
+  (still his unverdicted candidate). Catalog flipped ✅ this commit; ledger row → ✅ GO.
 
 ---
 

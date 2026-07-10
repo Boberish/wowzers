@@ -8,16 +8,17 @@ your done with the plan to implement, let me know and ill start it"*). Design of
 artifact, D0 tab. Work in a worktree (`git worktree add ../wow-tempo-d0 -b tempo-d0`), merge
 main often, gate every slice.
 
-## 0 · SCOPE GATE — what's approved vs what each slice waits on
+## 0 · SCOPE GATE — ✅ ALL GATES OPEN (Bill's GO, 2026-07-10 evening)
 
-**✅ APPROVED (Bill, 07-10 artifact notes):** the SPEED GOVERNOR ("good") · RESONANCE ("yeah, no
-set bonus") · THE DUO system ("yes we need this, make this rich and nice") · Pickup stays cut
-("meh") · the NO-SINGLE-NEXT-HIT LAW (from his Sforzando/Count-In notes) + its two built-card
-reworks · Grand Pause reword (clarity).
-**🟡 GATED (each blocks only its own slice — listed in §7):** ① the v4 branch lock (WOUND ·
-EDGE · FINISH — Bill proposed it; resonance perks + duo pairs below assume it; if SWIFT stays
-instead, swap tables per §17.10) · ② the trim table · ③ the transform trio + Floor-2 acquisition.
-**Deferred fine:** kick carriers (pillar #3 unbuilt) · THE SET PIECE CD (S6, deferrable).
+**✅ APPROVED:** the SPEED GOVERNOR · RESONANCE · the NO-SINGLE-NEXT-HIT LAW + its reworks ·
+Grand Pause reword · **gate ① the v4 branches LOCKED (WOUND · EDGE · FINISH)** · **gate ② the
+trim CONFIRMED** (park Momentum · Held Breath · Efficiency — **Encore kept**, the stated lean;
+Da Capo → the Rondo door; Uptempo ✂️ → the EASE beat-speed knob) · **gate ③ the TRANSFORM TRIO
++ Floor-2 1-of-3 ceremony, doors included.**
+**⏸ DEFERRED (later wave, do NOT build now):** **S3 THE DUO** — system approved, Bill: *"we
+want duos but we can save that for later"*; the 4 duo cards stay 🟡 · S6 THE SET PIECE CD ·
+kick carriers (pillar #3 unbuilt) · On the Beat (unverdicted candidate — leave out of offers).
+**BUILD ORDER: S0 → S5 → S1 → S2 → S4.** Statuses: flip each card ✅→🔨+SHA per merged slice.
 
 ## 1 · SLICES (build in this order; commit + gate each before the next)
 
@@ -44,7 +45,7 @@ riders are fine (dumps are chosen). Fermata's hold grammar is exempt.
   mechanic change — you can't hold more than full; Overkill's over-cap bank is a separate pot
   that rides on top.)
 
-### S1 · D0 DECK DATA 🟡→ (needs gate ① v4 lock + gate ② trim)
+### S1 · D0 DECK DATA ✅ (gates ①+② OPEN — v4 locked, trim confirmed)
 - `twinfang_boons.gd`: add `theme:"wound"|"edge"|"finish"` tags to EVERY pool card (generics
   untagged); new cards — boons `lacerate` · `slowBleed` · `arterialNote` · `throughline` ·
   `quickstep` · `heavyInk` (+ `grandPause` reword from S5); creeds `openVeins` · `whetstone`
@@ -55,7 +56,8 @@ riders are fine (dumps are chosen). Fermata's hold grammar is exempt.
   iteration order (determinism); inscribe on Bullseye (creed) / Perfect (lacerate); tick in
   `update()`; Evis cash hook when `hemorrhage` held. **The KEEN meter** (strop): int stack on
   Perfect+, consumed by the next crit.
-- **Trim applied** (gate ②): park `flowCap`/Momentum · `heldbreath` · one of Encore/Efficiency;
+- **Trim applied** (gate ② confirmed): park `flowCap`/Momentum · `heldbreath` · `strikeEnergy`/
+  Efficiency (**Encore kept**);
   `daCapo` leaves the open pool → Rondo door (S4). Uptempo does NOT ship as a creed (absorbed
   by the EASE dial — if EASE machinery isn't built yet, beat-speed simply isn't available:
   fine, the governor still guards the rest).
@@ -71,7 +73,7 @@ riders are fine (dumps are chosen). Fermata's hold grammar is exempt.
 - Build-panel chip ("WOUND 3/3 — resonance"). HUD render may defer to the gauge pass (P4 base).
 - **Gates:** threshold fires deterministically per seed · no-resonance runs byte-identical.
 
-### S3 · THE DUO ✅ system (needs S1 tags; the slate per CARD-CATALOG, all 🟡 cards)
+### S3 · THE DUO — ⏸ DEFERRED (Bill: "save that for later"; system ✅, build in a later wave)
 - **System:** a duo enters later offers ONLY while armed — **≥2 drafted cards from EACH of its
   two themes** (the A7 `_crit_source` offer-gating idiom); rolls in the Opus slot; distinct
   two-tone frame (draft render — flag if deferred). No run cap (prereqs + rarity gate it).
@@ -84,7 +86,7 @@ riders are fine (dumps are chosen). Fermata's hold grammar is exempt.
   with S4, proves transforms join the duo grammar).
 - **Gates:** never offered unarmed (probe cell) · undrafted byte-identical · det PASS.
 
-### S4 · TRANSFORMS 🟡→ (needs gate ③)
+### S4 · TRANSFORMS ✅ (gate ③ OPEN — trio + Floor-2 ceremony approved)
 - **Ceremony:** 1-of-3 at the Floor-2 elevation (mirror the module pick / `_show_rig_wire`
   flow in `raid_hud`); ≤1 transformed ability per run; un-rerollable.
 - **Kit branches** (aspect-gated guarded no-ops, byte-identical unpicked — the Brew idiom):
@@ -124,5 +126,5 @@ frame (headless can't render `_draw`).
 
 ## 4 · STATUS FLOW
 Each merged slice: flip CARD-CATALOG rows ✅→🔨+SHA · tick the BUILD-LEDGER D0 row per slice ·
-MASTER-PLAN Coordination Log entry. Gated slices wait for their §0 verdict — do NOT build ahead
-of gate ① on branch-dependent content.
+MASTER-PLAN Coordination Log entry. All gates are OPEN (§0 GO record) — build S0 → S5 → S1 →
+S2 → S4; do NOT build the deferred shelf (S3 duos · S6 Set Piece) without a new verdict.

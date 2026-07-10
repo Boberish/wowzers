@@ -829,6 +829,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO §17.12 GO record + `TEMPO-D0-BRIEF.md` §0 + catalog
+  flips + ledger D0 row → ✅ — **THE D0 GO (Bill: "1 yes… yes tri[m] and yes transform trio").**
+  All three gates OPEN: **v4 LOCKED (Wound · Edge · Finish** — Uptempo ✂️→EASE knob, Whetstone/
+  Strop ✅) · **trim CONFIRMED** (park Momentum · Held Breath · Efficiency, **Encore kept** — the
+  stated lean, cheap veto) · **transforms ✅** (Cadenza · Rondo · Tremolo + Floor-2 ceremony +
+  doors). **DUOS approved-but-DEFERRED** ("save that for later" — system ✅, 4 cards stay 🟡).
+  **Build order: S0 governor → S5 law reworks → S1 deck data → S2 resonance → S4 transforms**;
+  deferred shelf: S3 duos · S6 Set Piece · kick carriers · On the Beat. The build claim is
+  Bill's to start (his ask); catalog rows flip ✅→🔨+SHA per merged slice. *(ability-audit
+  session, the GO)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.12 (NEW) + `TEMPO-D0-BRIEF.md` (NEW, root) +
   CARD-CATALOG flips + ledger D0 row + CLAUDE.md index + artifact D0 tab — **TEMPO ABILITY AUDIT
   PASS 3: Bill's artifact notes folded + THE BUILD BRIEF.** Verdicts: **GOVERNOR ✅ · RESONANCE ✅
