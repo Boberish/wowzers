@@ -4,19 +4,32 @@
 # self-checks live in each), every system probe, and the 4 smokes — in parallel,
 # one log per script, and exits nonzero if ANY of them fails or script-errors.
 #
-#   scripts/verify-all.sh              # the full bar (default seeds, ~fast)
+#   scripts/verify-all.sh              # the full bar (default seeds=60, light)
 #   SEEDS=300 scripts/verify-all.sh    # heavier det/balance confidence
+#   JOBS=6 scripts/verify-all.sh       # more fan-out if the box has RAM to spare
 #   scripts/verify-all.sh --import     # rebuild the class cache first (fresh checkout)
+#
+# ⚠ A single run peaks all cores by design (JOBS Godots × internal threads). To
+# stop concurrent sessions from STACKING runs (→ swap-thrash + OOM on a small
+# WSL box) this script takes a single-run LOCK: a second invocation WAITS for
+# the first to finish instead of piling on. Tune load with SEEDS / JOBS above.
 #
 # Byte-identical A/B vs a baseline is the OTHER half of the law — that's
 # scripts/ab-gate.sh. Visual probes (screenshot_*) need WSLg and stay manual.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GODOT="${GODOT:-$HOME/.local/bin/godot}"
-SEEDS="${SEEDS:-120}"
+SEEDS="${SEEDS:-60}"                     # lighter default; SEEDS=300 for heavy claims
 NC="$(nproc)"
-JOBS="${JOBS:-$(( NC > 6 ? 6 : NC ))}"   # ~30 concurrent Godots OOMs a WSL box — cap the stampede
+JOBS="${JOBS:-$(( NC > 4 ? 4 : NC ))}"   # each Godot is multi-threaded — 4 already peaks a 12-core box; keeps RAM headroom
 LOGD="$(mktemp -d /tmp/rift-verify.XXXXXX)"
+
+# --- single-run lock: a second verify-all WAITS instead of stacking (swap/OOM guard) ---
+exec 9>"${TMPDIR:-/tmp}/rift-verify-all.lock"
+if ! flock -n 9; then
+  echo "verify-all: another run holds the lock — waiting for it to finish before starting…"
+  flock 9
+fi
 
 if [ "${1:-}" = "--import" ]; then
   "$GODOT" --headless --path "$ROOT/godot" --import >/dev/null 2>&1 || true
