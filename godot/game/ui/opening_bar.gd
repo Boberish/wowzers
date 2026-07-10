@@ -7,7 +7,10 @@
 ## when the needle enters it, a sweeping plumb needle with a motion trail, and a spark-burst
 ## PUNISH! on a peak read. Pure view — fed each frame from observe()'s open_* fields.
 class_name OpeningBar
-extends Control
+extends ClassGauge
+
+func _init() -> void:
+	pulse_rate = 5.0
 
 var active: bool = false        ## an opening is scheduled or live
 var now_tick: int = 0
@@ -19,13 +22,10 @@ var bonus_now: float = 0.0      ## live grade of a dump RIGHT NOW (0 .. open_bon
 var armed: bool = false         ## the player has a dump ready to spend into the window
 
 # animation state (all view-only)
-var _pulse: float = 0.0
 var _ignite: float = 0.0        ## 0→1 glow ramp while the needle sits in the window
 var _arm_glow: float = 0.0      ## 0→1 ramp while a dump is ready
 var _trail: Array[float] = []   ## recent needle x-fractions → motion trail
-var _result: String = ""        ## "peak" | "hit" | "whiff"
-var _result_t: float = 0.0
-var _result_x: float = 0.0
+var verdict_x: float = 0.0
 var _burst_t: float = 0.0       ## PUNISH spark-burst timer
 
 const HOLD := 0.72
@@ -33,26 +33,22 @@ const LEAD := 44.0              ## ticks of run-up drawn before the peak (~1.47s
 const TAIL := 16.0              ## ticks drawn after the peak (~0.53s)
 const PAD := 14.0
 
-func show_result(r: String) -> void:
-	_result = r
-	_result_t = HOLD
-	_result_x = _track_x(_tf(float(now_tick)))
+func showverdict(r: String) -> void:
+	flash(r, Palette.GOLD, HOLD)   # verdict slot on the ClassGauge base
+	verdict_x = _track_x(_tf(float(now_tick)))
 	if r == "peak":
 		_burst_t = 1.0
 
-func _process(delta: float) -> void:
-	_pulse += delta * 5.0
+func _tick(delta: float) -> void:
 	var in_win := active and now_tick >= from_tick and now_tick <= to_tick
 	_ignite = move_toward(_ignite, 1.0 if in_win else 0.0, delta * (7.0 if in_win else 4.0))
 	_arm_glow = move_toward(_arm_glow, 1.0 if (armed and active) else 0.0, delta * 5.0)
-	if _result_t > 0.0: _result_t -= delta
 	if _burst_t > 0.0: _burst_t = maxf(0.0, _burst_t - delta * 1.7)
 	if active:
 		_trail.push_back(_tf(float(now_tick)))
 		while _trail.size() > 7: _trail.pop_front()
 	elif not _trail.is_empty():
 		_trail.clear()
-	queue_redraw()
 
 ## absolute tick → 0..1 across the visible span (peak sits near the right).
 func _tf(t: float) -> float:
@@ -121,7 +117,7 @@ func _draw() -> void:
 	# ---- the WOUND (vulnerability window): crimson→ember, breathing outer glow ----
 	var wx0 := _track_x(_tf(float(from_tick)))
 	var wx1 := _track_x(_tf(float(to_tick)))
-	var breath := 0.5 + 0.5 * sin(_pulse * 1.3)
+	var breath := 0.5 + 0.5 * sin(pulse * 1.3)
 	# soft outer bloom (concentric fading rects)
 	for g in range(4, 0, -1):
 		var gm := float(g)
@@ -158,7 +154,7 @@ func _draw() -> void:
 	draw_line(Vector2(px, ty + 1.0), Vector2(px, ty + th - 1.0), seam, 2.0, true)
 	# travelling shimmer inside the core while live
 	if _ignite > 0.4 and cw > 8.0:
-		var shx := cx0 + fmod(_pulse * 30.0, maxf(cw - 5.0, 1.0))
+		var shx := cx0 + fmod(pulse * 30.0, maxf(cw - 5.0, 1.0))
 		draw_rect(Rect2(shx, ty + 3.0, 4.0, th - 6.0), Color(1, 1, 1, 0.35 * _ignite))
 
 	# ---- boundary gems (window edges) + peak gem ----
@@ -193,7 +189,7 @@ func _draw() -> void:
 	if _burst_t > 0.0:
 		var bt := _burst_t
 		var by := ty + th * 0.5
-		var bc := Vector2(_result_x, by)
+		var bc := Vector2(verdict_x, by)
 		# expanding ring
 		var rr := (1.0 - bt) * 30.0 + 4.0
 		draw_arc(bc, rr, 0.0, TAU, 28, Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.6 * bt), 2.0, true)
@@ -209,14 +205,14 @@ func _draw() -> void:
 	_draw_verdict(trk_l, trk_w, ty, th)
 
 func _draw_verdict(_l: float, _w: float, ty: float, _th: float) -> void:
-	if _result_t <= 0.0:
+	if not verdict_live():
 		return
-	var a := clampf(_result_t / HOLD, 0.0, 1.0)
+	var a := verdict_alpha()
 	var grow := 1.0 + (1.0 - a) * 0.4
 	var txt := ""
 	var vc := Palette.GOLD
 	var sz := 18
-	match _result:
+	match verdict:
 		"peak":
 			txt = "PUNISH!"; vc = Palette.GOLD_BRIGHT; sz = 22
 		"hit":
@@ -227,5 +223,5 @@ func _draw_verdict(_l: float, _w: float, ty: float, _th: float) -> void:
 	var f := UiKit.display(700, 1)
 	var fs := int(sz * grow)
 	var tw := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var vx := clampf(_result_x - tw * 0.5, 2.0, size.x - tw - 2.0)
+	var vx := clampf(verdict_x - tw * 0.5, 2.0, size.x - tw - 2.0)
 	UiKit.text_shadowed(self, f, Vector2(vx, ty - 16.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, vc)

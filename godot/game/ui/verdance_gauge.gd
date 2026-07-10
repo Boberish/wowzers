@@ -5,7 +5,7 @@
 ## the ◆ FLOURISH ◆ line at 3+; Thornveil tallies reflected thorn damage in bark amber.
 ## Pure view; the HUD feeds the same fields as before.
 class_name VerdanceGauge
-extends Control
+extends ClassGauge
 
 var aspect: String = "wildgrove"
 var verdance: float = 0.0
@@ -22,18 +22,15 @@ var thorns: int = 0                 ## Thornveil: total reflected damage
 var thorn_charge: int = 0           ## Thornveil: snap-streak (0..max)
 var thorn_charge_max: int = 5
 var thorns_pct: float = 0.45        ## current reflect fraction (ramps with charge)
-var _pulse: float = 0.0
 var _bloom_t: float = 0.0           ## petal pop when a new petal completes
 var _last_lit: int = 0
 
-func _process(delta: float) -> void:
-	_pulse += delta * 3.2
+func _tick(delta: float) -> void:
 	var lit := int(clampf(verdance / maxf(verdance_max, 1.0), 0.0, 1.0) * 8.0)
 	if lit > _last_lit:
 		_bloom_t = 1.0                 # a petal just unfurled
 	_last_lit = lit
 	_bloom_t = maxf(0.0, _bloom_t - delta * 2.4)
-	queue_redraw()
 
 func _draw() -> void:
 	var w := size.x
@@ -52,7 +49,7 @@ func _draw() -> void:
 	# ---- the jade core ----
 	if spendable or _bloom_t > 0.0:
 		var halo := Palette.VERDANCE
-		halo.a = (0.14 + 0.10 * sin(_pulse * 2.0) if spendable else 0.0) + 0.18 * _bloom_t
+		halo.a = (0.14 + 0.10 * sin(pulse * 2.0) if spendable else 0.0) + 0.18 * _bloom_t
 		draw_circle(c, R * 1.65, halo)
 	draw_circle(c, R * 0.80, Palette.FILL_BOT)
 	draw_circle(c - Vector2(0, R * 0.16), R * 0.66, Color(Palette.FILL_TOP.r, Palette.FILL_TOP.g, Palette.FILL_TOP.b, 0.5))
@@ -79,7 +76,7 @@ func _draw() -> void:
 		var mid := base + dir * ln * 0.5
 		var col := Palette.VERDANCE if pf >= 1.0 else Palette.VERDANCE.darkened(0.45)
 		if pf >= 1.0 and spendable:
-			col = col.lerp(Palette.GOLD_BRIGHT, 0.25 + 0.25 * sin(_pulse + float(i)))
+			col = col.lerp(Palette.GOLD_BRIGHT, 0.25 + 0.25 * sin(pulse + float(i)))
 		# the leaf: a pointed four-vertex blade with a darker vein
 		draw_colored_polygon(PackedVector2Array([base, mid + side * 3.4 * pf, tip, mid - side * 3.4 * pf]), col)
 		draw_line(base, tip, col.darkened(0.35), 1.0, true)
@@ -106,7 +103,7 @@ func _draw() -> void:
 			var on := i < garden                       # allies carrying a bed (breadth)
 			if on and flourish:
 				var gh := Palette.VERDANCE
-				gh.a = 0.20 + 0.14 * sin(_pulse * 2.2 + float(i))
+				gh.a = 0.20 + 0.14 * sin(pulse * 2.2 + float(i))
 				draw_circle(gp, 14.0, gh)
 			UiKit.gilded_pip(self, gp, 8.0, on, Palette.VERDANCE)
 		UiKit.engraved_plaque(self, Vector2(gx0 - spacing * 1.5, h - 11.0),
@@ -117,7 +114,7 @@ func _draw() -> void:
 		if flourish_hi:
 			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(c.x + 40.0, h - 7.0),
 				"◆ LUSH FIELD +40% ◆", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
-				Palette.GOLD_BRIGHT.lerp(Palette.VERDANCE, 0.5 + 0.5 * sin(_pulse * 2.0)))
+				Palette.GOLD_BRIGHT.lerp(Palette.VERDANCE, 0.5 + 0.5 * sin(pulse * 2.0)))
 		elif flourish:
 			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(c.x + 40.0, h - 7.0),
 				"FLOURISH +25% — STACK FOR MORE", HORIZONTAL_ALIGNMENT_CENTER, 260.0, UiKit.SIZE["CAPTION"],
@@ -134,7 +131,7 @@ func _draw() -> void:
 			var lit := i < thorn_charge
 			if lit and i == thorn_charge - 1:
 				var th := Palette.THORN
-				th.a = 0.25 + 0.2 * sin(_pulse * 2.4)
+				th.a = 0.25 + 0.2 * sin(pulse * 2.4)
 				draw_circle(tp, 11.0, th)
 			UiKit.gilded_pip(self, tp, 6.5, lit, Palette.THORN)
 		UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(c.x + 40.0, h - 8.0),

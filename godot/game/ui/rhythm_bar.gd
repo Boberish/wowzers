@@ -10,7 +10,10 @@
 ## the window you were. Without the hold, the bar would instantly reset and its live
 ## hint would read "too early", which looks like it's judging the press you just landed.
 class_name RhythmBar
-extends Control
+extends ClassGauge
+
+func _init() -> void:
+	pulse_rate = 8.0
 
 const HOLD := 0.55
 
@@ -38,9 +41,6 @@ var ramp_good_frac: float = 0.45   ## GOOD covers this fraction of the window fr
 var ramp_perfect_frac: float = 0.37 ## …then PERFECT; the rest to the lip is BULLSEYE
 var lip: int = 0               ## the cliff tick (= window hi, or hi+extension under Patient)
 var dance_no_snap: bool = false ## Shadow Dance: the cliff is gone — ride freely
-var _pulse: float = 0.0
-var _result: String = ""      ## "perfect" | "early" | "late"
-var _result_t: float = 0.0    ## fade timer for the verdict flash
 var _press_f: float = 0.0     ## track fraction where the last Strike landed
 var _prev_prog: float = 0.0   ## last frame's needle position (pre-reset)
 var _prev_aim_f: float = 0.0  ## last frame's aim-line position (snapshot with the press)
@@ -49,9 +49,8 @@ var _press_off_ticks: float = 0.0  ## signed ticks off the aim line (+ = late of
 var _bull: bool = false        ## a Perfect landed within ~50ms of the aim line
 
 ## Called by the HUD when a Strike lands (drained from the combat event stream).
-func show_result(r: String) -> void:
-	_result = r
-	_result_t = HOLD
+func showverdict(r: String) -> void:
+	flash(r, Color.WHITE, HOLD)   # verdict slot on the ClassGauge base
 	_press_f = _prev_prog     # the needle has already snapped back — remember where it was
 	# Snapshot the aim line WITH the press so an accelerando shift during the 0.55s hold
 	# can't relabel how far off the ideal beat you were.
@@ -59,13 +58,8 @@ func show_result(r: String) -> void:
 	var hi := maxf(1.0, float(maxi(scale_ticks, perfect_hi + 2)))
 	_press_off_ticks = (_press_f - _press_aim_f) * hi
 	# FERMATA ramp passes the real grade string; Tempo derives the bullseye from press-offset.
-	_bull = _result == "bullseye" if ramp else (_result == "perfect" and absf(_press_off_ticks) <= 1.5)
+	_bull = verdict == "bullseye" if ramp else (verdict == "perfect" and absf(_press_off_ticks) <= 1.5)
 
-func _process(delta: float) -> void:
-	_pulse += delta * 8.0
-	if _result_t > 0.0:
-		_result_t = maxf(0.0, _result_t - delta)
-	queue_redraw()
 
 func _draw() -> void:
 	var w := size.x
@@ -84,8 +78,8 @@ func _draw() -> void:
 	var edge_hi := lip if (ramp and lip > 0) else perfect_hi
 	var in_green := since >= perfect_lo and since <= edge_hi
 	var past := since > edge_hi
-	var flashing := _result_t > 0.0
-	var fa := clampf(_result_t / HOLD, 0.0, 1.0)   # 1 -> 0 fade
+	var flashing := verdict_live()
+	var fa := verdict_alpha()   # 1 -> 0 fade
 
 	# ---- header: plaque + live cue + TEMPO readout (the accelerando made explicit) ----
 	UiKit.engraved_plaque(self, Vector2(76.0, 10.0), "STRIKE TIMING", in_green)
@@ -192,7 +186,7 @@ func _draw() -> void:
 		draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th - 6), ig, false, 1.2)
 		draw_rect(Rect2(lo_x + 1, ty + 3, bw - 3, th * 0.30), Color(1, 1, 1, 0.10))
 		if in_green and bw > 16.0:      # travelling shimmer while the press would be Perfect
-			var sx := lo_x + fmod(_pulse * 34.0, maxf(bw - 8.0, 1.0))
+			var sx := lo_x + fmod(pulse * 34.0, maxf(bw - 8.0, 1.0))
 			var sh := Palette.PERFECT.lightened(0.5)
 			sh.a = 0.38
 			draw_rect(Rect2(sx, ty + 3, 7.0, th - 6), sh)
@@ -255,11 +249,11 @@ func _draw() -> void:
 
 	# ---- verdict tint + ghost needle at the pressed spot ----
 	if flashing:
-		var tc := _result_color()
+		var tc := _verdict_col()
 		tc.a = 0.26 * fa
 		draw_rect(Rect2(tx + 2, ty + 2, tw - 4, th - 4), tc)
 		var px := tx + tw * _press_f
-		var gcol := _result_color()
+		var gcol := _verdict_col()
 		gcol.a = 0.85 * fa
 		draw_line(Vector2(px, ty - 2.0), Vector2(px, ty + th + 2.0), gcol, 3.0, true)
 		# burst where you pressed
@@ -267,12 +261,12 @@ func _draw() -> void:
 		gcol.a = 0.7 * fa
 		draw_arc(Vector2(px, ty - 8.0), br, 0.0, TAU, 24, gcol, 2.0, true)
 		# offset connector — SEE how far the press landed from the ideal beat (the plumb)
-		var conn := Palette.GOLD_BRIGHT if _bull else _result_color()
+		var conn := Palette.GOLD_BRIGHT if _bull else _verdict_col()
 		conn.a = 0.55 * fa
 		draw_line(Vector2(px, ty - 12.0), Vector2(aim_x, ty - 12.0), conn, 1.0, true)
 		draw_line(Vector2(px, ty - 15.0), Vector2(px, ty - 9.0), conn, 1.0, true)
 		draw_line(Vector2(aim_x, ty - 15.0), Vector2(aim_x, ty - 9.0), conn, 1.0, true)
-		if _result == "perfect":
+		if verdict == "perfect":
 			var reach := 9.0 + (7.0 if _bull else 0.0)   # tighter aim → longer, brighter rays
 			for k in 6:
 				var a := TAU * float(k) / 6.0 - PI / 2.0
@@ -300,7 +294,7 @@ func _draw() -> void:
 			draw_rect(Rect2(mx - trail_w + seg * float(k), ty + 3, seg, th - 6), tcol)
 	if in_green:
 		var halo := Palette.PERFECT
-		halo.a = 0.30 + 0.20 * sin(_pulse)
+		halo.a = 0.30 + 0.20 * sin(pulse)
 		draw_rect(Rect2(mx - 5.0, ty - 3.0, 10.0, th + 6.0), halo)
 	draw_rect(Rect2(mx - 1.5, ty - 4.0, 3.0, th + 10.0), mcol)
 	draw_rect(Rect2(mx - 0.5, ty - 4.0, 1.0, th + 10.0), Color(1, 1, 1, 0.5))
@@ -315,7 +309,7 @@ func _draw() -> void:
 		var rr := 14.0
 		draw_arc(ctr, rr, 0.0, TAU, 40, Color(umbra.r, umbra.g, umbra.b, 0.25), 3.0, true)
 		if coil_sharp:
-			var hot := Color(1, 1, 1, 0.80 + 0.20 * sin(_pulse * 1.4))   # white-hot pulse = release-live
+			var hot := Color(1, 1, 1, 0.80 + 0.20 * sin(pulse * 1.4))   # white-hot pulse = release-live
 			draw_arc(ctr, rr, 0.0, TAU, 40, hot, 3.5, true)
 		else:
 			var fill := TAU * clampf(coil_charge, 0.0, 1.0)
@@ -345,7 +339,7 @@ func _draw() -> void:
 			var rc := "RIDE IT — deeper pays" if ramp else "RELEASE!"
 			UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), rc,
 				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER" if not ramp else "LABEL"],
-				Color(1, 1, 1, 0.6 + 0.4 * sin(_pulse)))
+				Color(1, 1, 1, 0.6 + 0.4 * sin(pulse)))
 		elif past:
 			var pc := "SNAP — held too deep" if ramp else "LATE — RELEASE NOW"
 			UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(0, my), pc,
@@ -354,18 +348,18 @@ func _draw() -> void:
 			UiKit.text_shadowed(self, UiKit.display(700, 1), Vector2(0, my), "sharp — wait for green…",
 				HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], umb)
 	elif flashing:
-		UiKit.text_shadowed(self, UiKit.display(750, 1), Vector2(0, my), _result_text(),
+		UiKit.text_shadowed(self, UiKit.display(750, 1), Vector2(0, my), _verdict_text(),
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
-			Color(_result_color().r, _result_color().g, _result_color().b, 0.55 + 0.45 * fa))
+			Color(_verdict_col().r, _verdict_col().g, _verdict_col().b, 0.55 + 0.45 * fa))
 	elif fermata and not coiling:
 		# THE DRAW is yours to start — no clock runs while idle (cast dumps in the calm).
 		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0, my), "HOLD 1 — start the draw",
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"],
-			Color(0.72, 0.62, 1.0, 0.5 + 0.2 * sin(_pulse * 0.5)))
+			Color(0.72, 0.62, 1.0, 0.5 + 0.2 * sin(pulse * 0.5)))
 	elif in_green:
 		UiKit.text_shadowed(self, UiKit.display(750, 2), Vector2(0, my), "STRIKE!",
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["HEADER"],
-			Color(Palette.PERFECT.r, Palette.PERFECT.g, Palette.PERFECT.b, 0.55 + 0.45 * sin(_pulse)))
+			Color(Palette.PERFECT.r, Palette.PERFECT.g, Palette.PERFECT.b, 0.55 + 0.45 * sin(pulse)))
 	elif past:
 		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(0, my), "LATE — STRIKE NOW",
 			HORIZONTAL_ALIGNMENT_CENTER, w, UiKit.SIZE["LABEL"], Palette.RAGE)
@@ -383,7 +377,7 @@ func _draw() -> void:
 func _gem(at: Vector2, r: float, body: Color, live: bool) -> void:
 	if live:
 		var halo := body.lightened(0.2)
-		halo.a = 0.30 + 0.20 * sin(_pulse)
+		halo.a = 0.30 + 0.20 * sin(pulse)
 		draw_circle(at, r * 1.8, halo)
 	var pts := PackedVector2Array([at + Vector2(0, -r), at + Vector2(r * 0.75, 0),
 		at + Vector2(0, r), at + Vector2(-r * 0.75, 0)])
@@ -398,7 +392,7 @@ func _gem(at: Vector2, r: float, body: Color, live: bool) -> void:
 func _needle_head(at: Vector2, col: Color, live: bool) -> void:
 	if live:
 		var halo := col
-		halo.a = 0.35 + 0.25 * sin(_pulse)
+		halo.a = 0.35 + 0.25 * sin(pulse)
 		draw_circle(at, 10.0, halo)
 	var pts := PackedVector2Array([at + Vector2(0, -7.0), at + Vector2(5.5, 0),
 		at + Vector2(0, 7.0), at + Vector2(-5.5, 0)])
@@ -409,8 +403,8 @@ func _needle_head(at: Vector2, col: Color, live: bool) -> void:
 	draw_line(pts[3], pts[0], Palette.GOLD, 1.3, true)
 	draw_circle(at + Vector2(-1.6, -2.2), 1.6, Color(1, 1, 1, 0.8))
 
-func _result_color() -> Color:
-	match _result:
+func _verdict_col() -> Color:
+	match verdict:
 		"bullseye": return Palette.GOLD_BRIGHT
 		"perfect": return Palette.PERFECT
 		"good": return Palette.PERFECT.darkened(0.2)
@@ -418,10 +412,10 @@ func _result_color() -> Color:
 		"early": return Palette.RAGE
 		_: return Palette.CRIMSON
 
-func _result_text() -> String:
+func _verdict_text() -> String:
 	# FERMATA (EDGE): the ramp verdicts read by DEPTH, and the SNAP is the cliff.
 	if ramp:
-		match _result:
+		match verdict:
 			"bullseye": return "BULLSEYE — the lip!"
 			"perfect": return "PERFECT"
 			"good": return "GOOD — safe & shallow"
@@ -429,7 +423,7 @@ func _result_text() -> String:
 			_: return "MISS"
 	if _bull:
 		return "BULLSEYE!"
-	match _result:
+	match verdict:
 		"perfect":
 			# high-granularity feedback: how many ms off the ideal beat you were
 			return "PERFECT!  %+.0f ms" % (_press_off_ticks * (1000.0 / 30.0))

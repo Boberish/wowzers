@@ -17,7 +17,10 @@
 ## the HUD feeds observe() fields each frame and pushes combat events via on_event();
 ## signals carry intent OUT — nothing here touches state.
 class_name BrewGauge
-extends Control
+extends ClassGauge
+
+func _init() -> void:
+	pulse_rate = 3.0
 
 signal brew_pressed(side: String)   ## pointer went down on a reservoir — start the hold
 signal brew_released()              ## the held pointer lifted — pour
@@ -61,11 +64,6 @@ var _tilt_d := 0.0                  ## see-saw beam angle (−1 venom-heavy … 
 var _ripe_d := 0.0
 
 # --- feedback state (driven by on_event) ---
-var _pulse := 0.0
-var _banner := ""
-var _banner_col := Palette.GOLD_BRIGHT
-var _banner_t := 0.0
-var _banner_hold := 0.85
 var _col_flash := {"venom": 0.0, "rot": 0.0}     ## pour landed — reservoir rim flash
 var _vial_stamp := {}               ## {lvl, col, t} — verdict line where you released
 var _pour_drops: Array = []         ## droplet stream vial → reservoir [{t, side, col}]
@@ -75,15 +73,13 @@ var _history: Array = []            ## last 8 pours [{col, hollow, big}]
 var _hist_pop := 0.0
 var _held_zone := ""                ## pointer bookkeeping: which zone owns the press
 
-const VERDICT_HOLD := 0.85
 const STAMP_HOLD := 0.6
 const EASE := 14.0                  ## display spring rate (fast attack, no lag feel)
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-func _process(delta: float) -> void:
-	_pulse += delta * 3.0
+func _tick(delta: float) -> void:
 	var k := minf(1.0, EASE * delta)
 	_venom_d += (venom - _venom_d) * k
 	_rot_d += (rot - _rot_d) * k
@@ -95,7 +91,6 @@ func _process(delta: float) -> void:
 	_tilt_d += (tilt - _tilt_d) * minf(1.0, 8.0 * delta)
 	var power := (minf(venom, rot) / maxf(1.0, cap)) * (0.5 + 0.5 * balance)
 	_bloom_d += (power - _bloom_d) * minf(1.0, 10.0 * delta)
-	_banner_t = maxf(0.0, _banner_t - delta)
 	_dud_t = maxf(0.0, _dud_t - delta * 3.0)
 	_hist_pop = maxf(0.0, _hist_pop - delta * 3.0)
 	for side in _col_flash:
@@ -111,7 +106,6 @@ func _process(delta: float) -> void:
 		_burst["t"] = float(_burst["t"]) - delta
 		if float(_burst["t"]) <= 0.0:
 			_burst = {}
-	queue_redraw()
 
 # ------------------------------------------------------------------ input zones
 ## Layout (Bill 2026-07-06): the two poison bars sit SHOULDER-TO-SHOULDER as one
@@ -151,11 +145,8 @@ func _gui_input(event: InputEvent) -> void:
 				accept_event()
 
 # ------------------------------------------------------------------ feedback
-func _set_banner(word: String, col: Color, punch := 1.0) -> void:
-	_banner = word
-	_banner_col = col
-	_banner_hold = VERDICT_HOLD * punch
-	_banner_t = _banner_hold
+func _setverdict(word: String, col: Color, punch := 1.0) -> void:
+	flash(word, col, VERDICT_HOLD * punch)   # verdict slot on the ClassGauge base
 
 ## The combat event stream (already filtered to MY seat by the HUD).
 func on_event(ev: Dictionary) -> void:
@@ -168,18 +159,18 @@ func on_event(ev: Dictionary) -> void:
 			var lvl := charge                       # release level (obs still holds it this frame)
 			match grade:
 				"fizzle":
-					_set_banner("TOO SOON", Palette.TEXT_DIM, 0.7)
+					_setverdict("TOO SOON", Palette.TEXT_DIM, 0.7)
 				"spoiled":
-					_set_banner("SPOILED!", Palette.SPOIL, 1.1)
+					_setverdict("SPOILED!", Palette.SPOIL, 1.1)
 					_vial_stamp = {"lvl": maxf(lvl, 1.02), "col": Palette.SPOIL, "t": STAMP_HOLD}
 				"hot":
-					_set_banner("HOT +%d" % dose, Palette.GOLD_BRIGHT, 1.05)
+					_setverdict("HOT +%d" % dose, Palette.GOLD_BRIGHT, 1.05)
 					_vial_stamp = {"lvl": lvl, "col": Palette.GOLD_BRIGHT, "t": STAMP_HOLD}
 				"potent":
-					_set_banner("POTENT +%d" % dose, Palette.PERFECT, 1.0)
+					_setverdict("POTENT +%d" % dose, Palette.PERFECT, 1.0)
 					_vial_stamp = {"lvl": lvl, "col": Palette.PERFECT, "t": STAMP_HOLD}
 				_:
-					_set_banner("+%d" % dose, scol, 0.75)
+					_setverdict("+%d" % dose, scol, 0.75)
 					_vial_stamp = {"lvl": lvl, "col": scol, "t": STAMP_HOLD}
 			if grade != "fizzle":
 				_col_flash[side] = 1.0
@@ -197,18 +188,18 @@ func on_event(ev: Dictionary) -> void:
 		"brew_rupture":
 			var amt := int(ev.get("amt", 0))
 			var peak := bool(ev.get("peak", false))
-			_set_banner(("RUPTURE  %d" % amt) + ("  — AT PEAK" if peak else ""),
+			_setverdict(("RUPTURE  %d" % amt) + ("  — AT PEAK" if peak else ""),
 				Palette.REACT_HOT, 1.35 if peak else 1.15)
 			_burst = {"t": STAMP_HOLD, "big": peak}
 			_push_gem(Palette.REACT_HOT, false, true)
 		"brew_dud":
-			_set_banner("nothing to rupture", Palette.TEXT_DIM, 0.6)
+			_setverdict("nothing to rupture", Palette.TEXT_DIM, 0.6)
 			_dud_t = 1.0
 		"brew_ferment":
-			_set_banner("FERMENT  %d" % int(ev.get("amt", 0)), Palette.ROT_BREW.lerp(Palette.REACT, 0.5), 1.2)
+			_setverdict("FERMENT  %d" % int(ev.get("amt", 0)), Palette.ROT_BREW.lerp(Palette.REACT, 0.5), 1.2)
 			_burst = {"t": STAMP_HOLD, "big": false}
 		"brew_catalyst":
-			_set_banner("CATALYST DROPPED", Palette.GOLD_BRIGHT, 1.0)
+			_setverdict("CATALYST DROPPED", Palette.GOLD_BRIGHT, 1.0)
 
 func _push_gem(col: Color, hollow: bool, big: bool) -> void:
 	_history.append({"col": col, "hollow": hollow, "big": big})
@@ -234,7 +225,7 @@ func _draw() -> void:
 	_draw_potency(w, h)
 	_draw_modules(w, h)
 	_draw_history(w, h)
-	_draw_banner(w, h)
+	_drawverdict(w, h)
 
 func _draw_panel(w: float, h: float) -> void:
 	var sb := StyleBoxFlat.new()
@@ -248,7 +239,7 @@ func _draw_panel(w: float, h: float) -> void:
 		var c := _chamber_c()
 		var wash := Palette.REACT
 		draw_circle(c, _chamber_r() * (2.1 + 0.5 * _bloom_d),
-			Color(wash.r, wash.g, wash.b, 0.045 * _bloom_d + 0.02 * _bloom_d * sin(_pulse * 1.7)))
+			Color(wash.r, wash.g, wash.b, 0.045 * _bloom_d + 0.02 * _bloom_d * sin(pulse * 1.7)))
 	UiKit.filigree_corner(self, Vector2(0, 0), Vector2(1, 1))
 	UiKit.filigree_corner(self, Vector2(w, 0), Vector2(-1, 1))
 	UiKit.filigree_corner(self, Vector2(0, h), Vector2(1, -1))
@@ -280,7 +271,7 @@ func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s
 			draw_rect(Rect2(z.position.x + 1, top_y + fh * (1.0 - t0 - 1.0 / steps),
 				z.size.x - 2, fh / steps + 1.0), seg_col)
 		# the lit, wobbling surface — the liquid is ALIVE
-		var wob := sin(_pulse * 2.4 + z.position.x) * 1.6
+		var wob := sin(pulse * 2.4 + z.position.x) * 1.6
 		draw_rect(Rect2(z.position.x + 1, top_y + wob - 1.5, z.size.x - 2, 3.0), col.lightened(0.35))
 		draw_rect(Rect2(z.position.x + 1, top_y + wob + 1.5, z.size.x - 2, 2.0),
 			Color(1, 1, 1, 0.18))
@@ -305,7 +296,7 @@ func _draw_reservoir(z: Rect2, val_d: float, val_live: float, col: Color, name_s
 	var cue := "…POURING" if held else "HOLD"
 	UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(z.get_center().x - 40, z.position.y - 10.0),
 		cue, HORIZONTAL_ALIGNMENT_CENTER, 80, 9,
-		col if held else Color(col.r, col.g, col.b, 0.55 + 0.2 * sin(_pulse * 2.0)))
+		col if held else Color(col.r, col.g, col.b, 0.55 + 0.2 * sin(pulse * 2.0)))
 
 ## The VIAL — the skill instrument: sweet band, red line, min floor, live liquor.
 func _draw_vial(w: float, h: float) -> void:
@@ -325,7 +316,7 @@ func _draw_vial(w: float, h: float) -> void:
 	var sweet_top: float = lvl_y.call(sweet_hi)
 	var sweet_bot: float = lvl_y.call(sweet_lo)
 	# the band breathes while the vial is live — the target zone begs for the release
-	var band_a := (0.34 + 0.10 * sin(_pulse * 4.0)) if live else 0.14
+	var band_a := (0.34 + 0.10 * sin(pulse * 4.0)) if live else 0.14
 	draw_rect(Rect2(v.position.x + 1, sweet_top, v.size.x - 2, sweet_bot - sweet_top),
 		Color(Palette.PERFECT.r, Palette.PERFECT.g, Palette.PERFECT.b, band_a))
 	draw_rect(Rect2(v.position.x + 1, sweet_top, v.size.x - 2, sweet_bot - sweet_top),
@@ -343,24 +334,24 @@ func _draw_vial(w: float, h: float) -> void:
 		var over := charge > overflow_at
 		var lcol := Palette.SPOIL if over else col
 		var top: float = lvl_y.call(charge)
-		var wob := sin(_pulse * 6.0) * 1.2
+		var wob := sin(pulse * 6.0) * 1.2
 		var fill_top := top + wob
 		draw_rect(Rect2(v.position.x + 2, fill_top, v.size.x - 4,
 			v.position.y + v.size.y - fill_top - 2.0), Color(lcol.r, lcol.g, lcol.b, 0.85))
 		draw_rect(Rect2(v.position.x + 2, fill_top - 1.0, v.size.x - 4, 3.0), lcol.lightened(0.45))
 		# rising bubbles — the brew is working
 		for i in 4:
-			var ph := fmod(_pulse * (0.9 + 0.23 * float(i)) + float(i) * 1.7, 1.0)
+			var ph := fmod(pulse * (0.9 + 0.23 * float(i)) + float(i) * 1.7, 1.0)
 			var by := v.position.y + v.size.y - 4.0 - (v.position.y + v.size.y - fill_top - 6.0) * ph
 			if by > fill_top + 3.0:
-				var bx := v.get_center().x + sin(_pulse * 3.0 + float(i) * 2.1) * v.size.x * 0.22
+				var bx := v.get_center().x + sin(pulse * 3.0 + float(i) * 2.1) * v.size.x * 0.22
 				draw_circle(Vector2(bx, by), 1.4 + 0.7 * float(i % 2),
 					Color(1, 1, 1, 0.30 * (1.0 - ph)))
 		# urgency: past the sweet band the tube pulses toward the red line
 		if charge > sweet_hi:
 			var u := clampf((charge - sweet_hi) / (charge_max - sweet_hi), 0.0, 1.0)
 			draw_rect(v.grow(3.0), Color(Palette.SPOIL.r, Palette.SPOIL.g, Palette.SPOIL.b,
-				(0.25 + 0.30 * sin(_pulse * 9.0)) * u), false, 2.5)
+				(0.25 + 0.30 * sin(pulse * 9.0)) * u), false, 2.5)
 		# release cue
 		var in_sweet := charge >= sweet_lo and charge <= sweet_hi
 		var cue := "OVERFLOW!" if over else ("RELEASE!" if in_sweet else ("keep holding" if charge < fizzle_below else "…"))
@@ -405,7 +396,7 @@ func _draw_chamber(w: float, h: float) -> void:
 	var r := _chamber_r()
 	# acid bloom behind the ring (radius + brightness = the boil)
 	if _bloom_d > 0.01:
-		var pr := r * (0.5 + 1.1 * _bloom_d) * (1.0 + 0.05 * sin(_pulse * 2.6))
+		var pr := r * (0.5 + 1.1 * _bloom_d) * (1.0 + 0.05 * sin(pulse * 2.6))
 		var steps := 5
 		for i in steps:
 			var t := 1.0 - float(i) / float(steps)
@@ -413,7 +404,7 @@ func _draw_chamber(w: float, h: float) -> void:
 			draw_circle(c, pr * t, Color(bc.r, bc.g, bc.b, (0.06 + 0.34 * _bloom_d) * (0.35 + 0.16 * float(i))))
 	# RIPE halo — breathing, brightening ring outside the bezel as fuel × power peak
 	if _ripe_d > 0.05:
-		var halo_r := r + 9.0 + 3.5 * sin(_pulse * (2.0 + 2.5 * _ripe_d))
+		var halo_r := r + 9.0 + 3.5 * sin(pulse * (2.0 + 2.5 * _ripe_d))
 		var hcol := Palette.REACT.lerp(Palette.REACT_HOT, _ripe_d)
 		draw_arc(c, halo_r, 0.0, TAU, 48, Color(hcol.r, hcol.g, hcol.b, 0.15 + 0.55 * _ripe_d),
 			2.0 + 4.0 * _ripe_d, true)
@@ -422,7 +413,7 @@ func _draw_chamber(w: float, h: float) -> void:
 	UiKit.engraved_ticks(self, c, r - 9.0, r - 3.0, 16)
 	# dud shiver — an empty rupture tap rattles the bezel
 	if _dud_t > 0.0:
-		var sx := sin(_pulse * 30.0) * 2.5 * _dud_t
+		var sx := sin(pulse * 30.0) * 2.5 * _dud_t
 		draw_arc(c + Vector2(sx, 0), r - 1.0, 0.0, TAU, 48,
 			Color(Palette.TEXT_DIM.r, Palette.TEXT_DIM.g, Palette.TEXT_DIM.b, 0.5 * _dud_t), 1.5, true)
 	# the live reaction numeral
@@ -501,9 +492,9 @@ func _draw_potency(w: float, h: float) -> void:
 		draw_rect(Rect2(x + fw - 2.0, y + 1, 2.5, bh - 2), Palette.REACT_HOT.lightened(0.2))
 		# hot shimmer: a travelling highlight once the boil is real
 		if frac > 0.66:
-			var sh := x + fmod(_pulse * 60.0, maxf(1.0, fw))
+			var sh := x + fmod(pulse * 60.0, maxf(1.0, fw))
 			draw_rect(Rect2(sh, y + 2, 6.0, bh - 4), Color(1, 1, 1, 0.22))
-			draw_rect(Rect2(x, y + 2, fw, bh - 4), Color(1, 1, 1, 0.05 + 0.06 * sin(_pulse * 5.0)))
+			draw_rect(Rect2(x, y + 2, fw, bh - 4), Color(1, 1, 1, 0.05 + 0.06 * sin(pulse * 5.0)))
 	var hot := frac > 0.66
 	UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(x, y - 8.0),
 		"POTENCY", HORIZONTAL_ALIGNMENT_LEFT, 90, 9,
@@ -541,7 +532,7 @@ func _draw_modules(w: float, h: float) -> void:
 	if frac > 0.004:
 		draw_rect(Rect2(x + 1, y + 2, (bw - 2) * frac, bh - 4), col)
 		if mod_reagent_active and mod_third_reagent:
-			draw_rect(Rect2(x + 1, y + 2, bw - 2, bh - 4), Color(1, 1, 1, 0.06 + 0.06 * sin(_pulse * 6.0)))
+			draw_rect(Rect2(x + 1, y + 2, bw - 2, bh - 4), Color(1, 1, 1, 0.06 + 0.06 * sin(pulse * 6.0)))
 	UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(x, y - 9.0),
 		label, HORIZONTAL_ALIGNMENT_LEFT, int(bw), 9, col)
 
@@ -564,17 +555,17 @@ func _draw_history(w: float, h: float) -> void:
 			draw_circle(Vector2(px, y), pr * 0.55, Color(0.05, 0.05, 0.08, a))
 		UiKit.gilded_ring(self, Vector2(px, y), pr, 1.2, 12)
 
-func _draw_banner(w: float, h: float) -> void:
+func _drawverdict(w: float, h: float) -> void:
 	var cx := w * 0.5
 	var y := h * 0.085
-	if _banner_t > 0.0 and _banner != "":
-		var f := _banner_t / maxf(0.01, _banner_hold)
+	if verdict_live() and verdict != "":
+		var f := verdict_alpha()
 		var scale := 1.0 + 0.32 * f * f          # scale-punch: overshoot then settle
 		var a := clampf(0.35 + f, 0.0, 1.0)
-		var col := Color(_banner_col.r, _banner_col.g, _banner_col.b, a)
+		var col := Color(verdict_color.r, verdict_color.g, verdict_color.b, a)
 		var fnt := UiKit.display(750, 2)
 		var sz := int((UiKit.SIZE["GAUGE"] - 6) * scale)
-		UiKit.text_shadowed(self, fnt, Vector2(cx - 320, y - sz * 0.5), _banner,
+		UiKit.text_shadowed(self, fnt, Vector2(cx - 320, y - sz * 0.5), verdict,
 			HORIZONTAL_ALIGNMENT_CENTER, 640, sz, col)
 	else:
 		# idle cue line — what to do next, in the instrument's own voice
@@ -590,7 +581,7 @@ func _draw_banner(w: float, h: float) -> void:
 			cue = "TIPPED — FEED THE LIGHT SIDE"
 		else:
 			cue = "KEEP IT FED — THE REACTION EATS THE BREW"
-		var pa := 0.7 + 0.3 * sin(_pulse * 2.0) if ccol != Palette.TEXT_DIM else 0.85
+		var pa := 0.7 + 0.3 * sin(pulse * 2.0) if ccol != Palette.TEXT_DIM else 0.85
 		UiKit.text_shadowed(self, UiKit.display(700, 3), Vector2(cx - 300, y - 8),
 			cue, HORIZONTAL_ALIGNMENT_CENTER, 600, UiKit.SIZE["LABEL"],
 			Color(ccol.r, ccol.g, ccol.b, pa))

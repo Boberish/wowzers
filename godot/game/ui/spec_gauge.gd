@@ -3,7 +3,10 @@
 ## a gilded Momentum core — an engraved ring that fills, ticks, and flares as the
 ## snowball grows, with the payoff readout on a plaque.
 class_name SpecGauge
-extends Control
+extends ClassGauge
+
+func _init() -> void:
+	pulse_rate = 4.0
 
 var aspect: String = "warden"
 var counter: int = 0
@@ -13,17 +16,14 @@ var momentum: int = 0
 var momentum_max: int = 10
 var overdrive: bool = false     ## Juggernaut: at the redline cap
 var riposte: bool = false
-var _pulse: float = 0.0
 var _last_counter: int = 0
 var _break_t: float = 0.0       ## chain-break flash
 
-func _process(delta: float) -> void:
-	_pulse += delta * 4.0
+func _tick(delta: float) -> void:
 	if counter < _last_counter and counter > 0:   # a partial drop = the chain BROKE (a spend zeroes it)
 		_break_t = 1.0
 	_last_counter = counter
 	_break_t = maxf(0.0, _break_t - delta * 2.0)
-	queue_redraw()
 
 func _draw() -> void:
 	if aspect == "warden":
@@ -38,7 +38,7 @@ func _draw() -> void:
 			Color(Palette.GOLD_DIM.r, Palette.GOLD_DIM.g, Palette.GOLD_DIM.b, 0.5), 1.2, true)
 		# riposte: radiant burst behind the lit gems
 		if riposte:
-			var ba := 0.20 + 0.15 * sin(_pulse * 2.0)
+			var ba := 0.20 + 0.15 * sin(pulse * 2.0)
 			for i in range(counter):
 				var bx := size.x * 0.5 + (float(i) - float(n - 1) / 2.0) * spacing
 				draw_circle(Vector2(bx, y), 16.0, Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, ba))
@@ -47,7 +47,7 @@ func _draw() -> void:
 			var lx0 := size.x * 0.5 + (0.0 - float(n - 1) / 2.0) * spacing
 			var lx1 := size.x * 0.5 + (float(counter - 1) - float(n - 1) / 2.0) * spacing
 			var lc := Palette.CRIMSON if _break_t > 0.0 else Palette.GOLD_BRIGHT
-			lc.a = 0.55 + 0.3 * sin(_pulse * 2.0)
+			lc.a = 0.55 + 0.3 * sin(pulse * 2.0)
 			draw_line(Vector2(lx0, y), Vector2(lx1, y), lc, 3.0, true)
 		for i in range(n):
 			var x := size.x * 0.5 + (float(i) - float(n - 1) / 2.0) * spacing
@@ -58,7 +58,7 @@ func _draw() -> void:
 		elif riposte:
 			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(0, y + 32.0), "◆ RIPOSTE READY ◆",
 				HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"],
-				Palette.GOLD_BRIGHT.lerp(Palette.GOLD, 0.5 + 0.5 * sin(_pulse)))
+				Palette.GOLD_BRIGHT.lerp(Palette.GOLD, 0.5 + 0.5 * sin(pulse)))
 		else:
 			UiKit.engraved_plaque(self, Vector2(size.x * 0.5, y + 30.0),
 				"CHAIN  +%d%% DMG" % int(round(chain_bonus * 100.0)) if counter > 0 else "GUARD CHAIN", counter > 0)
@@ -69,13 +69,13 @@ func _draw() -> void:
 		# core flare as the snowball grows
 		if f > 0.0:
 			var fl := Palette.MOMENTUM
-			fl.a = 0.10 + 0.14 * f + (0.06 * sin(_pulse * 2.0) if f >= 1.0 else 0.0)
+			fl.a = 0.10 + 0.14 * f + (0.06 * sin(pulse * 2.0) if f >= 1.0 else 0.0)
 			draw_circle(c, r * (1.15 + 0.25 * f), fl)
 		draw_arc(c, r, 0.0, TAU, 40, Palette.BG0, 6.0, true)      # recessed well
 		if overdrive:                                            # OVERDRIVE halo — the redline reward
 			var od := Palette.CRIMSON
-			od.a = 0.16 + 0.16 * sin(_pulse * 3.0)
-			draw_circle(c, r * (1.5 + 0.12 * sin(_pulse * 3.0)), od)
+			od.a = 0.16 + 0.16 * sin(pulse * 3.0)
+			draw_circle(c, r * (1.5 + 0.12 * sin(pulse * 3.0)), od)
 		UiKit.gradient_arc(self, c, r, -PI / 2.0, -PI / 2.0 + TAU * f, 6.0,
 			Palette.MOMENTUM.darkened(0.3), Palette.GOLD_BRIGHT, 40)
 		# the top fifth of the ring is the OVERHEAT band — ride it, vent to stay hot
@@ -89,7 +89,7 @@ func _draw() -> void:
 		if overdrive:
 			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(0, c.y + r + 12.0), "◆ OVERDRIVE — VENT IT ◆",
 				HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"],
-				Palette.CRIMSON.lerp(Palette.GOLD_BRIGHT, 0.5 + 0.5 * sin(_pulse * 2.0)))
+				Palette.CRIMSON.lerp(Palette.GOLD_BRIGHT, 0.5 + 0.5 * sin(pulse * 2.0)))
 		else:
 			UiKit.engraved_plaque(self, Vector2(c.x, c.y + r + 20.0),
 				"MOMENTUM  +%d%% DMG / +%d%% MIT" % [int(momentum * 6), int(momentum * 2.5)], momentum > 0)
