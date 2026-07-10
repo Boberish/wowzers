@@ -3,7 +3,10 @@
 > **2026-07-10:** BOTH branch slates are 🟡 AT VERDICT — **BRIM §9** (Low Catch · Overflow
 > Engine · Glintsmith · the Pulse) and **DRAW §10** (the Rapids · the Vigil · the Skim · the
 > Eddy), plus the **§10.7 built-pool addendum** filing all 24 built boons (Millrace-vs-Flume
-> reconcile flagged for the deck passes).
+> reconcile flagged for the deck passes). **Same day, later: DRAW ABILITY PASS §13 🟡** —
+> 3 cast transforms (Cupped Hand · Deep Draw · the Braid, per TEMPO §17.11) + **SKIN**, the
+> missing-heal base cast (the water's film — defers damage, never absorbs/heals; Bloom's HoT
+> lane untouched).
 
 **Status:** 🟢 **BASE BUILT & MERGED 2026-07-07** (branch `mender-rework` → main). The reworked
 healer ships as a guarded class **`well`** (codename — Bill's name pick open) on the healer seat,
@@ -790,3 +793,148 @@ Current-preservation thresholds · drift-tracking (the built Eddy creed is alrea
 
 **Next:** your verdicts → catalog flips; build = a light slice on the Well's wiring (the Vigil
 module is the one real kit-mechanic addition; everything else is boon-local).
+
+---
+
+## 13. THE DRAW ABILITY PASS — cast transforms + THE MISSING HEAL 🟡 AT VERDICT (2026-07-10)
+
+**What this is (Bill's direct ask):** the Tempo ability treatment (`TEMPO-PLAN.md §17.10/§17.11`,
+law in `DECK-LAYOUT.md §5`) applied to the Well's DRAW spec, around the §12 top-3
+**VIGIL · RAPIDS · EDDY** (your ✅ picks still swap free), **plus the coverage gap from your
+playtest** — *"I was missing some heals"* — closed with ONE small cast, deliberately **not** a
+full spell, not Bloom's HoT, not the cut Ward. Design only; catalog rows land 🟡 this commit.
+Sibling gate held throughout: everything below lives on the release/rhythm/hold surface (SKIN is
+a shared book cast — spec-graded, noted).
+
+### 13.1 THE BUDGET (counted honestly, then parked per Bill)
+
+The Well is the sanctioned broad-kit (ceiling **8**; one grammar — every cast rides the same
+graded release). Loaded today = 10 (the standing over-count, `DECK-LAYOUT §5` compliance +
+ledger row "ABILITY-LAW compliance trims"). **SKIN adds +1 base cast → loaded 11.** Bill's word
+this pass: *don't worry about the 8-cap* — so the trim question stays PARKED where it already
+lives (candidates unchanged: Meditate/Boiling Over compete for the one allowance slot · a
+Dispel fold · `SPELL_CAP` retune at reshape). Counted, flagged, not solved. **No transform below
+adds a touch target** — they rewrite casts the book already has.
+
+### 13.2 THE MISSING HEAL — **SKIN** `skin` (new base cast · the water's film)
+
+**The diagnosis:** the C-6 law made every heal a casted direct heal — righteous for the class,
+but it means the healer covers exactly ONE ally at a time. While your bar is mid-draw on the
+tank, a second dip has NO answer; by the time the cast bar frees, the heal you owed is late.
+That lateness is the "missing heals" you felt. Bloom answers this with gardens; the Well must
+answer it with WATER.
+
+**The cast:** quick (~Flash speed), **1 ◍**, graded release like everything (one grammar — the
+ceiling-8 rationale honored, no new timing system). For **~6s the ally wears the water's skin**:
+every hit that lands on them is **SOFTENED** — a share of its damage is **DEFERRED into a slow
+drip over the next ~3s** instead of landing at once.
+- Clean release: **~35% deferred** · plain/overrun: ~20% · **Still Point: ~45% + the Glint**
+  (the F15 superset law holds).
+- It **never heals a point and never blocks a point** — every drop of damage still arrives,
+  just LATE. It converts spike-death into a drawable wound: the film buys exactly the seconds
+  your cast bar needs to come around.
+- One skin per ally (recast refreshes, no stacking); numbers = `well_skin_*` knobs.
+**Why it's not the cut Ward:** Ward was an absorb — damage deleted, cast-and-forget insurance.
+The skin deletes nothing; it re-times. You still owe the heal — SKIN is a promise to arrive,
+priced at a charge and a graded cast. **Why it's not Bloom's HoT:** it heals zero. Nothing
+ticks upward; there is no over-time healing to steal.
+**Determinism/engine:** a per-seat defer-buffer drained at 30 Hz — pure state in the reducer,
+guarded, byte-identical unless cast. **AI:** the policy skins the predicted spike target off the
+telegraph schedule it already reads.
+**The Brim question (the book is shared):** ship it **Draw-graded / Brim-plain** first. The
+tasty option on file: Brim grades the FORESIGHT — a fresh skin (<2s old) catching a real hit
+retro-grades the cast perfect (Glint). Flagged as open point 4, not core.
+
+### 13.3 THE TRANSFORM SYSTEM (inherited from TEMPO §17.11)
+
+≤1 transformed cast per run · acquisition **1-of-3 at the Floor-2 elevation** (rides your Tempo
+verdict ③) · every transform is a **DOOR** — its 2 sub-boons enter later offers only while it's
+held (never dead cards) + ONE rig WHEN joins the wiring board · never a new touch target. One
+transform per theme, so every top-3 build has its rewrite:
+
+1. **CUPPED HAND `cuppedhand` (Flash transform → RAPIDS)** — Flash may be thrown **from the
+   Current itself**: spend 1 stack — it lands INSTANTLY, ungraded (a plain heal, never clean,
+   never a Glint), no cast bar. Your banked rhythm becomes the emergency valve — and the cost is
+   the exact thing a Rapids build protects (that's the tension: the theme that loves the Current
+   gets the one reason to spend it). Normal Flash unchanged; a cupped throw never feeds the
+   Current.
+   - door **Handful After Handful** [POWER] — cupped flashes +15/22/30% (cap stated).
+   - door **Return to the River** [STRAT] — a CLEAN release within ~2s of a cupped flash
+     restores the spent stack (spend, then earn it back — the rhythm apology, priced in skill).
+   - rig WHEN: *"a cupped flash lands on an ally below 30%"* (~×4.5 — chooseable: you threw it).
+2. **THE DEEP DRAW `deepdraw` (Mend transform → VIGIL)** — Mend's bar gains a **second band past
+   the clean band**: keep drawing — catch the DEEP band and the heal lands **×1.6**; but past
+   the deep band the cast **GUTTERS** (charge + cast wasted — drawing past clean surrenders the
+   overrun's free auto-complete). Every Mend becomes a chosen gamble: release clean, or go
+   deeper on a read. **⭐Vigil interaction (one line):** with the module held, a missed deep band
+   becomes a HELD heal at plain value instead of guttering — the hold is the net, at the price
+   of the hold's own tremble clock.
+   - door **Pearl Diver** [GREED] — the deep band shrinks ~30%, pays ×2 (cap stated).
+   - door **Came Up Singing** [STRAT] — a caught deep band grants +2 Current (the Vigil↔Rapids
+     bridge).
+   - rig WHEN: *"I catch the deep band"* (~×4).
+3. **THE BRAID `braid` (Cascade transform → EDDY)** — Cascade's three arcs become **three
+   releases**: a short graded string, one band per arc, each on its own beat; land all three
+   clean and the third arc pays **+40%**. **Boon-math law (Tremolo's, verbatim):** the string
+   counts as ONE cast for boon/charge math; grades are per press; Current gain caps at +1 for
+   the whole string. Under the Eddy creed the bands DRIFT between arcs — the virtuoso read, and
+   why the transform files here.
+   - door **Tight Braid** [GREED] — arc bands −25%, the all-clean bonus +40%→+70%.
+   - door **Crossing Streams** [STRAT] — each arc re-aims at release to the CURRENT lowest ally
+     (the braid steers mid-string).
+   - rig WHEN: *"I land an all-clean braid"* (~×5).
+
+### 13.4 THE LADDER REFIT (top-3 arcs, transforms woven)
+
+- **THE VIGIL** — Patient Hand → ⭐Vigil → Second Hand · Ride the Tremble · Long Draw →
+  **THE DEEP DRAW** (+Pearl Diver / Came Up Singing) → 👑 LOOSED AT LAST. *Walk with the drawn
+  arrow, and now the draw itself has a deep end.*
+- **THE RAPIDS** — Narrows → (module-free) → Whitewater · Strong Pull · Millrace(boon) ·
+  Eddyline → **CUPPED HAND** (+Handful / Return to the River) → 👑 THE FLUME. *The river you
+  guard is finally also the river you can drink from — the emergency no longer breaks the build,
+  it TAXES it.*
+- **THE EDDY** — Eddy creed → ⭐Vigil or none → Current Reading · Deep Eddy · Shoot the Gap →
+  **THE BRAID** (+Tight Braid / Crossing Streams) → 👑 THE GLASS RIVER. *Three moving reads in
+  one cast; the Glass River freeze is now three-times as earned.*
+- **SKIN files as BASE BOOK** (no theme owns it) — themes may address it later; nothing in this
+  pass does (kept small on purpose — it's a gap-fix, not a build).
+
+### 13.5 GATES + SKEPTICS (delta-scope — §12's audit stands)
+
+**Anti-patterns:** no new buttons beyond SKIN's counted +1 (transforms rewrite, doors are
+boons) ✓ · SKIN insurance-check: it's base-kit utility answering a diagnosed base-kit hole —
+and it re-times damage rather than pardoning anything; the heal is still owed, the cast still
+graded ✓ · Eddyline/pardon precedents untouched · every scaler capped ✓ · no luck-greed (the
+deep band, the cupped spend, the tight braid are all chosen per use) ✓.
+**Trio spot-check (doors in later offers):** (Pearl Diver | Tight Braid | Whitewater) — two
+greeds on different bars vs bread ✓ · (Return to the River | Came Up Singing | Current Reading)
+— three Current engines, three clocks ✓.
+**Repack skeptic:** Cupped Hand vs Tempo's Cadenza — same "flexible spender" grammar, different
+economy (banked rhythm→instant heal vs Flow→damage); recorded in the distinctness ledger's
+terms. Deep Draw vs the Long Draw creed — run-long temperament vs per-cast gamble; recorded.
+The Braid vs Tremolo — the sanctioned mirror (one string law, shared). SKIN vs Brim's Levee
+absorb / Brink Bell — those DELETE damage (absorbs); the skin defers 100% of it. Survives.
+**Fight-clock skeptic:** all three transforms + SKIN cycle inside a 60s zone fight ✓; the drip
+(~3s) can't straddle fights ✓; no cross-fight hoarding ✓.
+**Sibling gate:** no landing grades, no party-read surfaces touched; SKIN is shared-book with
+per-spec grading (stated) ✓.
+**AI:** cupped-flash = emergency threshold on ally-HP forecast · deep-draw = go-deep only when
+incoming-damage forecast clears a tier bar · braid = the release model ×3 with per-tier jitter ·
+skin = pre-cast on predicted spike target. All on `well_policy` surfaces that exist.
+
+### 13.6 TENSION POINTS (Bill's calls)
+
+1. **SKIN itself** — the film shape (defer, never absorb/heal): right answer to the missing
+   heals? And numbers-wise, is 35% clean deferral enough to FEEL like a save? (⚙ knob, sims
+   measure deaths-prevented per cast.)
+2. **SKIN's home** — base book (lean: yes, the gap is base and you felt it bare) vs a drafted
+   boon. Base partially revisits the C-6 "no proactive casts" spirit — your law, your call.
+3. **The three transforms** — Cupped Hand · Deep Draw · Braid: keep/tweak/cut per card?
+4. **Brim's SKIN grading** — plain (lean, ship-first) vs the foresight retro-grade (tastier,
+   costs a rule).
+5. **Acquisition** rides your Tempo verdict ③ (Floor-2 1-of-3).
+6. **The 8-cap trim stays parked** per your word — confirmed here so nobody "helpfully" trims
+   the book in this pass.
+
+**Next:** verdicts → catalog flips → build is a light slice (SKIN = one cast + a defer buffer;
+transforms are kit-local cast rewrites on the built release machinery; doors are boon-local).

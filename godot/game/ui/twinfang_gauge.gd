@@ -7,7 +7,7 @@
 ## chained toward COUP, or the Venomancer's three-poison cocktail + Toxic Synergy ramp.
 ## Pure view; the HUD feeds the same fields as before.
 class_name TwinfangGauge
-extends Control
+extends ClassGauge
 
 var aspect: String = "tempo"
 ## Fermata is Flow-based like Tempo — it shows the tier-gem wing, never the poison wheel.
@@ -21,17 +21,14 @@ var flow_mult: float = 1.0
 var tier: int = 0
 var venom: Dictionary = {"V": 0, "F": 0, "C": 0, "syn_ramp": 1.0, "syn_active": false}
 var wheel: int = 0             ## Venom poison wheel: the lit (on-deck) lane a Strike feeds — 0=V 1=F 2=C
-var _pulse: float = 0.0
 var _flash: float = 0.0        # facet pop on a Flow gain
 var _last_flow: int = 0
 
-func _process(delta: float) -> void:
-	_pulse += delta * 3.2
+func _tick(delta: float) -> void:
 	if flow > _last_flow:
 		_flash = 1.0
 	_last_flow = flow
 	_flash = maxf(0.0, _flash - delta * 2.6)
-	queue_redraw()
 
 func _draw() -> void:
 	var w := size.x
@@ -48,7 +45,7 @@ func _draw() -> void:
 	# ---- the Flow crystal core ----
 	if maxed or _flash > 0.0:
 		var halo := Palette.FLOW
-		halo.a = (0.16 + 0.10 * sin(_pulse * 2.2) if maxed else 0.0) + 0.22 * _flash
+		halo.a = (0.16 + 0.10 * sin(pulse * 2.2) if maxed else 0.0) + 0.22 * _flash
 		draw_circle(c, R * 1.55, halo)
 	draw_circle(c, R * 0.80, Palette.FILL_BOT)
 	draw_circle(c - Vector2(0, R * 0.16), R * 0.66, Color(Palette.FILL_TOP.r, Palette.FILL_TOP.g, Palette.FILL_TOP.b, 0.5))
@@ -61,7 +58,7 @@ func _draw() -> void:
 		var seg := Palette.FLOW.lerp(Palette.FLOW.lightened(0.35), float(i) / float(nfac)) if lit \
 			else Color(0.07, 0.08, 0.12)
 		if lit and maxed:
-			seg = seg.lightened(0.15 + 0.15 * sin(_pulse * 2.2 + float(i)))
+			seg = seg.lightened(0.15 + 0.15 * sin(pulse * 2.2 + float(i)))
 		if lit and i == flow - 1 and _flash > 0.0:
 			seg = seg.lerp(Color(1, 1, 1), _flash * 0.6)
 		draw_arc(c, R, a0, a1, 10, seg, 8.0, true)
@@ -94,9 +91,9 @@ func _draw() -> void:
 		var r := 13.0 if fin else 10.0
 		if fin and full:
 			var burst := Palette.CP
-			burst.a = 0.25 + 0.18 * sin(_pulse * 2.4)
+			burst.a = 0.25 + 0.18 * sin(pulse * 2.4)
 			draw_circle(gp, r * 1.9, burst)
-		_combo_gem(gp, r + (1.5 * sin(_pulse * 2.4) if (fin and full) else 0.0), i < combo)
+		_combo_gem(gp, r + (1.5 * sin(pulse * 2.4) if (fin and full) else 0.0), i < combo)
 	UiKit.engraved_plaque(self, Vector2(gx0 - spacing * 2.0, h - 11.0), "COMBO", full)
 
 	# ---- right wing: the aspect readout ----
@@ -122,9 +119,9 @@ func _tempo_wing(c: Vector2, h: float) -> void:
 		var gp := Vector2(xs[i], c.y)
 		if i == 2 and tier >= 3:
 			var burst := Palette.PERFECT
-			burst.a = 0.28 + 0.18 * sin(_pulse * 2.4)
+			burst.a = 0.28 + 0.18 * sin(pulse * 2.4)
 			draw_circle(gp, rs[i] * 2.0, burst)
-		UiKit.gilded_pip(self, gp, rs[i] + ((1.5 * sin(_pulse * 2.4)) if (i == 2 and tier >= 3) else 0.0),
+		UiKit.gilded_pip(self, gp, rs[i] + ((1.5 * sin(pulse * 2.4)) if (i == 2 and tier >= 3) else 0.0),
 			on, Palette.PERFECT)
 		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(gp.x - 34.0, c.y + rs[i] + 16.0), labels[i],
 			HORIZONTAL_ALIGNMENT_CENTER, 68.0, UiKit.SIZE["MICRO"],
@@ -132,7 +129,7 @@ func _tempo_wing(c: Vector2, h: float) -> void:
 	if tier >= 3:
 		UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(c.x + 70.0, h - 7.0), "◆ COUP READY ◆",
 			HORIZONTAL_ALIGNMENT_CENTER, 224.0, UiKit.SIZE["CAPTION"],
-			Palette.PERFECT.lerp(Palette.GOLD_BRIGHT, 0.5 + 0.5 * sin(_pulse * 2.0)))
+			Palette.PERFECT.lerp(Palette.GOLD_BRIGHT, 0.5 + 0.5 * sin(pulse * 2.0)))
 
 ## Venomancer: the three-poison cocktail with stack numerals + the Synergy ramp meter.
 func _venom_wing(c: Vector2, h: float) -> void:
@@ -149,7 +146,7 @@ func _venom_wing(c: Vector2, h: float) -> void:
 		var lit: bool = int(t[1]) > 0
 		if lit and syn_active:
 			var halo := t[2] as Color
-			halo.a = 0.18 + 0.12 * sin(_pulse * 2.2 + float(i))
+			halo.a = 0.18 + 0.12 * sin(pulse * 2.2 + float(i))
 			draw_circle(gp, 17.0, halo)
 		UiKit.gilded_pip(self, gp, 9.5, lit, t[2] as Color)
 		UiKit.text_shadowed(self, UiKit.display(650), Vector2(gp.x - 24.0, c.y + 26.0),
@@ -159,7 +156,7 @@ func _venom_wing(c: Vector2, h: float) -> void:
 	# gold ring + chevron, so "ride vs Envenom-fixate" is a glance, not memory.
 	var wl := clampi(wheel, 0, 2)
 	var wp := Vector2(lane_x.call(wl), c.y)
-	var pull := 0.5 + 0.5 * sin(_pulse * 2.4)
+	var pull := 0.5 + 0.5 * sin(pulse * 2.4)
 	var mk := Palette.GOLD_BRIGHT
 	mk.a = 0.55 + 0.35 * pull
 	UiKit.gilded_ring(self, wp, 15.0 + 1.5 * pull, 1.6, 22)
@@ -175,7 +172,7 @@ func _venom_wing(c: Vector2, h: float) -> void:
 		Palette.POISON.lightened(0.1) if syn_active else Palette.POISON.darkened(0.2))
 	if syn_active:
 		var g := Palette.POISON
-		g.a = 0.30 + 0.20 * sin(_pulse * 2.0)
+		g.a = 0.30 + 0.20 * sin(pulse * 2.0)
 		draw_rect(Rect2(bar.position - Vector2(2, 2), bar.size + Vector2(4, 4)), g, false, 1.2)
 	UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(bar.end.x + 8.0, h - 9.5),
 		"x%.1f" % ramp if syn_active else "—",

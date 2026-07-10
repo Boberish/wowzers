@@ -2450,6 +2450,8 @@ func _restore_raid_col() -> void:
 	var cf := ConfigFile.new()
 	if cf.load(UI_CFG) != OK:
 		return
+	if not cf.has_section_key("raid_frames", _raid_col_key()):
+		return   # nothing saved for this layout (a null default still ERROR-spams the logs)
 	var v = cf.get_value("raid_frames", _raid_col_key(), null)
 	if v is Vector2:
 		# saved as offsets off the panel's own anchors — size preserved

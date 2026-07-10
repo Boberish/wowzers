@@ -285,6 +285,12 @@ Each its own worktree/claim, in this order:
   read it. raid_sim ab-gate BYTE-IDENTICAL; `registry_probe` locks the salts.
 - **ClassBand registry** in the HUD (build/render/key strategy per class) — deletes the
   if/elif ladders + ~30 nullable members; add a shared Gauge base for the common shell.
+  **✅ BUILT 2026-07-10 (`b4e8d26` bands · `ee58124` gauge base):** `game/ui/bands/` —
+  per-class band objects own build/render/keys/mouse/events (raid_hud −630 lines,
+  ~25 members → one `_band`; adding a class = one band file + one for_hud arm);
+  `game/ui/class_gauge.gd` — the verdict flash + pulse clock + frame plumbing under
+  all 7 widgets (draw style stays per-widget; the art-era retheme lands once).
+  Verified: verify-all ALL GREEN + two WSLg visual passes.
 - **ClassKit hoists** (`_b`/`_tt`/`_has_payloads`) + TuningConfig literals sweep.
   **✅ HOISTS BUILT 2026-07-10 (`94b1147`):** `boons`/`modules`/`_b`/`_m`/`_tt` up to the
   ClassKit base (−47 duplicated lines, 5 kits); `_has_payloads` stays per-kit (bodies are

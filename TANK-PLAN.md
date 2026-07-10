@@ -2,7 +2,8 @@
 
 **Status:** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
 VERDICT + 3 challenger themes (§7) joined that board 2026-07-10; Warden BRANCH SLATE (§6, 5 themes)
-🟡 AT VERDICT 2026-07-10.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
+🟡 AT VERDICT 2026-07-10; DUELIST ABILITY PASS (§10 — 3 transforms + EN GARDE CD, the Tempo §17.11
+treatment) 🟡 AT VERDICT 2026-07-10.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
 universal, progressive peel (§1c)** · consequences worked/deferred (§1d). Flow-economy *numbers* are left
 to a live slice (Bill: "playtest for feel"). The round-5 minigame (tester v5) is the base; the Duelist deck
 is on the verdict board:
@@ -122,23 +123,31 @@ you out* and wanders (reuses the existing THREAT_DROP = "context-window shift" f
   curses) blooms at raid intensity because the numbers are brutal there, not because the rule changed.
 - **The progressive peel (Bill's model):** aggro is a **%** (the tank's normalized flow). **≥ 30%** → the
   boss is locked on the top-threat seat (the tank). **< 30%** → each incoming attack has an **X% chance to
-  peel** to another seat, **X rising as aggro falls**. **0%** → fully **random** targeting. A **TAUNT** is
+  peel** to another seat, **X rising as aggro falls**. **0%** → fully **random** targeting. ~~A **TAUNT** is
   the hard override (grab it back a few seconds; everyone-has-a-taunt = a DPS can clutch-grab it, hot-potato
-  curses force swaps).
+  curses force swaps).~~ **⚠ AMENDED 2026-07-10 (Bill — `BOSS-PLAN.md §1`): THE TAUNT BUTTON IS DEAD, on
+  every seat.** Aggro is **100% passive**: the only way back is playing clean (flow re-climbs). The
+  skill-shaped valve: a **PERFECT MAIN grants a flow SPIKE** (the counter IS the "look at me"), plus an
+  aggro **boon lane** (LODESTONE · HARD STARE — 💡 in CARD-CATALOG). Taunt-swaps were judged WoW-import
+  risk-erasers; hot-potato choreography re-homes to boss-authored mechanics (the Mythos mark relay).
 - **Flow moves on SKILL, never on hits (Bill, locked):** clean answers raise flow; **un-clean answers**
   (miss / whiff / baited) drop it. **Taking damage NEVER lowers flow** — otherwise a tank under heavy fire
   spirals (hit → lose flow → peel → more hits). Flow measures *your play*, not your luck.
 - **A peel is telegraphed to the person who catches it (Bill, locked):** a peeled attack rides the
   **victim's OWN dodge bar** + a **warning cue** — so a stray hit is always dodgeable and never a surprise.
   A **small fixed GRACE-DELAY** before a peeled hit lands is the reaction window: the new victim reads the
-  warning and dodges, AND the tank can **TAUNT it back before it lands** (the peel's recovery valve). It's
+  warning and dodges~~, AND the tank can **TAUNT it back before it lands** (the peel's recovery valve)~~ —
+  **⚠ 2026-07-10: the grace-delay is the VICTIM'S window only** (no taunt-back exists); a peel always costs
+  the raid one real answer, which is the risk Bill wants live. It's
   **determinism-safe** — a fixed tick offset (not wall-clock), one telegraph still, melee keeps ticking; it
   just paces the fight a hair during peels. *(Does not break the scheduler.)*
 - **UI (Bill):** FLOW gets its **own dedicated bar** (tank only — it's the aggro driver). Everyone's aggro
   shows in a **small shared "aggro box"** = the built party victim-frame extended (a pip/bar per seat, gold
   = current target). Non-tanks have **no flow bar** (their aggro is passive) → no bar-bloat.
-- **Reuses the built threat engine wholesale** — `BossState.threat` (by seat index), `taunt_seat_i`,
-  `_threat_target()`, `THREAT_DROP`, the victim gold-frame + aggro-lost banner. We only **change the tank's
+- **Reuses the built threat engine wholesale** — `BossState.threat` (by seat index), ~~`taunt_seat_i`~~
+  *(dies with the button, 2026-07-10)*, `_threat_target()`, `THREAT_DROP` *(re-based as **FLOW DUMP** —
+  the curse zeroes the tank's flow, rebuild by playing clean; `BOSS-PLAN §1`)*, the victim gold-frame +
+  aggro-lost banner. We only **change the tank's
   threat SOURCE from damage → flow**; non-tanks keep low passive threat (damage/heals).
 - **No tank? it just degrades (Bill's "crazy stuff" for free):** aggro is universal, but **only the tank
   DRIVES it high** (via the flow minigame). Remove the tank → nobody drives it → aggro sits low → the peel
@@ -699,8 +708,9 @@ first-cut `warden_*` knobs.
 
 **Dials:** THE READ · THE TAP · **THE HOLD** (Warden-only) · THE SLAM · THE WIND · THE BANK ·
 THE SPEND · THE LINE — plus **THE CHARGE (the Payload's new dial: the battery of prevented
-damage)**. **Budget:** buttons = BLOCK · SHIELD · DUMP · TAUNT + the owed signature CD ("the
-wall", §1b) = 5 of 7; nothing below adds one. Boons land at 12 (in-quota); modules 3 (one per
+damage)**. **Budget:** buttons = BLOCK · SHIELD · DUMP ~~· TAUNT~~ *(deleted 2026-07-10,
+`BOSS-PLAN §1`)* + the owed signature CD ("the
+wall", §1b) = 4 of 7; nothing below adds one. Boons land at 12 (in-quota); modules 3 (one per
 theme); keystones 3.
 
 ### 8.1 CREEDS (pick 1 · pool of 5 — quota shapes all present)
@@ -919,3 +929,157 @@ thresholds — all 3-tier expressible (per §7).
 
 **Next:** your picks (2–3 ladders total across the six) → fold: winning kits' rows flip 🟡→✅,
 losing kits park 🔮 with their slate; the build claim proceeds per §4 order unchanged.
+
+## §10 · THE DUELIST ABILITY PASS — transforms, not buttons + EN GARDE 🟡 AT VERDICT (2026-07-10)
+
+**What this is (Bill's direct ask):** the Tempo ability treatment (`TEMPO-PLAN.md §17.10/§17.11` —
+the worked reference; `DECK-LAYOUT.md §5` carries the law) applied to the dodge tank. The top-3
+ladders stay the incumbents **HEADSMAN · IRONSIDE · GHOST** (the D2 default — your live §3 board
+still swaps any of them; the §9.2 swap kits stand untouched, and transforms rewrite BUTTONS, not
+ladders, so every pick-combination keeps all three transforms). This pass: **①** the button audit
+under the +1/ceiling-6 law, **②** the owed signature CD designed (**EN GARDE**), **③** THREE
+ABILITY TRANSFORMS with door sub-boons, **④** the ladders refit so each has a transform affinity.
+Design only — no code, catalog rows land 🟡 this commit.
+
+### 10.1 THE BUDGET + THE BUTTON AUDIT (the law, run honestly)
+
+**Touch targets:** DODGE + PARRY + ⚡DUMP + EN GARDE (the CD, designed below) = **4 of the
+hard-ceiling 6**. **The +1 allowance slot: THE DUELIST LEAVES IT EMPTY** (Tempo precedent —
+freshness comes from transforms, and Bill's steer is anti-bloat). Nothing below adds a button;
+doors gate BOONS, never inputs.
+
+**Every button needs a WHEN, not just a WHAT (law rule 4):**
+- **DODGE ✓** — graded per bar, height law, the WEAVE. Richest button in the roster.
+- **PARRY ✓** — the commit: tall bars, tiny window, land-or-miss. The identity press.
+- **⚡DUMP ✗ — the storyless press.** Its only WHEN today is "the bank is full" — that's
+  press-when-ready, a passive in a button costume. The v1 deck decorates it (Powder Keg / All In
+  scale it) but nothing gives it a MOMENT. **FLÈCHE (transform 3) exists to fix exactly this** —
+  the same itch that started Tempo's audit ("nothing about coup").
+- **Post-taunt hole (BOSS-PLAN §1):** the taunt died; the tank's only attention tools are passive
+  flow + the GAZE boon lane. The signature CD lands on this surface — as an AMPLIFIER, never an
+  override (the "only way back is playing clean" law holds).
+
+### 10.2 THE SIGNATURE CD — ⏱ EN GARDE `engarde` (the challenge; the tank's "wall")
+
+~1-min CD. You plant your feet and CALL THE BOSS OUT — a ~4s challenge window:
+- **The invitation:** melee tempo at you +~25% while it holds (more bars = more answers — you
+  asked for this).
+- **The wall (the old GUARD's mitigation, re-homed per §1b):** your leaks and slivers are HALVED
+  while the challenge holds.
+- **The payoff:** every clean answer pays **DOUBLE flow**; a PERFECT MAIN inside the window banks
+  **◆◆**. Two slips and the challenge BREAKS early (the boss loses interest; normal flow drops
+  apply).
+**Why it's legal:** amplifies skill, never button=damage — it pays NOTHING if you don't answer.
+It never touches targeting (no peel-freeze, no taunt costume): if your aggro collapsed, En Garde
+doesn't yank the boss back — it doubles the rate at which clean play does. Role-shaped: press it
+INTO the burst you see coming (the boss window law). One knob: window length. *(The Warden's THE
+GATE stays its own shape — role twins, different instruments.)*
+
+### 10.3 THE TRANSFORM SYSTEM (inherited verbatim from TEMPO §17.11)
+
+A TRANSFORM is a drafted card that REWRITES one existing button. **≤1 transformed ability per
+run** · proposed acquisition **1-of-3 at the Floor-2 elevation** (rides Bill's Tempo verdict ③ —
+whatever he picks there is the pattern) · **every transform is a DOOR**: taking it gates its 2
+sub-boons into later offers (never dead cards) and adds ONE rig WHEN to the wiring board · never
+a new touch target. Fencing vocabulary throughout (the class's own words, like Tempo's music).
+
+**THE THREE (parry-weighted — the MAIN is the identity button; DUMP gets the story it lacks):**
+
+1. **PRISE DE FER `prisedefer` (PARRY transform)** — *"take the blade."* A PERFECT parry no
+   longer counters instantly: it **SEIZES the bar** — the caught attack hangs at your gate, wind
+   draining while you hold (≤ ~1.2s); release **THROWS it back**, damage scaling with the seized
+   bar's power and hold length (cap: a full seize of a tall bar ≈ today's counter ×1.5 — the
+   ceiling law). Non-perfect parries behave exactly as today. The instant jackpot becomes a
+   hold/release read: dump the throw into the stream's gap, or cut it short before the next bar
+   arrives. **Affinity: IRONSIDE** (wind-economy pressure; Bellows/Crucible feed the drain).
+   - door **Disarm** [STRAT] — a full-length seize DOWNGRADES the boss's next bar one size
+     (tall→normal, normal→small).
+   - door **Wrenched Steel** [GREED] — seize drains wind ×2, the throw +40% (cap stated).
+   - rig WHEN: *"I throw a full seize"* (~×5, inverse-frequency priced).
+2. **REMISE `remise` (PARRY transform)** — *"the renewed attack."* Parry becomes **two
+   half-presses**: the **PRIME** (~1/3 the wind, early — sets your guard: a primed bar you then
+   fail to answer leaks 30% less) and the **COMMIT** inside the window (the remaining cost — full
+   parry + counter). You choose commitment mid-flight: prime the bar you're unsure of, commit
+   only when it's real; a primed FEINT costs only the prime (the read got cheaper, not free).
+   The fixed all-or-nothing becomes a flexible spender — Cadenza's exact grammar on the defense
+   side. **Affinity: GHOST** (read-flavored footwork; pairs naturally with Kit M's insight if the
+   Matador wins a slot — flagged, not required).
+   - door **Second Intention** [STRAT] — a committed remise (both presses landed) banks +1◆
+     (the planned second attack pays).
+   - door **Beat Parry** [POWER] — the prime alone deflects harder (primed-miss leak −30%→−45%).
+   - rig WHEN: *"I commit a remise on a TALL bar"* (~×4.5).
+3. **FLÈCHE `fleche` (DUMP transform)** — *"the running attack."* DUMP no longer fires from
+   standing: pressing it **LOADS the bank onto your blade** (~2.5s); your next **PERFECT answer**
+   (land or step) releases it as the charging strike — the full dump **+25%**, riding the
+   counter's moment. If nothing perfect comes before the load expires, **half the ◆ return, the
+   rest fizzles** (the greed is choosing WHEN you can afford to promise perfection). The spender
+   finally has a WHEN — offense fused onto defense. **Affinity: HEADSMAN** (the one huge answer,
+   now skill-stamped) — and the Ghost releases it off perfect steps.
+   - door **Running Edge** [POWER] — flèche damage +15/22/30% (cap stated).
+   - door **Point in Line** [STRAT] — a flèche released on a TALL-bar land staggers the stream
+     half a beat (the follow-up gap widens — a breath you earned).
+   - rig WHEN: *"a flèche releases on a perfect answer"* (~×5).
+
+### 10.4 THE LADDER REFIT (the top-3, restated onto the new plan — v1.1 folded as FINAL)
+
+The §9.1 reconcile stops being errata and is adopted here: **Quick Wrists + Roll With It → the
+EASE dial** (pool 15→13+dial) · **FLOW module = 4th Floor-1 candidate, offered 3-of-4 rolled** ·
+**Hold the Line keys its uptime read to FLOW** · GAZE lane (Lodestone / Hard Stare) is the
+aggro insurance · GUARD trio lives with the Warden. Each ladder now reads entry → module → boons
+→ **transform** → capstone:
+
+- **THE HEADSMAN** — Wager → Whetstone → Heavier Steel · High Line · Deep Pockets · Powder Keg ·
+  All In → **FLÈCHE** (+Running Edge / Point in Line) → 👑 THE AVALANCHE. *Dream draft:* bank fat,
+  sharpen it, load the flèche, release it off a tall land — then the Avalanche returns the whole
+  string. Every rung raises the promise you have to keep.
+- **THE IRONSIDE** — Veteran/Bellows → ⭐ Crucible (or FLOW) → Blood Price · Overreach · Deep
+  Pockets → **PRISE DE FER** (+Disarm / Wrenched Steel) → 👑 THE IMPOSSIBLE PARRY. *Dream draft:*
+  the bleed fuels the Crucible, the seize spends the wind the Bellows rebuilds, Disarm shrinks
+  what you'd have eaten — the engine breathes in hits and breathes out counters.
+- **THE GHOST** — Dancer → Scales → Feather Step · Perfect Form · Read the Room → **REMISE**
+  (+Second Intention / Beat Parry) → 👑 BORROWED TIME. *Dream draft:* primes ride the footwork
+  rhythm, commits land only on the real bars, the Scales stay centred because both buttons pay.
+  ⚠ **Dancer×transform law:** under the Dancer (parry button GONE) the two parry transforms have
+  no host — the Floor-2 offer EXCLUDES them for Dancer runs (flèche + a re-offer). Stated now so
+  the ceremony can't deal a dead card.
+- **Cross-feed:** all three transforms read your ladder for nothing — they rewrite the button
+  itself; the doors are where the ladder-flavor lives. A swap-kit win (M/S/W) changes NONE of
+  this section (kits replace ladder cards, not buttons).
+
+### 10.5 GATES + SKEPTICS (delta-scope — §3/§9 audits stand)
+
+**Anti-patterns:** no new buttons (4 of 6, slot empty) ✓ · no passive wind-ups (the flèche load
+is a chosen promise with a priced expiry, not a wait) ✓ · doors never dead (offer-gated on the
+transform being held) ✓ · insurance count unchanged (the prime is PRICED cover — wind spent for
+partial mitigation, Toro's precedent — not a pardon) ✓ · every scaler capped ✓.
+**Trio spot-check (doors enter later offers):** (Disarm | Wrenched Steel | Heavier Steel) — plan
+vs greed vs bread, no auto-pick ✓ · (Second Intention | Running Edge | The Rally) — three banks,
+three clocks ✓.
+**Repack skeptic:** Prise de fer vs Borrowed Time — seize freezes ONE bar you caught; Borrowed
+Time slows the whole stream (keystone-scale). Different reads, recorded. Remise vs the Veteran
+creed — the creed forgives misses run-long; the prime is a per-bar purchased hedge. Flèche vs
+Avalanche — the load times ONE release; the keystone re-plays the string. All three survive.
+**Fight-clock skeptic:** all three transforms cycle multiple times inside a 60s zone fight
+(seize per perfect parry · prime per bar · load per bank) ✓; nothing hoards across fights ✓.
+**Engine debts (small, kit-local):** the seized-bar hold state + thrown-bar render (the
+Avalanche's returning-bar shape proves it) · the flèche load timer · En Garde's melee-tempo
+window (the §1c "3 scalars" knob, briefly turned — deterministic, tick-counted, no scheduler
+change). No new systems.
+**AI-pilotability (one sentence each):** Prise de fer — hold-length policy = f(wind, next-bar
+ETA), 3 tiers by hold-precision · Remise — prime-rate + commit-threshold on the existing
+feint-classifier · Flèche — load only when P(perfect answer < 2.5s) clears a tier-scaled bar.
+All on surfaces the tank policy already reads.
+
+### 10.6 TENSION POINTS (Bill's calls)
+
+1. **The three transforms** — Prise de Fer · Remise · Flèche: keep/tweak/cut per card?
+2. **EN GARDE as the Duelist CD** — the challenge shape (invite + wall + double flow), and: is
+   a pure amplifier ENOUGH of a post-taunt clutch, or does the class want one harder attention
+   tool? (Lean: amplifier only — BOSS-PLAN §1's law is yours and it's clean.)
+3. **Acquisition** rides your Tempo verdict ③ (Floor-2 ceremony 1-of-3 is the lean there).
+4. **The +1 slot stays EMPTY** (transforms carry freshness) — veto adds a spell lane back.
+5. **The v1.1 adoption** (EASE fold · FLOW 3-of-4 · Hold-the-Line re-key) — this pass treats it
+   as final; say the word if any piece should wait for the v1 board export instead.
+
+**Next:** verdicts → CARD-CATALOG flips (rows landed 🟡 this commit) → transforms build with the
+deck layers in §4 step 3 (kit-local, guarded, byte-identical unpicked — same bar as everything).

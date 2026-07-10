@@ -663,40 +663,37 @@ combat pillars eventually — Bill isn't sure of the end state yet, so we do NOT
 recast through the Forge/casting-pool era). The only simmed, maintained bosses are **the 4 Seals**
 (`raid_sim`): Vorathek · MISTRAL · GEMINI · MYTHOS — and they get the pass below.
 
-**SEAL PILLAR PASS v1 — nudge the 4 Seals toward the pillars (design 2026-07-06 with Bill; CLAIMABLE).**
-**➡ Full execution brief for the claiming agent: `SEAL-PILLAR-PLAN.md`** (beat-source map with
-today's numbers, Phase A byte-identical instrumentation spec, per-Seal starting knobs, band
-targets, gates, env notes). The summary below stays as the section-of-record.
-Goal: "update what we have a bit closer to the end goal" — cheap, reversible tuning, NOT a rework.
-The pillar that bites today is **DODGE RATION** (WORLD-PLAN pillar 2): less footwork for dps/heals,
-tanks keep the densest; marquee moments survive.
-1. **Instrument BEFORE touching content:** add a per-seat **beat-budget diagnostic** to `raid_sim`
-   (answerable beats/run per seat per Seal, from the existing grade counters in `seat.diag`/events).
-   Print today's table first — the suspects are the rand-beat casts (Mixture of Fists · A/B Test ·
-   Agentic Fan-Out) and aoe string counts; **ULTRATHINK stays whole** (3 beats, the raid's best
-   moment — marquee, not weather).
-2. **Retune to budget (~3–8 answerable beats/fight for non-tank seats):** prefer lowering rand-beat
-   cast FREQUENCY (cooldowns) and victims-per-cast over deleting moments; tank strings
-   (Double-Check etc.) untouched. ⚠ M7.2's lesson runs in REVERSE here: removing beats un-freezes
-   scheduler time and SOFTENS the boss — retune each Seal's other cadence to keep the pressure
-   (don't let MYTHOS sloppy drift up from 43 to "free").
-3. **Interrupt content: HANDS OFF for now.** Kick chains stay tuned for the old kick verb
-   (~~the frozen Voidcaller still plays the caster seat~~ — **DELETED 2026-07-10 THE PURGE; the
-   Alchemist default carries NO kick, so verses go uncontested in the interim**); they retune when
-   **interrupt-by-ability** lands with the Framework-v2 reworks (WORLD-PLAN pillar 3 / W5) and
-   "who carries kicks" actually exists.
-4. **Deliberate re-baseline:** bands WILL shift — that's the point, not a regression. Fresh
-   300-seed bands per Seal recorded here; keep expert ≈100 and the MISTRAL→GEMINI→MYTHOS curve;
-   loose tiers must still lose. Blade seat is mid-rework (Tempo), so treat exact percentages as
-   indicative — gate hard on determinism + the beat-budget table, not on ±a few pp.
-**Acceptance:** `raid_sim` determinism PASS ×4 Seals; per-seat beat budgets within 3–8 non-tank
-(documented exceptions allowed, e.g. ULTRATHINK); difficulty curve preserved; `ui_smoke_raid` +
-`net_smoke` green; new bands + beat table recorded in this section.
+**THE SEAL REWORK v1 — the 4-boss redo (Bill's go 2026-07-10; 🟡 at his 10-verdict board).**
+**➡ THE spec: `BOSS-PLAN.md`** — fills the DESCENT §4 timer contract (**5 / 7 / 9 / 12 min**,
+today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief:
+- **Identities (§V#1):** VORATHEK = **THE AXE** (slow huge honest hits, the learnable teaching
+  loop, the raid's only silent boss) · MISTRAL = **THE EXPERTS** (tempo boss; visible
+  Mixture-of-Experts stance loop + interactive charge counter + visible FREE-TIER enrage) ·
+  GEMINI = **THE TWINS** (two alternating minds FLASH/PRO on one pool · feint capital ·
+  MODEL PROMOTION at 50% · BARD.EXE ×2 · one mini dialogue break) · MYTHOS = **THE THREE
+  ACTS** (Helpful→Harmless→Honest as real ability-set acts with dialogue curtains · LISTENING ·
+  THE ESCALATION mark relay · Compaction = flow dump · ULTRATHINK untouched forever).
+- **TAUNT BUTTON REMOVED (Bill, LOCKED — BOSS-PLAN §1):** aggro 100% passive, tank regains by
+  flow; valve = perfect-MAIN flow spike + aggro boon lane (LODESTONE/HARD STARE 💡);
+  THREAT_DROP re-based as FLOW DUMP; TANK-PLAN §1c/§8.0 + WORLD-PLAN + ledger amended.
+- **Tuning spine (§2):** every pacing number on per-Seal `SealTune` (E4) + tune.sh flags + sim
+  TTK/beat-budget/act-timeline gates — playtest-turnable without a playtest, nothing bakes.
+- **Density ramp (§3):** Seal I presents 1–2 raid answers (~3–5 beats), +1 type/beat per rung
+  to Mythos ~6–8; dodge kept everywhere, never heavy. Two-stream law: melee = invisible tank
+  tempo; all authored content = telegraphs in declared visual lanes (§4).
+- **Engine addenda (§7, all guarded):** E1 gated ability sets · E2 stance cycler · E3 BREAK
+  dialogue curtain · E4 SealTune · E5 mark relay (V#8) · E6 deny-race empower · E7 LISTENING.
+- **Build (§8):** S0 instrumentation (byte-identical, absorbs SEAL-PILLAR Phase A) → per-Seal
+  slices S2–S5 after `wow-descent-map` + Wave-1 flow-aggro merge — the 5th deliberate
+  re-baseline, one bang per slice, untouched Seals byte-identical per slice.
+**Supersedes `SEAL-PILLAR-PLAN.md`** (never executed; Phase A absorbed as Slice 0; its
+beat-source map + 3–8 budget + ULTRATHINK carve-out stay canon). Steal catalog (Hades II ·
+StS1/2 · AtO · Punch-Out/Furi/Sekiro genre) in BOSS-PLAN §5; research run 2026-07-10 (7 agents).
 
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
-- **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — design against `RAID-PLAN.md` R3.
-- **OPUS phase design** (Helpful/Harmless/Honest) — the raid finale deserves authored phases, not just the curse.
+- **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — **still parked; BOSS-PLAN v1 deliberately needs no 2nd telegraph source.**
+- ~~**OPUS phase design** (Helpful/Harmless/Honest)~~ — **FOLDED into BOSS-PLAN §6 Mythos (2026-07-10)**: the three acts are the finale's spec now.
 **Open ideas:** boss "patch notes" as Trial-Ladder flavor; a Stable-Diffusion illusion miniboss (all feints, low HP).
 **Acceptance (fresh-slate era):** `raid_sim` determinism PASS, bands within intent, byte-identical for untouched Seals (solo-boss content is unsimmed until recast — see BOSS-REDO ERA note).
 
@@ -727,6 +724,22 @@ tanks keep the densest; marquee moments survive.
 - ~~Wire the other 4 HUDs to CombatStage3D~~ — DEAD 2026-07-10 (loop audit): the solo HUDs + `stage3d/` were deleted in REFIT P1; stage work now targets the 2D raid stage rigs (per-body Forge rigs owed).
 - **Robot re-rig**: per-boss silhouettes as ROBOTS/COMPUTERS (theme!) — replaces the `variant()` stopgap and is easier than organic sculpts. CAPTCHA-9 = a turnstile with an eye; GEMINI = two identical chassis; OPUS = a server-cathedral.
 - Blender/GLTF pipeline later (art replaces rig subclasses; `act()`/`windup()` contracts stay).
+- **TWINFANG ART PASS v1 — CLAIMED 2026-07-10 (branch `tempo-art`), the first real character-art
+  slice.** Foundation review done with Bill (Spine vs native vs code — StS2 is literally Godot 4 +
+  Spine, so the ceiling is same-engine): **verdict = painted layers on the EXISTING `PoseRig2D`
+  code-driven skeleton** (agents can author/tune it; Godot's Bone2D-modification layer is
+  half-abandoned; the `Actor2D` contract keeps **Spine Pro ($369) as a per-actor upgrade door**
+  later — same layer cuts rig straight in). Art = **AI-generated AtO-cel** (prompts specced),
+  generated NOW with THEME-PLAN re-skin risk accepted (regen cheap, re-cut ≈ half-day). Scope:
+  Twinfang ships regardless — autos (strike) + 2 signatures (eviscerate, coup). Slices: **① juice
+  pass** (wire the dormant `screen_post.gdshader` shockwave/aberration/wash + stage-local hit-stop
+  [never on plain strikes — the idle bounce IS the beat reference] + dagger smears + coup
+  afterimages + lunge-slides + boss flash_all + coup/finisher damage-number styles) → **② skin
+  rig** (`tex` Limb kind in `pose_rig_2d.gd`, `TwinfangSkinRig2D` same-joint-tree override,
+  factory parts-dir check, scarf spring, cut/align the PNGs) → **③ flipbook FX** (AI-generated
+  4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
+  trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
+  `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -816,6 +829,84 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · §CLASSES — **THE ABILITY PASS ×2 — DONE, both 🟡 AT BILL'S
+  BOARD.** Duelist (`TANK-PLAN §10`): button audit (4 of 6, +1 slot EMPTY; DUMP named the
+  storyless press) · ⏱ **EN GARDE** designed (the owed "wall" CD — invite/halved-leaks/double-flow
+  amplifier, never a taunt costume) · 3 transforms w/ doors (**PRISE DE FER** parry-seize ·
+  **REMISE** prime/commit · **FLÈCHE** dump-loads-onto-perfect-answer) · top-3 ladders refit w/
+  v1.1 adopted (Dancer excludes parry transforms from the offer). Draw (`MENDER-PLAN §13`):
+  **SKIN** — the missing-heal base cast (graded film, DEFERS a share of each hit into a ~3s drip;
+  never absorbs/heals — not Ward, not Bloom's HoT; Bill's playtest gap closed) · 3 cast
+  transforms w/ doors (**CUPPED HAND** Flash-from-the-Current · **DEEP DRAW** Mend's second band ·
+  **THE BRAID** Cascade as a graded string) · 8-cap trim parked per Bill (counted 10→11, rides
+  the compliance-trims ledger row). Catalog rows 🟡 (2 tables) · ledger rows (2 new + CD row 💡→🟡
+  + trims note) same commit. Both acquisition rules ride Bill's Tempo verdict ③.
+  *(ability-pass session)*
+
+- ☐ 2026-07-10 · worktree `../wow-stats` (branch `stats-page`) · §SYSTEMS/§GRAPHICS — **CLAIM: STATS
+  PAGE v2 — the full post-fight report (Bill's direct ask; per-fight only, run recap deferred).**
+  Audit found ~80% already engine-truth (`state.meter` per-source, `seat.diag` grades, the shipped
+  `RecapPanel`/`MeterPanel`). Building the genuinely-missing layer: (1) engine accounting — new
+  `meter_boon` funnel + `s.boon_meter`, amplifier-boon credit folded ONCE in `damage_boss` at the
+  vuln stack, `aggro_pulled` event+diag on threat-overtake retarget, `kick_open_missed` on an
+  uncontested INTERRUPTIBLE cast, `s.series` 1 Hz sampler for the dmg-over-time graph (all
+  diag-family, NEVER checksummed); (2) per-kit boon-credit one-liners + a `ClassKit.recap_spec()`
+  hook, backfilled for the 3 ACTIVE kits (Twinfang/Alchemist/Well; frozen Bulwark/Bloomweaver
+  skipped) — the credit line becomes a STANDING RULE every future kit rework carries; (3) a new
+  `game/ui/stats_page.gd` FULL REPORT screen (% breakdowns · damage-mix share bars · dmg-over-time
+  graph · BOON IMPACT · MISSED-OPPORTUNITY top-3 · category grades), reached by a button on the
+  Reckoning + `_show_end`. BYTE-IDENTICAL bar: ab-gate raid/twinfang/alchemist/well_sim (all new
+  writes are diag-family); `meter_probe` gains a boon-bucket reconcile [8]; new `screenshot_stats`
+  visual probe. ⚠ COLLISION: `combat_core.gd` also claimed live by `../wow-rails` (tuning-sweep) —
+  additive changes, merge main often, reconcile at merge. *(stats session)*
+
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `tuning-sweep`) — **CLAIM: TUNINGCONFIG LITERALS
+  SWEEP (REFIT P4's split-out follow-up; determinism law #5: no hard-coded balance literals).**
+  The sweep is SMALL — earlier passes moved most tuning; six real literals remain in
+  `combat_core.gd`: the fight-opening ability stagger (base 2.0 / step 1.5 / jitter 0.3 —
+  duplicated at create_state + pack entry, gets a shared helper), the silenced-cast re-check
+  (0.4s), the chained-target splash (0.28), the EMPOWER dmg_buff cap (0.55), the
+  taunt-answers-curse window (2.0s). All → `TuningConfig` @exports with identical defaults.
+  Encounter-data fallbacks (melee every/max) stay — they're data defaults, not engine balance.
+  BYTE-IDENTICAL bar: ab-gate raid_sim + twinfang_sim. *(rails session v2 — the twinfang kit
+  split remains the last P4 item after this)*
+
+- ☑ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW) — DONE,
+  🟡 AT BILL'S 10-VERDICT BOARD (BOSS-PLAN §V).** Delivered: BOSS-PLAN.md (laws · taunt-removal
+  aggro spec · SealTune tuning spine · density ramp · visual-grammar law · 15-steal catalog +
+  parked/rejected lists · 4 fight scripts to contract · 7 engine addenda · 6-slice build order);
+  ripples amended in the same commit (TANK-PLAN §1c ×3 + §8.0 budget · WORLD-PLAN §raid-identity ·
+  SEAL-PILLAR-PLAN superseded banner · MASTER §BOSSES rewritten · ledger rows · CARD-CATALOG
+  THE GAZE lane 💡×2 · CLAUDE.md index). Research: 7-agent workflow (engine inventory + constraint
+  sheet + Hades II/StS/AtO/duel-genre steals). Build gates: after `wow-descent-map` merge +
+  Wave-1 flow-aggro. *(boss-rework session)* — original claim text follows:
+  Bill's
+  go (2026-07-10): the 4-Seal boss redo begins — fill the DESCENT §4 timer contract (5/7/9/12 min)
+  with STRUCTURE (phases · adds · dialogue breaks), never +HP; update the Seals to the post-overhaul
+  systems (flow-aggro peels · one-dodge · interrupt-by-ability posture · PACK engine); **Bill's
+  aggro decision: TAUNT BUTTON REMOVED — aggro all-passive, tank regains by flow** (amends TANK-PLAN
+  §1c, ripples handled); a tuning spine so length/speed/density are knobs (no playtest yet);
+  mechanic-density ramp (Seal I teaches 1–2 answers, ladder ramps); per-Seal identity plans + a
+  steal-catalog from Hades II / StS2 / AtO (+ research/ reuse). Bill's addenda (mid-claim): tank
+  content designs against **DUELIST/WARDEN** (Bulwark ignored — dies with the Duelist base merge);
+  respect the **two-stream law** (invisible melee chip = the tank's own tempo · telegraphs = the
+  raid-wide authored beats); every mechanic must be **coherent in the game's visual grammar**
+  (bars/flurries/rigs — nothing unrepresentable). Docs: BOSS-PLAN.md (new) ·
+  §BOSSES · TANK-PLAN §1c amendment · BUILD-LEDGER row+collisions · CARD-CATALOG (aggro-boon idea
+  rows) · CLAUDE.md index. ⚠ build slices will touch `raid_content.gd` — `wow-descent-map` owns it
+  live (fight ladder bang); build starts only after that merge. *(boss-rework session)*
+
+- ☐ 2026-07-10 · worktree `../wow-tempo-art` (branch `tempo-art`, docs on main) · §GRAPHICS —
+  **CLAIM: TWINFANG ART PASS v1.** Foundation review locked with Bill: painted layers on the
+  existing `PoseRig2D` skeleton (native, $0, agent-authorable; **Spine Pro = per-actor upgrade
+  door** behind `Actor2D` — StS2 is literally Godot 4 + Spine, so the ceiling is same-engine);
+  AtO-cel AI art generated now (THEME re-skin risk accepted). Slices: ① juice pass (screen_post
+  wire + stage hit-stop + smears + lunge) ② painted skin rig (`tex` limbs + `TwinfangSkinRig2D`)
+  ③ flipbook FX + strike/evis/coup polish. Spec block in §GRAPHICS; ledger row §G. Touches
+  `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
+  the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
+  session)*
+
 - ☐ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **CLAIM: DESCENT SLICE 1
   — THE MAP BANG (Bill's go).** The one deliberate `raid_map_sim` re-baseline (DESCENT-PLAN §2/§3/
   §5 + ledger §I): 4-floor FLOORS (Vorathek→F1 Seal, Rings 3-2-1-0) · rows 6/8/8/9 + FINAL quota
@@ -866,22 +957,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   PUNISH pairs with Coup-as-kick · BAND = the Count-In, not a branch). 5 verdict points on the
   artifact D0 tab. *(ability-audit session)*
 
-- ◐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLASSBAND REGISTRY: BUILT &
-  MERGED (`b4e8d26`); shared Gauge base = the remaining slice of this claim.** THE BANDS:
-  `game/ui/bands/` — ClassBand base (shared orb/rune-rail/guard shell + `for_hud` picker keyed
-  off `_seat_cls_now`, the view twin of ClassRegistry) · TankBand · BladeBand (Tempo+Fermata
-  incl. the coil hold-release) · BrewBand (ALEMBIC + brew holds) · HealerBand (click-cast +
-  shared castbar) · WellBand (DRAW's tap-tap/hold-release grammars) · BloomBand. **raid_hud
-  sheds ~630 lines** — ~25 per-class widget members → ONE `_band`; the 4-way match on
-  build/render/keys/mouse/events → band routing; adding a class = one band file + one for_hud
-  arm. **Also fixed: BOTH glint indicators (target-bar + raid-frame pips) were DEAD since the
-  vuln-stack merge** (`855ac2f` missed these two `seat.vars` readers — a truncated grep; now on
-  `CombatCore.vuln_until`). ⚠ pure BASE plumbing, zero class-content change (Bill's mid-rework
-  carve-out honored — reworks land INTO band slots). GATES: ui_smoke_raid ALL OK · verify-all
-  **ALL GREEN (40 scripts)** · **WSLg visual pass 5/5 bands** (33 PNGs, scratchpad/bands/ —
-  Alembic/Well-window/Verdance/rune rails all pixel-right, GLINT tag live again). NEXT SLICE:
-  the shared Gauge base under the 5 gauge scripts (retheme-once seam, REFIT §4 art-era prereq).
-  *(rails session v2 — after: TuningConfig sweep · twinfang kit split)*
+- ☑ 2026-07-10 · `class-bands` → main (`b4e8d26` bands · `ee58124` gauge base) — **CLASSBAND
+  REGISTRY + SHARED GAUGE BASE: DONE (REFIT P4's last big rail).** THE BANDS: `game/ui/bands/` —
+  ClassBand base (shared orb/rune-rail/guard shell + `for_hud` picker keyed off `_seat_cls_now`,
+  the view twin of ClassRegistry) · TankBand · BladeBand (Tempo+Fermata incl. the coil
+  hold-release) · BrewBand (ALEMBIC + brew holds) · HealerBand (click-cast + shared castbar) ·
+  WellBand (DRAW grammars) · BloomBand. **raid_hud sheds ~630 lines** — ~25 per-class widget
+  members → ONE `_band`; the 4-way match on build/render/keys/mouse/events → band routing;
+  adding a class = one band file + one for_hud arm. **THE GAUGE BASE** (Bill's scope: "the
+  obvious shared stuff, grow from there"): `game/ui/class_gauge.gd` — the VERDICT FLASH
+  (flash()/verdict_alpha()/verdict_live(), four hand-rolled copies collapsed), the PULSE clock
+  (per-widget rates kept), per-frame decay+redraw plumbing (`_tick` hook), the standard
+  `on_event` entry; all 7 widgets retrofitted, draw STYLE untouched per widget — the art-era
+  retheme lands once. **Also fixed en route:** both glint indicators (dead since `855ac2f` —
+  stale `seat.vars` readers), the `show_result` rename mangle (75 masked script errors — the
+  "ALL OK tail ≠ clean" lesson, now in memory), and the `rift_ui.cfg` ERROR-spam on every combat
+  boot (has_section_key guard). ⚠ zero class-content change (Bill's mid-rework carve-out).
+  GATES: verify-all **ALL GREEN (40 scripts)** post-fix · WSLg visual passes ×2 (bands 5/5,
+  gauge-base spot-checks — brew banner drawn through the new flash path). **REFIT P4 now fully
+  built except: TuningConfig literals sweep (split-out claim) · twinfang per-spec kit split.**
+  *(rails session v2)*
 
 - ☑ 2026-07-10 · main (docs only) · §REALMS/WORLD · `THEME-PLAN.md` (NEW) — **THE SETTING
   riff v0**: the world fiction born — **the Gilded Age → the Binding → the Quiet → the
