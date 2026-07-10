@@ -252,6 +252,8 @@ not bigger numbers (Model A, frequency-scaled, Monotonic-Pool-safe).
 
 **Global meta-layer (realm-independent, keep — it's the subtle wink):** draft currency = **TOKENS** ("spend them responsibly"), rarity tiers = **Haiku / Sonnet / Opus**. Everything else AI-flavored is Realm 1 scoped.
 
+**⚠ REVISED 2026-07-10 (Bill) — the world fiction now has its own doc: `THEME-PLAN.md` (riff v0), which owns the frame on any diff.** Two changes to the above: (1) the "Rift tears into somewhere new" origin is RETIRED — realms are domains *under* the SEALS (bound human-made WONDERS of the Gilded Age, not tears into elsewhere; the word "rift" is leaving the fiction, title open). (2) the global meta-layer is REVERSED: Haiku/Sonnet/Opus rarities + the tokens gag go **Realm-1-local**; system nouns get one world-neutral name everywhere (THEME-PLAN §4 NAMING LAW — display-fields-only rename, ids untouched, sims byte-identical). Realm 1's bible below is UNTOUCHED *inside its door* — and gains a thematic home (the thinking engine = one wonder among wonders).
+
 ---
 
 ### REALM 1 — "THE TAKEOVER" (the AI-robot-takeover irony)
@@ -814,6 +816,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · §REALMS/WORLD · `THEME-PLAN.md` (NEW) — **THE SETTING
+  riff v0**: the world fiction born — **the Gilded Age → the Binding → the Quiet → the
+  Return** (a new generation *chooses* the dive: gold-rush on the grandparents' locked
+  estate, explicitly NOT post-apocalyptic; no rift, no invaders — every Seal a human-made
+  WONDER, "humans being humans"; the AI realm = one wonder among wonders, joke contained +
+  thematically home). Cohesion rule: **a region wears its Seal** (one cause for all zone
+  variety; 6 seal seeds tabled). **TONE LAW**: heavy history / chipper present, registered
+  cast, combat-never-the-joke generalized world-wide. **NAMING LAW**: system nouns = one
+  global name forever, content nouns wear costumes, visual grammar constant → §REALMS
+  global meta-layer REVERSED (haiku/sonnet/opus + tokens gag → Realm-1-local; leak audit
+  triaged incl. ARMORY-v3 flag + Vorathek re-skin note). Ledger §D row added. **7 open
+  dials at Bill (THEME §6):** origin · why-now · rarity names · module rename · title ·
+  org · mystery-volume. *(theme session)*
 - ☑ 2026-07-10 · main (docs only) · §SYSTEMS GEAR / `GEAR-CATALOG.md` §ARMORY-v3 (NEW) —
   **CURIO ARMORY v3 — the universal BIG SLATE: DONE, ~40 rows AT BILL'S NARROWING VERDICT
   (keep ~15–20).** Mined `research/` (Hades · StS · AtO · WoW · E33 · wildcards) into 10

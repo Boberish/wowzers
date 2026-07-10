@@ -37,7 +37,10 @@ on two ledgers; 🟡 at Bill's 12-verdict board §V, 2026-07-10) · `DUNGEON-PLA
 RUN — the dungeon structure spec v1**, DESCENT's twin: ~29-min push lap · map preset · THE DOOR
 CONTRACT (Version+Depth dials) · skin table · per-dungeon subset table · Dungeon 1 THE
 UNDERGRANARY worked contract; 🟡 at Bill's 8-verdict board §V, 2026-07-10) · `WORLD-PLAN.md` (the world pivot +
-COMBAT PILLARS — locked 2026-07-06) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
+COMBAT PILLARS — locked 2026-07-06) · `THEME-PLAN.md` (**THE SETTING — world fiction · tone
+law · naming law**: the Gilded Age → the Binding → the Return premise (sealed human-made
+WONDERS, not post-apoc, no rift) · region-wears-its-Seal · system-vs-content noun reskin
+rules; riff v0 at Bill's 7-dial board §6, 2026-07-10) · `DECK-LAYOUT.md` (canonical class-deck anatomy — slots · 3 axes · 6 card-types · branches ·
 signature CD · rules, consolidated 2026-07-09) · `CARD-CATALOG.md` (**THE single source of truth for
 every card's design + status** — creeds/modules/boons/rig/keystones across all classes, one format,
 strict idea→verdict→approved→built→cut lifecycle; wins any diff with a plan doc, 2026-07-09) ·

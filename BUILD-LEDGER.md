@@ -204,6 +204,7 @@ build-once seams that five separate class reworks and the endgame all need:
 
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
+| THE SETTING — world fiction + NAMING pass | 🟡 | THEME-PLAN §1–4 | display strings only: rarity labels (`draft.gd` display layer), door-dial name, tooltip nouns, armory renames, Bastion/ticket flavor | Riff v0 at Bill's 7-dial board (THEME §6). Rename via display fields NEVER ids — sims byte-identical (MASTER §REALMS bar). Reverses the global haiku/sonnet/opus wink → Realm-1-local. Fiction dressing rides W2 quest board. |
 | THE UNLOCK SYSTEM (tree + one XP meter) | 🔒 | PROGRESSION §UNLOCK | world save, tree UI, per-surface stacks, crest gates | **The meta spine.** Supersedes §LEVELS. Big interlocked build (W2/W3). |
 | W3 — doors + front-door flip (PLAY→ATLAS) | 🔒 | WORLD §PHASES | Dungeon 1, Versions dial, raid door, route attunement | Amends GAME SHAPE. Removes old realm-card flow. |
 | W4 — living world (online) | 🔒 | WORLD §PHASES | co-op traversal, presence rooms, world-event scheduler, Vorathek world boss | Additive protocol (combat frames untouched). Mid-fight join stays parked. |
@@ -319,6 +320,9 @@ The 🟡 pull-list — open decisions that will rot the plan if left. Grouped:
   WILD ration · SEV-1 timing · interim ship). **V#11 shop purse ✅ DECIDED 07-10: per-seat earned
   wallets + player-directed AI shopping w/ AUTO default.** Subsumes the old Teeth feel-verdicts
   for CONTEST scoring + curse magnitudes below.
+- **THE SETTING (THEME-PLAN §6)** — 7 dials: origin (made-wonders recommended) · why-now ·
+  rarity tier names · module rename · title · org · mystery volume. Unblocks the naming
+  pass (§D row); riff-stage, keep riffing before ruling.
 - **Tank·Duelist deck v1** — the whole slate is at your board (KEEP/TWEAK/CUT per card).
 - **Warden deck** — later pass, but confirm the frame after Duelist.
 - **Alchemist·Brew review** — 11 proposals (§8).
