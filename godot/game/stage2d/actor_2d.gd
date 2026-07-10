@@ -60,8 +60,6 @@ static func make(id: String, aspect := "") -> Actor2D:
 	if ResourceLoader.exists(art):
 		return SpriteActor2D.new(art)
 	match id:
-		"bulwark":
-			return BulwarkRig2D.new(aspect)
 		"twinfang":
 			return TwinfangRig2D.new(aspect)
 		"voidcaller":

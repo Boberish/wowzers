@@ -44,13 +44,15 @@ func _process(_delta: float) -> bool:
 	hud._inject_boons(bseat)
 	var bk := bseat.kit as TwinfangKit
 	assert(bk.creed_id == "flourish" and bk.modules.has("edge"), "creed+module fold into the blade kit")
-	# non-conforming seat is EMPTY: a tank skips both picks (done fires immediately, no screen)
+	# EVERY class is a framework class now (post-purge + the Duelist): the TANK (Duelist) shows
+	# the creed pick too — no seat "skips" it anymore.
 	hud._seat_key = "tank"
 	hud._d.run.creed = ""
 	hud._show_creed_pick(func(): flags.skip = true)
-	assert(flags.skip, "a non-blade seat skips the creed pick (empty page, per design)")
+	assert(hud._screen == "creed" and not flags.skip, "the DUELIST tank SHOWS the creed pick (a framework class)")
+	hud._d.run.creed = "veteran"
 	hud._seat_key = "blade"
-	print("TEMPO framework: creed pick + module pick + kit inject ok; non-framework seat skips clean")
+	print("TEMPO framework: creed pick + module pick + kit inject ok; the Duelist tank shows creeds too")
 
 	# WELL REWORK framework: the healer seat (class "well") snaps onto the SAME ceremony,
 	# with PER-SPEC creed pools + the deck folding into the WellKit (MENDER-PLAN §2-5).

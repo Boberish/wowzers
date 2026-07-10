@@ -87,6 +87,10 @@ const DOORS := [
 		"desc": "A flèche released on a TALL-bar land staggers the stream half a beat — a breath you earned."},
 ]
 
+## The Duelist has ONE aspect, so everything lives in POOL (spec_pool) — SHARED is empty (the
+## Draft engine reads both `cat.SHARED` and `cat.spec_pool(aspect)` and offers their union).
+const SHARED := []
+
 static func spec_pool(_aspect: String) -> Array:
 	return POOL
 

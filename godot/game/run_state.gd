@@ -6,7 +6,7 @@
 class_name RunState
 extends RefCounted
 
-var char_class: String = "bulwark"   ## "bulwark" | "twinfang" | "bloomweaver" | "alchemist" | "well"  (post-purge 2026-07-10)
+var char_class: String = "duelist"   ## "duelist" | "twinfang" | "bloomweaver" | "alchemist" | "well"  (Bulwark deleted 2026-07-10)
 var aspect: String = "warden"
 var loadout: Array = []           ## ability ids in key order (1..N)
 var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
@@ -35,9 +35,9 @@ var flags: Dictionary = {}        ## cross-node ripple marks ({"covered_shift": 
 var check_fails: int = 0          ## consecutive failed checks → comeback pity (resets on a pass)
 
 static func start(aspect: String, seed_v: int = -1) -> RunState:
-	var r := _base("bulwark", aspect, seed_v)
-	r.loadout = ["cleave", "rampage", "fortify", ("vindicate" if aspect == "warden" else "avalanche")]
-	r.encounters = BulwarkContent.run_encounters()
+	var r := _base("duelist", aspect, seed_v)
+	r.loadout = ["dump"]
+	r.encounters = DuelistContent.run_encounters()
 	return r
 
 static func start_duelist(aspect: String, seed_v: int = -1) -> RunState:

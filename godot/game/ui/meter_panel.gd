@@ -105,7 +105,6 @@ func _accent(seat: Seat) -> Color:
 		return Palette.TEXT_DIM
 	var scr: Script = seat.kit.get_script()
 	match (String(scr.get_global_name()) if scr != null else ""):
-		"BulwarkKit": return Palette.GOLD
 		"DuelistKit": return Palette.STEEL
 		"TwinfangKit": return Palette.FLOW
 		"BloomweaverKit": return Palette.VERDANCE

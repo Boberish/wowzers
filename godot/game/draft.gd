@@ -16,13 +16,12 @@ const REROLL_COST := 1
 const UPSELL_COST := 2
 const LOCK_COST := 1
 ## The class-signature skill counter each kit bumps into diag (see Draft.mint).
-const SIG_KEY := {"bulwark": "negate", "duelist": "counter", "twinfang": "perfect_strike",
+const SIG_KEY := {"duelist": "counter", "twinfang": "perfect_strike",
 	"bloomweaver": "perfect_ward",
 	"alchemist": "pour_potent", "well": "well_pour"}
 
 static func catalog(run) -> Variant:
 	match String(run.char_class):
-		"bulwark": return BulwarkBoons
 		"duelist": return DuelistBoons
 		"twinfang": return TwinfangBoons
 		"bloomweaver": return BloomweaverBoons

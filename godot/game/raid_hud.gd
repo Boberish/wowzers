@@ -2304,7 +2304,7 @@ func _verb_summary_lines() -> Array:
 						String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
 				return WellBoons.verb_summary(_d.run.boons, _aspect)
 			return BloomweaverBoons.verb_summary(_d.run.boons, _aspect)
-		_: return BulwarkBoons.guard_summary(_d.run.boons, _aspect)
+		_: return DuelistBoons.verb_summary(_d.run.boons, _aspect)
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
 ## so you can always see the run you've drafted. Offline descent only (_d.run present;
@@ -2427,7 +2427,7 @@ func _owned_boon_labels() -> Array:
 				pools = [BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN]
 			else:
 				pools = [WellBoons.SHARED, WellBoons.BRIM, WellBoons.DRAW]
-		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
+		_: pools = [DuelistBoons.POOL]
 	var out: Array = []
 	for pool in pools:
 		for b in pool:

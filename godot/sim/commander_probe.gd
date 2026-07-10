@@ -91,6 +91,10 @@ func _process(_d: float) -> bool:
 	_ck(String(rb.char_class) == "twinfang" and String(rb.aspect) == "tempo",
 		"D: the AI run matches the command (twinfang/tempo)")
 	hud._d.run.tokens = 5   # a banked pool to prove the mirror in/out
+	# The tank is now the DUELIST — a reworked (framework) class, so its FIRST draft wires the
+	# Combo rig before boons. Pre-wire it here to isolate the COMMANDER boon-chain test from the
+	# rig-wire step (which the rig_wire screenshot probe covers).
+	hud._d.run.rig = {"when": "tall_land", "then": "strike"}
 	var seen: Array = []
 	hud._show_boon_draft(func(): seen.append("done"))
 	var guard := 0
@@ -105,7 +109,7 @@ func _process(_d: float) -> bool:
 		seen.append(String((ds._run as RunState).char_class))
 		ds.emit_signal("boon_taken", ds._offers[0])
 		guard += 1
-	_ck(seen.size() == 5 and String(seen[4]) == "done" and String(seen[0]) == "bulwark",
+	_ck(seen.size() == 5 and String(seen[4]) == "done" and String(seen[0]) == "duelist",
 		"D: chain = your REFORGE then 3 AI drafts then done (%s)" % str(seen))
 	var ai_boons := 0
 	for k in hud._d.ai_runs:

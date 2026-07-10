@@ -12,7 +12,7 @@
 extends SceneTree
 
 const CLASSES := {
-	"bulwark": ["warden", "juggernaut"],
+	"duelist": ["duelist"],
 	"twinfang": ["tempo", "venomancer"],
 	"bloomweaver": ["wildgrove", "thornveil"],
 }
@@ -44,7 +44,7 @@ func _check(ok: bool, what: String) -> void:
 
 func _start(cls: String, aspect: String, seed_v: int) -> RunState:
 	match cls:
-		"bulwark": return RunState.start(aspect, seed_v)
+		"duelist": return RunState.start_duelist(aspect, seed_v)
 		"twinfang": return RunState.start_twinfang(aspect, seed_v)
 		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
 	return null
@@ -196,11 +196,11 @@ func _test_lock() -> void:
 			and _ids(p1) == _ids(c1) and _ids(p2) == _ids(c2),
 			"%s broke lock/kept-reroll refused, no rng" % cls)
 	# equivalence: reroll_kept with no locks consumes the identical rng stream as reroll
-	var a := _start("bulwark", "warden", 888)
+	var a := _start("duelist", "duelist", 888)
 	a.tokens = 3
 	var _ao := Draft.roll_offers(a)
 	var ar := Draft.reroll(a)
-	var b := _start("bulwark", "warden", 888)
+	var b := _start("duelist", "duelist", 888)
 	b.tokens = 3
 	var bo := Draft.roll_offers(b)
 	var br := Draft.reroll_kept(b, bo, [])
@@ -226,10 +226,10 @@ func _test_mint_table() -> void:
 	s.config = TuningConfig.new()
 	# footwork only: (6+0)/3 = 2, miss present -> no flawless
 	s.diag = {"perfect": 6, "read": 0, "miss": 1}
-	_check(Draft.mint(s, "bulwark") == 2, "footwork tokens (expect 2)")
+	_check(Draft.mint(s, "duelist") == 2, "footwork tokens (expect 2)")
 	# signature + footwork + flawless: (2+1)/3=1 + 8/4=2 + 1 = 4 -> capped at 3
-	s.diag = {"perfect": 2, "read": 1, "negate": 8}
-	_check(Draft.mint(s, "bulwark") == 3, "cap applies (expect 3)")
+	s.diag = {"perfect": 2, "read": 1, "counter": 8}
+	_check(Draft.mint(s, "duelist") == 3, "cap applies (expect 3)")
 	# scrappy but flawless-by-absence: only the flawless bonus
 	s.diag = {"perfect": 1, "graze": 4}
 	_check(Draft.mint(s, "twinfang") == 1, "flawless bonus alone (expect 1)")
@@ -250,12 +250,12 @@ func _test_mint_integration() -> void:
 		"identical fight -> identical diag (%s) -> identical mint (%d)" % [str(a["diag"]), a["mint"]])
 
 func _fight_mint(seed_v: int) -> Dictionary:
-	var cfg := BulwarkContent.make_config()
-	var bcfg := BulwarkContent.make_bulwark_config()
-	var s := BulwarkContent.make_state(seed_v, "warden", cfg, bcfg, BulwarkContent.make_the_duelist())
-	var pol := s.seats[0].policy as BulwarkPolicy
-	pol.reaction_slack = 0.0
-	pol.rng = DetRng.new(seed_v * 2749 + 1337)
+	var cfg := DuelistContent.make_config()
+	var dcfg := DuelistContent.make_duelist_config()
+	var s := DuelistContent.make_state(seed_v, "duelist", cfg, dcfg, DuelistContent.make_dense())
+	var pol := s.seats[0].policy as DuelistPolicy
+	pol.latency_ticks = 0
+	pol.rng = DetRng.new(seed_v * 2749 + 6737)
 	var cap := int(120.0 / s.dt)
 	while not s.over and s.tick < cap:
 		for seat in s.seats:
@@ -264,4 +264,4 @@ func _fight_mint(seed_v: int) -> Dictionary:
 				if not act.is_empty():
 					s.enqueue(s.tick + 1, seat, act)
 		CombatCore.update(s)
-	return {"mint": Draft.mint(s, "bulwark"), "diag": s.diag.duplicate(), "cs": s.checksum}
+	return {"mint": Draft.mint(s, "duelist"), "diag": s.diag.duplicate(), "cs": s.checksum}

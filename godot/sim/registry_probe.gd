@@ -40,7 +40,7 @@ func _initialize() -> void:
 	var r1 := ClassRegistry.start_run("well", "brim", 99)
 	var r2 := RunState.start_well("brim", 99)
 	_chk(fails, "starter round-trip", r1.char_class == r2.char_class and r1.run_seed == r2.run_seed)
-	_chk(fails, "unknown cls -> base starter", ClassRegistry.start_run("ghost", "x", 5).char_class == "bulwark")
+	_chk(fails, "unknown cls -> base starter", ClassRegistry.start_run("ghost", "x", 5).char_class == "duelist")
 
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
