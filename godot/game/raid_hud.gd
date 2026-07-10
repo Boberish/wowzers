@@ -7,7 +7,7 @@
 extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -72,7 +72,7 @@ func _seat_cls_now() -> String:
 	if _seat_key == "healer": return _healer_cls
 	if _seat_key == "blade": return _blade_cls
 	if _seat_key == "caster": return _caster_cls
-	return String(SEAT_CLASS.get(_seat_key, "bulwark"))
+	return String(SEAT_CLASS.get(_seat_key, "duelist"))
 
 ## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
 ## right kit + the lobby/sim/net all agree). Non-polymorphic seats keep their native class.
@@ -110,7 +110,7 @@ func _ensure_party() -> void:
 	for key in RaidNet.SEAT_KEYS:
 		if key == _seat_key or _d.party.has(key):
 			continue
-		var cls := String(SEAT_CLASS.get(key, "bulwark"))
+		var cls := String(SEAT_CLASS.get(key, "duelist"))
 		_d.party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
 
 ## ROSTER PERSISTENCE (REFIT P4): a stored raider is only adopted if its class/aspect
@@ -832,6 +832,13 @@ func _inject_boons(seat: Seat) -> void:
 				wk.creed_id = _d.run.creed
 			wk.modules = _d.run.modules.duplicate()
 			wk.rig = _d.run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
+		elif seat.kit is DuelistKit:
+			var dk := seat.kit as DuelistKit
+			if _d.run.creed != "":
+				dk.creed_id = _d.run.creed
+			dk.rig = _d.run.rig.duplicate()      # TANK-PLAN §3/rig: the wired Combo rig
+			# (DuelistKit reads modules via the shared kit.boons/modules dicts + _m())
+			dk.modules = _d.run.modules.duplicate()
 
 ## Generate the current ring's map (RaidContent.FLOORS[_d.floor_i]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -1297,7 +1304,7 @@ func _apply_map_fx(fx: Dictionary) -> void:
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 
 ## Which class this seat key plays (gear rows are class-marked by class name).
-const SEAT_CLS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 
 ## The human seat carries the run's equipped curios into a fight (offline map runs
 ## only — the seat starts each pull with fresh per-fight gear bookkeeping).
@@ -2082,6 +2089,8 @@ func _fw() -> String:
 		return "alchemist"
 	if _seat_key == "healer" and _seat_cls_now() == "well":
 		return "well"
+	if _seat_key == "tank" and _seat_cls_now() == "duelist":
+		return "duelist"
 	return ""
 
 ## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
@@ -2090,6 +2099,8 @@ func _fw_creed_ids(fw: String) -> Array:
 		return AlchemistCreeds.v1_ids()
 	if fw == "well":
 		return WellCreeds.v1_ids(_aspect)      # per-spec pools (brim vs draw)
+	if fw == "duelist":
+		return DuelistCreeds.v1_ids()
 	return TwinfangCreeds.v1_ids()
 
 func _fw_creed(fw: String, id: String) -> Dictionary:
@@ -2097,6 +2108,8 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 		return AlchemistCreeds.get_creed(id)
 	if fw == "well":
 		return WellCreeds.get_creed(id)
+	if fw == "duelist":
+		return DuelistCreeds.get_creed(id)
 	return TwinfangCreeds.get_creed(id)
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
@@ -2104,6 +2117,8 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 func _fw_module_offer_ids(fw: String, creed: String, aspect := "") -> Array:
 	if fw == "well":
 		return WellModules.offer_ids(aspect)   # ⭐The Vigil is Draw-only; the rest read either spec
+	if fw == "duelist":
+		return DuelistModules.built_ids()
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -2119,6 +2134,8 @@ func _fw_module(fw: String, id: String) -> Dictionary:
 		return AlchemistModules.get_module(id)
 	if fw == "well":
 		return WellModules.get_module(id)
+	if fw == "duelist":
+		return DuelistModules.get_module(id)
 	return TwinfangModules.get_module(id)
 
 ## Rig data dispatch (both classes mirror the TwinfangRig static API).
@@ -2127,6 +2144,8 @@ func _fw_rig_when_table(fw: String) -> Dictionary:
 		return AlchemistRig.WHENS
 	if fw == "well":
 		return WellRig.WHENS
+	if fw == "duelist":
+		return DuelistRig.WHENS
 	return TwinfangRig.WHENS
 
 func _fw_rig_then_table(fw: String) -> Dictionary:
@@ -2134,6 +2153,8 @@ func _fw_rig_then_table(fw: String) -> Dictionary:
 		return AlchemistRig.THENS
 	if fw == "well":
 		return WellRig.THENS
+	if fw == "duelist":
+		return DuelistRig.THENS
 	return TwinfangRig.THENS
 
 func _fw_rig_describe(fw: String, w: String, t: String) -> String:
@@ -2141,6 +2162,8 @@ func _fw_rig_describe(fw: String, w: String, t: String) -> String:
 		return AlchemistRig.describe(w, t)
 	if fw == "well":
 		return WellRig.describe(w, t)
+	if fw == "duelist":
+		return DuelistRig.describe(w, t)
 	return TwinfangRig.describe(w, t)
 
 ## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
@@ -2153,6 +2176,8 @@ func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
 			if WellRig.when_spec(String(id)) == _aspect:
 				wp.append(id)
 		return {"whens": WellRig.offer(wp, rng, 3), "thens": WellRig.offer(WellRig.then_ids(), rng, 3)}
+	if fw == "duelist":
+		return {"whens": DuelistRig.offer(DuelistRig.base_when_ids(), rng, 3), "thens": DuelistRig.offer(DuelistRig.then_ids(), rng, 3)}
 	if fw != "alchemist":
 		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
 			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
@@ -2700,7 +2725,7 @@ func _verb_summary_lines() -> Array:
 						String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
 				return WellBoons.verb_summary(_d.run.boons, _aspect)
 			return BloomweaverBoons.verb_summary(_d.run.boons, _aspect)
-		_: return BulwarkBoons.guard_summary(_d.run.boons, _aspect)
+		_: return DuelistBoons.verb_summary(_d.run.boons, _aspect)
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
 ## so you can always see the run you've drafted. Offline descent only (_d.run present;
@@ -2823,7 +2848,7 @@ func _owned_boon_labels() -> Array:
 				pools = [BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN]
 			else:
 				pools = [WellBoons.SHARED, WellBoons.BRIM, WellBoons.DRAW]
-		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
+		_: pools = [DuelistBoons.POOL]
 	var out: Array = []
 	for pool in pools:
 		for b in pool:
@@ -3187,10 +3212,10 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 	var aggro_me := bool(obs.get("aggro_me", false))
 	match _seat_key:
 		"tank":
-			_aggro_warn.text = "IT TURNS ON YOUR RAID  —  CHALLENGE IT BACK  (T)"
+			_aggro_warn.text = "IT DRIFTS TO YOUR RAID  —  PLAY CLEAN, IT COMES BACK"
 			_aggro_warn.visible = not aggro_me and not s.over
 		"blade", "caster":
-			_aggro_warn.text = "IT'S HUNTING YOU  —  SURVIVE UNTIL THE TAUNT"
+			_aggro_warn.text = "IT'S HUNTING YOU  —  DODGE!"
 			_aggro_warn.visible = aggro_me and not s.over
 		_:
 			_aggro_warn.visible = false
@@ -3363,13 +3388,11 @@ func _handle_event(ev: Dictionary) -> void:
 				_big_text("KICK!", Palette.KICK, 34)
 			_dial.react("stagger")
 			_add_shake(5.0)
-		"taunt":
+		"duel_counter":                       # FLOW=AGGRO: the perfect-parry hit-back (the tank's "look at me")
 			if mine:
-				_big_text("CHALLENGED — IT'S YOURS!", Palette.GOLD_BRIGHT, 38)
-				_add_shake(5.0)
-				_dial.react("impact", 30.0)
-			elif _seat_key != "tank":
-				_big_text("taunted back", Palette.STEEL, 22, 0.5)
+				_big_text("COUNTER!", Palette.GOLD_BRIGHT, 34)
+				_add_shake(4.0)
+				_dial.react("impact", 24.0)
 		"threat_drop":
 			if mine:
 				_big_text("IT FORGETS YOU!" if _seat_key == "tank" else "ITS GAZE FALLS ON YOU!", Palette.CRIMSON, 42)

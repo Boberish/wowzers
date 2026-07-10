@@ -34,8 +34,8 @@ func _run(s: CombatState, cap_sec := 130.0) -> void:
 
 ## Wire the standard skill knobs onto a raid state's four AI seats (expert-ish).
 func _arm(s: CombatState, seed: int) -> void:
-	(s.seats[0].policy as RaidTankPolicy).reaction_slack = 0.05
-	(s.seats[0].policy as RaidTankPolicy).rng = DetRng.new(seed * 2749 + 1337)
+	(s.seats[0].policy as DuelistPolicy).latency_ticks = 6
+	(s.seats[0].policy as DuelistPolicy).rng = DetRng.new(seed * 2749 + 6737)
 	(s.seats[1].policy as TwinfangPolicy).latency_ticks = 4
 	(s.seats[1].policy as TwinfangPolicy).rng = DetRng.new(seed * 2749 + 2338)
 	(s.seats[2].policy as AlchemistPolicy).latency_ticks = 4

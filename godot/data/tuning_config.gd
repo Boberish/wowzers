@@ -63,11 +63,16 @@ extends Resource
 @export var block_graze: float = 0.75
 @export var statblock_dodge: float = 0.65  ## stat-block ally chance to auto-dodge an answerable beat
 
-# --- Raid threat (threat_enabled fights only; ignored by all solo content) ---
-@export var threat_tank_mult: float = 4.0    ## tank threat per point of boss damage (dps/healers: 1.0)
-@export var threat_heal_factor: float = 0.5  ## threat per point of EFFECTIVE healing
-@export var taunt_dur: float = 3.0           ## taunt forces the boss onto you this long, seconds
-@export var taunt_threat_bonus: float = 1.1  ## taunt also sets your threat to top × this
+# --- FLOW=AGGRO (threat_enabled fights only; ignored by all solo content). TANK-PLAN §1c:
+#     the tank's FLOW (0..1) is the boss's attention. RULES locked, NUMBERS = playtest
+#     (first thing a live slice tunes — build-process-two-track). No taunt exists. ---
+@export var flow_lock_floor: float = 0.30    ## flow ≥ this → boss locked on the tank; below → peel
+@export var flow_gain_perfect: float = 0.10  ## a PERFECT answer adds this much flow
+@export var flow_gain_good: float = 0.06     ## a GOOD answer
+@export var flow_gain_graze: float = 0.02    ## a GRAZE / a held READ
+@export var flow_slip: float = 0.14          ## an un-clean answer (miss/whiff/baited) DROPS flow
+@export var flow_spike: float = 0.20         ## a PERFECT MAIN (parry) grants this bonus flow — the valve
+@export var flow_decay: float = 0.05         ## flow drifts down this much/sec (hold it by playing clean)
 
 # --- Draft 2.0 token mint (game layer reads state.diag at fight end — see game/draft.gd;
 #     diag is deterministic and never in the checksum, so these can't shift combat) ---

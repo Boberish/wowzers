@@ -67,8 +67,10 @@ var add_hp: float = 0.0
 var add_hp_max: float = 0.0
 var adds_spawned: Dictionary = {}      ## AddRes index -> true (each wave fires once)
 
-## Raid threat (threat_enabled fights only — see RAID-PLAN.md). Untouched solo.
-## Keyed/indexed by seats[] position (never Seat refs — cycle/serialization safety).
-var threat: Dictionary = {}            ## seat index (int) -> accumulated threat (float)
-var taunt_seat_i: int = -1             ## forced-target seat index while tick < taunt_until_tick
-var taunt_until_tick: int = -1
+## FLOW=AGGRO (TANK-PLAN §1c · BOSS-PLAN §1): the tank's FLOW (on seat.vars["flow"], 0..1)
+## IS the boss's attention. ≥ config.flow_lock_floor → the boss locks on the tank; below it
+## each incoming attack has a rising chance to PEEL to a random other seat; 0 = fully random.
+## The old threat TABLE + taunt (taunt_seat_i / taunt_until_tick / CombatCore.taunt) were
+## DELETED here — aggro is passive, driven by the flow minigame, never a damage-threat rotation.
+## The boss's current focus is a pure read of flow (CombatCore._threat_target, kept by name for
+## the HUD/stage victim highlight); last_melee_victim_i (above) tracks the wandering focus.

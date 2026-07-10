@@ -697,7 +697,7 @@ func _map_ctx_srv(room: Dictionary, seat: String) -> Dictionary:
 		_avg_frac_srv(cp["fracs"]), int(cp["entropy"]),
 		int(cp["check_fails"]), cp["inv"], cp["flags"], 0)
 
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist"}
+const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist"}
 
 func _avg_frac_srv(fracs: Array) -> float:
 	if fracs.is_empty():

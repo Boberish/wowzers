@@ -31,10 +31,14 @@ func _process(_d: float) -> bool:
 	step += 1
 	if step == 1:
 		hud._seat_key = "tank"
-		hud._aspect = "warden"
+		hud._aspect = "duelist"
 		hud._start_map_run()
+		if hud._d.map == null:   # the DUELIST is a reworked class: a creed-pick interposes at descent start
+			hud._d.run.creed = "veteran"
+			hud._d.run.rig = {"when": "tall_land", "then": "strike"}
+			hud._build_floor()
 		# TEST A — wiring: a run exists, a boon can be drafted, and it injects into the kit
-		var run_ok := hud._d.run != null and String(hud._d.run.char_class) == "bulwark"
+		var run_ok := hud._d.run != null and String(hud._d.run.char_class) == "duelist"
 		var picks: Array = Draft.roll_offers(hud._d.run)
 		var pre := (hud._d.run.boons as Dictionary).size()
 		if not picks.is_empty():

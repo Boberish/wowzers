@@ -16,13 +16,13 @@ const UPSELL_COST := 2
 ## REROLL_COST + LOCK_COST retired (§11 #3, rerolls-out): the reroll spends a banked
 ## REGENERATE charge (run.regenerate), not a Token; LOCK is gone entirely.
 ## The class-signature skill counter each kit bumps into diag (see Draft.mint).
-const SIG_KEY := {"bulwark": "negate", "twinfang": "perfect_strike",
+const SIG_KEY := {"duelist": "counter", "twinfang": "perfect_strike",
 	"bloomweaver": "perfect_ward",
 	"alchemist": "pour_potent", "well": "well_pour"}
 
 static func catalog(run) -> Variant:
 	match String(run.char_class):
-		"bulwark": return BulwarkBoons
+		"duelist": return DuelistBoons
 		"twinfang": return TwinfangBoons
 		"bloomweaver": return BloomweaverBoons
 		"alchemist": return AlchemistBoons

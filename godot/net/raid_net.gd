@@ -10,7 +10,7 @@ const SEAT_KEYS := ["tank", "blade", "caster", "healer"]
 const DEFAULT_ASPECT := {"tank": "warden", "blade": "venomancer", "caster": "brew", "healer": "brim"}
 ## Each seat's native CLASS (post-purge 2026-07-10). Only the healer seat is polymorphic —
 ## "well" (default) or "bloomweaver". `cls` rides the fight spec per seat.
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 const ALLY_LATENCY := 5
 const ALLY_SLACK := 0.06
 

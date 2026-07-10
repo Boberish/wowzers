@@ -877,6 +877,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   tank-w1 merges → rebase `seal-rework`, reconcile `raid_sim.gd` → S1 (E1–E9 guarded addenda)
   → S2–S5 the four fights.** S2–S5 also need Bill's V1–V10 (recs = defaults) before authoring.
   *(boss-build session — S0)*
+  **↳ pass 2 (2026-07-10, Bill: "tank build complete, verifying · v1–10 build with my recs"):**
+  **① VERDICTS — all 11 DECIDED (recs)**, BOSS-PLAN §V flipped, gate ③ cleared. **② tank-w1
+  RECON done → every engine block RESOLVED** (mapped to real APIs in BOSS-BRIEF §0a: flow =
+  `seat.vars["flow"]`/`_flow_aggro`; peel = `_aggro_peel(s,base)` at `combat_core.gd:1237` = the
+  path E5/E7 reuse; **THREAT_DROP already zeroes flow → S5 Compaction is pure data, zero engine**;
+  V#9 valve = `flow_spike .20` already built; taunt fully deleted). **③ THE REAL REMAINING GATE
+  = the UNION BASE:** tank-w1 is COMPLETE but forked from OLD main (merge-base `c6738ff`) and
+  NOT merged — neither base alone has both the descent fight-ladder (new-main) AND the flow
+  engine (tank-w1). S1 edits `combat_core` → needs the union. **Union forms when tank-w1 merges
+  main → main** (the tank session's reconcile — NOT front-run in seal-rework; a trial merge here
+  surfaced tank-w1↔new-main drift conflicts that are theirs to resolve). Verified: tank-w1's
+  `raid_content` delta is party-naming only, so S2–S5 content is conflict-free once the union
+  exists. **Turnkey after tank-w1 lands:** rebase seal-rework → re-apply S0 → S1–S5. *(pass 2 —
+  recon + verdicts)*
 
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
@@ -972,7 +986,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `src_label()` per-kit hook (`capitalize()` reads fine today) → L2 tail. **Next: L2 tail
   (DISCIPLINE from `seat.diag` · row sparklines) or L3 segments/run-history.** *(meter session)*
 
-- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **BUILT + VERIFIED
+- ☑ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **✅ LANDED ON MAIN
+  `62cc09e`** (FF; the Duelist is now the playable tank default — playtest-ready). **Merge resolution
+  (6 files, principled — newer system wins per side):** `combat_core.gd` → tank-w1 FLOW=AGGRO
+  (`taunt()` DELETED, no caller remained post-Bulwark) · `bulwark_kit.gd` → keep the delete ·
+  `meter_panel.gd` → main's `kit.accent()` hook + added `DuelistKit.accent()→STEEL` · `raid_hud.gd`
+  → combined (main's Draw `WellModules.offer_ids` + tank-w1 Duelist module branch) ·
+  `commander_probe.gd` → combined (main per-seat wallets + tank-w1 rig-wire) · `draft_sim.gd` →
+  main's rerolls-out (dropped tank-w1's dead `reroll_kept`/`lock` tests) · `verify-all.sh` → main's
+  probe superset. **`net_protocol` resolved coherent at v16** (superset of v15 descent — no
+  conflict materialized). **VERIFIED on main:** import clean · `ui_smoke_raid` ALL OK · `duelist_sim`
+  determinism PASS · `commander_probe`/`draft_sim`/`meter_probe` ALL OK. **⚠ FOLLOW-UP (not a
+  blocker):** the GEAR-2 "answer a Baleful Curse within 2s" deed lost its trigger — `curse_answered`
+  was only bumped inside the deleted `taunt()`; re-home to the flow-rebuild path when the Duelist
+  deck re-hosts the Bulwark GearFx cells. **UNBLOCKS:** `seal-rework` (rebase → re-apply S0 → S1–S5)
+  + DECK-TAX (`wow-deck-tax`, combat_core) — the union base is now formed. *(tank-w1 landing session)*
+- ☑ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD (landed `62cc09e`, above) · **BUILT + VERIFIED
   on the branch — `DUELIST-BRIEF.md` S0–S8 IN FULL + the Bulwark deletion; MERGE PENDING conflict
   resolution vs main's `tempo-d0`/`descent-s4`.** 6 commits: **S0** FLOW=AGGRO + taunt funeral
   (taunt DELETED whole, passive flow + seeded progressive peel, `bespoke_defense()` seam, THREAT_DROP→
@@ -1203,6 +1232,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
+
+- ☐ 2026-07-10 · worktree `../wow-deck-tax` (branch `deck-tax`) — **CLAIM: DECK TAX (offline) —
+  the JAILBREAK run-length ability-poison curse** (DESCENT §7; the slice-4 deferred bite). Offline
+  only (online rides the deferred online-curse-system + protocol bump). Build: `class_kit.poisoned`
+  id-set + a 1-line gate in `combat_core.gd:132` (before `on_action`, byte-identical when empty) ·
+  `run_director.poisoned` (persistent) · `raid_hud._launch_map_fight` injects the human seat's kit
+  poison · a dynamic DECK deal in `_show_jailbreak` (poisons a named loadout slot) · `_add_curse`
+  sets the poison, DEPRECATE/Cooling purge clears it · `_expire_curses` guard so the run-length
+  DECK curse persists · header pip · curse_probe extension. ⚠ touches `combat_core` — the tank-w1
+  merge is pending on that file; keep the gate minimal, merge promptly. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **DESCENT SLICE 4 — THE
   JAILBREAK (printed curse deals): MERGED to main (`a22c1ec`), 2 commits.** Built via a 5-reader

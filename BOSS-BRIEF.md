@@ -13,44 +13,57 @@ re-implements) · collisions: `BUILD-LEDGER.md §0/§F`. Work in a worktree
 ⚠ Line numbers in this brief drift with concurrent merges — **grep the symbol, never trust
 the number.** Fresh worktree: `godot --headless --path godot --import` FIRST.
 
-## 0 · SCOPE GATE — what's OPEN vs what BLOCKS (state as of 2026-07-10 evening)
+## 0 · SCOPE GATE — what's OPEN vs what BLOCKS (state as of 2026-07-10 · pass 5 — tank-w1 recon)
 
-**✅ OPEN — buildable the moment the session starts:**
-- **S0 (sim instrumentation)** — print-only, sim-side, byte-identical. No design gate at all.
-- **S1 (engine addenda E1–E4 + E6 + E8 + E9)** — all guarded, byte-identical when absent;
-  no content uses them until S2+. No verdict gate (they implement decided §1½/§6 shapes;
-  E5/E7 wait for their verdicts at S5).
-- **V#11 is DECIDED** (Bill: Vorathek gets the Chant — the kick kindergarten).
-- **Gate ① CLEARED:** the DESCENT map bang + fight ladder are MERGED to main (`a59ffa4` +
-  `cf3f8d9` in `raid_content.gd` history — 4-floor FLOORS, per-floor packroll, skirmish
-  enrage retighten). `raid_content.gd` (596 L) is free to claim. The live `descent-s2`/
-  `descent-s3` worktrees touch draft/display files, not Seal beat data.
+**✅ GATE ③ CLEARED — ALL 11 VERDICTS DECIDED** (Bill, 2026-07-10: *"v1–10 is build with your
+recs"* + V11(b)). The RECOMMENDED option of every verdict is now the build spec (BOSS-PLAN §V
+record). S2–S5 author the recs directly — no per-slice verdict lookups needed.
 
-**⛔ GATE ② — the Wave-1 merge (`wow-tank-w1`, IN FLIGHT now):** flow-aggro + peels + the
-taunt funeral + the Duelist base (DUELIST-BRIEF S0–S4) are being built in a live worktree that
-owns `combat_core.gd` / `boss_state.gd` / `raid_sim.gd` churn. **Do NOT start S1+ until
-tank-w1 merges** — the addenda edit the same reducer, and the fights author against peels +
-the Duelist stream. S0 may start pre-merge if you accept rebase churn in `raid_sim.gd`
-(tank-w1 rewrites ~60 lines of it); otherwise start everything after. **This build never
-touches flow/peel/threat code — it CONSUMES it** (BOSS-PLAN §1 is Wave 1's spec, incl. the
-V#9 perfect-MAIN flow spike — that knob belongs to DUELIST-BRIEF S0's flow economy).
+**✅ S0 BUILT & gate-clean** on `seal-rework` (`d8bc675`, byte-identical, det PASS ×4; baseline
+in MASTER §BOSSES). Reconcile note (§1a below): S0 re-applies on the union with a trivial
+`raid_sim.gd` merge (tank-w1 renamed the band's `taunts` col → `peels`; keep that + the S0
+`inst_by_skill`/`_accum_inst`/`_print_instrumentation` additions — they're in different funcs).
 
-**🟡 GATE ③ — Bill's verdicts V1–V10** (board: BOSS-PLAN §V / the ⚔️ artifact). His signal so
-far: *"recs are pretty good"* + V11 decided. Per the house pattern, **the RECOMMENDED options
-are the build defaults** — but content slices S2–S5 re-author his fights, so get the
-one-sentence go ("build the recs") or the per-verdict answers before S2. Slice-by-slice
-dependence:
-- **S2 Vorathek** needs V1(V identity)·V2(cuts)·V3(ramp read-back) — all rec'd, low risk.
-- **S3 Mistral** needs V4 (flip mode — rec (a) timed; (b)/(c) swap ~20 lines in the cycler).
-- **S4 Gemini** needs V5 (promotion pick — rec (a) seeded) · V6 (breaks — rec (a) mini-break).
-- **S5 Mythos** needs V6 (curtains) · **V7 (LISTENING → build E7)** · **V8 (ESCALATION →
-  build E5)**. If V7/V8 = out, skip the primitive; acts still stand.
-- **V10 ribbon**: rec = park; build nothing.
+**✅ GATE ① CLEARED** — the DESCENT map bang + fight ladder are in main (`a59ffa4`/`cf3f8d9`).
 
-**BUILD ORDER: S0 → S1 (one merge each) → [gates ②③] S2 → S3 → S4 → S5 → S6 → S7 (rides the
-first class-side `interrupts` flag, whenever a class rework lands it).** Each of S2–S5 is its
-own deliberate re-baseline — **untouched Seals must stay byte-identical per slice** (that's
-the regression gate that keeps four fights honest while one changes).
+**⛔ THE ONE REMAINING GATE — the UNION BASE (tank-w1 ⊕ new-main).** tank-w1 is **COMPLETE
+(Bill, 2026-07-10 — "just doing sims to verify")** but **NOT merged, and forked from an OLDER
+main** (merge-base `c6738ff`). So neither base alone is buildable: new-main has the descent
+fight-ladder but no flow engine; tank-w1 has flow but lacks new-main's +62-line `combat_core`
+change (descent/meter/tempo) + the descent `raid_content` ladder. **S1's addenda edit
+`combat_core` → they need the UNION.** The union forms when **tank-w1 merges main → lands in
+main** (the tank session's own reconcile — do NOT front-run it in `seal-rework`; that
+duplicates the drift-merge and risks divergence). **The moment tank-w1 is in main: rebase
+`seal-rework` onto main, re-apply S0, and S1–S5 run turnkey off §1a.**
+- Verified conflict-free once the union exists: **tank-w1 touches `raid_content.gd` only for
+  party naming** (Bulwark→Duelist tank fixture), NOT the `make_*` Seal builders → S2–S5 content
+  collides with neither tank-w1 nor descent (different regions of the file).
+
+**BUILD ORDER (post-union): rebase seal-rework → reconcile S0 → S1 (E1–E9 addenda, one merge)
+→ S2 → S3 → S4 → S5 → S6 → S7 (rides the first class `interrupts` flag).** Each of S2–S5 is
+its own deliberate re-baseline — **untouched Seals must stay byte-identical per slice.**
+
+### 0a · RESOLVED BLOCKS — the real tank-w1 APIs S1/S5 hook into (recon 2026-07-10)
+Every engine block this brief flagged is BUILT in tank-w1 (worktree `../wow-tank-w1`), and
+cleaner than assumed. Build against THESE names, not the placeholders in older brief text:
+
+| Block (was) | RESOLVED in tank-w1 — the real API | Used by |
+|---|---|---|
+| flow state | **`seat.vars["flow"]`** (0..1) on the tank seat; `CombatCore._flow_aggro(s)` reads it (0 if no tank) | S5 Compaction · aggro accounting |
+| boss focus | **`CombatCore._threat_target(s)`** — pure read of flow, NO rng (kept by name; safe to call often) | HUD/observe · content |
+| the peel roll | **`CombatCore._aggro_peel(s, base)`** — per-attack rng (`s.rng.next_float()/next_u32()`, fixed order), guarded by `s.threat_enabled`; called at `combat_core.gd:240` (melee victim) + **`:1237`** (targeted-strike victim = "the peel path") | **E5 mark relay · E7 LISTENING counter** route a hit onto a chosen victim by reusing this selection |
+| flow config | `TuningConfig`: **`flow_lock_floor 0.30`** · `flow_gain_perfect .10`/`good .06`/`graze .02` · `flow_slip .14` · **`flow_spike .20`** · `flow_decay .05`/s | SealTune (E4) may per-Seal-override; **V#9 valve = `flow_spike`, ALREADY BUILT** |
+| taunt | **DELETED** — `taunt_seat_i`/`taunt_until_tick`/`taunt()`/`use_challenge` gone; no taunt-back anywhere | — (the §1 contract, done) |
+| THREAT_DROP → FLOW DUMP | **ALREADY re-based** (`combat_core.gd` ~`:426`): `Effect.THREAT_DROP` resolve zeroes `tk.vars["flow"] = 0.0` + `curse_dropped` diag + `threat_drop` event | **S5 Context Compaction just USES `Effect.THREAT_DROP`** (the `_curse` builder) — ZERO new code |
+| melee-victim accounting | `_note_melee_victim` + `s.boss.last_melee_victim_i` (diag `stray_hit`/`aggro_pulled`, never checksummed) | S0 already reads `aggro_pulled` (renamed `peels` col) |
+| party fixture | tank seat = `DuelistKit`/`DuelistPolicy`, `vars {flow, wind, combo}` (Bulwark retired to a sim/gear fixture) | sim comp — no content dependency |
+
+**Consequence for the slice specs:** S5's "re-point `_curse` resolve … to `flow = 0`" is
+**already done** — Mythos Compaction = a normal `_curse` with `Effect.THREAT_DROP`. E5/E7 route
+their personal hits via **`_aggro_peel`-style victim selection at `combat_core.gd:1237`**, not a
+new peel subsystem. The V#9 flow-spike is a config knob that already exists — nothing to build.
+S1 still owns E1 (gate filter) · E2 (stance) · E3 (BREAK) · E4 (SealTune) · E6 (deny-empower) ·
+E8 (kick-window) · E9 (pips) on the union `combat_core`.
 
 ---
 
@@ -229,9 +242,10 @@ keep mult/speed mild inside acts, the SET change is the escalation).
 - **CURTAIN 2 (E3, ~15 s, @0.32)** → OPUS wave (hp ~4200; **Hotfix INTERIM heal +540 as
   today**; S7: ~7% pool — the raid's worst miss).
 - **ACT III HONEST:** melee → {0.90, 26, 36} · Fan-Out full 5 beats (`phase_from:2`) ·
-  **Context Compaction = FLOW DUMP** — re-point `_curse` resolve for this id from
-  threat-zero to `flow = 0` on the tank seat (the field lands in Wave 1; grep
-  `seat.vars["flow"]`) · enrage VISIBLE "USAGE LIMIT" · CoT double-time (cd ×0.8 variant).
+  **Context Compaction = FLOW DUMP — a normal `_curse` with `Effect.THREAT_DROP`; the flow-zero
+  is ALREADY built in tank-w1** (§0a — `combat_core` resolve zeroes `tk.vars["flow"]`), so this
+  is pure data authoring, no engine change · enrage VISIBLE "USAGE LIMIT" · CoT double-time
+  (cd ×0.8 variant).
 - **First cut:** hp 47500 → **~92000** · enrage 900 s. TTK ≈ 720 ±20% · beats 6–8 +
   ULTRATHINK exception.
 **Gate:** as S2 (+ relay/LISTENING probes: mark passes deterministically, offense-lock
