@@ -813,6 +813,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	if _m("benediction"):
 		o["bene"] = int(seat.vars.get("bene", 0))
 		o["bene_pips"] = cfg.bene_pips
+	if _m("vigil"):
+		o["hold_active"] = bool(seat.casting.get("held", false))
+		o["hold_start"] = int(seat.casting.get("held_start", -1))
+		o["hold_until"] = int(seat.casting.get("held_until", -1))   # the gutter clock (tremble render, S5)
 	if _cr_b("foresight"):
 		o["foresight"] = int(seat.vars.get("foresight", 0))
 	if not seat.casting.is_empty():
