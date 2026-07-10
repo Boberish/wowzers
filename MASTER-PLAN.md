@@ -814,6 +814,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `class-registry`) — **CLAIM: CLASS REGISTRY
+  (REFIT P4 — `class_id → factory`, breaking the RunState/RaidContent fan-out; gates net
+  spec-carry).** NEW `data/class_registry.gd`: ONE lazy-init table (load-order-safe) per class —
+  seat · display · aspects · seat factory · RunState starter · policy factory (byte-exact seed
+  offsets, incl. Bloomweaver's no-rng quirk) · kit script name. Rewired to read it:
+  `RaidContent._healer/_blade/_caster_seat` dispatchers · `RaidNet.make_policy`/`cls_of` ·
+  `raid_hud._make_seat_run` · the world_shell healer class toggle (cycles
+  `classes_for_seat("healer")` instead of a hardcoded dict). Per-class seat factories/starters
+  STAY as content in their homes — the registry indexes them (Callables), never re-authors.
+  BYTE-IDENTICAL bar: ab-gate raid_sim + twinfang_sim · NEW `sim/registry_probe.gd` (policy rng
+  states equal the old constants via `DetRng.state_hash`) · full verify-all. NO class/boon
+  content. *(rails session — queue after: ClassBand+Gauge base → ClassKit hoists)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §18 (NEW) + CARD-CATALOG Fermata section (NEW) +
   ledger flips — **DECK MACHINE row D8 (FINAL): THE FERMATA v6 — DONE. 🏁 BOTH MACHINES
   COMPLETE: 9 slates + 9 decks, all 🟡 at Bill's board; crons retired.** D8 itself: v5 pool →
