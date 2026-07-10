@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 02:14 · main (docs only) — **CLAIM: SLATE MACHINE row 7 — Alchemist·BREW
+  challenger slate** (fresh sweep → `research/brew-sweep.md` → live-deck ladders filed as PITCH
+  #0 + additive themes that don't duplicate §8's 11 proposals → 3 skeptics → `ALCHEMIST-PLAN.md`
+  new § 🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 02:12)*
+
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §10 (NEW) + §10.7 built-pool addendum +
   `research/draw-sweep.md` (NEW) + ledger §C row — **SLATE MACHINE row 6: Well·DRAW branch slate
   — DONE, four themes AT BILL'S VERDICT** (sibling law held: every theme on the release/hold

@@ -34,7 +34,7 @@ reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 | 4 | Alchemist · **Cask** | branch slate | `ALCHEMIST-PLAN.md` §9 | 🟡 | — | LANDED 07-10: filing pass (locked pool → Blend Line · Gauntlet · Tap List, zero orphans) + 3 ADDITIVE themes (Twin Casks · House Recipe · Taproom); §7 verdicts untouched. 1 kill (Storm Brewer — F3 untested), ~6 fixes. |
 | 5 | Well · **Brim** | branch slate | `MENDER-PLAN.md` §9 | 🟡 | — | LANDED 07-10: filing (zero orphans) + 4 themes (Low Catch · Overflow Engine · Glintsmith · Deep Well); 1 kill (Surgeon — Draw-rhythm collision), ~7 fixes. Bill picks 2–3. |
 | 6 | Well · **Draw** | branch slate | `MENDER-PLAN.md` §10 | 🟡 | — | LANDED 07-10: 4 themes (Rapids · Vigil · Skim · Eddy) + §10.7 built-pool addendum (all 24 built boons filed; §9's Deep Well theme → THE PULSE rename). 1 kill (Whirlpool), ~6 fixes. |
-| 7 | Alchemist · **Brew** | challenger slate | `ALCHEMIST-PLAN.md` new § | ⬜ | — | Live deck + the §8 review pass (11 proposals 🟡) = a RICH incumbent — fold both in as PITCH #0 material; don't duplicate the review pass. |
+| 7 | Alchemist · **Brew** | challenger slate | `ALCHEMIST-PLAN.md` new § | 🔄 | 07-10 02:14 | Live deck + the §8 review pass (11 proposals 🟡) = a RICH incumbent — fold both in as PITCH #0 material; don't duplicate the review pass. |
 | 8 | Twinfang · **Fermata** | challenger slate | `TEMPO-PLAN.md` new § | ⬜ | — | Deck v5 AT VERDICT = PITCH #0 (Cold Cut/Brink/Razor). Ramp/Snap verb locked — branches bend around it, never replace it. |
 
 ## 1. THE PASS (per target — generalized from the Tempo §14 run)
