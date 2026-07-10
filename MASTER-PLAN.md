@@ -954,6 +954,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
+- ☐ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **CLAIM: DESCENT SLICE 2 —
+  THE LEGIBILITY UI PASS** (BUILD-LEDGER §I row / DESCENT §5·§9·§11). Deliverables: one-line
+  reward CONTRACT text + fight-tier ▮ pips on every node door · BOTH-LEGS check hints (`% · on
+  win/on loss`) on all check/wager buttons · display RENAMES (Entropy→**LUCK** ⚡ · attempts→
+  **BACKUPS** · rerolls→**REGENERATE** · remove-cost→**DEPRECATE**) — display-only, ids frozen ·
+  **THE RAID INTEGRITY KILL** (§11 cut #2 — dead-integrity ticket payloads re-priced to live
+  goods, overtime_daemon bluff-stake retired, integrity check-row dropped) · header 3-meter
+  legend (⏣ ⚡ ⏻) + wound/curse pips + first-⏻ tooltip. **Byte-identical law:** renames are
+  DISPLAY-ONLY; map rng / node kinds / fx ids frozen so `raid_map_sim` stays checksum-identical.
+  Touches `map_screen`/`map_event_panel`/`map_check`/`map_content`/`campaign_core`/`raid_hud`
+  (MAP region — ⚠ coordinating with `tempo-art` which owns the combat region of the same file) +
+  sim/probe updates (integrity_probe re-scope). Flag: if integrity rides the netcode protocol,
+  a protocol bump is in scope (recon confirming). *(raid-rebuild session)*
+
 - ☑ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **DESCENT SLICE 1 — THE
   MAP BANG: MERGED to main (`ee18e05`), verify-all 40/40 GREEN ×2 (branch + merged tree).** The
   one deliberate `raid_map_sim` re-baseline, delivered: **4-floor FLOORS** (Vorathek→F1 Seal,
