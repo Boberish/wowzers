@@ -816,6 +816,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.11 (NEW) + **DECK-LAYOUT §5 LAW CHANGE** +
+  CARD-CATALOG flips + ledger rows + artifact D0 tab — **TEMPO ABILITY AUDIT PASS 2 (Bill's
+  verdicts on §17.10) — DONE, 🟡 AT BILL'S BOARD.** His steers: pass-1 spells *"not great"*,
+  +2 = button bloat → **ABILITY LAW tightened +2→+1 allowance, ceiling 6** (DECK-LAYOUT §5;
+  ripple: Alchemist reshape trims to ONE slot — Wave-2 note added); freshness moves to his idea —
+  **ABILITY TRANSFORMS** (drafted cards that REWRITE Evis/Coup, ≤1 transformed ability/run,
+  Floor-2 1-of-3 lean, each a DOOR gating 2 sub-boons; Hades-hammer steal, Tempo pilots): 
+  **CADENZA** (Coup at any Flow ≥2, scales with Flow spent) · **THE RONDO** (post-Coup 4-beat
+  return phrase — the spell reborn, button deleted) · **TREMOLO** (Evis becomes a ≤3-press graded
+  string). Tempo leaves its +1 slot EMPTY (Count-In parked 🔮; Sforzando/Pickup ✂️ → A5).
+  **Crit-vs-speed answered (v4 branch proposal 🟡): WOUND · EDGE · FINISH** — speed is the
+  CHASSIS, so SWIFT demotes to generics with NO ladder rungs (Uptempo → the EASE dial's
+  beat-speed BITE face · Quickstep/Through-Line → STRIKE generics · Double Time v2 → class
+  keystone) = NOT a hidden 4th branch; THE EDGE enters at 2 new cards (Whetstone entry creed —
+  Bullseyes-can-crit IS the A7 opt-in · The Strop KEEN-gauge module; A7 boons + Hone stand).
+  Governor stands regardless. 5 v2 verdict points on the artifact. *(ability-audit session,
+  pass 2)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.10 (NEW) + CARD-CATALOG D0 addendum + ledger
   rows (D0 + pillar-#3) + the Slate-Machine artifact D0 tab — **TEMPO ABILITY AUDIT (Bill's D0
   pass) — DONE, 🟡 AT BILL'S VERDICT.** His four asks answered: **① the +2 button slots** — 4
@@ -833,17 +851,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   PUNISH pairs with Coup-as-kick · BAND = the Count-In, not a branch). 5 verdict points on the
   artifact D0 tab. *(ability-audit session)*
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLAIM: CLASSBAND REGISTRY +
-  SHARED GAUGE BASE (REFIT P4 — the LAST big rail; collision-map rule: land this BEFORE any
-  per-class meter wave).** Bill resumed the build (morning). Plan: per-class BAND objects
-  (`game/ui/bands/*.gd`, the gauge-script pattern) owning build/render/input for their seat —
-  the HUD's seat-matches route to a band instance from a registry keyed off `ClassRegistry`;
-  the ~25 per-class nullable members migrate onto their bands (raid_hud shrinks). Then a shared
-  Gauge base under the 5 gauge scripts (common place/panel/idle shell — retheme once, not 5×).
-  Sliced: tank band → blade → caster → healer(well+bloom) → gauge base; ui_smoke_raid + WSLg
-  `screenshot_*` PNG diffs per slice (headless can't render `_draw`). Byte-identical logic bar:
-  sims untouched by construction (view layer); smokes green each slice. *(rails session v2 —
-  after: TuningConfig sweep · twinfang kit split)*
+- ◐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLASSBAND REGISTRY: BUILT &
+  MERGED (`b4e8d26`); shared Gauge base = the remaining slice of this claim.** THE BANDS:
+  `game/ui/bands/` — ClassBand base (shared orb/rune-rail/guard shell + `for_hud` picker keyed
+  off `_seat_cls_now`, the view twin of ClassRegistry) · TankBand · BladeBand (Tempo+Fermata
+  incl. the coil hold-release) · BrewBand (ALEMBIC + brew holds) · HealerBand (click-cast +
+  shared castbar) · WellBand (DRAW's tap-tap/hold-release grammars) · BloomBand. **raid_hud
+  sheds ~630 lines** — ~25 per-class widget members → ONE `_band`; the 4-way match on
+  build/render/keys/mouse/events → band routing; adding a class = one band file + one for_hud
+  arm. **Also fixed: BOTH glint indicators (target-bar + raid-frame pips) were DEAD since the
+  vuln-stack merge** (`855ac2f` missed these two `seat.vars` readers — a truncated grep; now on
+  `CombatCore.vuln_until`). ⚠ pure BASE plumbing, zero class-content change (Bill's mid-rework
+  carve-out honored — reworks land INTO band slots). GATES: ui_smoke_raid ALL OK · verify-all
+  **ALL GREEN (40 scripts)** · **WSLg visual pass 5/5 bands** (33 PNGs, scratchpad/bands/ —
+  Alembic/Well-window/Verdance/rune rails all pixel-right, GLINT tag live again). NEXT SLICE:
+  the shared Gauge base under the 5 gauge scripts (retheme-once seam, REFIT §4 art-era prereq).
+  *(rails session v2 — after: TuningConfig sweep · twinfang kit split)*
 
 - ☑ 2026-07-10 · main (docs only) · §REALMS/WORLD · `THEME-PLAN.md` (NEW) — **THE SETTING
   riff v0**: the world fiction born — **the Gilded Age → the Binding → the Quiet → the
