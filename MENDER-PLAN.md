@@ -609,3 +609,84 @@ the deck-creator BROKE/FADED/DEAD/OPENED sweep when themes land:**
 **Net effect:** every built card now files somewhere; the two slates' theme sets survive the
 full pool contact unchanged — the only casualties were the theme NAME (Deep Well → the Pulse)
 and the Levee's filing (Overflow, not the Pulse). Stated so the deck passes don't re-discover it.
+
+---
+
+## 11. THE BRIM DECK RESHAPE — around LOW CATCH · OVERFLOW · GLINTSMITH 🟡 (2026-07-10, Phase-2 D5)
+
+**What this is** (SLATE-PLAN row D5; deck-creator reshape law — the Well's deck is BUILT
+(`well-deck` `500334f`), so this is absorb-don't-duplicate: the built pool files into the §9
+winners, new cards land only in OPENED space, and the pass runs the BROKE/FADED/DEAD/OPENED
+sweep). Winners = the §9 ranking's top 3 (the Pulse is 4th; your ✅ picks swap free). Two
+skeptic catches this pass: **Blind Pour CUT before birth** (it duplicated the BUILT Blindfold —
+the greed pole already exists in code) and **"Steady Under Fire" renamed COOL HEAD** (the Brew's
+§8 P8 proposal owns that name).
+
+### 11.1 THE SWEEP (base unchanged → light form)
+
+- **BROKE:** nothing (the core didn't move; themes are a filing layer).
+- **FADED:** *Wide Brim* — a pure widener → **folds into the EASE dial** (standing law), leaves
+  the pool. *Cadence of Mend* — generic bread, stays but flagged low-tension.
+- **DEAD:** none.
+- **OPENED:** the three theme lanes — every built creed happens to enter one (§10.7 filing):
+  **The Brink → LOW CATCH · The Levee → OVERFLOW · The Shallows → GLINTSMITH.** Entry law
+  satisfied by cards already in code — the reshape's luckiest fact.
+
+### 11.2 THE THEME LANES (built cards filed 🔨 · new cards 🟡 — full rows in CARD-CATALOG)
+
+**LOW CATCH** (entry: The Brink 🔨): built — *Low Catch* (the boon the theme is named for),
+*Brink Bell* (⚠ the lane's ONE pardon, counted), Triage Protocol module. New 🟡 — **Knife's
+Edge** [GREED] the band drops another 10%, catches +25% · **Cool Head** [STRAT, renamed] a
+catch during a boss telegraph string refunds 1 ◍ · keystone **THE UNDERTOW** — three
+consecutive catches with zero spill pull the whole party's bars up 10% in one visible wave.
+**OVERFLOW ENGINE** (entry: The Levee 🔨): built — ⭐Reservoir module, *Overflowing Cup*,
+*Still Water*. New 🟡 — **Runneth Over** [STRAT] spill banks at 130% on Cascade · **Pressure
+Head** [GREED] over half Reservoir: pours +1 ◍ cost, Surge shields ×1.4 · keystone **THE
+FLOODGATE** — a full Reservoir opens as one party-wide shield wall; absorbs re-bank at half.
+**GLINTSMITH** (entry: The Shallows 🔨): built — *The Blindfold* (the greed pole — Blind Pour
+died to it), *The Kept Light*, *High Tide* (the BUILT capstone), ✦*The Shining Hour* (the TEAM
+card), Benediction module. New 🟡 — **Whetstone Waters** [POWER] Glints +1s, stack to 2 allies
+· **The Primed Vein** [STRAT] PRIME an ally: their next landing window ×1.5, a perfect there
+Glints the party 1s · keystone **THE GILDED HOUR** — all four Glints live at once: every
+ally's next clean answer crits.
+**Generic/shared (stay):** Deep Well · Steady Pulse · Meditate · Boiling Over · Warm Rekindle ·
+Second Ring · Cadence of Mend (the Pulse's cards wait with their theme).
+
+### 11.3 KEYSTONES · EASE · the counts
+
+- **Keystone pool:** High Tide 🔨 + Undertow/Floodgate/Gilded Hour 🟡 = 4, theme-weighted
+  1-of-2 elite offers (the same rule proposed at D0/D4).
+- **EASE knobs (Brim):** brim-band width (Wide Brim's fold) · landing-preview strength ·
+  catch-band width · Glint grace.
+- **Counts:** pool after fold = 14 built + 6 new = within quota with the Pulse's cards parked;
+  insurance total = 1 (Brink Bell) ✓; no new buttons ✓.
+
+### 11.4 GATES + SKEPTICS (evidence, delta-scope)
+
+**Dream drafts:** *LOW CATCH:* Brink → Triage Protocol → Knife's Edge + Cool Head + Low Catch
+→ THE UNDERTOW (the band sinks, the saves escalate, the wave crowns it) ✓ · *OVERFLOW:* Levee
+→ Reservoir → Runneth Over + Pressure Head + Overflowing Cup → THE FLOODGATE (waste becomes a
+wall) ✓ · *GLINTSMITH:* Shallows → Benediction → Whetstone Waters + Primed Vein + Blindfold →
+THE GILDED HOUR (precision becomes the warband's crit hour) ✓ · *Hybrid:* Brink + Reservoir
+(catch low, bank the rebound spill) — legal, rich ✓.
+**Trios:** (Knife's Edge | Pressure Head | Blindfold) three greeds three surfaces ✓ · (Cool
+Head | Runneth Over | Whetstone Waters) three STRAT/POWER, build-dependent ✓.
+**Overlap/skeptics:** **Blind Pour KILLED** (duplicate of the built Blindfold — caught at the
+distinctness table) · **Cool Head renamed** (Brew P8 owns "Steady Under Fire") · Undertow vs
+Benediction's bloom (both party-heals-on-streak) — elite-tier wave vs module pip-cash, ladder
+rungs not duplicates, recorded · the FADED fold (Wide Brim → dial) executed · no pardons added
+(Brink Bell stays the counted one) ✓.
+**AI:** catch-band thresholds · Reservoir-level triggers · Glint-uptime scheduling — the built
+`well_policy` already reads all three surfaces; 3 tiers natural.
+
+### 11.5 TENSION POINTS (Bill)
+
+1. Winners = Low Catch · Overflow · Glintsmith (the §9 ranking) — swap the Pulse in? (Its
+   cards wait, filed.)
+2. **Wide Brim → EASE fold** (leaves the pool) — accept? (Lean: yes, standing law.)
+3. The keystone offer rule (third deck proposing it — if you accept once, it's the pattern).
+4. High Tide vs Gilded Hour BOTH in Glintsmith's pool — two capstones in one theme (lean:
+   fine — one built, one elite-priced; the trio test keeps them apart).
+
+**Next:** your picks → catalog flips; the build claim is a light slice (new cards are kit-local
+boons + two module-adjacent effects; the Well's `_fw()` wiring is already in).
