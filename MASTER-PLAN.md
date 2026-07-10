@@ -903,6 +903,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   now also rebalances Seal tank-damage for the Duelist. **S1 (engine addenda E1–E9, guarded/
   byte-identical) is now unblocked and building next** — balance-independent, so it proceeds
   ahead of the Duelist-tuning question. *(pass 3 — union merge)*
+  **↳ pass 4 (2026-07-10) — S1 ENGINE ADDENDA BUILT & gate-clean on `seal-rework` (`43d70b0`).**
+  The seven guarded primitives the fights build on, every default a no-op: **E1** gated ability
+  sets (`AbilityRes.gate` {phase_from/until·stance·featured} + `_ability_eligible`/`_phase_index`
+  + pick-loop skip) · **E2** stance cycler (`Effect.STANCE_SHIFT` + `EncounterRes.stance_count` +
+  `BossState.stance`) · **E3** BREAK curtain (`Effect.BREAK` + `script_lines`, re-staggers) ·
+  **E4** SealTune (`EncounterRes.tune` + `RaidContent._apply_tune` build scalars) · **E6**
+  deny-race empower (`deny_denom/floor` + `deny_dmg` accrual + resolve clamp) · **E8** kick_window
+  (field; honor rides the class interrupts flag) · **E9** pips (field + `Telegraph.pips_left`).
+  Enum values appended (ordinals never shift). **Gates: raid_sim byte-identical vs main (32 rows,
+  all 4 Seals) · determinism PASS ×4 · raid_probe ALL OK (+12 new E1/E2/E3/E4/E6 asserts) ·
+  ui_smoke_raid ALL OK.** E5/E7 (mark relay / LISTENING) land at S5. **NEXT: S2 (Vorathek v2) —
+  the first content re-baseline** (needs the recs, all decided). *(pass 4 — S1)*
 
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
