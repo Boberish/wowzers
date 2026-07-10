@@ -121,7 +121,12 @@ func _process(_delta: float) -> bool:
 			else:
 				_check(_press(""), "draft screen routed onward")
 		"recap":
-			_check(_press(""), "recap has a CONTINUE")
+			# STATS PAGE v2 rides every recap as a "◆ FULL REPORT" button — press
+			# CONTINUE by name so the walk routes onward instead of into the report
+			_check(_press("CONTINUE"), "recap has a CONTINUE")
+		"report":
+			# if a walk ever lands on the stats page, BACK out and keep walking
+			_check(_press("‹ BACK"), "stats page has a BACK")
 		"end":
 			print("floor cleared: ok (fights=%d stops=%d drafts=%d visited=%d steps=%d)" %
 				[fights, stops, takes, _visited(), step])
