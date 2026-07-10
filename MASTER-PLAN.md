@@ -836,6 +836,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED `4e46e73`** · **TEMPO D0 FOLLOW-UP BUILT** (Bill's
+  board answers) — **On the Beat** back in the offer pool (kit code was already live) · **S3 THE
+  4 DUOS** (Blood Coda W×F · Red Edge W×E · Grand Finale E×F · Reprise Rondo×W — kit hooks +
+  `DUOS`/`theme_counts`/`armed_duos` folded into `Draft.offerable`: armed at ≥2 cards from EACH
+  theme, Reprise also needs Rondo; Opus slot, two-tone frame render deferred) · **S6 THE SET
+  PIECE** (the DECK-LAYOUT §5 signature-CD slot, first game-wide: a 4-strike phrase → build-scaled
+  flourish [flow-scaled dmg + bleed pulse + combo refund + 2s Flow-lock]; new base ability on the
+  Tempo/Fermata bar, `setpiece_enabled` A/B, policy arms it). Parse-clean + runtime smoke green
+  (0 errors, all 8 determinism cells PASS incl. flourish). **ONLY kick carriers remain deferred**
+  — gated on the interrupt-by-ability pillar (#3), not a Tempo verdict. *(commit `595ecd0`.)*
+
 - ◐ 2026-07-10 · worktree `../wow-seals` (branch `seal-rework`) — **CLAIM: THE SEAL REWORK
   BUILD (`BOSS-BRIEF.md`).** Bill's go ("implement these bosses like the brief says"). **S0
   (sim instrumentation) IN PROGRESS — the one slice unblocked today.** ⚠ Gate ② is NOT clear:
