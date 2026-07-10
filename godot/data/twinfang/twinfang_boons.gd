@@ -50,6 +50,7 @@ const TEMPO := [
 	{"id": "heavyInk", "type": "relic", "rarity": "sonnet", "tags": ["eviscerate", "combo", "greed"], "theme": "finish", "title": "Heavy Ink", "desc": "Combo points above 3 each add +10% to your next finisher; one drips off per missed beat. Hold the fat hand in rhythm.", "req": "eviscerate"},
 	# --- COUP DE GRACE (Da Capo parked from the open pool -> returns as the Rondo door, S4) ---
 	{"id": "crescendo", "type": "upgrade", "rarity": "haiku", "tags": ["flow", "coupdegrace"], "title": "Crescendo", "desc": "Coup de Grace hits 40% harder."},
+	{"id": "onTheBeat", "type": "relic", "rarity": "sonnet", "tags": ["opening", "eviscerate", "coupdegrace"], "title": "On the Beat", "desc": "Dumps fired INSIDE your Strike window take the window's grade multiplier - a Bullseye-timed Eviscerate hits far harder. Time your finishers to the beat, not just the Opening."},
 	# --- KEYSTONES (elite; theme-weighted 1-of-2 elite offers, the offer rule) ---
 	{"id": "hone", "type": "relic", "rarity": "opus", "tags": ["crit", "strike", "keystone"], "theme": "edge", "title": "Hone", "desc": "KEYSTONE: unlocks the EDGE meter. A Perfect hones +1, a Bullseye +2, a slip dulls -3. While Edge is up, ALL your hits carry crit chance (~4.5% per point, x2 damage) - nothing is spent, so a whiffed dump wastes nothing. Hone the blade with clean rhythm."},
 	{"id": "exsanguinate", "type": "relic", "rarity": "opus", "tags": ["wound", "eviscerate", "keystone"], "theme": "wound", "title": "Exsanguinate", "desc": "KEYSTONE: an Eviscerate consuming 5+ live bleeds ERUPTS - the pot detonates as a chained blood-burst across the next 3 beats."},
@@ -133,6 +134,50 @@ static func doors_for(transform_id: String) -> Array:
 		return out
 	for d in TRANSFORM_DOORS:
 		if String(d.get("door", "")) == transform_id:
+			out.append(d)
+	return out
+
+## D0 S3 · THE DUOS — cross-theme capstone boons, offered ONLY while ARMED (>=2 drafted cards from
+## EACH of the two themes; Reprise also needs the Rondo transform). Opus slot, two-tone frame
+## (render deferred), no run cap (prereqs + rarity gate it). Duos are BOONS with kit hooks.
+const DUOS := [
+	{"id": "bloodCoda", "type": "relic", "rarity": "opus", "tags": ["wound", "finish", "eviscerate", "duo"], "themes": ["wound", "finish"], "title": "Blood Coda", "desc": "Wound x Finish: a full-combo Eviscerate cashing 4+ live bleeds pays both bonuses ×1.15 - the burst paints the phrase-mark red."},
+	{"id": "redEdge", "type": "relic", "rarity": "opus", "tags": ["wound", "edge", "crit", "duo"], "themes": ["wound", "edge"], "title": "The Red Edge", "desc": "Wound x Edge: every CRIT pulses ALL live bleeds for one immediate extra tick - crit-fish while the pot is fat, against expiry."},
+	{"id": "grandFinale", "type": "relic", "rarity": "opus", "tags": ["edge", "finish", "crit", "duo"], "themes": ["edge", "finish"], "title": "Grand Finale", "desc": "Edge x Finish: a full-combo finisher with your crit build hot is a GUARANTEED crit at +50% crit damage; the screen holds a half-beat on the number."},
+	{"id": "reprise", "type": "relic", "rarity": "opus", "tags": ["wound", "coupdegrace", "duo"], "themes": ["wound"], "req_transform": "rondo", "title": "The Reprise", "desc": "Rondo x Wound: during the RETURN, each re-strike also re-opens one expired bleed - the song reopens the wounds."},
+]
+
+## The theme counts across a run's drafted deck (creed + modules + boons) — for duo arming.
+static func theme_counts(run) -> Dictionary:
+	var c := {"wound": 0, "edge": 0, "finish": 0}
+	var creed: Dictionary = TwinfangCreeds.get_creed(String(run.creed))
+	var ct := String(creed.get("theme", ""))
+	if c.has(ct):
+		c[ct] = int(c[ct]) + 1
+	for mid in run.modules:
+		if bool(run.modules[mid]):
+			var mt := String(TwinfangModules.get_module(String(mid)).get("theme", ""))
+			if c.has(mt):
+				c[mt] = int(c[mt]) + 1
+	for card in TEMPO:
+		if run.boons.has(String(card.get("id", ""))):
+			var bt := String(card.get("theme", ""))
+			if c.has(bt):
+				c[bt] = int(c[bt]) + 1
+	return c
+
+## The duos currently ARMED for `run` (>=2 from each theme; req_transform honored) — for the draft.
+static func armed_duos(run) -> Array:
+	var counts := theme_counts(run)
+	var out: Array = []
+	for d in DUOS:
+		var ok := true
+		for th in d.get("themes", []):
+			if int(counts.get(String(th), 0)) < 2:
+				ok = false
+		if d.has("req_transform") and String(run.transform) != String(d["req_transform"]):
+			ok = false
+		if ok:
 			out.append(d)
 	return out
 

@@ -697,6 +697,23 @@ today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief
 beat-source map + 3–8 budget + ULTRATHINK carve-out stay canon). Steal catalog (Hades II ·
 StS1/2 · AtO · Punch-Out/Furi/Sekiro genre) in BOSS-PLAN §5; research run 2026-07-10 (7 agents).
 
+**S0 BASELINE — built & gate-clean on `seal-rework` (`d8bc675`, 2026-07-10, NOT yet merged —
+holds behind tank-w1 to dodge a `raid_sim.gd` conflict).** The pre-rework instrumentation
+(byte-identical to main: 24-row checksum diff clean, determinism PASS ×4) reads today's Seals
+at **good tier, 25 seeds** — this is the gap the rework fills:
+
+| Seal | TTK now | Contract | Gap | Non-tank beats now | Target | Read |
+|---|---|---|---|---|---|---|
+| VORATHEK | 160 s | 300 s | **−47%** | ~18 (blade/caster) | 3–5 | over budget (SEAL-PILLAR's finding, confirmed) + 7-mechanic overload |
+| MISTRAL | 122 s | 420 s | **−71%** | ~4 | 4–6 | shortest Seal, biggest relative gap (matches §4) |
+| GEMINI | 168 s | 540 s | **−69%** | ~8–9 (+6 tank feints) | 5–7 | mid; Double-Check feints already register |
+| MYTHOS | 203 s | 720 s | **−72%** | ~15 | 6–8 | finale most under-filled + over dodge-budget |
+
+Every Seal is far under the clock AND (V/MY) over the dodge ration — the rework adds *length*
+via structure while *cutting* the raw dodge load. S1+ (engine addenda, then the four fights)
+resumes when `wow-tank-w1` merges (flow/peels/taunt-delete land there; the boss build consumes
+them). Fresh 300-seed bands land per content slice.
+
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
 - **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — **still parked; BOSS-PLAN v1 deliberately needs no 2nd telegraph source.**
@@ -836,16 +853,30 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED `4e46e73`** · **TEMPO D0 FOLLOW-UP BUILT** (Bill's
+  board answers) — **On the Beat** back in the offer pool (kit code was already live) · **S3 THE
+  4 DUOS** (Blood Coda W×F · Red Edge W×E · Grand Finale E×F · Reprise Rondo×W — kit hooks +
+  `DUOS`/`theme_counts`/`armed_duos` folded into `Draft.offerable`: armed at ≥2 cards from EACH
+  theme, Reprise also needs Rondo; Opus slot, two-tone frame render deferred) · **S6 THE SET
+  PIECE** (the DECK-LAYOUT §5 signature-CD slot, first game-wide: a 4-strike phrase → build-scaled
+  flourish [flow-scaled dmg + bleed pulse + combo refund + 2s Flow-lock]; new base ability on the
+  Tempo/Fermata bar, `setpiece_enabled` A/B, policy arms it). Parse-clean + runtime smoke green
+  (0 errors, all 8 determinism cells PASS incl. flourish). **ONLY kick carriers remain deferred**
+  — gated on the interrupt-by-ability pillar (#3), not a Tempo verdict. *(commit `595ecd0`.)*
+
 - ◐ 2026-07-10 · worktree `../wow-seals` (branch `seal-rework`) — **CLAIM: THE SEAL REWORK
-  BUILD (`BOSS-BRIEF.md`).** Bill's go ("implement these bosses like the brief says"). **S0
-  (sim instrumentation) IN PROGRESS — the one slice unblocked today.** ⚠ Gate ② is NOT clear:
-  `wow-tank-w1` (Wave-1 FLOW=AGGRO/Duelist) is still IN FLIGHT (unmerged, at its S4 — main
-  still has `threat_enabled`/`taunt_seat_i`, no `seat.vars["flow"]`). Per the brief, **S1+
-  (engine addenda E1–E9) and S2–S5 (content) HARD-BLOCK on the tank-w1 merge** — they edit the
-  same reducer tank-w1 rewrites, and the content authors against flow/peels/Compaction-flow-dump
-  that don't exist in main yet. So this session builds **S0 only** (byte-identical, sim-side:
-  beat-budget + cast-source + TTK-vs-contract + valley/timeline + verse tables in `raid_sim.gd`)
-  and stops at the gate — S1+ resumes when tank-w1 lands. *(boss-build session)*
+  BUILD (`BOSS-BRIEF.md`) — S0 BUILT & GATE-CLEAN on the branch (`d8bc675`); S1+ blocked on
+  tank-w1.** Bill's go ("implement these bosses like the brief says"). **S0 done:** `raid_sim.gd`
+  instrumentation (beat-budget/seat · cast-source counts · TTK-vs-DESCENT-§4-contract with ±20%
+  flag · verse/kick baseline · act/valley timeline), all pure reads → **byte-identical** (main
+  vs S0 checksum diff clean 24 rows; determinism PASS ×4). Baseline recorded in §BOSSES (every
+  Seal −47…−72% under contract). **⚠ NOT merged — held behind tank-w1:** that Wave-1 branch
+  (still IN FLIGHT, at its S4) rewrites the SAME `raid_sim.gd` regions (`taunts→peels`, band
+  loop, `_run_one` sig, return dict) + owns the `combat_core`/`boss_state` reducer S1's addenda
+  need. Merging S0 now would hand tank-w1 a conflict on the file the brief flagged. **Order:
+  tank-w1 merges → rebase `seal-rework`, reconcile `raid_sim.gd` → S1 (E1–E9 guarded addenda)
+  → S2–S5 the four fights.** S2–S5 also need Bill's V1–V10 (recs = defaults) before authoring.
+  *(boss-build session — S0)*
 
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
@@ -1164,6 +1195,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
+
+- ☐ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **CLAIM: DESCENT SLICE 4 —
+  THE JAILBREAK (printed curse deals)** (DESCENT §7, V#4 mixed-lean-gentle; BUILD-LEDGER §I). Flip
+  `RunMap.JAILBREAK_LIVE`; the node offers **two deals, both halves printed** (a strong good + a
+  printed bite in a DIFFERENT currency). The CURSE SYSTEM: active curses (cap 2, header pips — the
+  row map_screen reserved in slice 2), bounded-duration bites that tick per fight. Bite vocab
+  (V#4): **ECONOMY TAX** (mint halved / market +⏣ — I own Draft.mint + _market_price from slice 3),
+  **HP TAX** (temporary corrupted sector), **TIMING TAX** + **DECK TAX** (combat integration —
+  recon scoping whether buildable now vs deferred). Exits: **Market DEPRECATE-curse** (wires the
+  slice-3 deferred slot) + **Cooling purge fork**. HARD RULE: no run-long timing curse ever.
+  Welded-downside draft boons (② door) + event-curse legs (③) = extensions, scope per recon.
+  Touches `run_map`/`raid_hud`/`draft.gd`/`map_content`/`map_screen`/`campaign_core` + a curse
+  probe. ⚠ hot files — merge main often. Offline-first (online = follow-up like slice 3). Recon
+  running. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **DESCENT SLICE 3 — THE
   PROMPT MARKET + PER-SEAT WALLETS: MERGED to main (`fd8b895`), 3 commits.** Built via a 6-reader
