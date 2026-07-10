@@ -836,6 +836,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `meter-l3` → main (`9a6f6c0`→`7ee55b2`) · §SYSTEMS/§GRAPHICS · **METER L3
+  SEGMENTS / RUN HISTORY — BUILT & MERGED (Bill: "continue to L3 now").** Recount's
+  Current/Overall/per-pull dropdown, and it built the deferred run-recap accumulator in the same
+  slice. **Accumulator:** `RunDirector.fight_log` — each fight snapshots meter/boon_meter/diag
+  (+elapsed+encounter name) at `_on_end_moment` (once/fight, win/loss, headless too), auto-reset
+  per descent via `fight_log_seed` keyed on `run_seed`; deep-copied plain data. **This unblocks
+  the run-summary screen** (BUILD-LEDGER `:270` → 🟡, screen still owed). **Selector:** a footer
+  chip cycles This Fight / Whole Run / ‹each past fight›; Whole Run merges snapshots (skips the
+  live fight when frozen to avoid a double-count). Works across all 6 modes via a duck-typed
+  `_Segment` (readers de-typed off `CombatState` — StatsPage's static calls still pass a real
+  state; diag routed through `_diag_of`; segment build cached; NOW live-only). **Bugs caught &
+  fixed pre-merge:** `fights` name collision (→ `fight_log`), Whole-Run double-count on the end
+  screen, 3 Variant-inference parse errors from de-typing. Touches `run_director`/`raid_hud`/
+  `meter_panel`; **project imports clean**, auto-merged clean on `raid_hud`. **⚠ built with the
+  sim/screenshot bar paused (`2ee8325`) — a live playthrough is owed** (segment cycling + Whole
+  Run totals). Ledger §G → 🔨 `7ee55b2`; METER-PLAN L3 ticked. **Meter is now feature-complete
+  through L3** (6 modes + sparklines + run-history); remaining: run-summary screen · L4 window
+  chrome · L5 teaching layer. *(meter session)*
+
 - ☑ 2026-07-10 · `meter-spark` → main (`1924405`→`a26a3cd`) · §SYSTEMS/§GRAPHICS · **METER
   SPARKLINES — BUILT & MERGED (Bill: "continue"). L1 + all L2 view-only work now DONE.** A faint
   per-second trace behind each compact row in dmg/taken modes: reads `state.series` (cumulative
