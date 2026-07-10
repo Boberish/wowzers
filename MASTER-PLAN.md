@@ -1011,8 +1011,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   deck-creator passes are separate claims after each verdict. *(slate-machine session — the loop
   runs here)*
 
-- ☐ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **CLAIM: THE
-  OLD-GAME PURGE + audit follow-ups (Bill).** (1) docs: record the purge decisions (GAME SHAPE
+- ☑ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **THE
+  OLD-GAME PURGE + audit follow-ups (Bill) — DONE, MERGED `0582294`.** Code: Voidcaller ·
+  Mender · Reckoner + the 15 solo exam bosses + the GATE node kind DELETED (~40 files edited,
+  3 class dirs + gate_content + policies/binds/gauges/probes removed); defaults flipped
+  caster→Alchemist(brew) · healer→Well(brim) (healer keeps the Well⇄Bloomweaver toggle);
+  Zone 1's THE THRESHOLD re-payloaded to a Forge elite; protocol **v13** (⚠ rebuild+redeploy
+  server with clients); Twinfang Warden/Executioner + kept-class solo bosses survive as SIM
+  FIXTURES only. **Full verify surface green** (35 harnesses: balance sims · probes · smokes ·
+  both net smokes, zero desyncs). **Bands re-baselined @60 seeds** (deliberate): riftmaw
+  100/100/0 · mistral 100/100/100 · gemini 100/100/28 · mythos 100/92/0 — good-tier IMPROVED
+  on deep Seals (the Well), **⚠ riftmaw sloppy 77→0 = watch item** (entry Seal stone-walls
+  the worst tier on the no-kicker comp — SEAL-PILLAR/healer-retune lever). Docs: purge
+  decisions recorded (GAME SHAPE amendment etc., commit `35d270c`), audit drift/stale fixes,
+  `archive/` born (5 docs), WORLD-PLAN §THE DUNGEON, ceremony-order in DECK-LAYOUT, ledger
+  §A½ rows (Bulwark-dies-with-Duelist pinned). ⚠ WSLg visual pass OWED (class-select /
+  party / lobby screens changed — headless can't render): Bill's next feel pass. *(this
+  session)* **CLAIM was:** (1) docs: record the purge decisions (GAME SHAPE
   amendment · roster · casting-pool cut · BREADTH/gear consequences), fix the loop-audit drift +
   stale blocks, archive retired docs → `archive/`, WORLD-PLAN §DUNGEON consolidation; (2) code:
   DELETE Voidcaller + Mender + Reckoner + the 15 solo bosses + the GATE node kind wholesale;
