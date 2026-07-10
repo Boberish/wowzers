@@ -769,7 +769,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - ~~**MED — `fight_seed()` collides in Topology map mode**~~ — ✅ FIXED 2026-07-03 (`ac386bf`): folds `map_node` in map mode; `map==null` byte-identical; `sim/fight_seed_probe.gd` guards it.
 
 **Netcode robustness (architectural):**
-- **MED — desync checksum covers only boss HP + tick** (`combat_core.gd` :68): excludes seat HP/resources/absorb, threat, and `rng._state` — the lockstep detector can't see non-boss drift until it reaches boss HP. Two paths: (a) fold seat state + `rng.state_hash()` into `state.checksum` (strongest, but **rebaselines every sim checksum** — a coordinated change), or (b) a **net-layer-only** integrity hash on the existing 30-tick cadence (additive, keeps all sim baselines byte-identical). *Recommend (b).*
+- ~~**MED — desync checksum covers only boss HP + tick**~~ — ✅ FIXED 2026-07-10 (`4779f59`, option b as recommended): `RaidNet.integrity()` ships `ih` beside `cs` every 30 ticks (seat HP/resources/absorb + `DetRng.state_hash()`); replica halts on mismatch; protocol v14. Engine checksum untouched — all sim baselines byte-identical. `sim/integrity_probe.gd` guards it.
 - **MED — `seat.casting` holds a live Seat ref → RefCounted self-cycle** (`seat.gd`): a raid healer self-cast leaks the seat on Esc-mid-cast (only cleared on fight-over). Definitive fix: store `target_i` (index), mirroring `absorb_owner_i`/HoT `caster_i` — touches mender/bloom kits + HUD readers. (An interim `casting={}` teardown stopgap exists but the index fix is the right one.)
 
 **Bigger DRY refactors (safe but larger churn — deliberate, not drive-by):**
@@ -857,16 +857,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   · Drumfire rhyme · numbers=playtest). Distinctness-ledger row 2. *(slate-machine session,
   deck tick 02:49)*
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `net-integrity`) — **CLAIM: NET-LAYER INTEGRITY
-  HASH (audit 07-03 checksum-coverage finding, option b — the recommended additive path; REFIT §5
-  disposition).** The desync detector only sees boss HP + tick (`combat_core.gd:72`); seat
-  HP/resources/absorb and `rng._state` drift invisibly until it reaches boss HP. Build: read-only
-  `DetRng.state_hash()` + pure `RaidNet.integrity(state)` (tick · boss · per-seat scalars · rng
-  state) → server sends `ih` beside `cs` on the same 30-tick cadence → replica compares both →
-  `NetProtocol.VERSION` 13→14 (rebuild+redeploy coupled, by design). Engine checksum UNTOUCHED —
-  every sim baseline stays byte-identical. NEW `sim/integrity_probe.gd` + verify-all row. Gates:
-  both net smokes checksum-identical · full verify-all. NO class/boon content. *(rails session —
-  P4 queue continues: vuln stack ⚠ rebaseline → class registry → ClassBand+Gauge → hoists)*
+- ☑ 2026-07-10 · `net-integrity` → main (`4779f59`) — **NET-LAYER INTEGRITY HASH: BUILT & MERGED
+  (audit 07-03 checksum-coverage finding, option b as recommended; REFIT §5 disposition).** The
+  desync detector only saw boss HP + tick; seat HP/resources/absorb and `rng._state` drifted
+  invisibly until they compounded into boss damage. Shipped: read-only `DetRng.state_hash()` +
+  pure `RaidNet.integrity(state)` (tick · boss · per-seat scalars · rng state — scalars only, no
+  Dictionary iteration) → the server ships `ih` beside `cs` on the same 30-tick cadence → the
+  replica compares both and halts loudly on mismatch. **`NetProtocol.VERSION` 13→14** — ⚠ next
+  deploy rebuilds server+clients together (`server/preflight.sh`, the versioned-protocol law).
+  Engine checksum UNTOUCHED — every sim baseline byte-identical (that was the point of option b).
+  NEW `sim/integrity_probe.gd` (replicas agree · hashing pure · seat drift caught · rng drift
+  caught, checksum blind to both). GATES: **verify-all ALL GREEN (38 scripts)** incl. both net
+  smokes checksum-identical through the new comparison. §CODE AUDIT bullet struck. *(rails
+  session — P4 queue continues: vuln stack ⚠ rebaseline → class registry → ClassBand+Gauge →
+  hoists)*
 
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17 (NEW) + CARD-CATALOG D0 rows + ledger §C —
   **DECK MACHINE row D0: THE TEMPO DECK v3 — DONE, 🟡 AT BILL'S VERDICT.** Winners = **WOUND ·
