@@ -283,6 +283,53 @@ low end early, high end late. All columns are SealTune-turnable.
 Dodge stays load-bearing everywhere (Bill: "keep it for sure") — the ramp moves COUNT and
 STAKES, never deletes the motion. ULTRATHINK keeps all 3 beats at Mythos, whole, forever.
 
+## 3½ · THE TANK STREAM = THE RHYTHM (Bill, 2026-07-10 — the base layer, LOCKED)
+
+§3 names a "tank stream" but the engine never defined one — today the stream is
+**untelegraphed melee chip**: the tank eats ~4 invisible hits before the first real telegraph
+(open_stagger 2.0s vs melee every ~0.8–1.1s), the dial sits empty most of the fight, and the
+dodge-tank has nothing to dodge. Bill's playtest verdict (Duelist v1, first descent fight):
+unplayable. The fix — **upgrade the melee channel itself into THE RHYTHM**, the visible
+dodgeable auto-attack stream the whole §3 table already assumes.
+
+**The mechanism (why it's cheap + safe):**
+- The rhythm **rides the melee channel**, not the scheduler. Boss ability timers FREEZE
+  during telegraphs but melee keeps ticking — so real telegraphs stay on cadence and the
+  rhythm **fills every gap** (pauses presentation while a real telegraph is in flight,
+  resumes after; nothing ever overlaps — one press answers one bar, the WEAVE).
+- The Duelist mitigation funnel is **source-agnostic** (`modify_incoming` grades ANY bar,
+  melee included) — the press already works; melee just never showed a wind-up to time
+  against. The rhythm adds the wind-up + grading surface, not new combat rules.
+- **Chip = the partial-mit leak** (mit cap .90, EN GARDE halves). No separate melee floor —
+  a perfect tank still bleeds slivers; the healer always has work.
+
+**ONE LANGUAGE (minigame ↔ global grammar — the sight-read law):**
+
+| The read | Underneath | Size | The tank's move |
+|---|---|---|---|
+| THE RHYTHM (aggro-holder only) | melee channel + wind-up, graded press | small | DODGE (bread — full mit on smalls) |
+| BIG HIT | tank-targeted DEFENSIBLE telegraph | big/huge | PARRY (the commit; dodge leaks by height) |
+| FAKE BIG | same, `feint` | looks big | HOLD — press = BAITED |
+| SHARED STRING | multi-beat, per-seat answers | small beats | universal DODGE like everyone |
+| BRACE | raid-wide nova, unavoidable | — | eat it (healer's moment). **No UNAVOIDABLE bar ever aims at only the tank.** |
+
+**Stray rule:** the rhythm re-targets via the existing aggro peel — strays **only on aggro
+loss** (or authored mechanics). A strayed bar renders on the *victim's* dial with a **longer
+wind-up** (reaction grace) and is **hidden from the tank**. Statblock victims auto-roll
+(`statblock_dodge`), FULL-fidelity policies answer their own bar.
+
+**Pilot = the first descent fight** (forge `swarm`, "Crawler/Chaff Swarm"): melee numbers
+move into the rhythm; the body gains its missing **one BIG parry bar** (+ **feint twin at
+tier ≥2** — the "fake big hits") so the parry half of the minigame exists in fight 1. Chaff
+Burst stays the single brace. Other bodies + the Seals inherit the rhythm as the §3 "tank
+stream texture" row (VORATHEK slow·tall·honest → MYTHOS dense) — via SealTune, per-Seal
+slices.
+
+**Guards:** encounters without a rhythm flag keep the exact old melee path — **byte-identical**
+(ab-gate). Sims re-baseline for the swarm only. Slices: S1 engine channel · S2 swarm content ·
+S3 per-seat dial visibility · S4 duelist_sim/raid_sim + feel pass. Worktree `wow-rhythm`
+(branch `tank-rhythm`).
+
 ---
 
 ## 4 · THE VISUAL GRAMMAR LAW (Bill: "coherent to the game/visuals")

@@ -1921,6 +1921,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☐ 2026-07-10 · docs on main + worktree `../wow-rhythm` (branch `tank-rhythm`) — **CLAIM: THE
+  TANK STREAM = THE RHYTHM (Bill's playtest verdict + design, `BOSS-PLAN §3½` NEW).** Bill
+  playtested Duelist v1 in the descent fight 1 (forge swarm): ~4 invisible melee hits before the
+  first telegraph (open_stagger 2.0s vs melee ~0.8s), dial empty ~70% of fight → "unplayable,
+  totally bugged" (it wasn't a render bug — video-frame + framepace + headless analysis proved
+  logic/render clean; the tank just has nothing to answer). FIX (Bill's design): upgrade the
+  MELEE CHANNEL into THE RHYTHM — visible, dodgeable auto-attack bars on the aggro-holder,
+  riding melee's keeps-ticking-through-telegraphs property (fills gaps, never overlaps, big
+  beats stay on cadence); Duelist funnel is already source-agnostic so the press works today —
+  it just lacked a wind-up to time. Chip = the partial-mit leak (no melee floor). Strays only
+  on aggro-peel (victim-visible, longer wind-up, hidden from tank). Pilot = fight-1 swarm
+  (+ its missing BIG parry bar + feint twin t≥2). Slices S1 engine (guarded, no-rhythm
+  encounters byte-identical) · S2 swarm · S3 per-seat dial · S4 sims+feel. Ledger §F row added.
+  *(this session)*
+
 - ☑ 2026-07-09 · main (docs only) · NEW `GAME-LOOPS.md` + CLAUDE.md index line + 2 drift banners —
   **core game-loop AUDIT (Bill) — DONE.** Read all 23 plan docs; **`GAME-LOOPS.md`** is the
   deliverable: the game stated as 7 loops (beat→fight→node→run→world→account→warband) with status
