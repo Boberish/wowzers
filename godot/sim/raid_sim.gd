@@ -34,6 +34,11 @@ const SKILLS := [
 	{"label": "good", "slack": 0.06, "lat": 6, "hlat": 6},
 	{"label": "sloppy", "slack": 0.12, "lat": 14, "hlat": 18},
 ]
+# S0 (BOSS-BRIEF): the DESCENT §4 timer contract, in seconds — the target good-tier
+# TTK the boss rework must fill with STRUCTURE. The instrumentation flags a fight
+# ⚠ OFF-TARGET when it lands outside ±20% (a report line, not a hard fail — numbers
+# are still SealTune-loose until Bill locks them). Baseline today reads WAY under.
+const CONTRACT_TTK := {"riftmaw": 300.0, "mistral": 420.0, "gemini": 540.0, "mythos": 720.0}
 
 func _initialize() -> void:
 	var seeds := int(SimUtil.arg("seeds", "200"))
@@ -80,12 +85,16 @@ func _initialize() -> void:
 		# a mana floor that actually dips = the healer's resource is a real constraint;
 		# hlMana pinned near 100 with high hlIdle = the fight doesn't pressure the healer.
 		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  rez  losses")
+		var inst_by_skill := {}                   # S0: per-skill instrumentation accumulators
 		for sk in _skills:
 			var wins := 0
 			var ttk_sum := 0.0
 			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
 				"miss": 0.0, "adds": 0.0, "hmana": 0.0, "hover": 0.0, "hidle": 0.0, "rez": 0.0}
 			var causes := {}
+			var i_beats: Array = [{}, {}, {}, {}]   # S0: per-seat beat-budget sums
+			var i_casts := {}                       # S0: ability id -> cast count sum
+			var i_pf := 0.0; var i_as := 0.0; var i_vp := 0.0
 			for seed in range(seed0, seed0 + seeds):
 				var r := _run_one(String(b), seed, sk, true)
 				r["skill"] = sk["label"]; r["seed"] = seed; r["boss"] = b; r["probe"] = "taunt"
@@ -100,6 +109,8 @@ func _initialize() -> void:
 				agg["hover"] += float(r["hl_over_pct"])
 				agg["hidle"] += float(r["hl_idle_pct"])
 				agg["rez"] += float(int(r["revives"]))
+				_accum_inst(i_beats, i_casts, r)
+				i_pf += float(r["phase_flips"]); i_as += float(r["add_spawns"]); i_vp += float(r["valley_pct"])
 				if r["won"]:
 					wins += 1; ttk_sum += float(r["ttk_sec"])
 				else:
@@ -112,6 +123,10 @@ func _initialize() -> void:
 				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
 				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, SimUtil.fmt_causes(causes)])
+			inst_by_skill[sk["label"]] = {"beats": i_beats, "casts": i_casts,
+				"pf": i_pf, "as": i_as, "vp": i_vp, "n": n, "ttk": avg}
+		print("")
+		_print_instrumentation(String(b), enc, inst_by_skill)
 		print("")
 	if seed0 == 1 and _probes and (only == "" or only == "riftmaw"):
 		_prove_threat_gate(mini(seeds, 200))
@@ -191,6 +206,18 @@ func _run(s: CombatState) -> Dictionary:
 	var mana_min := (healer.resource if healer != null else 0.0)
 	var h_idle := 0
 	var h_acts := 0
+	# --- S0 instrumentation (BOSS-BRIEF): pure reads of state AFTER each update, so
+	# checksums stay byte-identical. Watches telegraph transitions (cast counts),
+	# phase/add/walk-in transitions (the act/valley timeline). ---
+	var casts: Dictionary = {}                 # ability id (String) -> telegraphs started for it
+	var prev_tele: Telegraph = null
+	var phase_flips := 0
+	var phase_last := CombatCore.current_phase(s).at
+	var add_spawns := 0
+	var add_kills := 0
+	var add_last := s.boss.add_i
+	var valley_ticks := 0
+	var total_ticks := 0
 	while not s.over and s.tick < cap:
 		for seat in s.seats:
 			if seat.policy != null and seat.alive():
@@ -206,6 +233,25 @@ func _run(s: CombatState) -> Dictionary:
 		CombatCore.update(s)
 		if healer != null:
 			mana_min = minf(mana_min, healer.resource)
+		# --- S0 sampling (read-only) ---
+		total_ticks += 1
+		var tele := s.telegraph
+		if tele != null and tele != prev_tele:      # a NEW telegraph began this tick
+			var aid := String(tele.ability.id)
+			casts[aid] = int(casts.get(aid, 0)) + 1
+		prev_tele = tele
+		var ph_at := CombatCore.current_phase(s).at
+		if ph_at != phase_last:
+			phase_flips += 1; phase_last = ph_at
+		if s.boss.add_i != add_last:
+			if s.boss.add_i >= 0: add_spawns += 1
+			else: add_kills += 1
+			add_last = s.boss.add_i
+		# valley = a diegetic breather the raid isn't dodging through. Today only PACK
+		# walk-ins qualify (Seals have no packs yet) → ~0% baseline; the BREAK/stance
+		# valleys the rework adds light this up in S2+.
+		if s.boss.entered_tick > 0 and s.tick < s.boss.entered_tick + s.config.pack_walkin_ticks:
+			valley_ticks += 1
 	if not s.over:
 		s.loss_cause = "timeout"
 	var dps_deaths := 0
@@ -238,6 +284,12 @@ func _run(s: CombatState) -> Dictionary:
 		"revives": int(healer.vars.get("revives", 0)) if healer != null else 0,
 		"loss_cause": s.loss_cause,
 		"checksum": s.checksum,
+		# --- S0 instrumentation payload (byte-identical: never read by update()) ---
+		"beats": _seat_beats(s),
+		"casts": casts,
+		"phase_flips": phase_flips,
+		"add_spawns": add_spawns,
+		"valley_pct": 100.0 * float(valley_ticks) / float(maxi(1, total_ticks)),
 	}
 
 ## --skills filter: "" = all three; "good" or "good,sloppy" = just those tiers (faster).
@@ -291,6 +343,100 @@ func _prove_determinism(boss: String) -> void:
 		boss, ("PASS" if repro else "FAIL"), a["checksum"], a["ttk_sec"],
 		("win" if a["won"] else a["loss_cause"]),
 		("differ (good)" if a["checksum"] != c["checksum"] else "IDENTICAL (suspect!)")])
+
+# --------------------------------------------------------------------------
+# S0 INSTRUMENTATION (BOSS-BRIEF) — beat budget · cast sources · TTK-vs-contract ·
+# act/valley timeline · the verse (kick) baseline. All fed by pure reads in _run(),
+# so the whole block is byte-identical to the pre-S0 sim.
+# --------------------------------------------------------------------------
+
+## Per-seat beat-budget snapshot from seat.diag at end of run. presented = the
+## answerable beats put to this seat (perfect+good+graze+miss); feints = the
+## hallucination reads (baited+read). Two dps seats print separately (blade/caster).
+func _seat_beats(s: CombatState) -> Array:
+	var labels := ["tank", "blade", "caster", "healer"]
+	var out: Array = []
+	for i in range(mini(4, s.seats.size())):
+		var d: Dictionary = s.seats[i].diag
+		var perfect := int(d.get("perfect", 0))
+		var good := int(d.get("good", 0))
+		var graze := int(d.get("graze", 0))
+		var miss := int(d.get("miss", 0))
+		out.append({"label": labels[i],
+			"presented": perfect + good + graze + miss,
+			"perfect": perfect, "good": good, "graze": graze, "miss": miss,
+			"feints": int(d.get("baited", 0)) + int(d.get("read", 0))})
+	return out
+
+## Merge one run's instrumentation into the per-skill accumulators.
+func _accum_inst(i_beats: Array, i_casts: Dictionary, r: Dictionary) -> void:
+	var beats: Array = r.get("beats", [])
+	for i in range(mini(beats.size(), i_beats.size())):
+		var b: Dictionary = beats[i]
+		var acc: Dictionary = i_beats[i]
+		acc["label"] = b["label"]
+		for k in ["presented", "perfect", "good", "graze", "miss", "feints"]:
+			acc[k] = float(acc.get(k, 0.0)) + float(b[k])
+	var casts: Dictionary = r.get("casts", {})
+	for k in casts:
+		i_casts[k] = int(i_casts.get(k, 0)) + int(casts[k])
+
+## Collect the INTERRUPTIBLE (kickable verse) ability ids on an encounter, walking
+## chains — used to mark verses in the cast table and print the §1½ kick baseline.
+func _collect_verse_ids(ab: AbilityRes, out: Dictionary) -> void:
+	if ab.response == AbilityRes.Response.INTERRUPTIBLE:
+		out[String(ab.id)] = true
+	for ch in ab.chain:
+		_collect_verse_ids(ch as AbilityRes, out)
+
+## The S0 tables, printed per boss off the good-tier aggregate (the budget's
+## reference tier; falls back to whatever tier ran if good was filtered out).
+func _print_instrumentation(boss: String, enc: EncounterRes, by_skill: Dictionary) -> void:
+	if by_skill.is_empty():
+		return
+	var ref: String = "good" if by_skill.has("good") else String(by_skill.keys()[0])
+	var d: Dictionary = by_skill[ref]
+	var n: float = maxf(1.0, float(d["n"]))
+	print("  [S0] instrumentation @ %s tier (%d seeds) — the pre-rework baseline:" % [ref, int(n)])
+
+	# 1 · TTK vs the DESCENT §4 contract
+	var target := float(CONTRACT_TTK.get(boss, 0.0))
+	var meas := float(d["ttk"])
+	if target > 0.0 and meas > 0.0:
+		var dev := 100.0 * (meas - target) / target
+		var flag := "⚠ OFF-TARGET" if absf(dev) > 20.0 else "ok"
+		print("    TTK(%s) %.0fs vs contract %.0fs  (%+.0f%%)  %s" % [ref, meas, target, dev, flag])
+
+	# 2 · beat budget per seat (the ~3–8/fight non-tank ration lives here)
+	print("    beat budget/seat    presented  perfect  good  graze  miss  feints")
+	for acc in d["beats"]:
+		if acc.is_empty():
+			continue
+		print("      %-7s           %7.1f  %7.1f %5.1f %6.1f %5.1f %6.1f" % [
+			acc["label"], float(acc["presented"]) / n, float(acc["perfect"]) / n,
+			float(acc["good"]) / n, float(acc["graze"]) / n, float(acc["miss"]) / n,
+			float(acc["feints"]) / n])
+
+	# 3 · cast-source counts (verses tagged) + the §1½ verse baseline
+	var verse_ids := {}
+	for ab in enc.abilities:
+		_collect_verse_ids(ab as AbilityRes, verse_ids)
+	var ids: Array = d["casts"].keys(); ids.sort()
+	var line := "    casts/run: "
+	for id in ids:
+		line += "%s×%.1f%s  " % [id, float(d["casts"][id]) / n, (" [verse]" if verse_ids.has(id) else "")]
+	print(line)
+	if not verse_ids.is_empty():
+		# no class carries a kick yet (KICK POSTURE) → every verse lands uncontested;
+		# landed==casts, kicked==0. S7 flips this live once a class carries interrupts.
+		var vline := "    verses (uncontested, no kicker): "
+		for id in verse_ids:
+			vline += "%s landed×%.1f (kicked 0)  " % [id, float(d["casts"].get(id, 0)) / n]
+		print(vline)
+
+	# 4 · act / valley timeline
+	print("    timeline: phase-flips %.2f/run · add-spawns %.2f/run · valley(walk-in) %.1f%%" % [
+		float(d["pf"]) / n, float(d["as"]) / n, float(d["vp"]) / n])
 
 func _write_csv(path: String, rows: Array) -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path).get_base_dir())
