@@ -181,7 +181,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D5 | Well · **Brim** | `MENDER-PLAN.md` §11 | 🟡 | — | LANDED 07-10: reshape around Low Catch·Overflow·Glintsmith — built pool filed 🔨 (catalog back-fill done, shared+Brim), 6 new cards + 3 keystones 🟡, Wide Brim→EASE fold, 2 skeptic catches (Blind Pour killed as built-Blindfold dupe · Cool Head renamed). |
 | D6 | Well · **Draw** | `MENDER-PLAN.md` §12 | 🟡 | — | LANDED 07-10: reshape around Vigil·Rapids·Eddy — ⭐VIGIL module promoted · **Millrace demote proposal** (economy keystone fails the bar; Flume crowned) · Ride-the-Tremble rename · 9 new cards 🟡 · sibling gate held. |
 | D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` §12 | 🟡 | — | LANDED 07-10: ONE merged board — built pool 🔨 cataloged (ladder-tagged) · §8's 11 slotted 🟡 · kits G/P/S formalized (Silencer/Fusillade ⏸ pillar-parked) · keystone-pool math flagged (6 candidates vs pool law) · Muscle Memory rename. |
-| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | ⬜ | — | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
+| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | 🔄 | 07-10 04:39 | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
 
 **Cross-deck DISTINCTNESS LEDGER** — each deck pass APPENDS its row here before writing cards,
 and checks its plans against every earlier row (the cheap cross-class overlap gate — no re-reading

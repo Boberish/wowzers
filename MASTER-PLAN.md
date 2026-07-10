@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 04:39 · main (docs only) — **CLAIM: DECK MACHINE row D8 (FINAL) — the Fermata v6
+  revision** (v5 built pool → catalog 🔨 · §16's two additive kits formalized 🟡 · reconciles).
+  The deck queue DRAINS after this row — the machine's cron retires. *(slate-machine session,
+  deck tick 04:34)*
+
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §12 (NEW) + CARD-CATALOG Brew section (NEW)
   + ledger row — **DECK MACHINE row D7: THE BREW ASSEMBLY — DONE, one merged board.** Built
   pool → 🔨 catalog rows (the Brew's back-fill drift closed), ladder-tagged Slow Boil/Cannonade/
