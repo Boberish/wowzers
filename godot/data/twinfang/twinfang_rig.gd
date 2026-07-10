@@ -31,7 +31,7 @@ const WHENS := {
 const THENS := {
 	"echo":        {"name": "Echo",         "base": 12.0, "kind": "damage",  "blurb": "a delayed phantom slash for bonus damage."},
 	"secondwind":  {"name": "Second Wind",  "base": 5.0,  "kind": "energy",  "blurb": "refund energy — keep the rhythm hot."},
-	"edge":        {"name": "Killing Edge", "base": 0.5,  "kind": "crit", "cap": 3, "blurb": "bank guaranteed-crit charges for your next Strikes."},
+	"edge":        {"name": "Killing Edge", "base": 0.5,  "kind": "crit", "cap": 3, "blurb": "with the Edge meter up, sharpen it; else your next 3 Strikes crit."},
 	"bloodletter": {"name": "Bloodletter",  "base": 8.0,  "kind": "bleed",   "blurb": "open a small bleed on the boss."},
 	"overcharge":  {"name": "Overcharge",   "base": 6.0,  "kind": "empower", "blurb": "your NEXT dump hits harder (Coup build-up bait)."},
 	"expose":      {"name": "Expose",       "base": 3.0,  "kind": "expose",  "blurb": "the boss takes +% damage for 2s."},

@@ -206,9 +206,23 @@ extends Resource
 @export var on_the_beat_frac: float = 0.60      ## fraction of the live window grade bonus a dump gains
 # DOUBLE TIME (signature): at max Flow, each further Perfect adds an "overdrive" stack.
 @export var doubletime_dmg: float = 0.04    ## +this damage per overdrive stack (flow-scaled hits)
-@export var doubletime_tighten: float = 0.06 ## window shrinks this fraction per stack…
-@export var doubletime_min_frac: float = 0.35 ## …but never below this fraction of its width
-@export var doubletime_cap: int = 12        ## overdrive stack ceiling (window-floor backstop)
+@export var doubletime_tighten: float = 0.06 ## per-stack SPEED PUSH weight (folds into the governor)
+@export var doubletime_min_frac: float = 0.35 ## DEPRECATED (D0 S0): the per-source clamp is retired —
+                                            ## the ONE window_min wall replaces it. Field kept so the
+                                            ## Resource's saved data loads; no longer read by the kit.
+@export var doubletime_cap: int = 12        ## overdrive stack ceiling (push backstop)
+
+# --- THE SPEED GOVERNOR (D0 S0, TEMPO-PLAN §17.10 D · §17.11) — ONE wall every EXTRA speed
+#     source folds into asymptotically, so stacks approach the ceiling but each card keeps a
+#     visible delta and the engine's 30 Hz Bullseye band stays readable. The accelerando itself
+#     is NOT folded here (its _lo anchors already ARE its asymptote, and folding it would move
+#     the boonless numbers): the governor is the wall for the multiplicative speed ON TOP of the
+#     accelerando (Double Time · Quickstep · later the EASE beat-speed BITE). Per-source clamps
+#     (doubletime_min_frac) are deleted — one wall. Numbers are sim knobs.
+@export var beat_rate_cap: float = 1.6      ## the governed beat may run at most this × the accelerando cadence
+@export var window_min: float = 0.15        ## a governed window never narrows below this WIDTH (sec) —
+                                            ## ≈4-5 ticks @30 Hz, keeps the 18% Bullseye band ≥ ~1 tick + read
+@export var gov_k: float = 0.9              ## asymptote curvature: rate = 1 + (cap-1)·(1 − exp(−k·push))
 
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)

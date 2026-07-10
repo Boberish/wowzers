@@ -204,7 +204,29 @@ func _tempo_t(seat: Seat) -> float:
 		return 0.0
 	return clampf(float(_flow(seat)) / float(max_flow()), 0.0, 1.0)
 func _swing_min_sec(seat: Seat) -> float:
-	return lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat)) * (cfg.largo_beat_mult if _largo() else 1.0)
+	var base := lerpf(cfg.swing_min, cfg.swing_min_lo, _tempo_t(seat)) * (cfg.largo_beat_mult if _largo() else 1.0)
+	# THE SPEED GOVERNOR (D0 S0): extra speed brings the earliest strike sooner, clamped to the
+	# wall (base ÷ beat_rate_cap). Boonless push == 0 → speedup 1 → byte-identical.
+	var sp := _gov_speedup(seat)
+	if sp > 1.0:
+		base = maxf(base / sp, cfg.swing_min / cfg.beat_rate_cap)
+	return base
+
+## THE SPEED GOVERNOR (D0 S0, TEMPO-PLAN §17.10 D) — the summed EXTRA speed push beyond the
+## accelerando: Double Time overdrive stacks (Quickstep joins in S1), each as its rate−1 slice.
+## Boonless returns 0 (no doubleTime, no quickstep) → the governor is a byte-identical no-op.
+func _speed_push(seat: Seat) -> float:
+	if not _tempo_family():
+		return 0.0
+	return float(int(seat.vars.get("overdrive", 0))) * cfg.doubletime_tighten
+
+## The governed speedup multiplier (1.0 = no extra speed). rate = 1 + (cap−1)·(1 − exp(−k·push)):
+## sources fold ASYMPTOTICALLY so stacks approach beat_rate_cap but every card keeps a visible delta.
+func _gov_speedup(seat: Seat) -> float:
+	var push := _speed_push(seat)
+	if push <= 0.0:
+		return 1.0
+	return 1.0 + (cfg.beat_rate_cap - 1.0) * (1.0 - exp(-cfg.gov_k * push))
 func _perfect_lo_sec(seat: Seat) -> float:
 	return _edge_window(seat)[0]
 func _perfect_hi_sec(seat: Seat) -> float:
@@ -223,7 +245,9 @@ func _edge_window(seat: Seat) -> Array:
 	var pad := 0.0
 	if _b("wideTempo"):
 		pad += cfg.wide_pad
-	if _b("fencersLine") and bool(seat.vars.get("fencer_next", false)):
+	# FENCER'S LINE (D0 S5 · NO-SINGLE-NEXT-HIT LAW): a Bullseye widens the next 3 strikes (was the
+	# single next window — imperceptible at tap pace). fencer_left counts the strikes still owed.
+	if _b("fencersLine") and int(seat.vars.get("fencer_left", 0)) > 0:
 		pad += cfg.fencer_pad
 	# FIRST NOTE (Fermata boon): a draw begun after a 1.5s rest gets extra ENTRY runway.
 	if _fermata() and _b("firstNote") and bool(seat.vars.get("first_note_ready", false)):
@@ -244,12 +268,13 @@ func _edge_window(seat: Seat) -> Array:
 		var half := (hi - lo) * 0.5 * cfg.edge_window_mult
 		lo = mid - half
 		hi = mid + half
-	# DOUBLE TIME (signature): each max-Flow overdrive stack tightens the window further.
-	var od := int(seat.vars.get("overdrive", 0))
-	if od > 0:
+	# THE SPEED GOVERNOR (D0 S0): Double Time / Quickstep tighten the window through the ONE
+	# asymptotic wall — width shrinks by the governed speedup and never narrows below window_min
+	# (the per-source doubletime_min_frac clamp is retired). push == 0 (boonless) → byte-identical.
+	var sp := _gov_speedup(seat)
+	if sp > 1.0:
 		var mid2 := (lo + hi) * 0.5
-		var f := maxf(cfg.doubletime_min_frac, 1.0 - float(od) * cfg.doubletime_tighten)
-		var half2 := (hi - lo) * 0.5 * f
+		var half2 := maxf(cfg.window_min * 0.5, (hi - lo) * 0.5 / sp)
 		lo = mid2 - half2
 		hi = mid2 + half2
 	# LARGO creed: the beat runs slower (window sits later) and TIGHTER (fewer, sharper Perfects).
@@ -311,7 +336,13 @@ func _rig_fire(s: CombatState, seat: Seat, when_id: String) -> void:
 		"energy":
 			_gain_energy(seat, float(mag))
 		"crit":
-			seat.vars["rig_crit"] = int(seat.vars.get("rig_crit", 0)) + mag
+			# KILLING EDGE (D0 S5 · A3 rework + NO-SINGLE-NEXT-HIT LAW): with the Edge meter up it
+			# sharpens it by the greed-scaled magnitude; with no Edge meter its fallback is a
+			# guaranteed crit across the NEXT 3 strikes (was a single flat charge — imperceptible).
+			if _b("hone"):
+				seat.vars["edge"] = mini(int(seat.vars.get("edge", 0)) + mag, cfg.edge_max)
+			else:
+				seat.vars["rig_crit"] = maxi(int(seat.vars.get("rig_crit", 0)), 3)
 		"bleed":
 			seat.vars["bleed_left"] = mag
 			seat.vars["bleed_per"] = maxi(1, int(round(float(mag) / 4.0)))
@@ -1093,8 +1124,13 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 			_creed_slip(s, seat)                                             # REWORK: a missed beat is a SLIP (Creed pays it)
 			if _fermata() and _b("firstBlood"):                              # FIRST BLOOD: a miss arms the comeback
 				seat.vars["first_blood_ready"] = true
-	# FENCER'S LINE: a Bullseye widens the NEXT window (one-shot); any other grade clears it.
-	seat.vars["fencer_next"] = (bullseye and _b("fencersLine"))
+	# FENCER'S LINE (D0 S5): a Bullseye re-arms the widener for the next 3 strikes; every other
+	# strike spends one of them (the DURATION rider the NO-SINGLE-NEXT-HIT law demands).
+	if _b("fencersLine"):
+		if bullseye:
+			seat.vars["fencer_left"] = 3
+		elif int(seat.vars.get("fencer_left", 0)) > 0:
+			seat.vars["fencer_left"] = int(seat.vars["fencer_left"]) - 1
 	# FERMATA · THE ROAMING WINDOW: every resolve rolls where the NEXT green lands. Drawn from
 	# s.rng so lockstep replicas agree; only the fermata aspect reaches this line, so the
 	# tempo/venom rng streams are untouched (their checksums stay byte-identical).
