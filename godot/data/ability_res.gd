@@ -18,7 +18,12 @@ enum Effect {
 	MARK_NUKE,    ## detonate a big hit on a victim marked at cast start
 	HEAL_ABSORB,  ## bury a victim's incoming healing (not dispellable)
 	EMPOWER_BOSS, ## boss buffs its own outgoing damage (Voidcaller: interrupt it or it hits harder)
-	THREAT_DROP,  ## raid: zero the top-threat unit's threat — the boss turns; taunt it back
+	THREAT_DROP,  ## raid: zero the tank's FLOW (the "context-window shift" curse — flow dump)
+	## --- THE SEAL REWORK (BOSS-PLAN E2/E3; appended so existing ordinals never shift) ---
+	STANCE_SHIFT, ## E2: advance boss.stance = (stance+1) % encounter.stance_count (Mistral experts)
+	BREAK,        ## E3: a dialogue curtain — a no-strike telegraph whose `cast` IS the pause;
+	              ##     `script_lines` shows as prose (view-only); re-staggers timers on resolve
+	MARK,         ## E5 (authored at S5): start THE ESCALATION mark relay (mark_seat_i/fuse)
 }
 
 ## How the player can answer this telegraph. (Named "Response" to avoid clashing
@@ -69,3 +74,32 @@ enum Size { NONE, LIGHT, HEAVY, CRUSH }
 ## silence kills the whole chain). Only the opener carries the array; links leave
 ## it empty. Empty = classic single cast (all solo content).
 @export var chain: Array = []           ## Array of AbilityRes
+
+# --- THE SEAL REWORK addenda (BOSS-PLAN §7; every default is a no-op → byte-identical) ---
+
+## E1 · GATED ABILITY SETS. Empty = always eligible (every existing ability). Keys:
+##  `phase_from`:int  eligible only when the current phase INDEX >= this
+##  `phase_until`:int eligible only when the current phase INDEX <= this
+##  `stance`:int      eligible only when boss.stance == this (Mistral experts / Gemini voices)
+##  `featured`:int    eligible only when boss.featured == this (Gemini's promoted voice)
+## The scheduler skips an ineligible ability in the PICK; its timer still ticks, so it
+## fires the instant it becomes eligible (re-staggered on the flip so it never bursts).
+@export var gate: Dictionary = {}
+
+## E3 · BREAK prose (view-only, NEVER checksummed / never read by update() logic).
+@export var script_lines: PackedStringArray = PackedStringArray()
+
+## E8 · KICK WINDOW (the §1½ contract): a kick lands ONLY when remaining cast <= this
+## (absolute seconds). 0 = whole cast kickable = legacy. FIELD ONLY in S1 — the honoring
+## press lands with the class-side `interrupts` flag (interrupt-by-ability, S7).
+@export var kick_window: float = 0.0
+
+## E9 · CHARGE-COUNTER PIPS (Mistral's Batch Job). 0 = no pips. FIELD + Telegraph.pips_left
+## plumbing in S1; the perfect-decrement + payload-scale are authored with Batch Job at S3.
+@export var pips: int = 0
+
+## E6 · DENY-RACE EMPOWER. deny_denom 0 = no scaling (every existing empower). When > 0, the
+## resolved buff scales down by the damage dealt to the boss DURING this cast (deny_dmg /
+## deny_denom), clamped to [deny_floor, 1.0] — burst into the wind-up to shrink the escalation.
+@export var deny_denom: float = 0.0
+@export var deny_floor: float = 0.5

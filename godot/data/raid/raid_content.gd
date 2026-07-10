@@ -455,6 +455,49 @@ static func apply_burden(enc: EncounterRes, burden: String) -> void:
 		adds.append(a)
 	enc.adds = adds
 
+## E4 (BOSS-PLAN): apply a Seal's SEALTUNE overrides ONCE at build. Empty tune (every fight
+## today) = no-op → byte-identical. Build-time scalars only (hp/dmg/cd/melee/enrage); runtime
+## keys (window_mult, pacing) are read by the slice that uses them. HEAL/EMPOWER payloads are
+## never damage-scaled (they aren't "damage"), matching the sim's --dmg convention.
+static func _apply_tune(e: EncounterRes) -> EncounterRes:
+	var t := e.tune
+	if t.is_empty():
+		return e
+	if t.has("hp_mult"):
+		e.hp = int(round(float(e.hp) * float(t["hp_mult"])))
+	if t.has("enrage_at") and float(t["enrage_at"]) > 0.0:
+		e.enrage_at = float(t["enrage_at"])
+	if t.has("melee") and not e.melee.is_empty():
+		var m: Dictionary = t["melee"]
+		for k in ["every", "min", "max"]:
+			if m.has(k): e.melee[k] = float(m[k])
+	var dm := float(t.get("dmg_mult", 1.0))
+	var cm := float(t.get("cd_mult", 1.0))
+	if dm != 1.0 and not e.melee.is_empty():
+		e.melee["min"] = float(e.melee.get("min", 0.0)) * dm
+		e.melee["max"] = float(e.melee.get("max", 0.0)) * dm
+	if dm != 1.0 or cm != 1.0:
+		for ab in e.abilities:
+			_tune_ability(ab as AbilityRes, dm, cm)
+		for ad in e.adds:
+			var a := ad as AddRes
+			if dm != 1.0 and not a.melee.is_empty():
+				a.melee["min"] = float(a.melee.get("min", 0.0)) * dm
+				a.melee["max"] = float(a.melee.get("max", 0.0)) * dm
+			for ab in a.abilities:
+				_tune_ability(ab as AbilityRes, dm, cm)
+	return e
+
+static func _tune_ability(ab: AbilityRes, dm: float, cm: float) -> void:
+	if dm != 1.0 and ab.effect != AbilityRes.Effect.HEAL_BOSS \
+			and ab.effect != AbilityRes.Effect.EMPOWER_BOSS:
+		ab.amount *= dm
+		ab.dot_tick *= dm
+	if cm != 1.0:
+		ab.cd *= cm
+	for ch in ab.chain:
+		_tune_ability(ch as AbilityRes, dm, cm)
+
 static func encounter_by_id(id: String) -> EncounterRes:
 	# THE FORGE (WORLD-PLAN W2): a "forge:" id IS the recipe — regenerate the encounter
 	# from the id alone (deterministic), so specs/lockstep/packs carry Forge fights as
@@ -463,12 +506,14 @@ static func encounter_by_id(id: String) -> EncounterRes:
 		var f := Forge.from_id(id)
 		if f != null:
 			return f
+	var e: EncounterRes
 	match id:
-		"mistral": return make_mistral()
-		"gemini": return make_gemini()
-		"mythos": return make_mythos()
-		"bard", "sonnet", "opus": return make_skirmish(id)
-		_: return make_riftmaw()
+		"mistral": e = make_mistral()
+		"gemini": e = make_gemini()
+		"mythos": e = make_mythos()
+		"bard", "sonnet", "opus": e = make_skirmish(id)
+		_: e = make_riftmaw()
+	return _apply_tune(e)                # E4: no-op while tune is empty (byte-identical)
 
 static func run_encounters() -> Array:
 	return [make_riftmaw(), make_mistral(), make_gemini(), make_mythos()]

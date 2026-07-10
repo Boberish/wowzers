@@ -230,6 +230,39 @@ static func current_phase(s: CombatState) -> PhaseRes:
 		chosen = PhaseRes.new()
 	return chosen
 
+## E1 (BOSS-PLAN): the current phase INDEX (0-based into encounter.phases) — the last
+## phase whose `at >= frac`, mirroring current_phase's selection. -1 (no phases) → 0.
+static func _phase_index(s: CombatState) -> int:
+	var frac := s.boss.hp / s.boss.hp_max
+	var chosen := -1
+	var i := 0
+	for p in s.encounter.phases:
+		if p.at >= frac:
+			chosen = i
+		i += 1
+	return maxi(0, chosen)
+
+## E1: is a GATED ability eligible right now? (Only called when gate is non-empty.)
+static func _ability_eligible(s: CombatState, ab: AbilityRes) -> bool:
+	var g := ab.gate
+	if g.has("phase_from") and _phase_index(s) < int(g["phase_from"]):
+		return false
+	if g.has("phase_until") and _phase_index(s) > int(g["phase_until"]):
+		return false
+	if g.has("stance") and s.boss.stance != int(g["stance"]):
+		return false
+	if g.has("featured") and s.boss.featured != int(g["featured"]):
+		return false
+	return true
+
+## E2/E3 (BOSS-PLAN): re-arm the boss's ability timers with the opener stagger — called on a
+## stance flip / act curtain so abilities that just became eligible don't burst-train the tick
+## the scheduler frees (the banked-timer gotcha). Reuses the create_state opening spread.
+static func _re_stagger(s: CombatState) -> void:
+	if s.boss.add_i >= 0:
+		return                             # an add holds the field; its openers were staggered on spawn
+	_stagger_abilities(s.boss, s.encounter, s.config, s.rng)
+
 static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	var enc := s.encounter
 
@@ -284,6 +317,11 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 			if silenced and ab.response == AbilityRes.Response.INTERRUPTIBLE:
 				s.boss.ability_timer[ab.id] = to_ticks(s.config.silence_recheck, s.config.fixed_hz)
 				continue
+			# E1 (BOSS-PLAN): a gated ability that isn't eligible this phase/stance is skipped
+			# in the pick (its timer already ticked, so it fires the instant it unlocks). Empty
+			# gate = every existing ability = never enters this branch → byte-identical.
+			if not ab.gate.is_empty() and not _ability_eligible(s, ab):
+				continue
 			if best == null or (ab.danger and not best.danger):
 				best = ab
 	if best != null:
@@ -308,6 +346,8 @@ static func _start_telegraph(s: CombatState, ab: AbilityRes) -> void:
 	if not ab.chain.is_empty():
 		tg.chain_src = ab
 		tg.chain_i = 0
+	tg.pips_left = ab.pips              # E9: charge-counter pips (0 = none → no-op)
+	s.boss.deny_dmg = 0.0              # E6: fresh deny-race accumulator per cast (0 for non-deny)
 	s.telegraph = tg
 
 ## Add waves (raid). Main form: crossing a wave's HP threshold spawns its add — the
@@ -432,9 +472,28 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 				if healed > 0.0:
 					_emit(s, {"t": "boss_heal", "amt": int(healed)})
 		AbilityRes.Effect.EMPOWER_BOSS:
-			# Uninterrupted empower cast: the boss permanently hits harder (capped).
-			s.boss.dmg_buff = minf(s.config.dmg_buff_cap, s.boss.dmg_buff + s.telegraph.ability.buff)
-			_emit(s, {"t": "empower", "amt": s.telegraph.ability.buff})
+			# Uninterrupted empower cast: the boss permanently hits harder (capped). E6 (BOSS-PLAN):
+			# a DENY-RACE empower (deny_denom > 0) shrinks its landed buff by the damage the raid
+			# dealt during the wind-up — burst it to blunt the escalation. deny_denom 0 = as-authored.
+			var eb := ab.buff
+			if ab.deny_denom > 0.0:
+				eb *= clampf(1.0 - s.boss.deny_dmg / ab.deny_denom, ab.deny_floor, 1.0)
+			s.boss.dmg_buff = minf(s.config.dmg_buff_cap, s.boss.dmg_buff + eb)
+			_emit(s, {"t": "empower", "amt": eb})
+		AbilityRes.Effect.STANCE_SHIFT:
+			# E2: rotate to the next expert/voice, then re-stagger so the newly-eligible set
+			# doesn't burst-train. stance_count 0 (every existing fight) = no-op.
+			if s.encounter.stance_count > 0:
+				s.boss.stance = (s.boss.stance + 1) % s.encounter.stance_count
+				_re_stagger(s)
+				_emit(s, {"t": "stance", "i": s.boss.stance})
+		AbilityRes.Effect.BREAK:
+			# E3: the dialogue curtain — the freeze during `cast` WAS the pause; resolve just
+			# re-staggers (so the next act doesn't burst) and hands the prose to the view layer.
+			_re_stagger(s)
+			_emit(s, {"t": "break", "lines": ab.script_lines})
+		AbilityRes.Effect.MARK:
+			pass    # E5 (THE ESCALATION relay): authored at S5 — the fields exist, the relay is not yet
 		AbilityRes.Effect.THREAT_DROP:
 			# FLOW DUMP (TANK-PLAN §1c / BOSS-PLAN §1): the "context-window shift" curse ZEROES
 			# the tank's flow — rebuild it by playing clean. No taunt-back exists (aggro is passive).
@@ -892,6 +951,11 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 		_emit(s, {"t": "boss_hit", "amt": int(d), "seat": seat, "kind": String(src), "crit": crit})
 		if s.boss.sunder > 0.0 or s.boss.debilitate > 0.0 or not s.boss.vulns.is_empty():
 			_credit_amps(s, s.seats.find(seat), d, true)   # STATS PAGE v2 — raid-amp attribution
+		# E6 (BOSS-PLAN): while a DENY-RACE empower winds up, bank the damage into deny_dmg so
+		# the buff shrinks on resolve. Guarded by deny_denom > 0 → every other cast is untouched.
+		if s.telegraph != null and s.telegraph.ability.effect == AbilityRes.Effect.EMPOWER_BOSS \
+				and s.telegraph.ability.deny_denom > 0.0:
+			s.boss.deny_dmg += d
 	return d
 
 # --------------------------------------------------------------------------

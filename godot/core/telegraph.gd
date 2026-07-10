@@ -16,3 +16,6 @@ var beat_targets: Dictionary = {}   ## beat idx -> Seat (rand_target beats, roll
 # --- cast chains (raid) — the opener AbilityRes whose chain[] we're walking ---
 var chain_src: AbilityRes = null
 var chain_i: int = 0                ## index of the NEXT link to start
+
+## E9 (BOSS-PLAN): charge-counter pips left on this cast (init from ability.pips; 0 = none).
+var pips_left: int = 0

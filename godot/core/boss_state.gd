@@ -74,3 +74,10 @@ var adds_spawned: Dictionary = {}      ## AddRes index -> true (each wave fires 
 ## DELETED here — aggro is passive, driven by the flow minigame, never a damage-threat rotation.
 ## The boss's current focus is a pure read of flow (CombatCore._threat_target, kept by name for
 ## the HUD/stage victim highlight); last_melee_victim_i (above) tracks the wandering focus.
+
+## THE SEAL REWORK addenda (BOSS-PLAN §7; every default keeps existing fights byte-identical:
+## stance 0 + featured -1 + deny_dmg 0 contribute a constant to the checksum, and no existing
+## content ever moves them). E2 stance cycler · E1 featured gate · E6 deny-race accumulator.
+var stance: int = 0                    ## E2: current expert/voice (STANCE_SHIFT advances it)
+var featured: int = -1                 ## E1: Gemini's promoted voice (-1 = none yet)
+var deny_dmg: float = 0.0              ## E6: damage dealt to the boss during the live empower cast

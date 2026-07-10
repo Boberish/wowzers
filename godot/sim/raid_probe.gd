@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_probe_chain_kick_and_empower()
 	_probe_silence_kills_chain()
 	_probe_rand_beats()
+	_probe_seal_addenda()
 	print("RAID PROBE: %s" % ("ALL OK" if _fails == 0 else "%d FAILURES" % _fails))
 	quit(1 if _fails > 0 else 0)
 
@@ -132,3 +133,63 @@ func _probe_rand_beats() -> void:
 			mine_counts_ok = false
 	_check(all_alive, "every victim is a living raider")
 	_check(mine_counts_ok, "each beat is 'mine' for exactly ONE seat")
+
+## THE SEAL REWORK addenda (BOSS-PLAN §7): prove the guarded primitives WORK when fed
+## (byte-identity already proves they're inert when absent). E1 gate · E2 stance · E3 BREAK ·
+## E4 SealTune · E6 deny-race.
+func _probe_seal_addenda() -> void:
+	print("THE SEAL REWORK addenda (E1/E2/E3/E4/E6):")
+	var s := RaidContent.make_state(3, RaidContent.make_riftmaw())   # phases 1.0/0.6/0.3
+	# E1 · phase index + gate eligibility (pure reads)
+	s.boss.hp = s.boss.hp_max
+	_check(CombatCore._phase_index(s) == 0, "E1: full HP → phase index 0")
+	s.boss.hp = s.boss.hp_max * 0.5
+	_check(CombatCore._phase_index(s) == 1, "E1: 50% HP → phase index 1")
+	var g1 := AbilityRes.new(); g1.gate = {"phase_from": 2}
+	_check(not CombatCore._ability_eligible(s, g1), "E1: gate phase_from:2 ineligible at phase 1")
+	s.boss.hp = s.boss.hp_max * 0.2
+	_check(CombatCore._ability_eligible(s, g1), "E1: …eligible once phase 2 is reached")
+	var gs := AbilityRes.new(); gs.gate = {"stance": 1}
+	s.boss.stance = 0
+	_check(not CombatCore._ability_eligible(s, gs), "E1: gate stance:1 ineligible at stance 0")
+	s.boss.stance = 1
+	_check(CombatCore._ability_eligible(s, gs), "E1: …eligible at stance 1")
+	# E2 · STANCE_SHIFT advances mod stance_count (wraps)
+	s.encounter.stance_count = 3
+	s.boss.stance = 2
+	var sh := AbilityRes.new(); sh.id = &"probe_shift"; sh.effect = AbilityRes.Effect.STANCE_SHIFT
+	_inject_resolve(s, sh)
+	_check(s.boss.stance == 0, "E2: STANCE_SHIFT advances 2 → 0 (wraps mod stance_count)")
+	# E3 · BREAK resolves as a no-damage curtain and clears the telegraph
+	var brk := AbilityRes.new(); brk.id = &"probe_break"; brk.effect = AbilityRes.Effect.BREAK
+	brk.script_lines = PackedStringArray(["I would prefer not to fight you."])
+	var hp_before := s.boss.hp
+	_inject_resolve(s, brk)
+	_check(s.boss.hp == hp_before and s.telegraph == null, "E3: BREAK resolves as a no-op curtain")
+	# E4 · SealTune build-time apply
+	var e := RaidContent.make_mistral()
+	var base_hp := e.hp
+	var base_amt := (e.abilities[0] as AbilityRes).amount
+	e.tune = {"hp_mult": 2.0, "dmg_mult": 0.5}
+	RaidContent._apply_tune(e)
+	_check(e.hp == int(round(float(base_hp) * 2.0)), "E4: tune hp_mult scales boss HP ×2")
+	_check(is_equal_approx((e.abilities[0] as AbilityRes).amount, base_amt * 0.5),
+		"E4: tune dmg_mult scales ability damage ×0.5")
+	# E6 · deny-race empower shrinks by damage taken during the cast
+	var de := AbilityRes.new(); de.id = &"probe_deny"; de.effect = AbilityRes.Effect.EMPOWER_BOSS
+	de.buff = 0.10; de.deny_denom = 1000.0; de.deny_floor = 0.5
+	s.boss.dmg_buff = 0.0; s.boss.deny_dmg = 500.0             # half the denom → buff ×0.5
+	_inject_resolve(s, de)
+	_check(is_equal_approx(s.boss.dmg_buff, 0.05), "E6: deny-race halves the buff (500/1000 → ×0.5)")
+	s.boss.dmg_buff = 0.0; s.boss.deny_dmg = 5000.0           # past the denom → clamp to floor 0.5
+	_inject_resolve(s, de)
+	_check(is_equal_approx(s.boss.dmg_buff, 0.05), "E6: …clamped at deny_floor (never below ×0.5)")
+
+## Set a synthetic telegraph and resolve it immediately (no wind-up) to exercise a resolve case.
+func _inject_resolve(s: CombatState, ab: AbilityRes) -> void:
+	var tg := Telegraph.new()
+	tg.ability = ab
+	tg.start_tick = s.tick
+	tg.dur_ticks = 0
+	s.telegraph = tg
+	CombatCore._resolve_telegraph(s, CombatCore.current_phase(s))
