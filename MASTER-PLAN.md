@@ -913,8 +913,9 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   (field; honor rides the class interrupts flag) · **E9** pips (field + `Telegraph.pips_left`).
   Enum values appended (ordinals never shift). **Gates: raid_sim byte-identical vs main (32 rows,
   all 4 Seals) · determinism PASS ×4 · raid_probe ALL OK (+12 new E1/E2/E3/E4/E6 asserts) ·
-  ui_smoke_raid ALL OK.** E5/E7 (mark relay / LISTENING) land at S5. **NEXT: S2 (Vorathek v2) —
-  the first content re-baseline** (needs the recs, all decided). *(pass 4 — S1)*
+  ui_smoke_raid ALL OK.** E5/E7 (mark relay / LISTENING) land at S5. **S0+S1 MERGED to main (`07a5e9b`) — byte-identical, raid_probe ALL OK on main.** NEXT: S2
+  (Vorathek v2) — the first content re-baseline (recs all decided). ⚠ NOTE the Duelist-death
+  finding: S2's Seal tank-damage tuning should track the Duelist's own survivability. *(pass 4 — S1 + merge)*
 
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
