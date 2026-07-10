@@ -333,16 +333,52 @@ TAP LIST** (§9.1).
 | Rolling Boil | `rollingboil` | GREED | H/S/O | 🟡 | T | Two casks live: pours +15%; misses taint the OTHER cask −10%. |
 | THE BOTTLING LINE (keystone) | `bottlingline` | RULE | elite | 🟡 | T | Two peak-taps in one 3s window pour as ONE doubled burst. |
 | The Signature (creed) | `signature` | STRAT | curated | 🟡 | H | First sealed recipe = the HOUSE recipe; repeats +8%. |
-| Practiced Hands | `practicedhands` | STRAT | H/S/O | 🟡 | H | House-recipe pours strain 20% softer. |
+| Muscle Memory | `musclememory` | STRAT | H/S/O | 🟡 | H | House-recipe pours strain 20% softer. *(Renamed from Practiced Hands — Brew's built Practiced Hand owns the family, D7.)* |
 | Never Change | `neverchange` | GREED | H/S/O | 🟡 | H | House-style stacks to +30%; off-recipe drops it all. |
 | THE DYNASTY POUR (keystone) | `dynastypour` | RULE | elite | 🟡 | H | 4th consecutive clean house batch: the band freezes on your recipe's walk for one stack. |
 | On the House | `onthehouse` | TEAM | H/S/O | 🟡 | R | A bottled peak thrown to an ally: 70% as their buff on their next clean hit. |
 | Private Reserve | `privatereserve` | GREED | H/S/O | 🟡 | R | Bottles kept 6s+ gain +25%; no second shelf while one waits. |
 | CLOSING TIME (keystone) | `closingtime` | RULE | elite | 🟡 | R | Boss Opening: throw the whole shelf; every clean answer under it pays the finish. *(Renamed from Last Call — Brew boon collision.)* |
 
-## ALCHEMIST · THE BREW — 🔨 built · review-pass proposals 🟡
-_Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§8` (review-pass verdicts) + `§10`
-(ladder filing) + `godot/data/alchemist/*.gd` — D7's job._
+## ALCHEMIST · THE BREW — 🔨 BUILT (`alch-cards`) · §8 proposals + D7 kits 🟡 (one merged board)
+
+Source: `ALCHEMIST-PLAN.md §2–§4` (built) · §8 (11 proposals) · §10 (ladders) · §12 (assembly).
+Ladders: **SLOW BOIL · CANNONADE · ANCHOR**.
+
+**Built pool (🔨 `alch-cards` 2026-07-06, ladder-tagged):** creeds Steady Hand [EASE·generic] ·
+Volatile Mix [GREED·Cannonade entry] · Anchorite [STRAT·Anchor entry] · Purist [RULE·Slow Boil
+entry] — modules Third Reagent [STRAT] · Fermentation [STRAT — P6 fix pending] · ⭐Reaction-
+Vessel [RULE·Cannonade] — boons: FUEL Deep Cauldron/Preservative/Clinging Rot [Anchor] · VIAL
+Steady Pour/Practiced Hand · POTENCY Quick Study/Distilled Focus/Concentrate/Killing Draught
+[Anchor] · REACTION-RUPTURE Corrosive Blood/Deepening Rot/Perfect Emulsion [Slow Boil] ·
+Rupturing/Chain Rupture/Catalyst/Volatile Reaction [Cannonade] · ✦Debilitator [TEAM] · Last
+Call — spells Spitfire (interrupt carrier) / Decant / Reduction — the 6×6 rig board.
+
+**§8 proposals (🟡 at Bill's board, slotted):** P1 Bullseye Pours [verb] · P2 Master's Draught
+[Gauntlet-rhyme, VIAL] · P3 The Red Line [Cannonade keystone] · P4 Quicksilver [Anchor
+keystone] · P5 Seething Vial [Slow Boil keystone] · P6 Fermentation hold-or-cash · P7 Strike
+the Seam [Cannonade] · P8 Steady Under Fire [F3-probe] · P9 Brimming [Slow Boil GREED] ·
+P10 The Fever [creed slot].
+
+**D7 additive kits (🟡 — §10 ranking G · P · S):**
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| The Wire-Walker (creed) | `wirewalker` | STRAT | curated | 🟡 | G | Low catches pay from run start; both-sides-low doubles (and risks all). |
+| The Save | `thesave` | GREED | H/S/O | 🟡 | G | A catch under 2 units: +30% fuel back; hitting ZERO crashes Potency. |
+| Practiced Wobble | `practicedwobble` | STRAT | H/S/O | 🟡 | G | After a low catch, balance window +15% for 4s. |
+| THE PENDULUM (keystone) | `pendulum` | RULE | elite | 🟡 | G | 3 alternating low catches in one Potency cycle: ~6s of ×1.5 balance, bars swing in counterphase. |
+| Venom-Tipped | `venomtipped` | STRAT | H/S/O | 🟡 | S | A dart during a fed, balanced reaction carries 20% of its tick. |
+| Quick Draw | `quickdraw` | GREED | H/S/O | 🟡 | S | Darts drain 1 vial charge — fuel for tempo, per throw. |
+| The Silencer | `silencer` | STRAT | H/S/O | 🟡⏸ | S | A dart that KICKS refunds potency drain 3s — parked on the pillar-#3 flag. |
+| THE FUSILLADE (keystone) | `fusillade` | RULE | elite | 🟡⏸ | S | Post-kick ~4s: darts chain — parked on the pillar flag. |
+| The Diagnostician (creed) | `diagnostician` | STRAT | curated | 🟡 | P | Boss HP milestones marked; a Rupture within 2s of one +15%. |
+| Terminal Course | `terminalcourse` | POWER | H/S/O | 🟡 | P | Below 30% boss HP, Deepening Rot ramps ×2. |
+| Called Shot | `calledshot` | GREED | H/S/O | 🟡 | P | Auto-declared Rupture budget: finish at-or-under = each +20%; over = excess −20%. |
+| THE AUTOPSY REPORT (keystone) | `autopsyreport` | RULE | elite | 🟡 | P | A milestone-window killing Rupture: next fight opens +2 Potency. |
+
+**Cross-spec renames executed this pass:** Cask kit-H *Practiced Hands* → **MUSCLE MEMORY**
+(the Brew's built Practiced Hand owns the family) — veto restores.
 
 ## THE WELL — 🔨 deck BUILT (`500334f`) · **BRIM RESHAPE (D5) 🟡 2026-07-10** · Draw reshape = D6
 
