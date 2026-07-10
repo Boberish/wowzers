@@ -680,3 +680,17 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		o["cast_dur"] = dur
 		o["cast_p"] = clampf(float(s.tick - int(c["start_tick"])) / float(dur), 0.0, 1.0)
 	return o
+
+## STATS PAGE v2 — the Well's spec rows for the FULL REPORT: pours cast, dispels, and the
+## charge count at the final bell. Read-only from seat.diag / seat.vars; empty rows self-skip.
+func recap_spec(_s: CombatState, seat: Seat) -> Array:
+	var d: Dictionary = seat.diag
+	var rows: Array = []
+	if int(d.get("well_pour", 0)) > 0:
+		rows.append({"label": "Pours", "value": str(int(d.get("well_pour", 0))), "hint": "charged heals cast"})
+	if int(d.get("dispel", 0)) > 0:
+		rows.append({"label": "Dispels", "value": str(int(d.get("dispel", 0))), "hint": ""})
+	var cur := int(seat.vars.get("charges", -1))
+	if cur >= 0:
+		rows.append({"label": "Charges left", "value": str(cur), "hint": "at the final bell"})
+	return rows

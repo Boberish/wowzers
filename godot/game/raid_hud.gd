@@ -3237,6 +3237,7 @@ func _show_fight_recap(done: Callable) -> void:
 	cont.text = "CONTINUE ▸"
 	cont.pressed.connect(func(): done.call())
 	box.add_child(cont)
+	_report_button(box, func(): _show_fight_recap(done))
 	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
 	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
 	UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
@@ -3287,6 +3288,40 @@ func _show_end(won: bool) -> void:
 		again.text = "PULL AGAIN"
 		again.pressed.connect(func(): _show_select(_seat_key))
 	box.add_child(again)
+	_report_button(box, func(): _show_end(won))
+
+## STATS PAGE v2 — the "◆ FULL REPORT" affordance on every end screen, and the page it opens.
+## `back` re-shows the screen it was pressed from. Guarded null-state (smoke-built end screens).
+func _report_button(box: Node, back: Callable) -> void:
+	if _ctrl == null or _ctrl.state == null:
+		return
+	var rep := Button.new()
+	rep.custom_minimum_size = Vector2(220, 34)
+	rep.add_theme_font_size_override("font_size", 14)
+	rep.text = "◆ FULL REPORT"
+	rep.pressed.connect(func(): _show_stats_page(back))
+	box.add_child(rep)
+
+func _show_stats_page(back: Callable) -> void:
+	if _ctrl == null or _ctrl.state == null:
+		back.call()
+		return
+	_screen = "report"
+	_clear()
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_ui.add_child(scroll)
+	var page := StatsPage.new(_ctrl, _recap_stats)
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(page)
+	var backb := Button.new()
+	backb.custom_minimum_size = Vector2(150, 38)
+	backb.add_theme_font_size_override("font_size", 15)
+	backb.text = "‹ BACK"
+	backb.pressed.connect(func(): back.call())
+	UiKit.place(backb, 0, 0, 0, 0, 20, 16, 170, 54)
+	_ui.add_child(backb)
 
 
 

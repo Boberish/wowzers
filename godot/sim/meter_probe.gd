@@ -149,13 +149,34 @@ func _initialize() -> void:
 		float(bls.get("total", 0.0)) == 48.0,
 		"(heal srcs: %s)" % [brow.get("heal", {}).keys()])
 
-	# ---- [7] determinism: same seed → byte-identical meter ----
+	# ---- [7] determinism: same seed → byte-identical meter + boon_meter + series ----
 	var a := _raid_state(29)
 	_run(a)
 	var b := _raid_state(29)
 	_run(b)
 	_check("raid meter determinism", JSON.stringify(a.meter) == JSON.stringify(b.meter)
+		and JSON.stringify(a.boon_meter) == JSON.stringify(b.boon_meter)
+		and JSON.stringify(a.series) == JSON.stringify(b.series)
 		and a.checksum == b.checksum, "(checksum %d)" % a.checksum)
+	_check("series sampled (1 Hz)", a.series.size() >= 2,
+		"(rows %d over %.0fs)" % [a.series.size(), a.time()])
+
+	# ---- [8] STATS PAGE v2 — per-boon impact reconciles ----
+	# Amp path: a raid-wide vuln credits its src the EXTRA damage it added (vs no-vuln baseline).
+	var raw := 200.0
+	var n0 := _raid_state(5)
+	var d0 := CombatCore.damage_boss(n0, n0.seats[0], raw, &"unit")
+	var n1 := _raid_state(5)
+	CombatCore.add_vuln(n1, -1, 1.5, n1.tick + 100, &"probeamp")
+	var d1 := CombatCore.damage_boss(n1, n1.seats[0], raw, &"unit")
+	var cred := float((n1.boon_meter.get(-1, {}).get(&"probeamp", {}) as Dictionary).get("total", 0.0))
+	_check("amp credit ≈ extra damage it added", absf(cred - (d1 - d0)) <= 2.0 and cred > 0.0,
+		"(credit %.1f vs extra %.1f · d0 %.1f d1 %.1f)" % [cred, d1 - d0, d0, d1])
+	# Inline funnel: credit_boon_factors banks d*(1 - 1/factor) to the seat's own bucket.
+	var n2 := _raid_state(5)
+	CombatCore.credit_boon_factors(n2, n2.seats[1], 300.0, [[&"probeboon", 1.5]])
+	var ib := float((n2.boon_meter.get(1, {}).get(&"probeboon", {}) as Dictionary).get("total", 0.0))
+	_check("inline boon credit funnel", absf(ib - 300.0 * (1.0 - 1.0 / 1.5)) < 0.01, "(credit %.1f)" % ib)
 
 	print("METER PROBE: %s" % ("ALL OK" if _fails.is_empty() else "FAIL " + str(_fails)))
 	quit(0 if _fails.is_empty() else 1)

@@ -117,3 +117,11 @@ func defense_cd() -> float:
 ## Extra fields merged into the observation a policy sees (rage, momentum, ...).
 func observe(_s: CombatState, _seat: Seat) -> Dictionary:
 	return {}
+
+## STATS PAGE v2 — the spec's own recap rows for the FULL REPORT page: whatever timing
+## lines matter for THIS kit (Twinfang tempo-window %, Alchemist pour grades, the Well's
+## charge floor). Each entry is {label:String, value:String, hint:String}, already formatted
+## from seat.diag, so all per-spec display logic — and its rework drift — stays inside the
+## kit file. Default [] = a kit with nothing spec-specific to add. Pure / read-only.
+func recap_spec(_s: CombatState, _seat: Seat) -> Array:
+	return []
