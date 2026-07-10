@@ -801,3 +801,64 @@ moment · Rolling Boil's mutual bite); no pardons anywhere in the additive set �
 
 **Next:** your kit picks → rows flip · §7.7 slices 3–5 build the locked slate + winners (the
 cards slice was always the plan's step 4; it now has its complete card list waiting).
+
+---
+
+## 12. THE BREW DECK — the assembly (one merged picture) 🔨/🟡 (2026-07-10, Phase-2 D7)
+
+**What this is** (SLATE-PLAN row D7). The Brew's deck is BUILT (`alch-cards`, 2026-07-06) and
+has TWO open 🟡 layers (§8's 11 proposals · §10's additive themes) — the pass merges everything
+into ONE catalog picture so your verdicts happen on one board, not three: **①** built pool →
+CARD-CATALOG at 🔨 with §10.1 ladder tags · **②** §8's proposals cataloged 🟡, each slotted
+into its ladder (per §10.1's mapping — they were never competing revisions, now visibly so) ·
+**③** the §10 additive themes formalized as kits 🟡. **Two cross-spec catches** (the
+distinctness table again): the Cask kit-H card **"Practiced Hands" → renamed MUSCLE MEMORY**
+(the Brew's built *Practiced Hand* owns the name family) · noted: the TIGHTROPE theme name
+shares a word with Twinfang's built *Tightrope* boon — no card in the kit carries the name
+(the Wire-Walker is the creed), flagged for board readability only.
+
+### 12.1 The assembly record
+
+- **Built pool → 🔨** (4 creeds · 3 modules · 18 boons · 3 spells · rig board), ladder-tagged
+  Slow Boil / Cannonade / Anchor / generic per §10.1.
+- **§8's 11 → 🟡, slotted:** P1 Bullseye Pours + P2 Master's Draught → verb + Gauntlet · P3
+  Red Line → Cannonade keystone · P4 Quicksilver → Anchor keystone · P5 Seething Vial → Slow
+  Boil keystone · P6 Fermentation hold-or-cash → Cannonade-adjacent module fix · P7 Strike the
+  Seam → Cannonade · P8 Steady Under Fire → generic (F3-probe) · P9 Brimming → Slow Boil greed
+  · P10 The Fever → the open creed slot. (P11 was docs — closed by §9.)
+- **Additive kits → 🟡:** **KIT G — TIGHTROPE:** creed *The Wire-Walker* · *The Save* [GREED] ·
+  *Practiced Wobble* [STRAT] · keystone *THE PENDULUM*. **KIT S — SIDEARM:** *Venom-Tipped*
+  [STRAT] · *Quick Draw* [GREED] · *The Silencer* [STRAT, pillar-#3-gated] · keystone *THE
+  FUSILLADE* (pillar-gated). **KIT P — PROGNOSIS:** creed *The Diagnostician* · *Terminal
+  Course* [POWER] · *Called Shot* [GREED] · keystone *THE AUTOPSY REPORT*.
+- **Keystone pool math (the one real quota fight):** the Brew audit said ZERO keystones; §8
+  adds 3 candidates (P3/P4/P5, one per ladder — clean) and each kit brings 1 more. If all
+  land: 6 — over the 2–3 pool law even with theme-weighting. **Proposal: the elite pool =
+  P3/P4/P5 (one per incumbent ladder) + AT MOST the picked kits' keystones, capped at 5 with
+  theme-weighted 1-of-2 offers** — or trim at your verdict. Flagged as the pass's tension #1.
+- **EASE knobs (Brew):** sweet-band width · charge speed · balance-window width (reward-side
+  only — the Balance lane's no-easing law is untouched) · potency-drain grace.
+
+### 12.2 Gates (delta-scope) + skeptics
+
+**Trios:** (The Save | Momentum-none — Brew has no Momentum | P9 Brimming | Quick Draw) —
+greed spread across fuel/weave surfaces ✓ · kit cards never share an offer with 2+ locked
+EASE breads (Steady Pour/Practiced Hand weighting note) ✓.
+**Overlap:** *Practiced Wobble* vs built *Practiced Hand* — different dials (balance-window
+recovery vs charge speed), name-family flagged, kept · *Called Shot* vs *Killing Draught* —
+both endgame-keyed; Draught is a potency lock (built), Called Shot is a declared budget (new);
+composition = the full Prognosis hand, legal ✓ · *The Silencer/Fusillade* stay parked-not-
+contingent (the pillar is committed, unbuilt — same split as §10.3) ✓.
+**Anti-patterns:** all §10 fixes carried; the kits add zero pardons; Called Shot auto-declares
+(no UI button) ✓. **AI:** low-catch thresholds (G) · dart cadence (S) · milestone prep (P) —
+all threshold policies on the existing AlchemistPolicy surfaces.
+
+### 12.3 Tension points (Bill)
+
+1. **The keystone pool math** (above — cap at 5 theme-weighted, or trim).
+2. **MUSCLE MEMORY rename** on the Cask's kit-H card (executed in catalog — veto restores it).
+3. Kit picks: your §10 ranking was Tightrope · Prognosis · Sidearm (0–3 enter).
+4. §8 verdicts remain the senior board — kits never block them.
+
+**Next:** one verdict sitting covers §8 + §10 + this assembly (they're now one board);
+the build claim is the guarded `brew-review` slice §8 already planned, plus picked kits.
