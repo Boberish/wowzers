@@ -180,7 +180,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` §11 | 🟡 | — | LANDED 07-10: the locked §7 slate HARD-COPIED to catalog at ✅ (24 cards — the back-fill drift closed) + 3 additive kits at 🟡 (T/H/R; CLOSING TIME renamed from Last Call — collision caught) + EASE knobs + Solera×Recipe tune flag. |
 | D5 | Well · **Brim** | `MENDER-PLAN.md` §11 | 🟡 | — | LANDED 07-10: reshape around Low Catch·Overflow·Glintsmith — built pool filed 🔨 (catalog back-fill done, shared+Brim), 6 new cards + 3 keystones 🟡, Wide Brim→EASE fold, 2 skeptic catches (Blind Pour killed as built-Blindfold dupe · Cool Head renamed). |
 | D6 | Well · **Draw** | `MENDER-PLAN.md` §12 | 🟡 | — | LANDED 07-10: reshape around Vigil·Rapids·Eddy — ⭐VIGIL module promoted · **Millrace demote proposal** (economy keystone fails the bar; Flume crowned) · Ride-the-Tremble rename · 9 new cards 🟡 · sibling gate held. |
-| D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | ⬜ | — | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
+| D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | 🔄 | 07-10 04:24 | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
 | D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | ⬜ | — | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
 
 **Cross-deck DISTINCTNESS LEDGER** — each deck pass APPENDS its row here before writing cards,

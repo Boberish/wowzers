@@ -814,6 +814,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 04:24 · main (docs only) — **CLAIM: DECK MACHINE row D7 — the Brew deck
+  assembly** (built pool → catalog 🔨 back-fill · §8's 11 proposals cataloged 🟡 slotted into
+  the §10 ladders · additive kits G/S/P formalized 🟡 — ONE merged picture, no competing
+  revisions) → ALCHEMIST-PLAN §12 + catalog Brew section. Design only. *(slate-machine session,
+  deck tick 04:19)*
+
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §12 (NEW) + CARD-CATALOG Draw rows + ledger row
   — **DECK MACHINE row D6: THE DRAW RESHAPE — DONE, 🟡.** Winners = Vigil · Rapids · Eddy (§10
   ranking; the Skim parked, filed). **The headline: THE MILLRACE DEMOTION** — the built keystone
