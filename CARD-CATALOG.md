@@ -380,6 +380,30 @@ land now. Shared + Brim below; Draw rows arrive with D6.)*
 | **The Primed Vein** | `primedvein` | STRAT | H/S/O | 🟡 | Glintsmith | PRIME an ally: next landing window ×1.5; a perfect there Glints the party 1s. |
 | **THE GILDED HOUR** (keystone) | `gildedhour` | RULE | elite | 🟡 | Glintsmith | All four Glints live: every ally's next clean answer crits. |
 
+**DRAW rows (D6 reshape, `MENDER-PLAN.md §12` — themes VIGIL · RAPIDS · EDDY):**
+
+| Card | id | Type | Rarity | St | Theme | One line |
+|---|---|---|---|---|---|---|
+| The Patient Hand (creed) | `patienthand` | STRAT | curated | 🔨 `500334f` | Vigil (entry) | Overrun becomes a HELD heal, released on the spike. |
+| The Long Draw (creed) | `longdraw` | STRAT | curated | 🔨 | Vigil | Slow/big/tight — the Largo mirror. |
+| The Narrows (creed) | `narrows` | GREED | curated | 🔨 | Rapids (entry) | Outside the band heals ZERO; in-band much stronger. |
+| The Eddy (creed) | `eddy` | STRAT | curated | 🔨 | Eddy (entry) | The band's centre drifts each cast (deterministic). |
+| Strong Pull | `strongpull` | POWER | H/S/O | 🔨 | Rapids | Max-Current clean heals +30%. |
+| The Millrace | `millrace` | RULE→POWER | elite→H/S/O | 🔨 → **proposed DEMOTE to boon** | Rapids | Every 3rd cast free at full Current — economy in a keystone slot fails the locked bar; the Flume crowns instead. |
+| Loose Grip · Short Pour · Cool Hand · Double Draw · Deep Still · Last Drops | — | mixed | H/S/O | 🔨 | effect-filing at build | Banner names only; Short Pour/Loose Grip presumed the Skim's (parked). |
+| rig: Clean Draw / High Water / Still Point | — | — | — | 🔨 | per theme | The built Draw WHENs. |
+| ⭐ **THE VIGIL** (module) | `vigilmodule` | RULE | — | 🟡 | Vigil | Overruns become HELD heals (~3s, visible tremble→gutter); release instant. |
+| **Second Hand** | `secondhand` | STRAT | H/S/O | 🟡 | Vigil | Flash castable while holding. |
+| **Ride the Tremble** | `ridetremble` | GREED | H/S/O | 🟡 | Vigil | Held heal +8%/half-second held. *(Renamed — Warden owns White Knuckles.)* |
+| **LOOSED AT LAST** (keystone) | `loosedatlast` | RULE | elite | 🟡 | Vigil | Release within 0.2s of the ally's hit = PERFECT INTERCEPT (full heal + 2s shield). |
+| **Whitewater** | `whitewater` | POWER | H/S/O | 🟡 | Rapids | Heals +4%/Current stack. |
+| **Shoot the Gap** | `shootgap` | GREED | H/S/O | 🟡 | Rapids | At Current 5, Still-Point tags ×1.3. |
+| **Eddyline** | `eddyline` | STRAT | H/S/O | 🟡 | Rapids | One undercook/10s downgrades the Current instead of breaking it (still weak, still costs). |
+| **THE FLUME** (keystone) | `flume` | RULE | elite | 🟡 | Rapids | Current 5 held 12s → ~6s the river runs white (auto-clean releases), then 0. |
+| **Current Reading** | `currentreading` | STRAT | H/S/O | 🟡 | Eddy | First-third drift tags grant +1 Current (the bridge). |
+| **Deep Eddy** | `deepeddy` | GREED | H/S/O | 🟡 | Eddy | Drift range doubles; Still-Point tags ×1.5. |
+| **THE GLASS RIVER** (keystone) | `glassriver` | RULE | elite | 🟡 | Eddy | Three moving Still-Point tags freeze the water ~5s. |
+
 ## BLOOMWEAVER — **ORCHARD CLOCK DECK v0 (D3) 🟡 PROVISIONAL 2026-07-10** · core unpicked
 
 Source of record: `BLOOM-PLAN.md §4` (provisional on core A — Bill's core pick overrides; B/C/D

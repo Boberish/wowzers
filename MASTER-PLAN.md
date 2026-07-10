@@ -814,10 +814,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 04:09 · main (docs only) — **CLAIM: DECK MACHINE row D6 — the Well·DRAW deck
-  reshape** (top-3 = Vigil · Rapids · Eddy per MENDER §10; the Millrace-vs-Flume capstone
-  reconcile is the headline) → MENDER-PLAN §12 🟡 + catalog Draw rows. Design only.
-  *(slate-machine session, deck tick 04:04)*
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §12 (NEW) + CARD-CATALOG Draw rows + ledger row
+  — **DECK MACHINE row D6: THE DRAW RESHAPE — DONE, 🟡.** Winners = Vigil · Rapids · Eddy (§10
+  ranking; the Skim parked, filed). **The headline: THE MILLRACE DEMOTION** — the built keystone
+  (every 3rd cast free) is economy in a keystone slot and fails Bill's own locked bar; proposed
+  boon-demote with **THE FLUME crowned** as the Rapids keystone (the §10.7 reconcile, resolved
+  at his board — it touches a built card, so his verdict flips it). **⭐THE VIGIL module
+  promoted** (the §1 transformer note made real — trembling held heals; the one real kit
+  addition). New 🟡: Second Hand · **Ride the Tremble** (renamed — Warden owns White Knuckles) ·
+  Whitewater · Shoot the Gap · Eddyline (pardon-check re-run: priced) · Current Reading (the
+  Eddy→Rapids bridge) · Deep Eddy + keystones LOOSED AT LAST / THE FLUME / THE GLASS RIVER.
+  Entry law from built creeds again (Patient Hand/Narrows/Eddy). Unfiled built boons
+  (Loose Grip et al) = effect-filing at build, stated. Sibling gate held (zero landing/party
+  cards). 4 tension points (§12.5). *(slate-machine session, deck tick 04:04)*
 
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §11 (NEW) + CARD-CATALOG Well section (NEW —
   the shared+Brim back-fill, closing that ledger drift) + ledger row — **DECK MACHINE row D5:

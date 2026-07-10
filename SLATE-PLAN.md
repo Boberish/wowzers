@@ -179,7 +179,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` §4 | 🟡 | — | LANDED 07-10: ORCHARD CLOCK DECK v0 — PROVISIONAL on core A (Bill's core pick → free re-run): 4 creeds (WILD ROWS wild) · Almanac/Cider Press modules · 11 boons · 2 keystones · THE SEASON CD. Meadow = sibling pass after core locks. |
 | D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` §11 | 🟡 | — | LANDED 07-10: the locked §7 slate HARD-COPIED to catalog at ✅ (24 cards — the back-fill drift closed) + 3 additive kits at 🟡 (T/H/R; CLOSING TIME renamed from Last Call — collision caught) + EASE knobs + Solera×Recipe tune flag. |
 | D5 | Well · **Brim** | `MENDER-PLAN.md` §11 | 🟡 | — | LANDED 07-10: reshape around Low Catch·Overflow·Glintsmith — built pool filed 🔨 (catalog back-fill done, shared+Brim), 6 new cards + 3 keystones 🟡, Wide Brim→EASE fold, 2 skeptic catches (Blind Pour killed as built-Blindfold dupe · Cool Head renamed). |
-| D6 | Well · **Draw** | `MENDER-PLAN.md` | 🔄 | 07-10 04:09 | Same; sibling-distinctness vs D5 is a hard gate. |
+| D6 | Well · **Draw** | `MENDER-PLAN.md` §12 | 🟡 | — | LANDED 07-10: reshape around Vigil·Rapids·Eddy — ⭐VIGIL module promoted · **Millrace demote proposal** (economy keystone fails the bar; Flume crowned) · Ride-the-Tremble rename · 9 new cards 🟡 · sibling gate held. |
 | D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | ⬜ | — | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
 | D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | ⬜ | — | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
 
@@ -195,6 +195,7 @@ whole decks):
 | **Bloomweaver (D3, core A prov.)** | Orchard lean + Sap engine + Wild read | whole-garden chord (Full Bloom) · standing golden arc ends-on-wilt (Orchard Eternal) | unripe cash-out (Forced Bloom) · peak-stacking (Harvest Moon) · overplanting attention (Overplanted) |
 | **Cask (D4)** | Blend Line · Gauntlet · Tap List (+kits T/H/R) | monstrous single cask (Century) · two-cask chord (Bottling Line) · band-freeze replay (Dynasty Pour) · shelf-dump Opening (Closing Time) | strain-stack pours (Momentum Pour) · mutual-taint twin casks (Rolling Boil) · off-recipe crash (Never Change) |
 | **Brim (D5)** | Low Catch · Overflow · Glintsmith | party-bar wave (Undertow) · Reservoir shield wall (Floodgate) · all-Glints crit hour (Gilded Hour) + built High Tide | deeper band (Knife's Edge) · costlier pours for fatter shields (Pressure Head) · preview-off (built Blindfold) |
+| **Draw (D6)** | Vigil · Rapids · Eddy | perfect-intercept hold (Loosed at Last) · white river (Flume, crowned over demoted Millrace) · frozen bands (Glass River) | tremble-surfing (Ride the Tremble) · hardened-sliver fishing (Shoot the Gap) · doubled drift (Deep Eddy) |
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 
