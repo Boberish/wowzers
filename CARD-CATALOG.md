@@ -299,6 +299,38 @@ _Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§7` (Cask) + `§8` (
 _Stub — back-fill from `MENDER-PLAN.md` "BOARD VERDICTS" export once the deck is authored +
 `godot/data/well/*.gd`._
 
+## BLOOMWEAVER — **ORCHARD CLOCK DECK v0 (D3) 🟡 PROVISIONAL 2026-07-10** · core unpicked
+
+Source of record: `BLOOM-PLAN.md §4` (provisional on core A — Bill's core pick overrides; B/C/D
+→ free re-run). Dials: ARC / PEAK / STAGGER / HARVEST / SAP / WILT / TABLE.
+
+| Card | id | Type | Rarity | St | One line |
+|---|---|---|---|---|---|
+| **Long Summer** (creed) | `longsummer` | EASE | curated | 🟡 | Arcs 20% slower, windows 20% wider — the learner. |
+| **Hothouse** (creed) | `hothouse` | GREED | curated | 🟡 | Arcs 25% faster, peaks +20% — the overclocked garden. |
+| **Mulchwork** (creed) | `mulchwork` | STRAT | curated | 🟡 | Wilts leave MULCH: next plant there grows 30% faster, peaks +10%. |
+| **THE WILD ROWS** (creed) | `wildrows` | RULE | curated | 🟡 | **WILD:** the garden plants itself; your skill = stagger-reading + harvests; +1 arc cap. |
+| **The Almanac** (module) | `almanac` | STRAT | — | 🟡 | Forward timeline of the next ~8s of peaks; plants slot into gaps. |
+| **The Cider Press** (module) | `ciderpress` | GREED | — | 🟡 | Overripe harvests squeeze into SAP instead of healing. |
+| **Deep Roots** | `deeproots` | POWER | H/S/O | 🟡 | Peaks +15/22/30%. |
+| **Forced Bloom** | `forcedbloom` | GREED | H/S/O | 🟡 | One unripe harvest per cycle at full value; its next arc wilts 30% faster. |
+| **Second Fruit** | `secondfruit` | RULE | H/S/O | 🟡 | A Bullseye harvest replants itself free. |
+| **Harvest Moon** | `harvestmoon` | GREED | H/S/O | 🟡 | Peaks within 0.5s of each other pay +20% both — deliberate stagger-collapse. |
+| **Heavy Bough** | `heavybough` | POWER | H/S/O | 🟡 | While ≤2 arcs live, peaks +18/26/35% (the ORCHARD lean). |
+| **Sugar Run** | `sugarrun` | STRAT | H/S/O | 🟡 | Bullseye harvests +1 Sap. |
+| **Deep Cellar** | `deepcellar` | POWER | H/S/O | 🟡 | Sap cap +2. |
+| **Root Tithe** | `roottithe` | GREED | H/S/O | 🟡 | Plants cost +1 Sap, heal +25%. |
+| **Crop Rotation** | `croprotation` | STRAT | H/S/O | 🟡 | A harvest grants the oldest arc +10% ripeness. |
+| **Overplanted** | `overplanted` | GREED | H/S/O | 🟡 | +1 arc cap; ALL arcs 10% faster. |
+| **Companion Planting** | `companion` | STRAT | H/S/O | 🟡 | Two arcs may overlap on one ally; the 2nd at half value. |
+| **The Clean Pick** (rig) | `cleanpick` | — | — | 🟡 | WHEN: Bullseye harvest (~1.2). |
+| **The Full Table** (rig) | `fulltable` | — | — | 🟡 | WHEN: harvest at 4 live arcs (~3.0). |
+| **The Rescue** (rig) | `rescue` | — | — | 🟡 | WHEN: peak harvested on an ally <40% HP (~4.0). |
+| **FULL BLOOM** (keystone) | `fullbloom` | RULE | elite | 🟡 | 3 Bullseyes in one telegraph cycle → the whole garden ripens; one chord-press. |
+| **THE ORCHARD ETERNAL** (keystone) | `orchardeternal` | RULE | elite | 🟡 | A full-table Bullseye plants a GOLDEN arc (re-peaks ~8s) until any WILT ends it. |
+| ✦ **Harvest Home** (support) | `harvesthome` | TEAM | — | 🟡 | 3+ arcs harvested within 2s → warband +damage 3s. |
+| **THE SEASON** (signature CD) | `season` | STRAT | baseline | 🟡 | ~1min: 6s of double growth + wider peaks — align the orchard with the boss window. |
+
 ## FROZEN CLASSES (Bulwark / Bloomweaver)
 _Code slate only, not under active planning. Fill on demand from `godot/data/<class>/<class>_boons.gd`.
 (Mender / Voidcaller / Reckoner were DELETED whole in THE PURGE 2026-07-10 — their card slates died

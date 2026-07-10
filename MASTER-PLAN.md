@@ -814,10 +814,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 03:24 · main (docs only) — **CLAIM: DECK MACHINE row D3 — the Bloomweaver deck
-  v0** (provisional core = A THE ORCHARD CLOCK, the slate's #1; Bill's core pick overrides →
-  free re-run; the deck exists to make the core verdict CONCRETE) → BLOOM-PLAN §4 🟡 + catalog
-  section. Design only. *(slate-machine session, deck tick 03:19)*
+- ☑ 2026-07-10 · main (docs only) · BLOOM-PLAN §4 (NEW) + CARD-CATALOG Bloomweaver section
+  (NEW) + ledger row — **DECK MACHINE row D3: THE ORCHARD CLOCK DECK v0 — DONE, 🟡
+  PROVISIONAL.** Core unpicked, so the deck is authored on **A (the slate's #1)** to make the
+  core verdict CONCRETE — B/C/D pick = free re-run. 4 creeds (Long Summer EASE · Hothouse
+  GREED · Mulchwork — wilts→MULCH tempo, rewritten from a pardon mid-pass · **THE WILD ROWS
+  wild** — the garden plants itself) · 2 modules (**the Almanac** — the roster's FIRST
+  forward-timeline gauge, HUD cost flagged · the Cider Press waste→Sap valve) · 11 boons ·
+  3 rig WHENs (the Rescue = the clutch premium) · 2 keystones (FULL BLOOM chord · THE ORCHARD
+  ETERNAL — skeptic fix: the golden arc ends on a WILT, never on hits taken) · ✦ Harvest Home ·
+  **THE SEASON** CD · EASE knobs. Gates: 3 dream drafts · trio flag (three-POWER offer) ·
+  distinctness rows (Twin-Casks stagger kinship · Full-Bloom vs Bottling-Line recorded).
+  5 tension points (§4.8 — the core pick itself is #1). Meadow = sibling pass after the core
+  locks. *(slate-machine session, deck tick 03:19)*
 
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §9 (NEW) + CARD-CATALOG D2 swap-kit rows + ledger
   flip — **DECK MACHINE row D2: THE DUELIST v2 — DONE, 🟡.** v1 is at Bill's LIVE board, so the

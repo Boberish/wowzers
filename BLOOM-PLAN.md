@@ -3,6 +3,8 @@
 **Status:** 🟡 **CLASS SLATE AT VERDICT (2026-07-10)** — four core-minigame candidates below;
 nothing is built; the frozen in-code Bloomweaver stays the placeholder until Bill picks a core
 (then: base kit → deck pass → build claims, the Well's guarded-class pattern).
+**+ §4 (same day): THE ORCHARD CLOCK DECK v0** — a PROVISIONAL deck on core A (the slate's #1)
+so the core verdict is concrete; picking B/C/D re-runs it free.
 
 **The frame (locked facts this slate obeys):**
 - **Seat: HEALER — the second option vs the Well.** The merge question is SETTLED (2026-07-06,
