@@ -814,6 +814,73 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §18 (NEW) + CARD-CATALOG Fermata section (NEW) +
+  ledger flips — **DECK MACHINE row D8 (FINAL): THE FERMATA v6 — DONE. 🏁 BOTH MACHINES
+  COMPLETE: 9 slates + 9 decks, all 🟡 at Bill's board; crons retired.** D8 itself: v5 pool →
+  🔨 catalog (ladder-tagged Brinkman/Rested Blade/Window-Setter) + KIT A Afterimage (Doubled
+  Dark/Deep Shadow/Procession/THE COMPANY OF KNIVES — anchored on built twinEcho+phantom) +
+  KIT C Cold Hand (**Kept Books** — renamed from The Ledger, Duelist Red-Ledger family ·
+  Patient Books · No Flourishes · THE RECKONING STROKE) at 🟡. Keystone cap-5 theme-weighted
+  rule proposed the 4th time (accept once = the pattern). **The machine's full output:** every
+  class/spec has a slate + a deck at verdict · CARD-CATALOG back-fills closed (Cask/Brew/Well/
+  Fermata + new Warden/Bloom/Tempo/Duelist-kits sections) · 9-row cross-deck distinctness
+  ledger · 8 research sweeps · ~40 tension points consolidated per-deck. NEXT = Bill's
+  verdicts; the `/slate-loop` skill survives for re-runs. *(slate-machine session, deck tick
+  04:34)*
+
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §12 (NEW) + CARD-CATALOG Brew section (NEW)
+  + ledger row — **DECK MACHINE row D7: THE BREW ASSEMBLY — DONE, one merged board.** Built
+  pool → 🔨 catalog rows (the Brew's back-fill drift closed), ladder-tagged Slow Boil/Cannonade/
+  Anchor. §8's 11 proposals cataloged 🟡 and SLOTTED (P3/P4/P5 = one keystone per incumbent
+  ladder — the audit's zero-keystone gap closes cleanly). Kits formalized 🟡: G Tightrope
+  (Wire-Walker/The Save/Practiced Wobble/THE PENDULUM) · P Prognosis (Diagnostician/Terminal
+  Course/Called Shot/THE AUTOPSY REPORT) · S Sidearm (Venom-Tipped/Quick Draw + Silencer/
+  FUSILLADE **⏸ pillar-parked**). **The keystone-pool math flagged:** 6 candidates vs the 2–3
+  law — cap-5 theme-weighted proposed, Bill trims. **Cross-spec rename executed:** Cask kit-H
+  Practiced Hands → **MUSCLE MEMORY** (Brew's built Practiced Hand owns the family); Tightrope
+  theme-name/Twinfang-boon word-share noted for board readability. One verdict sitting now
+  covers §8+§10+§12. 4 tension points (§12.3). *(slate-machine session, deck tick 04:19)*
+
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §12 (NEW) + CARD-CATALOG Draw rows + ledger row
+  — **DECK MACHINE row D6: THE DRAW RESHAPE — DONE, 🟡.** Winners = Vigil · Rapids · Eddy (§10
+  ranking; the Skim parked, filed). **The headline: THE MILLRACE DEMOTION** — the built keystone
+  (every 3rd cast free) is economy in a keystone slot and fails Bill's own locked bar; proposed
+  boon-demote with **THE FLUME crowned** as the Rapids keystone (the §10.7 reconcile, resolved
+  at his board — it touches a built card, so his verdict flips it). **⭐THE VIGIL module
+  promoted** (the §1 transformer note made real — trembling held heals; the one real kit
+  addition). New 🟡: Second Hand · **Ride the Tremble** (renamed — Warden owns White Knuckles) ·
+  Whitewater · Shoot the Gap · Eddyline (pardon-check re-run: priced) · Current Reading (the
+  Eddy→Rapids bridge) · Deep Eddy + keystones LOOSED AT LAST / THE FLUME / THE GLASS RIVER.
+  Entry law from built creeds again (Patient Hand/Narrows/Eddy). Unfiled built boons
+  (Loose Grip et al) = effect-filing at build, stated. Sibling gate held (zero landing/party
+  cards). 4 tension points (§12.5). *(slate-machine session, deck tick 04:04)*
+
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §11 (NEW) + CARD-CATALOG Well section (NEW —
+  the shared+Brim back-fill, closing that ledger drift) + ledger row — **DECK MACHINE row D5:
+  THE BRIM RESHAPE — DONE, 🟡.** Winners = Low Catch · Overflow · Glintsmith (§9 ranking; the
+  Pulse's cards wait, filed). The sweep: BROKE none · FADED **Wide Brim → the EASE dial** ·
+  DEAD none · OPENED = the three lanes, and every one ENTERS from a BUILT creed (Brink/Levee/
+  Shallows — the reshape's luckiest fact). New at 🟡: Knife's Edge · **Cool Head** (renamed —
+  Brew P8 owns "Steady Under Fire") · Runneth Over · Pressure Head · Whetstone Waters · The
+  Primed Vein + keystones **THE UNDERTOW / THE FLOODGATE / THE GILDED HOUR** (pool = 4 with
+  built High Tide, theme-weighted offers). Skeptic kills/catches: **Blind Pour killed before
+  birth** (duplicate of the BUILT Blindfold) · Undertow-vs-Benediction rung distinction
+  recorded · Brink Bell stays the one counted pardon. EASE knobs listed. 4 tension points
+  (§11.5). *(slate-machine session, deck tick 03:49)*
+
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §11 (NEW) + CARD-CATALOG Cask section (NEW,
+  35 rows) + ledger row — **DECK MACHINE row D4: THE CASK DECK ASSEMBLY — DONE.** The locked §7
+  slate (24 KEEP) is **hard-copied into the catalog at ✅** (approved-not-built; flips 🔨+SHA as
+  slices 3–5 merge — the back-fill drift for this spec is CLOSED) with §9.1 ladder tags (Blend
+  Line · Gauntlet · Tap List). The three §9 additive themes formalized as drop-in KITS at 🟡
+  (T Twin Casks: Double Barrel/Clean Handoff/Rolling Boil/Bottling Line · H House Recipe:
+  Signature/Practiced Hands/Never Change/Dynasty Pour · R Taproom: On the House/Private
+  Reserve/**CLOSING TIME** — renamed from Last Call, Brew-boon collision caught by the
+  distinctness check). Combined-pool gates: trios clean · Private-Reserve/Cellar integrates ·
+  Never-Change×Single-Malt = the flagged monk build · **Solera×House-Recipe echo-ease tune
+  flag** recorded for build. EASE knobs: band width · cook grace · peak width · strain
+  softness. 4 tension points (§11.3). *(slate-machine session, deck tick 03:34)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `vuln-stack`) — **CLAIM: GENERIC BOSS-VULNERABILITY
   STACK (REFIT P4; ledger §A row "build FIRST — TEAM-COMP + Depth + Well-glint ride it").**
   ⚠ DELIBERATE REBASELINE (ledger §0 cluster). Build: `boss_state.vulns` window list

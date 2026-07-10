@@ -177,11 +177,11 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D1 | Tank · **Warden** | `TANK-PLAN.md` §8 | 🟡 | — | LANDED 07-10: DECK v1 around Payload·Slam·Rampart — 5 creeds (incl. MONOLITH wild) · 3 modules · 12 boons (🔮 trio re-homed 🟡) · 3 keystones · THE GATE CD. 1 kill (Iron Reserves), 5 tension points. |
 | D2 | Tank · **Duelist** | `TANK-PLAN.md` §9 | 🟡 | — | LANDED 07-10: v1.1 reconcile (EASE fold · FLOW 4th module · aggro re-keys) + 3 pre-authored SWAP KITS (M/S/W, catalog rows 🟡) — any verdict outcome = ready deck, no re-pass. v1 board stays the gating event. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` §4 | 🟡 | — | LANDED 07-10: ORCHARD CLOCK DECK v0 — PROVISIONAL on core A (Bill's core pick → free re-run): 4 creeds (WILD ROWS wild) · Almanac/Cider Press modules · 11 boons · 2 keystones · THE SEASON CD. Meadow = sibling pass after core locks. |
-| D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` | ⬜ | — | Pays the owed §7.7 slices 3–5 card design. |
-| D5 | Well · **Brim** | `MENDER-PLAN.md` | ⬜ | — | Deck exists in code — this is the RESHAPE onto branches (DECK-LAYOUT Phase 2), absorb-don't-duplicate. |
-| D6 | Well · **Draw** | `MENDER-PLAN.md` | ⬜ | — | Same; sibling-distinctness vs D5 is a hard gate. |
-| D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | ⬜ | — | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
-| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | ⬜ | — | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
+| D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` §11 | 🟡 | — | LANDED 07-10: the locked §7 slate HARD-COPIED to catalog at ✅ (24 cards — the back-fill drift closed) + 3 additive kits at 🟡 (T/H/R; CLOSING TIME renamed from Last Call — collision caught) + EASE knobs + Solera×Recipe tune flag. |
+| D5 | Well · **Brim** | `MENDER-PLAN.md` §11 | 🟡 | — | LANDED 07-10: reshape around Low Catch·Overflow·Glintsmith — built pool filed 🔨 (catalog back-fill done, shared+Brim), 6 new cards + 3 keystones 🟡, Wide Brim→EASE fold, 2 skeptic catches (Blind Pour killed as built-Blindfold dupe · Cool Head renamed). |
+| D6 | Well · **Draw** | `MENDER-PLAN.md` §12 | 🟡 | — | LANDED 07-10: reshape around Vigil·Rapids·Eddy — ⭐VIGIL module promoted · **Millrace demote proposal** (economy keystone fails the bar; Flume crowned) · Ride-the-Tremble rename · 9 new cards 🟡 · sibling gate held. |
+| D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` §12 | 🟡 | — | LANDED 07-10: ONE merged board — built pool 🔨 cataloged (ladder-tagged) · §8's 11 slotted 🟡 · kits G/P/S formalized (Silencer/Fusillade ⏸ pillar-parked) · keystone-pool math flagged (6 candidates vs pool law) · Muscle Memory rename. |
+| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` §18 | 🟡 | — | LANDED 07-10: v5 pool 🔨 cataloged + kits A/C 🟡 (Kept Books rename; cap-5 keystone rule proposed 4th time). **DECK QUEUE DRAINED — the machine is COMPLETE.** |
 
 **Cross-deck DISTINCTNESS LEDGER** — each deck pass APPENDS its row here before writing cards,
 and checks its plans against every earlier row (the cheap cross-class overlap gate — no re-reading
@@ -193,6 +193,16 @@ whole decks):
 | **Warden (D1)** | Payload · Slam · Rampart | one colossal returning bar (Siege) · lane-shove (Breakwater) · rooted shield/shrinking bars (Immovable) | charge decay (Heavy Shipment) · full-price mains (Meet It Head-On) · pool brinkmanship (White Knuckles) |
 | **Duelist (D2)** | Headsman · Ironside · Ghost (default) + swap kits M/S/W | returning ◆-string (Avalanche) · gold-sliver parry (Impossible Parry) · slow-mo (Borrowed Time) · freeze-beat ×3 (Estocada ⚠ rhymes w/ Reckoning Stroke) · mirrored flurry (Tempest Answer) | full-bank exposure (All In) · winded blood-parry (Overreach) · last-slice fishing (Late Answer) · the self-cut (Deep Cut) |
 | **Bloomweaver (D3, core A prov.)** | Orchard lean + Sap engine + Wild read | whole-garden chord (Full Bloom) · standing golden arc ends-on-wilt (Orchard Eternal) | unripe cash-out (Forced Bloom) · peak-stacking (Harvest Moon) · overplanting attention (Overplanted) |
+| **Cask (D4)** | Blend Line · Gauntlet · Tap List (+kits T/H/R) | monstrous single cask (Century) · two-cask chord (Bottling Line) · band-freeze replay (Dynasty Pour) · shelf-dump Opening (Closing Time) | strain-stack pours (Momentum Pour) · mutual-taint twin casks (Rolling Boil) · off-recipe crash (Never Change) |
+| **Brim (D5)** | Low Catch · Overflow · Glintsmith | party-bar wave (Undertow) · Reservoir shield wall (Floodgate) · all-Glints crit hour (Gilded Hour) + built High Tide | deeper band (Knife's Edge) · costlier pours for fatter shields (Pressure Head) · preview-off (built Blindfold) |
+| **Draw (D6)** | Vigil · Rapids · Eddy | perfect-intercept hold (Loosed at Last) · white river (Flume, crowned over demoted Millrace) · frozen bands (Glass River) | tremble-surfing (Ride the Tremble) · hardened-sliver fishing (Shoot the Gap) · doubled drift (Deep Eddy) |
+| **Brew (D7)** | Slow Boil · Cannonade · Anchor (+kits G/P/S) | counterphase pendulum swing (Pendulum) · milestone autopsy carry-forward (Autopsy Report) · §8's Red Line/Quicksilver/Seething Vial | zero-line fuel crash (The Save) · declared Rupture budget (Called Shot) · dart fuel-tax (Quick Draw) |
+| **Fermata (D8)** | Brinkman · Rested Blade · Window-Setter (+kits A/C) | blade-flight procession (Company of Knives) · still-frame number (Reckoning Stroke ⚠ rhyme) + built Dance/Eclipse/Phantom | procession streak (snap-cleared) · the never-built Brink (No Flourishes) · lip-riding (built theBrink/razor) |
+
+> **⚡ MACHINE COMPLETE (2026-07-10 ~04:45):** both queues drained — 9 slates + 9 decks, all 🟡
+> at Bill's board. Crons retired. Every card row lives in CARD-CATALOG; every decision trail in
+> the Coordination Log; cross-deck identity in the table above. What remains is VERDICTS (Bill)
+> → status flips → build claims.
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 

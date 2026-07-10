@@ -85,7 +85,7 @@ support, spells). Every table has the same columns:
 | Class (spec) | Seat | Base | Deck status | Full slate |
 |---|---|---|---|---|
 | **Twinfang · Tempo** | rogue | 🔨 built | boons mostly 🔨, keystones/2nd-spec owed | [§ Twinfang](#twinfang) · `TEMPO-PLAN.md` |
-| **Twinfang · Fermata** | rogue | partial | EDGE core 🔒, deck v5 🟡 | `FERMATA-V5-BRIEF.md` |
+| **Twinfang · Fermata** | rogue | 🔨 built (`f5d5397`) | v5 pool 🔨 cataloged · v6 kits 🟡 (D8) | `FERMATA-V5-BRIEF.md` + `TEMPO-PLAN.md §16/§18` |
 | **Alchemist · Brew** | caster | 🔨 built | full slate 🔨; review-pass proposals 🟡 | `ALCHEMIST-PLAN.md` |
 | **Alchemist · Cask** | caster | 🔨 slices 1–2 | HUD/cards/balance owed | `ALCHEMIST-PLAN.md §7` |
 | **The Well** | healer | 🔨 built | **deck 🔮 not authored** | `MENDER-PLAN.md` |
@@ -291,13 +291,179 @@ below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
 **Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮 ·
 Efficiency 🔨→🔮 (or keep, park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate.
 
-## ALCHEMIST · BREW / CASK — 🔨 built · review-pass proposals 🟡
-_Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§7` (Cask) + `§8` (review-pass verdicts) +
-`godot/data/alchemist/*.gd`._
+## TWINFANG · FERMATA — 🔨 v5 BUILT (`f5d5397`) · **v6 KITS (D8) 🟡 2026-07-10**
 
-## THE WELL — 🔨 base built · deck 🔮 not authored
-_Stub — back-fill from `MENDER-PLAN.md` "BOARD VERDICTS" export once the deck is authored +
-`godot/data/well/*.gd`._
+Source: `FERMATA-V5-BRIEF.md` (the build truth) + `TEMPO-PLAN.md §16` (ladders) + `§18`
+(assembly). Ladders: **BRINKMAN · RESTED BLADE · WINDOW-SETTER**.
+
+**v5 pool (🔨 `f5d5397`, ladder-tagged):** creeds the Long Ramp [Brinkman entry] · Fleeting
+Shade · Long Night · Tutti [wild] — modules ⭐Shadow Dance (no-snap fever) · the Mark — boons
+stretto/refrain [Window-Setter] · coldCut [Cold Hand anchor] · theBrink/killingWhisper/
+quietFuse [Brinkman] · firstNote/composure/restlessDark [Rested Blade] · vanish (the one
+block) · twinEcho/firstBlood · ✦veilWarband [TEAM] — rig rested/razor/unravel — keystones
+unseenBlade [Rested Blade] · eclipse [Window-Setter] · phantom [Afterimage anchor].
+
+**v6 kits (🟡 — §16 ranking: Cold Hand · Afterimage):**
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| The Doubled Dark (creed) | `doubleddark` | STRAT | curated | 🟡 | A | Twin Echo at half strength from run start. |
+| Deep Shadow | `deepshadow` | POWER | H/S/O | 🟡 | A | Echoes inherit depth — a Bull's echo echoes at 45%. |
+| Procession | `procession` | GREED | H/S/O | 🟡 | A | Consecutive Perfect+ releases add +1 echo to the NEXT (cap 3); snap/unravel clears. |
+| THE COMPANY OF KNIVES (keystone) | `companyknives` | RULE | elite | 🟡 | A | Full-procession Bullseye: every banked echo flies, graded half-steps softer. |
+| Kept Books (creed) | `keptbooks` | STRAT | curated | 🟡 | C | Good-band releases +1 CP from run start. *(Renamed from The Ledger — Duelist's Red Ledger family.)* |
+| Patient Books | `patientbooks` | STRAT | H/S/O | 🟡 | C | Evis at 5 CP consumes the Mark at +1 tier. |
+| No Flourishes | `noflourishes` | GREED | H/S/O | 🟡 | C | While your Brink is 0 (never built), Evis +25% — the chosen shallow book. |
+| THE RECKONING STROKE (keystone) | `reckoningstroke` | RULE | elite | 🟡 | C | Tier-III brand + 5 CP + an Opening: one still frame, then the number. *(Freeze-beat rhyme w/ Estocada — at Bill from D2.)* |
+
+## ALCHEMIST · THE CASK — **✅ LOCKED SLATE (hard-copied D4, 2026-07-10) + additive kits 🟡**
+
+Source: `ALCHEMIST-PLAN.md §7` (24 KEEP / 6 CUT, Bill 2026-07-07 — ✅ = approved, flips 🔨+SHA as
+slices 3–5 build) + `§9`/`§11` (ladders + additive kits). Ladders: **BLEND LINE · GAUNTLET ·
+TAP LIST** (§9.1).
+
+| Card | id | Type | Rarity | St | Ladder | One line |
+|---|---|---|---|---|---|---|
+| The Solera (creed) | `solera` | EASE | curated | ✅ | Blend | Casks never sour; max 4 doses, proof cap 4. |
+| The Overproofer (creed) | `overproofer` | GREED | curated | ✅ | Tap List | Cook ×0.5, window ×0.6, peak-taps +30%; a dump crashes proof. |
+| The Single Malt (creed) | `singlemalt` | STRAT | curated | ✅ | Gauntlet | Strain softened ×0.91; swaps relieve NOTHING. |
+| ⭐ The Blend (module) | `blend` | RULE | — | ✅ | Blend | No taps — batches pour into ONE compounding master blend; dumps TAINT it. |
+| The Cellar (module) | `cellar` | STRAT | — | ✅ | Tap List | Bottle peaks (shelf 2), throw on demand. |
+| The Copper Still (module) | `copperstill` | GREED | — | ✅ | any | RACK stir-beats: +quality, +cook, faster sour. |
+| Master's Measure | `mastersmeasure` | POWER | H/S/O | ✅ | Gauntlet | Perfect+ pours +10/15/22% volume. |
+| Heavy Hand | `heavyhand` | POWER | H/S/O | ✅ | Gauntlet | Max doses +1/+1&bigger/+2. |
+| Iron Wrist | `ironwrist` | EASE | H/S/O | ✅ | Gauntlet | Strain shrink ×0.86/0.88/0.90. |
+| Momentum Pour | `momentumpour` | GREED | H/S/O | ✅ | Gauntlet | +6/9/13% volume per strain level on that dose. |
+| Clean Break | `cleanbreak` | STRAT | H/S/O | ✅ | generic | First pour after a swap +20/30/45% volume. |
+| Slow Proof | `slowproof` | GREED | H/S/O | ✅ | Blend | Cook +25%, tap +30/40/55%. |
+| Cooper's Ear | `coopersear` | EASE | H/S/O | ✅ | generic | Peak window +0.3/0.45/0.6s. |
+| Breathe | `breathe` | EASE | H/S/O | ✅ | generic | Cook −0.8/1.2/1.6s. |
+| Overproof | `overproofboon` | STRAT | H/S/O | ✅ | Tap List | Late taps BURN (60/70/80% + DoT) instead of souring. |
+| Long Echo | `longecho` | POWER | H/S/O | ✅ | Blend | Tails +40/60/90%. |
+| The Finisher | `finisher` | POWER | H/S/O | ✅ | Tap List | V finish ×1.4/1.5/1.65 · R tail ×2.5/3/3.5. |
+| Killing Vintage | `killingvintage` | STRAT | H/S/O | ✅ | Blend | Below 20/25/33% boss HP casks never sour. |
+| ✦ A Round for the House | `roundhouse` | TEAM | H/S/O | ✅ | Tap List | Peak taps buff party +3/4.5/6% for 4s (buff-channel debt). |
+| rig: strain-×3 pour | `rig_strain3` | — | ~2.2 | ✅ | Gauntlet | WHEN I land a strain-×3 pour. |
+| rig: 6-dose seal | `rig_seal6` | — | ~3.5 | ✅ | Gauntlet | WHEN I seal a 6-dose cask. |
+| rig: dead-center tap | `rig_deadcenter` | — | ~5 | ✅ | Tap List | WHEN I tap dead-center. |
+| 👑 THE CENTURY CASK | `centurycask` | RULE | elite | ✅ | Gauntlet | Dose cap GONE; +8%/dose past 6; strain never relieves past 6. |
+| Spitfire (carry) | `spitfire` | — | — | ✅ | generic | The off-brew dart; the designated interrupt carrier. |
+
+**Additive kits (D4/§11 — 🟡 pending Bill's §9 picks; ranking was H · T · R):**
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| Double Barrel (module) | `doublebarrel` | STRAT | — | 🟡 | T | The second cask slot (the parked candidate, homed). |
+| Clean Handoff | `cleanhandoff` | STRAT | H/S/O | 🟡 | T | Sealing during another cook grants that cook +0.3s window. |
+| Rolling Boil | `rollingboil` | GREED | H/S/O | 🟡 | T | Two casks live: pours +15%; misses taint the OTHER cask −10%. |
+| THE BOTTLING LINE (keystone) | `bottlingline` | RULE | elite | 🟡 | T | Two peak-taps in one 3s window pour as ONE doubled burst. |
+| The Signature (creed) | `signature` | STRAT | curated | 🟡 | H | First sealed recipe = the HOUSE recipe; repeats +8%. |
+| Muscle Memory | `musclememory` | STRAT | H/S/O | 🟡 | H | House-recipe pours strain 20% softer. *(Renamed from Practiced Hands — Brew's built Practiced Hand owns the family, D7.)* |
+| Never Change | `neverchange` | GREED | H/S/O | 🟡 | H | House-style stacks to +30%; off-recipe drops it all. |
+| THE DYNASTY POUR (keystone) | `dynastypour` | RULE | elite | 🟡 | H | 4th consecutive clean house batch: the band freezes on your recipe's walk for one stack. |
+| On the House | `onthehouse` | TEAM | H/S/O | 🟡 | R | A bottled peak thrown to an ally: 70% as their buff on their next clean hit. |
+| Private Reserve | `privatereserve` | GREED | H/S/O | 🟡 | R | Bottles kept 6s+ gain +25%; no second shelf while one waits. |
+| CLOSING TIME (keystone) | `closingtime` | RULE | elite | 🟡 | R | Boss Opening: throw the whole shelf; every clean answer under it pays the finish. *(Renamed from Last Call — Brew boon collision.)* |
+
+## ALCHEMIST · THE BREW — 🔨 BUILT (`alch-cards`) · §8 proposals + D7 kits 🟡 (one merged board)
+
+Source: `ALCHEMIST-PLAN.md §2–§4` (built) · §8 (11 proposals) · §10 (ladders) · §12 (assembly).
+Ladders: **SLOW BOIL · CANNONADE · ANCHOR**.
+
+**Built pool (🔨 `alch-cards` 2026-07-06, ladder-tagged):** creeds Steady Hand [EASE·generic] ·
+Volatile Mix [GREED·Cannonade entry] · Anchorite [STRAT·Anchor entry] · Purist [RULE·Slow Boil
+entry] — modules Third Reagent [STRAT] · Fermentation [STRAT — P6 fix pending] · ⭐Reaction-
+Vessel [RULE·Cannonade] — boons: FUEL Deep Cauldron/Preservative/Clinging Rot [Anchor] · VIAL
+Steady Pour/Practiced Hand · POTENCY Quick Study/Distilled Focus/Concentrate/Killing Draught
+[Anchor] · REACTION-RUPTURE Corrosive Blood/Deepening Rot/Perfect Emulsion [Slow Boil] ·
+Rupturing/Chain Rupture/Catalyst/Volatile Reaction [Cannonade] · ✦Debilitator [TEAM] · Last
+Call — spells Spitfire (interrupt carrier) / Decant / Reduction — the 6×6 rig board.
+
+**§8 proposals (🟡 at Bill's board, slotted):** P1 Bullseye Pours [verb] · P2 Master's Draught
+[Gauntlet-rhyme, VIAL] · P3 The Red Line [Cannonade keystone] · P4 Quicksilver [Anchor
+keystone] · P5 Seething Vial [Slow Boil keystone] · P6 Fermentation hold-or-cash · P7 Strike
+the Seam [Cannonade] · P8 Steady Under Fire [F3-probe] · P9 Brimming [Slow Boil GREED] ·
+P10 The Fever [creed slot].
+
+**D7 additive kits (🟡 — §10 ranking G · P · S):**
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| The Wire-Walker (creed) | `wirewalker` | STRAT | curated | 🟡 | G | Low catches pay from run start; both-sides-low doubles (and risks all). |
+| The Save | `thesave` | GREED | H/S/O | 🟡 | G | A catch under 2 units: +30% fuel back; hitting ZERO crashes Potency. |
+| Practiced Wobble | `practicedwobble` | STRAT | H/S/O | 🟡 | G | After a low catch, balance window +15% for 4s. |
+| THE PENDULUM (keystone) | `pendulum` | RULE | elite | 🟡 | G | 3 alternating low catches in one Potency cycle: ~6s of ×1.5 balance, bars swing in counterphase. |
+| Venom-Tipped | `venomtipped` | STRAT | H/S/O | 🟡 | S | A dart during a fed, balanced reaction carries 20% of its tick. |
+| Quick Draw | `quickdraw` | GREED | H/S/O | 🟡 | S | Darts drain 1 vial charge — fuel for tempo, per throw. |
+| The Silencer | `silencer` | STRAT | H/S/O | 🟡⏸ | S | A dart that KICKS refunds potency drain 3s — parked on the pillar-#3 flag. |
+| THE FUSILLADE (keystone) | `fusillade` | RULE | elite | 🟡⏸ | S | Post-kick ~4s: darts chain — parked on the pillar flag. |
+| The Diagnostician (creed) | `diagnostician` | STRAT | curated | 🟡 | P | Boss HP milestones marked; a Rupture within 2s of one +15%. |
+| Terminal Course | `terminalcourse` | POWER | H/S/O | 🟡 | P | Below 30% boss HP, Deepening Rot ramps ×2. |
+| Called Shot | `calledshot` | GREED | H/S/O | 🟡 | P | Auto-declared Rupture budget: finish at-or-under = each +20%; over = excess −20%. |
+| THE AUTOPSY REPORT (keystone) | `autopsyreport` | RULE | elite | 🟡 | P | A milestone-window killing Rupture: next fight opens +2 Potency. |
+
+**Cross-spec renames executed this pass:** Cask kit-H *Practiced Hands* → **MUSCLE MEMORY**
+(the Brew's built Practiced Hand owns the family) — veto restores.
+
+## THE WELL — 🔨 deck BUILT (`500334f`) · **BRIM RESHAPE (D5) 🟡 2026-07-10** · Draw reshape = D6
+
+Source: `MENDER-PLAN.md` deck banner (built) + §9/§10.7 (filing) + §11 (the Brim reshape).
+Themes: **LOW CATCH · OVERFLOW ENGINE · GLINTSMITH** (the Pulse's cards wait, filed).
+*(The old "deck not authored" note was catalog-format drift — the deck was always built; rows
+land now. Shared + Brim below; Draw rows arrive with D6.)*
+
+| Card | id | Type | Rarity | St | Theme | One line |
+|---|---|---|---|---|---|---|
+| The Brink (creed) | `brink` | GREED | curated | 🔨 `500334f` | Low Catch (entry) | Heals scale on the bloodied; the band drops LOW. |
+| Foresight (creed) | `foresight` | STRAT | curated | 🔨 | Glintsmith-adj | Pours bank stacks while topped; a dip crashes them. |
+| The Levee (creed) | `levee` | EASE | curated | 🔨 | Overflow (entry) | Low band + pours leave an absorb; weaker Glint. |
+| The Shallows (creed) | `shallows` | STRAT | curated | 🔨 | Glintsmith (entry) | Tight high band, brighter Glint — glass. |
+| ⭐ The Reservoir (module) | `reservoir` | RULE | — | 🔨 | Overflow | Spill banks → SURGE shields → re-bank flywheel. |
+| Triage Protocol (module) | `triage` | STRAT | — | 🔨 | Low Catch | Bloodied allies build NERVE → auto LAST STAND. |
+| Benediction (module) | `benediction` | STRAT | — | 🔨 | Glintsmith | Good grades light pips; the 5th cashes a party BLOOM. |
+| Deep Well · Steady Pulse · Meditate · Warm Rekindle · Boiling Over · Second Ring · Cadence of Mend | — | mixed | H/S/O | 🔨 | generic | The shared/bread set (the Pulse's future material). |
+| The Kept Light | `keptlight` | POWER | H/S/O | 🔨 | Glintsmith | Glint lasts longer + extends. |
+| Brink Bell | `brinkbell` | EASE | H/S/O | 🔨 | Low Catch | Emergency absorb on an ally dropping low — **the counted pardon (1 total)**. |
+| ✦ The Shining Hour | `shininghour` | TEAM | H/S/O | 🔨 | Glintsmith | Warband +dmg while everyone is topped. |
+| Overflowing Cup · Still Water | — | STRAT | H/S/O | 🔨 | Overflow | The built spill pair. |
+| Low Catch (boon) | `lowcatch` | STRAT | H/S/O | 🔨 | Low Catch | The boon its theme is named for. |
+| The Blindfold | `blindfold` | GREED | H/S/O | 🔨 | Glintsmith | Preview OFF, bigger rewards — the greed pole (killed the D5 "Blind Pour" duplicate). |
+| High Tide (keystone) | `hightide` | RULE | elite | 🔨 | Glintsmith | A pour Glints the WHOLE party while topped. |
+| ~~Wide Brim~~ | `widebrim` | EASE | — | 🔨→**fold** | — | → the EASE dial (widener law) — leaves the pool at reshape. |
+| rig: Sweet Pour / Spillover / Low Catch | — | — | — | 🔨 | per theme | The built Brim WHENs. |
+| **Knife's Edge** | `knifesedge` | GREED | H/S/O | 🟡 | Low Catch | Band drops another 10%; catches +25%. |
+| **Cool Head** | `coolhead` | STRAT | H/S/O | 🟡 | Low Catch | A catch during a boss telegraph string refunds 1 ◍. *(Renamed — Brew P8 owns "Steady Under Fire".)* |
+| **THE UNDERTOW** (keystone) | `undertow` | RULE | elite | 🟡 | Low Catch | Three zero-spill catches pull the party's bars up 10% in one wave. |
+| **Runneth Over** | `runnethover` | STRAT | H/S/O | 🟡 | Overflow | Spill banks at 130% on Cascade. |
+| **Pressure Head** | `pressurehead` | GREED | H/S/O | 🟡 | Overflow | Reservoir over half: pours +1 ◍, Surge ×1.4. |
+| **THE FLOODGATE** (keystone) | `floodgate` | RULE | elite | 🟡 | Overflow | Full Reservoir opens as a party shield wall; absorbs re-bank at half. |
+| **Whetstone Waters** | `whetstonewaters` | POWER | H/S/O | 🟡 | Glintsmith | Glints +1s, stack to 2 allies. |
+| **The Primed Vein** | `primedvein` | STRAT | H/S/O | 🟡 | Glintsmith | PRIME an ally: next landing window ×1.5; a perfect there Glints the party 1s. |
+| **THE GILDED HOUR** (keystone) | `gildedhour` | RULE | elite | 🟡 | Glintsmith | All four Glints live: every ally's next clean answer crits. |
+
+**DRAW rows (D6 reshape, `MENDER-PLAN.md §12` — themes VIGIL · RAPIDS · EDDY):**
+
+| Card | id | Type | Rarity | St | Theme | One line |
+|---|---|---|---|---|---|---|
+| The Patient Hand (creed) | `patienthand` | STRAT | curated | 🔨 `500334f` | Vigil (entry) | Overrun becomes a HELD heal, released on the spike. |
+| The Long Draw (creed) | `longdraw` | STRAT | curated | 🔨 | Vigil | Slow/big/tight — the Largo mirror. |
+| The Narrows (creed) | `narrows` | GREED | curated | 🔨 | Rapids (entry) | Outside the band heals ZERO; in-band much stronger. |
+| The Eddy (creed) | `eddy` | STRAT | curated | 🔨 | Eddy (entry) | The band's centre drifts each cast (deterministic). |
+| Strong Pull | `strongpull` | POWER | H/S/O | 🔨 | Rapids | Max-Current clean heals +30%. |
+| The Millrace | `millrace` | RULE→POWER | elite→H/S/O | 🔨 → **proposed DEMOTE to boon** | Rapids | Every 3rd cast free at full Current — economy in a keystone slot fails the locked bar; the Flume crowns instead. |
+| Loose Grip · Short Pour · Cool Hand · Double Draw · Deep Still · Last Drops | — | mixed | H/S/O | 🔨 | effect-filing at build | Banner names only; Short Pour/Loose Grip presumed the Skim's (parked). |
+| rig: Clean Draw / High Water / Still Point | — | — | — | 🔨 | per theme | The built Draw WHENs. |
+| ⭐ **THE VIGIL** (module) | `vigilmodule` | RULE | — | 🟡 | Vigil | Overruns become HELD heals (~3s, visible tremble→gutter); release instant. |
+| **Second Hand** | `secondhand` | STRAT | H/S/O | 🟡 | Vigil | Flash castable while holding. |
+| **Ride the Tremble** | `ridetremble` | GREED | H/S/O | 🟡 | Vigil | Held heal +8%/half-second held. *(Renamed — Warden owns White Knuckles.)* |
+| **LOOSED AT LAST** (keystone) | `loosedatlast` | RULE | elite | 🟡 | Vigil | Release within 0.2s of the ally's hit = PERFECT INTERCEPT (full heal + 2s shield). |
+| **Whitewater** | `whitewater` | POWER | H/S/O | 🟡 | Rapids | Heals +4%/Current stack. |
+| **Shoot the Gap** | `shootgap` | GREED | H/S/O | 🟡 | Rapids | At Current 5, Still-Point tags ×1.3. |
+| **Eddyline** | `eddyline` | STRAT | H/S/O | 🟡 | Rapids | One undercook/10s downgrades the Current instead of breaking it (still weak, still costs). |
+| **THE FLUME** (keystone) | `flume` | RULE | elite | 🟡 | Rapids | Current 5 held 12s → ~6s the river runs white (auto-clean releases), then 0. |
+| **Current Reading** | `currentreading` | STRAT | H/S/O | 🟡 | Eddy | First-third drift tags grant +1 Current (the bridge). |
+| **Deep Eddy** | `deepeddy` | GREED | H/S/O | 🟡 | Eddy | Drift range doubles; Still-Point tags ×1.5. |
+| **THE GLASS RIVER** (keystone) | `glassriver` | RULE | elite | 🟡 | Eddy | Three moving Still-Point tags freeze the water ~5s. |
 
 ## BLOOMWEAVER — **ORCHARD CLOCK DECK v0 (D3) 🟡 PROVISIONAL 2026-07-10** · core unpicked
 
