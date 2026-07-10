@@ -28,9 +28,7 @@ func _process(_d: float) -> bool:
 		shell.hud._show_home()
 		shell.drive_autostart(["--autostart=zone"])
 		_check(String(shell._screen) == "zone", "zone idiom -> zone (got %s)" % shell._screen)
-		shell.hud._show_home()
-		shell.drive_autostart(["--autostart=gate:tank"])
-		_check(String(shell.hud._screen) == "combat", "gate idiom -> exam combat (got %s)" % shell.hud._screen)
+		# (the gate idiom died with THE PURGE 2026-07-10 — gates are gone from the game)
 		print("SHELL PROBE: %s" % ("ALL OK" if fails == 0 else "%d FAILURES" % fails))
 		quit(1 if fails > 0 else 0)
 		return true

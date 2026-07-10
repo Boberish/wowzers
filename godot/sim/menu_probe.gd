@@ -27,8 +27,8 @@ func _process(_d: float) -> bool:
 		_ck(String(shell._screen) == "class", "PLAY -> class select (screen=%s)" % shell._screen)
 		shell._show_aspect_pick("healer")
 		_ck(String(shell._screen) == "aspect", "class -> aspect (screen=%s)" % shell._screen)
-		shell._show_raid_select("healer", "brinkwarden")
-		_ck(String(shell._screen) == "raidpick" and hud._seat_key == "healer" and hud._aspect == "brinkwarden",
+		shell._show_raid_select("healer", "brim")   # post-purge healer = THE WELL (brim/draw)
+		_ck(String(shell._screen) == "raidpick" and hud._seat_key == "healer" and hud._aspect == "brim",
 			"aspect -> raid pick (seat=%s aspect=%s)" % [hud._seat_key, hud._aspect])
 		# COMMANDER: the realm card now leads to PARTY setup (assemble the AI raiders)
 		shell._show_party_setup()
@@ -36,8 +36,12 @@ func _process(_d: float) -> bool:
 			"raid -> PARTY setup (3 AI seats, yours excluded: %s)" % str(hud._d.party.keys()))
 		hud._d.party["blade"]["aspect"] = "tempo"     # command a non-default aspect
 		hud._start_map_run()
-		_ck(String(hud._screen) == "map" and hud._d.map != null and hud._d.run != null,
-			"party -> live descent (screen=%s run=%s)" % [hud._screen, str(hud._d.run != null)])
+		# the Well is a CREED class — descent start is the creed ceremony, run already live
+		_ck(String(hud._screen) == "creed" and hud._d.run != null,
+			"party -> descent start: creed ceremony (screen=%s run=%s)" % [hud._screen, str(hud._d.run != null)])
+		hud._pick_creed(String(hud._fw_creed_ids("well")[0]), hud._build_floor)
+		_ck(String(hud._screen) == "map" and hud._d.map != null,
+			"creed sworn -> live descent map (screen=%s)" % hud._screen)
 		_ck(hud._d.ai_runs.size() == 3 and String((hud._d.ai_runs["blade"] as RunState).aspect) == "tempo"
 			and String((hud._d.ai_runs["blade"] as RunState).char_class) == "twinfang",
 			"descent carries commanded AI boon runs (blade=tempo, n=%d)" % hud._d.ai_runs.size())
