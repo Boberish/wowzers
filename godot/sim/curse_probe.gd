@@ -11,6 +11,16 @@ extends SceneTree
 var hud: Control
 var step := 0
 var fails := 0
+var _left := false
+
+func _find(node: Node, cls: String):
+	if (cls == "MapEventPanel" and node is MapEventPanel) and not node.is_queued_for_deletion():
+		return node
+	for c in node.get_children():
+		var r = _find(c, cls)
+		if r != null:
+			return r
+	return null
 
 func _ck(cond: bool, label: String) -> void:
 	if not cond:
@@ -87,6 +97,17 @@ func _process(_dt: float) -> bool:
 	_ck(int((hud._d.curses[0] as Dictionary)["fights"]) == 1, "E: economy curse ticks 2->1")
 	hud._tick_economy_curses()
 	_ck(hud._d.curses.is_empty(), "E: economy curse expires at 0")
+
+	# ---- F. the JAILBREAK node: a deal grants the good AND the bite; the node opens
+	hud._d.curses = []
+	hud._d.charge = 10
+	var deal: Dictionary = hud.JAILBREAK_DEALS[0]        # OVERCLOCK: +45 ⏻ + a timing bite
+	hud._apply_map_fx((deal["fx"] as Dictionary).duplicate(true))
+	_ck(hud._d.charge == 55 and hud._d.curses.size() == 1,
+		"F: a deal grants the good (+45⏻) AND applies the bite (both halves)")
+	hud._d.curses = []
+	hud._show_jailbreak(0, func(): _left = true)
+	_ck(_find(hud._ui, "MapEventPanel") != null, "F: _show_jailbreak opens a two-deal panel")
 
 	print("CURSE PROBE: %s" % ("ALL OK" if fails == 0 else "%d FAIL" % fails))
 	quit(1 if fails > 0 else 0)

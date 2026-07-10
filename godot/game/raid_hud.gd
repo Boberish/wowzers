@@ -983,6 +983,8 @@ func _resolve_node(n: Dictionary) -> void:
 				Palette.GOLD, _show_map)
 		RunMap.KIND_MARKET:
 			_show_market(int(n["id"]), _show_map, false)
+		RunMap.KIND_JAILBREAK:
+			_show_jailbreak(int(n["id"]), _show_map)
 
 ## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
 ## choice (a check computes its % + breakdown; a gated choice greys if unmet), and hands
@@ -1550,6 +1552,47 @@ func _expire_curses() -> void:
 		if int((c as Dictionary).get("fights", 0)) > 0:
 			kept.append(c)
 	_d.curses = kept
+
+## The deal menu (§7, V#4 lean-gentle): a strong good + a bite in a DIFFERENT currency, both
+## bounded + printed. Two are rolled per node. Goods run over market value; bites are gentle.
+const _JAILBREAK_BODY := "A back-alley terminal blinks [b]UNSIGNED PATCH — INSTALL?[/b]  Two deals, both halves printed. Each is a strong good with a bite in a different currency — the best value in the raid IF you can eat the pain, and the pain lands wherever you route it. Walking away is free."
+const JAILBREAK_DEALS := [
+	{"label": "OVERCLOCK — take +45 ⏻", "fx": {"charge": 45,
+		"curse": {"kind": "timing", "label": "windows −10% next fight", "fights": 1, "mag": 0.10},
+		"result": "The Kill Switch surges — but your reflexes lag a beat next fight."}},
+	{"label": "SKIM THE TILL — take +8 ⏣", "fx": {"tokens": 8,
+		"curse": {"kind": "economy_mint", "label": "mint halved (2 fights)", "fights": 2, "mag": 0.0},
+		"result": "Fat stack, flagged account. The next two paydays run lean."}},
+	{"label": "HOT PATCH — bank +2 REGENERATE", "fx": {"regenerate": 2,
+		"curse": {"kind": "hp", "label": "a corrupted sector next fight", "fights": 1, "mag": 0.20},
+		"result": "Two reloads, one bruise. A sector corrupts — it auto-repairs after the next fight."}},
+	{"label": "PRICE GOUGE — take +55 ⏻", "fx": {"charge": 55,
+		"curse": {"kind": "economy_price", "label": "market +3⏣ (3 fights)", "fights": 3, "mag": 3.0},
+		"result": "Charged up, marked up — THE SCRAPER hears you're desperate and raises prices."}},
+	{"label": "DOUBLE OR NOTHING — take +11 ⏣", "fx": {"tokens": 11,
+		"curse": {"kind": "timing", "label": "windows −10% next 2 fights", "fights": 2, "mag": 0.10},
+		"result": "A fistful of ⏣ and a shakier hand for two fights. Route the pain."}},
+]
+
+## THE JAILBREAK node (§7). Two deals rolled on a (map_seed, node) rng → replay-stable +
+## co-op-shared. Walking away is free. At cap 2 the cell is full (DEPRECATE/purge first).
+func _show_jailbreak(node_id: int, done: Callable) -> void:
+	var mseed: int = _d.map.seed if _d.map != null else 12345
+	var rng := DetRng.new((mseed * 1000003 + (node_id + 1) * 6971 + 5) & 0x7FFFFFFF)
+	var choices: Array = []
+	if _d.curses.size() >= 2:
+		choices.append({"label": "The cell is FULL — no room for another bite",
+			"fx": {"result": "Two curses already ride your file. DEPRECATE one at the Market — or vent it at a Cooling station — before you deal again."}})
+	else:
+		var pool := JAILBREAK_DEALS.duplicate()
+		for _k in 2:
+			if pool.is_empty():
+				break
+			var d: Dictionary = pool.pop_at(int(rng.next_u32() % pool.size()))
+			choices.append({"label": String(d["label"]), "fx": (d["fx"] as Dictionary).duplicate(true)})
+	choices.append({"label": "WALK AWAY  (take no deal — free)",
+		"fx": {"result": "You keep your hands clean. THE JAILBREAK will be here if you change your mind."}})
+	_map_stop("THE JAILBREAK", _JAILBREAK_BODY, choices, Palette.VOID, done)
 
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 

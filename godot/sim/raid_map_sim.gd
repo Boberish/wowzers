@@ -385,6 +385,12 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				if int(carry["tokens"]) >= 5 and any_wound:
 					_apply_fx({"repair": true, "mana": 1.0}, carry)
 					carry["tokens"] = int(carry["tokens"]) - 5
+			RunMap.KIND_JAILBREAK:
+				# §7 THE JAILBREAK (JAILBREAK_LIVE): model taking a gentle HP-tax deal — a good
+				# (⏻ charge toward the Kill Switch) for a small corrupted-sector bite. Representative
+				# of curse attrition; the full timing/economy/curse system is HUD-side, off-sim.
+				carry["charge"] = mini(100, int(carry["charge"]) + 45)
+				_apply_fx({"wound": 0.08}, carry)
 	return {"cleared": false, "fights": fights,
 		"integrity": _avg(carry["fracs"]), "loss_at": "walk_stuck", "trace": str(trace)}
 
