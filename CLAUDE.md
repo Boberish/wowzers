@@ -60,6 +60,9 @@ curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (s
 BOSS-PLAN 2026-07-10; Phase A absorbed) ·
 `FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `TEMPO-D0-BRIEF.md` (**the D0 build brief**
 — governor/law-reworks/deck-data/resonance/duos/transforms slices + gates, 2026-07-10) ·
+`DUELIST-BRIEF.md` (**the Wave-1 build brief** — the dodge tank: FLOW=AGGRO/taunt-funeral ·
+base kit+Bulwark deletion · policy/sims/HUD · deck · EN GARDE · transforms, slices S0–S8 +
+gates ①②, 2026-07-10) ·
 `REFIT-PLAN.md` (structural audit v2 →
 the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
 loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·

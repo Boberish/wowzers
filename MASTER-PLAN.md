@@ -829,6 +829,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · **`DUELIST-BRIEF.md` (NEW, root) — THE WAVE-1 BUILD BRIEF**
+  (Bill: *"make a plan to implement the new dodge tank class… when ready I'll start you with
+  Opus to do the code"*) + ledger §B pointer/row updates + CLAUDE.md index. The whole ledger
+  Wave 1 sliced S0–S8: **S0 FLOW=AGGRO + taunt funeral → S1 base kit + Bulwark deletion (ONE
+  merge, §A½ rule) → S2 DuelistPolicy → S3 duelist_sim/carry → S4 HUD (ClassBand rail) →
+  [gates] S5 deck data → S6 EN GARDE (first signature-CD chassis game-wide) → S7 transforms +
+  Floor-2 ceremony → S8 per-Seal streams.** Scope-gate honesty: **S0–S4 are verdict-free**;
+  S5–S7 block on **gate ① the §3 deck board** (or Bill's explicit "build the defaults") +
+  **gate ② the §10.6 points**; transform ACQUISITION is already locked by the Tempo GO.
+  Found + noted in the brief: the 30 Hz wall on the 60ms parry window (build grading
+  tick-native) · the GEAR-2 taunt-deed re-home (`combat_core.gd:904`) · DuelistPolicy needs a
+  NEW seed salt (byte-exact-history rule). Statuses untouched (no decisions taken — catalog
+  stays 🟡). Next: Bill starts the build session on the brief. *(tank-brief session)*
+
 - ☐ 2026-07-10 · worktree `../wow-tempo-d0` (branch `tempo-d0`) · TEMPO D0 BUILD · **building
   `TEMPO-D0-BRIEF.md` — S0 governor → S5 law reworks → S1 deck data → S2 resonance → S4
   transforms** (deferred shelf S3 duos · S6 Set Piece · kick carriers left untouched). Kit-local
