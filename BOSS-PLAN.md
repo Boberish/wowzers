@@ -18,7 +18,7 @@ same numbers). Its beat-source map + budget (~3–8 answerable beats/non-tank se
 
 ---
 
-## §V · THE VERDICT BOARD — ten decisions for Bill
+## §V · THE VERDICT BOARD — eleven decisions for Bill
 
 1. **THE FOUR IDENTITIES** *(approve/veto each — §6 has the full scripts)*
    **VORATHEK = THE AXE** (slow huge honest hits, the teaching loop — the raid's only silent
@@ -73,6 +73,11 @@ same numbers). Its beat-source map + budget (~3–8 answerable beats/non-tank se
     showing the next 2–3 telegraph SHAPES (not answers/targets) so long fights read ahead.
     *(a) park to v2 (rec — v1 ships on today's banner grammar; scope control) · (b) build in v1
     as its own HUD slice.*
+11. **VORATHEK — does the teacher get one verse?** *(added with the §1½ kick contract,
+    2026-07-10.)* Now that every non-healer will carry a kick: *(a) rec — zero verses on the
+    teacher* (the ramp holds at 2 raid answers; kicks enter at Mistral's kindergarten with its
+    extra-wide window) · *(b) return ONE gentle Devouring Chant* as the kick-teacher (3 answers
+    on the teaching Seal — earlier lesson, denser teacher).
 
 ---
 
@@ -96,11 +101,10 @@ same numbers). Its beat-source map + budget (~3–8 answerable beats/non-tank se
   the bread. Bulwark is ignored everywhere in this doc (dies with the Duelist base merge).
   ⚠ The Warden has no dodge — any "must-dodge" raid beat is answered by his SHIELD by design
   (PIERCE is a Depth affix, not a Seal mechanic).
-- **KICK POSTURE (pillar-3 interim):** no class carries a kick until interrupt-by-ability
-  lands — **every verse/chain is tuned survivable when it lands uncontested**, and every
-  kick-shaped mechanic must have a non-kick answer or a survivable failure. When kicks arrive:
-  Mistral = the kick kindergarten (1 short chain) · Gemini = the kick school (densest traffic) ·
-  Mythos = the exam (CoT + Hotfix). Kick windows re-tune then, not now.
+- **KICK POSTURE:** the full contract is **§1½** (Bill, 2026-07-10 — every class but healers
+  carries, warn-early/short-window/free-press, BIG miss consequences). Interim (until the
+  `interrupts` flag lands class-by-class): verses stay survivable uncontested; the §1½
+  consequence numbers arrive WITH the flag, per Seal slice.
 - **VALLEY LAW (DESCENT §1):** every fight ≥3 min carries **≥25% of its length as in-fight
   valleys** — walk-ins, stance turns, act curtains, breaks. The §6 scripts each print their
   valley share.
@@ -160,6 +164,49 @@ override" log entry stands as history; this doc + the 2026-07-10 log entry gover
 
 ---
 
+## 1½ · THE KICK CONTRACT (Bill, 2026-07-10 — the interrupt spec the fights author against)
+
+**The carrier amendment (supersedes pillar-3's "2/1/0 comp texture"):** **every class except
+healers carries a kick**, bolted onto its DUMP (Twinfang: Evis proposal 🟡 TEMPO §17.10 ·
+Alchemist: the Spitfire carrier · Duelist/Warden: ⚡ DUMP). Healers never kick. The standard
+warband fields **3 kickers**; comp texture moves from *who carries* to **whose dump is armed
+when the window lights** — the interrupt tax (hold your payoff or lose the kick) and the
+chain rotation are the whole skill. WORLD-PLAN §PILLARS #3 + CLAUDE.md amended this commit.
+
+**The anatomy — warn EARLY, window SMALL, press FREE, miss EXPENSIVE:**
+- **The warn is the whole cast.** The castbar + banner appear at cast start (verses cast
+  ~2–6 s) — plenty of read time to arm the right dump. (The V#10 ribbon, if built, extends
+  the warning earlier; not required.)
+- **The window is a small lit slice at the END of the cast** — `kick_window`, an ABSOLUTE
+  time knob on SealTune (first cut **~0.6 s** ≈ 18 ticks; per-Seal mult: Mistral ×1.3 the
+  kindergarten · Gemini ×1.0 · Mythos ×0.85). This tightens WORLD-PLAN's "last ~35% of cast"
+  starting idiom into a fixed slice — because the press is free, the window carries ALL the
+  skill. Tunable, like everything (§2).
+- **The press is free, the timing isn't.** Pressing your dump EARLY just fires it as normal
+  damage (no kick, no penalty) — the cost is your dump may not be re-armed when the slice
+  lights. First in-window press consumes the verse (simultaneous same-tick presses resolve in
+  seat order, deterministic; the loser's dump fires as damage). Silence-kills-chain semantics
+  unchanged.
+- **Missing is the costliest single mistake in the raid** (Bill: "make the consequences
+  big") — a landed verse must out-hurt any missed dodge/parry. The ladder:
+  | Seal | Missed-kick consequence (first cut — all knobs, re-tuned when the flag lands) |
+  |---|---|
+  | VORATHEK | none — no verses on the teacher (V#11 asks whether one returns) |
+  | MISTRAL | License verse lands = the **biggest single raid blast in the fight** (heal-scramble tier, recoverable — the loud lesson) |
+  | GEMINI | Overview verses = raid blasts; the **Model Merge lands = permanent EMPOWER stack** — every miss makes the rest of the fight worse, and stacks compound |
+  | MYTHOS | CoT Conclusion = the biggest EMPOWER in the raid; **OPUS Hotfix lands = the boss HEALS** (direct progress loss — the classic worst outcome); an Act-III verse at near-lethal |
+- **AI seats kick too** (policies hold dumps for incoming verses; miss rates are the skill
+  tier — sloppy AI misses kicks, that's the comp texture in solo).
+- **Sim gates (rides S0):** the pillar's accidental-vs-deliberate kick-rate diag becomes a
+  per-seat table (landed / missed / uncovered verses per tier; targets: accidental <10%,
+  deliberate >85% at good — WORLD-PLAN numbers stand). With early-press-fires-as-damage,
+  "accidental" kicks should measure ≈0 — the table proves it.
+- **Count stays modest (Bill: "some, not a ton"):** Vorathek 0 (V#11) · Mistral one 2-verse
+  chain (~2–3 casts/fight) · Gemini one 3-verse chain incl. the Merge (~2–3 casts) · Mythos
+  CoT 3-verse (~2 casts) + Hotfix per OPUS wave. Verses stay INSIDE the §3 beat budgets.
+
+---
+
 ## 2 · THE TUNING SPINE — playtest-turnable without a playtest
 
 **The problem (Bill):** fight length/speed can't be validated until the raid is playable, so
@@ -179,6 +226,8 @@ numbers ship *loose*.
 | `break_len[]` | dialogue-break durations in ticks | Gemini · Mythos |
 | `beats_scale` | barrage beat-counts (3→2 etc, the last-resort lever) | §3 |
 | `peel {grace_ticks, curve, lethality}` · `flow {gain, loss, decay, spike}` | the §1 economy, per-Seal overridable | all |
+| `kick_window` (+ per-Seal mult) | the lit kick slice at cast end, ABSOLUTE seconds (§1½; first cut ~0.6 s) | Mistral ×1.3 · Gemini ×1.0 · Mythos ×0.85 |
+| `verse_miss_mult` | the missed-kick consequence sizes (blast / EMPOWER / heal amounts, §1½ ladder) | re-tuned when the flag lands |
 | `enrage_at` · `enrage_visible` | the wall + whether the countdown banner shows | all |
 | `re_stagger` | post-break/act re-arm stagger (kills the banked burst-train, §7 gotcha) | all |
 
@@ -210,7 +259,7 @@ low end early, high end late. All columns are SealTune-turnable.
 | Non-tank beats/fight (good tier) | **3–5** | **4–6** | **5–7** | **6–8** + ULTRATHINK (exception) |
 | Tank stream texture | slow · tall · honest (the axe) | fast · light · flurry-rich (WEAVE/HOLD food) | paired beats · feint-heavy (Double-Check stays) | dense · all shapes · compaction resets |
 | Feints (HALLUCINATIONS) | none | trace (stance-flip bait) | **capital** — strings + armed-banner doubles | mind-game tier (delay-hitch beats) |
-| Verses (kick posture) | none (chant parked V#2) | 1 short chain | **densest** — chains + empower merge | CoT + Hotfix (the exam) |
+| Verses (§1½ kick contract) | none (chant parked V#2 — V#11 asks) | 1 short chain, widest window (the kindergarten) | **densest** — chains + the Merge EMPOWER | CoT + Hotfix, tightest window (the exam) |
 | Melee tempo (`every`) | ~1.15 gentle | ~0.95 (the tempo boss) | ~1.1 | ~1.0 → 0.9 by act |
 
 Dodge stays load-bearing everywhere (Bill: "keep it for sure") — the ramp moves COUNT and
@@ -310,7 +359,9 @@ announces the routed expert; each re-textures the one stream for a rotation (~80
 **Batch Job (NEW, S4):** a charged cast with **3 countdown pips**; every PERFECT answer
 anywhere in the raid during the windup removes a pip — clean play visibly shoves the
 detonation back/down. The "your skill moves the fight" lesson.
-**Verse:** Recite the License (1 short chain — the kick kindergarten; survivable uncontested).
+**Verse:** Recite the License (1 short 2-verse chain — the kick kindergarten: longest warn,
+widest window ×1.3; **a landed verse = the biggest single raid blast in the fight** — the
+loud, recoverable lesson that kicks matter; survivable uncontested until the flag lands).
 **Structure to 7:00:** opener ~0:15 → 3 expert rotations ≈ 4:15 (each flip = a ~4 s stance
 turn, the valley beat) → Batch Job ×2 ≈ 1:00 → **THE MIXTURE (final act, <25%):** experts
 interleave per-beat, sigil flickers — the exam ~1:30. No adds (the only add-free machine
@@ -329,8 +380,9 @@ model, I delegate.").
 - **PRO** (voice B): slow deliberate talls + Double-Check (the kept tank string, feint mid-
   combo — it GROWS one beat in act 3 per S14) + Benchmark Hammer.
 Voices alternate on `stance_period` (~70 s) with a "NOW SERVING: FLASH ⚡ / PRO ◆" banner +
-sigil tint. **The verse:** AI Overview chain → Model Merge empower (kickable-later; survivable
-now).
+sigil tint. **The verse:** AI Overview 3-chain → **Model Merge** — the kick school: three
+kickers must rotate dumps across the chain, and **every landed Merge = a permanent EMPOWER
+stack** (misses compound; the fight you tolerate at 100% is the fight that kills you at 30%).
 **Structure to 9:00:** ACT 1 voices alternate ~2:30 → **BARD.EXE cycle 1** at ~72% (the
 deprecated brother resurfaces; farewell sonnet = aoe string) ~1:00 → **the 50% MINI-BREAK
 (V#6):** "AI OVERVIEW: *Here is a summary of our fight so far. (Nobody asked.)*" ~8 s →
@@ -350,7 +402,8 @@ healer = add-cycle triage + the promotion spike.
 by dialogue breaks (V#6). The apex of every vocabulary the ladder taught. Phases stop being
 multipliers and become acts (E1): the ability SET changes at the gates.
 - **ACT I — HELPFUL (100→65%):** courteous and by-the-book: Alignment Hammer talls ·
-  Red-Team Probe · Chain-of-Thought verses (the kick exam, survivable now) · Agentic Fan-Out
+  Red-Team Probe · Chain-of-Thought verses (the kick exam — tightest window ×0.85; **the
+  Conclusion landing = the biggest EMPOWER in the raid**) · Agentic Fan-Out
   (light: 3 of 5 beats). *"I've prepared a briefing on your weaknesses. It's quite thorough."*
 - **CURTAIN 1 at 65% (BREAK, ~12 s)** → **SONNET SUBAGENT wave** (kept; "Parallel Tool
   Calls" goes rand-target — one victim per beat, more thematic, from SEAL-PILLAR's own note).
@@ -361,7 +414,9 @@ multipliers and become acts (E1): the ability SET changes at the gates.
   at each act gate the boss "absorbs compute" (~3 s invuln beat); damage dealt INTO the windup
   shrinks the incoming act's mult — the deny-race.
 - **CURTAIN 2 at 32% (BREAK, ~15 s)** → **OPUS SUBAGENT wave** (kept; Hotfix Deployment =
-  the deny-the-heal (S13) — burn-race while kickless, kick-answer when pillar 3 lands).
+  the deny-the-heal (S13) — **a landed Hotfix HEALS the withdrawn boss: direct progress loss,
+  the raid's worst single miss** (§1½); burn-race while kickless, kick-answer when the flag
+  lands).
 - **ACT III — HONEST (32→0):** pretense drops: melee 0.9 · Fan-Out full 5 beats · **Context
   Compaction = FLOW DUMP (§1):** the tank is forgotten (flow→0), peels fly, the raid covers
   while the tank rebuilds — the taunt-less system's showpiece · Double-time CoT · the USAGE
@@ -391,6 +446,7 @@ seam — boss logic is central in `CombatCore` off pure data. Hence:
 | E5 | **Mark relay** *(V#8-gated)* | `boss.mark_seat_i/mark_until` + handoff beat on the victim's bar; pass-on re-rolls target (seed-ordered) | reuses rand-target routing + peel grace idioms; seat INDEX not ref (the §gotcha idiom). |
 | E6 | **Deny-race empower** | EMPOWER/act-mult amount scales down with damage taken during its own cast | one hook at resolve; powers S10 + makes future empowers denyable. |
 | E7 | **Input-draws-counter window** *(V#7-gated)* | `boss.listening_until`: ability/dump inputs during it queue a telegraphed personal counter on the presser | AI policies read it from `observe()` (a `hold` flag) — policy work rides the slice. |
+| E8 | **Kick-window slice** (§1½) | `AbilityRes.kick_window` (absolute s): an INTERRUPTIBLE cast accepts the kick ONLY inside its final slice; castbar renders the lit slice; sim gains the landed/missed/uncovered verse table | boss-side half of pillar 3 — the class-side `interrupts` flag lands with the reworks (BUILD-LEDGER §A); early presses fire as normal dumps (no state). |
 
 **Consumed, not built here:** flow-aggro + peel roll + taunt removal (Wave 1, BUILD-LEDGER §B)
 · Duelist/Warden kits · interrupt-by-ability (pillar 3). **Explicitly NOT built:** a second

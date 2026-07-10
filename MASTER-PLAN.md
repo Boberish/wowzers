@@ -663,7 +663,7 @@ combat pillars eventually — Bill isn't sure of the end state yet, so we do NOT
 recast through the Forge/casting-pool era). The only simmed, maintained bosses are **the 4 Seals**
 (`raid_sim`): Vorathek · MISTRAL · GEMINI · MYTHOS — and they get the pass below.
 
-**THE SEAL REWORK v1 — the 4-boss redo (Bill's go 2026-07-10; 🟡 at his 10-verdict board).**
+**THE SEAL REWORK v1 — the 4-boss redo (Bill's go 2026-07-10; 🟡 at his 11-verdict board).**
 **➡ THE spec: `BOSS-PLAN.md`** — fills the DESCENT §4 timer contract (**5 / 7 / 9 / 12 min**,
 today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief:
 - **Identities (§V#1):** VORATHEK = **THE AXE** (slow huge honest hits, the learnable teaching
@@ -676,6 +676,13 @@ today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief
 - **TAUNT BUTTON REMOVED (Bill, LOCKED — BOSS-PLAN §1):** aggro 100% passive, tank regains by
   flow; valve = perfect-MAIN flow spike + aggro boon lane (LODESTONE/HARD STARE 💡);
   THREAT_DROP re-based as FLOW DUMP; TANK-PLAN §1c/§8.0 + WORLD-PLAN + ledger amended.
+- **THE KICK CONTRACT (Bill 2026-07-10 — BOSS-PLAN §1½, amends pillar #3):** EVERY class but
+  healers carries ONE kick, bolted on its dump (2/1/0 retired — 3 kickers per warband); warn =
+  the whole castbar, window = a small ABSOLUTE slice at cast end (~0.6 s `kick_window`, per-Seal
+  mult — Mistral wide, Mythos tight); the press is free, the timing is everything; **missing =
+  the raid's costliest single mistake** (Mistral biggest-blast → Gemini permanent EMPOWER
+  stacks → Mythos boss-HEAL). Counts stay modest; verses survivable-uncontested until the
+  class-side `interrupts` flag lands. WORLD-PLAN §PILLARS #3 + CLAUDE.md + ledger §A amended.
 - **Tuning spine (§2):** every pacing number on per-Seal `SealTune` (E4) + tune.sh flags + sim
   TTK/beat-budget/act-timeline gates — playtest-turnable without a playtest, nothing bakes.
 - **Density ramp (§3):** Seal I presents 1–2 raid answers (~3–5 beats), +1 type/beat per rung
@@ -828,6 +835,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-10 · main (docs only) · BOSS-PLAN §1½ (NEW) + §V#11 + WORLD-PLAN §PILLARS #3 +
+  CLAUDE.md pillar + ledger §A — **THE KICK CONTRACT (Bill's steer on the boss-rework recs;
+  board grows 10→11 verdicts).** His calls folded in: **every class but healers carries ONE
+  kick, bolted on the dump** (2/1/0 spread retired — 3 kickers/warband; Alchemist's kickless
+  gap closes when the flag lands) · **warn early, window small** — the castbar is the warning,
+  the kickable slice is absolute ~0.6 s at cast end (`kick_window` SealTune knob, per-Seal
+  mult: kindergarten wide → exam tight) · **the press is free** (early press = normal dump, no
+  penalty — the tax is having your dump armed) · **missing = the raid's costliest single
+  mistake** (ladder: Mistral biggest-blast → Gemini permanent EMPOWER stacks → Mythos
+  boss-HEAL) · counts modest (V 0 · M one 2-chain · G one 3-chain · MY CoT+Hotfix). E8 engine
+  addendum (kick-window slice + castbar lit-slice + verse sim table); note METER's parked
+  per-seat kick counter (entry below) — E8's verse table is the sim-side half. V#11 asks: does
+  the teacher Seal get one gentle chant back, or do kicks enter at Mistral (rec). *(boss-rework
+  session, pass 2)*
 
 - ☑ 2026-07-10 · `meter-l2` → main (`c502d36`→`88553af`) · §SYSTEMS/§GRAPHICS · **METER 🎯DISCIPLINE
   MODE — BUILT & MERGED (Bill: "continue").** The L2-tail follow-up to L1+AMPLIFY. A 6th

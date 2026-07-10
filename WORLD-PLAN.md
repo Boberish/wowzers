@@ -518,17 +518,25 @@ a designer soul on a Forge body — generator does the body, a human does the si
    - `AbilityRes` gains an `interrupts` flag (pure data). Landing a flagged ability while
      an INTERRUPTIBLE cast is inside its **KICK WINDOW** stops the cast (existing kick
      resolution path — silence/chain semantics unchanged).
-   - **The window is TIGHT** — start from the clean-zone idiom (last ~35% of the cast)
-     and tune down. The named risk is accidental kicks from normal rotation; the sims
-     measure it directly: add an **accidental-kick rate** diagnostic (kicks landed by a
+   - **The window is TIGHT** — ~~start from the clean-zone idiom (last ~35% of the cast)
+     and tune down~~ **⚠ AMENDED 2026-07-10 (Bill, `BOSS-PLAN §1½`): warn EARLY, window
+     SMALL-ABSOLUTE** — the castbar (whole cast, ~2–6 s) is the warning; the kickable slice
+     is a fixed ~**0.6 s** at cast END (`kick_window`, a SealTune knob + per-Seal mult).
+     Because the press is free (it's your dump), the window carries all the skill. The sims
+     measure it directly: an **accidental-kick rate** diagnostic (kicks landed by a
      policy that never aims) vs **deliberate-kick rate** (a policy that holds the ability
-     for the window). Tuning target: accidental <10%, deliberate >85% at good-tier.
+     for the window). Tuning target: accidental <10%, deliberate >85% at good-tier
+     (early presses fire as normal dumps, so accidental should measure ≈0).
    - **Carriers are the class's DUMP/payoff abilities** wherever possible — holding your
      spender to stop a cast costs you throughput: the **interrupt tax** is the decision.
-   - **Distribution is comp texture** (Bill): some classes carry 2 interrupt-capable
-     abilities, some 1, some 0 — "who covers the kicks" becomes a party-assembly question
-     (Commander included). Chain content (Seal verses) retunes against "the party must
-     hold dumps across a chain," which is a richer version of the old kick-rotation.
+   - ~~**Distribution is comp texture** (Bill): some classes carry 2 interrupt-capable
+     abilities, some 1, some 0~~ **⚠ AMENDED 2026-07-10 (Bill, `BOSS-PLAN §1½`): EVERY
+     class except healers carries ONE kick, bolted on its dump** — the standard warband
+     fields 3 kickers; healers never kick. Comp texture moves from *who carries* to *whose
+     dump is armed when the window lights*. Chain content (Seal verses) retunes against
+     "the party must hold dumps across a chain," which is a richer version of the old
+     kick-rotation — and **missing is the costliest single mistake in the raid**
+     (consequence ladder: `BOSS-PLAN §1½` — blasts → EMPOWER stacks → boss heals).
    - HUD: carrier runes glow while a kickable cast is up; the StrikeJudge already renders
      the clean-zone window — reuse it.
    - Rollout: lands class-by-class WITH the Framework-v2 reworks (Tempo first — pick
