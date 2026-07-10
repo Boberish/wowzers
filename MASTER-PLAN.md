@@ -1921,7 +1921,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
-- ☐ 2026-07-10 · docs on main + worktree `../wow-rhythm` (branch `tank-rhythm`) — **CLAIM: THE
+- ☑ 2026-07-10 · docs on main + worktree `../wow-rhythm` (branch `tank-rhythm`) — **DONE, MERGED `3096098`: THE
   TANK STREAM = THE RHYTHM (Bill's playtest verdict + design, `BOSS-PLAN §3½` NEW).** Bill
   playtested Duelist v1 in the descent fight 1 (forge swarm): ~4 invisible melee hits before the
   first telegraph (open_stagger 2.0s vs melee ~0.8s), dial empty ~70% of fight → "unplayable,
@@ -1934,7 +1934,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   on aggro-peel (victim-visible, longer wind-up, hidden from tank). Pilot = fight-1 swarm
   (+ its missing BIG parry bar + feint twin t≥2). Slices S1 engine (guarded, no-rhythm
   encounters byte-identical) · S2 swarm · S3 per-seat dial · S4 sims+feel. Ledger §F row added.
-  *(this session)*
+  **BUILT + MERGED `3096098`** — S1 engine (BossState rhythm_* · TuningConfig knobs · _tick_rhythm
+  gap-fill channel · observe() victim-only · DuelistPolicy reads the bar · CastDial tg_rhythm +
+  raid_hud dial feed) + S2 content (swarm rhythm 1.1s/22-30 + CARAPACE SNAP big parry bar +
+  CHITIN BLUFF feint t≥2 + DuelistContent fixtures) + S4 gates. GATES: guard proven byte-identical
+  pre-content (duelist dense/spike + raid riftmaw checksums = main) · forge_sim swarm 100/100/100 t1
+  → 100/100/95 t3, TTK gradient 27.7→41.7s t1 · duelist_sim deliberate re-baseline (expert sharp%
+  48→86 — the visible bar) · ui_smoke_raid ALL OK · ui_smoke_map ALL PASS · WSLg proof shots (bar
+  live at fight-open, >> DODGE << in-zone, telegraph layering). Fixture 0%-win state = the known
+  union baseline (SEAL REWORK owns that rebalance). NEXT: Bill feel pass on fight 1; then rhythm
+  textures per Seal (§3 row) ride SEAL-REWORK S2+. *(this session)*
 
 - ☑ 2026-07-09 · main (docs only) · NEW `GAME-LOOPS.md` + CLAUDE.md index line + 2 drift banners —
   **core game-loop AUDIT (Bill) — DONE.** Read all 23 plan docs; **`GAME-LOOPS.md`** is the
