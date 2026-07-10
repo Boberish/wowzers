@@ -135,6 +135,7 @@ func _tick_room(room: Dictionary, delta: float) -> void:
 		RaidNet.step(s, inputs)
 		if s.tick % CS_EVERY == 0:
 			frame["cs"] = str(s.checksum)   # string: 63-bit ints don't survive JSON floats
+			frame["ih"] = str(RaidNet.integrity(s))   # the wider net (seats + rng) — same cadence
 		_broadcast(room, frame)
 		if s.over:
 			_log("room %s fight over: %s at tick %d (cs %d)" % [

@@ -81,6 +81,24 @@ static func make_spec(seed: int, seat_cfg: Dictionary, enc: String = "riftmaw",
 		spec["pack"] = pack.duplicate()
 	return spec
 
+## NET-LAYER INTEGRITY HASH (audit 07-03 option b): the engine checksum only folds
+## boss HP + tick, so seat-side drift (HP/resource/absorb) or a diverged RNG stream
+## is invisible to the desync detector until it reaches boss HP. This is the WIDER
+## net — a pure read-only fold over the state the checksum misses, computed on the
+## same 30-tick cadence and shipped BESIDE `cs` (protocol v14). Deliberately NOT in
+## `state.checksum`: every sim baseline stays byte-identical (option a rebaselines
+## everything). Reads scalars only — no Dictionary iteration, no float formatting.
+static func integrity(s: CombatState) -> int:
+	var h := s.tick & 0x7FFFFFFFFFFFFFFF
+	h = (h * 1000003 + int(s.boss.hp * 100.0) + int(s.boss.add_hp * 100.0)) & 0x7FFFFFFFFFFFFFFF
+	for seat in s.seats:
+		h = (h * 1000003 + int(seat.hp * 100.0)) & 0x7FFFFFFFFFFFFFFF
+		h = (h * 1000003 + int(seat.hp_max * 100.0)) & 0x7FFFFFFFFFFFFFFF
+		h = (h * 1000003 + int(seat.resource * 100.0)) & 0x7FFFFFFFFFFFFFFF
+		h = (h * 1000003 + int(seat.absorb * 100.0)) & 0x7FFFFFFFFFFFFFFF
+	h = (h * 1000003 + s.rng.state_hash()) & 0x7FFFFFFFFFFFFFFF
+	return h
+
 ## Build the fight state from a spec — identically on every machine.
 ## `my_seat` only sets the view-side is_player flag (diag/event tagging; audited
 ## sim-neutral in raid mode) — pass "" on the server.

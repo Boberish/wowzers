@@ -44,6 +44,13 @@ func on_frame(f: Dictionary) -> bool:
 			state.tick, String(f["cs"]), state.checksum])
 		running = false
 		return false
+	# the wider integrity net (v14): seat HP/resource/absorb + the rng stream — catches
+	# drift the boss-HP checksum can't see until it compounds into boss damage
+	if f.has("ih") and not state.over and String(f["ih"]) != str(RaidNet.integrity(state)):
+		push_warning("[net] INTEGRITY DESYNC at tick %d: server ih %s != local %d" % [
+			state.tick, String(f["ih"]), RaidNet.integrity(state)])
+		running = false
+		return false
 	if state.over:
 		running = false
 		encounter_ended.emit(state.won)

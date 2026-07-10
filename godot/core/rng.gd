@@ -40,3 +40,8 @@ func next_float() -> float:
 ## Uniform float in [a, b).
 func next_range(a: float, b: float) -> float:
 	return a + next_float() * (b - a)
+
+## Read-only view of the stream position for integrity hashing (net-layer desync
+## detection). NEVER advances the stream — reading it cannot perturb determinism.
+func state_hash() -> int:
+	return _state
