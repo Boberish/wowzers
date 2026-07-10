@@ -23,6 +23,7 @@ const SIG_KEY := {"bulwark": "negate", "duelist": "counter", "twinfang": "perfec
 static func catalog(run) -> Variant:
 	match String(run.char_class):
 		"bulwark": return BulwarkBoons
+		"duelist": return DuelistBoons
 		"twinfang": return TwinfangBoons
 		"bloomweaver": return BloomweaverBoons
 		"alchemist": return AlchemistBoons

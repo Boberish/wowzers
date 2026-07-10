@@ -56,3 +56,36 @@ extends Resource
 #     The shared flow economy knobs (gain/slip/decay/spike/lock-floor) live on TuningConfig —
 #     they outlive any one tank class; only the pull's starting value is class-flavored here. ---
 @export var flow_start: float = 0.55       ## initial flow so the boss opens on the tank
+
+# --- THE DECK (creeds/modules/boons/rig — S5..S7). ALL guarded: an empty creed + no modules +
+#     no boons + no rig reproduce the base numbers, so the base build stays byte-identical. ---
+# EN GARDE (S6) — the signature CD
+@export var engarde_cd: float = 60.0       ## ~1-min cooldown
+@export var engarde_dur: float = 4.0       ## the challenge window
+@export var engarde_break_slips: int = 2   ## two slips break it early
+# MODULES (auto-fire off a gauge)
+@export var crucible_full: float = 900.0   ## damage TAKEN that IGNITES the Crucible
+@export var crucible_ignite_sec: float = 6.0
+@export var crucible_crash_sec: float = 4.0
+@export var whet_sharpen_sec: float = 4.0  ## a banked ◆ sharpens over this long
+@export var whet_sharp_mult: float = 1.5   ## a sharp pip hits ×this in a dump
+@export var scales_edge_max: float = 0.12  ## near-balance edge cap (±12%)
+@export var flow_dump_max: float = 0.50    ## FLOW module: dump +up to this at full flow
+# BOONS (first-cut; playtest tunes)
+@export var heavier_steel_mult: float = 1.30
+@export var feather_step_mult: float = 0.65
+@export var feather_step_floor: float = 0.5
+@export var deep_pockets_cap: int = 1
+@export var powder_keg_per: float = 0.30
+@export var all_in_mult: float = 1.40
+@export var lodestone_decay_mult: float = 0.60
+@export var hold_line_mult: float = 1.08
+@export var overreach_hp_cost: float = 0.07  ## fraction of max HP a winded parry costs in blood
+@export var overreach_floor: float = 0.10    ## never below this HP frac
+# TRANSFORMS (§10) — kit-local knobs
+@export var seize_max_hold: float = 1.2      ## Prise de Fer: max seize hold (s)
+@export var seize_throw_mult: float = 1.5    ## a full seize throws for ≈ counter ×this
+@export var remise_prime_frac: float = 0.34  ## Remise: the prime costs ~1/3 the parry
+@export var remise_leak_cut: float = 0.30    ## a primed-then-missed bar leaks this much less
+@export var fleche_load_sec: float = 2.5     ## Flèche: the load window
+@export var fleche_bonus: float = 0.25       ## a released flèche hits full dump +this

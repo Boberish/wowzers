@@ -817,6 +817,13 @@ func _inject_boons(seat: Seat) -> void:
 				wk.creed_id = _d.run.creed
 			wk.modules = _d.run.modules.duplicate()
 			wk.rig = _d.run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
+		elif seat.kit is DuelistKit:
+			var dk := seat.kit as DuelistKit
+			if _d.run.creed != "":
+				dk.creed_id = _d.run.creed
+			dk.rig = _d.run.rig.duplicate()      # TANK-PLAN §3/rig: the wired Combo rig
+			# (DuelistKit reads modules via the shared kit.boons/modules dicts + _m())
+			dk.modules = _d.run.modules.duplicate()
 
 ## Generate the current ring's map (RaidContent.FLOORS[_d.floor_i]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -1695,6 +1702,8 @@ func _fw() -> String:
 		return "alchemist"
 	if _seat_key == "healer" and _seat_cls_now() == "well":
 		return "well"
+	if _seat_key == "tank" and _seat_cls_now() == "duelist":
+		return "duelist"
 	return ""
 
 ## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
@@ -1703,6 +1712,8 @@ func _fw_creed_ids(fw: String) -> Array:
 		return AlchemistCreeds.v1_ids()
 	if fw == "well":
 		return WellCreeds.v1_ids(_aspect)      # per-spec pools (brim vs draw)
+	if fw == "duelist":
+		return DuelistCreeds.v1_ids()
 	return TwinfangCreeds.v1_ids()
 
 func _fw_creed(fw: String, id: String) -> Dictionary:
@@ -1710,6 +1721,8 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 		return AlchemistCreeds.get_creed(id)
 	if fw == "well":
 		return WellCreeds.get_creed(id)
+	if fw == "duelist":
+		return DuelistCreeds.get_creed(id)
 	return TwinfangCreeds.get_creed(id)
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
@@ -1717,6 +1730,8 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 func _fw_module_offer_ids(fw: String, creed: String) -> Array:
 	if fw == "well":
 		return WellModules.built_ids()         # no Well creed hides a module in v1
+	if fw == "duelist":
+		return DuelistModules.built_ids()
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -1732,6 +1747,8 @@ func _fw_module(fw: String, id: String) -> Dictionary:
 		return AlchemistModules.get_module(id)
 	if fw == "well":
 		return WellModules.get_module(id)
+	if fw == "duelist":
+		return DuelistModules.get_module(id)
 	return TwinfangModules.get_module(id)
 
 ## Rig data dispatch (both classes mirror the TwinfangRig static API).
@@ -1740,6 +1757,8 @@ func _fw_rig_when_table(fw: String) -> Dictionary:
 		return AlchemistRig.WHENS
 	if fw == "well":
 		return WellRig.WHENS
+	if fw == "duelist":
+		return DuelistRig.WHENS
 	return TwinfangRig.WHENS
 
 func _fw_rig_then_table(fw: String) -> Dictionary:
@@ -1747,6 +1766,8 @@ func _fw_rig_then_table(fw: String) -> Dictionary:
 		return AlchemistRig.THENS
 	if fw == "well":
 		return WellRig.THENS
+	if fw == "duelist":
+		return DuelistRig.THENS
 	return TwinfangRig.THENS
 
 func _fw_rig_describe(fw: String, w: String, t: String) -> String:
@@ -1754,6 +1775,8 @@ func _fw_rig_describe(fw: String, w: String, t: String) -> String:
 		return AlchemistRig.describe(w, t)
 	if fw == "well":
 		return WellRig.describe(w, t)
+	if fw == "duelist":
+		return DuelistRig.describe(w, t)
 	return TwinfangRig.describe(w, t)
 
 ## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
@@ -1766,6 +1789,8 @@ func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
 			if WellRig.when_spec(String(id)) == _aspect:
 				wp.append(id)
 		return {"whens": WellRig.offer(wp, rng, 3), "thens": WellRig.offer(WellRig.then_ids(), rng, 3)}
+	if fw == "duelist":
+		return {"whens": DuelistRig.offer(DuelistRig.base_when_ids(), rng, 3), "thens": DuelistRig.offer(DuelistRig.then_ids(), rng, 3)}
 	if fw != "alchemist":
 		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
 			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}

@@ -11,6 +11,7 @@ var gauge: DuelistGauge
 var parry_rune: AbilityRune
 var dodge_rune: AbilityRune
 var dump_rune: AbilityRune
+var engarde_rune: AbilityRune
 
 func build() -> void:
 	hp_orb = hud._orb(Palette.BLOOD, "HEALTH", false)
@@ -49,7 +50,16 @@ func build() -> void:
 	dump_rune.tooltip_text = "⚡ DUMP — spend the ◆ bank for a burst of pure damage."
 	dump_rune.pressed.connect(func(): hud._ctrl.human({"type": "ability", "id": "dump"}))
 	row.add_child(dump_rune)
-	hud._hint_line("SPACE — DODGE    ·    F — PARRY (perfect = counter + ◆)    ·    1 — ⚡ DUMP")
+	# ⏱ EN GARDE (the signature CD, S6) — the challenge: invite + wall + double flow
+	engarde_rune = AbilityRune.new()
+	engarde_rune.label = "En Garde"
+	engarde_rune.key_num = 2
+	engarde_rune.icon_id = "shockwave"
+	engarde_rune.accent = Palette.CRIMSON
+	engarde_rune.tooltip_text = "⏱ EN GARDE (~1-min CD) — plant your feet and CALL IT OUT: +25% melee tempo, leaks HALVED, clean answers pay DOUBLE flow, a perfect MAIN banks ◆◆. Two slips break it early. An amplifier — pays nothing if you don't answer."
+	engarde_rune.pressed.connect(func(): hud._ctrl.human({"type": "ability", "id": "engarde"}))
+	row.add_child(engarde_rune)
+	hud._hint_line("SPACE — DODGE    ·    F — PARRY (perfect = counter + ◆)    ·    1 — ⚡ DUMP    ·    2 — ⏱ EN GARDE")
 
 func render(_s: CombatState, p: Seat, obs: Dictionary) -> void:
 	hp_orb.set_values(p.hp, p.hp_max)
@@ -62,6 +72,13 @@ func render(_s: CombatState, p: Seat, obs: Dictionary) -> void:
 	gauge.queue_redraw()
 	dump_rune.affordable = int(obs.get("combo", 0)) > 0
 	dump_rune.usable = bool(obs.get("gcd_ready", true))
+	# EN GARDE cd rune (glows while live)
+	engarde_rune.usable = bool(obs.get("engarde_ready", false))
+	engarde_rune.affordable = not bool(obs.get("engarde_live", false))
+	var eg := int(p.cooldowns.get("engarde", 0))
+	engarde_rune.cd_frac = clampf(float(eg - _s.tick) / float(CombatCore.to_ticks(60.0, _s.config.fixed_hz)), 0.0, 1.0)
+	# THE DANCER: the parry button is gone — grey the parry rune (SPACE does it all)
+	parry_rune.usable = not bool(obs.get("no_parry", false))
 
 func key_pressed(code: int) -> void:
 	match code:
@@ -71,3 +88,5 @@ func key_pressed(code: int) -> void:
 			hud._ctrl.human({"type": "defense"})   # PARRY (main)
 		KEY_1:
 			hud._ctrl.human({"type": "ability", "id": "dump"})
+		KEY_2:
+			hud._ctrl.human({"type": "ability", "id": "engarde"})
