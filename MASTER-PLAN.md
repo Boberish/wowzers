@@ -832,6 +832,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW).** Bill's
+  go (2026-07-10): the 4-Seal boss redo begins — fill the DESCENT §4 timer contract (5/7/9/12 min)
+  with STRUCTURE (phases · adds · dialogue breaks), never +HP; update the Seals to the post-overhaul
+  systems (flow-aggro peels · one-dodge · interrupt-by-ability posture · PACK engine); **Bill's
+  aggro decision: TAUNT BUTTON REMOVED — aggro all-passive, tank regains by flow** (amends TANK-PLAN
+  §1c, ripples handled); a tuning spine so length/speed/density are knobs (no playtest yet);
+  mechanic-density ramp (Seal I teaches 1–2 answers, ladder ramps); per-Seal identity plans + a
+  steal-catalog from Hades II / StS2 / AtO (+ research/ reuse). Bill's addenda (mid-claim): tank
+  content designs against **DUELIST/WARDEN** (Bulwark ignored — dies with the Duelist base merge);
+  respect the **two-stream law** (invisible melee chip = the tank's own tempo · telegraphs = the
+  raid-wide authored beats); every mechanic must be **coherent in the game's visual grammar**
+  (bars/flurries/rigs — nothing unrepresentable). Docs: BOSS-PLAN.md (new) ·
+  §BOSSES · TANK-PLAN §1c amendment · BUILD-LEDGER row+collisions · CARD-CATALOG (aggro-boon idea
+  rows) · CLAUDE.md index. ⚠ build slices will touch `raid_content.gd` — `wow-descent-map` owns it
+  live (fight ladder bang); build starts only after that merge. *(boss-rework session)*
+
 - ☐ 2026-07-10 · worktree `../wow-tempo-art` (branch `tempo-art`, docs on main) · §GRAPHICS —
   **CLAIM: TWINFANG ART PASS v1.** Foundation review locked with Bill: painted layers on the
   existing `PoseRig2D` skeleton (native, $0, agent-authorable; **Spine Pro = per-actor upgrade
