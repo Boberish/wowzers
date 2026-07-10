@@ -13,6 +13,7 @@ var aspect: String = "tempo"           ## "tempo" | "venomancer" | "fermata"
 var cfg: TwinfangConfig
 var creed_id: String = "drumline"      ## TEMPO rework: the run's risk temperament (Tempo only)
 var rig: Dictionary = {}               ## TEMPO §5: the run's ONE Combo rig — {"when": id, "then": id}
+var transform: String = ""             ## D0 S4: the run's ONE ability transform (cadenza/rondo/tremolo); "" = none
 
 # TEMPO REWORK · GRADED WINDOW (§2c): one landing zone, four tiers by centredness.
 enum { G_MISS = 0, G_GOOD = 1, G_PERFECT = 2, G_BULL = 3 }
@@ -95,6 +96,10 @@ func _snap(s: CombatState, seat: Seat) -> void:
 # --- CREEDS (Tempo rework, TEMPO-PLAN §3): a slip's cost + Flow's reward value ---
 func _creed() -> Dictionary:
 	return TwinfangCreeds.get_creed(creed_id)
+
+## D0 S4 · the run's ability TRANSFORM (tempo-family only; "" = the vanilla ability path).
+func _transform() -> String:
+	return transform if _tempo_family() else ""
 
 func _creed_flow_value() -> float:
 	if not _tempo_family():
@@ -1215,6 +1220,17 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 				seat.vars["quickstep"] = mini(int(seat.vars.get("quickstep", 0)) + 1, cfg.quickstep_cap)
 			if _m("strop"):
 				seat.vars["keen"] = mini(int(seat.vars.get("keen", 0)) + 1, cfg.keen_cap)
+			# RONDO transform: during the RETURN, each Perfect+ re-strikes a slice of the stored Coup.
+			if _transform() == "rondo" and s.tick <= int(seat.vars.get("rondo_until", -1)):
+				var rfrac := (cfg.rondo_restrike_bull if bullseye else cfg.rondo_restrike) + (cfg.second_theme_bonus if _b("secondTheme") else 0.0)
+				var rhit := float(seat.vars.get("rondo_hit", 0.0)) * rfrac
+				if rhit > 0.0:
+					var rpaid := _deal(s, seat, roundf(rhit), false, false, "rondo")
+					var rtot := float(seat.vars.get("rondo_paid", 0.0)) + rpaid
+					seat.vars["rondo_paid"] = rtot
+					if rtot >= float(seat.vars.get("rondo_hit", 0.0)) * 0.5 and not bool(seat.vars.get("rondo_when_fired", false)):
+						seat.vars["rondo_when_fired"] = true
+						_rig_fire(s, seat, "returnWhen")
 			if _m("overdrive") and was_max and not fever:                     # OVERDRIVE: max-Flow Perfects fill the meter
 				var od2 := int(seat.vars.get("od_meter", 0)) + 1
 				if od2 >= cfg.overdrive_fill:
@@ -1367,6 +1383,8 @@ func _fermata_after_release(s: CombatState, seat: Seat, grade: int, bullseye: bo
 		_rig_fire(s, seat, "razor")
 
 func _eviscerate(s: CombatState, seat: Seat) -> bool:
+	if _transform() == "tremolo":
+		return _tremolo_press(s, seat)          # TREMOLO: Eviscerate becomes a graded 3-press string
 	var a: Dictionary = cfg.abilities["eviscerate"]
 	var cp := int(seat.vars.get("cp", 0))
 	# STACCATO FURY (boon): a crash-armed Eviscerate is FREE and hits harder.
@@ -1408,6 +1426,73 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 		CombatCore.emit_event(s, {"t": "phrase_mark", "player": seat.is_player})
 	_dump_landed(s, seat, "finisher")     # THE OPENING: read-reward if it hit the window
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
+	return true
+
+## D0 S4 · TREMOLO transform — Eviscerate is a STRING: up to tremolo_max_presses, each spending
+## cp_per combo, each graded on its own beat. All Perfect+ -> the final hit +tremolo_final_bonus.
+## The string is ONE finisher for boon math (Grand Pause / Heavy Ink snapshot the FIRST press).
+## Ends on the 3rd press, an empty hand (< cp_per combo), or a phrase timeout.
+func _tremolo_press(s: CombatState, seat: Seat) -> bool:
+	var a: Dictionary = cfg.abilities["eviscerate"]
+	var cp := int(seat.vars.get("cp", 0))
+	if cp < cfg.tremolo_cp_per:
+		return false                                # empty hand — nothing to press
+	var live := int(seat.vars.get("trem_presses", 0)) > 0 \
+		and int(seat.vars.get("trem_presses", 0)) < cfg.tremolo_max_presses \
+		and s.tick <= int(seat.vars.get("trem_until", -1))
+	var first := not live
+	if first:
+		seat.vars["trem_presses"] = 0
+		seat.vars["trem_all_perf"] = true
+		seat.vars["trem_all_bull"] = true
+	var cost := float(a["energy"]) if first else 0.0
+	if seat.resource < cost:
+		return false
+	seat.resource -= cost
+	# grade this press on the beat (Rolled Chord pads the ENTRY side — the widener law)
+	var since := s.tick - int(seat.vars.get("last_strike_tick", -100000))
+	var lo := _tt(s, _perfect_lo_sec(seat))
+	var hi := _tt(s, _perfect_hi_sec(seat))
+	if _b("rolledChord"):
+		lo -= int(round(float(hi - lo) * cfg.rolled_chord_pad))
+	var grade := _strike_grade(since, lo, hi)
+	if grade < G_PERFECT:
+		seat.vars["trem_all_perf"] = false
+	if grade < G_BULL:
+		seat.vars["trem_all_bull"] = false
+	var per := float(a["per_cp"]) + (8.0 if _b("eviPlus") else 0.0)
+	var base := per * float(cfg.tremolo_cp_per)
+	var gmul := 0.6
+	if grade == G_BULL:
+		gmul = cfg.bull_mult
+	elif grade == G_PERFECT:
+		gmul = 1.6
+	elif grade == G_GOOD:
+		gmul = cfg.good_mult
+	base *= gmul
+	# the FIRST press snapshots the finisher boon math (Grand Pause / Heavy Ink) for the whole string
+	if first:
+		var fm := 1.0
+		if _b("grandPause") and cp >= cfg.cp_max:
+			fm *= (1.0 + cfg.grand_pause_mult)
+		if _b("heavyInk"):
+			fm *= (1.0 + cfg.heavy_ink_per * float(seat.vars.get("heavy_ink", 0)))
+			seat.vars["heavy_ink"] = 0
+		seat.vars["trem_first_mult"] = fm
+	base *= float(seat.vars.get("trem_first_mult", 1.0))
+	_gain_cp(seat, -cfg.tremolo_cp_per)             # spend the combo
+	seat.vars["trem_presses"] = int(seat.vars.get("trem_presses", 0)) + 1
+	seat.vars["trem_until"] = s.tick + _tt(s, cfg.tremolo_phrase_sec)
+	seat.vars["last_strike_tick"] = s.tick          # each press sets the next press's beat
+	var is_final := int(seat.vars["trem_presses"]) >= cfg.tremolo_max_presses
+	if is_final and bool(seat.vars.get("trem_all_perf", true)):
+		base *= (1.0 + cfg.tremolo_final_bonus)      # all Perfect+ -> the final hit pays more
+		if _b("triplet") and bool(seat.vars.get("trem_all_bull", true)):
+			base *= (1.0 + cfg.triplet_bonus)        # TRIPLET door: an all-Bullseye string
+	_deal(s, seat, roundf(base), true, false, "finisher")
+	_dump_landed(s, seat, "finisher")               # THE OPENING: the press punishes the window
+	CombatCore.emit_event(s, {"t": "tremolo", "press": int(seat.vars["trem_presses"]),
+		"final": is_final, "player": seat.is_player})
 	return true
 
 func _kick(s: CombatState, seat: Seat) -> bool:
@@ -1485,13 +1570,26 @@ func _coup(s: CombatState, seat: Seat) -> bool:
 	var a: Dictionary = cfg.abilities["coupdegrace"]
 	if s.tick < int(seat.cooldowns.get("coupdegrace", 0)):
 		return false
-	if _flow(seat) < max_flow() or seat.resource < float(a["energy"]):
+	if _flow(seat) < (cfg.cadenza_min_flow if _transform() == "cadenza" else max_flow()) or seat.resource < float(a["energy"]):
 		return false
 	seat.resource -= float(a["energy"])
 	seat.cooldowns["coupdegrace"] = s.tick + _tt(s, float(a["cd"]))
+	var flow_spent := _flow(seat)
 	# Damage rides the Flow you spend (via _deal's flow_mult) — then Coup CONSUMES it.
-	_deal(s, seat, float(a["dmg"]) * (1.4 if _b("crescendo") else 1.0), true, false, "coup")
-	seat.vars["flow"] = clampi(cfg.coup_flow_seed + (cfg.da_capo_seed if _b("daCapo") else 0), 0, max_flow())   # DA CAPO: a higher seed — come back from the top
+	var coup_raw := float(a["dmg"]) * (1.4 if _b("crescendo") else 1.0)
+	if _transform() == "cadenza":                       # CADENZA: damage scales with the Flow spent (full = today's)
+		coup_raw *= float(flow_spent) / float(max_flow())
+		if _b("bravura") and flow_spent >= max_flow() and _in_opening(s, seat):
+			coup_raw *= (1.0 + cfg.bravura_bonus)        # BRAVURA door
+	var coup_dmg := _deal(s, seat, coup_raw, true, false, "coup")
+	if _transform() == "rondo":                         # RONDO: arm the RETURN — the crash valley becomes act two
+		seat.vars["rondo_hit"] = coup_dmg
+		seat.vars["rondo_until"] = s.tick + _tt(s, cfg.rondo_beats * cfg.perfect_end)
+		seat.vars["rondo_paid"] = 0.0
+	var seed := cfg.coup_flow_seed + (cfg.da_capo_seed if _b("daCapo") else 0)   # DA CAPO (Rondo door): a higher seed
+	if _transform() == "cadenza" and _b("dalSegno") and flow_spent >= cfg.dal_segno_flow:
+		seed += cfg.dal_segno_seed                       # DAL SEGNO door: a deep Cadenza seeds +1
+	seat.vars["flow"] = clampi(seed, 0, max_flow())
 	seat.vars["flow_decay_acc"] = 0
 	_gain_cp(seat, 3)                                    # refeeds combo → chain into Eviscerate
 	_dump_landed(s, seat, "coup")                       # THE OPENING (fires after the Flow reset)
@@ -1604,7 +1702,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"def_zone": cfg.dodge_zone,
 		"def_cd": cfg.dodge_cd,
 		"kick_ready": s.tick >= int(seat.cooldowns.get("kick", 0)),
-		"coup_ready": _tempo_family() and _flow(seat) >= max_flow() \
+		"coup_ready": _tempo_family() and _flow(seat) >= (cfg.cadenza_min_flow if _transform() == "cadenza" else max_flow()) \
 			and s.tick >= int(seat.cooldowns.get("coupdegrace", 0)),
 		"rupture_ready": aspect == "venomancer" and _venom_total(seat) >= 1 \
 			and s.tick >= int(seat.cooldowns.get("rupture", 0)),
@@ -1635,6 +1733,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 
 	# CREED + MODULES (Tempo rework) — for the HUD combo board / verdict pops / policy
 	out["creed"] = creed_id
+	if _transform() != "":                                       # D0 S4 · TRANSFORM state (view + policy)
+		out["transform"] = _transform()
+		out["rondo_active"] = _transform() == "rondo" and s.tick <= int(seat.vars.get("rondo_until", -1))
+		out["trem_presses"] = int(seat.vars.get("trem_presses", 0))
 	if seat.vars.has("res_counts"):                              # D0 S2 · RESONANCE (view: the build-panel chip)
 		out["resonance"] = seat.vars.get("res_counts", {})
 		out["res_wound"] = bool(seat.vars.get("res_wound", false))

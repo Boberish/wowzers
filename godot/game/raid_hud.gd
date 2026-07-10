@@ -805,6 +805,7 @@ func _inject_boons(seat: Seat) -> void:
 				tk.creed_id = _d.run.creed
 			tk.modules = _d.run.modules.duplicate()
 			tk.rig = _d.run.rig.duplicate()      # TEMPO §5: the wired Combo rig
+			tk.transform = _d.run.transform      # D0 S4: the wired ability transform
 		elif seat.kit is AlchemistKit:
 			var ak := seat.kit as AlchemistKit
 			if _d.run.creed != "":
@@ -850,7 +851,8 @@ func _advance_floor() -> void:
 	elif _d.floor_i == 1:
 		_show_module_pick(_build_floor)   # TEMPO: end of Floor 1 elevation → install a Module
 	elif _d.floor_i == 2:
-		_show_rig_wire(_build_floor)      # TEMPO §5: re-wire the Combo at end of Floor 2
+		# D0 S4: the Floor-2 ceremony — transform an ability (1-of-3), THEN re-wire the Combo.
+		_show_transform_pick(func(): _show_rig_wire(_build_floor))
 	else:
 		_build_floor()
 
@@ -1875,6 +1877,38 @@ var _rig_confirm: Button = null
 
 ## WIRE YOUR COMBO — pick 1 of 3 WHENs + 1 of 3 THENs; the readout shows the computed number
 ## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
+## D0 S4 · TRANSFORMS — the Floor-2 1-of-3 pick (≤1 per run, un-rerollable). Twinfang/blade only;
+## every other seat skips straight through (byte-identical no-op).
+func _show_transform_pick(done: Callable) -> void:
+	if _d.run == null or _fw() != "twinfang" or _d.run.transform != "":
+		done.call()
+		return
+	_screen = "transform"
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	UiKit.place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
+	_ui.add_child(head)
+	var hl := UiKit.title_in(head, "TRANSFORM AN ABILITY", 34, Palette.FLOW)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	UiKit.title_in(head, "R E W R I T E   O N E   A B I L I T Y ,   F O R E V E R  —  pick one", 15, Palette.TEXT_DIM)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -370, -175, 370, 200)
+	_ui.add_child(box)
+	for t in TwinfangBoons.TRANSFORMS:
+		var card := AspectCard.new(String(t.get("title", "")) + "  ·  " + String(t.get("kicker", "")),
+			String(t.get("desc", "")), Palette.FLOW, "coupdegrace")
+		card.chosen.connect(_pick_transform.bind(String(t.get("id", "")), done))
+		box.add_child(card)
+
+func _pick_transform(id: String, done: Callable) -> void:
+	if _d.run != null:
+		_d.run.transform = id
+	_toast_add("♪  Ability transformed — %s" % id.capitalize())
+	done.call()
+
 func _show_rig_wire(done: Callable) -> void:
 	var fw := _fw()
 	if _d.run == null or fw == "":
@@ -2395,7 +2429,7 @@ func _owned_boon_labels() -> Array:
 		return []
 	var pools: Array = []
 	match _seat_key:
-		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
+		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM, TwinfangBoons.TRANSFORM_DOORS]
 		"caster": pools = [AlchemistBoons.SHARED, AlchemistBoons.BREW]
 		"healer":
 			if _healer_cls == "bloomweaver":

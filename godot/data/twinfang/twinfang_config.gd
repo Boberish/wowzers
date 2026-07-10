@@ -270,6 +270,25 @@ extends Resource
 @export var res_edge_pad: float = 0.15      ## EDGE resonance: the window holds ~this much wider for a beat after a crit
 @export var res_edge_hold_sec: float = 0.6  ## EDGE resonance: how long the "doesn't tighten after a crit" hold lasts
 
+# --- D0 S4 · TRANSFORMS (≤1 per run, Floor-2 1-of-3; guarded no-ops when unpicked) ---
+# CADENZA (Coup): castable at Flow ≥ cadenza_min_flow, damage scales with Flow spent (full = today's).
+@export var cadenza_min_flow: int = 2       ## Cadenza: the minimum Flow to cash Coup (was max-only)
+@export var dal_segno_flow: int = 4         ## DAL SEGNO door: a Cadenza spending this many Flow seeds +1
+@export var dal_segno_seed: int = 1         ## DAL SEGNO door: the extra Flow seed
+@export var bravura_bonus: float = 0.25     ## BRAVURA door: a full-Flow Cadenza inside an Opening +this
+# RONDO (Coup): the post-Coup RETURN — for rondo_beats each Perfect+ re-strikes a fraction of the Coup.
+@export var rondo_beats: float = 4.0        ## RONDO: the RETURN lasts this many beats
+@export var rondo_restrike: float = 0.15    ## RONDO: a Perfect+ re-strikes this fraction of the stored Coup
+@export var rondo_restrike_bull: float = 0.25 ## RONDO: a Bullseye re-strikes this fraction
+@export var second_theme_bonus: float = 0.10  ## SECOND THEME door: the return fraction +this (a tier up)
+# TREMOLO (Evis): a STRING of up to N presses, each spending cp_per combo, graded per press.
+@export var tremolo_max_presses: int = 3    ## TREMOLO: presses per string
+@export var tremolo_cp_per: int = 2         ## TREMOLO: combo spent per press
+@export var tremolo_final_bonus: float = 0.40 ## TREMOLO: all-Perfect+ string → the final hit +this
+@export var tremolo_phrase_sec: float = 1.2 ## TREMOLO: a press must land within this of the last, or the string ends
+@export var triplet_bonus: float = 0.40     ## TRIPLET door: an all-Bullseye string pays the final hit +this MORE
+@export var rolled_chord_pad: float = 0.15  ## ROLLED CHORD door: the string's grade window pads ENTRY-side this much
+
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap

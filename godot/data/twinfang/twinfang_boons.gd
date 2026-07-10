@@ -100,6 +100,42 @@ const VENOM := [
 	{"id": "lingerVenom", "type": "relic", "rarity": "sonnet", "tags": ["rupture", "poison"], "title": "Lingering Venom", "desc": "Rupture becomes a SIP: a smaller detonation that keeps HALF your cocktail + Synergy warm. Sustain the brew instead of cratering it."},
 ]
 
+## D0 S4 · TRANSFORMS — the Floor-2 1-of-3 pick (≤1 per run). Each REWRITES an existing ability
+## (the Hades Daedalus-hammer steal at ability scale) and is never a new touch target. Taking one
+## gates its 2 sub-boons (below) into later offers. Kit reads `transform`; "" = the vanilla path.
+const TRANSFORMS := [
+	{"id": "cadenza", "ability": "coup", "title": "Cadenza", "kicker": "Coup, unlocked",
+		"desc": "Coup casts from Flow >= 2, consuming whatever you have; damage scales steeply with Flow spent (full-Flow = today's Coup). Cash small before a phase you fear, or ride to max.",
+		"doors": ["dalSegno", "bravura"]},
+	{"id": "rondo", "ability": "coup", "title": "The Rondo", "kicker": "Coup's second act",
+		"desc": "After your Coup, the next 4 beats are THE RETURN: each Perfect+ re-strikes 15% of it (a Bullseye 25%). The crash valley becomes the payoff's second act.",
+		"doors": ["secondTheme", "daCapo"]},
+	{"id": "tremolo", "ability": "eviscerate", "title": "Tremolo", "kicker": "Eviscerate, a string",
+		"desc": "Eviscerate becomes a STRING: up to 3 presses, each spending 2 combo, each graded on its own beat; land all three Perfect+ and the final hit pays +40%.",
+		"doors": ["triplet", "rolledChord"]},
+]
+
+## The 6 transform DOOR boons — offered ONLY while their transform is held (door-gated by the
+## raid draft). Kit hooks live in TwinfangKit (dalSegno/bravura/secondTheme/daCapo/triplet/rolledChord).
+const TRANSFORM_DOORS := [
+	{"id": "dalSegno", "type": "upgrade", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "door": "cadenza", "title": "Dal Segno", "desc": "A Cadenza spending 4+ Flow seeds +1 (absorbs Da Capo's job)."},
+	{"id": "bravura", "type": "relic", "rarity": "sonnet", "tags": ["coupdegrace", "opening", "greed"], "door": "cadenza", "title": "Bravura", "desc": "A full-Flow Cadenza inside an Opening +25%."},
+	{"id": "secondTheme", "type": "upgrade", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "door": "rondo", "title": "Second Theme", "desc": "The Rondo return re-strikes a tier harder (+10%)."},
+	{"id": "daCapo", "type": "relic", "rarity": "sonnet", "tags": ["coupdegrace", "flow"], "door": "rondo", "title": "Da Capo", "desc": "Coup leaves you +1 Flow seed - come back from the top, not from walking pace."},
+	{"id": "triplet", "type": "upgrade", "rarity": "sonnet", "tags": ["eviscerate", "bullseye", "greed"], "door": "tremolo", "title": "Triplet", "desc": "An all-Bullseye Tremolo string pays the final hit +40% more."},
+	{"id": "rolledChord", "type": "upgrade", "rarity": "haiku", "tags": ["eviscerate", "window"], "door": "tremolo", "title": "Rolled Chord", "desc": "Tremolo string windows pad ENTRY-side (the widener law)."},
+]
+
+## The door boons unlocked by a held transform (for the draft to fold into later offers). "" = none.
+static func doors_for(transform_id: String) -> Array:
+	var out: Array = []
+	if transform_id == "":
+		return out
+	for d in TRANSFORM_DOORS:
+		if String(d.get("door", "")) == transform_id:
+			out.append(d)
+	return out
+
 const SPELL_CAP := 5
 
 static func spec_pool(aspect: String) -> Array:
