@@ -328,6 +328,12 @@ func _fx_hint(fx: Dictionary) -> String:
 		bits.append("emergency patch")
 	if int(fx.get("tokens", 0)) != 0:
 		bits.append("%s⏣%d" % [("+" if int(fx["tokens"]) > 0 else "−"), abs(int(fx["tokens"]))])
+	if int(fx.get("charge", 0)) != 0:
+		bits.append("%s⏻%d" % [("+" if int(fx["charge"]) > 0 else "−"), abs(int(fx["charge"]))])
+	if int(fx.get("regenerate", 0)) != 0:
+		bits.append("+%d REGENERATE" % int(fx["regenerate"]))
+	if fx.has("curse"):        # §7 the printed BITE — the other half of a JAILBREAK deal
+		bits.append("CURSE: %s" % String((fx["curse"] as Dictionary).get("label", "a curse")))
 	if int(fx.get("entropy", 0)) != 0 or int(fx.get("refund_entropy", 0)) != 0:
 		var e := int(fx.get("entropy", 0)) + int(fx.get("refund_entropy", 0))
 		bits.append("%s⚡%d" % [("+" if e > 0 else "−"), abs(e)])

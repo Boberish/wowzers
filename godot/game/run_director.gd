@@ -32,6 +32,11 @@ var entropy: int = 0
 var flags: Dictionary = {}
 var marks: Dictionary = {}         ## a pending fight-altering mark (KILL SWITCH cash-out / curse)
 var charge: int = 0                ## ⏻ THE KILL SWITCH — a party-shared 0..100 meter
+# ---- THE JAILBREAK (§7): active curses (cap 2). Each = {kind, label, fights, mag}: kind ∈
+# economy_mint | economy_price | hp | timing; fights>0 = bounded (ticks down at its bite site).
+# NOT in cp_view — read directly on _d like tokens (offline-only this slice; online = no-op).
+var curses: Array = []
+var deprecate_uses: int = 0        ## DEPRECATE price escalates each use (§6)
 var check_fails: int = 0           ## consecutive check fails → comeback pity
 
 # ---- GEAR-1 (Curios): run-scoped loot; only Ledger UNLOCKS persist (GearStore)

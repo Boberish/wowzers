@@ -748,6 +748,8 @@ func _start_map_run() -> void:
 	_d.flags = {}
 	_d.marks = {}
 	_d.charge = 0
+	_d.curses = []          # THE JAILBREAK: a fresh run carries no bites (§7)
+	_d.deprecate_uses = 0
 	_d.check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _d.gear_unlocks directly.
@@ -885,6 +887,7 @@ func _show_map() -> void:
 	ms.charge = _d.charge
 	ms.tokens = _tokens_now()          # ⏣ meter (§9); offline = the real wallet
 	ms.wounds = _d.wounds              # per-seat corrupted sectors → header pips
+	ms.curses = _curse_pips()          # §7 JAILBREAK bites → header curse pips (cap 2)
 	# ⏻ one-shot teach: fire the first map after charge appears in this run
 	if _d.charge > 0 and not _charge_taught:
 		ms.charge_hint = true
@@ -965,10 +968,14 @@ func _resolve_node(n: Dictionary) -> void:
 		RunMap.KIND_EVENT:
 			_event_stop(n)
 		RunMap.KIND_COOLING:
-			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
-				[{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
-					"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}],
-				Palette.FLOW, _show_map)
+			# The campfire fork (§7): the second redundant curse exit — free purge if a bite is active.
+			var cool_choices: Array = [{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
+				"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}]
+			if not _d.curses.is_empty():
+				cool_choices.append({"label": "PURGE A CURSE  (vent one active JAILBREAK bite — free)",
+					"fx": {"purge_curse": true,
+						"result": "You route the corruption to /dev/null. The bite lifts."}})
+			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY, cool_choices, Palette.FLOW, _show_map)
 		RunMap.KIND_CACHE:
 			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
 				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)",
@@ -1172,6 +1179,7 @@ func _launch_map_fight(fi: int) -> void:
 			u.hp = u.hp_max
 			if u.role == "healer":    # the fuel gauge: mana carries between nodes (it bites now)
 				u.resource = roundf(u.resource_max * _d.mana)
+	_apply_curse_marks()        # §7: fold active HP/TIMING curse bites into the pending mark, tick them
 	_apply_next_fight_mark(s)   # the KILL SWITCH cash-out / a fight-curse weakens THIS boss, then clears
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -1269,6 +1277,13 @@ func _apply_map_fx(fx: Dictionary) -> void:
 	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
 	if int(fx.get("tokens", 0)) != 0:
 		_gain_tokens(int(fx["tokens"]))
+	# §6/§7: REGENERATE charges + curse add/purge also live off-cp (on the run / _d.curses)
+	if int(fx.get("regenerate", 0)) != 0 and _d.run != null:
+		_d.run.regenerate += int(fx["regenerate"])
+	if fx.has("curse"):
+		_add_curse(fx["curse"] as Dictionary)          # a JAILBREAK bite / event-curse leg
+	if bool(fx.get("purge_curse", false)) and not _d.curses.is_empty():
+		_d.curses.pop_front()                           # the Cooling purge fork (§7)
 
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 
@@ -1293,6 +1308,7 @@ func _mint_seats() -> void:
 	if _ctrl == null or _ctrl.state == null:
 		return
 	var st = _ctrl.state
+	var mult := _mint_curse_mult()        # §7 ECONOMY TAX — a curse halves this fight's mint
 	for key in RaidNet.SEAT_KEYS:
 		var i: int = SEAT_IDX[key]
 		if i >= st.seats.size():
@@ -1300,11 +1316,12 @@ func _mint_seats() -> void:
 		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
 		if run == null:
 			continue
-		var minted := Draft.mint_diag(st.seats[i].diag, st.config, run.char_class)
+		var minted := int(Draft.mint_diag(st.seats[i].diag, st.config, run.char_class) * mult)
 		if key == _seat_key:
 			_gain_tokens(minted)          # your seat — Hashgrinder ×2 lives here
 		else:
 			run.tokens += minted          # the AI raider banks its own clean play
+	_tick_economy_curses()                # one tick per fight for mint/price bites
 
 func _gain_tokens(n: int) -> void:
 	# CURIO Hashgrinder reframed (§6): no longer doubles income — it discounts the MARKET
@@ -1328,6 +1345,7 @@ const MARKET_CURIO_PRICE := {"haiku": 6, "sonnet": 8, "opus": 10}
 
 func _market_price(base: int) -> int:
 	var p := int(round(float(base) * (1.0 + 0.30 * float(_d.floor_i))))
+	p += _price_curse_surcharge()         # §7 ECONOMY TAX — a JAILBREAK price curse marks up the shop
 	if _d.gear.has("hashgrinder"):        # CURIO Hashgrinder reframed (§6): prices −1⏣ (floor 1)
 		p = maxi(1, p - 1)
 	return p
@@ -1388,6 +1406,12 @@ func _show_market(node_id: int, done: Callable, recovery_only: bool) -> void:
 	stock.append({"kind": "backup", "title": "+1 BACKUP",
 		"desc": "an extra attempt — arrives with the wipe budget", "price": _market_price(10),
 		"disabled": true, "disabled_text": "SOON"})
+	# §7 DEPRECATE — pay to have LESS: purge one active JAILBREAK curse. Price escalates each
+	# use. Only offered while a curse is active (the slice-3 deferred slot, now live).
+	if not _d.curses.is_empty():
+		stock.append({"kind": "deprecate", "title": "DEPRECATE",
+			"desc": "purge one active curse — %s" % String((_d.curses[0] as Dictionary).get("label", "a bite")),
+			"price": _market_price(5 + 5 * _d.deprecate_uses)})
 
 	var buy := func(i: int) -> bool: return _market_buy(stock, i)
 	var leave := func() -> void:
@@ -1421,6 +1445,12 @@ func _market_buy(stock: Array, i: int) -> bool:
 		"patch":
 			_apply_map_fx({"repair": true, "mana": 1.0})
 			_toast_add("🛒  PATCH — sectors repaired, reserves topped")
+		"deprecate":
+			if _d.curses.is_empty():
+				return false
+			var gone: Dictionary = _d.curses.pop_front()
+			_d.deprecate_uses += 1                # the NEXT DEPRECATE costs more
+			_toast_add("🛒  DEPRECATE — purged %s" % String(gone.get("label", "a curse")))
 		_:
 			return false
 	_d.run.tokens -= price
@@ -1452,6 +1482,74 @@ func _market_banter(key: String) -> String:
 		"caster": return "for science. and rerolls."
 		"healer": return "one for me, none for the printer on fire."
 	return "shopping."
+
+# ---------------------------------------------------------------- THE JAILBREAK — curses (§7)
+## Add an active curse (the JAILBREAK deals + event-curse legs route here). CAP 2; the HARD
+## RULE — no run-length TIMING curse — is enforced (a timing bite must be bounded). Returns
+## false when the cap is hit (the deal button greys; the player must DEPRECATE first).
+func _add_curse(c: Dictionary) -> bool:
+	if _d.curses.size() >= 2:
+		return false
+	if String(c.get("kind", "")) == "timing" and int(c.get("fights", 0)) <= 0:
+		return false                       # §7 HARD RULE: no run-long timing curse ever
+	_d.curses.append(c.duplicate(true))
+	return true
+
+## Header pips (§7): one printed line per active bite. The render already ships (slice 2,
+## map_screen curses row) — this just composes the strings.
+func _curse_pips() -> Array:
+	var out: Array = []
+	for c in _d.curses:
+		out.append(String((c as Dictionary).get("label", "a curse")))
+	return out
+
+## Is a mint-halving curse active? (bites _mint_seats)
+func _mint_curse_mult() -> float:
+	for c in _d.curses:
+		if String((c as Dictionary).get("kind", "")) == "economy_mint" and int((c as Dictionary).get("fights", 0)) > 0:
+			return 0.5
+	return 1.0
+
+## The market price surcharge from active price curses (bites _market_price).
+func _price_curse_surcharge() -> int:
+	var s := 0
+	for c in _d.curses:
+		if String((c as Dictionary).get("kind", "")) == "economy_price" and int((c as Dictionary).get("fights", 0)) > 0:
+			s += int((c as Dictionary).get("mag", 0))
+	return s
+
+## At each fight LAUNCH: fold active HP/TIMING curse bites into the pending fight mark
+## (RaidMarks delivers them), then decrement — they're "next N fights" bites, consumed at
+## the start of each fight. Two HP curses sum (RaidMarks caps). Byte-identical when none.
+func _apply_curse_marks() -> void:
+	for c in _d.curses:
+		var cd: Dictionary = c
+		if int(cd.get("fights", 0)) <= 0:
+			continue
+		match String(cd.get("kind", "")):
+			"hp":
+				_d.marks["seat_hp_cut"] = float(_d.marks.get("seat_hp_cut", 0.0)) + float(cd.get("mag", 0.0))
+				cd["fights"] = int(cd["fights"]) - 1
+			"timing":
+				_d.marks["window_tighten"] = float(_d.marks.get("window_tighten", 0.0)) + float(cd.get("mag", 0.0))
+				cd["fights"] = int(cd["fights"]) - 1
+	_expire_curses()
+
+## Post-mint: decrement the economy curses (mint/price) — one tick per fight — and expire.
+func _tick_economy_curses() -> void:
+	for c in _d.curses:
+		var cd: Dictionary = c
+		var k := String(cd.get("kind", ""))
+		if (k == "economy_mint" or k == "economy_price") and int(cd.get("fights", 0)) > 0:
+			cd["fights"] = int(cd["fights"]) - 1
+	_expire_curses()
+
+func _expire_curses() -> void:
+	var kept: Array = []
+	for c in _d.curses:
+		if int((c as Dictionary).get("fights", 0)) > 0:
+			kept.append(c)
+	_d.curses = kept
 
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 
