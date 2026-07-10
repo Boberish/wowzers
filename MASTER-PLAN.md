@@ -814,6 +814,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-rails` (branch `kit-hoists`) — **CLAIM: CLASSKIT HOISTS (REFIT
+  P4, byte-identical DRY).** `var boons`/`var modules` + `_b()`/`_m()`/`_tt()` are byte-identical
+  copies across all 5 kits → hoist to the `ClassKit` base, delete the 10+ duplicates (subclass
+  redeclaration is a parse error, so the deletes are mandatory with the hoist). NOT hoisted:
+  `_has_payloads()` — bodies differ per class (it's content, not plumbing); the TuningConfig
+  literals sweep SPLITS OUT to its own later claim (judgment-heavy, not mechanical). Gates:
+  ab-gate twinfang_sim byte-identical · full verify-all. *(rails session — ClassBand+Gauge base
+  remains the last big P4 item, needs a WSLg visual pass)*
+
 - ☑ 2026-07-10 · `class-registry` → main (`fcee675`) — **CLASS REGISTRY: BUILT & MERGED (REFIT
   P4 — `class_id → factory`; the seam that gates net spec-carry of arbitrary builds).** NEW
   `data/class_registry.gd`: ONE lazy-init table (zero load-order risk in the class cache) per
