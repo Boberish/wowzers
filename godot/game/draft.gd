@@ -60,9 +60,12 @@ static func offerable(run) -> Array:
 	var seen := {}
 	var out: Array = []
 	# D0 S4 · a held TRANSFORM gates its 2 sub-boons (doors) into later offers (Twinfang only).
+	# D0 S3 · an ARMED DUO (>=2 cards from each of its two themes) enters the offers too.
 	var pool: Array = cat.spec_pool(run.aspect) + cat.SHARED
-	if String(run.char_class) == "twinfang" and String(run.transform) != "":
-		pool += TwinfangBoons.doors_for(String(run.transform))
+	if String(run.char_class) == "twinfang":
+		if String(run.transform) != "":
+			pool += TwinfangBoons.doors_for(String(run.transform))
+		pool += TwinfangBoons.armed_duos(run)
 	for b in pool:
 		if seen.has(b["id"]):
 			continue
