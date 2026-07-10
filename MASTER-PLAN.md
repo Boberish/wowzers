@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 02:00 · main (docs only) — **CLAIM: SLATE MACHINE row 6 — Well·DRAW branch slate**
+  (fresh sweep → `research/draw-sweep.md` → release/rhythm themes, sibling-distinct vs Brim §9 →
+  3 skeptics → `MENDER-PLAN.md` new § 🟡). Docs only; no code, no CARD-CATALOG rows.
+  *(slate-machine session, tick 01:57)*
+
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §9 (NEW) + `research/brim-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 5: Well·BRIM branch slate — DONE, four themes AT BILL'S
   VERDICT** (filing table homes every verdicted creed/module/sketch, zero orphans). **THE LOW
