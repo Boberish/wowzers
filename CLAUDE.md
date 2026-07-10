@@ -51,9 +51,16 @@ Tempo-§14-style pass + the 15-min loop protocol; restart via the `slate-loop` s
 `MENDER-PLAN.md` (direct-cast healer rework — the Well + BRIM/DRAW twin specs, pair locked 2026-07-07) ·
 `BLOOM-PLAN.md` (the Bloomweaver v2 — garden-healer class slate, 4 core candidates 🟡 at verdict 2026-07-10) ·
 `TANK-PLAN.md` (tank rework — the Duelist/Warden two-kit core + the Duelist deck, 2026-07-08) ·
+`BOSS-PLAN.md` (**THE SEAL REWORK — the 4-boss redo v1**: fill the DESCENT §4 timer contract
+5/7/9/12 with structure never +HP · **TAUNT BUTTON REMOVED, aggro all-passive flow** · SealTune
+tuning spine · answer-density ramp · per-Seal scripts THE AXE/THE EXPERTS/THE TWINS/THE THREE
+ACTS · steal catalog; supersedes SEAL-PILLAR-PLAN; 🟡 at Bill's 10-verdict board §V, 2026-07-10) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
-curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (Seal pillar pass) ·
-`FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `REFIT-PLAN.md` (structural audit v2 →
+curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (superseded by
+BOSS-PLAN 2026-07-10; Phase A absorbed) ·
+`FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `TEMPO-D0-BRIEF.md` (**the D0 build brief**
+— governor/law-reworks/deck-data/resonance/duos/transforms slices + gates, 2026-07-10) ·
+`REFIT-PLAN.md` (structural audit v2 →
 the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
 loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·
 `SIM-PLAN.md` (the balance ladder — two-speed sims: quick gate + weekly SOAK/digest; S1–S5

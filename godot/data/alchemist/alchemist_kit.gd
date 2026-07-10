@@ -864,3 +864,28 @@ func _cask_observe(s: CombatState, seat: Seat) -> Dictionary:
 		"def_zone": cfg.dodge_zone,
 		"def_cd": cfg.dodge_cd,
 	}
+
+## STATS PAGE v2 — the Brew's spec rows for the FULL REPORT: pour quality, ruptures cashed,
+## and (Cask aspect) tap timing. Read-only from seat.diag; empty rows self-skip.
+func recap_spec(_s: CombatState, seat: Seat) -> Array:
+	var d: Dictionary = seat.diag
+	var rows: Array = []
+	var ptot := 0
+	for k in ["pour_potent", "pour_hot", "pour_ok", "pour_fizzle", "pour_spoiled"]:
+		ptot += int(d.get(k, 0))
+	if ptot > 0:
+		var clean := int(d.get("pour_potent", 0)) + int(d.get("pour_hot", 0))
+		rows.append({"label": "Pours", "value": "%d%% strong" % int(round(100.0 * float(clean) / float(ptot))),
+			"hint": "%d potent · %d hot · %d fizzle · %d spoiled" % [int(d.get("pour_potent", 0)),
+				int(d.get("pour_hot", 0)), int(d.get("pour_fizzle", 0)), int(d.get("pour_spoiled", 0))]})
+	if int(d.get("ruptures", 0)) > 0:
+		rows.append({"label": "Ruptures", "value": str(int(d.get("ruptures", 0))),
+			"hint": "peak potency %d" % int(d.get("rupture_peak", 0))})
+	if int(d.get("ferments", 0)) > 0:
+		rows.append({"label": "Ferments", "value": str(int(d.get("ferments", 0))), "hint": "auto-detonations"})
+	var ct := int(d.get("cask_tap_peak", 0)) + int(d.get("cask_tap_early", 0)) + int(d.get("cask_tap_sour", 0))
+	if ct > 0:
+		rows.append({"label": "Cask taps", "value": "%d%% peak" % int(round(100.0 * float(int(d.get("cask_tap_peak", 0))) / float(ct))),
+			"hint": "%d peak · %d early · %d sour" % [int(d.get("cask_tap_peak", 0)),
+				int(d.get("cask_tap_early", 0)), int(d.get("cask_tap_sour", 0))]})
+	return rows

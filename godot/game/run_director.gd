@@ -25,11 +25,10 @@ var ticket_total := 0              ## tickets placed on this floor (for the spri
 var closed := 0                    ## tickets closed this floor
 var toast := ""                    ## a one-shot ticket pop, shown on the next map screen
 
-# ---- The Inference Check meta (Topology deep events): ⚡ within-run luck, 📁 across-run
-# luck (loaded at descent start), cross-node ripple flags. Inert (0/{}) until an event
-# carries the matching fx.
+# ---- The Inference Check meta (Topology deep events): ⚡ within-run luck +
+# cross-node ripple flags. Inert (0/{}) until an event carries the matching fx.
+# (V#8: the across-run 📁 Prior died — nothing follows you into a fresh run.)
 var entropy: int = 0
-var prior: int = 0
 var flags: Dictionary = {}
 var marks: Dictionary = {}         ## a pending fight-altering mark (KILL SWITCH cash-out / curse)
 var charge: int = 0                ## ⏻ THE KILL SWITCH — a party-shared 0..100 meter
@@ -60,7 +59,7 @@ var drop_pity := 0                 ## opus dry-streak counter (purses add ticks)
 ## natively — the rulebook can't tell the sides apart, by design.)
 func cp_view() -> Dictionary:
 	return {"fracs": fracs, "wounds": wounds, "mana": mana,
-		"entropy": entropy, "prior": prior, "inv": inv, "flags": flags,
+		"entropy": entropy, "inv": inv, "flags": flags,
 		"marks": marks, "charge": charge,
 		"tickets": tickets, "closed": closed, "total": ticket_total,
 		"toast": toast}
@@ -68,7 +67,6 @@ func cp_view() -> Dictionary:
 func cp_sync(cp: Dictionary) -> void:
 	mana = float(cp["mana"])
 	entropy = int(cp["entropy"])
-	prior = int(cp["prior"])
 	charge = int(cp["charge"])
 	closed = int(cp["closed"])
 	toast = String(cp["toast"])

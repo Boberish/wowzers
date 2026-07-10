@@ -66,6 +66,20 @@ var diag: Dictionary = {}
 ## checksum. The HUD meter window and end-screen recap read it; sims may print it.
 var meter: Dictionary = {}
 
+## Per-boon impact accounting (STATS PAGE v2): seats[] index -> {boon_id: {total, n}}.
+## Credits the marginal contribution of a boon to a hit (inline multipliers via a delta
+## captured in the kit; raid-wide amplifiers — Glint/Sunder/Debilitate — credited once in
+## damage_boss at the vuln fold). Overlapping stacked amps make each marginal a shade
+## generous, so the recap prints these as "≈". Diag-family: engine-written, deterministic
+## per seed, NEVER checksummed. -1 keys the whole-raid amp pool (window credited to no seat).
+var boon_meter: Dictionary = {}
+
+## 1 Hz time-series for the damage-over-time graph (STATS PAGE v2). One flat row per
+## sample tick: [tick, boss_hp_pct, dmg0,dmg1,dmg2,dmg3, taken0,taken1,taken2,taken3]
+## (cumulative dmg_total / taken_total per seat). Diag-family, deterministic, NEVER
+## checksummed. Sampled in CombatCore.update; the stats page differentiates for rates.
+var series: Array = []
+
 func time() -> float:
 	return float(tick) * dt
 

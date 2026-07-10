@@ -43,6 +43,11 @@ var debilitate: float = 0.0
 ## (Sticky Note, "answer every curse" oaths). Write-only otherwise; never checksummed.
 var last_curse_tick: int = -999999
 
+## STATS PAGE v2: seats[] index the boss's melee last landed on (raid aggro accounting) —
+## lets the aggro-pull detector fire an event only when the victim CHANGES, not per swing.
+## Write-only; never checksummed. -1 = no melee has landed yet.
+var last_melee_victim_i: int = -1
+
 ## PACK: the tick this member took the field. 0 = fight start (every classic fight —
 ## the default keeps all single-fight math byte-identical). Drives the walk-in grace
 ## (no actions until entered_tick + config.pack_walkin_ticks) and the per-member

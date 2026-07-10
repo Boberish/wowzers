@@ -29,19 +29,19 @@ const NUDGE_PER := 8             ## +% per ⚡ fed pre-commit …
 const NUDGE_MAX := 3            ## … up to this many points
 const MULLIGAN_COST := 2        ## ⚡ per post-fail reroll (attempt+1 → a new deterministic die)
 const MULLIGAN_MAX := 3         ## most rerolls a single check allows
-const PRIOR_FLOOR_DIV := 20      ## prior/this = the floor % …
-const PRIOR_FLOOR_CAP := 10     ## … capped
+const START_ENTROPY := 2        ## ⚡ every descent opens with — V#8: NOTHING carries across
+                                ## runs (the old 📁 Prior file is deleted; fresh stays fresh)
 
 # ---------------------------------------------------------------- context
 ## A pure bag of resolved ingredients. `boon_tags`/`gear_tags` are Arrays of tag-arrays
 ## (one entry per owned boon / equipped curio) — so a boon is counted ONCE even if it
 ## carries two of a check's tags, and SELF checks can read the largest single-tag cluster.
 static func build_ctx(boon_tags: Array, gear_tags: Array, aspect: String, role: String,
-		party_frac: float, prior: int, entropy: int, check_fails: int,
+		party_frac: float, entropy: int, check_fails: int,
 		inv: Dictionary, flags: Dictionary, tokens: int) -> Dictionary:
 	return {
 		"boon_tags": boon_tags, "gear_tags": gear_tags, "aspect": aspect, "role": role,
-		"party_frac": party_frac, "prior": prior, "entropy": entropy,
+		"party_frac": party_frac, "entropy": entropy,
 		"check_fails": check_fails, "inv": inv, "flags": flags, "tokens": tokens,
 	}
 
@@ -139,10 +139,6 @@ static func chance(chk: Dictionary, ctx: Dictionary, nudge: int = 0) -> Dictiona
 		if it2 != 0:
 			parts.append(["desperation", it2]); p += it2
 
-	var pf := clampi(int(ctx.get("prior", 0)) / PRIOR_FLOOR_DIV, 0, PRIOR_FLOOR_CAP)
-	if pf > 0:
-		parts.append(["your prior", pf]); p += pf
-
 	var pity := mini(PITY_CAP, int(ctx.get("check_fails", 0)) * PITY_PER)
 	if pity > 0:
 		parts.append(["comeback", pity]); p += pity
@@ -181,8 +177,6 @@ static func gate_ok(gate: Dictionary, ctx: Dictionary) -> bool:
 		return String(ctx.get("role", "")) == String(gate["role"])
 	if gate.has("entropy"):
 		return int(ctx.get("entropy", 0)) >= int(gate["entropy"])
-	if gate.has("prior"):
-		return int(ctx.get("prior", 0)) >= int(gate["prior"])
 	if gate.has("flag"):
 		return bool((ctx.get("flags", {}) as Dictionary).has(String(gate["flag"])))
 	if gate.has("tokens"):
@@ -202,8 +196,6 @@ static func gate_reason(gate: Dictionary) -> String:
 		return "Requires the %s at the terminal" % String(gate["role"])
 	if gate.has("entropy"):
 		return "Requires ⚡%d" % int(gate["entropy"])
-	if gate.has("prior"):
-		return "Requires PRIOR ≥ %d" % int(gate["prior"])
 	if gate.has("flag"):
 		return "Requires an earlier choice"
 	if gate.has("tokens"):

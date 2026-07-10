@@ -10,7 +10,7 @@ func _initialize() -> void:
 	var fails := 0
 	# The acting seat's server-side build ctx (a caster with interrupt/counter boons).
 	var ctx := MapCheck.build_ctx([["interrupt"], ["interrupt"], ["counter"]], [],
-		"disruptor", "caster", 0.8, 20, 4, 1, {}, {}, 0)
+		"disruptor", "caster", 0.8, 4, 1, {}, {}, 0)
 	var checked := 0
 	var matched := 0
 	for eid in ["helpdesk", "prompt_injection", "model_graveyard"]:
@@ -50,8 +50,8 @@ func _initialize() -> void:
 									int(res["p"]), str(res["success"])])
 	print("online check contract: %d/%d client==server  (%d check choices swept)" % [matched, checked, checked])
 	# a gated choice: server rejection == client greying (same gate_ok), both ways
-	var no_key := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, 0, {}, {}, 0)
-	var have := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, 0, {"api_key": true}, {}, 0)
+	var no_key := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, {}, {}, 0)
+	var have := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, {"api_key": true}, {}, 0)
 	var badge: Dictionary = (MapContent.event("prompt_injection")["choices"] as Array)[0]
 	var gate_ok := not MapCheck.gate_ok(badge["gate"], no_key) and MapCheck.gate_ok(badge["gate"], have)
 	print("gate: server rejects locked / accepts unlocked (== client grey): %s" % ("PASS" if gate_ok else "FAIL"))
@@ -93,10 +93,10 @@ func _initialize() -> void:
 	# ---- SEAT-PICKER (v7): each seat's build reads the SAME check differently; the die is
 	# seat-INDEPENDENT; and the leader's local resolve for the CHOSEN seat == the server's.
 	var seat_ctx := {
-		"tank": MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.8, 0, 4, 0, {}, {}, 0),
-		"caster": MapCheck.build_ctx([["interrupt"], ["interrupt"]], [], "disruptor", "caster", 0.8, 0, 4, 0, {}, {}, 0),
-		"blade": MapCheck.build_ctx([], [], "tempo", "blade", 0.8, 0, 4, 0, {}, {}, 0),
-		"healer": MapCheck.build_ctx([], [], "tidecaller", "healer", 0.8, 0, 4, 0, {}, {}, 0),
+		"tank": MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.8, 4, 0, {}, {}, 0),
+		"caster": MapCheck.build_ctx([["interrupt"], ["interrupt"]], [], "disruptor", "caster", 0.8, 4, 0, {}, {}, 0),
+		"blade": MapCheck.build_ctx([], [], "tempo", "blade", 0.8, 4, 0, {}, {}, 0),
+		"healer": MapCheck.build_ctx([], [], "tidecaller", "healer", 0.8, 4, 0, {}, {}, 0),
 	}
 	var hackc: Dictionary = (MapContent.event("helpdesk")["choices"] as Array)[1]   # HACK: interrupt, role caster
 	var chk2: Dictionary = hackc["check"]

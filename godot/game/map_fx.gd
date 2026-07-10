@@ -5,7 +5,7 @@
 ## now, so a new fx key lands everywhere at once.
 ##
 ## `cp` is a "campaign-view" Dictionary — a bag of live references the caller owns:
-##   {fracs:[f×N], wounds:[f×N], mana:f, entropy:i, tokens:i, prior:i,
+##   {fracs:[f×N], wounds:[f×N], mana:f, entropy:i, tokens:i,
 ##    inv:{}, flags:{}}
 ## Only `fracs` is required; every other key is optional and its fx branch simply
 ## no-ops when absent (so the solo hp_frac path, the sim's {fracs,wounds,mana} carry,
@@ -18,8 +18,9 @@
 ## patch/draft) this reproduces their exact arithmetic and clamps. Order differs from
 ## the sim copy but every op is independent (fracs / mana / wounds / lowest-frac), and
 ## `patch` always reads fracs AFTER heal/hurt in all four, so results are identical.
-## The new keys (wound/tokens/entropy/prior/key/shard/flag) are inert unless an event
+## The new keys (wound/tokens/entropy/key/shard/flag) are inert unless an event
 ## actually carries them — so every existing event/ticket/cooling reward is unchanged.
+## (The `prior` key died with V#8 — the cross-run luck file is deleted.)
 class_name MapFx
 extends RefCounted
 
@@ -72,9 +73,6 @@ static func apply(cp: Dictionary, fx: Dictionary) -> void:
 	var d_ent := int(fx.get("entropy", 0)) + int(fx.get("refund_entropy", 0))
 	if d_ent != 0 and cp.has("entropy"):
 		cp["entropy"] = maxi(0, int(cp.get("entropy", 0)) + d_ent)
-	var d_pri := int(fx.get("prior", 0))
-	if d_pri != 0 and cp.has("prior"):
-		cp["prior"] = maxi(0, int(cp.get("prior", 0)) + d_pri)
 	# ⏻ THE KILL SWITCH — a signed charge delta (feed +, drain −), clamped 0..100.
 	# `charge_set` forces an absolute value (e.g. the arming panel after a spend).
 	var d_ch := int(fx.get("charge", 0))

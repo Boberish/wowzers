@@ -1841,6 +1841,51 @@ Opus-rarity drafts? · ④ the v4 branches: SWIFT → generics + EASE, THE EDGE 
 Strop new)? · ⑤ carried from §17.10, still open: resonance/duo · the kick carriers (Evis
 standard + Coup premium). Catalog flips land this commit; ledger rows amended.
 
+### 17.12 PASS 3 — Bill's artifact notes folded + THE BUILD BRIEF ⚒ (2026-07-10)
+
+**Verdicts (his exported notes, 14:59):** SPEED GOVERNOR **✅** ("good") · RESONANCE **✅**
+("yeah, no set bonus") · THE DUO **✅ + a mandate** ("yes we need this, make this rich and
+nice" — the rich slate landed in CARD-CATALOG, 4 duos 🟡) · the Pickup's cut CONFIRMED ("meh
+too much speed stuff") · Grand Pause = a CLARITY fail ("what is exactly? you cant have more?
+so just full?" — yes: it's just a FULL-combo (5/5) Evis bonus; you can't hold more than max,
+Overkill's over-cap bank is a separate pot. Reworded everywhere; the "EXACTLY max" phrasing
+dies) · and he asked for **the implementation plan** — *"idk like to get this into code and
+test it. when your done with the plan to implement, let me know and ill start it."*
+
+**⚖ THE NO-SINGLE-NEXT-HIT LAW (new — from his Sforzando + Count-In notes):** *"the flow is
+super fast… a 'single next hit' not feasible, would have to be a next x seconds or next x hits"*
+· *"one note buffs are insignificant, needs to be a xtime or x notes."* Generalized: **on
+Tempo's tap pace, no rider may key to THE SINGLE NEXT strike/window/note** — too fast to
+perceive or use; riders must cover a **duration (~seconds) or a count (X strikes)**. Next-DUMP
+riders are exempt (dumps are chosen moments — Staccato Fury, Overcharge stay). Fermata's hold
+grammar is exempt (draws are deliberate). **Built-card sweep:** `fencersLine` VIOLATES
+(one-shot next-window) → rework *"a Bullseye widens your windows for the next 3 strikes"*
+(ladder unchanged, F19 taper stands; flagged REWORK 🟡, ships in brief slice S5) ·
+`killingEdge`'s no-crit fallback "flat next-strike bonus" → "next 3 strikes" · the parked
+Count-In's text amended (a call covers the next 4 beats, never one note). Everything else in
+the pool already reads duration/count/state.
+
+**THE DUO SLATE (rich, per the mandate — system ✅, cards 🟡 in CARD-CATALOG):**
+- **System:** a duo enters later offers only while ARMED — **≥2 drafted cards from EACH of its
+  two themes** (lighter than resonance's 3-of-one, so duos reward MIXING while resonance rewards
+  depth — the two pulls stay opposed, the Hades Legendary-vs-Duo tension on our grammar). Opus
+  slot, two-tone frame, no run cap (prereqs + rarity gate it). Duos are boons with kit hooks —
+  never a second rig circuit.
+- **BLOOD CODA** (Wound × Finish) — an Evis cashing 4+ live bleeds at full combo pays both
+  bonuses ×1.15/1.25/1.4; the burst paints the phrase-mark red.
+- **THE RED EDGE** (Wound × Edge) — every CRIT pulses ALL live bleeds for one immediate extra
+  tick. Crit-fish while the pot is fat — expiry pressure vs crit timing, two clocks in tension.
+- **GRAND FINALE** (Edge × Finish) — a full-combo finisher with your crit build hot is a
+  GUARANTEED crit at +50% crit damage; the screen holds a half-beat on the number.
+- **THE REPRISE** (Rondo-transform × Wound) — during the Return phrase, each re-strike also
+  re-opens one expired bleed (the song reopens the wounds). Transforms join the duo grammar.
+
+**⚒ THE BUILD BRIEF IS ON MAIN: `TEMPO-D0-BRIEF.md`** — slices S0 governor → S5 law-reworks →
+S1 deck data → S2 resonance → S3 duos → S4 transforms (→ S6 Set Piece, deferrable), each with
+files, knobs, gates, and the verification matrix. **Pressing locks before the gated slices
+(§0 there):** ① the v4 branches (his own proposal — unblocks S1–S3 fully) · ② the trim table ·
+③ the transform trio + Floor-2 acquisition. S0 + S5 are approved and buildable immediately.
+
 ---
 
 ## 18. THE FERMATA DECK v6 — the assembly (v5 built + two kits) 🔨/🟡 (2026-07-10, Phase-2 D8 — the deck queue's LAST row)

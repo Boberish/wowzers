@@ -46,10 +46,10 @@ func _bg() -> void:
 func _build_panel() -> void:
 	# four seat builds; the caster carries the interrupt kit (best on a HACK check)
 	var ctxs := {
-		"tank": MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.85, 20, 4, 0, {}, {}, 0),
-		"blade": MapCheck.build_ctx([["rage"]], [], "tempo", "blade", 0.85, 20, 4, 0, {}, {}, 0),
-		"caster": MapCheck.build_ctx([["interrupt"], ["interrupt"], ["counter"]], [], "disruptor", "caster", 0.85, 20, 4, 0, {}, {}, 0),
-		"healer": MapCheck.build_ctx([], [], "tidecaller", "healer", 0.85, 20, 4, 0, {}, {}, 0),
+		"tank": MapCheck.build_ctx([["guard"], ["guard"]], [], "warden", "tank", 0.85, 4, 0, {}, {}, 0),
+		"blade": MapCheck.build_ctx([["rage"]], [], "tempo", "blade", 0.85, 4, 0, {}, {}, 0),
+		"caster": MapCheck.build_ctx([["interrupt"], ["interrupt"], ["counter"]], [], "disruptor", "caster", 0.85, 4, 0, {}, {}, 0),
+		"healer": MapCheck.build_ctx([], [], "tidecaller", "healer", 0.85, 4, 0, {}, {}, 0),
 	}
 	var seats := ["tank", "blade", "caster", "healer"]
 	var ev := MapContent.event("helpdesk")

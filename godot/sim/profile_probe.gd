@@ -1,6 +1,6 @@
 ## Probe for the Profile save aggregate (REFIT P4 save unification): headless
 ## disk-inertness + fixed root, the run-seed stream's closed form, facade round-trips
-## (GearStore / LuckProfile / WellBinds), canonical serialization, the version gate,
+## (GearStore / WellBinds), canonical serialization, the version gate,
 ## and roster copy-isolation.
 ##   godot --headless --path godot --script res://sim/profile_probe.gd
 extends SceneTree
@@ -28,8 +28,6 @@ func _initialize() -> void:
 	GearStore.save_unlocks({"riftmaw": ["visor", "coil"]})
 	var unlocks := GearStore.load_unlocks()
 	_chk(fails, "gear round-trip", Array(unlocks.get("riftmaw", [])) == ["visor", "coil"])
-	LuckProfile.save_prior(999)   # over the cap — the facade owns the clamp
-	_chk(fails, "prior clamped", LuckProfile.load_prior() == LuckProfile.PRIOR_CAP)
 	WellBinds.save_binds({"left": "mend", "bogus_chord": "flash"})
 	var wb := WellBinds.load_binds()
 	_chk(fails, "binds override kept", String(wb["left"]) == "mend")
@@ -43,14 +41,15 @@ func _initialize() -> void:
 	_chk(fails, "canonical round-trip", p2.canonical() == blob)
 	_chk(fails, "roster survives", String((p2.roster()["healer"] as Dictionary)["cls"]) == "well")
 
-	# [5] version gate: a wrong-version blob loads as a FRESH profile
-	var old := Profile.from_json('{"version":0,"prior":55}')
-	_chk(fails, "version gate", old.prior() == 0)
+	# [5] version gate: a wrong-version blob loads as a FRESH profile (prior died w/ V#8 —
+	# the gate now proves itself on the gear domain)
+	var old := Profile.from_json('{"version":0,"gear":{"riftmaw":["visor"]}}')
+	_chk(fails, "version gate", old.gear_unlocks().is_empty())
 
 	# [6] corruption tolerance: right version, wrong domain shapes → fresh defaults
-	var corrupt := Profile.from_json('{"version":1,"gear":"not-a-dict","prior":7,"runs":[1,2]}')
+	var corrupt := Profile.from_json('{"version":1,"gear":"not-a-dict","binds":{"well":{"left":"mend"}},"runs":[1,2]}')
 	_chk(fails, "corrupt domain dropped", corrupt.gear_unlocks().is_empty())
-	_chk(fails, "good domain kept", corrupt.prior() == 7)
+	_chk(fails, "good domain kept", String((corrupt.binds("well") as Dictionary).get("left", "")) == "mend")
 	_chk(fails, "corrupt runs healed", corrupt.next_run_seed() >= 0)
 
 	# [7] copy isolation: mutating a returned domain never writes through

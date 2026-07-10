@@ -31,7 +31,6 @@ var hp_frac: float = 1.0          ## persistent integrity across map nodes (figh
 
 # ---- The Inference Check meta (Topology deep events; all inert on a linear run) ----
 var entropy: int = 0              ## ⚡ within-run luck pool spent to bias a roll
-var prior: int = 0               ## 📁 across-run luck (loaded once at descent start)
 var flags: Dictionary = {}        ## cross-node ripple marks ({"covered_shift": true, …})
 var check_fails: int = 0          ## consecutive failed checks → comeback pity (resets on a pass)
 

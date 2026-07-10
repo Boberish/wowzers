@@ -730,14 +730,13 @@ func _start_map_run() -> void:
 	_d.fracs = [1.0, 1.0, 1.0, 1.0]
 	_d.wounds = [0.0, 0.0, 0.0, 0.0]
 	_d.mana = 1.0
-	# The Inference Check meta resets for a fresh descent. ⚡ Entropy seeds from 📁 Prior
-	# (the veteran's warm welcome); Prior itself loads once from the permanent file
-	# (headless stays disk-inert — smokes/sims start from a clean file).
-	_d.prior = _my_prior()
-	_d.entropy = LuckProfile.starting_entropy(_d.prior)
+	# The Inference Check meta resets for a fresh descent. V#8 (DESCENT-PLAN): the
+	# cross-run Prior file is DELETED — nothing follows you into a fresh run; every
+	# descent opens on the same baseline ⚡.
+	_d.entropy = MapCheck.START_ENTROPY
 	_d.flags = {}
 	_d.marks = {}
-	_d.charge = clampi(_d.prior / 25, 0, 4)   # a veteran's file pre-warms the switch a little
+	_d.charge = 0
 	_d.check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _d.gear_unlocks directly.
@@ -824,17 +823,16 @@ func _inject_boons(seat: Seat) -> void:
 func _build_floor() -> void:
 	var fl: Dictionary = RaidContent.FLOORS[_d.floor_i]
 	_d.fights = RaidContent.floor_fights(int(fl["ring"]))
-	# the ROOT floor gates its Seal behind credential shards (MAP-3c); TICKETS are the
-	# quests (MAP-2). (GATE exams died in THE PURGE 2026-07-10.)
-	# THE DESCENT REFIT: floors run `rows` deep (8 = 20 nodes) — quest/story quotas stay
-	# authored (4 events, tickets per FLOORS), the extra mid slots pad to COMBAT filler;
-	# +1 cooling/+1 cache keep the breather + ⏻ economy proportional to the longer floor.
+	# THE DESCENT REBUILD (DESCENT-PLAN §2/§5): the floor's WHOLE non-combat bag lives
+	# on its FLOORS row (`quota` → RunMap quota_override; combat pads the rest) — one
+	# source of truth for HUD + server + sims. The ROOT floor gates its Seal behind
+	# credential shards; TICKETS are the quests.
 	# floor topology derives from the descent seed (REFIT P4 reproducible runs);
 	# +1 so floor 0 never collapses the fold to the bare run_seed.
 	_d.map = RunMap.generate(int((_d.run_seed * 1000003 + (_d.floor_i + 1) * 7919 + 1) & 0x7FFFFFFF),
 		_d.fights.size(), MapContent.raid_event_ids(),
-		{RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
-		int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
+		{}, int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)),
+		fl.get("quota", {}), String(fl.get("minigame", "")))
 	_d.node = -1
 	_d.inv = {}
 	_d.tickets = {}
@@ -872,7 +870,6 @@ func _show_map() -> void:
 	ms.gear_line = _gear_line()
 	ms.entropy = _d.entropy
 	ms.charge = _d.charge
-	ms.prior = _d.prior
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
@@ -930,9 +927,13 @@ func _enter_node(id: int) -> void:
 		return
 	_resolve_node(n)
 
+## THE DESCENT REBUILD: nodes resolve through RunMap.effective_kind — a WILD reveals
+## its rolled payload; unbuilt interiors (market/jailbreak/minigame) fall back to the
+## honest existing kind until their slice flips the flag. ELITE rides the combat path
+## (its promotion lands in the packroll, its bounty in the win path).
 func _resolve_node(n: Dictionary) -> void:
-	match String(n["kind"]):
-		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
+	match RunMap.effective_kind(n):
+		RunMap.KIND_COMBAT, RunMap.KIND_SEAL, RunMap.KIND_ELITE:
 			# GEAR-2: the boss's Ledger page offers its oaths before the pull
 			var fi := int(n["fight"])
 			var enc: EncounterRes = _d.fights[clampi(fi, 0, _d.fights.size() - 1)]
@@ -1056,24 +1057,7 @@ func _map_ctx() -> Dictionary:
 	for gid in _d.gear:
 		gear_tags.append(GearCatalog.item(String(gid)).get("tags", []))
 	return MapCheck.build_ctx(boon_tags, gear_tags, aspect, _seat_key,
-		_avg_frac(_d.fracs), _d.prior, _d.entropy, _d.check_fails, _d.inv, _d.flags, _tokens_now())
-
-## Persist 📁 Prior at a DESCENT end (win or wipe): the run's earned prior (already in
-## _d.prior from mercy/event grants) plus leftover ⚡ Entropy (÷2) plus a clear bonus, banked
-## to the permanent file. "Better luck next time." Headless stays disk-inert. Returns the
-## amount gained THIS descent (leftover-⚡ + clear bonus) for the end-screen line.
-func _bank_prior(won: bool) -> int:
-	var gained := int(_d.entropy / 2) + (4 if won else 0)
-	_d.prior = clampi(_d.prior + gained, 0, LuckProfile.PRIOR_CAP)
-	if DisplayServer.get_name() != "headless":
-		LuckProfile.save_prior(_d.prior)
-	return gained
-
-## This client's 📁 Prior tier (headless/sims stay disk-inert). Sent to the server at
-## seat-claim (v10) so co-op checks read the veteran's warm welcome — the server can't
-## read a client's user:// file, so it trusts this.
-func _my_prior() -> int:
-	return LuckProfile.load_prior() if DisplayServer.get_name() != "headless" else 0
+		_avg_frac(_d.fracs), _d.entropy, _d.check_fails, _d.inv, _d.flags, _tokens_now())
 
 ## PACK QUOTAS v2 (WORLD-PLAN shape-assignment rule: "Topology floors roll shapes from
 ## the run seed inside authored quotas"). MID skirmish nodes only — the entry body and
@@ -1086,11 +1070,12 @@ func _my_prior() -> int:
 ## own specs (packs land there with the server pass).
 const PACK_FILLER_BODIES := ["swarm", "swarm", "stalker"]   ## swarm-weighted walk-ins
 
-## One rolled walk-in: a light Forge body at the ring's tier, seed drawn from the
-## node's own stream (variety across nodes, identical on replay).
+## One rolled walk-in: a light Forge body at the FLOOR's tier (FLOORS "tier" —
+## F1 teaches on t1, F4 holds root with t3), seed drawn from the node's own stream
+## (variety across nodes, identical on replay).
 func _pack_filler(rng: DetRng) -> String:
 	var body := String(PACK_FILLER_BODIES[rng.next_u32() % PACK_FILLER_BODIES.size()])
-	var tier := clampi(4 - int(RaidContent.FLOORS[_d.floor_i]["ring"]), 1, 3)   # ring 3→t1 · 2→t2 · 0→t3
+	var tier := clampi(int(RaidContent.FLOORS[_d.floor_i].get("tier", 1)), 1, 3)
 	return "forge:takeover:%s:%d:%d" % [body, tier, 900 + int(rng.next_u32() % 64)]
 
 func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
@@ -1099,11 +1084,21 @@ func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
 	if fi <= 0 or fi >= _d.fights.size() - 1:
 		return []                        # entry + Seal: authored, never rolled
 	var rng := DetRng.new((_d.map.seed ^ (0x9A7B * (_d.node + 7))) & 0x7FFFFFFF)
+	# THE DESCENT REBUILD (§5): an ELITE node is a guaranteed REINFORCED trio — the
+	# mutator is printed on the door; entry/Seal stay authored, never rolled.
+	# (bounds-guarded: the packroll probe samples synthetic node ids past the map)
+	if _d.node >= 0 and _d.node < _d.map.nodes.size() \
+			and String(_d.map.node(_d.node).get("kind", "")) == RunMap.KIND_ELITE:
+		return [_pack_filler(rng), _pack_filler(rng), String(enc.id)]
+	# THE FIGHT LADDER (DESCENT-PLAN §3): pack size scales with the floor via the
+	# FLOORS "packroll" thresholds — F1 mostly solos, F4 mostly trios; a normal
+	# fight grows because MORE happens, never because the same body gets spongier.
+	var pr: Array = RaidContent.FLOORS[_d.floor_i].get("packroll", [0.30, 0.75])
 	var r := rng.next_float()
-	if r < 0.30:
+	if r < float(pr[0]):
 		return []                        # a classic solo pull
 	var pack: Array = [_pack_filler(rng)]
-	if r >= 0.75:
+	if r >= float(pr[1]):
 		pack.append(_pack_filler(rng))
 	pack.append(String(enc.id))          # smalls → captain (the node's own body)
 	return pack
@@ -1365,7 +1360,9 @@ func _resolve_oath(s: CombatState, seat: Seat, won: bool) -> void:
 	_d.sworn = {}
 
 ## ARMORY cadence: what a repeat skirmish kill pays instead of a drop roll, by ring.
-const SALVAGE_TOKENS := {3: 1, 2: 2, 0: 3}
+const SALVAGE_TOKENS := {3: 1, 2: 2, 1: 2, 0: 3}
+## THE DESCENT REBUILD (§5): the elite's fat-⏣ bounty, by ring (F1 fields no elites).
+const ELITE_TOKENS := {2: 4, 1: 5, 0: 6}
 
 ## Roll the kill's drop (map mode only), run the ceremony, then continue the run.
 ## Rolls draw from _d.drop_rng only — the combat stream never notices loot.
@@ -2014,7 +2011,6 @@ func _show_floor_cleared() -> void:
 ## The last Seal (CLAUDE MYTHOS at Ring 0) is down — Realm 1, "The Takeover," is over.
 func _show_campaign_cleared() -> void:
 	_screen = "end"
-	var prior_gain := _bank_prior(true)   # bank BEFORE clearing the run
 	_d.map = null
 	_clear()
 	var center := CenterContainer.new()
@@ -2028,8 +2024,6 @@ func _show_campaign_cleared() -> void:
 	banner.add_theme_font_override("font", UiKit.title(900))
 	UiKit.title_in(box, "Ring 0 is yours. CLAUDE MYTHOS is unplugged. THE TAKEOVER ends — Realm 1 cleared.", 17, Palette.TEXT)
 	UiKit.title_in(box, String((RaidContent.QUIPS.get("mythos", {}) as Dictionary).get("win", "")), 13, Palette.TEXT_DIM)
-	UiKit.title_in(box, "📁 TRAINING SIGNAL RECORDED — your prior is now %d (+%d). Welcome back, valued user." % [_d.prior, prior_gain],
-		13, Palette.VOID)
 	var again := Button.new()
 	again.text = "BACK TO THE RIFT"
 	again.custom_minimum_size = Vector2(260, 48)
@@ -3170,25 +3164,35 @@ func _on_end(won: bool) -> void:
 		if not won:
 			_show_end(false)
 			return
-		# THE KILL SWITCH: scavenge ⏻ from a cleared SKIRMISH (not the Seal — you cash out there)
-		if String(_d.map.node(_d.node)["kind"]) == RunMap.KIND_COMBAT:
+		# THE DESCENT REBUILD: the node's EFFECTIVE kind drives the win ceremonies
+		# (a WILD that revealed a fight pays like the fight it was).
+		var ek := RunMap.effective_kind(_d.map.node(_d.node))
+		# THE KILL SWITCH: scavenge ⏻ from a cleared trash pull (not the Seal — you cash out there)
+		if ek == RunMap.KIND_COMBAT or ek == RunMap.KIND_ELITE:
 			var scp := _d.cp_view()
 			CampaignCore.skirmish_scavenge(scp)
 			_d.cp_sync(scp)
+		# ELITE bounty (DESCENT §5): fat ⏣ on top of the curio-roll drop event below.
+		# (The keystone 1-of-2 slot is reserved here — lands with the per-class deck
+		# slices; no class ships a granter-ready keystone pool yet.)
+		if ek == RunMap.KIND_ELITE:
+			var bounty := int(ELITE_TOKENS.get(int(RaidContent.FLOORS[_d.floor_i]["ring"]), 4))
+			_gain_tokens(bounty)
+			_toast_add("☠  ELITE DOWN — bounty claimed (+%d⏣)" % bounty)
 		# GEAR-1: the kill's drop ceremony runs first, then the run continues wherever
 		# it was headed (map / elevation / campaign clear).
 		var after: Callable = _show_map
-		if String(_d.map.node(_d.node)["kind"]) == RunMap.KIND_SEAL:
+		if ek == RunMap.KIND_SEAL:
 			# a floor Seal fell: elevate to the next ring, or clear the realm on the last
 			after = _show_campaign_cleared if _d.floor_i >= RaidContent.FLOORS.size() - 1 \
 				else _show_floor_cleared
 		# THE RECKONING first — the raid ranked by damage + the fight's biggest hit —
 		# THEN gear drop, THEN the boon REFORGE (1-of-3), THEN continue (map/elevate/clear).
-		# ARMORY: only a Seal kill is a drop EVENT here — skirmish repeats pay salvage
-		var seal_kill: bool = String(_d.map.node(_d.node)["kind"]) == RunMap.KIND_SEAL
+		# ARMORY: a Seal kill OR an elite is a drop EVENT here — skirmish repeats pay salvage
+		var drop_event: bool = ek == RunMap.KIND_SEAL or ek == RunMap.KIND_ELITE
 		var enc_id := String(_ctrl.state.encounter.id)
 		_show_fight_recap(func(): _after_drop(enc_id,
-			func(): _show_boon_draft(after), seal_kill))
+			func(): _show_boon_draft(after), drop_event))
 		return
 	_show_end(won)
 
@@ -3237,6 +3241,7 @@ func _show_fight_recap(done: Callable) -> void:
 	cont.text = "CONTINUE ▸"
 	cont.pressed.connect(func(): done.call())
 	box.add_child(cont)
+	_report_button(box, func(): _show_fight_recap(done))
 	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
 	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
 	UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
@@ -3265,11 +3270,8 @@ func _show_end(won: bool) -> void:
 		UiKit.title_in(box, "Wipe — %s. Re-form and pull again." % cause.replace("_", " "), 16, Palette.TEXT)
 		if quips.has("lose"):
 			UiKit.title_in(box, String(quips["lose"]), 13, Palette.TEXT_DIM)
-	# A Topology descent that WIPED still banks 📁 Prior (leftover ⚡ converts) — the
-	# facility trains on every run. (A map win banks via _show_campaign_cleared instead.)
-	if _d.map != null and not _online:
-		var pg := _bank_prior(false)
-		UiKit.title_in(box, "📁 TRAINING SIGNAL RECORDED — prior %d (+%d). The facility remembers." % [_d.prior, pg], 13, Palette.VOID)
+	# V#8 (DESCENT-PLAN): the cross-run Prior bank is deleted — a wipe carries nothing
+	# out, and the next descent opens fresh. Nothing follows you into a fresh run.
 	# THE RECKONING — the fight's recap plaque (state survives into this screen)
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
@@ -3287,6 +3289,40 @@ func _show_end(won: bool) -> void:
 		again.text = "PULL AGAIN"
 		again.pressed.connect(func(): _show_select(_seat_key))
 	box.add_child(again)
+	_report_button(box, func(): _show_end(won))
+
+## STATS PAGE v2 — the "◆ FULL REPORT" affordance on every end screen, and the page it opens.
+## `back` re-shows the screen it was pressed from. Guarded null-state (smoke-built end screens).
+func _report_button(box: Node, back: Callable) -> void:
+	if _ctrl == null or _ctrl.state == null:
+		return
+	var rep := Button.new()
+	rep.custom_minimum_size = Vector2(220, 34)
+	rep.add_theme_font_size_override("font_size", 14)
+	rep.text = "◆ FULL REPORT"
+	rep.pressed.connect(func(): _show_stats_page(back))
+	box.add_child(rep)
+
+func _show_stats_page(back: Callable) -> void:
+	if _ctrl == null or _ctrl.state == null:
+		back.call()
+		return
+	_screen = "report"
+	_clear()
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_ui.add_child(scroll)
+	var page := StatsPage.new(_ctrl, _recap_stats)
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(page)
+	var backb := Button.new()
+	backb.custom_minimum_size = Vector2(150, 38)
+	backb.add_theme_font_size_override("font_size", 15)
+	backb.text = "‹ BACK"
+	backb.pressed.connect(func(): back.call())
+	UiKit.place(backb, 0, 0, 0, 0, 20, 16, 170, 54)
+	_ui.add_child(backb)
 
 
 

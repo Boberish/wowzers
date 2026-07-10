@@ -328,35 +328,54 @@ func _rig_fire(s: CombatState, seat: Seat, when_id: String) -> void:
 func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool,
 		kind := "strike") -> float:
 	var d := raw
+	# STATS PAGE v2 — [boon_id, factor] for each inline multiplier that fired, credited to
+	# the per-boon impact bucket once the hit lands (d unchanged — pure side-accounting).
+	var bf: Array = []
 	if flow_scaled:
 		d *= _flow_mult(seat)
 		if _b("tightrope") and _flow(seat) >= max_flow():     # TIGHTROPE: +dmg riding max Flow
-			d *= (1.0 + cfg.tightrope_mult)
+			var f_tr := 1.0 + cfg.tightrope_mult
+			d *= f_tr
+			bf.append([&"tightrope", f_tr])
 		var od := int(seat.vars.get("overdrive", 0))          # DOUBLE TIME: overdrive damage
 		if od > 0:
-			d *= (1.0 + float(od) * cfg.doubletime_dmg)
+			var f_od := 1.0 + float(od) * cfg.doubletime_dmg
+			d *= f_od
+			bf.append([&"overdrive", f_od])
 	# THE BRINK (Fermata boon): a nerve-streak meter multiplies ALL your outgoing damage -
 	# the fermata Through-Line, keyed to how deep you keep riding (a snap zeroes it in _snap).
 	if _fermata() and _b("theBrink"):
-		d *= (1.0 + cfg.brink_per * float(seat.vars.get("brink", 0)))
+		var f_br := 1.0 + cfg.brink_per * float(seat.vars.get("brink", 0))
+		d *= f_br
+		bf.append([&"theBrink", f_br])
 	# COMBO RIG (§5) — Expose: the boss takes +% from ALL your damage for a beat.
 	if int(seat.vars.get("rig_expose_until", 0)) >= s.tick:
-		d *= (1.0 + float(seat.vars.get("rig_expose_amt", 0)) / 100.0)
+		var f_ex := 1.0 + float(seat.vars.get("rig_expose_amt", 0)) / 100.0
+		d *= f_ex
+		bf.append([&"rig_expose", f_ex])
 	# COMBO RIG (§5) — Overcharge: your NEXT dump hits harder (consumed by the first dump).
 	if _is_dump(kind):
 		var emp := int(seat.vars.get("rig_empower", 0))
 		if emp > 0:
-			d *= (1.0 + float(emp) / 100.0)
+			var f_emp := 1.0 + float(emp) / 100.0
+			d *= f_emp
+			bf.append([&"rig_empower", f_emp])
 			seat.vars["rig_empower"] = 0
 	# FINISH IT (boon): the execute now lives on the SPENDER — Eviscerate only, below 35%.
 	if _b("execute") and kind == "finisher" and s.boss.hp_max > 0.0 and s.boss.hp / s.boss.hp_max < 0.35:
-		d *= (1.0 + cfg.execute_mult)
+		var f_exe := 1.0 + cfg.execute_mult
+		d *= f_exe
+		bf.append([&"execute", f_exe])
 	if crit:
 		d *= 2.0
 		if _b("serrated"):                                    # SERRATED FATE: crits deal more
-			d *= (1.0 + cfg.serrated_bonus)
+			var f_se := 1.0 + cfg.serrated_bonus
+			d *= f_se
+			bf.append([&"serrated", f_se])
 		if _b("assassinsNote") and _in_opening(s, seat):      # ASSASSIN'S NOTE: crits in the Opening bite harder
-			d *= (1.0 + cfg.assassin_open_mult)
+			var f_an := 1.0 + cfg.assassin_open_mult
+			d *= f_an
+			bf.append([&"assassinsNote", f_an])
 	# THE OPENING: a dump landed in the boss's vulnerability window hits harder (graded
 	# by how centred on the sweet spot). Strikes/perfects are NOT dumps — they keep their
 	# own rhythm. All hits of a multi-hit dump (Flurry) share the same window.
@@ -364,24 +383,35 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 		var ob := _opening_bonus(s, seat)
 		if ob > 0.0:
 			d *= (1.0 + ob)
+			bf.append([&"opening", 1.0 + ob])
 		# TUTTI creed (Fermata) / ON THE BEAT (Tempo boon): a dump reads the live rhythm window —
 		# a sharp/centred dump takes the grade multiplier, an off-window one is a shade weaker.
 		var db := _dump_beat_bonus(s, seat)
 		if db != 0.0:
 			d *= (1.0 + db)
+			if db > 0.0:
+				bf.append([&"onTheBeat", 1.0 + db])
 	# STRIKE-lane boons on the basic tap (not dumps): Press the Advantage rewards a Strike landed
 	# inside the Opening; Cold Open rewards a Strike while Flow is low (a post-crash rebuild bet).
 	if kind == "perfect" or kind == "strike":
 		if _b("pressAdvantage") and _in_opening(s, seat):
-			d *= (1.0 + cfg.press_advantage_mult)
+			var f_pa := 1.0 + cfg.press_advantage_mult
+			d *= f_pa
+			bf.append([&"pressAdvantage", f_pa])
 		if _b("coldOpen") and _flow(seat) <= cfg.cold_open_flow_max:
-			d *= (1.0 + cfg.cold_open_mult)
+			var f_co := 1.0 + cfg.cold_open_mult
+			d *= f_co
+			bf.append([&"coldOpen", f_co])
 		if _b("throughline"):                                 # THROUGH-LINE: consecutive Perfects escalate the tap
-			d *= (1.0 + cfg.throughline_per * float(seat.vars.get("tl_stacks", 0)))
+			var f_tl := 1.0 + cfg.throughline_per * float(seat.vars.get("tl_stacks", 0))
+			d *= f_tl
+			bf.append([&"throughline", f_tl])
 	d = roundf(d)
 	s.boss.hp = maxf(0.0, s.boss.hp - d)
 	if d > 0.0:
 		CombatCore.meter_dmg(s, seat, StringName(kind), d, crit)
+		if not bf.is_empty():                                 # STATS PAGE v2 — per-boon impact
+			CombatCore.credit_boon_factors(s, seat, d, bf)
 		# `seat` lets the RAID HUD tell your hits from an ally's (damage_boss already
 		# carries seat); solo ignores it. View-only — never checksummed.
 		CombatCore.emit_event(s, {"t": "boss_hit", "amt": int(d), "crit": crit, "kind": kind, "seat": seat})
@@ -1446,3 +1476,23 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 			out["dance_fill"] = cfg.shadowdance_fill
 			out["dance_active"] = bool(seat.vars.get("dance_armed", false))
 	return out
+
+## STATS PAGE v2 — Twinfang's spec rows for the FULL REPORT: how sharp the tempo ran and
+## how the Openings were used. Read-only from seat.diag; empty rows self-skip.
+func recap_spec(_s: CombatState, seat: Seat) -> Array:
+	var d: Dictionary = seat.diag
+	var rows: Array = []
+	var sharp := int(d.get("s_bull", 0)) + int(d.get("s_perfect", 0))
+	var s_all := sharp + int(d.get("s_good", 0)) + int(d.get("s_miss", 0))
+	if s_all > 0:
+		rows.append({"label": "Strike windows", "value": "%d%% sharp" % int(round(100.0 * float(sharp) / float(s_all))),
+			"hint": "%d bull/perfect · %d good · %d missed" % [sharp, int(d.get("s_good", 0)), int(d.get("s_miss", 0))]})
+	var oh := int(d.get("open_hit", 0))
+	var ow := int(d.get("open_whiff", 0))
+	if oh + ow > 0:
+		rows.append({"label": "Openings", "value": "%d landed" % oh, "hint": "%d dumped off-window" % ow})
+	if int(d.get("perfect_strike", 0)) > 0:
+		rows.append({"label": "Perfect strikes", "value": str(int(d.get("perfect_strike", 0))), "hint": ""})
+	if int(d.get("snap", 0)) > 0:
+		rows.append({"label": "Snaps", "value": str(int(d.get("snap", 0))), "hint": "nerve streaks lost at the lip"})
+	return rows

@@ -48,7 +48,7 @@ func _bg() -> void:
 func _build_panel() -> void:
 	# a caster with two interrupt boons, holding ⚡4 — the HACK check reads high + nudgeable
 	var ctx := MapCheck.build_ctx([["interrupt"], ["interrupt"]], [], "disruptor", "caster",
-		1.0, 20, 4, 0, {}, {}, 0)
+		1.0, 4, 0, {}, {}, 0)
 	var ev := MapContent.event("helpdesk")
 	var raw: Array = ev["choices"]
 	var descs: Array = []

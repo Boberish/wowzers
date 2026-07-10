@@ -299,8 +299,11 @@ triaged against the laws — what survived is the *identity* split, not the gate
   so it's fun enough to live everywhere (`TANK-PLAN §1c`). **One rule in all content** —
   overworld / dungeon / raid — so players never relearn it; only the *ambient numbers* scale
   by content (the Depth spine), never the aggro rule. **Raids keep their identity via
-  intensity** — the full coordination *expression* (tank-swaps, hot-potato curses, split
-  soaks) blooms only at raid numbers. Single-target law holds: one boss stream, the recipient
+  intensity** — the full coordination *expression* (~~tank-swaps, hot-potato curses~~, split
+  soaks) blooms only at raid numbers. **⚠ 2026-07-10 (`BOSS-PLAN.md §1`): the TAUNT BUTTON is
+  deleted — aggro is 100% passive**, so taunt-swap/hot-potato-by-taunt tech is gone; the
+  raid-intensity expression is now **boss-authored** (mark relays, compaction flow-dumps, peel
+  coverage). Single-target law holds: one boss stream, the recipient
   varies (the built "Swing → Victim"). `threat_enabled` stays the engine flag but is now on by
   default in group content, feeding off flow.
 - **Dungeons are the M+ push surface.** The infinite Depth ladder (`spec.depth` numeric

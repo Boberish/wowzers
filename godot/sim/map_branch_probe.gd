@@ -68,8 +68,8 @@ func _test_slots() -> void:
 		c0 != 0 and c0 != s0 and c0 >= 1000)
 
 func _test_flags() -> void:
-	var none := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, 0, {}, {}, 0)
-	var covered := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, 0, {}, {"covered_shift": true}, 0)
+	var none := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, {}, {}, 0)
+	var covered := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 0, {}, {"covered_shift": true}, 0)
 	var fr := MapContent.event("favor_returned")
 	var g0: Dictionary = (fr["choices"] as Array)[0]["gate"]
 	_ok("favor_returned repayment gated without the flag", not MapCheck.gate_ok(g0, none))
@@ -79,7 +79,7 @@ func _test_flags() -> void:
 ## the catch sub-page's check resolves at its OWN slot, identical to the client-local
 ## resolve; a check leg's goto (fail-forward) surfaces from the resolved leg.
 func _test_online_branch() -> void:
-	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 4, 0, {}, {}, 0)
+	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 4, 0, {}, {}, 0)
 	var ev := MapContent.event("rollback_daemon")
 	# the root "Hear the catch…" branch choice → goto 'catch'
 	var branch: Dictionary = (ev["choices"] as Array)[1]

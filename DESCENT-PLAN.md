@@ -1,9 +1,15 @@
 # DESCENT-PLAN — THE RAID REBUILD (the descent spec v1)
 
-**Status: ✅ v1 LOCKED — ALL 12 VERDICTS IN (Bill, 2026-07-10).** V1–V6/V10/V12 at the
-recommendations · **V7 NO second module** · **V8 STANDING/Prior DELETED entirely** (fresh runs
-stay fresh) · **V9 WILD bumped to ~10%** · V11 per-seat earned wallets. Design-locked,
-tune-on-feel for all numbers; **build lands AFTER `purge-oldgame` merges** (ledger §I). The zoom-out rebuild of the raid run structure
+**Status: 🔨 SLICE 1 BUILT & MERGED (`ee18e05`, 2026-07-10) — the map bang is live.** All 12
+verdicts in (V1–V6/V10/V12 at the recommendations · **V7 NO second module** · **V8
+STANDING/Prior DELETED entirely** — shipped, 14 files · **V9 WILD ~10%** — shipped · V11
+per-seat wallets — lands with slice 3). The 4-floor descent GENERATES AND PLAYS: Vorathek
+seals Floor 1, elites are live (REINFORCED trios, bounty + curio roll; keystone slot reserved),
+wilds roll sealed payloads, market/jailbreak/minigame nodes exist with honest stub interiors —
+slices 3–5 flip `RunMap.*_LIVE` flags without regenerating any map. Fight ladder + skirmish
+enrage retighten shipped; verify-all 40/40 ×2; solo maps + raid combat byte-identical.
+**Next: slice 2 (legibility UI: contracts · pips · 3 meters · renames · integrity kill) → then
+Market → Jailbreak → minigames → QUEUE** — ledger §I is the tracker. The zoom-out rebuild of the raid run structure
 Bill asked for ("the raid is all over the place — rebuild it from the ground up; keep the bosses
 for now"). Produced by a 14-agent workflow: 7 recon readers (as-built map code · quest-confusion
 audit · measured sim timings · zone TICKETS v2 · reward economy · genre references · parked
@@ -667,6 +673,14 @@ ledgers.
 - Plain-language check done: all new names are fiction words; no designer jargon reaches the
   screen. CREDENTIAL REQUEST is a display reframe of the key pickup, not a new ticket object.
 
-**Change log:** 2026-07-10 — v1 authored from the raid-rebuild workflow (Bill's zoom-out brief +
-mid-brief minigame addendum). Status 🟡 at Bill's verdict; statuses in BUILD-LEDGER §I flip as
-verdicts land.
+**Change log:**
+- 2026-07-10 — v1 authored from the raid-rebuild workflow (Bill's zoom-out brief + mid-brief
+  minigame addendum); 🟡 at Bill's verdict.
+- 2026-07-10 — all 12 verdicts in (V7 no 2nd module · V8 Prior deleted · V9 WILD ~10% · V11
+  per-seat wallets); v1 LOCKED; WORLD-PLAN amend banners placed.
+- 2026-07-10 — **SLICE 1 (the map bang) BUILT & MERGED `ee18e05`**: 4 floors · new kinds +
+  stub layer (`RunMap.effective_kind`, `*_LIVE` flags) · gen invariants proven
+  (`raid_map_sim._prove_descent`) · V#8 Prior deletion shipped · fight ladder + skirmish
+  enrages · protocol v15 · ONE deliberate re-baseline, solo maps + raid combat byte-identical.
+  Interim notes: elite keystone = reserved slot (per-class deck slices) · online elite fights
+  its captain solo until the server pack pass · Forge body enrages untouched (zone-shared).

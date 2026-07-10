@@ -12,6 +12,9 @@ extends RefCounted
 # Helpers
 # --------------------------------------------------------------------------
 
+## STATS PAGE v2 — ticks between time-series samples (30 = 1 s at the fixed 30 Hz step).
+const SERIES_EVERY := 30
+
 static func to_ticks(seconds: float, hz: int) -> int:
 	return int(round(seconds * float(hz)))
 
@@ -73,6 +76,8 @@ static func update(s: CombatState) -> void:
 		# never frees. Nothing reads cast bars after `over`; not in the checksum.
 		for seat in s.seats:
 			seat.casting = {}
+	if s.tick % SERIES_EVERY == 0:         # STATS PAGE v2 — 1 Hz dmg-over-time sample
+		_sample_series(s)
 	# add_hp is 0.0 whenever no add holds the field, so the extra term keeps every
 	# pre-add fight's checksum byte-identical while covering add fights against drift.
 	s.checksum = (s.checksum * 1000003 + int(s.boss.hp * 100.0) + int(s.boss.add_hp * 100.0) + s.tick) & 0x7FFFFFFFFFFFFFFF
@@ -234,7 +239,10 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 		while s.boss.melee_timer <= 0:
 			var mn := float(melee.get("min", 10.0))
 			var mx := float(melee.get("max", 15.0))
-			_damage(s, _tank_target(s), s.rng.next_range(mn, mx), &"melee")
+			var mtgt := _tank_target(s)
+			_damage(s, mtgt, s.rng.next_range(mn, mx), &"melee")
+			if s.threat_enabled:                   # STATS PAGE v2 — aggro / stray-shot accounting
+				_note_melee_victim(s, mtgt)
 			s.boss.melee_timer += to_ticks(float(melee.get("every", 1.5)), s.config.fixed_hz)
 
 	# A telegraph is winding up: advance it; resolve on completion. Ability timers
@@ -340,6 +348,12 @@ static func _advance_chain(s: CombatState) -> bool:
 
 static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 	var ab := s.telegraph.ability
+	# STATS PAGE v2 — a kickable cast that reached resolution was NOT staggered: count the
+	# missed interrupt window (raid only). Post-PURGE nobody carries a kick, so this is the
+	# standing evidence of the interrupt-by-ability gap (WORLD-PLAN pillar #3). Diag-family,
+	# stored raid-wide on s.diag; never checksummed.
+	if s.threat_enabled and ab.response == AbilityRes.Response.INTERRUPTIBLE:
+		s.diag["kick_open_missed"] = int(s.diag.get("kick_open_missed", 0)) + 1
 	var amt := roundf(ab.amount * ph.mult)
 	match ab.effect:
 		AbilityRes.Effect.DMG_TARGET:
@@ -718,6 +732,84 @@ static func meter_taken(s: CombatState, seat: Seat, src: StringName, amt: float,
 	_meter_hit(row["taken"], src, amt, discrete)
 	row["taken_total"] = float(row["taken_total"]) + amt
 
+## STATS PAGE v2 — per-boon impact. Credits `amt` (the marginal damage/heal a boon added)
+## to that boon's bucket so the recap can show "this boon added ≈X". `seat == null` (or a
+## seat not in the fight) routes to the raid-wide amp pool at index -1 — where Glint / Sunder
+## / Debilitate land, since they amplify OTHER seats' hits, not the caster's own total.
+## `heal` routes to a parallel sub-total so heal boons never inflate the damage number.
+## Diag-family: engine-written, deterministic per seed, NEVER checksummed.
+static func meter_boon(s: CombatState, seat: Seat, boon_id: StringName, amt: float,
+		heal := false, discrete := true) -> void:
+	if amt <= 0.0:
+		return
+	var i := -1
+	if seat != null:
+		i = s.seats.find(seat)
+	if not s.boon_meter.has(i):
+		s.boon_meter[i] = {}
+	var pool: Dictionary = s.boon_meter[i]
+	if not pool.has(boon_id):
+		pool[boon_id] = {"total": 0.0, "n": 0, "heal": 0.0}
+	var e: Dictionary = pool[boon_id]
+	if heal:
+		e["heal"] = float(e["heal"]) + amt
+	else:
+		e["total"] = float(e["total"]) + amt
+	if discrete:
+		e["n"] = int(e["n"]) + 1
+
+## STATS PAGE v2 — attribute the marginal damage each active raid AMPLIFIER added to a hit
+## of final size `d`. Each factor f is credited d*(1 - 1/f): what removing that one amp would
+## have cost this hit. Stacked amps overlap, so the marginals sum to a shade MORE than the
+## real total — the recap prints these as "≈". Raid-wide pool (seat -1), since an amp helps
+## whoever is swinging. `boss_amps` false for the stat-block ally path (sunder/debilitate are
+## not folded there — only the vuln stack is). Pure side-accounting; touches no gameplay.
+static func _credit_amps(s: CombatState, seat_i: int, d: float, discrete: bool,
+		boss_amps := true) -> void:
+	if d <= 0.0:
+		return
+	if boss_amps and s.boss.sunder > 0.0:
+		var fs := 1.0 + s.boss.sunder * s.config.sunder_k
+		if fs > 1.0:
+			meter_boon(s, null, &"sunder", d * (1.0 - 1.0 / fs), false, discrete)
+	if boss_amps and s.boss.debilitate > 0.0:
+		var fd := 1.0 + s.boss.debilitate * s.config.debilitate_k
+		if fd > 1.0:
+			meter_boon(s, null, &"debilitate", d * (1.0 - 1.0 / fd), false, discrete)
+	for v in s.boss.vulns:
+		if s.tick < int(v["until"]) and (int(v["seat_i"]) < 0 or int(v["seat_i"]) == seat_i):
+			var fv := float(v["mult"])
+			if fv > 1.0:
+				meter_boon(s, null, StringName(v["src"]), d * (1.0 - 1.0 / fv), false, discrete)
+
+## STATS PAGE v2 — kit helper: credit a landed hit of size `d` across the inline boon
+## factors that shaped it. `factors` is [[boon_id:StringName, factor:float], ...]; each is
+## credited d*(1 - 1/factor) to the SEAT's own per-boon bucket (the same marginal convention
+## as _credit_amps, so stacked factors read "≈"). Kits collect the factors as they multiply
+## their damage, then call this once when the hit resolves. Diag-family; never checksummed.
+static func credit_boon_factors(s: CombatState, seat: Seat, d: float, factors: Array) -> void:
+	if d <= 0.0:
+		return
+	for f in factors:
+		var fac := float(f[1])
+		if fac > 1.0:
+			meter_boon(s, seat, StringName(f[0]), d * (1.0 - 1.0 / fac), false, true)
+
+## STATS PAGE v2 — one time-series row for the damage-over-time graph: the tick, boss HP%,
+## then each of the 4 seats' cumulative damage total and cumulative damage-taken total. The
+## stats page differentiates consecutive rows for per-second rates. Solo fights (1 seat) just
+## carry zeros in the empty columns. Diag-family: never checksummed, never touches gameplay.
+static func _sample_series(s: CombatState) -> void:
+	var hp_pct := 0.0
+	if s.boss.hp_max > 0.0:
+		hp_pct = 100.0 * s.boss.hp / s.boss.hp_max
+	var row: Array = [s.tick, hp_pct]
+	for i in 4:
+		row.append(float((s.meter.get(i, {}) as Dictionary).get("dmg_total", 0.0)))
+	for i in 4:
+		row.append(float((s.meter.get(i, {}) as Dictionary).get("taken_total", 0.0)))
+	s.series.append(row)
+
 # --------------------------------------------------------------------------
 # Damage
 # --------------------------------------------------------------------------
@@ -788,6 +880,8 @@ static func damage_boss(s: CombatState, seat: Seat, raw: float, src: StringName 
 	if d > 0.0:
 		meter_dmg(s, seat, src, d, crit)
 		_emit(s, {"t": "boss_hit", "amt": int(d), "seat": seat, "kind": String(src), "crit": crit})
+		if s.boss.sunder > 0.0 or s.boss.debilitate > 0.0 or not s.boss.vulns.is_empty():
+			_credit_amps(s, s.seats.find(seat), d, true)   # STATS PAGE v2 — raid-amp attribution
 	return d
 
 # --------------------------------------------------------------------------
@@ -844,6 +938,22 @@ static func _threat_target(s: CombatState) -> Seat:
 	if best != null:
 		return best
 	return _primary_target(s)
+
+## STATS PAGE v2 — aggro accounting (raid only). A melee that lands on a NON-tank while no
+## taunt forces it means the tank lost threat: count the stray hit on the victim, and emit
+## one aggro_pulled event only the tick the victim CHANGES (so the recap flags each peel
+## without spamming per swing). Diag-family: never checksummed, never touches gameplay.
+static func _note_melee_victim(s: CombatState, victim: Seat) -> void:
+	if victim == null:
+		return
+	var i := s.seats.find(victim)
+	var taunting := s.boss.taunt_seat_i >= 0 and s.tick < s.boss.taunt_until_tick
+	if victim.role != "tank" and not taunting:
+		_bump_diag(s, victim, "stray_hit")
+		if i != s.boss.last_melee_victim_i:
+			_bump_diag(s, victim, "aggro_pulled")
+			_emit(s, {"t": "aggro_pulled", "seat": victim, "player": victim.is_player})
+	s.boss.last_melee_victim_i = i
 
 
 ## Append a view-layer combat event (bounded; the sim ignores these).
@@ -928,6 +1038,8 @@ static func _apply_group_damage(s: CombatState, dt: float) -> void:
 				contrib *= float(seat.vars.get("well_hour_mult", 1.0))
 			total += contrib
 			meter_dmg(s, seat, &"attack", contrib * dt, false, false)
+			if not s.boss.vulns.is_empty():        # STATS PAGE v2 — vuln amps on stat-block chip
+				_credit_amps(s, s.seats.find(seat), contrib * dt, false, false)
 			if s.threat_enabled:
 				_add_threat(s, seat, contrib * dt)
 	if s.boss.add_i >= 0:
