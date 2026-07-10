@@ -44,6 +44,8 @@ var drop_rng: DetRng = null        ## the drop stream — NEVER the combat rng
 # ---- Draft 2.0 + COMMANDER: the human's boon run, and the AI raiders you command
 var run_seed: int = -1             ## the descent's ONE minted seed (REFIT P4): drops/floors/fights/drafts derive closed-form — a run replays from this integer
 var run: RunState = null           ## the human's boon run (null = no descent live)
+var fight_log: Array = []          ## METER L3 — per-fight meter snapshots (MeterPanel.snapshot) for the meter's run-history segments; auto-reset per descent via fight_log_seed
+var fight_log_seed: int = -2       ## the run_seed the `fight_log` was gathered under (-2 sentinel); a change clears the log = new descent
 var taken_boons: Array = []        ## drafted boon dicts (for the build panel: title/rarity)
 var party: Dictionary = {}         ## AI seats only: seat_key -> {cls, aspect} (persists across descents)
 var ai_runs: Dictionary = {}       ## AI seats only: seat_key -> RunState (their boon runs)

@@ -51,6 +51,12 @@ var frozen := false                 # end-screen recap: static, no NOW/hints
 var focus_i := -1                   # detail view: seats[] index (-1 = the player)
 var amp_focus := -999               # AMPLIFY drill: -999 = ranking · -1 = raid pool · ≥0 = seat
 
+## L3 run-history segments: 0 = This Fight (live) · 1 = Whole Run · 2+ = _fights[i-2] (past fights)
+var _fights: Array = []             # RunDirector.fights, passed in (per-fight snapshots); read-only
+var _seg_i := 0
+var _seg_cache = null               # built segment cache (avoid per-frame merge churn)
+var _seg_key := ""
+
 ## session-sticky visibility the M key cycles: 0 compact · 1 detail · 2 hidden
 static var view_state := 0
 
@@ -60,28 +66,44 @@ var _hits: Array = []               # click regions rebuilt each draw: {rect, ki
 var _now_buf: Array = []            # rolling (time, total) samples for the NOW readout
 var _now_rate := 0.0
 
-func _init(ctrl, default_mode := "dmg", frozen_recap := false) -> void:
+func _init(ctrl, default_mode := "dmg", frozen_recap := false, fights := []) -> void:
 	_ctrl = ctrl
 	mode = default_mode
 	frozen = frozen_recap
+	_fights = fights
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _state() -> CombatState:
 	return _ctrl.state if _ctrl != null else null
+
+## METER L3 — a past/aggregate segment the panel can render in place of the live state. Duck-typed
+## to the subset of CombatState the readers touch (.meter/.boon_meter/.seats/.time()/.over) plus a
+## per-seat diag map (live seats give identity; snapshot diag gives the graded numbers). Reads only.
+class _Segment extends RefCounted:
+	var label := ""
+	var meter := {}
+	var boon_meter := {}
+	var diag_by := {}                 # seat_i -> snapshot diag dict
+	var seats := []                   # LIVE seats (identity: names/accents/alive/is_player)
+	var series := []                  # empty — snapshots carry no time-series (sparkline no-ops)
+	var over := true
+	var _elapsed := 0.0
+	func time() -> float:
+		return _elapsed
 
 ## M key: compact -> detail -> hidden -> compact (shared across fights/HUDs)
 func cycle() -> void:
 	view_state = (view_state + 1) % 3
 
 # ------------------------------------------------------------------ data reads
-static func _row(s: CombatState, i: int) -> Dictionary:
+static func _row(s, i: int) -> Dictionary:
 	return s.meter.get(i, {})
 
-static func _total(s: CombatState, i: int, m: String) -> float:
+static func _total(s, i: int, m: String) -> float:
 	return float(_row(s, i).get(m + "_total", 0.0))
 
 ## ranked [ [seat_i, total], ... ] for the mode, zeros dropped
-static func _ranking(s: CombatState, m: String) -> Array:
+static func _ranking(s, m: String) -> Array:
 	var out: Array = []
 	for i in s.seats.size():
 		var t := _total(s, i, m)
@@ -91,7 +113,7 @@ static func _ranking(s: CombatState, m: String) -> Array:
 	return out
 
 ## ranked [ [src, entry], ... ] inside one seat's mode dict
-static func _sources(s: CombatState, i: int, m: String) -> Array:
+static func _sources(s, i: int, m: String) -> Array:
 	var by: Dictionary = _row(s, i).get(m, {})
 	var out: Array = []
 	for src in by:
@@ -113,7 +135,7 @@ static func _amp_sum(e: Dictionary) -> float:
 ## AMPLIFY — one row per contributor: each seat's OWN summed boon lift, plus a synthetic RAID
 ## row (key -1) for the raid-amp pool (Sunder/Glint/Debilitate — credited raid-wide, not to the
 ## applier). Ranked by total. Returns [[key:int, total], ...].
-static func _amp_ranking(s: CombatState) -> Array:
+static func _amp_ranking(s) -> Array:
 	var out: Array = []
 	for key in s.boon_meter:
 		var pool: Dictionary = s.boon_meter[key]
@@ -126,7 +148,7 @@ static func _amp_ranking(s: CombatState) -> Array:
 	return out
 
 ## AMPLIFY — one contributor's per-boon breakdown, ranked. [[boon_id, entry], ...]
-static func _amp_sources(s: CombatState, key: int) -> Array:
+static func _amp_sources(s, key: int) -> Array:
 	var pool: Dictionary = s.boon_meter.get(key, {})
 	var out: Array = []
 	for bid in pool:
@@ -135,18 +157,161 @@ static func _amp_sources(s: CombatState, key: int) -> Array:
 	out.sort_custom(func(a, b): return _amp_sum(a[1]) > _amp_sum(b[1]))
 	return out
 
-func _amp_focused(s: CombatState) -> bool:
+func _amp_focused(s) -> bool:
 	return amp_focus != -999 and not _amp_sources(s, amp_focus).is_empty()
 
-func _amp_label(s: CombatState, key: int) -> String:
+func _amp_label(s, key: int) -> String:
 	if key < 0:
 		return "⚡ Raid amps"
 	if key < s.seats.size():
 		return _seat_name(s.seats[key])
 	return "Seat %d" % key
 
-func _amp_accent(s: CombatState, key: int) -> Color:
+func _amp_accent(s, key: int) -> Color:
 	return Palette.EXPOSE if key < 0 else _accent(s.seats[key])
+
+# ---------------------------------------------------------------- L3 run-history segments
+## Snapshot the finished fight's meter data into a plain, class-agnostic dict (deep-copied so it
+## survives the next fight resetting state). Stored on RunDirector.fights; the meter renders it as
+## a past segment. Seats aren't copied (RefCounted) — the live roster gives identity by index.
+static func snapshot(state, label: String) -> Dictionary:
+	var diag := {}
+	for i in state.seats.size():
+		diag[i] = (state.seats[i].diag as Dictionary).duplicate(true)
+	return {
+		"label": label,
+		"elapsed": state.time(),
+		"meter": (state.meter as Dictionary).duplicate(true),
+		"boon_meter": (state.boon_meter as Dictionary).duplicate(true),
+		"diag": diag,
+	}
+
+## per-seat diag for the current view: snapshot map on a _Segment, else the live seat's diag.
+static func _diag_of(s, i: int) -> Dictionary:
+	if s is _Segment:
+		return (s as _Segment).diag_by.get(i, {})
+	return s.seats[i].diag
+
+func _seg_count() -> int:
+	return 1 if _fights.is_empty() else 2 + _fights.size()
+
+func _seg_name() -> String:
+	if _seg_i <= 0 or _fights.is_empty():
+		return "This Fight"
+	if _seg_i == 1:
+		return "Whole Run"
+	var k := _seg_i - 2
+	if k >= 0 and k < _fights.size():
+		return String((_fights[k] as Dictionary).get("label", "Fight %d" % (k + 1)))
+	return "This Fight"
+
+## resolve the view to render: the live state (This Fight) or a built _Segment (Whole Run / past).
+func _view():
+	var live := _state()
+	if live == null:
+		return null
+	if _seg_i <= 0 or _fights.is_empty():
+		return live
+	# cache so Whole Run doesn't re-merge every frame (key ticks ~1 Hz off live time)
+	var key := "%d|%d|%d" % [_seg_i, _fights.size(), int(live.time()) if _seg_i == 1 else 0]
+	if _seg_cache != null and _seg_key == key:
+		return _seg_cache
+	var seg
+	if _seg_i == 1:
+		seg = _build_whole(live)
+	else:
+		var k := _seg_i - 2
+		if k < 0 or k >= _fights.size():
+			return live
+		seg = _build_segment(_fights[k], live)
+	_seg_cache = seg
+	_seg_key = key
+	return seg
+
+func _build_segment(snap: Dictionary, live) -> _Segment:
+	var seg := _Segment.new()
+	seg.label = String(snap.get("label", "Fight"))
+	seg.meter = snap.get("meter", {})
+	seg.boon_meter = snap.get("boon_meter", {})
+	seg.diag_by = snap.get("diag", {})
+	seg._elapsed = float(snap.get("elapsed", 0.0))
+	seg.seats = live.seats
+	return seg
+
+func _build_whole(live) -> _Segment:
+	var seg := _Segment.new()
+	seg.label = "Whole Run"
+	seg.seats = live.seats
+	var el := 0.0
+	# the CURRENT fight — only mid-combat. On the end screen (frozen) it's already the last
+	# fight_log entry, so adding live too would double-count it.
+	if not frozen:
+		var live_diag := {}
+		for i in live.seats.size():
+			live_diag[i] = live.seats[i].diag
+		_merge_meter(seg.meter, live.meter)
+		_merge_boon(seg.boon_meter, live.boon_meter)
+		_merge_diag(seg.diag_by, live_diag)
+		el = live.time()
+	for snap in _fights:
+		_merge_meter(seg.meter, snap.get("meter", {}))
+		_merge_boon(seg.boon_meter, snap.get("boon_meter", {}))
+		_merge_diag(seg.diag_by, snap.get("diag", {}))
+		el += float(snap.get("elapsed", 0.0))
+	seg._elapsed = el
+	return seg
+
+## additive merges (src read-only into dst) for the Whole Run aggregate.
+static func _merge_hit(dst: Dictionary, e: Dictionary) -> void:
+	dst["total"] = float(dst.get("total", 0.0)) + float(e.get("total", 0.0))
+	dst["n"] = int(dst.get("n", 0)) + int(e.get("n", 0))
+	dst["max"] = maxf(float(dst.get("max", 0.0)), float(e.get("max", 0.0)))
+	dst["crit_n"] = int(dst.get("crit_n", 0)) + int(e.get("crit_n", 0))
+	dst["over"] = float(dst.get("over", 0.0)) + float(e.get("over", 0.0))
+
+static func _merge_meter(dst: Dictionary, src: Dictionary) -> void:
+	for i in src:
+		var srow: Dictionary = src[i]
+		if not dst.has(i):
+			dst[i] = {"dmg": {}, "heal": {}, "shield": {}, "taken": {},
+				"dmg_total": 0.0, "heal_total": 0.0, "over_total": 0.0,
+				"shield_total": 0.0, "taken_total": 0.0}
+		var drow: Dictionary = dst[i]
+		for k in srow:
+			var v = srow[k]
+			if v is Dictionary:                       # a mode bucket {src: entry}
+				if not drow.has(k):
+					drow[k] = {}
+				var dby: Dictionary = drow[k]
+				for sname in v:
+					if not dby.has(sname):
+						dby[sname] = {"total": 0.0, "n": 0, "max": 0.0, "crit_n": 0, "over": 0.0}
+					_merge_hit(dby[sname], v[sname])
+			else:                                     # a *_total scalar
+				drow[k] = float(drow.get(k, 0.0)) + float(v)
+
+static func _merge_boon(dst: Dictionary, src: Dictionary) -> void:
+	for i in src:
+		if not dst.has(i):
+			dst[i] = {}
+		var dp: Dictionary = dst[i]
+		var sp: Dictionary = src[i]
+		for b in sp:
+			if not dp.has(b):
+				dp[b] = {"total": 0.0, "n": 0, "heal": 0.0}
+			var de: Dictionary = dp[b]
+			var se: Dictionary = sp[b]
+			de["total"] = float(de.get("total", 0.0)) + float(se.get("total", 0.0))
+			de["n"] = int(de.get("n", 0)) + int(se.get("n", 0))
+			de["heal"] = float(de.get("heal", 0.0)) + float(se.get("heal", 0.0))
+
+static func _merge_diag(dst: Dictionary, src: Dictionary) -> void:
+	for i in src:
+		if not dst.has(i):
+			dst[i] = {}
+		var dd: Dictionary = dst[i]
+		for k in src[i]:
+			dd[k] = int(dd.get(k, 0)) + int(src[i][k])
 
 # ---------------------------------------------------------------- DISCIPLINE data
 ## DISCIPLINE — a seat's clean-answer %: boss telegraphs answered cleanly (perfect/good/graze/
@@ -160,13 +325,13 @@ static func _disc_clean(d: Dictionary) -> float:
 
 ## DISCIPLINE — ranked [[seat_i, clean_pct], ...] over full-fidelity seats. Stat-block AI has no
 ## timed inputs to grade, so it is skipped. Ungradeable seats (<3 answers, pct -1) sort last.
-static func _disc_ranking(s: CombatState) -> Array:
+static func _disc_ranking(s) -> Array:
 	var out: Array = []
 	for i in s.seats.size():
 		var seat: Seat = s.seats[i]
 		if seat.fidelity == "statblock":
 			continue
-		out.append([i, _disc_clean(seat.diag)])
+		out.append([i, _disc_clean(_diag_of(s, i))])
 	out.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
 	return out
 
@@ -185,12 +350,12 @@ func _disc_col(p: float) -> Color:
 
 ## DISCIPLINE — a seat's fault tally for the compact hint: times hit (from the taken meter) and
 ## stray hits taken off the tank (raid non-tanks). Returns [times_hit, strays].
-func _disc_faults(s: CombatState, i: int) -> Array:
+func _disc_faults(s, i: int) -> Array:
 	var taken_n := 0
 	var by: Dictionary = (s.meter.get(i, {}) as Dictionary).get("taken", {})
 	for src in by:
 		taken_n += int(by[src]["n"])
-	var strays := int((s.seats[i].diag as Dictionary).get("stray_hit", 0))
+	var strays := int(_diag_of(s, i).get("stray_hit", 0))
 	return [taken_n, strays]
 
 static func _fmt(x: float) -> String:
@@ -215,7 +380,7 @@ func _seat_name(seat: Seat) -> String:
 		return seat.unit_name
 	return "You" if seat.is_player else "Ally"
 
-func _focus_seat_i(s: CombatState) -> int:
+func _focus_seat_i(s) -> int:
 	if focus_i >= 0 and focus_i < s.seats.size():
 		return focus_i
 	var p = _ctrl.player() if _ctrl != null else null
@@ -227,14 +392,16 @@ func _process(delta: float) -> void:
 	var s := _state()
 	if s == null:
 		return
-	if not frozen:
-		# rolling NOW rate over the last ~5s of the focused seat's column
+	if not frozen and _seg_i == 0:
+		# rolling NOW rate over the last ~5s of the focused seat's column (live view only)
 		var t := s.time()
 		_now_buf.append(Vector2(t, _total(s, _focus_seat_i(s), mode)))
 		while _now_buf.size() > 2 and _now_buf[0].x < t - 5.0:
 			_now_buf.pop_front()
 		var span: float = _now_buf[-1].x - _now_buf[0].x
 		_now_rate = ((_now_buf[-1].y - _now_buf[0].y) / span) if span > 0.5 else 0.0
+	else:
+		_now_rate = 0.0
 	queue_redraw()
 
 # ------------------------------------------------------------------ input
@@ -256,6 +423,11 @@ func _gui_input(event: InputEvent) -> void:
 							view_state = 1
 					"ampseat":
 						amp_focus = int(h["i"])
+					"seg":
+						_seg_i = (_seg_i + 1) % _seg_count()
+						focus_i = -1
+						amp_focus = -999
+						_now_buf.clear()
 					"back":
 						focus_i = -1
 						amp_focus = -999
@@ -270,7 +442,9 @@ func _gui_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ draw
 func _draw() -> void:
 	_hits = []
-	var s := _state()
+	if _seg_i >= _seg_count():        # history shrank/reset (new descent) — snap back to live
+		_seg_i = 0
+	var s = _view()
 	if s == null:
 		return
 	if view_state == 2 and not frozen:
@@ -325,7 +499,7 @@ func _draw() -> void:
 	# ---- header: mode (click to cycle) · clock · NOW ----
 	var hdr := Rect2(0, 0, size.x, HDR)
 	_hits.append({"rect": hdr, "kind": "mode", "i": 0})
-	var secs := s.time()
+	var secs: float = s.time()
 	var clock := "%d:%04.1f" % [int(secs) / 60, fmod(secs, 60.0)] if secs >= 60.0 else "%.0fs" % secs
 	var mname := String(MODE_NAMES[mode])
 	UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(12, 21),
@@ -346,14 +520,23 @@ func _draw() -> void:
 	else:
 		y = _draw_compact(s, rk, y)
 
-	# ---- footer hint ----
+	# ---- footer: segment chip (left, clickable when a run history exists) + hint ----
+	var fy := h - 6.0
+	var has_hist := _seg_count() > 1
+	if has_hist:
+		_hits.append({"rect": Rect2(2, h - FOOT + 2, 160, FOOT), "kind": "seg", "i": 0})
+		UiKit.text_shadowed(self, UiKit.body(600), Vector2(8, fy), "◷ " + _seg_name() + " ▸",
+			HORIZONTAL_ALIGNMENT_LEFT, 160, UiKit.SIZE["MICRO"],
+			Palette.GOLD if _seg_i != 0 else Palette.TEXT_DIM)
 	if not frozen:
-		var hint := "M · view      click title · column"
-		if (is_amp and detail) or (detail and rk.size() > 1):
-			hint = "M · view      ‹ back to ranking"
-		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, h - 6.0), hint,
-			HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["MICRO"],
-			Palette.TEXT_DIM.darkened(0.2))
+		var back := (is_amp and detail) or (detail and rk.size() > 1)
+		var hint := "‹ back to ranking" if back else "M · view      click title · column"
+		var halign := HORIZONTAL_ALIGNMENT_CENTER
+		if has_hist:                      # make room for the chip on the left
+			hint = "‹ back" if back else "M · view"
+			halign = HORIZONTAL_ALIGNMENT_RIGHT
+		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, fy), hint,
+			halign, size.x - 12, UiKit.SIZE["MICRO"], Palette.TEXT_DIM.darkened(0.2))
 
 ## COMPACT: ranked combatant bars (bar length ∝ the leader), total + rate.
 ## series column base for the current mode's per-second sparkline. The 1 Hz series tracks only
@@ -368,7 +551,7 @@ func _spark_col(m: String) -> int:
 ## A faint per-second trace behind a compact row — the shape of the seat's output over the fight,
 ## from `series` (cumulative col `base+i`, differentiated to per-second, normalized to its own
 ## peak). Low-alpha under the text so it adds life without clutter. Pure view; reads state.series.
-func _draw_spark(s: CombatState, i: int, base: int, rr: Rect2, acc: Color) -> void:
+func _draw_spark(s, i: int, base: int, rr: Rect2, acc: Color) -> void:
 	var ser: Array = s.series
 	if ser.size() < 3:
 		return
@@ -391,7 +574,7 @@ func _draw_spark(s: CombatState, i: int, base: int, rr: Rect2, acc: Color) -> vo
 		pts.append(Vector2(fx, fy))
 	draw_polyline(pts, Color(acc.r, acc.g, acc.b, 0.30), 1.0, true)
 
-func _draw_compact(s: CombatState, rk: Array, y: float) -> float:
+func _draw_compact(s, rk: Array, y: float) -> float:
 	var elapsed := maxf(s.time(), 1.0)
 	var top := (float(rk[0][1]) if not rk.is_empty() else 1.0)
 	var party := 0.0
@@ -450,7 +633,7 @@ func _draw_compact(s: CombatState, rk: Array, y: float) -> float:
 	return y
 
 ## DETAIL: one combatant's spells — total · share% · hits/avg/max · crit/overheal.
-func _draw_detail(s: CombatState, fi: int, rk: Array, y: float) -> float:
+func _draw_detail(s, fi: int, rk: Array, y: float) -> float:
 	var seat: Seat = s.seats[fi]
 	var acc := _accent(seat)
 	var col_total := _total(s, fi, mode)
@@ -511,7 +694,7 @@ func _draw_detail(s: CombatState, fi: int, rk: Array, y: float) -> float:
 ## AMPLIFY: who enables the raid. Compact = ranked contributors (each seat's own boon lift + a
 ## RAID row for the shared amp pool); drill a row → that contributor's per-boon "≈ +X". Reads
 ## state.boon_meter (diag-family, never checksummed) — the live twin of STATS PAGE v2's BOON IMPACT.
-func _draw_amp(s: CombatState, rk: Array, y: float) -> float:
+func _draw_amp(s, rk: Array, y: float) -> float:
 	if _amp_focused(s):
 		return _draw_amp_detail(s, y)
 	if rk.is_empty():
@@ -544,7 +727,7 @@ func _draw_amp(s: CombatState, rk: Array, y: float) -> float:
 	return y
 
 ## AMPLIFY detail — one contributor's per-boon "≈ +X" (damage, or heal for a heal-boon).
-func _draw_amp_detail(s: CombatState, y: float) -> float:
+func _draw_amp_detail(s, y: float) -> float:
 	var key := amp_focus
 	var acc := _amp_accent(s, key)
 	_hits.append({"rect": Rect2(0, y, size.x, 18), "kind": "back", "i": 0})
@@ -586,7 +769,7 @@ func _draw_amp_detail(s: CombatState, y: float) -> float:
 ## clean-answer %, colored by grade (S..D). Bar ∝ clean%; the dim tail shows the fault count
 ## (times hit · strays off the tank). Reads seat.diag + the taken meter — the live twin of STATS
 ## PAGE v2's DEFENSE/DISCIPLINE grades (full grade breakdown lives on that page).
-func _draw_disc(s: CombatState, rk: Array, y: float) -> float:
+func _draw_disc(s, rk: Array, y: float) -> float:
 	if rk.is_empty():
 		UiKit.text_shadowed(self, UiKit.body(500), Vector2(0, y + 14), "· no timed inputs to grade ·",
 			HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"], Palette.TEXT_DIM)

@@ -146,6 +146,21 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if aspect == "draw" and int(seat.vars.get("current", 0)) < cfg.current_max:
 		seat.vars["millrace_n"] = 0
 
+	# THE FLUME (keystone): hold MAX Current for flume_hold_sec and the river runs white
+	# (flume_run_sec of auto-clean releases), then the Current empties. Earned, never toggled.
+	if aspect == "draw" and _b("flume"):
+		if int(seat.vars.get("current", 0)) >= cfg.current_max:
+			var since := int(seat.vars.get("current_full_since", -1))
+			if since < 0:
+				seat.vars["current_full_since"] = s.tick
+			elif s.tick - since >= _tt(s, cfg.flume_hold_sec):
+				seat.vars["flume_until"] = s.tick + _tt(s, cfg.flume_run_sec)
+				seat.vars["current"] = 0
+				seat.vars["current_full_since"] = -1
+				CombatCore._emit(s, {"t": "well_flume", "seat": seat, "player": seat.is_player})
+		else:
+			seat.vars["current_full_since"] = -1
+
 	# FORESIGHT (creed): a dip below half CRASHES the banked stacks
 	if _cr_b("foresight") and int(seat.vars.get("foresight", 0)) > 0:
 		if not _all_topped(s, seat, 0.5):
@@ -171,9 +186,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 			var holdable := id0 == "flash" or id0 == "mend"
 			# THE PATIENT HAND (creed, draw): a heal-cast that RUNS PAST its end doesn't fire —
 			# it becomes a HELD heal cocked in the hand, released on the spike (or it gutters).
-			if aspect == "draw" and _cr_b("patient_hold") and holdable and not bool(c.get("held", false)):
+			if aspect == "draw" and _hold_armed() and holdable and not bool(c.get("held", false)):
 				seat.casting["held"] = true
-				seat.casting["held_until"] = s.tick + _tt(s, 3.0)
+				seat.casting["held_start"] = s.tick
+				seat.casting["held_until"] = s.tick + _tt(s, 3.0 + cfg.ease_gutter_delay)
 				CombatCore._emit(s, {"t": "well_held", "seat": seat, "player": seat.is_player})
 			elif bool(c.get("held", false)):
 				if s.tick >= int(c.get("held_until", 0)):    # gutters — charge + cast wasted
@@ -200,6 +216,15 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 		return false
 	if s.tick < int(seat.cooldowns.get(key, 0)):
 		return false
+	# SECOND HAND (boon): while a HELD heal is cocked, Flash stays castable — it fires INSTANTLY
+	# (plain, ungraded, no Current), so you cover a second dip without dropping the hold. The held
+	# heal keeps the casting slot; the flash resolves on the spot (GCD-gated so it can't be spammed).
+	if key == "flash" and _b("secondHand") and bool(seat.casting.get("held", false)):
+		if target == null or not target.alive() or _charges(seat) < int(sp.get("charges", 0)):
+			return false
+		_resolve(s, seat, "flash", target, "instant")
+		seat.gcd_until_tick = s.tick + _tt(s, cfg.gcd)
+		return true
 	if not offgcd and not seat.casting.is_empty():
 		return false
 	# target validity
@@ -242,13 +267,9 @@ func _release(s: CombatState, seat: Seat) -> bool:
 	if seat.casting.is_empty():
 		return false
 	var c := seat.casting
-	# a HELD heal (Patient Hand) releases full & instant, and does NOT feed the Current
+	# a HELD heal (Patient Hand / ⭐Vigil) releases full & instant, and does NOT feed the Current
 	if bool(c.get("held", false)):
-		var hid := String(c["id"])
-		var htgt: Seat = c.get("target")
-		seat.casting = {}
-		_resolve(s, seat, hid, htgt, "held")
-		return true
+		return _release_held(s, seat, c)
 	if aspect != "draw":
 		return false
 	var start := int(c["start_tick"])
@@ -261,30 +282,100 @@ func _release(s: CombatState, seat: Seat) -> bool:
 	var tgt: Seat = c.get("target")
 	var band := _draw_band()
 	var centre := 1.0 - band * 0.5
+	# THE GLASS RIVER (keystone): while the water is FROZEN, the drift stops.
+	var frozen := s.tick < int(seat.vars.get("glassriver_until", -1))
 	# THE EDDY (creed): the clean band's centre drifts a little each cast — derived from the
 	# cast's start tick (deterministic, no RNG), so you read it live but can't memorise it.
-	if _cr_b("eddy"):
+	# DEEP EDDY boon widens the wander.
+	if _cr_b("eddy") and not frozen:
+		var rng := 0.16 * (cfg.deepeddy_drift_mult if _b("deepEddy") else 1.0)
 		var h := (start * 2654435761) & 0xFFFFFF
-		var drift := (float(h) / float(0xFFFFFF) - 0.5) * 0.16   # ±8%
+		var drift := (float(h) / float(0xFFFFFF) - 0.5) * rng
 		centre = clampf(centre + drift, 0.5, 1.0 - band * 0.5)
 	seat.casting = {}
-	if p >= centre - band * 0.5 and p <= centre + band * 0.5:
+	var lo := centre - band * 0.5
+	var in_band := p >= lo and p <= centre + band * 0.5
+	var is_still := absf(p - centre) <= _still_width() * 0.5
+	# THE FLUME (keystone): while the river runs white, any release auto-grades CLEAN.
+	var flume := s.tick < int(seat.vars.get("flume_until", -1))
+	if frozen:
+		in_band = true; is_still = true                     # frozen water = every release a Still Point
+	elif flume:
+		in_band = true; is_still = false                    # white water = every release a clean draw
+	if in_band:
 		var bonus := _draw_clean_bonus(s, seat)
-		if absf(p - centre) <= _still_width() * 0.5:
+		# CURRENT READING boon: a tag in the band's FIRST THIRD (of a genuine read) → +1 extra Current.
+		var cr_extra := _b("currentReading") and not frozen and not flume \
+			and p <= lo + band * cfg.currentreading_third
+		if is_still:
+			if _b("shootGap") and int(seat.vars.get("current", 0)) >= cfg.current_max:
+				bonus *= cfg.shootgap_still_mult            # the hardened sliver pays at max Current
+			if _b("deepEddy"):
+				bonus *= cfg.deepeddy_still_mult            # a Still in the wandering water pays more
 			_resolve(s, seat, id, tgt, "still", bonus)
 		else:
 			_resolve(s, seat, id, tgt, "clean", bonus)
+		if cr_extra:
+			_current_up(s, seat)                            # the fast-read reward, on top of the release's own
+		_glassriver_tick(s, seat, is_still)
 	else:
 		# THE NARROWS (creed): a release OUTSIDE the band heals for NOTHING.
 		var uf := 0.0 if _cr_b("narrows") else pow(maxf(0.05, p), _undercook_exp())
 		_resolve(s, seat, id, tgt, "under", uf)
+		_glassriver_tick(s, seat, false)
 	return true
+
+## A HELD heal (Patient Hand / ⭐Vigil) releasing: full & instant. RIDE THE TREMBLE scales it by
+## how long it was held; LOOSED AT LAST turns a release timed to the ally's hit into an intercept
+## (full heal + a 2s absorb). Held releases never feed the Current.
+func _release_held(s: CombatState, seat: Seat, c: Dictionary) -> bool:
+	var hid := String(c["id"])
+	var htgt: Seat = c.get("target")
+	var held_start := int(c.get("held_start", s.tick))
+	seat.casting = {}
+	var mult := 1.0
+	if _b("rideTremble"):
+		var halves := float(s.tick - held_start) / maxf(1.0, float(_tt(s, 0.5)))
+		mult += minf(cfg.ridetremble_cap, cfg.ridetremble_per * halves)
+	# LOOSED AT LAST (keystone): released within loosed_window of the ally's last hit = a PERFECT
+	# INTERCEPT — the heal lands full AND half of it clings on as a short absorb.
+	var intercept := false
+	if _b("loosedAtLast") and htgt != null:
+		var lh := int(htgt.vars.get("last_hit_tick", -999999))
+		if lh >= 0 and s.tick - lh <= _tt(s, cfg.loosed_window):
+			intercept = true
+	_resolve(s, seat, hid, htgt, "held", mult)
+	if intercept and htgt != null and htgt.alive():
+		var sp: Dictionary = cfg.book.get(hid, {})
+		var absorb := float(sp.get("heal", 0.0)) * mult * cfg.loosed_shield_frac
+		_add_absorb(s, htgt, absorb, seat)
+		CombatCore._emit(s, {"t": "well_intercept", "seat": htgt, "caster": seat, "player": seat.is_player})
+	return true
+
+## THE GLASS RIVER (keystone): three Still Points IN A ROW freeze the water (5s of all-Still
+## grading + no drift). Guarded on the boon; a non-still release breaks the streak. While already
+## frozen it doesn't re-arm (the freeze runs its course, then the streak rebuilds).
+func _glassriver_tick(s: CombatState, seat: Seat, still: bool) -> void:
+	if not _b("glassRiver") or s.tick < int(seat.vars.get("glassriver_until", -1)):
+		return
+	if still:
+		var n := int(seat.vars.get("still_streak", 0)) + 1
+		if n >= cfg.glassriver_streak:
+			seat.vars["still_streak"] = 0
+			seat.vars["glassriver_until"] = s.tick + _tt(s, cfg.glassriver_sec)
+			CombatCore._emit(s, {"t": "well_glassriver", "seat": seat, "player": seat.is_player})
+		else:
+			seat.vars["still_streak"] = n
+	else:
+		seat.vars["still_streak"] = 0
 
 ## Timing/state bonuses folded into a CLEAN/STILL draw's heal (guarded → 1.0 when unset).
 func _draw_clean_bonus(s: CombatState, seat: Seat) -> float:
 	var b := 1.0
 	if _cr_b("narrows"):
 		b *= 1.0 + _cr_f("narrows_bonus")
+	if _b("whitewater"):
+		b *= 1.0 + cfg.whitewater_per * float(int(seat.vars.get("current", 0)))   # +per stack of Current
 	if _b("strongPull") and int(seat.vars.get("current", 0)) >= cfg.current_max:
 		b *= 1.0 + cfg.strong_pull_bonus
 	if _b("lastDrops") and _charges(seat) <= cfg.last_drops_at:
@@ -294,6 +385,11 @@ func _draw_clean_bonus(s: CombatState, seat: Seat) -> float:
 		if lc >= 0 and s.tick - lc <= _tt(s, cfg.double_draw_sec):
 			b *= 1.0 + cfg.double_draw_bonus                # the chain's second clean
 	return b
+
+## The overrun-becomes-a-HELD-heal rule is armed by EITHER the Patient Hand creed OR the
+## ⭐Vigil module (§12 — the transformer candidate made real). Same state, one gate.
+func _hold_armed() -> bool:
+	return _cr_b("patient_hold") or _m("vigil")
 
 func _millrace_free(seat: Seat) -> bool:
 	return _b("theMillrace") and aspect == "draw" \
@@ -322,6 +418,8 @@ func _resolve(s: CombatState, seat: Seat, id: String, target: Seat, mode: String
 	match id:
 		"flash", "mend":
 			_direct_heal(s, seat, target, float(sp["heal"]) * mult * shm, id, mode)
+		"skin":
+			_apply_skin(s, seat, target, mode)              # the water's film — heals 0, defers damage
 		"cascade":
 			_heal_lowest(s, seat, int(sp.get("aoe", 3)), float(sp["heal"]) * mult * shm, id)
 			_draw_feedback(s, seat, mode, null)             # AoE: Current only, no Glint (base)
@@ -413,6 +511,31 @@ func _on_pour(s: CombatState, seat: Seat, target: Seat, eff: float, frac_before:
 	# BENEDICTION module: a good grade lights a pip.
 	_bene_pip(s, seat)
 
+## SKIN (the water's film — MENDER §13.2): the missing-heal cast. Sets a per-seat DEFERRAL on
+## the ally for skin_dur seconds — the grade sizes the fraction (Draw grades the release; Brim
+## casts it plain via mode "land"). It heals ZERO and blocks ZERO: the reducer's _tick_skin
+## drains the deferred chunks later as real damage. The Still Point also fires the Glint (the
+## F15 superset law). A graded Draw release feeds the Current like any clean/still draw — one
+## grammar, the whole reason it's a cast and not a free proc.
+func _apply_skin(s: CombatState, seat: Seat, target: Seat, mode: String) -> void:
+	if target == null or not target.alive():
+		return
+	var frac := cfg.skin_defer_plain
+	match mode:
+		"still": frac = cfg.skin_defer_still
+		"clean": frac = cfg.skin_defer_clean
+		_:       frac = cfg.skin_defer_plain   # land (Brim) · overrun · under · held · instant
+	target.vars["skin_until_tick"] = s.tick + _tt(s, cfg.skin_dur)
+	target.vars["skin_frac"] = frac
+	target.vars["skin_drip_ticks"] = maxi(1, _tt(s, cfg.skin_drip_sec))
+	target.vars["skin_caster_i"] = s.seats.find(seat)   # index — cycle-safe co-op credit
+	if mode == "still":
+		_glint(s, target)
+	CombatCore._bump_diag(s, seat, "well_skin")
+	CombatCore._emit(s, {"t": "well_skin", "seat": target, "caster": seat, "player": seat.is_player, "frac": frac})
+	if aspect == "draw":
+		_draw_feedback(s, seat, mode, null)   # a graded skin release rides the Current/rig economy
+
 ## OVERFLOWING CUP boon: a share of the spill isn't wasted — it heals the most-hurt ally.
 func _on_spill(s: CombatState, seat: Seat, over: float) -> void:
 	if _b("overflowingCup"):
@@ -443,7 +566,13 @@ func _draw_feedback(s: CombatState, seat: Seat, mode: String, target: Seat) -> v
 				_rig_fire(s, seat, "high_water")
 			_bene_pip(s, seat)
 		"under":
-			if not _b("shortPour"):                          # SHORT POUR: the quick-sip keeps the Current
+			# EDDYLINE (boon): once per 10s an undercook DOWNGRADES the Current by 1 instead of
+			# breaking it — costs the stack, and the sip still lands weak (a play, not a pardon).
+			if _b("eddyline") and s.tick >= int(seat.vars.get("eddyline_next", 0)) \
+					and int(seat.vars.get("current", 0)) > 0:
+				seat.vars["current"] = int(seat.vars.get("current", 0)) - 1
+				seat.vars["eddyline_next"] = s.tick + _tt(s, cfg.eddyline_cd)
+			elif not _b("shortPour"):                        # SHORT POUR: the quick-sip keeps the Current
 				_current_break(seat)
 			CombatCore._emit(s, {"t": "well_under", "seat": seat, "player": seat.is_player})
 		_:
@@ -576,6 +705,15 @@ func _add_absorb(s: CombatState, target: Seat, amt: float, caster: Seat) -> void
 	target.absorb_owner_i = s.seats.find(caster)            # co-op credit (index — cycle-safe)
 	target.ward_until_tick = maxi(target.ward_until_tick, s.tick + _tt(s, 12.0))
 
+## The still-pending deferred damage on an ally (the drip yet to land) — the HUD reads it to
+## draw the film's trailing wound. 0.0 when the ally was never skinned (byte-neutral read).
+func _skin_pending(u: Seat) -> float:
+	var drip: Array = u.vars.get("skin_drip", [])
+	var pending := 0.0
+	for chunk in drip:
+		pending += float(chunk.get("rem", 0.0))
+	return pending
+
 func _all_topped(s: CombatState, _seat: Seat, frac: float) -> bool:
 	for u in s.seats:
 		if u.role == "healer":
@@ -644,9 +782,11 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var party: Array = []
 	for u in s.seats:
 		if u.role != "healer" or (s.threat_enabled and u == seat):
+			var skinned := s.tick < int(u.vars.get("skin_until_tick", -1))
 			party.append({"seat": u, "name": u.unit_name, "role": u.role,
 				"frac": u.hp_frac(), "hp": u.hp, "max": u.hp_max, "absorb": u.absorb,
-				"debuff": not u.debuff.is_empty(), "hots": u.hots.size(), "dead": not u.alive()})
+				"debuff": not u.debuff.is_empty(), "hots": u.hots.size(), "dead": not u.alive(),
+				"skin": skinned, "skin_drip": _skin_pending(u)})
 	var o := {
 		"tick": s.tick,
 		"aspect": aspect,
@@ -661,7 +801,13 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"draw_band": _draw_band(),
 		"still_point": _still_width(),
 		"held": bool(seat.casting.get("held", false)),
+		"held_start": int(seat.casting.get("held_start", -1)),   # tremble read (S5 render)
+		"held_until": int(seat.casting.get("held_until", -1)),   # the gutter clock (AI hold-release)
+		"hold_armed": _hold_armed(),                             # Patient Hand creed OR ⭐Vigil module
+		"secondhand": _b("secondHand"),                          # off-hand flash stays castable while holding
 		"blindfold": _b("blindfold"),
+		"flume": s.tick < int(seat.vars.get("flume_until", -1)),       # RAPIDS: white water
+		"frozen": s.tick < int(seat.vars.get("glassriver_until", -1)), # EDDY: still water
 	}
 	# deck gauges (only meaningful when the module/creed is equipped — the HUD reads them then)
 	if _m("reservoir"):
@@ -673,6 +819,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	if _m("benediction"):
 		o["bene"] = int(seat.vars.get("bene", 0))
 		o["bene_pips"] = cfg.bene_pips
+	if _m("vigil"):
+		o["hold_active"] = bool(seat.casting.get("held", false))
+		o["hold_start"] = int(seat.casting.get("held_start", -1))
+		o["hold_until"] = int(seat.casting.get("held_until", -1))   # the gutter clock (tremble render, S5)
 	if _cr_b("foresight"):
 		o["foresight"] = int(seat.vars.get("foresight", 0))
 	if not seat.casting.is_empty():
@@ -693,6 +843,11 @@ func recap_spec(_s: CombatState, seat: Seat) -> Array:
 		rows.append({"label": "Pours", "value": str(int(d.get("well_pour", 0))), "hint": "charged heals cast"})
 	if int(d.get("dispel", 0)) > 0:
 		rows.append({"label": "Dispels", "value": str(int(d.get("dispel", 0))), "hint": ""})
+	if int(d.get("well_skin", 0)) > 0:
+		rows.append({"label": "Skins", "value": str(int(d.get("well_skin", 0))), "hint": "films cast"})
+	var deferred := int(seat.vars.get("skin_deferred", 0.0))
+	if deferred > 0:
+		rows.append({"label": "Damage re-timed", "value": str(deferred), "hint": "deferred by Skin"})
 	var cur := int(seat.vars.get("charges", -1))
 	if cur >= 0:
 		rows.append({"label": "Charges left", "value": str(cur), "hint": "at the final bell"})

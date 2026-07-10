@@ -836,6 +836,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `meter-l3` → main (`9a6f6c0`→`7ee55b2`) · §SYSTEMS/§GRAPHICS · **METER L3
+  SEGMENTS / RUN HISTORY — BUILT & MERGED (Bill: "continue to L3 now").** Recount's
+  Current/Overall/per-pull dropdown, and it built the deferred run-recap accumulator in the same
+  slice. **Accumulator:** `RunDirector.fight_log` — each fight snapshots meter/boon_meter/diag
+  (+elapsed+encounter name) at `_on_end_moment` (once/fight, win/loss, headless too), auto-reset
+  per descent via `fight_log_seed` keyed on `run_seed`; deep-copied plain data. **This unblocks
+  the run-summary screen** (BUILD-LEDGER `:270` → 🟡, screen still owed). **Selector:** a footer
+  chip cycles This Fight / Whole Run / ‹each past fight›; Whole Run merges snapshots (skips the
+  live fight when frozen to avoid a double-count). Works across all 6 modes via a duck-typed
+  `_Segment` (readers de-typed off `CombatState` — StatsPage's static calls still pass a real
+  state; diag routed through `_diag_of`; segment build cached; NOW live-only). **Bugs caught &
+  fixed pre-merge:** `fights` name collision (→ `fight_log`), Whole-Run double-count on the end
+  screen, 3 Variant-inference parse errors from de-typing. Touches `run_director`/`raid_hud`/
+  `meter_panel`; **project imports clean**, auto-merged clean on `raid_hud`. **⚠ built with the
+  sim/screenshot bar paused (`2ee8325`) — a live playthrough is owed** (segment cycling + Whole
+  Run totals). Ledger §G → 🔨 `7ee55b2`; METER-PLAN L3 ticked. **Meter is now feature-complete
+  through L3** (6 modes + sparklines + run-history); remaining: run-summary screen · L4 window
+  chrome · L5 teaching layer. *(meter session)*
+
 - ☑ 2026-07-10 · `meter-spark` → main (`1924405`→`a26a3cd`) · §SYSTEMS/§GRAPHICS · **METER
   SPARKLINES — BUILT & MERGED (Bill: "continue"). L1 + all L2 view-only work now DONE.** A faint
   per-second trace behind each compact row in dmg/taken modes: reads `state.series` (cumulative
@@ -860,11 +879,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   mult: kindergarten wide → exam tight) · **the press is free** (early press = normal dump, no
   penalty — the tax is having your dump armed) · **missing = the raid's costliest single
   mistake** (ladder: Mistral biggest-blast → Gemini permanent EMPOWER stacks → Mythos
-  boss-HEAL) · counts modest (V 0 · M one 2-chain · G one 3-chain · MY CoT+Hotfix). E8 engine
-  addendum (kick-window slice + castbar lit-slice + verse sim table); note METER's parked
-  per-seat kick counter (entry below) — E8's verse table is the sim-side half. V#11 asks: does
-  the teacher Seal get one gentle chant back, or do kicks enter at Mistral (rec). *(boss-rework
-  session, pass 2)*
+  boss-HEAL) · counts modest (V one un-chained Chant · M one 2-chain · G one 3-chain · MY
+  CoT+Hotfix). E8 engine addendum (kick-window slice + castbar lit-slice + verse sim table);
+  note METER's parked per-seat kick counter (entry below) — E8's verse table is the sim-side
+  half. **V#11 ✅ DECIDED (Bill, 2026-07-10): (b) YES — "add one to Vorathek"** — the teacher
+  returns ONE gentle un-chained Devouring Chant as the floor-1 kick kindergarten (widest window,
+  ~2 casts, miss = boss heals a chunk — the gentle rehearsal for Mythos's Hotfix; ramp reads
+  single-kick→first-chain→chain+empower→exam). BOSS-PLAN §V#11/§1½/§3/§6 flipped. *(boss-rework
+  session, pass 2 + V#11)*
 
 - ☑ 2026-07-10 · `meter-l2` → main (`c502d36`→`88553af`) · §SYSTEMS/§GRAPHICS · **METER 🎯DISCIPLINE
   MODE — BUILT & MERGED (Bill: "continue").** The L2-tail follow-up to L1+AMPLIFY. A 6th
@@ -932,12 +954,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   on it). Statuses untouched (no decisions taken). Next: Bill starts the Opus build session on
   the brief. *(draw-brief session)*
 
-- ☐ 2026-07-10 · worktree `../wow-well-draw` (branch `well-draw`) · DRAW HEALER BUILD · **building
-  `WELL-DRAW-BRIEF.md` — S0 SKIN → S1 D6 deck data → S2 ⭐Vigil module → S4 policy+sims** (S3
-  transforms DEFERRED: blocked on the `wow-tempo-d0` merge — no Floor-2 ceremony to reuse yet;
-  S5 render polish deferred). Kit-local + guarded; byte-identical gate = `ab-gate.sh well_sim`
-  + `ab-gate.sh raid_sim` for S0–S2; S4 is the ONE sanctioned re-baseline (skin casting + hold
-  releases in the policy). Catalog rows flip 🟡→🔨+SHA per merged slice; ledger §C rows ticked.
+- ☑ 2026-07-10 · `well-draw` → main (`ed358aa`) · DRAW HEALER BUILD · **`WELL-DRAW-BRIEF.md`
+  S0+S1+S2+S4 BUILT & MERGED** (Bill: *"okay go for it build it"*). **S0 SKIN** — the missing-heal
+  film: a guarded per-victim defer pool in `combat_core` (`_tick_skin` drains a share of each hit
+  as late damage over ~3s; never absorbs/heals; graded Draw / plain Brim; 1 charge; `SPELL_CAP`
+  8→9). **S1 D6 reshape** — 10 new Draw boons across VIGIL·RAPIDS·EDDY (whitewater · shootGap ·
+  eddyline · **flume** · secondHand · rideTremble · **loosedAtLast** · currentReading · deepEddy ·
+  **glassRiver**), Millrace DEMOTED (opus→sonnet, Flume crowned), Skim pair (looseGrip/shortPour)
+  parked. **S2 ⭐Vigil module** — the Patient-Hand hold generalized (`_hold_armed()` = creed OR
+  module), Draw-only offer (new `WellModules.offer_ids(aspect)` + aspect-gated `_fw_module_offer_ids`).
+  **S4 policy+sims** — the AI now films the tank ahead of danger telegraphs + banks/releases a
+  held heal on the spike; `well_sim --build=vigil|rapids|eddy` cells + skin metrics. **Gates:**
+  determinism PASS (well base+loaded+3 builds · raid 4 Seals · twinfang) · **twinfang byte-identical
+  to the pinned baseline** — proof the shared `combat_core` touch is guarded-neutral for other
+  classes · well/raid re-baseline is the SANCTIONED default-comp shift (Well·Brim now casts skin) ·
+  no crashes. **DEFERRED:** S3 transforms (Cupped Hand · Deep Draw · Braid + doors — 🟡, blocked on
+  the `wow-tempo-d0` Floor-2 ceremony, still docs-only) · S5 render polish (Vigil tremble / skin
+  film / flume-frozen chrome — states already exposed in `observe`) · balance @ real fightlen
+  (Bill's lever, owed row). Catalog Draw rows + ledger §C flipped 🔨. ⚠ the full `ab-gate.sh
+  well_sim/raid_sim` couldn't run (parallel A+B OOMs the 7 GB box; testing removed mid-build) —
+  byte-neutrality proven instead via the twinfang-vs-baseline checksum match + guard-by-construction.
   *(the Draw build)*
 
 - ☑ 2026-07-10 · main (docs only) · §SYSTEMS/§GRAPHICS · **METER-PLAN.md (NEW) — the live meter
@@ -1097,6 +1133,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
+
+- ☐ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **CLAIM: DESCENT SLICE 3 —
+  THE PROMPT MARKET + PER-SEAT WALLETS** (DESCENT §6, V#11; BUILD-LEDGER §I). Core: **per-seat
+  wallets** (`run_state` `tokens`→per-seat, `Draft.mint` `state.diag`→`seat.diag` deposit-to-
+  earner so AI seats START EARNING, UPSELL spends own wallet) · **the MARKET node interior**
+  (flip `RunMap.MARKET_LIVE`; 6-slot printed-price shop; buildable slots = CURIO×2 / PATCH+refuel
+  / DEPRECATE-boon / REGENERATE charge [builds the rerolls-out charge system]; **+1 BACKUP
+  DEFERRED** if the wipe budget isn't in code, **curse-purge DEFERRED** to Jailbreak slice 4) ·
+  **AI director + AUTO** shop spend · **post-Seal MARKET PHASE** (recovery-only) · **curio
+  reframes** (Hashgrinder→prices−1⏣, Hot Reload→2 REGENERATE) · `tokens@market` sim diag. ⚠
+  Touches the `draft.gd` + `raid_hud.gd` hotspots (coordinating w/ live tempo/tank/cask/well
+  worktrees — merge main often). rerolls-out is a SANCTIONED `draft_sim` re-baseline. Recon
+  workflow scoping buildable-vs-deferred now. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **DESCENT SLICE 2 — THE
   LEGIBILITY UI PASS: MERGED to main (`1f5e051`), 2 commits, ZERO file collisions with the

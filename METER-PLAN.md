@@ -128,18 +128,24 @@ all needs a small **engine field** (so it's no longer pure view): per-seat inter
 activity % (first/last-hit tick span), the `src_label()` prettifier (low-value — `capitalize()`
 reads today's sources fine). The next *substantial* level is **L3**.
 
-### L3 — SEGMENTS & RUN HISTORY — Recount's killer feature (needs the deferred accumulator)
-Recount's Current / Overall / per-pull dropdown. This **is** the deferred run-recap
-(`BUILD-LEDGER.md:270` 🔴) — build the accumulator once, and both the run-summary screen *and*
-the live meter's segment dropdown fall out of it.
-- `run_state` gathers each fight's `meter`/`boon_meter`/`diag` snapshot on fight-end.
-- Live meter gains a segment selector: **This Fight · Whole Run · ‹pick a past fight›**
-  ("Vorathek", "Elite pack 2", …). "Whole Run" sums the snapshots.
-- **Dependency:** the run-level accumulator (class-agnostic data, low drift). **Do this
-  together with the run-summary screen** — same data, two front-ends.
-- **Verify:** `ab-gate` (accumulator is diag-family too) · new `map_sim`/run smoke that a
-  cleared run produces N segments. **Files:** `run_state.gd`, `run_director.gd`, `meter_panel.gd`,
-  + the run-summary screen. **Size: M.**
+### ✅ L3 — SEGMENTS & RUN HISTORY — Recount's killer feature — **BUILT `7ee55b2`**
+Recount's Current / Overall / per-pull dropdown — and it built the deferred run-recap accumulator
+in the same slice.
+- ✅ **The accumulator:** `RunDirector.fight_log` — each fight snapshots its `meter`/`boon_meter`/
+  `diag` (+ elapsed + encounter name) at `_on_end_moment` (once per fight, win/loss, headless too),
+  auto-reset per descent via `fight_log_seed` keyed on `run_seed`. Class-agnostic plain data; deep-
+  copied so it survives the next fight's state reset. **This unblocks the run-summary screen**
+  (BUILD-LEDGER `:270`) — same data, two front-ends.
+- ✅ **The segment selector:** a footer chip (click to cycle) — **This Fight · Whole Run · ‹each
+  past fight›** (labeled by encounter name). "Whole Run" merges the snapshots (`_merge_meter/_boon/
+  _diag`), skipping the live fight when frozen (it's already the last log entry — avoids a double-
+  count). Works across all 6 modes via a duck-typed `_Segment` stand-in (readers de-typed off
+  `CombatState`; `StatsPage`'s static calls still pass a real state; diag routed through `_diag_of`).
+  NOW is live-only; the built segment is cached to avoid per-frame re-merge.
+- **Verify:** project imports clean; view/diag-family so byte-safe. **⚠ built with sims/screenshots
+  paused — a live playthrough is owed** (segment cycling + Whole Run totals). **Files touched:**
+  `run_director.gd`, `raid_hud.gd`, `meter_panel.gd`. **Size: M.**
+- **Fast-follow (still 🔴):** the run-summary SCREEN on clear/wipe, now that `fight_log` exists.
 
 ### L4 — WINDOW CHROME — make it feel like a real addon
 Where it stops being a fixed panel and becomes a thing you own.

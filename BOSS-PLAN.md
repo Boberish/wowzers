@@ -27,18 +27,21 @@ same numbers). Its beat-source map + budget (~3–8 answerable beats/non-tank se
    **MYTHOS = THE THREE ACTS** (Helpful→Harmless→Honest as REAL acts with rule changes).
    *Recommendation: approve — each boss is one theme + 2–3 mechanics, no boss has everything.*
 2. **VORATHEK'S TEACHING CUTS.** Today the teacher has SEVEN mechanic types (crush/rend/chant/
-   nova/curse/DoT/volley) — more than any other Seal. Cut to four (tank stream · Volley dodge ·
-   Cataclysm heal-check · the Opening): **park** Devouring Chant (kick content is dead until
-   interrupt-by-ability anyway), Riftrot, Baleful Curse (its threat-drop concept moves to
-   Mythos Compaction, re-based on flow). *Options: (a) park all three as written (rec) ·
-   (b) keep the DoT for healer texture · (c) keep as-is.* — parked ≠ deleted; they can return
-   up-ladder or on Trial-Ladder versions.
+   nova/curse/DoT/volley) — more than any other Seal. **⚠ Devouring Chant is UN-parked (V#11
+   DECIDED (b) — it's now the floor-1 kick teacher, §1½/§6).** So this cut is now **Riftrot +
+   Baleful Curse** only; the teacher keeps five: tank stream · Volley dodge · Cataclysm
+   heal-check · **the Chant kick** · the Opening. Baleful Curse's threat-drop concept still
+   moves to Mythos Compaction (re-based on flow). *Options: (a) park both as written (rec) ·
+   (b) keep the Riftrot DoT for healer texture · (c) keep as-is.* — parked ≠ deleted; they can
+   return up-ladder or on Trial-Ladder versions.
 3. **THE DENSITY RAMP READ-BACK** *(interpreting "we block too much at the start / 1st boss
-   just has 1 or 2 and ramps up")*: Seal I presents **1–2 raid-answer types** beyond the tank's
-   own stream, and sits at the **bottom of the dodge ration** (~3–5 beats/seat); each Seal up
-   the ladder adds ~1 answer type and ~1 beat (Mythos ~6–8 + the ULTRATHINK exception). Tank
-   stream density also ramps (Vorathek slow/tall → Mythos dense). §3 table. *Confirm or correct
-   the interpretation — every number is a SealTune knob either way.*
+   just has 1 or 2 and ramps up")*: Seal I presents **3 raid-answer types** beyond the tank's
+   own stream (Volley dodge · Cataclysm heal · the Chant kick — the kick added by V#11b), and
+   sits at the **bottom of the dodge ration** (~3–5 dodge beats/seat) with the raid's lowest
+   verse count (one un-chained cast); each Seal up the ladder adds ~1 answer type and ~1 beat
+   (Mythos ~6–8 + the ULTRATHINK exception). Tank stream density also ramps (Vorathek slow/tall
+   → Mythos dense). §3 table. *Confirm or correct the interpretation — every number is a
+   SealTune knob either way.*
 4. **MISTRAL'S EXPERT FLIP.** The stance loop rotates on *(a) a fixed timed cycle* (readable,
    deterministic, SealTune period — rec) · *(b) damage-driven* (StS-Guardian-style — the raid
    part-schedules the flip, spikier) · *(c) timed base + clean-answer nudge* (the warband's
@@ -73,11 +76,13 @@ same numbers). Its beat-source map + budget (~3–8 answerable beats/non-tank se
     showing the next 2–3 telegraph SHAPES (not answers/targets) so long fights read ahead.
     *(a) park to v2 (rec — v1 ships on today's banner grammar; scope control) · (b) build in v1
     as its own HUD slice.*
-11. **VORATHEK — does the teacher get one verse?** *(added with the §1½ kick contract,
-    2026-07-10.)* Now that every non-healer will carry a kick: *(a) rec — zero verses on the
-    teacher* (the ramp holds at 2 raid answers; kicks enter at Mistral's kindergarten with its
-    extra-wide window) · *(b) return ONE gentle Devouring Chant* as the kick-teacher (3 answers
-    on the teaching Seal — earlier lesson, denser teacher).
+11. **VORATHEK — one verse? ✅ DECIDED (Bill, 2026-07-10): (b) YES — "add one to Vorathek."**
+    The teacher returns ONE gentle un-chained **Devouring Chant** as the floor-1 kick teacher:
+    the raid's **widest kick window**, ~2 casts/fight, and a landed miss = **the boss restores
+    a chunk** ("restoring from checkpoint") — the gentle rehearsal for Mythos's Hotfix, and the
+    same boss-heal shape bookends the raid. **Vorathek is now THE kick kindergarten** (Mistral
+    steps up to the first 2-verse CHAIN). Teaching Seal now = 3 raid answers (Volley · Cataclysm
+    · the kick) + the Opening — still the lowest rung. Ripples applied §1½/§3/§6.
 
 ---
 
@@ -191,7 +196,7 @@ chain rotation are the whole skill. WORLD-PLAN §PILLARS #3 + CLAUDE.md amended 
   big") — a landed verse must out-hurt any missed dodge/parry. The ladder:
   | Seal | Missed-kick consequence (first cut — all knobs, re-tuned when the flag lands) |
   |---|---|
-  | VORATHEK | none — no verses on the teacher (V#11 asks whether one returns) |
+  | VORATHEK | **Devouring Chant lands = the boss HEALS a chunk** ("restoring from checkpoint") — the widest window, the gentlest miss: recoverable, but you feel the progress slip. The teaching version of Mythos's Hotfix (boss-heal bookends the raid). |
   | MISTRAL | License verse lands = the **biggest single raid blast in the fight** (heal-scramble tier, recoverable — the loud lesson) |
   | GEMINI | Overview verses = raid blasts; the **Model Merge lands = permanent EMPOWER stack** — every miss makes the rest of the fight worse, and stacks compound |
   | MYTHOS | CoT Conclusion = the biggest EMPOWER in the raid; **OPUS Hotfix lands = the boss HEALS** (direct progress loss — the classic worst outcome); an Act-III verse at near-lethal |
@@ -201,9 +206,11 @@ chain rotation are the whole skill. WORLD-PLAN §PILLARS #3 + CLAUDE.md amended 
   per-seat table (landed / missed / uncovered verses per tier; targets: accidental <10%,
   deliberate >85% at good — WORLD-PLAN numbers stand). With early-press-fires-as-damage,
   "accidental" kicks should measure ≈0 — the table proves it.
-- **Count stays modest (Bill: "some, not a ton"):** Vorathek 0 (V#11) · Mistral one 2-verse
-  chain (~2–3 casts/fight) · Gemini one 3-verse chain incl. the Merge (~2–3 casts) · Mythos
-  CoT 3-verse (~2 casts) + Hotfix per OPUS wave. Verses stay INSIDE the §3 beat budgets.
+- **Count stays modest (Bill: "some, not a ton"):** Vorathek **one un-chained Chant** (~2
+  casts/fight, widest window — the kindergarten, V#11b) · Mistral one 2-verse chain (~2–3
+  casts) · Gemini one 3-verse chain incl. the Merge (~2–3 casts) · Mythos CoT 3-verse (~2
+  casts) + Hotfix per OPUS wave. Verses stay INSIDE the §3 beat budgets. The ramp reads
+  **single kick → first chain → chain+empower → the exam.**
 
 ---
 
@@ -255,11 +262,11 @@ low end early, high end late. All columns are SealTune-turnable.
 
 | | VORATHEK (teach) | MISTRAL | GEMINI | MYTHOS |
 |---|---|---|---|---|
-| Raid answer types (beyond tank stream + Opening) | **2** — aoe-string dodge · nova heal-check | **3** — + rand-target personal beat (+ stance read) | **4** — + raid-side feints (+ verse posture, adds) | **5–6** — + doom · flow-dump · relay/LISTENING (V#7/8) |
+| Raid answer types (beyond tank stream + Opening) | **3** — aoe-string dodge · nova heal-check · the Chant kick | **4** — + rand-target personal beat (+ stance read) | **5** — + raid-side feints (+ chain posture, adds) | **6–7** — + doom · flow-dump · relay/LISTENING (V#7/8) |
 | Non-tank beats/fight (good tier) | **3–5** | **4–6** | **5–7** | **6–8** + ULTRATHINK (exception) |
 | Tank stream texture | slow · tall · honest (the axe) | fast · light · flurry-rich (WEAVE/HOLD food) | paired beats · feint-heavy (Double-Check stays) | dense · all shapes · compaction resets |
 | Feints (HALLUCINATIONS) | none | trace (stance-flip bait) | **capital** — strings + armed-banner doubles | mind-game tier (delay-hitch beats) |
-| Verses (§1½ kick contract) | none (chant parked V#2 — V#11 asks) | 1 short chain, widest window (the kindergarten) | **densest** — chains + the Merge EMPOWER | CoT + Hotfix, tightest window (the exam) |
+| Verses (§1½ kick contract) | **one un-chained Chant, widest window (the kindergarten, V#11b)** — miss = boss heals | 1 short 2-verse chain (the first chain) | **densest** — 3-chain + the Merge EMPOWER | CoT + Hotfix, tightest window (the exam) |
 | Melee tempo (`every`) | ~1.15 gentle | ~0.95 (the tempo boss) | ~1.1 | ~1.0 → 0.9 by act |
 
 Dodge stays load-bearing everywhere (Bill: "keep it for sure") — the ramp moves COUNT and
@@ -328,23 +335,30 @@ Hanshek's 10k-HP doom sponge (the community-flagged "don't": arbitrary HP on a c
 **Identity:** the first-bound wonder (fiction re-hang owed, display-only): a BEAST, the raid's
 only silent boss — slow, huge, honest. Bill's "2H axe guy": fewer, taller, harder-hitting
 telegraphs with generous windows. Teaches the grammar: bar heights, ONE raid dodge motion,
-the heal check, the Opening, the enrage clock. **The learnable loop (S2):** its telegraph
+the heal check, the Opening, **the kick** (V#11b), the enrage clock. **The learnable loop (S2):** its telegraph
 string repeats verbatim — with one slot that only sometimes fires (the first feint-shaped
 lesson without a real feint: an empty windup, "READ" if held).
-**Vocabulary (V#2 cuts applied):** melee (gentle 1.15) · Crush/Talon talls (tank) · Void
+**Vocabulary (V#2 cuts + V#11b Chant):** melee (gentle 1.15) · Crush/Talon talls (tank) · Void
 Volley (3-beat aoe string, slow, high-damage, wide windows — THE dodge lesson) · Rift
-Cataclysm (nova heal-check, ramps by phase) · **Overload Slam (NEW, S3):** long windup →
+Cataclysm (nova heal-check, ramps by phase) · **Devouring Chant (the kick teacher, V#11b):**
+one un-chained interruptible self-heal on a slow cast (~4 s) with the raid's **widest kick
+window** — miss it and the boss restores a chunk ("restoring from checkpoint"). Teaches the
+whole kick contract on floor 1; the gentle rehearsal for Mythos's Hotfix. A wordless
+growl-cast (still no banter — see Visuals). · **Overload Slam (NEW, S3):** long windup →
 one near-lethal aoe beat (mini-doom, 1 beat not 3) → boss STUNNED ~4 s = a printed Opening
 the whole warband dumps into. Brace → survive → punish, the game's core loop in one move.
 **Structure to 5:00:** walk-in pack (2 riftspawn, PACK idiom — the pull fantasy) ~0:40 →
-ACT A loop taught (100→60%) ~1:30 → **add wave at 60%** (Broodmaw, one body — teaches
-"boss withdraws, kill the add") ~0:45 → ACT B (60→30%) loop + Overload Slam cycle ~1:15 →
-ACT C (30→0) speed 1.2, Volley gains its 4th beat (S14) ~0:50. Valley share ~27% (walk-in ·
-stun-Openings · add walk-in). **Phases:** 1.0/0.6/0.3 (mult 1.0/1.15/1.3 · speed 1.0/1.1/1.2).
+ACT A loop taught, **first Chant ~50% into it** (100→60%) ~1:30 → **add wave at 60%**
+(Broodmaw, one body — teaches "boss withdraws, kill the add") ~0:45 → ACT B (60→30%) loop +
+Overload Slam cycle + 2nd Chant ~1:15 → ACT C (30→0) speed 1.2, Volley gains its 4th beat
+(S14) ~0:50. Valley share ~27% (walk-in · stun-Openings · add walk-in). **Phases:**
+1.0/0.6/0.3 (mult 1.0/1.15/1.3 · speed 1.0/1.1/1.2).
 **Seats:** tank = slow tall parry/shield rhythm (the honest teacher) · dps = Volley + Opening
-discipline · healer = Cataclysm + melee chip (the §1c scoreboard, gentle).
-**Visuals:** no dialogue, no sigils — the silent monster before the talking machines. Rig:
-the one organic body in the raid (contrast is the point).
+discipline **+ the armed-dump kick on the Chant** (the kick tax, taught soft) · healer =
+Cataclysm + melee chip (the §1c scoreboard, gentle) — never kicks.
+**Visuals:** no dialogue breaks, no sigils — the silent monster before the talking machines
+(the Chant is a wordless growl-cast, not speech). Rig: the one organic body in the raid
+(contrast is the point).
 
 ### SEAL II — MISTRAL-7B (F2 · Ring 2) — **THE EXPERTS** · 7:00 · enrage ~9:00 = "FREE TIER EXCEEDED", **visible countdown** (S5)
 **Identity:** small, fast, efficient — the TEMPO boss; the tank's rhythm exam (melee ~0.95,
