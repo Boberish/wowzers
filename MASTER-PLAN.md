@@ -816,6 +816,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.10 (NEW) + CARD-CATALOG D0 addendum + ledger
+  rows (D0 + pillar-#3) + the Slate-Machine artifact D0 tab — **TEMPO ABILITY AUDIT (Bill's D0
+  pass) — DONE, 🟡 AT BILL'S VERDICT.** His four asks answered: **① the +2 button slots** — 4
+  spell candidates (SFORZANDO accent-arm · THE RONDO post-Coup echo · THE COUNT-IN warband call ·
+  THE PICKUP window-steal, SWIFT-gated), hold ≤2, every one carries a WHEN; + the no-button Coup
+  fix: **Evis = standard interrupt carrier, Coup = premium kick** (pillar-#3 open Q now has a
+  proposal). **② abilities are DOORS not islands** (lean) — each gates 2 boons into offers +
+  adds 1 rig WHEN (the Hone/A7 offer-gating precedent generalized); Da Capo's park reverses into
+  the Rondo door. **③ set bonuses: NO stat 2pc/4pc** (threshold trap; commitment already paid 3
+  ways) — **RESONANCE** (3-of-theme auto-lights one tiny rotational perk, the Hades-2 Infusion
+  steal) + optional cross-theme **DUO** (Blood Coda) as the counterweight. **④ the SWIFT speed
+  wall is the ENGINE's** (30 Hz: Double Time v1's 0.08s rune = sub-tick Bullseye) — **SPEED
+  GOVERNOR** law (one clamp pair, all sources asymptotic) + **DOUBLE TIME v2 = ghost notes**
+  (optional half-beat pips, beat never passes the governor); swap menu kept warm (EDGE cheapest ·
+  PUNISH pairs with Coup-as-kick · BAND = the Count-In, not a branch). 5 verdict points on the
+  artifact D0 tab. *(ability-audit session)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLAIM: CLASSBAND REGISTRY +
   SHARED GAUGE BASE (REFIT P4 — the LAST big rail; collision-map rule: land this BEFORE any
   per-class meter wave).** Bill resumed the build (morning). Plan: per-class BAND objects

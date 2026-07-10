@@ -288,8 +288,30 @@ below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
 | **The Deep Cash** (rig WHEN) | `deepcash` | — | — | 🟡 | WHEN I consume 4+ bleeds in one Evis (~×4.5). |
 | **THE SET PIECE** (signature CD) | `setPiece` | STRAT | baseline | 🟡 | ~1-min CD: marks a 4-beat PHRASE; all Perfect+ = a build-scaled flourish. The DECK-LAYOUT §5 slot's first shape. |
 
-**Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮 ·
-Efficiency 🔨→🔮 (or keep, park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate.
+**Ability-audit additions (`TEMPO-PLAN.md §17.10`, Bill's D0 pass 2026-07-10 — spells fill the
+ABILITY-LAW +2 slots; "door" boons only enter offers while their ability is held):**
+
+| Card | id | Type | Rarity | St | One line |
+|---|---|---|---|---|---|
+| **Sforzando** (spell) | `sforzando` | STRAT | H/S/O | 🟡 | Arm: your NEXT strike is the accent — Perfect+ = ×1.6/1.9/2.2 + the build's currency; slip = fizzle. ~12s cd. ⚠ rhyme-flag vs Set Piece. |
+| **The Rondo** (spell) | `rondo` | STRAT | H/S/O | 🟡 | Post-Coup valley only (~6s): replay the Coup at 40/55/70%, graded by the beat you land it on. |
+| **The Count-In** (spell) | `countIn` | TEAM | H/S/O | 🟡 | Call a beat during a boss wind-up: warband windows +~20%, ally hits on the call echo your Flow. Buff-channel debt. |
+| **The Pickup** (spell) | `pickup` | GREED | H/S/O | 🟡 | Pull your next window ~40% earlier & ~20% tighter — chosen per press, governor-clamped. SWIFT-gated. |
+| Fortissimo | `fortissimo` | GREED | H/S/O | 💡 | Sforzando door: accent window −20%, payoff +30%. |
+| Marcato | `marcato` | STRAT | H/S/O | 💡 | Sforzando door: a Bullseye accent stretches the Opening half a beat. |
+| Second Theme | `secondTheme` | POWER | H/S/O | 💡 | Rondo door: the echo % up a tier. |
+| Section Leader | `sectionLeader` | TEAM | H/S/O | 💡 | Count-In door: AI seats play tighter during your call. |
+| Tutti Chord | `tuttiChord` | GREED | H/S/O | 💡 | Count-In door: all four seats land the call → boss +8% one beat. |
+| **Resonance** (system) | — | RULE | — | 🟡 | 3 cards of one theme auto-light that theme's ONE authored perk — rotational, tiny, 1/theme, never stacks (stat set-bonuses rejected). |
+| Blood Coda (duo) | `bloodCoda` | RULE | H/S/O | 💡 | Wound+Finish duo: an Evis cashing 4+ bleeds at exactly max combo pays both ×1.25. |
+| **DOUBLE TIME v2** (keystone rework) | `doubleTime` | RULE | elite | 🟡 | v1 beat-doubling CUT at the speed governor's wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. |
+| The Accent (rig WHEN) | `accentWhen` | — | — | 💡 | WHEN I land Sforzando's accent (~×5.5) — Sforzando door. |
+| The Return (rig WHEN) | `returnWhen` | — | — | 💡 | WHEN my Rondo lands ≥ half the Coup (~×6.0) — Rondo door. |
+
+**Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮
+**(§17.10 amends: un-parks as a Rondo-door boon if the Rondo enters)** · Efficiency 🔨→🔮 (or keep,
+park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate. **Role flag (not a card,
+§17.10):** Evis = standard interrupt carrier + Coup = premium kick — pillar-#3 proposal 🟡.
 
 ## TWINFANG · FERMATA — 🔨 v5 BUILT (`f5d5397`) · **v6 KITS (D8) 🟡 2026-07-10**
 
