@@ -206,9 +206,101 @@ extends Resource
 @export var on_the_beat_frac: float = 0.60      ## fraction of the live window grade bonus a dump gains
 # DOUBLE TIME (signature): at max Flow, each further Perfect adds an "overdrive" stack.
 @export var doubletime_dmg: float = 0.04    ## +this damage per overdrive stack (flow-scaled hits)
-@export var doubletime_tighten: float = 0.06 ## window shrinks this fraction per stack…
-@export var doubletime_min_frac: float = 0.35 ## …but never below this fraction of its width
-@export var doubletime_cap: int = 12        ## overdrive stack ceiling (window-floor backstop)
+@export var doubletime_tighten: float = 0.06 ## per-stack SPEED PUSH weight (folds into the governor)
+@export var doubletime_min_frac: float = 0.35 ## DEPRECATED (D0 S0): the per-source clamp is retired —
+                                            ## the ONE window_min wall replaces it. Field kept so the
+                                            ## Resource's saved data loads; no longer read by the kit.
+@export var doubletime_cap: int = 12        ## overdrive stack ceiling (push backstop)
+
+# --- THE SPEED GOVERNOR (D0 S0, TEMPO-PLAN §17.10 D · §17.11) — ONE wall every EXTRA speed
+#     source folds into asymptotically, so stacks approach the ceiling but each card keeps a
+#     visible delta and the engine's 30 Hz Bullseye band stays readable. The accelerando itself
+#     is NOT folded here (its _lo anchors already ARE its asymptote, and folding it would move
+#     the boonless numbers): the governor is the wall for the multiplicative speed ON TOP of the
+#     accelerando (Double Time · Quickstep · later the EASE beat-speed BITE). Per-source clamps
+#     (doubletime_min_frac) are deleted — one wall. Numbers are sim knobs.
+@export var beat_rate_cap: float = 1.6      ## the governed beat may run at most this × the accelerando cadence
+@export var window_min: float = 0.15        ## a governed window never narrows below this WIDTH (sec) —
+                                            ## ≈4-5 ticks @30 Hz, keeps the 18% Bullseye band ≥ ~1 tick + read
+@export var gov_k: float = 0.9              ## asymptote curvature: rate = 1 + (cap-1)·(1 − exp(−k·push))
+
+# --- D0 S1 · QUICKSTEP (generic STRIKE boon) — each Perfect adds a SPEED PUSH (governor-clamped:
+#     the wall keeps it readable) and self-bites (tighter window). Stacks reset on a slip. ---
+@export var quickstep_speed: float = 0.08   ## each Perfect adds this push (routes through _speed_push)
+@export var quickstep_cap: int = 8          ## push stack ceiling
+
+# --- D0 S1 · DOUBLE TIME v2 (ghost notes) — v1 beat-doubling CUT at the governor wall. Sustained
+#     max-Flow clean play opens an ~8s window where each Perfect+ ALSO lands a free GHOST half-
+#     strike (no Flow risk, no window tighten, no push): twice the NOTES, never a faster beat. ---
+@export var ghost_fill: int = 6             ## max-Flow Perfects to open the ghost window
+@export var ghost_window_sec: float = 8.0   ## the ghost window stays open this long
+@export var ghost_frac: float = 0.5         ## a ghost half-strike lands at this fraction of a Perfect
+
+# --- D0 S1 · THE WOUND POT (v4 WOUND branch, TEMPO-PLAN §17) — short bleeds inscribed on the boss
+#     frame, ticked in upkeep (fixed iteration order = determinism), press-cashed by Eviscerate
+#     when Hemorrhage is held. Durations in SECONDS; a "beat" in the fiction ≈ wound_tick_every. ---
+@export var wound_tick_every: float = 0.8   ## a live bleed ticks this often (≈ one beat)
+@export var open_veins_dur: float = 1.6     ## OPEN VEINS creed: a Bullseye bleed lasts this (≈2 beats)
+@export var open_veins_tick: float = 4.0    ## OPEN VEINS: damage per bleed tick (modest)
+@export var lacerate_frac: float = 0.5      ## LACERATE boon: a Perfect inscribes a bleed at this fraction
+@export var slow_bleed_dur: float = 0.8     ## SLOW BLEED boon: +this duration (sec) …
+@export var slow_bleed_mult: float = 1.10   ## … and ticks +10%
+@export var wound_dur_cap: float = 4.0      ## SLOW BLEED cap: a bleed never lasts beyond this (~5 beats)
+@export var arterial_mult: float = 1.30     ## ARTERIAL NOTE boon: bleeds tick this much harder …
+@export var arterial_shorten: float = 0.8   ## … but expire this much sooner (sec)
+@export var hemorrhage_ext: float = 0.8     ## HEMORRHAGE module: every bleed ticks +this longer
+@export var hemorrhage_cash_per: float = 0.10 ## HEMORRHAGE: Evis cash pays +this per bleed consumed
+@export var deepcash_min_bleeds: int = 4    ## THE DEEP CASH (rig WHEN): consume this many bleeds in one Evis
+@export var exsang_min_bleeds: int = 5      ## EXSANGUINATE keystone: min live bleeds to erupt
+@export var exsang_beats: int = 3           ## EXSANGUINATE: the erupted burst spans this many ticks
+
+# --- D0 S1 · THE EDGE branch (v4) — Whetstone creed (opt-in crit from run start) + The Strop
+#     module (the KEEN meter: clean strikes whet the blade, the next crit spends it all). ---
+@export var whetstone_crit: float = 0.12    ## WHETSTONE creed: a Bullseye crits at this chance from run start
+@export var keen_cap: int = 5               ## THE STROP module: KEEN gauge ceiling
+@export var keen_per: float = 0.08          ## THE STROP: the next crit consumes all KEEN for +this per stack
+
+# --- D0 S1 · FINISH-lane boons ---
+@export var heavy_ink_per: float = 0.10     ## HEAVY INK: each combo point above the floor adds +this to the next finisher
+@export var heavy_ink_floor: int = 3        ## HEAVY INK: combo above this counts
+@export var grand_pause_mult: float = 0.25  ## GRAND PAUSE: a full-combo (5/5) Eviscerate hits +this
+
+# --- D0 S2 · RESONANCE (3 drafted cards of ONE theme auto-light ONE rotational perk) ---
+@export var res_threshold: int = 3          ## cards of a theme (creed + module + boons) that light resonance
+@export var res_edge_pad: float = 0.15      ## EDGE resonance: the window holds ~this much wider for a beat after a crit
+@export var res_edge_hold_sec: float = 0.6  ## EDGE resonance: how long the "doesn't tighten after a crit" hold lasts
+
+# --- D0 S4 · TRANSFORMS (≤1 per run, Floor-2 1-of-3; guarded no-ops when unpicked) ---
+# CADENZA (Coup): castable at Flow ≥ cadenza_min_flow, damage scales with Flow spent (full = today's).
+@export var cadenza_min_flow: int = 2       ## Cadenza: the minimum Flow to cash Coup (was max-only)
+@export var dal_segno_flow: int = 4         ## DAL SEGNO door: a Cadenza spending this many Flow seeds +1
+@export var dal_segno_seed: int = 1         ## DAL SEGNO door: the extra Flow seed
+@export var bravura_bonus: float = 0.25     ## BRAVURA door: a full-Flow Cadenza inside an Opening +this
+# RONDO (Coup): the post-Coup RETURN — for rondo_beats each Perfect+ re-strikes a fraction of the Coup.
+@export var rondo_beats: float = 4.0        ## RONDO: the RETURN lasts this many beats
+@export var rondo_restrike: float = 0.15    ## RONDO: a Perfect+ re-strikes this fraction of the stored Coup
+@export var rondo_restrike_bull: float = 0.25 ## RONDO: a Bullseye re-strikes this fraction
+@export var second_theme_bonus: float = 0.10  ## SECOND THEME door: the return fraction +this (a tier up)
+# TREMOLO (Evis): a STRING of up to N presses, each spending cp_per combo, graded per press.
+@export var tremolo_max_presses: int = 3    ## TREMOLO: presses per string
+@export var tremolo_cp_per: int = 2         ## TREMOLO: combo spent per press
+@export var tremolo_final_bonus: float = 0.40 ## TREMOLO: all-Perfect+ string → the final hit +this
+@export var tremolo_phrase_sec: float = 1.2 ## TREMOLO: a press must land within this of the last, or the string ends
+@export var triplet_bonus: float = 0.40     ## TRIPLET door: an all-Bullseye string pays the final hit +this MORE
+@export var rolled_chord_pad: float = 0.15  ## ROLLED CHORD door: the string's grade window pads ENTRY-side this much
+
+# --- D0 S3 · THE DUOS (cross-theme capstones — armed at >=2 drafted cards from EACH theme; Opus) ---
+@export var blood_coda_mult: float = 1.15   ## BLOOD CODA (Wound×Finish): a full-combo Evis cashing 4+ bleeds pays both ×this
+@export var grand_finale_bonus: float = 0.50 ## GRAND FINALE (Edge×Finish): a full-combo finisher with crit hot = guaranteed crit +this crit dmg
+
+# --- D0 S6 · THE SET PIECE (signature CD, DECK-LAYOUT §5 — the first signature-CD build game-wide):
+#     press to MARK the next `setpiece_phrase` strikes as a phrase; land them ALL Perfect+ and cash a
+#     build-scaled flourish (flow-scaled damage + bleeds pulse + combo refund + a Flow-lock). ---
+@export var setpiece_enabled: bool = true    ## master A/B (off = classic Tempo, no signature — byte-identical baseline)
+@export var setpiece_phrase: int = 4         ## strikes to nail across the phrase (the one knob)
+@export var setpiece_flourish: float = 140.0 ## the flourish's base damage (flow-scaled)
+@export var setpiece_refund_cp: int = 2      ## the flourish refunds this combo (the FINISH flavor)
+@export var setpiece_flowlock_sec: float = 2.0 ## the flourish locks Flow (no decay) this long
 
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
@@ -231,12 +323,18 @@ extends Resource
 	# TEMPO REWORK · draftable spells (new buttons; fill bar slots 5+)
 	"gracenote":   {"name": "Grace Note",    "key": "6", "energy": 18.0, "dmg": 14.0, "cd": 2.0},
 	"coda":        {"name": "Coda",          "key": "7", "energy": 25.0, "cd": 10.0},
+	# D0 S6 · THE SET PIECE — the signature CD (DECK-LAYOUT §5 slot). Arming is free; the phrase is the cost.
+	"setpiece":    {"name": "Set Piece",     "key": "5", "energy": 0.0, "cd": 60.0, "sig": true},
 }
 
-## The four-slot bar for an Aspect (signature appended last). Draft spells fill 5+.
+## The bar for an Aspect (signature appended last). Draft spells fill 5+. D0 S6: the Set Piece
+## signature CD joins the Tempo/Fermata bar (guarded by setpiece_enabled — off = no signature).
 func loadout(aspect: String) -> Array:
 	if aspect == "tempo" or aspect == "fermata":   # Fermata IS Tempo's kit — the strike just COILS
-		return ["strike", "eviscerate", "kick", "coupdegrace"]
+		var bar := ["strike", "eviscerate", "kick", "coupdegrace"]
+		if setpiece_enabled:
+			bar.append("setpiece")
+		return bar
 	return ["strike", "envenom", "kick", "rupture"]
 
 # Phase B slot-verb RHYTHM mods (build-your-Rhythm; entries with `slot` in TwinfangBoons).

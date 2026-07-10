@@ -14,6 +14,7 @@ var boons: Dictionary = {}        ## acquired upgrade/relic id -> true
 var creed: String = ""            ## run-start risk temperament (TwinfangCreeds id); "" = default
 var modules: Dictionary = {}      ## equipped UI Modules id -> true (picked at Floor-1 elevation)
 var rig: Dictionary = {}          ## the ONE Combo rig (TEMPO §5): {"when": id, "then": id}; wired at draft 1
+var transform: String = ""        ## D0 S4: the ONE ability transform (cadenza/rondo/tremolo); picked at Floor 2; "" = none
 var enc_index: int = 0
 var encounters: Array = []        ## Array[EncounterRes]
 
@@ -21,6 +22,8 @@ var encounters: Array = []        ## Array[EncounterRes]
 var run_seed: int = 0             ## seeds fights (closed-form) and the draft stream
 var draft_rng: DetRng = null      ## draft/economy stream — never state.rng, never the global RNG
 var tokens: int = 0               ## skill-minted draft currency ("spend them responsibly")
+var regenerate: int = 0           ## banked REGENERATE charges — the ONLY reroll (rerolls-out §11#3):
+                                  ## earned/bought/Hot-Reload-granted, spent to redraw a draft row
 var pity_opus: int = 0            ## drafts since an opus was OFFERED while one was offerable
 
 # ---- Topology map mode (MASTER-PLAN §MAPS; map == null ⇒ classic linear run, untouched)

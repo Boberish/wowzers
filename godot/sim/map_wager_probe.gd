@@ -34,16 +34,23 @@ func _process(_d: float) -> bool:
 
 func _test_wager_fold() -> void:
 	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 4, 0, {}, {}, 0)
-	var wager: Dictionary = (MapContent.event("overtime_daemon")["choices"] as Array)[1]
-	_ok("overtime 'Bill it' is a WAGER staking integrity",
-		String(wager.get("kind", "")) == "wager" and String(wager["wager"]["stake"]) == "integrity")
-	# resolve at several seeds — the stake (0.08 hurt) is folded WIN OR LOSE
+	# SYNTHETIC wager — decoupled from content. The integrity kill (DESCENT §11 #2)
+	# re-priced the only in-content wager (overtime_daemon) off the retired "integrity"
+	# stake, so this guards the SURVIVING wager-fold path (MapCheck.resolve, §12 keeps
+	# wagers) directly: a 2 ⏣ stake folded into the leg fx, paid WIN OR LOSE.
+	var wager := {"kind": "wager", "wager": {"stake": "tokens", "amount": 2},
+		"check": {"verb": "OUTBID", "tags": ["rage"], "base": 40, "per": 9},
+		"success": {"fx": {"tokens": 4, "entropy": 1}}, "fail": {"fx": {"refund_entropy": 1}}}
+	_ok("synthetic 'Bill it' is a WAGER staking tokens",
+		String(wager.get("kind", "")) == "wager" and String(wager["wager"]["stake"]) == "tokens")
+	# resolve at several seeds — the 2 ⏣ stake is folded WIN OR LOSE (success 4−2=+2, fail 0−2=−2)
 	var always := true
 	for seed in [1, 2, 7, 99, 4242]:
 		var res := MapCheck.resolve(wager, ctx, seed, 3, 1, 0, {})
-		if float((res["fx"] as Dictionary).get("hurt", 0.0)) < 0.08:
+		var base_tokens := 4 if bool(res["success"]) else 0
+		if int((res["fx"] as Dictionary).get("tokens", 0)) != base_tokens - 2:
 			always = false
-	_ok("the wager stake (8% integrity) is folded into fx, win or lose", always)
+	_ok("the wager stake (2 ⏣) is folded into fx, win or lose", always)
 
 func _test_online_mulligan() -> void:
 	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 6, 0, {}, {}, 0)

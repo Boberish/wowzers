@@ -9,9 +9,9 @@ const CHORDS := ["left", "right", "middle", "shift+left", "shift+right", "ctrl+l
 const DEFAULTS := {
 	"left": "flash", "right": "mend", "middle": "cascade",
 	"shift+left": "spring", "shift+right": "dispel",
-	"ctrl+left": "rekindle",
+	"ctrl+left": "rekindle", "ctrl+right": "skin",
 }
-const SPELL_OPTIONS := ["none", "flash", "mend", "cascade", "spring", "dispel", "rekindle"]
+const SPELL_OPTIONS := ["none", "flash", "mend", "skin", "cascade", "spring", "dispel", "rekindle"]
 
 ## Disk moved to the Profile aggregate (REFIT P4 save unification — the old
 ## user://well_binds.json is legacy, imported once). Chord validation stays HERE.

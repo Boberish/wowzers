@@ -32,6 +32,11 @@ var entropy: int = 0
 var flags: Dictionary = {}
 var marks: Dictionary = {}         ## a pending fight-altering mark (KILL SWITCH cash-out / curse)
 var charge: int = 0                ## ⏻ THE KILL SWITCH — a party-shared 0..100 meter
+# ---- THE JAILBREAK (§7): active curses (cap 2). Each = {kind, label, fights, mag}: kind ∈
+# economy_mint | economy_price | hp | timing; fights>0 = bounded (ticks down at its bite site).
+# NOT in cp_view — read directly on _d like tokens (offline-only this slice; online = no-op).
+var curses: Array = []
+var deprecate_uses: int = 0        ## DEPRECATE price escalates each use (§6)
 var check_fails: int = 0           ## consecutive check fails → comeback pity
 
 # ---- GEAR-1 (Curios): run-scoped loot; only Ledger UNLOCKS persist (GearStore)
@@ -44,6 +49,8 @@ var drop_rng: DetRng = null        ## the drop stream — NEVER the combat rng
 # ---- Draft 2.0 + COMMANDER: the human's boon run, and the AI raiders you command
 var run_seed: int = -1             ## the descent's ONE minted seed (REFIT P4): drops/floors/fights/drafts derive closed-form — a run replays from this integer
 var run: RunState = null           ## the human's boon run (null = no descent live)
+var fight_log: Array = []          ## METER L3 — per-fight meter snapshots (MeterPanel.snapshot) for the meter's run-history segments; auto-reset per descent via fight_log_seed
+var fight_log_seed: int = -2       ## the run_seed the `fight_log` was gathered under (-2 sentinel); a change clears the log = new descent
 var taken_boons: Array = []        ## drafted boon dicts (for the build panel: title/rarity)
 var party: Dictionary = {}         ## AI seats only: seat_key -> {cls, aspect} (persists across descents)
 var ai_runs: Dictionary = {}       ## AI seats only: seat_key -> RunState (their boon runs)

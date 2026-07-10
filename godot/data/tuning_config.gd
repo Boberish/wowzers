@@ -28,6 +28,16 @@ extends Resource
 ## members 2+ ever have entered_tick > 0, so classic fights never read this.
 @export var pack_walkin_ticks: int = 75        ## 2.5s at 30 Hz
 
+# --- boss scheduling + engine ceilings (the P4 literals sweep — defaults are the
+#     exact old hard-codes, so every fight stays byte-identical until someone tunes) ---
+@export var open_stagger_base: float = 2.0     ## first ability arms this many seconds in
+@export var open_stagger_step: float = 1.5     ## each further ability arms this much later
+@export var open_stagger_jitter: float = 0.3   ## + rng × (cd × this) — spreads the opening
+@export var silence_recheck: float = 0.4       ## a silenced interruptible cast re-checks after this
+@export var chain_splash: float = 0.28         ## CHAIN ability: the arced second hit's fraction
+@export var dmg_buff_cap: float = 0.55         ## EMPOWER_BOSS permanent-buff ceiling (+55%)
+@export var curse_answer_window: float = 2.0   ## a taunt within this of a THREAT_DROP answers the curse
+
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
 @export var sunder_max: float = 5.0            ## pip ceiling

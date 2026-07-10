@@ -30,7 +30,7 @@ const ITEMS := {
 	},
 	"ticket_stub": {
 		"name": "Ticket Stub", "rarity": "haiku", "cls": "", "kind": "util",
-		"desc": "Closing a TICKET also repairs +10% party integrity and pays +1⏣.",
+		"desc": "Closing a TICKET also pays +2⏣.",
 		"flavor": "The subagent does the chores.",
 	},
 	"cooling_paste": {
@@ -57,12 +57,12 @@ const ITEMS := {
 	},
 	"hashgrinder": {
 		"name": "Hashgrinder Rig", "rarity": "sonnet", "cls": "", "kind": "util",
-		"desc": "All Token income is doubled, forever.",
+		"desc": "THE PROMPT MARKET is cheaper — every price −1⏣ (floor 1⏣).",
 		"flavor": "It mines while you fight.",
 	},
 	"hot_reload": {
 		"name": "Hot Reload", "rarity": "sonnet", "cls": "", "kind": "util",
-		"desc": "Rerolling a boon draft is FREE — reload the offer as many times as you like, no Tokens spent.",
+		"desc": "Grants 2 REGENERATE charges on equip — bank them to redraw a boon offer.",
 		"flavor": "Recompiled without restarting.",
 	},
 }

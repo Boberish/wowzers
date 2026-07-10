@@ -89,7 +89,8 @@ func _show_prompt() -> void:
 func _effective(c: Dictionary) -> Dictionary:
 	var m := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
 		"orig_index": int(c.get("orig_index", 0)), "fx": c.get("fx", {}),
-		"verb": String(c.get("verb", "CHECK")), "entropy_have": int(c.get("entropy_have", 0))}
+		"verb": String(c.get("verb", "CHECK")), "entropy_have": int(c.get("entropy_have", 0)),
+		"win_fx": c.get("win_fx", {}), "lose_fx": c.get("lose_fx", {})}   # both legs, printed pre-commit (§9.2)
 	var v: Dictionary = c
 	if c.has("by_seat") and _acting != "":
 		v = (c["by_seat"] as Dictionary).get(_acting, {})
@@ -172,6 +173,14 @@ func _add_choice_button(c: Dictionary, i: int) -> void:
 			var d := int((row as Array)[1])
 			parts += "  %s %s%d" % [String((row as Array)[0]), ("+" if d >= 0 else ""), d]
 		_sub("%s —%s" % [verb, parts], Palette.TEXT_DIM)
+		# BOTH LEGS, printed pre-commit (§9.2): what winning pays AND what losing costs —
+		# so a check reads like "72% · on ✓ +2⏣ · on ✗ nothing lost" (fails are soft, free).
+		var win := _fx_hint(c.get("win_fx", {}))
+		var lose := _fx_hint(c.get("lose_fx", {}))
+		if win != "" or lose != "":
+			_sub("on ✓  %s      ·      on ✗  %s" % [
+				(win if win != "" else "nothing gained"),
+				(lose if lose != "" else "nothing lost")], accent)
 		_add_nudge_row(c, orig)
 	else:
 		var hint := _fx_hint(c.get("fx", {}))
@@ -191,7 +200,7 @@ func _add_nudge_row(c: Dictionary, orig: int) -> void:
 	minus.pressed.connect(_adjust_nudge.bind(orig, -1))
 	row.add_child(minus)
 	var lbl := Label.new()
-	lbl.text = "feed ⚡ to bias  (hold %d)" % int(c.get("entropy_have", 0))
+	lbl.text = "spend ⚡ LUCK to raise the odds  (hold %d)" % int(c.get("entropy_have", 0))
 	lbl.custom_minimum_size = Vector2(300, 0)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", 12)
@@ -222,7 +231,7 @@ func _adjust_nudge(orig: int, delta: int) -> void:
 	if _nudge_lbl.has(orig):
 		var l := _nudge_lbl[orig] as Label
 		if cur == 0:
-			l.text = "feed ⚡ to bias  (hold %d)" % int(c.get("entropy_have", 0))
+			l.text = "spend ⚡ LUCK to raise the odds  (hold %d)" % int(c.get("entropy_have", 0))
 			l.add_theme_color_override("font_color", Palette.VOID)
 		else:
 			l.text = "⚡ %d fed  →  %d%%" % [cur, p]
@@ -308,9 +317,9 @@ func _can_mulligan() -> bool:
 func _fx_hint(fx: Dictionary) -> String:
 	var bits: Array = []
 	if float(fx.get("heal", 0.0)) > 0.0:
-		bits.append("+%d%% integrity" % int(round(float(fx["heal"]) * 100.0)))
+		bits.append("+%d%% party HP" % int(round(float(fx["heal"]) * 100.0)))
 	if float(fx.get("hurt", 0.0)) > 0.0:
-		bits.append("−%d%% integrity" % int(round(float(fx["hurt"]) * 100.0)))
+		bits.append("−%d%% party HP" % int(round(float(fx["hurt"]) * 100.0)))
 	if float(fx.get("wound", 0.0)) > 0.0:
 		bits.append("corrupted sector")
 	if bool(fx.get("repair", false)):
@@ -319,6 +328,12 @@ func _fx_hint(fx: Dictionary) -> String:
 		bits.append("emergency patch")
 	if int(fx.get("tokens", 0)) != 0:
 		bits.append("%s⏣%d" % [("+" if int(fx["tokens"]) > 0 else "−"), abs(int(fx["tokens"]))])
+	if int(fx.get("charge", 0)) != 0:
+		bits.append("%s⏻%d" % [("+" if int(fx["charge"]) > 0 else "−"), abs(int(fx["charge"]))])
+	if int(fx.get("regenerate", 0)) != 0:
+		bits.append("+%d REGENERATE" % int(fx["regenerate"]))
+	if fx.has("curse"):        # §7 the printed BITE — the other half of a JAILBREAK deal
+		bits.append("CURSE: %s" % String((fx["curse"] as Dictionary).get("label", "a curse")))
 	if int(fx.get("entropy", 0)) != 0 or int(fx.get("refund_entropy", 0)) != 0:
 		var e := int(fx.get("entropy", 0)) + int(fx.get("refund_entropy", 0))
 		bits.append("%s⚡%d" % [("+" if e > 0 else "−"), abs(e)])

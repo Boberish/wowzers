@@ -5,9 +5,10 @@
 **live coaching surface**. Bill's ask (2026-07-10): *"make it nice like Recount so I can
 see more details; plan what the next level up is."*
 
-**Status:** 🟡 design — a leveled roadmap (L1→L5) at Bill's verdict. NOT built. The engine
-data already exists for most of L1–L2 (STATS PAGE v2 laid the accounting); this is largely a
-**view-layer** plan, so nearly all of it is **byte-identical / diag-family** work.
+**Status:** 🔨 **L1 + ⚡AMPLIFY BUILT & MERGED** (`cce7c92`, 2026-07-10) · L2 tail + L3–L5 🟡
+design. The engine data already exists for most of L1–L2 (STATS PAGE v2 laid the accounting);
+this is largely a **view-layer** plan, so nearly all of it is **byte-identical / diag-family**
+work (L1+AMPLIFY proved `ab-gate raid_sim` BYTE-IDENTICAL).
 
 **Doc of record:** the meter's *design* lives here; the *card/boon* meanings live in
 `CARD-CATALOG.md`; the post-fight FULL REPORT is `stats_page.gd` (STATS PAGE v2, built) — this
@@ -84,48 +85,67 @@ the numbers exist; the live view doesn't show them yet.
 
 Ordered by value-per-effort. Each level is a shippable slice; L1 alone makes it "nice."
 
-### ⭐ L1 — POLISH & DE-STALE — *"make it nice"* (view-only, ~1 slice)
+### ✅ L1 — POLISH & DE-STALE — *"make it nice"* — **BUILT `cce7c92`**
 The cheap, high-impact pass. No new engine data.
-- **Kill the accent switch.** New `ClassKit.accent() -> Color` hook; `_accent()` calls it.
-  Backfill Twinfang/Alchemist/Well/Bloomweaver/(Bulwark). New classes self-color forever.
-- **Move source labels to the kit.** New `ClassKit.src_label(src) -> String` (falls back to
-  `capitalize()`); retire the stale central `PRETTY` map to a small shared-source table
-  (attack/kick/DoT). Every kit names its own sources; the meter stops rotting.
-- **Compact row polish (the "Recount look"):** rank number (1./2./3.), share **%** on the
-  compact row (Recount's signature "42.3%"), class glyph/pip, a bar gradient + subtle
-  leader-glow, brighter player row, cleaner right-aligned total|rate columns.
-- **Small honesties:** show overkill on the detail line; show **activity %** (fraction of the
-  fight the seat was contributing) from a cheap first/last-hit span.
-- **Verify:** `ab-gate.sh raid_sim` byte-identical (view-only) · `meter_probe` green ·
-  `screenshot_meter` visual probe (WSLg) for every accent + the new compact look.
-- **Files:** `meter_panel.gd`, `class_kit.gd` + 3 kit overrides. **Size: S.**
+- ✅ **Killed the accent switch.** New `ClassKit.accent() -> Color` hook (built-in Color — the
+  data layer never imports Palette/UI; sibling to `recap_spec()`); `_accent()` calls it.
+  Backfilled all 5 kits (Twinfang cyan · Alchemist ember · Well water · Bloomweaver jade ·
+  Bulwark gold). **Fixed the live bug: Alchemist + Well now have identity** (were steel).
+- ✅ **Compact row polish (the "Recount look"):** rank number (#1 gilded), share **%** column,
+  player-row wash, brighter bar leading-edge cap.
+- ⏳ **L2 tail — deferred:** `ClassKit.src_label()` per-kit hook — the active kits emit
+  `attack/boil/poison/red_harvest/ward`, all of which `capitalize()` already reads fine, so the
+  central `PRETTY` de-stale was low-value; do it when a kit ships a src that needs prettifying.
+- ⏳ **L2 tail — deferred:** overkill on the detail line; **activity %** (needs a cheap
+  first/last-hit tick span on the meter row — a small engine field, so not pure view).
+- **Verified:** `ab-gate.sh raid_sim` **BYTE-IDENTICAL PASS**, project imports clean. (Visual
+  `screenshot_meter` skipped — Bill paused the sim/verify bar mid-build.)
+- **Files touched:** `meter_panel.gd`, `class_kit.gd` + 5 kit overrides. **Size: S.**
 
 ### L2 — MORE MODES — *"see more details"* (surface data already captured)
 The richest untapped seams. Each is a new header-cycle mode reading existing state.
-- **⚡ AMPLIFY mode** (the standout — *Recount can't do this*). Reads `boon_meter`: per seat,
-  "≈ +X raid damage your debuffs enabled" (Sunder/Glint/Debilitate from the −1 pool, credited
-  to whoever applied them) + each seat's own inline boon lift. Answers Bill's *why* directly:
-  *which boons/passives are actually carrying.* Data is live; this is pure view.
-- **🎯 DISCIPLINE mode.** Reads `seat.diag`: interrupts landed · casts let finish
-  (`kick_open_missed`) · times-hit · aggro strays · dodge/parry grade mix. This is Recount's
-  Interrupts + a "are they playing clean?" scoreboard, in one column.
-- **Per-row sparkline.** A tiny live DPS trace per compact row from `series` — the shape of the
-  fight at a glance.
-- **Verify:** same as L1 (all diag-family). `meter_probe` already reconciles `boon_meter`.
-  **Files:** `meter_panel.gd` only. **Size: S–M.**
+- ✅ **⚡ AMPLIFY mode — BUILT `cce7c92`** (the standout — *Recount can't do this*). Reads
+  `boon_meter` as a new header-cycle mode: ranks each seat's OWN boon lift + a synthetic **RAID
+  AMPS** row for the −1 pool (Sunder/Glint/Debilitate — the engine credits these raid-wide, not
+  to the applier, so the row is honest as "raid" not mis-attributed); drill a row → per-boon
+  "≈ +X dmg/heal". Answers Bill's *why* directly. The live twin of STATS PAGE v2's BOON IMPACT.
+- ✅ **🎯 DISCIPLINE mode — BUILT `88553af`.** A live "who's playing clean" scoreboard: one row
+  per gradeable seat, ranked by clean-answer % (perfect/good/graze/read vs miss/baited/whiff),
+  colored by grade S..D, bar ∝ clean%; the dim tail shows the fault count (times hit · strays
+  off the tank). Stat-block AI is skipped (no timed inputs); <3 answers shows "—". `_disc_clean`
+  mirrors STATS PAGE v2's `_pct_defense` so live and post-fight grades agree. Compact-only
+  (non-interactive) — the full grade breakdown stays on the stats page. **Note:** interrupts
+  aren't per-seat in state (they're a HUD-side tally), so DISCIPLINE grades answers + strays,
+  not kicks — a per-seat interrupt counter would be a small engine field (L2-tail follow-up).
+- ✅ **Per-row sparkline — BUILT `a26a3cd`.** A faint per-second trace behind each compact row
+  (dmg/taken modes), read from `series` (cumulative col `base+i` → differentiated → normalized to
+  the seat's own peak), drawn low-alpha under the text so it adds "shape of the fight" texture
+  without crowding the columns. heal/shield/amp/disc have no series data → no sparkline.
+- **Verify:** same as L1 (all diag-family). **Files:** `meter_panel.gd` only. **Size: S–M.**
 
-### L3 — SEGMENTS & RUN HISTORY — Recount's killer feature (needs the deferred accumulator)
-Recount's Current / Overall / per-pull dropdown. This **is** the deferred run-recap
-(`BUILD-LEDGER.md:270` 🔴) — build the accumulator once, and both the run-summary screen *and*
-the live meter's segment dropdown fall out of it.
-- `run_state` gathers each fight's `meter`/`boon_meter`/`diag` snapshot on fight-end.
-- Live meter gains a segment selector: **This Fight · Whole Run · ‹pick a past fight›**
-  ("Vorathek", "Elite pack 2", …). "Whole Run" sums the snapshots.
-- **Dependency:** the run-level accumulator (class-agnostic data, low drift). **Do this
-  together with the run-summary screen** — same data, two front-ends.
-- **Verify:** `ab-gate` (accumulator is diag-family too) · new `map_sim`/run smoke that a
-  cleared run produces N segments. **Files:** `run_state.gd`, `run_director.gd`, `meter_panel.gd`,
-  + the run-summary screen. **Size: M.**
+**✅ L1 + all L2 view-only work is DONE** (6 modes + sparklines, `a26a3cd`). What's left on L2
+all needs a small **engine field** (so it's no longer pure view): per-seat interrupt counter,
+activity % (first/last-hit tick span), the `src_label()` prettifier (low-value — `capitalize()`
+reads today's sources fine). The next *substantial* level is **L3**.
+
+### ✅ L3 — SEGMENTS & RUN HISTORY — Recount's killer feature — **BUILT `7ee55b2`**
+Recount's Current / Overall / per-pull dropdown — and it built the deferred run-recap accumulator
+in the same slice.
+- ✅ **The accumulator:** `RunDirector.fight_log` — each fight snapshots its `meter`/`boon_meter`/
+  `diag` (+ elapsed + encounter name) at `_on_end_moment` (once per fight, win/loss, headless too),
+  auto-reset per descent via `fight_log_seed` keyed on `run_seed`. Class-agnostic plain data; deep-
+  copied so it survives the next fight's state reset. **This unblocks the run-summary screen**
+  (BUILD-LEDGER `:270`) — same data, two front-ends.
+- ✅ **The segment selector:** a footer chip (click to cycle) — **This Fight · Whole Run · ‹each
+  past fight›** (labeled by encounter name). "Whole Run" merges the snapshots (`_merge_meter/_boon/
+  _diag`), skipping the live fight when frozen (it's already the last log entry — avoids a double-
+  count). Works across all 6 modes via a duck-typed `_Segment` stand-in (readers de-typed off
+  `CombatState`; `StatsPage`'s static calls still pass a real state; diag routed through `_diag_of`).
+  NOW is live-only; the built segment is cached to avoid per-frame re-merge.
+- **Verify:** project imports clean; view/diag-family so byte-safe. **⚠ built with sims/screenshots
+  paused — a live playthrough is owed** (segment cycling + Whole Run totals). **Files touched:**
+  `run_director.gd`, `raid_hud.gd`, `meter_panel.gd`. **Size: M.**
+- **Fast-follow (still 🔴):** the run-summary SCREEN on clear/wipe, now that `fight_log` exists.
 
 ### L4 — WINDOW CHROME — make it feel like a real addon
 Where it stops being a fixed panel and becomes a thing you own.

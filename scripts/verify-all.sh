@@ -18,6 +18,19 @@
 # scripts/ab-gate.sh. Visual probes (screenshot_*) need WSLg and stay manual.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# --- PAUSE SWITCH (pre-release: we're building, not gating — Bill, 2026-07-10) ---
+# While a marker file exists the WHOLE bar no-ops instead of spawning ~40 Godots,
+# so concurrent sessions stop pegging the box. This is intentional pre-release.
+#   un-pause:     rm ~/.rift-verify-paused
+#   force 1 run:  RIFT_VERIFY_RUN=1 scripts/verify-all.sh
+# (Individual sims — scripts/psim.sh <sim> — are light and still run directly.)
+if [ -z "${RIFT_VERIFY_RUN:-}" ] && { [ -f "$HOME/.rift-verify-paused" ] || [ -f "$ROOT/.verify-paused" ]; }; then
+  echo "verify-all: PAUSED — skipping the bar (pre-release; building, not gating)."
+  echo "  un-pause: rm ~/.rift-verify-paused   |   force: RIFT_VERIFY_RUN=1 scripts/verify-all.sh"
+  exit 0
+fi
+
 GODOT="${GODOT:-$HOME/.local/bin/godot}"
 SEEDS="${SEEDS:-60}"                     # lighter default; SEEDS=300 for heavy claims
 NC="$(nproc)"
@@ -41,7 +54,7 @@ BALANCE=(
   "alchemist_sim:--seeds=$SEEDS" "well_sim:--seeds=$SEEDS" "forge_sim:--seeds=20"
 )
 PROBES=(
-  draft_sim commander_probe map_sim raid_map_sim map_check_sim
+  draft_sim gear_probe commander_probe market_probe curse_probe map_sim raid_map_sim map_check_sim
   map_advance_probe map_branch_probe map_charge_probe map_event_probe
   map_mark_probe map_wager_probe map_check_online_probe
   fight_seed_probe menu_probe meter_probe profile_probe splitlaw_probe integrity_probe vuln_probe registry_probe

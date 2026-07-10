@@ -81,7 +81,7 @@ func _process(_d: float) -> bool:
 	_ck(s1.checksum == s2.checksum and s1.tick == s2.tick,
 		"C: commanded fight deterministic over 600 ticks (cs %d)" % s1.checksum)
 
-	# ---- D. the REFORGE chain: you first, then each AI raider, shared bank
+	# ---- D. the REFORGE chain: you first, then each AI raider, PER-SEAT WALLETS (V#11)
 	hud._d.party = {}
 	hud._ensure_party()
 	hud._d.party["blade"]["aspect"] = "tempo"
@@ -90,7 +90,8 @@ func _process(_d: float) -> bool:
 	var rb: RunState = hud._d.ai_runs["blade"]
 	_ck(String(rb.char_class) == "twinfang" and String(rb.aspect) == "tempo",
 		"D: the AI run matches the command (twinfang/tempo)")
-	hud._d.run.tokens = 5   # a banked pool to prove the mirror in/out
+	hud._d.run.tokens = 5   # YOUR wallet; the AI raiders keep their own (no shared bank now)
+	rb.tokens = 3           # the blade AI's own wallet — must NOT be clobbered by the human's
 	# The tank is now the DUELIST — a reworked (framework) class, so its FIRST draft wires the
 	# Combo rig before boons. Pre-wire it here to isolate the COMMANDER boon-chain test from the
 	# rig-wire step (which the rig_wire screenshot probe covers).
@@ -116,7 +117,8 @@ func _process(_d: float) -> bool:
 		ai_boons += (hud._d.ai_runs[k] as RunState).boons.size()
 	_ck(ai_boons == 3, "D: each AI raider took exactly one boon (n=%d)" % ai_boons)
 	_ck(hud._d.run.boons.size() == 1, "D: your own pick landed too")
-	_ck(hud._d.run.tokens == 5, "D: shared bank intact when nothing was spent (5)")
+	_ck(hud._d.run.tokens == 5, "D: YOUR wallet untouched by AI drafts (per-seat, 5)")
+	_ck(rb.tokens == 3, "D: the blade AI's own wallet is independent (3, not mirrored from yours)")
 	_ck(hud._seat_boons_now().size() == 4,
 		"D: all four seats' boons ride the next pull's spec")
 

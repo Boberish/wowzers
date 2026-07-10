@@ -28,6 +28,9 @@ func _init(_aspect: String, _cfg: DuelistConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
 
+func accent() -> Color:
+	return Palette.STEEL   # the Duelist's tank steel (meter/HUD read this hook)
+
 func bespoke_defense() -> bool:
 	return true
 

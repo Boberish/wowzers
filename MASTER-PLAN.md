@@ -663,7 +663,7 @@ combat pillars eventually — Bill isn't sure of the end state yet, so we do NOT
 recast through the Forge/casting-pool era). The only simmed, maintained bosses are **the 4 Seals**
 (`raid_sim`): Vorathek · MISTRAL · GEMINI · MYTHOS — and they get the pass below.
 
-**THE SEAL REWORK v1 — the 4-boss redo (Bill's go 2026-07-10; 🟡 at his 10-verdict board).**
+**THE SEAL REWORK v1 — the 4-boss redo (Bill's go 2026-07-10; 🟡 at his 11-verdict board).**
 **➡ THE spec: `BOSS-PLAN.md`** — fills the DESCENT §4 timer contract (**5 / 7 / 9 / 12 min**,
 today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief:
 - **Identities (§V#1):** VORATHEK = **THE AXE** (slow huge honest hits, the learnable teaching
@@ -676,6 +676,13 @@ today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief
 - **TAUNT BUTTON REMOVED (Bill, LOCKED — BOSS-PLAN §1):** aggro 100% passive, tank regains by
   flow; valve = perfect-MAIN flow spike + aggro boon lane (LODESTONE/HARD STARE 💡);
   THREAT_DROP re-based as FLOW DUMP; TANK-PLAN §1c/§8.0 + WORLD-PLAN + ledger amended.
+- **THE KICK CONTRACT (Bill 2026-07-10 — BOSS-PLAN §1½, amends pillar #3):** EVERY class but
+  healers carries ONE kick, bolted on its dump (2/1/0 retired — 3 kickers per warband); warn =
+  the whole castbar, window = a small ABSOLUTE slice at cast end (~0.6 s `kick_window`, per-Seal
+  mult — Mistral wide, Mythos tight); the press is free, the timing is everything; **missing =
+  the raid's costliest single mistake** (Mistral biggest-blast → Gemini permanent EMPOWER
+  stacks → Mythos boss-HEAL). Counts stay modest; verses survivable-uncontested until the
+  class-side `interrupts` flag lands. WORLD-PLAN §PILLARS #3 + CLAUDE.md + ledger §A amended.
 - **Tuning spine (§2):** every pacing number on per-Seal `SealTune` (E4) + tune.sh flags + sim
   TTK/beat-budget/act-timeline gates — playtest-turnable without a playtest, nothing bakes.
 - **Density ramp (§3):** Seal I presents 1–2 raid answers (~3–5 beats), +1 type/beat per rung
@@ -689,6 +696,23 @@ today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief
 **Supersedes `SEAL-PILLAR-PLAN.md`** (never executed; Phase A absorbed as Slice 0; its
 beat-source map + 3–8 budget + ULTRATHINK carve-out stay canon). Steal catalog (Hades II ·
 StS1/2 · AtO · Punch-Out/Furi/Sekiro genre) in BOSS-PLAN §5; research run 2026-07-10 (7 agents).
+
+**S0 BASELINE — built & gate-clean on `seal-rework` (`d8bc675`, 2026-07-10, NOT yet merged —
+holds behind tank-w1 to dodge a `raid_sim.gd` conflict).** The pre-rework instrumentation
+(byte-identical to main: 24-row checksum diff clean, determinism PASS ×4) reads today's Seals
+at **good tier, 25 seeds** — this is the gap the rework fills:
+
+| Seal | TTK now | Contract | Gap | Non-tank beats now | Target | Read |
+|---|---|---|---|---|---|---|
+| VORATHEK | 160 s | 300 s | **−47%** | ~18 (blade/caster) | 3–5 | over budget (SEAL-PILLAR's finding, confirmed) + 7-mechanic overload |
+| MISTRAL | 122 s | 420 s | **−71%** | ~4 | 4–6 | shortest Seal, biggest relative gap (matches §4) |
+| GEMINI | 168 s | 540 s | **−69%** | ~8–9 (+6 tank feints) | 5–7 | mid; Double-Check feints already register |
+| MYTHOS | 203 s | 720 s | **−72%** | ~15 | 6–8 | finale most under-filled + over dodge-budget |
+
+Every Seal is far under the clock AND (V/MY) over the dodge ration — the rework adds *length*
+via structure while *cutting* the raw dodge load. S1+ (engine addenda, then the four fights)
+resumes when `wow-tank-w1` merges (flow/peels/taunt-delete land there; the boss build consumes
+them). Fresh 300-seed bands land per content slice.
 
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
@@ -829,22 +853,149 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **building
-  `DUELIST-BRIEF.md` — S0 FLOW=AGGRO + taunt funeral → S1 Duelist base kit (→ S2 policy → S3
-  sim → S4 HUD).** ⚠ **SCOPE STAGED (Bill, 2026-07-10):** the §A½ "Bulwark dies in the same
-  merge" HARD RULE is DEFERRED — discovery: Bulwark is the host fixture for `gear_probe`
-  (the whole GEAR/GearFx deed test), `meter_probe`, and `draft_sim`, all gated by
-  `verify-all.sh`, and `bulwark_kit._challenge()` calls the `taunt()` being deleted. So
-  Merge 1 = FLOW=AGGRO + **Duelist as the new playable tank DEFAULT**, with Bulwark kept
-  ALIVE as a guarded sim-only fixture (only its dead `_challenge`/taunt path removed);
-  the full Bulwark deletion + gear/meter/draft re-host is the immediate follow-up slice
-  (ledger §A½ Bulwark row stays 🔒). ⚙ **IMPLEMENTATION NOTE:** `threat_enabled` is KEPT and
-  repurposed as the aggro-subsystem enable (all game CONTENT sets it; raid today) rather than
-  ripped to always-on — the solo class-training sims (well/twinfang/alchemist) are multi-seat
-  threat-accumulating fights that would otherwise re-baseline + consume peel-rng, violating the
-  S1 "non-raid byte-identical" gate. Aggro stays universal in the game sense the brief intends.
-  Expect the documented raid re-baseline bang; non-raid + gear/meter/draft byte-identical.
-  *(tank-w1 build session)*
+- ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED `4e46e73`** · **TEMPO D0 FOLLOW-UP BUILT** (Bill's
+  board answers) — **On the Beat** back in the offer pool (kit code was already live) · **S3 THE
+  4 DUOS** (Blood Coda W×F · Red Edge W×E · Grand Finale E×F · Reprise Rondo×W — kit hooks +
+  `DUOS`/`theme_counts`/`armed_duos` folded into `Draft.offerable`: armed at ≥2 cards from EACH
+  theme, Reprise also needs Rondo; Opus slot, two-tone frame render deferred) · **S6 THE SET
+  PIECE** (the DECK-LAYOUT §5 signature-CD slot, first game-wide: a 4-strike phrase → build-scaled
+  flourish [flow-scaled dmg + bleed pulse + combo refund + 2s Flow-lock]; new base ability on the
+  Tempo/Fermata bar, `setpiece_enabled` A/B, policy arms it). Parse-clean + runtime smoke green
+  (0 errors, all 8 determinism cells PASS incl. flourish). **ONLY kick carriers remain deferred**
+  — gated on the interrupt-by-ability pillar (#3), not a Tempo verdict. *(commit `595ecd0`.)*
+
+- ◐ 2026-07-10 · worktree `../wow-seals` (branch `seal-rework`) — **CLAIM: THE SEAL REWORK
+  BUILD (`BOSS-BRIEF.md`) — S0 BUILT & GATE-CLEAN on the branch (`d8bc675`); S1+ blocked on
+  tank-w1.** Bill's go ("implement these bosses like the brief says"). **S0 done:** `raid_sim.gd`
+  instrumentation (beat-budget/seat · cast-source counts · TTK-vs-DESCENT-§4-contract with ±20%
+  flag · verse/kick baseline · act/valley timeline), all pure reads → **byte-identical** (main
+  vs S0 checksum diff clean 24 rows; determinism PASS ×4). Baseline recorded in §BOSSES (every
+  Seal −47…−72% under contract). **⚠ NOT merged — held behind tank-w1:** that Wave-1 branch
+  (still IN FLIGHT, at its S4) rewrites the SAME `raid_sim.gd` regions (`taunts→peels`, band
+  loop, `_run_one` sig, return dict) + owns the `combat_core`/`boss_state` reducer S1's addenda
+  need. Merging S0 now would hand tank-w1 a conflict on the file the brief flagged. **Order:
+  tank-w1 merges → rebase `seal-rework`, reconcile `raid_sim.gd` → S1 (E1–E9 guarded addenda)
+  → S2–S5 the four fights.** S2–S5 also need Bill's V1–V10 (recs = defaults) before authoring.
+  *(boss-build session — S0)*
+
+- ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
+  hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
+  BOSS-PLAN made buildable: **S0** sim instrumentation (byte-identical, claimable NOW) → **S1**
+  engine addenda E1–E9 (all guarded; E9 pips + E1 `featured` added to BOSS-PLAN §7 this pass) →
+  **S2–S5** the four fights (first-cut numbers table: hp 56k/95k/85k/92k · per-Seal
+  kick-window mults V×1.5→MY×0.85 · interim-vs-final miss costs) → **S6** sweep+record → **S7**
+  kick re-tune (rides the first class `interrupts` flag). Gate status verified in-repo:
+  **① descent map bang ✅ MERGED** (`a59ffa4`/`cf3f8d9` in `raid_content.gd` history;
+  descent-s2/s3 don't own Seal data) · **② Wave-1 `wow-tank-w1` IN FLIGHT** (owns
+  combat_core/raid_sim churn — S1+ waits on its merge; this build consumes flow/peels, never
+  builds them; V#9 flow-spike knob flagged to DUELIST-BRIEF S0) · **③ V1–V10 recs = build
+  defaults**, one-sentence go opens content. Ledger §F row → 🟡→🔒 + brief pointer; CLAUDE.md
+  index. Builder claims worktree `wow-seals`/`seal-rework`. *(boss-rework session, pass 3)*
+
+- ☑ 2026-07-10 · `meter-l3` → main (`9a6f6c0`→`7ee55b2`) · §SYSTEMS/§GRAPHICS · **METER L3
+  SEGMENTS / RUN HISTORY — BUILT & MERGED (Bill: "continue to L3 now").** Recount's
+  Current/Overall/per-pull dropdown, and it built the deferred run-recap accumulator in the same
+  slice. **Accumulator:** `RunDirector.fight_log` — each fight snapshots meter/boon_meter/diag
+  (+elapsed+encounter name) at `_on_end_moment` (once/fight, win/loss, headless too), auto-reset
+  per descent via `fight_log_seed` keyed on `run_seed`; deep-copied plain data. **This unblocks
+  the run-summary screen** (BUILD-LEDGER `:270` → 🟡, screen still owed). **Selector:** a footer
+  chip cycles This Fight / Whole Run / ‹each past fight›; Whole Run merges snapshots (skips the
+  live fight when frozen to avoid a double-count). Works across all 6 modes via a duck-typed
+  `_Segment` (readers de-typed off `CombatState` — StatsPage's static calls still pass a real
+  state; diag routed through `_diag_of`; segment build cached; NOW live-only). **Bugs caught &
+  fixed pre-merge:** `fights` name collision (→ `fight_log`), Whole-Run double-count on the end
+  screen, 3 Variant-inference parse errors from de-typing. Touches `run_director`/`raid_hud`/
+  `meter_panel`; **project imports clean**, auto-merged clean on `raid_hud`. **⚠ built with the
+  sim/screenshot bar paused (`2ee8325`) — a live playthrough is owed** (segment cycling + Whole
+  Run totals). Ledger §G → 🔨 `7ee55b2`; METER-PLAN L3 ticked. **Meter is now feature-complete
+  through L3** (6 modes + sparklines + run-history); remaining: run-summary screen · L4 window
+  chrome · L5 teaching layer. *(meter session)*
+
+- ☑ 2026-07-10 · `meter-spark` → main (`1924405`→`a26a3cd`) · §SYSTEMS/§GRAPHICS · **METER
+  SPARKLINES — BUILT & MERGED (Bill: "continue"). L1 + all L2 view-only work now DONE.** A faint
+  per-second trace behind each compact row in dmg/taken modes: reads `state.series` (cumulative
+  col `base+i` → differentiated to per-second → normalized to the seat's own peak), drawn
+  low-alpha under the text so it adds "shape of the fight" texture without crowding the columns
+  (heal/shield/amp/disc carry no series → no sparkline; all indices guarded, `<3` samples → no-op).
+  **The live meter is now 6 modes** (DAMAGE/HEALING/SHIELDING/TAKEN/⚡AMPLIFY/🎯DISCIPLINE) **+ row
+  sparklines.** View-only / diag-family; imports clean. **What's left on L2 all needs a small
+  engine field** (no longer pure view): per-seat interrupt counter · activity % · `src_label()`
+  prettifier (low-value). Ledger §G → 🔨 `a26a3cd`; METER-PLAN L2 sparkline ticked. **⚠ live
+  eyeball owed** — the byte gate + `screenshot_meter` are paused with the sim bar (`2ee8325`), and
+  headless can't render custom `_draw`. **Next substantial level: L3 segments/run-history** (first
+  slice that touches shared files `run_state`/`run_director` + wants a real verify pass).
+  *(meter session)*
+
+- ☑ 2026-07-10 · main (docs only) · BOSS-PLAN §1½ (NEW) + §V#11 + WORLD-PLAN §PILLARS #3 +
+  CLAUDE.md pillar + ledger §A — **THE KICK CONTRACT (Bill's steer on the boss-rework recs;
+  board grows 10→11 verdicts).** His calls folded in: **every class but healers carries ONE
+  kick, bolted on the dump** (2/1/0 spread retired — 3 kickers/warband; Alchemist's kickless
+  gap closes when the flag lands) · **warn early, window small** — the castbar is the warning,
+  the kickable slice is absolute ~0.6 s at cast end (`kick_window` SealTune knob, per-Seal
+  mult: kindergarten wide → exam tight) · **the press is free** (early press = normal dump, no
+  penalty — the tax is having your dump armed) · **missing = the raid's costliest single
+  mistake** (ladder: Mistral biggest-blast → Gemini permanent EMPOWER stacks → Mythos
+  boss-HEAL) · counts modest (V one un-chained Chant · M one 2-chain · G one 3-chain · MY
+  CoT+Hotfix). E8 engine addendum (kick-window slice + castbar lit-slice + verse sim table);
+  note METER's parked per-seat kick counter (entry below) — E8's verse table is the sim-side
+  half. **V#11 ✅ DECIDED (Bill, 2026-07-10): (b) YES — "add one to Vorathek"** — the teacher
+  returns ONE gentle un-chained Devouring Chant as the floor-1 kick kindergarten (widest window,
+  ~2 casts, miss = boss heals a chunk — the gentle rehearsal for Mythos's Hotfix; ramp reads
+  single-kick→first-chain→chain+empower→exam). BOSS-PLAN §V#11/§1½/§3/§6 flipped. *(boss-rework
+  session, pass 2 + V#11)*
+
+- ☑ 2026-07-10 · `meter-l2` → main (`c502d36`→`88553af`) · §SYSTEMS/§GRAPHICS · **METER 🎯DISCIPLINE
+  MODE — BUILT & MERGED (Bill: "continue").** The L2-tail follow-up to L1+AMPLIFY. A 6th
+  header-cycle mode: a live "who's playing clean" scoreboard — one row per gradeable seat, ranked
+  by **clean-answer %** (perfect/good/graze/read vs miss/baited/whiff), colored by grade S..D,
+  bar ∝ clean%, with a dim fault tail (times hit · strays off the tank). Stat-block AI skipped
+  (no timed inputs); <3 answers → "—". `_disc_clean` mirrors STATS PAGE v2's `_pct_defense` so the
+  live read and the post-fight grade agree; compact-only (the full grade breakdown stays on the
+  stats page). ⚠ interrupts aren't per-seat in state (HUD-side tally) → DISCIPLINE grades answers
+  + strays, not kicks (a per-seat kick counter = small engine field, parked). View-only /
+  diag-family; project imports clean (byte gate + `screenshot_meter` skipped — the sim/verify bar
+  is paused, `2ee8325`). Ledger §G → 🔨 `88553af`; METER-PLAN L2 DISCIPLINE ticked. **Next
+  L2-tail: per-row sparklines from `series`. Then L3 segments/run-history.** *(meter session)*
+
+- ☑ 2026-07-10 · `meter` → main (`0859b2b`→`cce7c92`) · §SYSTEMS/§GRAPHICS · **METER L1 + ⚡AMPLIFY
+  — BUILT & MERGED (Bill: "go ahead").** The live meter's first level-up. **L1:** killed the
+  fragile class-accent switch → new `ClassKit.accent()` hook (built-in Color, no Palette import
+  in the data layer, sibling to `recap_spec()`), backfilled on all 5 kits — **fixes the live bug
+  where Alchemist + Well (the two default seats) rendered colorless**; compact rows got the
+  Recount look (rank # w/ gilded #1 · share% column · player-row wash · brighter bar edge). **L2
+  ⚡AMPLIFY:** new header-cycle mode reading `state.boon_meter` — "who enables the raid" (each
+  seat's own boon lift + a synthetic RAID row for the raid-amp pool Sunder/Glint/Debilitate),
+  drill a row → per-boon "≈ +X dmg/heal"; the live twin of STATS PAGE v2's BOON IMPACT.
+  **View-only / diag-family:** `ab-gate raid_sim` **BYTE-IDENTICAL PASS** (both clean runs, before
+  Bill paused the verify bar), project imports clean; visual `screenshot_meter` skipped per the
+  sim-pause. Ledger §G row → 🔨 `cce7c92`; METER-PLAN L1+AMPLIFY marked built. **Deferred:**
+  `src_label()` per-kit hook (`capitalize()` reads fine today) → L2 tail. **Next: L2 tail
+  (DISCIPLINE from `seat.diag` · row sparklines) or L3 segments/run-history.** *(meter session)*
+
+- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **BUILT + VERIFIED
+  on the branch — `DUELIST-BRIEF.md` S0–S8 IN FULL + the Bulwark deletion; MERGE PENDING conflict
+  resolution vs main's `tempo-d0`/`descent-s4`.** 6 commits: **S0** FLOW=AGGRO + taunt funeral
+  (taunt DELETED whole, passive flow + seeded progressive peel, `bespoke_defense()` seam, THREAT_DROP→
+  FLOW DUMP) · **S1** Duelist base kit (`data/duelist/*`, graded parry/dodge, height law, partial-mit
+  .90, WIND, ◆/DUMP, flow feed) + wired as the **playable tank default** (registry/raid/net v16/HUD/
+  world-shell/codex/draft) · **S2** DuelistPolicy 3 tiers · **S3** `duelist_sim` + raid_sim carry ·
+  **S4** DuelistBand + DuelistGauge (FLOW orb/WIND/◆ pips) · **S5** deck (Veteran/Wager/Bellows/
+  Dancer creeds · Crucible/Scales/Whetstone/Flow modules · 14-boon POOL + GAZE + Ease dial + Hold-
+  the-Line · 3 keystones · rig) · **S6** ⏱ EN GARDE signature CD · **S7** transforms Prise-de-Fer/
+  Remise/Flèche + doors + Floor-2 ceremony data + Dancer-excludes-parry law · **S8** per-Seal streams
+  = existing Seal texture (left to BOSS-PLAN). **⚙ Bill GO'd building the deck defaults (07-10) + the
+  Bulwark deletion (07-10):** Bulwark is GONE — the Duelist is the only tank; `gear_probe` retired
+  (its GearFx deed cells are Bulwark-kit-hosted → re-home to the Duelist deck later; GEAR code stays
+  live in twinfang_kit), `meter_probe`/`draft_sim`/`commander_probe`/`raid_boon_probe`/both UI smokes
+  re-hosted/updated for the reworked-tank creed+rig ceremony. **⚙ `threat_enabled` KEPT** (repurposed
+  as the aggro-subsystem enable; content sets it) so solo sims stay byte-identical. **VERIFIED:**
+  import clean · determinism PASS everywhere (raid + duelist + deckless + all decked builds) ·
+  `ab-gate twinfang_sim` **BYTE-IDENTICAL** · WSLg visual pass (full Duelist HUD renders) · GREEN:
+  registry/meter/draft_sim/commander/raid_boon/ui_smoke_raid/ui_smoke_map/raid_sim. Numbers first-cut
+  (playtest); the existing Seals over-damage the new tank = the documented re-baseline BOSS-PLAN
+  retunes. **⚠ MERGE:** main moved (tempo-d0 reworked `combat_core.gd`; descent-s4 touched `draft`/
+  `raid_content`/`net_protocol`) → the merge needs careful `combat_core.gd` (FLOW=AGGRO vs governor/
+  transforms) + `net_protocol` VERSION conflict resolution before landing. *(tank-w1 build session)*
 
 - ☑ 2026-07-10 · main (docs only) · **`WELL-DRAW-BRIEF.md` (NEW, root) — THE DRAW HEALER BUILD
   BRIEF** (Bill: *"make a plan to implement the draw healer, then ill hand it off to opus"*) +
@@ -867,12 +1018,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   on it). Statuses untouched (no decisions taken). Next: Bill starts the Opus build session on
   the brief. *(draw-brief session)*
 
-- ☐ 2026-07-10 · worktree `../wow-well-draw` (branch `well-draw`) · DRAW HEALER BUILD · **building
-  `WELL-DRAW-BRIEF.md` — S0 SKIN → S1 D6 deck data → S2 ⭐Vigil module → S4 policy+sims** (S3
-  transforms DEFERRED: blocked on the `wow-tempo-d0` merge — no Floor-2 ceremony to reuse yet;
-  S5 render polish deferred). Kit-local + guarded; byte-identical gate = `ab-gate.sh well_sim`
-  + `ab-gate.sh raid_sim` for S0–S2; S4 is the ONE sanctioned re-baseline (skin casting + hold
-  releases in the policy). Catalog rows flip 🟡→🔨+SHA per merged slice; ledger §C rows ticked.
+- ☑ 2026-07-10 · `well-draw` → main (`ed358aa`) · DRAW HEALER BUILD · **`WELL-DRAW-BRIEF.md`
+  S0+S1+S2+S4 BUILT & MERGED** (Bill: *"okay go for it build it"*). **S0 SKIN** — the missing-heal
+  film: a guarded per-victim defer pool in `combat_core` (`_tick_skin` drains a share of each hit
+  as late damage over ~3s; never absorbs/heals; graded Draw / plain Brim; 1 charge; `SPELL_CAP`
+  8→9). **S1 D6 reshape** — 10 new Draw boons across VIGIL·RAPIDS·EDDY (whitewater · shootGap ·
+  eddyline · **flume** · secondHand · rideTremble · **loosedAtLast** · currentReading · deepEddy ·
+  **glassRiver**), Millrace DEMOTED (opus→sonnet, Flume crowned), Skim pair (looseGrip/shortPour)
+  parked. **S2 ⭐Vigil module** — the Patient-Hand hold generalized (`_hold_armed()` = creed OR
+  module), Draw-only offer (new `WellModules.offer_ids(aspect)` + aspect-gated `_fw_module_offer_ids`).
+  **S4 policy+sims** — the AI now films the tank ahead of danger telegraphs + banks/releases a
+  held heal on the spike; `well_sim --build=vigil|rapids|eddy` cells + skin metrics. **Gates:**
+  determinism PASS (well base+loaded+3 builds · raid 4 Seals · twinfang) · **twinfang byte-identical
+  to the pinned baseline** — proof the shared `combat_core` touch is guarded-neutral for other
+  classes · well/raid re-baseline is the SANCTIONED default-comp shift (Well·Brim now casts skin) ·
+  no crashes. **DEFERRED:** S3 transforms (Cupped Hand · Deep Draw · Braid + doors — 🟡, blocked on
+  the `wow-tempo-d0` Floor-2 ceremony, still docs-only) · S5 render polish (Vigil tremble / skin
+  film / flume-frozen chrome — states already exposed in `observe`) · balance @ real fightlen
+  (Bill's lever, owed row). Catalog Draw rows + ledger §C flipped 🔨. ⚠ the full `ab-gate.sh
+  well_sim/raid_sim` couldn't run (parallel A+B OOMs the 7 GB box; testing removed mid-build) —
+  byte-neutrality proven instead via the twinfang-vs-baseline checksum match + guard-by-construction.
   *(the Draw build)*
 
 - ☑ 2026-07-10 · main (docs only) · §SYSTEMS/§GRAPHICS · **METER-PLAN.md (NEW) — the live meter
@@ -905,12 +1070,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   NEW seed salt (byte-exact-history rule). Statuses untouched (no decisions taken — catalog
   stays 🟡). Next: Bill starts the build session on the brief. *(tank-brief session)*
 
-- ☐ 2026-07-10 · worktree `../wow-tempo-d0` (branch `tempo-d0`) · TEMPO D0 BUILD · **building
-  `TEMPO-D0-BRIEF.md` — S0 governor → S5 law reworks → S1 deck data → S2 resonance → S4
-  transforms** (deferred shelf S3 duos · S6 Set Piece · kick carriers left untouched). Kit-local
-  + guarded; byte-identical gate = `ab-gate.sh raid_sim --blade=tempo` (bare tempo blade, no
-  boons); twinfang_sim re-baselines on speed cells (accepted — S0 deletes per-source clamps).
-  Catalog rows flip ✅→🔨+SHA per merged slice; ledger D0 row ticked per slice. *(the D0 build)*
+- ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED to main `63d4308`** · **TEMPO D0 BUILT** —
+  `TEMPO-D0-BRIEF.md` slices **S0 governor + S5 laws `e9e83ae` · S1 deck data (v4) `8906d84` ·
+  S2 resonance `8389695` · S4 transforms `45f4d27`**. The one asymptotic speed wall
+  (`beat_rate_cap`/`window_min`, per-source clamps deleted); the WOUND pot + KEEN meter + ghost
+  Double Time v2; the v4 slate (WOUND·EDGE·FINISH themes, new creeds/modules/keystones/boons,
+  trim applied); 3-of-a-theme resonance; the Cadenza/Rondo/Tremolo transforms + the Floor-2
+  1-of-3 ceremony + 6 doors + the Return rig WHEN. All kit-local + guarded (transform/creed/module
+  gated → boonless byte-identical; the checksum is boss-HP+tick only). Parse-clean (`godot --import`).
+  Catalog rows → 🔨, ledger D0 row → 🔨. **DEFERRED (untouched): S3 duos · S6 Set Piece · kick
+  carriers · On the Beat. OWED: balance/gate sims (Bill paused testing 07-10) · HUD render of the
+  new gauges (view-only observe fields landed) · live-raid RaidNet spec-carry of creed/modules/rig/
+  transform (the standing class debt — unblocks the Well Draw ceremony §above).** *(the D0 build)*
 
 - ☑ 2026-07-10 · main (docs only) · TEMPO §17.12 GO record + `TEMPO-D0-BRIEF.md` §0 + catalog
   flips + ledger D0 row → ✅ — **THE D0 GO (Bill: "1 yes… yes tri[m] and yes transform trio").**
@@ -983,16 +1154,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   visual probe. ⚠ COLLISION: `combat_core.gd` also claimed live by `../wow-rails` (tuning-sweep) —
   additive changes, merge main often, reconcile at merge. *(stats session)*
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `tuning-sweep`) — **CLAIM: TUNINGCONFIG LITERALS
-  SWEEP (REFIT P4's split-out follow-up; determinism law #5: no hard-coded balance literals).**
-  The sweep is SMALL — earlier passes moved most tuning; six real literals remain in
-  `combat_core.gd`: the fight-opening ability stagger (base 2.0 / step 1.5 / jitter 0.3 —
-  duplicated at create_state + pack entry, gets a shared helper), the silenced-cast re-check
-  (0.4s), the chained-target splash (0.28), the EMPOWER dmg_buff cap (0.55), the
-  taunt-answers-curse window (2.0s). All → `TuningConfig` @exports with identical defaults.
-  Encounter-data fallbacks (melee every/max) stay — they're data defaults, not engine balance.
-  BYTE-IDENTICAL bar: ab-gate raid_sim + twinfang_sim. *(rails session v2 — the twinfang kit
-  split remains the last P4 item after this)*
+- ☑ 2026-07-10 · `tuning-sweep` → main (`784e365`) — **TUNINGCONFIG LITERALS SWEEP: BUILT &
+  MERGED (REFIT P4's split-out follow-up; determinism law #5).** The last six engine hard-codes
+  in `combat_core.gd` → `TuningConfig` @exports with the exact old values as defaults:
+  `open_stagger_base/step/jitter` (the fight-opening ability spread — also DRY'd, create_state +
+  pack entry share ONE `_stagger_abilities` helper) · `silence_recheck` 0.4 · `chain_splash`
+  0.28 · `dmg_buff_cap` 0.55 · `curse_answer_window` 2.0. Encounter-data fallbacks (melee
+  every/max) stay — data defaults, not engine balance. GATES: **ab-gate raid_sim + twinfang_sim
+  BYTE-IDENTICAL PASS** (60 seeds, all four Seals) · merged-tree bar 36/38 green — the two
+  "fails" were externally killed heavies (Bill cleared the box), zero failure strings in either
+  log; both passed in full on the pre-merge tree. **REFIT P4 CLOSES** — the one remaining line
+  item (twinfang per-spec kit split) is DEFERRED INTO the Twinfang rework itself (same
+  restructure, zero merge-conflict with the class wave; noted on the P4 ledger row). *(rails
+  session v2 — END OF THE RAILS QUEUE)*
 
 - ☑ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW) — DONE,
   🟡 AT BILL'S 10-VERDICT BOARD (BOSS-PLAN §V).** Delivered: BOSS-PLAN.md (laws · taunt-removal
@@ -1030,19 +1204,93 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
-- ☐ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **CLAIM: DESCENT SLICE 2 —
-  THE LEGIBILITY UI PASS** (BUILD-LEDGER §I row / DESCENT §5·§9·§11). Deliverables: one-line
-  reward CONTRACT text + fight-tier ▮ pips on every node door · BOTH-LEGS check hints (`% · on
-  win/on loss`) on all check/wager buttons · display RENAMES (Entropy→**LUCK** ⚡ · attempts→
-  **BACKUPS** · rerolls→**REGENERATE** · remove-cost→**DEPRECATE**) — display-only, ids frozen ·
-  **THE RAID INTEGRITY KILL** (§11 cut #2 — dead-integrity ticket payloads re-priced to live
-  goods, overtime_daemon bluff-stake retired, integrity check-row dropped) · header 3-meter
-  legend (⏣ ⚡ ⏻) + wound/curse pips + first-⏻ tooltip. **Byte-identical law:** renames are
-  DISPLAY-ONLY; map rng / node kinds / fx ids frozen so `raid_map_sim` stays checksum-identical.
-  Touches `map_screen`/`map_event_panel`/`map_check`/`map_content`/`campaign_core`/`raid_hud`
-  (MAP region — ⚠ coordinating with `tempo-art` which owns the combat region of the same file) +
-  sim/probe updates (integrity_probe re-scope). Flag: if integrity rides the netcode protocol,
-  a protocol bump is in scope (recon confirming). *(raid-rebuild session)*
+- ☑ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **DESCENT SLICE 4 — THE
+  JAILBREAK (printed curse deals): MERGED to main (`a22c1ec`), 2 commits.** Built via a 5-reader
+  recon whose key find corrected my prior: **TIMING is buildable** — `make_config()` returns a
+  FRESH TuningConfig per fight and every grade reads its windows live, so a `window_tighten` mark
+  scaling `s.config.strike_*` is a real windows−10% tax with ZERO per-boss work. **4a the curse
+  engine (byte-identical when dormant):** `RaidMarks` gains two guarded keys on the proven
+  carry→mark channel — `seat_hp_cut` (HP tax; auto-repairs because a mark clears each fight) +
+  `window_tighten` (TIMING tax); `RunDirector.curses` (cap 2) + `deprecate_uses` (NOT in cp_view —
+  read directly like tokens, offline-only this slice); the `raid_hud` curse core (`_add_curse` w/
+  CAP 2 + the HARD RULE *no run-long TIMING curse*, `_curse_pips`, `_apply_curse_marks` fold+tick
+  at launch, ECONOMY hooks — mint-halve in `_mint_seats`, price surcharge in `_market_price`,
+  `_apply_map_fx` routes curse/regenerate/purge keys, the **DEPRECATE** market slot [the slice-3
+  deferred slot, escalating price] + the **Cooling purge** fork, `ms.curses` feed, descent-start
+  reset); `map_event_panel._fx_hint` prints the bite + charge/regenerate goods; new `curse_probe`
+  (in verify-all). **4b the node LIVE:** `JAILBREAK_LIVE=true`, KIND_JAILBREAK dispatch →
+  `_show_jailbreak` — two deals rolled on a (map_seed,node) rng via the proven `_map_stop` panel,
+  both halves printed, WALK AWAY free, cap-2 "cell full" (no free-good exploit); a 5-deal gentle
+  pool (V#4); `raid_map_sim` KIND_JAILBREAK walker case (sanctioned re-baseline). **Merged main
+  mid-build** (SEAL-REWORK S0 + tempo — raid_hud auto-merged clean). **Deferred:** DECK tax
+  (run-length ability-poison — the `perform()` gate is one line but the offline+online spec-thread
+  is the cost) · welded-downside DRAFT boons (② door) · event-curse legs (③) · online (safe no-op,
+  **NO protocol bump**). **Verify:** import clean · `curse_probe` ALL OK (engine + node
+  end-to-end: cap-2/HARD-RULE, ECONOMY+HP+TIMING bites, both exits, ticking, a deal grants
+  good+bite) · `market_probe`/`commander_probe`/`draft_sim` ALL OK · `ui_smoke_map` ALL PASS ·
+  `raid_map_sim` map-gen determinism PASS (the walker case is deterministic by construction). ⏳
+  **Deferred to a nightly run** (OOM-prone under concurrent load): `raid_map_sim` run-trace +
+  statistical re-baseline · full `verify-all` · `net_map_smoke`. **Next:** slice 5 (minigames:
+  CAPTCHA/BENCHMARK + extraction schematics) + the DECK-tax follow-up. *(raid-rebuild session)*
+
+- ☑ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **DESCENT SLICE 3 — THE
+  PROMPT MARKET + PER-SEAT WALLETS: MERGED to main (`fd8b895`), 3 commits.** Built via a 6-reader
+  recon (buildable-vs-deferred scope). **3a per-seat wallets (V#11):** `Draft.mint_diag(diag,cfg,
+  cls)` mints each seat off its OWN `seat.diag` — `mint(state,cls)` delegates so it stays
+  BYTE-IDENTICAL (draft_sim green); `raid_hud._mint_seats` credits all 4 wallets post-fight; the
+  AI-draft shared-bank mirror is deleted → **AI raiders START EARNING** (before, `Draft.mint` read
+  only the is_player mirror, so AI minted nothing); `commander_probe` re-pointed to per-seat
+  independence. **3b rerolls-out (§11 #3):** `run.regenerate` charges are the ONLY reroll —
+  `Draft.reroll` spends a charge (same draft_rng draw), `lock`/`reroll_kept`/`REROLL_COST`/`LOCK_
+  COST` deleted, `draft_screen` shows "REGENERATE (n)" + drops LOCK, Hot Reload → +2 charges;
+  `draft_sim` `_test_lock`→`_test_regenerate`. fight_seed never touches draft_rng → NO fight
+  shift, only draft_sim's transcript re-baselines. **3c THE MARKET:** `RunMap.MARKET_LIVE=true`;
+  new `MarketScreen` (THE SCRAPER); `_show_market` rolls a (map_seed,node)-seeded stock — CURIO ×2
+  (unlocked pool, priced 6/8/10 by rarity) · REGENERATE (4⏣) · PATCH (5⏣), ~+30%/floor; per-seat
+  BUY + **AUTO** (AI spend own wallets, banter); KIND_MARKET branch (mandatory, no-default=
+  soft-lock); post-Seal recovery MARKET PHASE; Hashgrinder reframed (×2 income → market −1⏣);
+  `raid_map_sim` KIND_MARKET case + `tokens@market` diag + a flat mint estimate (sanctioned
+  re-baseline); new `market_probe` (in verify-all) drives the real HUD end-to-end. **Merged main
+  twice mid-build** (tuning/meter/tempo-d0 — the tempo `run_state.transform` + `draft.offerable`
+  doors auto-merged clean with my `regenerate`/`reroll`). **Deferred (dependency absent):** +1
+  BACKUP (no wipe budget — printed SOON) · DEPRECATE (curse-purge=slice 4, boon-scrap=follow-up) ·
+  online market/wallets (server has no purse — a safe no-op fallthrough, **NO protocol bump**).
+  **Verify:** import clean · `market_probe`/`draft_sim`/`commander_probe`/`gear_probe` ALL OK ·
+  `ui_smoke_map` ALL PASS · `raid_map_sim` determinism (seed1==seed1 + descent invariants) PASS on
+  main. ⏳ **Deferred to a nightly run** (OOM-prone under concurrent load): the `draft_sim` +
+  `raid_map_sim` STATISTICAL re-baselines (rerolls-out transcript + the live-market walk are the
+  sanctioned shifts) · full `verify-all` · `net_map_smoke`. **Next:** slice 4 (THE JAILBREAK
+  printed curse deals). *(raid-rebuild session)*
+
+- ☑ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **DESCENT SLICE 2 — THE
+  LEGIBILITY UI PASS: MERGED to main (`1f5e051`), 2 commits, ZERO file collisions with the
+  tuning-sweep merge landing alongside.** Built via a 6-reader recon workflow (the one that
+  disambiguated the THREE unrelated "integrity"s — see below). **2a display (byte-identical):**
+  node doors print a one-line reward CONTRACT (on hover + tooltip; WILD stays sealed) + fight-tier
+  ▮ pips (normal/elite/Seal, drawn as pip rects) · header restructured into the 3 meters
+  (⏣ TOKENS · ⚡ LUCK · ⏻ CHARGE) + per-seat wound pips + a reserved curse-pip row + a one-shot
+  first-⏻ teach + a currency legend, kind legend de-GATE'd, ⏣ moved off the peripherals line ·
+  check/wager buttons print BOTH legs pre-commit ("on ✓ … · on ✗ nothing lost") via new
+  `win_fx`/`lose_fx` descriptor fields folded with the wager stake (offline + online) · display
+  renames (⚡"entropy"→"LUCK", "eligibility base"→"base odds", "feed ⚡ to bias"→"spend ⚡ LUCK…",
+  fx-hint "integrity"→"party HP", THE ENTROPY→THE LUCK DAEMON) · §9.8 "REROLL THE FLOOR"
+  flavor-lie reworded to what it does · orphan `luck_profile.gd.uid` deleted (§11 #14 tail).
+  **2b THE RAID INTEGRITY KILL (§11 #2):** `map_check` integrity/desperation check-row deleted ·
+  overtime "Bill it" wager stake integrity→tokens · rollback `catch` orphan `"integrity":"steady"`
+  removed · the 5 tickets + SPRINT RETRO + Ticket Stub re-priced (drop dead heal/patch, KEEP
+  repair/mana, pay ⏣) · `map_wager_probe` decoupled from content to a synthetic tokens wager.
+  **Recon verdict that shaped it:** three things share the word — (A) `RaidNet.integrity()` net
+  desync hash (frame "ih", untouched — `integrity_probe` stays green), (B) the campaign HP-frac
+  carry (already retired-for-combat, §12 KEEP), (C) the currency (the kill). **NO PROTOCOL BUMP.**
+  Tokens-primary re-price → raid_map_sim FIGHT checksums unchanged (repair/mana held; ⏣ is
+  sim-carry-invisible), only the retired-integrity/fracs REPORT column shifts. Names BACKUPS/
+  REGENERATE/DEPRECATE **reserved only** (mechanics = slices 3–5; the draft REROLL economy is
+  untouched — that cut would shift `draft_sim`). **Verify:** 2a byte-identical proven (ab-gate
+  `map_check_sim` + `map_check_online_probe`); light green (import · `map_wager_probe` ALL OK ·
+  `ui_smoke_map` ALL PASS · `map_check_sim` ALL PASS · merged-tree parse + smoke). ⏳ **Heavy
+  verify DEFERRED to a nightly run per Bill** (OOM-prone under concurrent box load): `raid_map_sim`
+  2b baseline re-record · full `verify-all` · `net_map_smoke`. **Next:** slice 3 (PROMPT MARKET +
+  per-seat wallets). *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **DESCENT SLICE 1 — THE
   MAP BANG: MERGED to main (`ee18e05`), verify-all 40/40 GREEN ×2 (branch + merged tree).** The

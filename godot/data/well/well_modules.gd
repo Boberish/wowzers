@@ -36,6 +36,12 @@ const MODULES := {
 		"built": true,
 		"tags": [],
 	},
+	"vigil": {
+		"name": "The Vigil", "kicker": "⭐ Transformer", "gauge": "hold", "spec": "draw",
+		"blurb": "Walk with the drawn arrow: every OVERRUN becomes a HELD heal cocked in your hand (~3s). Release it the instant the spike lands for a full, instant heal. The hold visibly TREMBLES toward its gutter — camp too long and it's wasted, charge and cast both. The overrun stops being a shrug and becomes the held save. (DRAW only — Brim has no overrun to hold.)",
+		"built": true,
+		"tags": [],
+	},
 	"confluence": {
 		"name": "The Confluence", "kicker": "Two wells", "gauge": "conflu",
 		"blurb": "Split the Well into two chambers you fill in turn. (design)",
@@ -56,6 +62,17 @@ static func built_ids() -> Array:
 	for id in MODULES:
 		if bool(MODULES[id].get("built", false)):
 			out.append(id)
+	return out
+
+## Built modules offerable for an aspect. A module with a `spec` is per-spec (⭐The Vigil is
+## DRAW-only — Brim has no overrun to hold); specless modules read fine under either aspect.
+static func offer_ids(aspect := "") -> Array:
+	var out: Array = []
+	for id in built_ids():
+		var spec := String((MODULES.get(id, {}) as Dictionary).get("spec", ""))
+		if spec != "" and spec != aspect:
+			continue
+		out.append(id)
 	return out
 
 ## Does this module carry `tag` (for creed-aware offers)? No Well creed hides a module in v1.

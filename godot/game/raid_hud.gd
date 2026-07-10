@@ -162,7 +162,7 @@ func _seat_boons_now() -> Dictionary:
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
 	"strike": "Strike", "eviscerate": "Eviscerate", "kick": "Kick", "envenom": "Envenom",
-	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry",
+	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry", "setpiece": "Set Piece",
 	"bolt": "Bolt", "fracture": "Fracture", "barrier": "Barrier", "overload": "Overload",
 	"quietus": "Quietus", "silence": "Silence", "counterspell": "Counterspell",
 }
@@ -176,6 +176,8 @@ var _net: NetClient = null
 var _online: bool = false
 var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
 var _map_is_leader: bool = false   ## MAP-3b: am I the route-picker (server host)?
+var _charge_taught: bool = false   ## §9.7: the one-shot "⏻ feeds THE KILL SWITCH" teach has fired
+var _market_auto: bool = true      ## §6: AI raiders auto-spend their own wallets on LEAVE (V#11 default)
 var _room: Dictionary = {}
 var _my_ready: bool = false
 var _net_status: Label = null
@@ -506,6 +508,11 @@ func _on_net_map(msg: Dictionary) -> void:
 	ms.toast = String(msg.get("toast", ""))
 	ms.entropy = int(msg.get("entropy", 0))   # ⚡ the within-run luck pool (server-owned, v6)
 	ms.charge = int(msg.get("charge", 0))     # ⏻ THE KILL SWITCH meter (server-owned)
+	ms.wounds = msg.get("wounds", [])         # server broadcasts per-seat wounds → header pips
+	ms.show_tokens = false                    # per-seat wallets aren't on the wire yet (slice 3)
+	if ms.charge > 0 and not _charge_taught:
+		ms.charge_hint = true
+		_charge_taught = true
 	ms.interactive = _map_is_leader
 	if _map_is_leader:
 		ms.node_entered.connect(func(id: int): _net.send_node(id))
@@ -550,8 +557,13 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 			var d := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
 				"orig_index": i, "fx": c.get("fx", {}), "verb": String(sc.get("verb", "CHECK")),
 				"entropy_have": ent, "by_seat": sc.get("by_seat", {})}
-			if String(c.get("kind", "")) == "wager":
-				d["stake_label"] = _stake_label(c.get("wager", {}))
+			var ck := String(c.get("kind", ""))
+			if ck == "check" or ck == "wager":
+				var w2: Dictionary = c.get("wager", {})   # §9.2 both legs (seat-independent)
+				d["win_fx"] = _fold_wager((c.get("success", {}) as Dictionary).get("fx", {}), w2)
+				d["lose_fx"] = _fold_wager((c.get("fail", {}) as Dictionary).get("fx", {}), w2)
+				if ck == "wager":
+					d["stake_label"] = _stake_label(w2)
 			descs.append(d)
 		var p := MapEventPanel.new()
 		p.title_text = String(msg.get("title", ""))
@@ -621,7 +633,6 @@ func _on_net_draft() -> void:
 	_clear()
 	var ds := DraftScreen.new(_d.run, picks, "REFORGE — the kill reshapes your kit",
 		"Take one. Your raid is drafting too.", [], Palette.GOLD)
-	ds.free_reroll = _d.gear.has("hot_reload")  # CURIO Hot Reload
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_d.run, boon)
 		_d.taken_boons.append(boon)
@@ -737,6 +748,8 @@ func _start_map_run() -> void:
 	_d.flags = {}
 	_d.marks = {}
 	_d.charge = 0
+	_d.curses = []          # THE JAILBREAK: a fresh run carries no bites (§7)
+	_d.deprecate_uses = 0
 	_d.check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _d.gear_unlocks directly.
@@ -805,6 +818,7 @@ func _inject_boons(seat: Seat) -> void:
 				tk.creed_id = _d.run.creed
 			tk.modules = _d.run.modules.duplicate()
 			tk.rig = _d.run.rig.duplicate()      # TEMPO §5: the wired Combo rig
+			tk.transform = _d.run.transform      # D0 S4: the wired ability transform
 		elif seat.kit is AlchemistKit:
 			var ak := seat.kit as AlchemistKit
 			if _d.run.creed != "":
@@ -857,7 +871,8 @@ func _advance_floor() -> void:
 	elif _d.floor_i == 1:
 		_show_module_pick(_build_floor)   # TEMPO: end of Floor 1 elevation → install a Module
 	elif _d.floor_i == 2:
-		_show_rig_wire(_build_floor)      # TEMPO §5: re-wire the Combo at end of Floor 2
+		# D0 S4: the Floor-2 ceremony — transform an ability (1-of-3), THEN re-wire the Combo.
+		_show_transform_pick(func(): _show_rig_wire(_build_floor))
 	else:
 		_build_floor()
 
@@ -877,6 +892,13 @@ func _show_map() -> void:
 	ms.gear_line = _gear_line()
 	ms.entropy = _d.entropy
 	ms.charge = _d.charge
+	ms.tokens = _tokens_now()          # ⏣ meter (§9); offline = the real wallet
+	ms.wounds = _d.wounds              # per-seat corrupted sectors → header pips
+	ms.curses = _curse_pips()          # §7 JAILBREAK bites → header curse pips (cap 2)
+	# ⏻ one-shot teach: fire the first map after charge appears in this run
+	if _d.charge > 0 and not _charge_taught:
+		ms.charge_hint = true
+		_charge_taught = true
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
@@ -953,15 +975,23 @@ func _resolve_node(n: Dictionary) -> void:
 		RunMap.KIND_EVENT:
 			_event_stop(n)
 		RunMap.KIND_COOLING:
-			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
-				[{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
-					"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}],
-				Palette.FLOW, _show_map)
+			# The campfire fork (§7): the second redundant curse exit — free purge if a bite is active.
+			var cool_choices: Array = [{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
+				"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}]
+			if not _d.curses.is_empty():
+				cool_choices.append({"label": "PURGE A CURSE  (vent one active JAILBREAK bite — free)",
+					"fx": {"purge_curse": true,
+						"result": "You route the corruption to /dev/null. The bite lifts."}})
+			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY, cool_choices, Palette.FLOW, _show_map)
 		RunMap.KIND_CACHE:
 			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
 				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)",
 					"fx": CampaignCore.CACHE_FX.merged({"result": MapContent.CACHE_RESULT})}],
 				Palette.GOLD, _show_map)
+		RunMap.KIND_MARKET:
+			_show_market(int(n["id"]), _show_map, false)
+		RunMap.KIND_JAILBREAK:
+			_show_jailbreak(int(n["id"]), _show_map)
 
 ## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
 ## choice (a check computes its % + breakdown; a gated choice greys if unmet), and hands
@@ -1039,8 +1069,11 @@ func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 		d["verb"] = String(chk.get("verb", "CHECK"))
 		d["entropy_have"] = int(ctx.get("entropy", 0))       # ⚡ the party can feed
 		d["nudge_ladder"] = MapCheck.nudge_ladder(chk, ctx)   # the % at 1..min(3,⚡) fed
+		var w: Dictionary = c.get("wager", {})
+		d["win_fx"] = _fold_wager((c.get("success", {}) as Dictionary).get("fx", {}), w)   # §9.2 both legs
+		d["lose_fx"] = _fold_wager((c.get("fail", {}) as Dictionary).get("fx", {}), w)
 		if kind == "wager":
-			d["stake_label"] = _stake_label(c.get("wager", {}))
+			d["stake_label"] = _stake_label(w)
 	return d
 
 ## Human-readable wager stake ("10% integrity" / "2 ⏣" / "2 ⚡").
@@ -1051,6 +1084,20 @@ func _stake_label(w: Dictionary) -> String:
 		"tokens": return "%d ⏣" % int(amt)
 		"entropy": return "%d ⚡" % int(amt)
 	return ""
+
+## Fold a wager's fixed stake into a leg's fx — a mirror of MapCheck.resolve's fold — so
+## the pre-commit BOTH-LEGS hint (§9.2) shows the SAME numbers the roll will apply. Pure
+## display; never rolls, never touches rng.
+func _fold_wager(fx: Dictionary, w: Dictionary) -> Dictionary:
+	if w.is_empty():
+		return fx
+	var out: Dictionary = (fx as Dictionary).duplicate(true)
+	var amt := float(w.get("amount", 0))
+	match String(w.get("stake", "integrity")):
+		"integrity": out["hurt"] = float(out.get("hurt", 0.0)) + amt
+		"tokens": out["tokens"] = int(out.get("tokens", 0)) - int(amt)
+		"entropy": out["entropy"] = int(out.get("entropy", 0)) - int(amt)
+	return out
 
 ## The build context an Inference Check reads. Offline the human's seat is the only
 ## full build (AI raiders carry no boons), so `boon_tags` is the human's owned boons
@@ -1141,6 +1188,7 @@ func _launch_map_fight(fi: int) -> void:
 			u.hp = u.hp_max
 			if u.role == "healer":    # the fuel gauge: mana carries between nodes (it bites now)
 				u.resource = roundf(u.resource_max * _d.mana)
+	_apply_curse_marks()        # §7: fold active HP/TIMING curse bites into the pending mark, tick them
 	_apply_next_fight_mark(s)   # the KILL SWITCH cash-out / a fight-curse weakens THIS boss, then clears
 	_loadout = _make_loadout()
 	_build_combat(s)
@@ -1238,6 +1286,13 @@ func _apply_map_fx(fx: Dictionary) -> void:
 	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
 	if int(fx.get("tokens", 0)) != 0:
 		_gain_tokens(int(fx["tokens"]))
+	# §6/§7: REGENERATE charges + curse add/purge also live off-cp (on the run / _d.curses)
+	if int(fx.get("regenerate", 0)) != 0 and _d.run != null:
+		_d.run.regenerate += int(fx["regenerate"])
+	if fx.has("curse"):
+		_add_curse(fx["curse"] as Dictionary)          # a JAILBREAK bite / event-curse leg
+	if bool(fx.get("purge_curse", false)) and not _d.curses.is_empty():
+		_d.curses.pop_front()                           # the Cooling purge fork (§7)
 
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 
@@ -1253,9 +1308,33 @@ func _arm_gear(u: Seat) -> void:
 ## Tokens are ONE currency: scrap + oath purses feed the same purse the REFORGE
 ## boon draft spends (raid-boons' `_d.run.tokens`). `_d.tokens` stays only as the
 ## fallback bank for runless dev paths.
+## PER-SEAT MINT (V#11): after a won fight, credit EACH of the 4 seats' wallets from
+## its own combat diag — the human's via _gain_tokens (Hashgrinder ×2 applies to the seat
+## you pilot), each AI seat's straight into its own run wallet. This is why AI seats START
+## EARNING: `Draft.mint` used to read only the is_player mirror (state.diag), so AI raiders
+## minted nothing; now each reads `seat.diag`.
+func _mint_seats() -> void:
+	if _ctrl == null or _ctrl.state == null:
+		return
+	var st = _ctrl.state
+	var mult := _mint_curse_mult()        # §7 ECONOMY TAX — a curse halves this fight's mint
+	for key in RaidNet.SEAT_KEYS:
+		var i: int = SEAT_IDX[key]
+		if i >= st.seats.size():
+			continue
+		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
+		if run == null:
+			continue
+		var minted := int(Draft.mint_diag(st.seats[i].diag, st.config, run.char_class) * mult)
+		if key == _seat_key:
+			_gain_tokens(minted)          # your seat — Hashgrinder ×2 lives here
+		else:
+			run.tokens += minted          # the AI raider banks its own clean play
+	_tick_economy_curses()                # one tick per fight for mint/price bites
+
 func _gain_tokens(n: int) -> void:
-	if n > 0 and _d.gear.has("hashgrinder"):   # CURIO Hashgrinder: all Token income doubled
-		n *= 2
+	# CURIO Hashgrinder reframed (§6): no longer doubles income — it discounts the MARKET
+	# (prices −1⏣, applied in _market_price). Income is the honest mint now.
 	if _d.run != null:
 		_d.run.tokens += n
 	else:
@@ -1263,6 +1342,264 @@ func _gain_tokens(n: int) -> void:
 
 func _tokens_now() -> int:
 	return _d.run.tokens if _d.run != null else _d.tokens
+
+# ---------------------------------------------------------------- THE PROMPT MARKET (§6)
+## THE SCRAPER's shop (DESCENT §6, = GEAR-3): the human shops a printed-price stock from
+## YOUR wallet; AI raiders auto-spend their own ⏣ on LEAVE (V#11 per-seat wallets). The
+## stock rolls on a market rng seeded from (map_seed, node) → replay-stable + co-op-shared.
+## Live slots: CURIO ×2 (from your unlocked pool) · REGENERATE charge · PATCH (repair+refuel).
+## DEFERRED (dependency not in code): +1 BACKUP (no wipe budget) · DEPRECATE (curse-purge =
+## Jailbreak slice 4; boon-scrap = a follow-up). Prices scale ~+30%/floor; Hashgrinder −1⏣.
+const MARKET_CURIO_PRICE := {"haiku": 6, "sonnet": 8, "opus": 10}
+
+func _market_price(base: int) -> int:
+	var p := int(round(float(base) * (1.0 + 0.30 * float(_d.floor_i))))
+	p += _price_curse_surcharge()         # §7 ECONOMY TAX — a JAILBREAK price curse marks up the shop
+	if _d.gear.has("hashgrinder"):        # CURIO Hashgrinder reframed (§6): prices −1⏣ (floor 1)
+		p = maxi(1, p - 1)
+	return p
+
+## Up to `n` curios from YOUR unlocked pool (flattened across bosses), class-fitting and not
+## already equipped, drawn on a replay-stable market rng.
+func _market_curios(n: int, rng: DetRng) -> Array:
+	if _d.run == null:
+		return []
+	var seen := {}
+	var pool: Array = []
+	for boss in _d.gear_unlocks:
+		for id in (_d.gear_unlocks[boss] as Array):
+			var sid := String(id)
+			if seen.has(sid) or _d.gear.has(sid) or not Gear._fits(sid, _d.run.char_class):
+				continue
+			seen[sid] = true
+			pool.append(sid)
+	pool.sort()                            # deterministic order before the rng pick
+	var out: Array = []
+	for _k in n:
+		if pool.is_empty():
+			break
+		out.append(pool.pop_at(int(rng.next_u32() % pool.size())))
+	return out
+
+## The 4-seat wallet strip (per-seat wallets, V#11) — read live each refresh.
+func _market_wallets() -> Array:
+	var out: Array = []
+	for key in RaidNet.SEAT_KEYS:
+		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
+		out.append({"name": String(key).to_upper(), "tokens": run.tokens if run != null else 0,
+			"mine": key == _seat_key})
+	return out
+
+## THE MARKET stop. `recovery_only` = the post-Seal MARKET PHASE (no curios — repairs/refuel/
+## REGENERATE only, the exhale). `done` = where LEAVE goes.
+func _show_market(node_id: int, done: Callable, recovery_only: bool) -> void:
+	_screen = "market"
+	_clear()
+	var mseed: int = _d.map.seed if _d.map != null else 12345
+	var rng := DetRng.new((mseed * 1000003 + (node_id + 1) * 7919 + (7 if recovery_only else 3)) & 0x7FFFFFFF)
+	var stock: Array = []
+	if not recovery_only:
+		for gid in _market_curios(2, rng):
+			var it := GearCatalog.item(gid)
+			var rar := String(it.get("rarity", "haiku"))
+			stock.append({"kind": "curio", "gid": gid,
+				"title": "CURIO · %s" % String(it.get("name", gid)),
+				"desc": "%s peripheral — equip it" % rar,
+				"price": _market_price(int(MARKET_CURIO_PRICE.get(rar, 8))),
+				"disabled": _d.gear.size() >= Gear.SLOTS, "disabled_text": "SLOTS FULL"})
+	stock.append({"kind": "regenerate", "title": "REGENERATE charge",
+		"desc": "bank one draft redraw", "price": _market_price(4)})
+	stock.append({"kind": "patch", "title": "PATCH",
+		"desc": "repair corrupted sectors + refuel reserves", "price": _market_price(5)})
+	# printed-but-owed (§6): the slots whose systems land in later slices, honest not hidden
+	stock.append({"kind": "backup", "title": "+1 BACKUP",
+		"desc": "an extra attempt — arrives with the wipe budget", "price": _market_price(10),
+		"disabled": true, "disabled_text": "SOON"})
+	# §7 DEPRECATE — pay to have LESS: purge one active JAILBREAK curse. Price escalates each
+	# use. Only offered while a curse is active (the slice-3 deferred slot, now live).
+	if not _d.curses.is_empty():
+		stock.append({"kind": "deprecate", "title": "DEPRECATE",
+			"desc": "purge one active curse — %s" % String((_d.curses[0] as Dictionary).get("label", "a bite")),
+			"price": _market_price(5 + 5 * _d.deprecate_uses)})
+
+	var buy := func(i: int) -> bool: return _market_buy(stock, i)
+	var leave := func() -> void:
+		if _market_auto:
+			_market_ai_autospend()
+		done.call()
+	var set_auto := func(on: bool) -> void: _market_auto = on
+	var sub := "THE SCRAPER packs up between rings — recovery goods only. The blessed exhale." \
+		if recovery_only else ""
+	var ms := MarketScreen.new(stock, buy, _market_wallets, set_auto, leave, _market_auto, sub)
+	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui.add_child(ms)
+
+## Apply a purchase from YOUR wallet. Returns true when bought (the screen marks it SOLD).
+func _market_buy(stock: Array, i: int) -> bool:
+	if _d.run == null or i < 0 or i >= stock.size():
+		return false
+	var s: Dictionary = stock[i]
+	var price := int(s.get("price", 0))
+	if _d.run.tokens < price:
+		return false
+	match String(s.get("kind", "")):
+		"curio":
+			if _d.gear.size() >= Gear.SLOTS:
+				return false
+			_gear_equip(String(s["gid"]), -1)
+			_toast_add("🛒  bought %s" % String(GearCatalog.item(String(s["gid"])).get("name", "a curio")))
+		"regenerate":
+			_d.run.regenerate += 1
+			_toast_add("🛒  +1 REGENERATE charge")
+		"patch":
+			_apply_map_fx({"repair": true, "mana": 1.0})
+			_toast_add("🛒  PATCH — sectors repaired, reserves topped")
+		"deprecate":
+			if _d.curses.is_empty():
+				return false
+			var gone: Dictionary = _d.curses.pop_front()
+			_d.deprecate_uses += 1                # the NEXT DEPRECATE costs more
+			_toast_add("🛒  DEPRECATE — purged %s" % String(gone.get("label", "a curse")))
+		_:
+			return false
+	_d.run.tokens -= price
+	return true
+
+## AUTO (V#11 default): each AI raider spends its OWN wallet — banks up to 2 REGENERATE
+## charges for its drafts, with banter. Runs on LEAVE when AUTO is on.
+func _market_ai_autospend() -> void:
+	var price := _market_price(4)
+	for key in RaidNet.SEAT_KEYS:
+		if key == _seat_key:
+			continue
+		var run: RunState = _d.ai_runs.get(key) as RunState
+		if run == null:
+			continue
+		var bought := 0
+		while run.tokens >= price and run.regenerate < 2:
+			run.tokens -= price
+			run.regenerate += 1
+			bought += 1
+		if bought > 0:
+			_toast_add("🛒  %s banks %d REGENERATE — \"%s\"" % [
+				String(key).to_upper(), bought, _market_banter(key)])
+
+func _market_banter(key: String) -> String:
+	match key:
+		"tank": return "stocking up. no refunds, no regrets."
+		"blade": return "buy low, stab high."
+		"caster": return "for science. and rerolls."
+		"healer": return "one for me, none for the printer on fire."
+	return "shopping."
+
+# ---------------------------------------------------------------- THE JAILBREAK — curses (§7)
+## Add an active curse (the JAILBREAK deals + event-curse legs route here). CAP 2; the HARD
+## RULE — no run-length TIMING curse — is enforced (a timing bite must be bounded). Returns
+## false when the cap is hit (the deal button greys; the player must DEPRECATE first).
+func _add_curse(c: Dictionary) -> bool:
+	if _d.curses.size() >= 2:
+		return false
+	if String(c.get("kind", "")) == "timing" and int(c.get("fights", 0)) <= 0:
+		return false                       # §7 HARD RULE: no run-long timing curse ever
+	_d.curses.append(c.duplicate(true))
+	return true
+
+## Header pips (§7): one printed line per active bite. The render already ships (slice 2,
+## map_screen curses row) — this just composes the strings.
+func _curse_pips() -> Array:
+	var out: Array = []
+	for c in _d.curses:
+		out.append(String((c as Dictionary).get("label", "a curse")))
+	return out
+
+## Is a mint-halving curse active? (bites _mint_seats)
+func _mint_curse_mult() -> float:
+	for c in _d.curses:
+		if String((c as Dictionary).get("kind", "")) == "economy_mint" and int((c as Dictionary).get("fights", 0)) > 0:
+			return 0.5
+	return 1.0
+
+## The market price surcharge from active price curses (bites _market_price).
+func _price_curse_surcharge() -> int:
+	var s := 0
+	for c in _d.curses:
+		if String((c as Dictionary).get("kind", "")) == "economy_price" and int((c as Dictionary).get("fights", 0)) > 0:
+			s += int((c as Dictionary).get("mag", 0))
+	return s
+
+## At each fight LAUNCH: fold active HP/TIMING curse bites into the pending fight mark
+## (RaidMarks delivers them), then decrement — they're "next N fights" bites, consumed at
+## the start of each fight. Two HP curses sum (RaidMarks caps). Byte-identical when none.
+func _apply_curse_marks() -> void:
+	for c in _d.curses:
+		var cd: Dictionary = c
+		if int(cd.get("fights", 0)) <= 0:
+			continue
+		match String(cd.get("kind", "")):
+			"hp":
+				_d.marks["seat_hp_cut"] = float(_d.marks.get("seat_hp_cut", 0.0)) + float(cd.get("mag", 0.0))
+				cd["fights"] = int(cd["fights"]) - 1
+			"timing":
+				_d.marks["window_tighten"] = float(_d.marks.get("window_tighten", 0.0)) + float(cd.get("mag", 0.0))
+				cd["fights"] = int(cd["fights"]) - 1
+	_expire_curses()
+
+## Post-mint: decrement the economy curses (mint/price) — one tick per fight — and expire.
+func _tick_economy_curses() -> void:
+	for c in _d.curses:
+		var cd: Dictionary = c
+		var k := String(cd.get("kind", ""))
+		if (k == "economy_mint" or k == "economy_price") and int(cd.get("fights", 0)) > 0:
+			cd["fights"] = int(cd["fights"]) - 1
+	_expire_curses()
+
+func _expire_curses() -> void:
+	var kept: Array = []
+	for c in _d.curses:
+		if int((c as Dictionary).get("fights", 0)) > 0:
+			kept.append(c)
+	_d.curses = kept
+
+## The deal menu (§7, V#4 lean-gentle): a strong good + a bite in a DIFFERENT currency, both
+## bounded + printed. Two are rolled per node. Goods run over market value; bites are gentle.
+const _JAILBREAK_BODY := "A back-alley terminal blinks [b]UNSIGNED PATCH — INSTALL?[/b]  Two deals, both halves printed. Each is a strong good with a bite in a different currency — the best value in the raid IF you can eat the pain, and the pain lands wherever you route it. Walking away is free."
+const JAILBREAK_DEALS := [
+	{"label": "OVERCLOCK — take +45 ⏻", "fx": {"charge": 45,
+		"curse": {"kind": "timing", "label": "windows −10% next fight", "fights": 1, "mag": 0.10},
+		"result": "The Kill Switch surges — but your reflexes lag a beat next fight."}},
+	{"label": "SKIM THE TILL — take +8 ⏣", "fx": {"tokens": 8,
+		"curse": {"kind": "economy_mint", "label": "mint halved (2 fights)", "fights": 2, "mag": 0.0},
+		"result": "Fat stack, flagged account. The next two paydays run lean."}},
+	{"label": "HOT PATCH — bank +2 REGENERATE", "fx": {"regenerate": 2,
+		"curse": {"kind": "hp", "label": "a corrupted sector next fight", "fights": 1, "mag": 0.20},
+		"result": "Two reloads, one bruise. A sector corrupts — it auto-repairs after the next fight."}},
+	{"label": "PRICE GOUGE — take +55 ⏻", "fx": {"charge": 55,
+		"curse": {"kind": "economy_price", "label": "market +3⏣ (3 fights)", "fights": 3, "mag": 3.0},
+		"result": "Charged up, marked up — THE SCRAPER hears you're desperate and raises prices."}},
+	{"label": "DOUBLE OR NOTHING — take +11 ⏣", "fx": {"tokens": 11,
+		"curse": {"kind": "timing", "label": "windows −10% next 2 fights", "fights": 2, "mag": 0.10},
+		"result": "A fistful of ⏣ and a shakier hand for two fights. Route the pain."}},
+]
+
+## THE JAILBREAK node (§7). Two deals rolled on a (map_seed, node) rng → replay-stable +
+## co-op-shared. Walking away is free. At cap 2 the cell is full (DEPRECATE/purge first).
+func _show_jailbreak(node_id: int, done: Callable) -> void:
+	var mseed: int = _d.map.seed if _d.map != null else 12345
+	var rng := DetRng.new((mseed * 1000003 + (node_id + 1) * 6971 + 5) & 0x7FFFFFFF)
+	var choices: Array = []
+	if _d.curses.size() >= 2:
+		choices.append({"label": "The cell is FULL — no room for another bite",
+			"fx": {"result": "Two curses already ride your file. DEPRECATE one at the Market — or vent it at a Cooling station — before you deal again."}})
+	else:
+		var pool := JAILBREAK_DEALS.duplicate()
+		for _k in 2:
+			if pool.is_empty():
+				break
+			var d: Dictionary = pool.pop_at(int(rng.next_u32() % pool.size()))
+			choices.append({"label": String(d["label"]), "fx": (d["fx"] as Dictionary).duplicate(true)})
+	choices.append({"label": "WALK AWAY  (take no deal — free)",
+		"fx": {"result": "You keep your hands clean. THE JAILBREAK will be here if you change your mind."}})
+	_map_stop("THE JAILBREAK", _JAILBREAK_BODY, choices, Palette.VOID, done)
 
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 
@@ -1561,10 +1898,14 @@ func _gear_equip(id: String, replace_i: int) -> void:
 	var it := GearCatalog.item(id)
 	if bool(it.get("active", false)):
 		_d.gear_charges[id] = int(it.get("charges", 1))
+	# CURIO Hot Reload — reframed (§6): grants 2 REGENERATE charges on equip (was free rerolls)
+	if id == "hot_reload" and _d.run != null:
+		_d.run.regenerate += 2
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
-	if _d.gear.is_empty() and _tokens_now() == 0:
+	# ⏣ TOKENS moved to the header meter row (§9); this line is just the peripherals now.
+	if _d.gear.is_empty():
 		return ""
 	var names: Array = []
 	for g in _d.gear:
@@ -1572,8 +1913,7 @@ func _gear_line() -> String:
 		if _d.gear_charges.has(g):
 			nm += " ×%d" % int(_d.gear_charges[g])
 		names.append(nm)
-	var line := "PERIPHERALS:  " + ("  ·  ".join(PackedStringArray(names)) if not names.is_empty() else "—")
-	return line + "      ⏣ %d" % _tokens_now()
+	return "PERIPHERALS:  " + "  ·  ".join(PackedStringArray(names))
 
 func _worst_wound() -> float:
 	var w := 0.0
@@ -1599,7 +1939,7 @@ func _show_boon_draft(done: Callable) -> void:
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
-		_gain_tokens(Draft.mint(_ctrl.state, _d.run.char_class))  # routes through Hashgrinder ×2
+		_mint_seats()                                             # V#11: every seat mints its OWN ⏣
 	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
 	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
 	var chain := done
@@ -1615,16 +1955,14 @@ func _show_boon_draft(done: Callable) -> void:
 	_show_seat_draft(_seat_key, chain)
 
 ## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
-## AI drafts spend the SHARED ⏣ bank: Draft's economy reads run.tokens, so the bank
-## is mirrored into the AI run for the screen and the remainder banked back out.
+## PER-SEAT WALLETS (V#11): each seat spends its OWN `run.tokens` — the AI raider drafts
+## against the ⏣ it earned itself (the old shared-bank mirror is gone).
 func _show_seat_draft(key: String, done: Callable) -> void:
 	var mine: bool = key == _seat_key
 	var run: RunState = _d.run if mine else (_d.ai_runs.get(key) as RunState)
 	if run == null:
 		done.call()
 		return
-	if not mine and _d.run != null:
-		run.tokens = _d.run.tokens
 	# CURIO Expansion Bus (your seat only): +1 slot → a 1-of-4 draft.
 	var picks := Draft.roll_offers(run, 1 if (mine and _d.gear.has("expansion_bus")) else 0)
 	if picks.is_empty():
@@ -1633,8 +1971,8 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	_screen = "draft"
 	_clear()
 	var extras: Array = []
-	if run.tokens > 0:
-		extras.append("%d Tokens banked — REROLL / LOCK a card." % run.tokens)
+	if run.tokens > 0 or run.regenerate > 0:
+		extras.append("%d ⏣ · %d REGENERATE — UPSELL a card or redraw the row." % [run.tokens, run.regenerate])
 	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
 		else String(SEAT_NAMES.get(key, "RAIDER"))
 	var headline := "REFORGE — the kill reshapes your kit" if mine \
@@ -1642,7 +1980,6 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	var flavor := "Take one — every piece forges into your set." if mine \
 		else "You command the build — the AI only drives the rotation."
 	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
-	ds.free_reroll = mine and _d.gear.has("hot_reload")  # CURIO Hot Reload (your seat only)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(run, boon)
 		if mine:
@@ -1653,8 +1990,6 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
 				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
 		else:
-			if _d.run != null:
-				_d.run.tokens = run.tokens   # bank the remainder back to the shared pool
 			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
@@ -1727,9 +2062,9 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
 ## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
-func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+func _fw_module_offer_ids(fw: String, creed: String, aspect := "") -> Array:
 	if fw == "well":
-		return WellModules.built_ids()         # no Well creed hides a module in v1
+		return WellModules.offer_ids(aspect)   # ⭐The Vigil is Draw-only; the rest read either spec
 	if fw == "duelist":
 		return DuelistModules.built_ids()
 	if fw != "alchemist":
@@ -1859,7 +2194,7 @@ func _show_module_pick(done: Callable) -> void:
 		done.call()
 		return
 	var avail: Array = []
-	for id in _fw_module_offer_ids(fw, _d.run.creed):        # implemented + creed-allowed modules
+	for id in _fw_module_offer_ids(fw, _d.run.creed, String(_d.run.aspect)):   # implemented + creed/aspect-allowed
 		if not _d.run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
@@ -1900,6 +2235,38 @@ var _rig_confirm: Button = null
 
 ## WIRE YOUR COMBO — pick 1 of 3 WHENs + 1 of 3 THENs; the readout shows the computed number
 ## (the greed-dial payout: rare moments pay more, if you can land them). Blade/Tempo only.
+## D0 S4 · TRANSFORMS — the Floor-2 1-of-3 pick (≤1 per run, un-rerollable). Twinfang/blade only;
+## every other seat skips straight through (byte-identical no-op).
+func _show_transform_pick(done: Callable) -> void:
+	if _d.run == null or _fw() != "twinfang" or _d.run.transform != "":
+		done.call()
+		return
+	_screen = "transform"
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	UiKit.place(head, 0.5, 0, 0.5, 0, -430, 120, 430, 235)
+	_ui.add_child(head)
+	var hl := UiKit.title_in(head, "TRANSFORM AN ABILITY", 34, Palette.FLOW)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	UiKit.title_in(head, "R E W R I T E   O N E   A B I L I T Y ,   F O R E V E R  —  pick one", 15, Palette.TEXT_DIM)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -370, -175, 370, 200)
+	_ui.add_child(box)
+	for t in TwinfangBoons.TRANSFORMS:
+		var card := AspectCard.new(String(t.get("title", "")) + "  ·  " + String(t.get("kicker", "")),
+			String(t.get("desc", "")), Palette.FLOW, "coupdegrace")
+		card.chosen.connect(_pick_transform.bind(String(t.get("id", "")), done))
+		box.add_child(card)
+
+func _pick_transform(id: String, done: Callable) -> void:
+	if _d.run != null:
+		_d.run.transform = id
+	_toast_add("♪  Ability transformed — %s" % id.capitalize())
+	done.call()
+
 func _show_rig_wire(done: Callable) -> void:
 	var fw := _fw()
 	if _d.run == null or fw == "":
@@ -2024,7 +2391,9 @@ func _show_floor_cleared() -> void:
 	descend.text = "DESCEND TO %s" % String(nxt["title"])
 	descend.custom_minimum_size = Vector2(380, 52)
 	descend.add_theme_font_size_override("font_size", 18)
-	descend.pressed.connect(_advance_floor)
+	# §6 MARKET PHASE: the post-Seal town beat — a recovery-only Scraper stop (AI auto-spend),
+	# THE macro exhale, then descend. (After Mythos there's no market — see _show_campaign_cleared.)
+	descend.pressed.connect(func(): _show_market(-1, _advance_floor, true))
 	box.add_child(descend)
 	var leave := Button.new()
 	leave.text = "BANK & LEAVE TO THE RIFT"
@@ -2131,7 +2500,7 @@ func _build_combat(s: CombatState) -> void:
 	# the raid meter — right rail: all four raiders ranked, engine-truth accounting;
 	# M cycles ranking / your spells / hidden. Works identically offline and online
 	# (it only READS state — the lockstep replica never notices it).
-	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg")
+	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", false, _d.fight_log)
 	UiKit.place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(_meter)
 
@@ -2420,7 +2789,7 @@ func _owned_boon_labels() -> Array:
 		return []
 	var pools: Array = []
 	match _seat_key:
-		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM]
+		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM, TwinfangBoons.TRANSFORM_DOORS, TwinfangBoons.DUOS]
 		"caster": pools = [AlchemistBoons.SHARED, AlchemistBoons.BREW]
 		"healer":
 			if _healer_cls == "bloomweaver":
@@ -3266,7 +3635,7 @@ func _show_fight_recap(done: Callable) -> void:
 	box.add_child(cont)
 	_report_button(box, func(): _show_fight_recap(done))
 	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
-	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true, _d.fight_log)
 	UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(rmeter)
 
@@ -3299,7 +3668,7 @@ func _show_end(won: bool) -> void:
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 		# the meter's recap: the raid ranked, click a raider for their spells
-		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true, _d.fight_log)
 		UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 		_ui.add_child(rmeter)
 	var again := Button.new()
@@ -3354,6 +3723,14 @@ func _show_stats_page(back: Callable) -> void:
 ## THEN the normal end flow (draft / end screen / map) runs. Headless runs
 ## (smokes, sims) skip the beat entirely.
 func _on_end_moment(won: bool) -> void:
+	# METER L3 — snapshot this fight's meter into the run history (once per fight, win or loss,
+	# headless too). Keyed on run_seed so a new descent auto-clears the log.
+	if _d != null and _ctrl != null and _ctrl.state != null:
+		if _d.fight_log_seed != _d.run_seed:
+			_d.fight_log.clear()          # clear in place — the meter holds this same array by ref
+			_d.fight_log_seed = _d.run_seed
+		var enc = _ctrl.state.encounter
+		_d.fight_log.append(MeterPanel.snapshot(_ctrl.state, enc.name if enc != null else "Fight"))
 	if _screen != "combat" or DisplayServer.get_name() == "headless":
 		_on_end(won)
 		return

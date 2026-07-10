@@ -25,7 +25,7 @@ func _initialize() -> void:
 	_test_synergy()
 	_test_pity()
 	_test_spend_legality()
-	_test_lock()
+	_test_regenerate()
 	_test_mint_table()
 	_test_mint_integration()
 	if _fails > 0:
@@ -59,6 +59,7 @@ func _transcript(cls: String, aspect: String, seed_v: int) -> String:
 		var offers := Draft.roll_offers(run)
 		if d == 1:
 			run.tokens = 5
+			run.regenerate = 1                          # rerolls-out: a banked charge redraws
 			var rr := Draft.reroll(run)
 			if not rr.is_empty():
 				offers = rr
@@ -139,20 +140,20 @@ func _test_pity() -> void:
 		_check(worst <= Draft.OPUS_PITY_HARD + 1, "%s worst opus drought = %d drafts" % [cls, worst])
 
 func _test_spend_legality() -> void:
-	print("-- spend legality (broke spends refused, no tokens, NO rng consumed)")
+	print("-- spend legality (broke spends refused, no tokens/charges, NO rng consumed)")
 	for cls in CLASSES:
 		var aspect: String = CLASSES[cls][0]
 		# control: two straight rolls
 		var ctrl := _start(cls, aspect, 777)
 		var c1 := Draft.roll_offers(ctrl)
 		var c2 := Draft.roll_offers(ctrl)
-		# probe: refused reroll + refused upsell between the same two rolls
+		# probe: refused reroll (no charge) + refused upsell (no tokens) between the same rolls
 		var run := _start(cls, aspect, 777)
 		var p1 := Draft.roll_offers(run)
-		var rr := Draft.reroll(run)                     # tokens = 0 -> refused
+		var rr := Draft.reroll(run)                     # regenerate = 0 -> refused
 		var up := Draft.upsell(run, p1, 0)              # tokens = 0 -> unchanged
 		var p2 := Draft.roll_offers(run)
-		_check(rr.is_empty() and up == p1 and run.tokens == 0, "%s broke spends refused" % cls)
+		_check(rr.is_empty() and up == p1 and run.tokens == 0 and run.regenerate == 0, "%s broke spends refused" % cls)
 		_check(_ids(p1) == _ids(c1) and _ids(p2) == _ids(c2), "%s refused spends consume no rng" % cls)
 
 func _ids(offers: Array) -> String:
@@ -161,64 +162,41 @@ func _ids(offers: Array) -> String:
 		out += String(o["id"]) + ","
 	return out
 
-## Phase B — LOCK · 1⏣ holds a card through a reroll (reroll_kept redraws the rest).
-func _test_lock() -> void:
-	print("-- LOCK (hold through reroll)")
+## Phase B — REGENERATE · a banked charge redraws the whole row (rerolls-out §11 #3;
+## the token REROLL + per-card LOCK are gone).
+func _test_regenerate() -> void:
+	print("-- REGENERATE (banked charge redraws the row; no token cost, no LOCK)")
 	for cls in CLASSES:
 		var aspect: String = CLASSES[cls][0]
-		var t1 := _lock_transcript(cls, aspect, 4242)
-		var t2 := _lock_transcript(cls, aspect, 4242)
-		_check(t1 == t2, "%s lock transcript reproduces" % cls)
-		# hold semantics: the locked card survives verbatim and is never duplicated
+		# a charge spends one and redraws; Tokens are NOT touched by a reroll now
 		var run := _start(cls, aspect, 555)
-		run.tokens = 10
+		run.regenerate = 2
+		run.tokens = 7
 		var offers := Draft.roll_offers(run)
-		var held: Dictionary = offers[1]
-		var paid := Draft.lock(run)
-		var next := Draft.reroll_kept(run, offers, [1])
-		var survived: bool = next.size() == offers.size() and next[1]["id"] == held["id"]
-		var dup := 0
-		for o in next:
-			if o["id"] == held["id"]:
-				dup += 1
-		_check(paid and survived and dup == 1 and run.tokens == 8,
-			"%s locked card held, not duplicated, costs paid" % cls)
-		# broke: lock AND kept-reroll refused, zero tokens, NO rng consumed
+		var next := Draft.reroll(run)
+		_check(not next.is_empty() and run.regenerate == 1 and run.tokens == 7,
+			"%s REGENERATE redraws, decrements 2->1, leaves Tokens" % cls)
+		# the charge-gated redraw is the SAME rng stream a token reroll used to produce
+		var a := _start(cls, aspect, 888)
+		a.regenerate = 1
+		var _ao := Draft.roll_offers(a)
+		var ar := Draft.reroll(a)
+		var b := _start(cls, aspect, 888)
+		var bo := Draft.roll_offers(b)
+		var br := Draft.roll_offers(b)   # a second straight roll = the redraw's rng draw
+		_check(_ids(ar) == _ids(br), "%s a REGENERATE redraw == the next straight roll's stream" % cls)
+		# broke: no charge -> reroll refused, tokens untouched, NO rng consumed
 		var ctrl := _start(cls, aspect, 777)
 		var c1 := Draft.roll_offers(ctrl)
 		var c2 := Draft.roll_offers(ctrl)
 		var probe := _start(cls, aspect, 777)
+		probe.tokens = 9                 # Tokens can't buy a reroll anymore
 		var p1 := Draft.roll_offers(probe)
-		var lk := Draft.lock(probe)
-		var rr := Draft.reroll_kept(probe, p1, [0])
+		var rr := Draft.reroll(probe)    # regenerate = 0 -> refused
 		var p2 := Draft.roll_offers(probe)
-		_check((not lk) and rr.is_empty() and probe.tokens == 0 \
+		_check(rr.is_empty() and probe.tokens == 9 and probe.regenerate == 0 \
 			and _ids(p1) == _ids(c1) and _ids(p2) == _ids(c2),
-			"%s broke lock/kept-reroll refused, no rng" % cls)
-	# equivalence: reroll_kept with no locks consumes the identical rng stream as reroll
-	var a := _start("duelist", "duelist", 888)
-	a.tokens = 3
-	var _ao := Draft.roll_offers(a)
-	var ar := Draft.reroll(a)
-	var b := _start("duelist", "duelist", 888)
-	b.tokens = 3
-	var bo := Draft.roll_offers(b)
-	var br := Draft.reroll_kept(b, bo, [])
-	_check(_ids(ar) == _ids(br) and a.tokens == b.tokens, "reroll_kept([]) == classic reroll stream")
-
-## Scripted lock scenario: lock slot 2, kept-reroll, lock slot 0 too, kept-reroll again.
-func _lock_transcript(cls: String, aspect: String, seed_v: int) -> String:
-	var run := _start(cls, aspect, seed_v)
-	run.tokens = 6
-	var offers := Draft.roll_offers(run)
-	Draft.lock(run)
-	offers = Draft.reroll_kept(run, offers, [2])
-	Draft.lock(run)
-	offers = Draft.reroll_kept(run, offers, [0, 2])
-	var out := ""
-	for o in offers:
-		out += "%s/%s " % [o["id"], Draft.rarity(o)]
-	return out + "t%d p%d" % [run.tokens, run.pity_opus]
+			"%s no-charge reroll refused, tokens kept, no rng" % cls)
 
 func _test_mint_table() -> void:
 	print("-- mint formula (synthetic diags, exact values)")

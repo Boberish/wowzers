@@ -1,6 +1,8 @@
 # DESCENT-PLAN — THE RAID REBUILD (the descent spec v1)
 
-**Status: 🔨 SLICE 1 BUILT & MERGED (`ee18e05`, 2026-07-10) — the map bang is live.** All 12
+**Status: 🔨 SLICES 1–4 BUILT & MERGED (`ee18e05` · `1f5e051` · `fd8b895` · `a22c1ec`, 2026-07-10)
+— the map bang, the legibility pass, the PROMPT MARKET + per-seat wallets, and THE JAILBREAK
+curse deals are live.** All 12
 verdicts in (V1–V6/V10/V12 at the recommendations · **V7 NO second module** · **V8
 STANDING/Prior DELETED entirely** — shipped, 14 files · **V9 WILD ~10%** — shipped · V11
 per-seat wallets — lands with slice 3). The 4-floor descent GENERATES AND PLAYS: Vorathek
@@ -8,8 +10,50 @@ seals Floor 1, elites are live (REINFORCED trios, bounty + curio roll; keystone 
 wilds roll sealed payloads, market/jailbreak/minigame nodes exist with honest stub interiors —
 slices 3–5 flip `RunMap.*_LIVE` flags without regenerating any map. Fight ladder + skirmish
 enrage retighten shipped; verify-all 40/40 ×2; solo maps + raid combat byte-identical.
-**Next: slice 2 (legibility UI: contracts · pips · 3 meters · renames · integrity kill) → then
-Market → Jailbreak → minigames → QUEUE** — ledger §I is the tracker. The zoom-out rebuild of the raid run structure
+**SLICE 2 (`1f5e051`) — THE LEGIBILITY PASS:** node doors print a one-line reward CONTRACT (on
+hover + tooltip) + fight-tier ▮ pips (normal/elite/Seal); the header carries the 3 meters
+(⏣ TOKENS · ⚡ LUCK · ⏻ CHARGE) + wound pips + a reserved curse-pip row + a first-⏻ teach + a
+currency legend, and the kind legend is de-GATE'd; check/wager buttons print BOTH legs pre-commit
+("on ✓ … · on ✗ nothing lost"); the stats-jargon renames land (Entropy→LUCK display-only, ids
+frozen; THE LUCK DAEMON); the "REROLL THE FLOOR" flavor-lie is fixed; and **THE RAID INTEGRITY
+KILL** ships — the `map_check` integrity check-row is gone, the overtime wager + 5 tickets +
+SPRINT RETRO + Ticket Stub re-price off the dead integrity number onto live ⏣ (fight checksums
+unchanged; only the retired-integrity report column moves). 2a proven byte-identical
+(ab-gate map_check_sim + online-probe); light verify green (import · map_wager_probe · ui_smoke_map
+· map_check_sim). ⏳ **Deferred to a nightly run** (OOM-prone under concurrent box load):
+raid_map_sim baseline re-record for 2b · full verify-all · net_map_smoke.
+**SLICE 3 (`fd8b895`) — THE PROMPT MARKET + PER-SEAT WALLETS:** V#11 per-seat wallets ship
+(`Draft.mint_diag` mints each seat from its OWN combat diag → **AI raiders start earning**; the
+shared bank retires); **rerolls-out** (§11 #3 — the 1⏣ REROLL + LOCK die, a banked REGENERATE
+charge redraws; Hot Reload → +2 charges); and **THE MARKET node goes live** (`RunMap.MARKET_LIVE`)
+as THE SCRAPER's shop — a printed-price stock (CURIO ×2 from your unlocked pool · REGENERATE ·
+PATCH), a 4-seat wallet strip, per-seat BUY, and **AUTO** (AI raiders spend their own ⏣ with
+banter); plus the post-Seal **MARKET PHASE** (recovery-only), the Hashgrinder reframe (→ market
+−1⏣), and a `tokens@market` sim diagnostic. **Deferred (dependency absent):** +1 BACKUP (no wipe
+budget yet — printed SOON) · DEPRECATE (curse-purge = slice 4; boon-scrap = a follow-up) · online
+market/wallets (server has no purse — a safe no-op, NO protocol bump). Verify: import clean ·
+`market_probe`/`draft_sim`/`commander_probe`/`gear_probe` ALL OK · `ui_smoke_map` ALL PASS ·
+`raid_map_sim` determinism (seed1==seed1 + descent invariants) PASS. ⏳ **Deferred to a nightly
+run:** the `draft_sim` + `raid_map_sim` statistical re-baselines (rerolls-out + the live-market
+walk are sanctioned shifts) · full `verify-all` · `net_map_smoke`.
+**SLICE 4 (`a22c1ec`) — THE JAILBREAK (printed curse deals):** `RunMap.JAILBREAK_LIVE` on; the
+node offers **two deals, both halves printed** (a strong good + a curse bite in a different
+currency), WALK AWAY free, and refuses at cap 2. The **curse system** ships: active curses (cap 2,
+header pips, bounded-duration, ticking), enforced by `_add_curse` (with the HARD RULE — no
+run-length TIMING curse). Bites (V#4 gentle): **ECONOMY** (mint halved / market +⏣), **HP** (a
+temporary corrupted sector, auto-repairs — via a `seat_hp_cut` fight-mark), **TIMING** (windows
+−10% — via a `window_tighten` mark that scales the fresh-per-fight `s.config` answer windows, no
+per-boss work). Two **redundant exits**: the Market **DEPRECATE** slot (escalating price — the
+slice-3 deferred slot, now live) + a **Cooling purge fork**. All ride the proven `RaidMarks`
+channel, byte-identical when no curse. **Deferred:** DECK tax (run-length ability-poison — needs a
+`perform()` gate + spec-threading offline+online) · welded-downside draft boons (② door) ·
+event-curse legs (③) · online (safe no-op, NO protocol bump). Verify: import clean · `curse_probe`
+ALL OK (engine + node end-to-end) · `market_probe`/`commander_probe`/`draft_sim` ALL OK ·
+`ui_smoke_map` ALL PASS · `raid_map_sim` map-gen determinism PASS. ⏳ **Deferred to a nightly
+run:** the `raid_map_sim` run-trace + statistical re-baseline (JAILBREAK_LIVE walk = a sanctioned
+shift) · full `verify-all` · `net_map_smoke`.
+**Next: slice 5 (minigames: CAPTCHA / BENCHMARK + extraction schematics) → slice 6 (QUEUE) +
+the DECK-tax follow-up** — ledger §I is the tracker. The zoom-out rebuild of the raid run structure
 Bill asked for ("the raid is all over the place — rebuild it from the ground up; keep the bosses
 for now"). Produced by a 14-agent workflow: 7 recon readers (as-built map code · quest-confusion
 audit · measured sim timings · zone TICKETS v2 · reward economy · genre references · parked
@@ -684,3 +728,57 @@ ledgers.
   enrages · protocol v15 · ONE deliberate re-baseline, solo maps + raid combat byte-identical.
   Interim notes: elite keystone = reserved slot (per-class deck slices) · online elite fights
   its captain solo until the server pack pass · Forge body enrages untouched (zone-shared).
+- 2026-07-10 — **SLICE 2 (the legibility pass) BUILT & MERGED `1f5e051`**, two commits:
+  **2a display (byte-identical)** — `KIND_CONTRACT` one-liners + fight-tier pip rects on the
+  node doors (contract on hover + tooltip; WILD stays sealed) · header restructured into the 3
+  meters (⏣⚡⏻) + wound pips + reserved curse row + first-⏻ teach + currency legend + de-GATE'd
+  kind legend (⏣ moved off gear_line) · both-legs check hints via new `win_fx`/`lose_fx`
+  descriptor fields folded with the wager stake (offline + online) · display renames
+  (⚡"entropy"→"LUCK", "eligibility base"→"base odds", "feed ⚡ to bias"→"spend ⚡ LUCK…",
+  fx-hint "integrity"→"party HP", THE ENTROPY→THE LUCK DAEMON) · §9.8 "REROLL THE FLOOR"
+  flavor-lie reworded · orphan `luck_profile.gd.uid` deleted. **2b the integrity kill** —
+  `map_check` check-row deleted · overtime wager stake integrity→tokens · rollback `catch`
+  orphan key removed · 5 tickets + SPRINT RETRO + Ticket Stub re-priced (drop dead heal/patch,
+  keep repair/mana, pay ⏣) · `map_wager_probe` decoupled to a synthetic tokens wager. Tokens-
+  primary re-price keeps raid_map_sim FIGHT checksums identical (repair/mana unchanged; ⏣ is
+  sim-carry-invisible) — only the retired-integrity/fracs REPORT column shifts (intended). NO
+  protocol bump (the net `integrity()` desync hash is a different thing, untouched; `integrity_
+  probe` stays green). Names BACKUPS/REGENERATE/DEPRECATE reserved only (mechanics = slices 3-5;
+  draft REROLL economy untouched). ⏳ heavy verify (raid_map_sim re-baseline · verify-all ·
+  net_map_smoke) deferred to a nightly run per Bill (OOM-prone under concurrent box load).
+- 2026-07-10 — **SLICE 3 (PROMPT MARKET + per-seat wallets) BUILT & MERGED `fd8b895`**, three
+  commits behind a 6-reader recon (which disambiguated buildable-vs-deferred + the online scope).
+  **3a per-seat wallets (V#11):** `Draft.mint_diag(diag,cfg,cls)` mints each seat from its OWN
+  `seat.diag` (the human's mint unchanged — `mint` delegates → byte-identical); `raid_hud._mint_
+  seats` credits all 4 wallets post-fight; the AI-draft shared-bank mirror is deleted (AI drafts
+  spend their own ⏣); `commander_probe` re-pointed to per-seat independence. **AI seats START
+  EARNING** (before, `Draft.mint` read only the is_player mirror). **3b rerolls-out (§11 #3):**
+  `run.regenerate` charges are the only reroll — `Draft.reroll` spends a charge (same draft_rng
+  draw), `lock`/`reroll_kept`/`REROLL_COST`/`LOCK_COST` deleted, `draft_screen` shows "REGENERATE
+  (n)" + drops LOCK, Hot Reload → +2 charges on equip; `draft_sim` `_test_lock`→`_test_regenerate`.
+  fight_seed never touches draft_rng → NO fight shift, only draft_sim's transcript re-baselines.
+  **3c THE MARKET:** `RunMap.MARKET_LIVE=true`; new `MarketScreen` (THE SCRAPER's shop); `_show_
+  market` rolls stock on a (map_seed,node) rng — CURIO ×2 (unlocked pool, rarity-priced 6/8/10) ·
+  REGENERATE (4⏣) · PATCH (5⏣), ~+30%/floor; per-seat BUY + AUTO (AI spend own wallets, banter);
+  KIND_MARKET branch (mandatory, no-default=soft-lock); post-Seal recovery MARKET PHASE; Hash-
+  grinder reframed (×2 income → market −1⏣); `raid_map_sim` KIND_MARKET case + `tokens@market`
+  diag + flat mint estimate (sanctioned re-baseline); new `market_probe` (in verify-all) drives
+  the real HUD end-to-end. **Deferred:** +1 BACKUP (no wipe budget — printed SOON) · DEPRECATE
+  (curse=slice 4, boon-scrap=follow-up) · online market (safe no-op, NO protocol bump). ⏳ nightly:
+  the draft_sim/raid_map_sim statistical re-baselines · full verify-all · net_map_smoke.
+- 2026-07-10 — **SLICE 4 (THE JAILBREAK curse deals) BUILT & MERGED `a22c1ec`**, two commits
+  behind a 5-reader recon (which confirmed TIMING is buildable — `s.config` is fresh per fight so
+  a `window_tighten` mark is a real windows−10% tax with no per-boss work). **4a the curse engine
+  (byte-identical when dormant):** `RaidMarks` gains two guarded mark keys — `seat_hp_cut` (HP tax,
+  auto-repairs since a mark clears each fight) + `window_tighten` (TIMING tax, scales the fresh
+  `s.config.strike_*` windows read live at grade time); `RunDirector.curses` (cap 2) +
+  `deprecate_uses`; `raid_hud` curse core (`_add_curse` w/ cap-2 + the HARD RULE, `_curse_pips`,
+  `_apply_curse_marks` fold+tick, ECONOMY hooks in `_mint_seats`/`_market_price`, `_apply_map_fx`
+  curse/regenerate/purge keys, the DEPRECATE market slot + Cooling purge fork); `_fx_hint` prints
+  the bite; `curse_probe` (verify-all). **4b the node LIVE:** `JAILBREAK_LIVE=true`, KIND_JAILBREAK
+  dispatch → `_show_jailbreak` (two deals rolled on a (map_seed,node) rng via `_map_stop`, both
+  halves printed, WALK AWAY free, cap-2 "cell full"); 5-deal gentle pool (V#4); `raid_map_sim`
+  KIND_JAILBREAK walker case (sanctioned re-baseline). **Deferred:** DECK tax (run-length
+  ability-poison — the `perform()` gate is one line but the spec-threading offline+online is the
+  cost) · welded-downside boons · event-curse legs · online (no-op, NO protocol bump). ⏳ nightly:
+  raid_map_sim run-trace + statistical re-baseline · full verify-all · net_map_smoke.

@@ -11,6 +11,8 @@ extends RefCounted
 
 const HP_CUT_CAP := 0.35          ## a full 100⏻ dump caps here (linear below)
 const DMG_BUFF_CAP := 0.55        ## the boss self-empower cap (mirrors combat_core)
+const SEAT_HP_CUT_CAP := 0.35     ## JAILBREAK HP TAX: a corrupted-sector cut per seat, capped
+const WINDOW_TIGHTEN_CAP := 0.30  ## JAILBREAK TIMING TAX: answer-window shrink, capped
 const SURGE_FREEZE_TICKS := 90    ## a full SURGE dump → this many ticks (3s) of frozen boss timers
 const SHIELD_ABSORB_MAX := 220.0  ## a full SHIELD PRIME dump → this much absorb on every seat
 const STALL_MAX_SEC := 16.0       ## a full STALL dump → this many seconds of enrage delay
@@ -62,3 +64,20 @@ static func apply(s: CombatState, mark: Dictionary) -> void:
 	var eoff := float(mark.get("enrage_offset", 0.0))
 	if eoff != 0.0:
 		s.enrage_offset += eoff
+	# JAILBREAK HP TAX (§7) — a temporary corrupted sector: cut every seat's max HP for this
+	# fight. Because a mark auto-clears each fight, this IS the "auto-repairs after" promise —
+	# next fight rebuilds hp_max clean. Mirrors the wounds arithmetic (raid_hud/raid_net).
+	var shc := clampf(float(mark.get("seat_hp_cut", 0.0)), 0.0, SEAT_HP_CUT_CAP)
+	if shc > 0.0:
+		for u in s.seats:
+			u.hp_max = maxf(1.0, roundf(u.hp_max * (1.0 - shc)))
+			u.hp = minf(u.hp, u.hp_max)
+	# JAILBREAK TIMING TAX (§7) — answer windows shrink for this fight only. s.config is a
+	# FRESH TuningConfig per fight and every grade reads the windows live off it, so scaling
+	# strike_* here tightens PERFECT/GOOD/GRAZE for every seat + every boss with no per-boss
+	# work, and can't leak into another fight. Auto-clears with the mark ("−10% next fight").
+	var wt := clampf(float(mark.get("window_tighten", 0.0)), 0.0, WINDOW_TIGHTEN_CAP)
+	if wt > 0.0:
+		s.config.strike_perfect *= (1.0 - wt)
+		s.config.strike_good *= (1.0 - wt)
+		s.config.strike_graze *= (1.0 - wt)
