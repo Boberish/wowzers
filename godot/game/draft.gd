@@ -224,9 +224,15 @@ static func take(run, b: Dictionary) -> void:
 ## Called by the HUD at fight end (state.over): deterministic Tokens from state.diag —
 ## footwork (PERFECT dodges + held feints) + the class-signature verb (SIG_KEY), plus a
 ## flawless bonus for a sheet with no miss/bait/whiff. Rates live on TuningConfig.
+## Reads the is_player mirror `state.diag` — kept BYTE-IDENTICAL (delegates to mint_diag),
+## so solo play + draft_sim are unchanged.
 static func mint(state, char_class: String) -> int:
-	var cfg = state.config
-	var d: Dictionary = state.diag
+	return mint_diag(state.diag, state.config, char_class)
+
+## PER-SEAT MINT (V#11): the same formula off ANY seat's own diag + the run's config.
+## The raid credits each of the 4 seats' wallets from its own `seat.diag` (combat_core
+## tracks grades per seat), so a clean AI raider mints its own ⏣ — nobody shares a pot.
+static func mint_diag(d: Dictionary, cfg, char_class: String) -> int:
 	var t := int(d.get("perfect", 0) + d.get("read", 0)) / maxi(1, cfg.mint_per_grades)
 	t += int(d.get(String(SIG_KEY.get(char_class, "")), 0)) / maxi(1, cfg.mint_per_signature)
 	if int(d.get("miss", 0)) == 0 and int(d.get("baited", 0)) == 0 and int(d.get("whiff", 0)) == 0:

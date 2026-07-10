@@ -1280,6 +1280,28 @@ func _arm_gear(u: Seat) -> void:
 ## Tokens are ONE currency: scrap + oath purses feed the same purse the REFORGE
 ## boon draft spends (raid-boons' `_d.run.tokens`). `_d.tokens` stays only as the
 ## fallback bank for runless dev paths.
+## PER-SEAT MINT (V#11): after a won fight, credit EACH of the 4 seats' wallets from
+## its own combat diag — the human's via _gain_tokens (Hashgrinder ×2 applies to the seat
+## you pilot), each AI seat's straight into its own run wallet. This is why AI seats START
+## EARNING: `Draft.mint` used to read only the is_player mirror (state.diag), so AI raiders
+## minted nothing; now each reads `seat.diag`.
+func _mint_seats() -> void:
+	if _ctrl == null or _ctrl.state == null:
+		return
+	var st = _ctrl.state
+	for key in RaidNet.SEAT_KEYS:
+		var i: int = SEAT_IDX[key]
+		if i >= st.seats.size():
+			continue
+		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
+		if run == null:
+			continue
+		var minted := Draft.mint_diag(st.seats[i].diag, st.config, run.char_class)
+		if key == _seat_key:
+			_gain_tokens(minted)          # your seat — Hashgrinder ×2 lives here
+		else:
+			run.tokens += minted          # the AI raider banks its own clean play
+
 func _gain_tokens(n: int) -> void:
 	if n > 0 and _d.gear.has("hashgrinder"):   # CURIO Hashgrinder: all Token income doubled
 		n *= 2
@@ -1626,7 +1648,7 @@ func _show_boon_draft(done: Callable) -> void:
 		_show_rig_wire(func(): _show_boon_draft(done))
 		return
 	if _ctrl != null and _ctrl.state != null:
-		_gain_tokens(Draft.mint(_ctrl.state, _d.run.char_class))  # routes through Hashgrinder ×2
+		_mint_seats()                                             # V#11: every seat mints its OWN ⏣
 	# COMMANDER: after YOUR reforge, you draft each AI raider's boon too. Build the
 	# callable chain back-to-front so it runs you → the AI seats in SEAT_KEYS order.
 	var chain := done
@@ -1642,16 +1664,14 @@ func _show_boon_draft(done: Callable) -> void:
 	_show_seat_draft(_seat_key, chain)
 
 ## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
-## AI drafts spend the SHARED ⏣ bank: Draft's economy reads run.tokens, so the bank
-## is mirrored into the AI run for the screen and the remainder banked back out.
+## PER-SEAT WALLETS (V#11): each seat spends its OWN `run.tokens` — the AI raider drafts
+## against the ⏣ it earned itself (the old shared-bank mirror is gone).
 func _show_seat_draft(key: String, done: Callable) -> void:
 	var mine: bool = key == _seat_key
 	var run: RunState = _d.run if mine else (_d.ai_runs.get(key) as RunState)
 	if run == null:
 		done.call()
 		return
-	if not mine and _d.run != null:
-		run.tokens = _d.run.tokens
 	# CURIO Expansion Bus (your seat only): +1 slot → a 1-of-4 draft.
 	var picks := Draft.roll_offers(run, 1 if (mine and _d.gear.has("expansion_bus")) else 0)
 	if picks.is_empty():
@@ -1680,8 +1700,6 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 			_toast_add("⚒  %s REFORGED — %s is piece %d" % [
 				ArmorSlots.pretty(slot), String(boon.get("title", "?")), n])
 		else:
-			if _d.run != null:
-				_d.run.tokens = run.tokens   # bank the remainder back to the shared pool
 			_toast_add("⚒  %s takes %s" % [disp, String(boon.get("title", "?"))])
 		done.call())
 	_ui.add_child(ds)
