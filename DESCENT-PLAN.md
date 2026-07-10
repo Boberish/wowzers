@@ -1,6 +1,7 @@
 # DESCENT-PLAN — THE RAID REBUILD (the descent spec v1)
 
-**Status: 🔨 SLICE 1 BUILT & MERGED (`ee18e05`, 2026-07-10) — the map bang is live.** All 12
+**Status: 🔨 SLICES 1–2 BUILT & MERGED (`ee18e05` · `1f5e051`, 2026-07-10) — the map bang + the
+legibility pass are live.** All 12
 verdicts in (V1–V6/V10/V12 at the recommendations · **V7 NO second module** · **V8
 STANDING/Prior DELETED entirely** — shipped, 14 files · **V9 WILD ~10%** — shipped · V11
 per-seat wallets — lands with slice 3). The 4-floor descent GENERATES AND PLAYS: Vorathek
@@ -8,8 +9,20 @@ seals Floor 1, elites are live (REINFORCED trios, bounty + curio roll; keystone 
 wilds roll sealed payloads, market/jailbreak/minigame nodes exist with honest stub interiors —
 slices 3–5 flip `RunMap.*_LIVE` flags without regenerating any map. Fight ladder + skirmish
 enrage retighten shipped; verify-all 40/40 ×2; solo maps + raid combat byte-identical.
-**Next: slice 2 (legibility UI: contracts · pips · 3 meters · renames · integrity kill) → then
-Market → Jailbreak → minigames → QUEUE** — ledger §I is the tracker. The zoom-out rebuild of the raid run structure
+**SLICE 2 (`1f5e051`) — THE LEGIBILITY PASS:** node doors print a one-line reward CONTRACT (on
+hover + tooltip) + fight-tier ▮ pips (normal/elite/Seal); the header carries the 3 meters
+(⏣ TOKENS · ⚡ LUCK · ⏻ CHARGE) + wound pips + a reserved curse-pip row + a first-⏻ teach + a
+currency legend, and the kind legend is de-GATE'd; check/wager buttons print BOTH legs pre-commit
+("on ✓ … · on ✗ nothing lost"); the stats-jargon renames land (Entropy→LUCK display-only, ids
+frozen; THE LUCK DAEMON); the "REROLL THE FLOOR" flavor-lie is fixed; and **THE RAID INTEGRITY
+KILL** ships — the `map_check` integrity check-row is gone, the overtime wager + 5 tickets +
+SPRINT RETRO + Ticket Stub re-price off the dead integrity number onto live ⏣ (fight checksums
+unchanged; only the retired-integrity report column moves). 2a proven byte-identical
+(ab-gate map_check_sim + online-probe); light verify green (import · map_wager_probe · ui_smoke_map
+· map_check_sim). ⏳ **Deferred to a nightly run** (OOM-prone under concurrent box load):
+raid_map_sim baseline re-record for 2b · full verify-all · net_map_smoke.
+**Next: slice 3 (PROMPT MARKET + per-seat wallets) → Jailbreak → minigames → QUEUE** — ledger §I
+is the tracker. The zoom-out rebuild of the raid run structure
 Bill asked for ("the raid is all over the place — rebuild it from the ground up; keep the bosses
 for now"). Produced by a 14-agent workflow: 7 recon readers (as-built map code · quest-confusion
 audit · measured sim timings · zone TICKETS v2 · reward economy · genre references · parked
@@ -684,3 +697,21 @@ ledgers.
   enrages · protocol v15 · ONE deliberate re-baseline, solo maps + raid combat byte-identical.
   Interim notes: elite keystone = reserved slot (per-class deck slices) · online elite fights
   its captain solo until the server pack pass · Forge body enrages untouched (zone-shared).
+- 2026-07-10 — **SLICE 2 (the legibility pass) BUILT & MERGED `1f5e051`**, two commits:
+  **2a display (byte-identical)** — `KIND_CONTRACT` one-liners + fight-tier pip rects on the
+  node doors (contract on hover + tooltip; WILD stays sealed) · header restructured into the 3
+  meters (⏣⚡⏻) + wound pips + reserved curse row + first-⏻ teach + currency legend + de-GATE'd
+  kind legend (⏣ moved off gear_line) · both-legs check hints via new `win_fx`/`lose_fx`
+  descriptor fields folded with the wager stake (offline + online) · display renames
+  (⚡"entropy"→"LUCK", "eligibility base"→"base odds", "feed ⚡ to bias"→"spend ⚡ LUCK…",
+  fx-hint "integrity"→"party HP", THE ENTROPY→THE LUCK DAEMON) · §9.8 "REROLL THE FLOOR"
+  flavor-lie reworded · orphan `luck_profile.gd.uid` deleted. **2b the integrity kill** —
+  `map_check` check-row deleted · overtime wager stake integrity→tokens · rollback `catch`
+  orphan key removed · 5 tickets + SPRINT RETRO + Ticket Stub re-priced (drop dead heal/patch,
+  keep repair/mana, pay ⏣) · `map_wager_probe` decoupled to a synthetic tokens wager. Tokens-
+  primary re-price keeps raid_map_sim FIGHT checksums identical (repair/mana unchanged; ⏣ is
+  sim-carry-invisible) — only the retired-integrity/fracs REPORT column shifts (intended). NO
+  protocol bump (the net `integrity()` desync hash is a different thing, untouched; `integrity_
+  probe` stays green). Names BACKUPS/REGENERATE/DEPRECATE reserved only (mechanics = slices 3-5;
+  draft REROLL economy untouched). ⏳ heavy verify (raid_map_sim re-baseline · verify-all ·
+  net_map_smoke) deferred to a nightly run per Bill (OOM-prone under concurrent box load).

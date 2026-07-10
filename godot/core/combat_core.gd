@@ -33,14 +33,20 @@ static func create_state(enc: EncounterRes, cfg: TuningConfig, seed: int) -> Com
 	s.boss = BossState.new()
 	s.boss.hp = float(enc.hp)
 	s.boss.hp_max = float(enc.hp)
-	var i := 0
-	for ab in enc.abilities:
-		var stagger := 2.0 + float(i) * 1.5 + s.rng.next_float() * (ab.cd * 0.3)
-		s.boss.ability_timer[ab.id] = to_ticks(stagger, cfg.fixed_hz)
-		i += 1
+	_stagger_abilities(s.boss, enc, cfg, s.rng)
 	if not enc.melee.is_empty():
 		s.boss.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), cfg.fixed_hz)
 	return s
+
+## Arm a boss body's ability timers with the staggered opening spread — create_state
+## and every pack-member entry share this ONE spread (knobs on TuningConfig).
+static func _stagger_abilities(boss: BossState, enc: EncounterRes, cfg: TuningConfig, rng: DetRng) -> void:
+	var i := 0
+	for ab in enc.abilities:
+		var stagger := cfg.open_stagger_base + float(i) * cfg.open_stagger_step \
+			+ rng.next_float() * (ab.cd * cfg.open_stagger_jitter)
+		boss.ability_timer[ab.id] = to_ticks(stagger, cfg.fixed_hz)
+		i += 1
 
 # --------------------------------------------------------------------------
 # The tick  (canonical order — see PORT-PLAN.md)
@@ -55,6 +61,7 @@ static func update(s: CombatState) -> void:
 		if seat.kit != null and seat.alive():
 			seat.kit.upkeep(s, seat)
 	_apply_seat_effects(s)                 # 2b. HoTs heal, DoTs tick, wards expire
+	_tick_skin(s)                          # 2b′. SKIN drip — deferred damage arrives late (guarded)
 	if s.boss.sunder > 0.0:                # 2c. SUNDER bleeds toward 0 (guarded — only the tank feeds it)
 		s.boss.sunder = maxf(0.0, s.boss.sunder - s.config.sunder_decay * s.dt)
 	if s.boss.debilitate > 0.0:            # DEBILITATE bleeds toward 0 (guarded — only the Alchemist feeds it)
@@ -262,7 +269,7 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 		s.boss.ability_timer[ab.id] = int(s.boss.ability_timer[ab.id]) - 1
 		if int(s.boss.ability_timer[ab.id]) <= 0:
 			if silenced and ab.response == AbilityRes.Response.INTERRUPTIBLE:
-				s.boss.ability_timer[ab.id] = to_ticks(0.4, s.config.fixed_hz)
+				s.boss.ability_timer[ab.id] = to_ticks(s.config.silence_recheck, s.config.fixed_hz)
 				continue
 			if best == null or (ab.danger and not best.danger):
 				best = ab
@@ -399,7 +406,7 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 				t2 = _random_dps(s)
 			if t2 != null:
 				t2.heal_absorb += amt
-				_damage(s, t2, roundf(amt * 0.28), ab.id, ab.size)
+				_damage(s, t2, roundf(amt * s.config.chain_splash), ab.id, ab.size)
 		AbilityRes.Effect.HEAL_BOSS:
 			# Don't resurrect a boss a player burst already killed THIS tick: damage is
 			# applied at step 1 (inputs) but death isn't checked until step 7 (_check_end),
@@ -413,7 +420,7 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 					_emit(s, {"t": "boss_heal", "amt": int(healed)})
 		AbilityRes.Effect.EMPOWER_BOSS:
 			# Uninterrupted empower cast: the boss permanently hits harder (capped).
-			s.boss.dmg_buff = minf(0.55, s.boss.dmg_buff + s.telegraph.ability.buff)
+			s.boss.dmg_buff = minf(s.config.dmg_buff_cap, s.boss.dmg_buff + s.telegraph.ability.buff)
 			_emit(s, {"t": "empower", "amt": s.telegraph.ability.buff})
 		AbilityRes.Effect.THREAT_DROP:
 			# Raid: the boss forgets its grudge against the top-threat unit — it turns
@@ -903,7 +910,7 @@ static func taunt(s: CombatState, seat: Seat, dur: float = -1.0) -> void:
 	s.boss.taunt_until_tick = s.tick + to_ticks(dur, s.config.fixed_hz)
 	# GEAR-2: a taunt within 2s of a THREAT_DROP answers the curse (deed detector).
 	# Capped at one answer per drop so re-taunts can't outpace curse_dropped.
-	if s.tick - s.boss.last_curse_tick <= to_ticks(2.0, s.config.fixed_hz) \
+	if s.tick - s.boss.last_curse_tick <= to_ticks(s.config.curse_answer_window, s.config.fixed_hz) \
 			and int(seat.diag.get("curse_answered", 0)) < int(seat.diag.get("curse_dropped", 0)):
 		_bump_diag(s, seat, "curse_answered")
 	var top := 0.0
@@ -999,6 +1006,23 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 			meter_shield(s, hseat, &"ward", eaten)      # mitigation, tracked apart from heals
 			if hseat != null and hseat.kit != null:
 				hseat.kit.on_absorb(s, hseat, seat, eaten, emptied)
+	# SKIN (the Well's film — MENDER §13.2): a share of a landed hit DEFERS into a slow drip
+	# instead of arriving now — the immediate `d` softens, the deferred chunk is drained later
+	# by _tick_skin as LATE damage (never re-mitigated, never pardoned — the film re-times).
+	# Guarded: a seat that was never skinned has no skin_until_tick (-1) ⇒ no-op ⇒ byte-identical.
+	if d > 0.0 and s.tick < int(seat.vars.get("skin_until_tick", -1)):
+		var sfrac := float(seat.vars.get("skin_frac", 0.0))
+		if sfrac > 0.0:
+			var chunk := d * sfrac
+			d -= chunk
+			var dticks := maxi(1, int(seat.vars.get("skin_drip_ticks", 1)))
+			var drip: Array = seat.vars.get("skin_drip", [])
+			drip.append({"rem": chunk, "per": chunk / float(dticks), "src": src})
+			seat.vars["skin_drip"] = drip
+			var sci := int(seat.vars.get("skin_caster_i", -1))   # credit the film's caster (recap-only)
+			if sci >= 0 and sci < s.seats.size():
+				var cs: Seat = s.seats[sci]
+				cs.vars["skin_deferred"] = float(cs.vars.get("skin_deferred", 0.0)) + chunk
 	var pre_frac := seat.hp / maxf(1.0, seat.hp_max)   # GEAR-2: dip detector reads the crossing
 	seat.hp -= d
 	if seat.hp < 0.0:
@@ -1008,8 +1032,36 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 	if seat.kit != null and d > 0.0:
 		seat.kit.on_damage_taken(s, seat, d, src, size)
 	if d > 0.0:
+		seat.vars["last_hit_tick"] = s.tick              # Loosed at Last reads it (guarded; unread otherwise)
 		meter_taken(s, seat, src, d, src != &"enrage")   # enrage is per-tick chip — totals only
 		_emit(s, {"t": "hurt", "seat": seat, "player": seat.is_player, "amt": int(d), "size": size})
+
+## SKIN drip drain (MENDER §13.2): the deferred chunks arrive as LATE damage, drained linearly
+## over ~skin_drip_sec. Applied OUTSIDE _damage on purpose — the film never re-softens its own
+## drip and never re-mitigates it; it re-TIMES damage, it does not delete it (a drip can still
+## kill). Guarded: only a seat that was actually skinned carries `skin_drip`, so an unused SKIN
+## touches nothing and stays byte-identical. Chunks drain in append order (deterministic).
+static func _tick_skin(s: CombatState) -> void:
+	for seat in s.seats:
+		if not seat.alive() or not seat.vars.has("skin_drip"):
+			continue
+		var drip: Array = seat.vars["skin_drip"]
+		if drip.is_empty():
+			continue
+		var kept: Array = []
+		for chunk in drip:
+			var take := minf(float(chunk["rem"]), float(chunk["per"]))
+			if take <= 0.0:
+				continue
+			seat.hp -= take
+			if seat.hp < 0.0:
+				seat.hp = 0.0
+			meter_taken(s, seat, StringName(chunk["src"]), take, false)   # honest source, totals-only
+			var rem := float(chunk["rem"]) - take
+			if rem > 0.01:
+				chunk["rem"] = rem
+				kept.append(chunk)
+		seat.vars["skin_drip"] = kept
 
 ## Win condition (stat-block allies): boss loses Σ (living ally.dps * f(hp%)) * dt.
 static func _apply_group_damage(s: CombatState, dt: float) -> void:
@@ -1131,11 +1183,7 @@ static func _pack_advance(s: CombatState) -> void:
 	b.taunt_seat_i = -1
 	b.taunt_until_tick = -1
 	b.entered_tick = s.tick                 # walk-in grace + per-member enrage key off this
-	var i := 0
-	for ab in enc.abilities:
-		var stagger := 2.0 + float(i) * 1.5 + s.rng.next_float() * (ab.cd * 0.3)
-		b.ability_timer[ab.id] = to_ticks(stagger, s.config.fixed_hz)
-		i += 1
+	_stagger_abilities(b, enc, s.config, s.rng)
 	if not enc.melee.is_empty():
 		b.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
 	_emit(s, {"t": "pack_next", "i": s.pack_i, "n": s.pack.size(), "name": enc.name})

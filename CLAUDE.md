@@ -54,18 +54,30 @@ Tempo-§14-style pass + the 15-min loop protocol; restart via the `slate-loop` s
 `BOSS-PLAN.md` (**THE SEAL REWORK — the 4-boss redo v1**: fill the DESCENT §4 timer contract
 5/7/9/12 with structure never +HP · **TAUNT BUTTON REMOVED, aggro all-passive flow** · SealTune
 tuning spine · answer-density ramp · per-Seal scripts THE AXE/THE EXPERTS/THE TWINS/THE THREE
-ACTS · steal catalog; supersedes SEAL-PILLAR-PLAN; 🟡 at Bill's 10-verdict board §V, 2026-07-10) ·
+ACTS · steal catalog · **§1½ THE KICK CONTRACT** (all-but-healer carriers · warn-early/short-
+window · big miss consequences); supersedes SEAL-PILLAR-PLAN; 🟡 at Bill's 11-verdict board §V,
+2026-07-10) ·
 `PROGRESSION-PLAN.md` + `GEAR-CATALOG.md` (persistent meta: laws, oaths,
 curios) · `ASCENSION-STEAL-PLAN.md` (draft economy) · `SEAL-PILLAR-PLAN.md` (superseded by
 BOSS-PLAN 2026-07-10; Phase A absorbed) ·
 `FERMATA-V5-BRIEF.md` (Fermata v5 as-built brief) · `TEMPO-D0-BRIEF.md` (**the D0 build brief**
 — governor/law-reworks/deck-data/resonance/duos/transforms slices + gates, 2026-07-10) ·
+`DUELIST-BRIEF.md` (**the Wave-1 build brief** — the dodge tank: FLOW=AGGRO/taunt-funeral ·
+base kit+Bulwark deletion · policy/sims/HUD · deck · EN GARDE · transforms, slices S0–S8 +
+gates ①②, 2026-07-10) ·
+`WELL-DRAW-BRIEF.md` (**the Draw build brief** — the SPEED healer finish: SKIN · D6 deck
+data · ⭐Vigil module · Cupped-Hand/Deep-Draw/Braid transforms (after tempo-d0) · policy
+re-baseline, slices S0–S5, leans = defaults, 2026-07-10) ·
 `REFIT-PLAN.md` (structural audit v2 →
 the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
 loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·
 `SIM-PLAN.md` (the balance ladder — two-speed sims: quick gate + weekly SOAK/digest; S1–S5
 card-visibility rule · creed matrix · card delta · build sampler+lift · raid ablation; planned
 NOT built, triggers per rung, 2026-07-10) ·
+`METER-PLAN.md` (**the live combat meter leveled up** — Recount-nice: L1 de-stale/polish (accent
+bug + `ClassKit` label/accent hooks) · L2 new modes from existing data (⚡AMPLIFY/DISCIPLINE/
+sparklines) · L3 segments+run-history · L4 window chrome · L5 teaching layer; the live twin of
+STATS PAGE v2, nearly all view-only/diag-family; 🟡 at Bill's verdict, 2026-07-10) ·
 `archive/` (**frozen docs — 2026-07-10 cleanup**: `HISTORY.md` the milestone build-up M0→R2.5 ·
 `RAID-PLAN.md` netcode-era origin · `PORT-PLAN.md` / `rift-godot-port-brief.md` the port origins ·
 `UNLOCK-BRIEF.md` retired; see `archive/README.md` — never claim work from there) + `poc/`.
@@ -126,8 +138,11 @@ INDEX — design detail stays in the plan doc; its own upkeep rules live in `BUI
    the two-verb split byte-identical (opt-in `ClassKit.unified_dodge()`) until reworked —
    every new/reworked kit ships on the one dodge.
 3. **INTERRUPT-BY-ABILITY** — no kick button, no kicker class: flagged existing abilities
-   (ideally dumps — the *interrupt tax*) kick inside a TIGHT window; per-class carrier
-   counts (2/1/0) are comp texture. Sims measure accidental vs deliberate kick rates.
+   (dumps — the *interrupt tax*) kick inside a TIGHT window. **⚠ AMENDED 2026-07-10
+   (`BOSS-PLAN §1½`): EVERY class except healers carries ONE kick on its dump** (the old
+   2/1/0 spread is retired — the warband fields 3 kickers); warn = the whole castbar,
+   window = a small absolute slice at cast end (~0.6 s, SealTune knob); **missing a kick
+   is the raid's costliest single mistake**. Sims measure accidental vs deliberate rates.
 4. **WARBAND LAW** — every fight is tuned for exactly 4 seats (AI backfill). No 1-to-x
    enemy scaling system exists, ever.
 5. **OVERWORLD POWER RULE** — zone/event fights = bare kit + persistent unlocks; boons /

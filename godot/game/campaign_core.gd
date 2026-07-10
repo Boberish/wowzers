@@ -59,9 +59,8 @@ static func ticket_at(cp: Dictionary, n: Dictionary, has_stub := false) -> int:
 		var reward: Dictionary = td2.get("reward", {})
 		MapFx.apply(cp, reward)
 		tokens += int(reward.get("tokens", 0))
-		if has_stub:   # GEAR-1 (ARMORY strong) ticket stub: +10% integrity +1⏣
-			MapFx.apply(cp, {"heal": 0.10})
-			tokens += 1
+		if has_stub:   # GEAR-1 ticket stub — DESCENT integrity kill: the +10% integrity was
+			tokens += 2   # a dead payload; re-priced to a live +2⏣ (was +10% integrity +1⏣)
 		cp["toast"] = "✅  %s  —  CLOSED, reward claimed" % String(td2.get("title", "TICKET"))
 		if int(cp["closed"]) >= int(cp["total"]) and int(cp["total"]) > 0:
 			MapFx.apply(cp, MapContent.SPRINT_RETRO_FX)

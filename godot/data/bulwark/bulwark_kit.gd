@@ -7,6 +7,9 @@ extends ClassKit
 var aspect: String = "warden"          ## "warden" | "juggernaut"
 var cfg: BulwarkConfig
 
+func accent() -> Color:
+	return Color("e6b463")   # Palette.GOLD — the tank's gilded ward
+
 func _init(_aspect: String, _cfg: BulwarkConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg

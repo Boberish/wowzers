@@ -33,6 +33,17 @@ extends Resource
 @export var glint_mult: float = 1.40       ## glinted ally deals ×this damage
 @export var glint_dur: float = 4.0         ## seconds
 
+# --- SKIN (the water's film — the missing-heal base cast, MENDER §13.2). Grades like every
+#     cast; for skin_dur seconds the ally's incoming hits SOFTEN — a share DEFERS into a drip
+#     over skin_drip_sec. Never absorbs, never heals: every point still arrives, just LATE.
+#     Draw-graded / Brim-plain (§0). ALL guarded: no skin cast ⇒ no seat ever gets the drip
+#     fields ⇒ the reducer's skin branch is a dead -1 compare ⇒ byte-identical. ---
+@export var skin_dur: float = 6.0          ## seconds the film clings to the ally
+@export var skin_drip_sec: float = 3.0     ## a deferred chunk drips over this many seconds
+@export var skin_defer_clean: float = 0.35 ## CLEAN release: this fraction of each hit defers
+@export var skin_defer_plain: float = 0.20 ## plain/overrun/undercook (and every Brim cast): softer
+@export var skin_defer_still: float = 0.45 ## STILL POINT: the deepest film (+ a Glint, superset law)
+
 # --- THE DECK (creeds/modules/boons/rig — MENDER-PLAN §2-5). ALL guarded: an empty creed
 #     + no modules + no boons + no rig reproduce the base numbers, so the base build stays
 #     byte-identical (the sim gate). Creed multipliers live on WellCreeds; these are the
@@ -78,12 +89,42 @@ extends Resource
 @export var cool_hand_cd: float = 1.0        ## Cool Hand: a clean draw shaves this off Cascade cd
 @export var cadence_min: int = 1             ## Cadence of Mend: min charge floor after the discount
 
+# --- D6 DECK RESHAPE (MENDER §12 — themes VIGIL · RAPIDS · EDDY). New Draw boons/keystones,
+#     ALL guarded by boon id (no boon ⇒ untouched ⇒ byte-identical). ---
+# RAPIDS (the Current ladder)
+@export var whitewater_per: float = 0.04       ## Whitewater: a clean/still heal +this per Current stack
+@export var shootgap_still_mult: float = 1.30  ## Shoot the Gap: Still-Point tags ×this while at MAX Current
+@export var eddyline_cd: float = 10.0          ## Eddyline: min seconds between Current-downgrade saves
+@export var flume_hold_sec: float = 12.0       ## The Flume (keystone): hold MAX Current this long to trip it
+@export var flume_run_sec: float = 6.0         ## The Flume: seconds every release auto-grades CLEAN, then Current 0
+# VIGIL (held heals)
+@export var ridetremble_per: float = 0.08      ## Ride the Tremble: a held heal +this per half-second held
+@export var ridetremble_cap: float = 0.60      ## Ride the Tremble: the held bonus caps here
+@export var loosed_window: float = 0.2         ## Loosed at Last (keystone): held release within this of the ally's hit
+@export var loosed_shield_frac: float = 0.5    ## Loosed at Last: the intercept absorb = this × the heal
+@export var loosed_shield_sec: float = 2.0
+# EDDY (drift reads)
+@export var currentreading_third: float = 0.3333 ## Current Reading: a tag in the band's first this-fraction → +1 Current
+@export var deepeddy_drift_mult: float = 2.0   ## Deep Eddy: the eddy drift range ×this
+@export var deepeddy_still_mult: float = 1.5   ## Deep Eddy: Still-Point tags heal ×this
+@export var glassriver_streak: int = 3         ## The Glass River (keystone): consecutive Still tags to freeze the water
+@export var glassriver_sec: float = 5.0        ## The Glass River: seconds of frozen drift + all-Still grading
+
+# --- EASE dial (Draw) — the rolled comfort↔bite knobs (MENDER §12.3). The dial MACHINERY is a
+#     shared debt (draft.gd knob-roll); until it lands these sit at neutral and nothing sets them.
+#     Kept here so the reshape's knob surface is named and the dial has a target when built. ---
+@export var ease_draw_band_mult: float = 1.0   ## release-band width (looseGrip's fold — the widener law)
+@export var ease_current_ebb_mult: float = 1.0 ## Current ebb-grace (idle seconds before a stack sheds)
+@export var ease_gutter_delay: float = 0.0     ## extra seconds before a held heal gutters
+@export var ease_drift_mult: float = 1.0       ## eddy drift speed/range
+
 # --- THE BOOK: all heals are CAST, direct (Ward/Renew/Meditate cut from base). Costs in
 #     CHARGES. Single-target flash/mend carry the grade; cascade/spring are throughput;
 #     dispel is free utility; rekindle is the no-CD battle-rez commitment. ---
 @export var book: Dictionary = {
 	"flash":    {"name": "Flash Heal", "key": "1", "charges": 2, "cast": 1.5, "heal": 70.0,  "target": true},
 	"mend":     {"name": "Mend",       "key": "2", "charges": 1, "cast": 2.6, "heal": 95.0,  "target": true},
+	"skin":     {"name": "Skin",       "key": "e", "charges": 1, "cast": 1.4,                "target": true, "skin": true},
 	"cascade":  {"name": "Cascade",    "key": "3", "charges": 3, "cast": 2.0, "heal": 45.0,  "target": false, "aoe": 3,  "cd": 8.0},
 	"spring":   {"name": "Wellspring", "key": "4", "charges": 4, "cast": 2.5, "heal": 55.0,  "target": false, "aoe": 99, "cd": 22.0},
 	"dispel":   {"name": "Dispel",     "key": "q", "charges": 0, "cast": 0.0,                "target": true,  "offgcd": true, "cd": 8.0, "dispel": true},
@@ -96,4 +137,4 @@ extends Resource
 ## The bar for an Aspect. Both specs share the whole book — the aspect only changes how
 ## the graded window reads, not the buttons.
 func loadout(_aspect: String) -> Array:
-	return ["flash", "mend", "cascade", "spring", "dispel", "rekindle"]
+	return ["flash", "mend", "skin", "cascade", "spring", "dispel", "rekindle"]

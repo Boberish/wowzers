@@ -176,6 +176,7 @@ var _net: NetClient = null
 var _online: bool = false
 var _online_map: bool = false      ## MAP-3b: an online Topology DESCENT is in progress
 var _map_is_leader: bool = false   ## MAP-3b: am I the route-picker (server host)?
+var _charge_taught: bool = false   ## §9.7: the one-shot "⏻ feeds THE KILL SWITCH" teach has fired
 var _room: Dictionary = {}
 var _my_ready: bool = false
 var _net_status: Label = null
@@ -506,6 +507,11 @@ func _on_net_map(msg: Dictionary) -> void:
 	ms.toast = String(msg.get("toast", ""))
 	ms.entropy = int(msg.get("entropy", 0))   # ⚡ the within-run luck pool (server-owned, v6)
 	ms.charge = int(msg.get("charge", 0))     # ⏻ THE KILL SWITCH meter (server-owned)
+	ms.wounds = msg.get("wounds", [])         # server broadcasts per-seat wounds → header pips
+	ms.show_tokens = false                    # per-seat wallets aren't on the wire yet (slice 3)
+	if ms.charge > 0 and not _charge_taught:
+		ms.charge_hint = true
+		_charge_taught = true
 	ms.interactive = _map_is_leader
 	if _map_is_leader:
 		ms.node_entered.connect(func(id: int): _net.send_node(id))
@@ -550,8 +556,13 @@ func _on_net_mapstop(msg: Dictionary) -> void:
 			var d := {"label": String(c.get("label", "")), "kind": String(c.get("kind", "free")),
 				"orig_index": i, "fx": c.get("fx", {}), "verb": String(sc.get("verb", "CHECK")),
 				"entropy_have": ent, "by_seat": sc.get("by_seat", {})}
-			if String(c.get("kind", "")) == "wager":
-				d["stake_label"] = _stake_label(c.get("wager", {}))
+			var ck := String(c.get("kind", ""))
+			if ck == "check" or ck == "wager":
+				var w2: Dictionary = c.get("wager", {})   # §9.2 both legs (seat-independent)
+				d["win_fx"] = _fold_wager((c.get("success", {}) as Dictionary).get("fx", {}), w2)
+				d["lose_fx"] = _fold_wager((c.get("fail", {}) as Dictionary).get("fx", {}), w2)
+				if ck == "wager":
+					d["stake_label"] = _stake_label(w2)
 			descs.append(d)
 		var p := MapEventPanel.new()
 		p.title_text = String(msg.get("title", ""))
@@ -872,6 +883,12 @@ func _show_map() -> void:
 	ms.gear_line = _gear_line()
 	ms.entropy = _d.entropy
 	ms.charge = _d.charge
+	ms.tokens = _tokens_now()          # ⏣ meter (§9); offline = the real wallet
+	ms.wounds = _d.wounds              # per-seat corrupted sectors → header pips
+	# ⏻ one-shot teach: fire the first map after charge appears in this run
+	if _d.charge > 0 and not _charge_taught:
+		ms.charge_hint = true
+		_charge_taught = true
 	ms.node_entered.connect(_enter_node)
 	ms.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.add_child(ms)
@@ -1034,8 +1051,11 @@ func _prep_choice(c: Dictionary, i: int, ctx: Dictionary) -> Dictionary:
 		d["verb"] = String(chk.get("verb", "CHECK"))
 		d["entropy_have"] = int(ctx.get("entropy", 0))       # ⚡ the party can feed
 		d["nudge_ladder"] = MapCheck.nudge_ladder(chk, ctx)   # the % at 1..min(3,⚡) fed
+		var w: Dictionary = c.get("wager", {})
+		d["win_fx"] = _fold_wager((c.get("success", {}) as Dictionary).get("fx", {}), w)   # §9.2 both legs
+		d["lose_fx"] = _fold_wager((c.get("fail", {}) as Dictionary).get("fx", {}), w)
 		if kind == "wager":
-			d["stake_label"] = _stake_label(c.get("wager", {}))
+			d["stake_label"] = _stake_label(w)
 	return d
 
 ## Human-readable wager stake ("10% integrity" / "2 ⏣" / "2 ⚡").
@@ -1046,6 +1066,20 @@ func _stake_label(w: Dictionary) -> String:
 		"tokens": return "%d ⏣" % int(amt)
 		"entropy": return "%d ⚡" % int(amt)
 	return ""
+
+## Fold a wager's fixed stake into a leg's fx — a mirror of MapCheck.resolve's fold — so
+## the pre-commit BOTH-LEGS hint (§9.2) shows the SAME numbers the roll will apply. Pure
+## display; never rolls, never touches rng.
+func _fold_wager(fx: Dictionary, w: Dictionary) -> Dictionary:
+	if w.is_empty():
+		return fx
+	var out: Dictionary = (fx as Dictionary).duplicate(true)
+	var amt := float(w.get("amount", 0))
+	match String(w.get("stake", "integrity")):
+		"integrity": out["hurt"] = float(out.get("hurt", 0.0)) + amt
+		"tokens": out["tokens"] = int(out.get("tokens", 0)) - int(amt)
+		"entropy": out["entropy"] = int(out.get("entropy", 0)) - int(amt)
+	return out
 
 ## The build context an Inference Check reads. Offline the human's seat is the only
 ## full build (AI raiders carry no boons), so `boon_tags` is the human's owned boons
@@ -1559,7 +1593,8 @@ func _gear_equip(id: String, replace_i: int) -> void:
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
-	if _d.gear.is_empty() and _tokens_now() == 0:
+	# ⏣ TOKENS moved to the header meter row (§9); this line is just the peripherals now.
+	if _d.gear.is_empty():
 		return ""
 	var names: Array = []
 	for g in _d.gear:
@@ -1567,8 +1602,7 @@ func _gear_line() -> String:
 		if _d.gear_charges.has(g):
 			nm += " ×%d" % int(_d.gear_charges[g])
 		names.append(nm)
-	var line := "PERIPHERALS:  " + ("  ·  ".join(PackedStringArray(names)) if not names.is_empty() else "—")
-	return line + "      ⏣ %d" % _tokens_now()
+	return "PERIPHERALS:  " + "  ·  ".join(PackedStringArray(names))
 
 func _worst_wound() -> float:
 	var w := 0.0
@@ -1716,9 +1750,9 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
 ## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
-func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+func _fw_module_offer_ids(fw: String, creed: String, aspect := "") -> Array:
 	if fw == "well":
-		return WellModules.built_ids()         # no Well creed hides a module in v1
+		return WellModules.offer_ids(aspect)   # ⭐The Vigil is Draw-only; the rest read either spec
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -1836,7 +1870,7 @@ func _show_module_pick(done: Callable) -> void:
 		done.call()
 		return
 	var avail: Array = []
-	for id in _fw_module_offer_ids(fw, _d.run.creed):        # implemented + creed-allowed modules
+	for id in _fw_module_offer_ids(fw, _d.run.creed, String(_d.run.aspect)):   # implemented + creed/aspect-allowed
 		if not _d.run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
@@ -2140,7 +2174,7 @@ func _build_combat(s: CombatState) -> void:
 	# the raid meter — right rail: all four raiders ranked, engine-truth accounting;
 	# M cycles ranking / your spells / hidden. Works identically offline and online
 	# (it only READS state — the lockstep replica never notices it).
-	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg")
+	_meter = MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", false, _d.fight_log)
 	UiKit.place(_meter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(_meter)
 
@@ -3277,7 +3311,7 @@ func _show_fight_recap(done: Callable) -> void:
 	box.add_child(cont)
 	_report_button(box, func(): _show_fight_recap(done))
 	# the raid RANKED by damage, top-right — click a raider for their per-spell breakdown
-	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+	var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true, _d.fight_log)
 	UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 	_ui.add_child(rmeter)
 
@@ -3310,7 +3344,7 @@ func _show_end(won: bool) -> void:
 	if _ctrl != null and _ctrl.state != null and _ctrl.player() != null:
 		box.add_child(RecapPanel.new(_ctrl.state, _ctrl.player(), _recap_stats))
 		# the meter's recap: the raid ranked, click a raider for their spells
-		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true)
+		var rmeter := MeterPanel.new(_ctrl, "heal" if _seat_key == "healer" else "dmg", true, _d.fight_log)
 		UiKit.place(rmeter, 1, 0, 1, 0, -318, 118, -18, 600)
 		_ui.add_child(rmeter)
 	var again := Button.new()
@@ -3365,6 +3399,14 @@ func _show_stats_page(back: Callable) -> void:
 ## THEN the normal end flow (draft / end screen / map) runs. Headless runs
 ## (smokes, sims) skip the beat entirely.
 func _on_end_moment(won: bool) -> void:
+	# METER L3 — snapshot this fight's meter into the run history (once per fight, win or loss,
+	# headless too). Keyed on run_seed so a new descent auto-clears the log.
+	if _d != null and _ctrl != null and _ctrl.state != null:
+		if _d.fight_log_seed != _d.run_seed:
+			_d.fight_log.clear()          # clear in place — the meter holds this same array by ref
+			_d.fight_log_seed = _d.run_seed
+		var enc = _ctrl.state.encounter
+		_d.fight_log.append(MeterPanel.snapshot(_ctrl.state, enc.name if enc != null else "Fight"))
 	if _screen != "combat" or DisplayServer.get_name() == "headless":
 		_on_end(won)
 		return

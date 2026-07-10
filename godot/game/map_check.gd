@@ -1,9 +1,10 @@
 ## MapCheck — THE INFERENCE CHECK. The pure, Node-free resolver that turns a build
 ## into a success %, the Across-the-Obelisk "cards of Fire" mechanic adapted to Rift:
 ## a check names boon TAGS and counts how many of your boons carry them, then leans the
-## odds by your aspect + trinity role, your integrity, your 📁 Prior floor, comeback
-## pity, and any ⚡ Entropy you feed it. Everything is integer %, computed in one fixed,
-## documented order, and printed as an itemized breakdown BEFORE you commit.
+## odds by your aspect + trinity role, comeback pity, and any ⚡ LUCK you feed it.
+## (The retired integrity term and the cross-run 📁 Prior floor are both gone — DESCENT
+## §9/§11.) Everything is integer %, computed in one fixed, documented order, and
+## printed as an itemized breakdown BEFORE you commit.
 ##
 ## The die is a FRESH throwaway DetRng seeded from (map_seed, node, choice, attempt) —
 ## a pure function every machine (client, server, sim) computes identically, so co-op
@@ -105,7 +106,7 @@ static func strength(chk: Dictionary, ctx: Dictionary) -> int:
 static func chance(chk: Dictionary, ctx: Dictionary, nudge: int = 0) -> Dictionary:
 	var parts: Array = []
 	var base := int(chk.get("base", DEF_BASE))
-	parts.append(["eligibility base", base])
+	parts.append(["base odds", base])
 	var p := base
 
 	var s := strength(chk, ctx)
@@ -128,16 +129,10 @@ static func chance(chk: Dictionary, ctx: Dictionary, nudge: int = 0) -> Dictiona
 		parts.append(["%s at the terminal" % role, rb])
 		p += rb
 
-	var mode := String(chk.get("integrity", ""))
-	var frac := float(ctx.get("party_frac", 1.0))
-	if mode == "steady":
-		var it := int(round((frac - 0.5) * 40.0))
-		if it != 0:
-			parts.append(["raid integrity", it]); p += it
-	elif mode == "desperate":
-		var it2 := int(round((0.5 - frac) * 40.0))
-		if it2 != 0:
-			parts.append(["desperation", it2]); p += it2
+	# THE RAID INTEGRITY KILL (DESCENT §9/§11 #2): the old "raid integrity"/"desperation"
+	# check-row leaned the % off party_frac — the RETIRED integrity carry (a dead number).
+	# Dropped. `ctx["party_frac"]` is now unread but stays in build_ctx (removing it ripples
+	# to every caller); the check no longer prices in a resource that no longer matters.
 
 	var pity := mini(PITY_CAP, int(ctx.get("check_fails", 0)) * PITY_PER)
 	if pity > 0:
@@ -145,7 +140,7 @@ static func chance(chk: Dictionary, ctx: Dictionary, nudge: int = 0) -> Dictiona
 
 	var nb := mini(NUDGE_MAX, maxi(0, nudge)) * NUDGE_PER
 	if nb > 0:
-		parts.append(["⚡ entropy", nb]); p += nb
+		parts.append(["⚡ LUCK", nb]); p += nb
 
 	p = clampi(p, int(chk.get("floor", DEF_FLOOR)), int(chk.get("ceil", DEF_CEIL)))
 	return {"p": p, "parts": parts, "strength": s}

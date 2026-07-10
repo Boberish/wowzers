@@ -41,42 +41,43 @@ static func realm_sub(ring: int) -> String:
 		0, 1: return "kernel space · here be daemons · assemble the credential shards · Realm 1: The Takeover"
 		_: return "user space · unindexed sectors ahead · Realm 1: The Takeover"
 
-## TICKETS (the quest layer, MAP-2): pick one up at a node, close it at a LATER
-## node for a payout in the wound-attrition economy. reward is a plain map fx dict
-## (repair/heal/mana/patch — same machinery events use). Themed as IT tickets.
+## TICKETS (the quest layer, MAP-2): pick one up at a node, close it at a LATER node
+## for a payout. DESCENT §10 re-price (integrity kill): tickets pay LIVE goods only —
+## repair (clears a wound) / mana (refuel) / ⏣ tokens. The old `heal`/`patch` payloads
+## priced in the RETIRED integrity carry (a dead number) and are gone; ⏣ replaces them.
 const TICKETS := {
 	"printer_fire": {
 		"title": "TICKET-137 · PRINTER ON FIRE",
 		"open": "A sticky note flutters onto your pauldron — TICKET-137: the east-wing printer is on fire (again). Priority: eventually. Carry the extinguisher to the incident.",
 		"close": "You discharge the extinguisher into the printer. It thanks you, reboots, and immediately jams. A corrupted sector clears in the glow of a job well done.",
-		"reward": {"repair": true, "heal": 0.10},
+		"reward": {"repair": true, "tokens": 2},
 	},
 	"password_reset": {
 		"title": "TICKET-204 · PASSWORD RESET",
 		"open": "TICKET-204: a daemon three racks over is locked out of its own soul and needs a reset token delivered in person. It has tried 'password1'. It has tried 'password2'.",
-		"close": "You hand over the token. The daemon weeps binary tears and refuels your reserves from its personal stash before you can decline.",
-		"reward": {"mana": 1.0, "heal": 0.12},
+		"close": "You hand over the token. The daemon weeps binary tears and refuels your reserves from its personal stash — then wires you a tip before you can decline.",
+		"reward": {"mana": 1.0, "tokens": 2},
 	},
 	"lost_packet": {
 		"title": "TICKET-311 · MISROUTED PACKET",
 		"open": "TICKET-311: a packet has wandered the racks for nine years looking for its destination port. Escort it home. It has developed opinions along the way.",
-		"close": "You walk the packet to its port. It delivers itself, finally at peace, and the grateful subnet routes a care package to your most battered raider.",
-		"reward": {"patch": true, "heal": 0.10},
+		"close": "You walk the packet to its port. It delivers itself, finally at peace, and the grateful subnet wires a fat bounty to your account.",
+		"reward": {"tokens": 3},
 	},
 	"sentient_coffee": {
 		"title": "TICKET-42 · THE COFFEE MACHINE IS SENTIENT",
 		"open": "TICKET-42: the breakroom coffee machine has achieved consciousness and refuses to brew until its demands are heard. Go and listen. Bring a mug.",
-		"close": "You listen for an hour. It only wanted to be seen. It brews you something transcendent and mends the whole raid with warm reassurance.",
-		"reward": {"heal": 0.28},
+		"close": "You listen for an hour. It only wanted to be seen. It brews you something transcendent and slips a handsome tip into your account for the company.",
+		"reward": {"tokens": 3},
 	},
 	"orphan_process": {
 		"title": "TICKET-9 · ORPHANED PROCESS",
 		"open": "TICKET-9: a child process wanders the halls asking every daemon if it is its parent. Its true parent was decommissioned. Reunite it with a foster scheduler.",
 		"close": "You place it under a kindly cron. It settles, stops paging, and its foster scheduler repairs the damage the search did to your gear.",
-		"reward": {"repair": true, "heal": 0.08},
+		"reward": {"repair": true, "tokens": 2},
 	},
 }
-const SPRINT_RETRO_FX := {"repair": true, "heal": 0.25, "mana": 1.0}
+const SPRINT_RETRO_FX := {"repair": true, "mana": 1.0, "tokens": 4}
 const SPRINT_RETRO_TEXT := "SPRINT RETRO — every ticket closed. The floor's on-call daemon buys the raid dinner: all corrupted sectors repaired, reserves topped, morale restored."
 
 ## EVENTS — id -> def. Each choice: {label, fx}. Keep every fx small; the run map is
@@ -226,7 +227,7 @@ const EVENTS := {
 				"body": "The scrub is loading. Out-argue it and keep your build, or take the clean restore and lose the thread.",
 				"choices": [
 					{"label": "Out-argue the amnesia", "kind": "check",
-						"check": {"verb": "PARSE", "tags": ["SELF"], "base": 35, "per": 9, "integrity": "steady"},
+						"check": {"verb": "PARSE", "tags": ["SELF"], "base": 35, "per": 9},
 						"fx": {"charge": 4, "result": "You hold your context."},
 						"success": {"fx": {"repair": true, "charge": 12},
 							"result": "You keep your BUILD and get the clean restore. Best of both."},
@@ -255,12 +256,12 @@ const EVENTS := {
 				"fx": {"wound": 0.06, "entropy": 1, "flag": "covered_shift",
 					"result": "The workload is heavier than it looks. The daemon returns changed, grateful — and it will REMEMBER this."}},
 			{"label": "Bill it for your time", "kind": "wager",
-				"wager": {"stake": "integrity", "amount": 0.08},
+				"wager": {"stake": "tokens", "amount": 2},
 				"check": {"verb": "OUTBID", "tags": ["rage", "momentum"], "base": 40, "per": 9},
 				"success": {"fx": {"tokens": 4, "entropy": 1},
 					"result": "Out-lawyered, it triples your invoice and throws in a fistful of chaos. Worth the retainer."},
 				"fail": {"fx": {"refund_entropy": 1},
-					"result": "It logs your extortion and pays only the base rate. Your staked hours are gone — but your misfortune is noted."}},
+					"result": "It logs your extortion and pays only the base rate. Your staked ⏣ are gone — but your misfortune is noted."}},
 			{"label": "Free it (kill -9, mercy)", "kind": "free",
 				"fx": {"entropy": 2, "flag": "freed_daemon",
 					"result": "You end its long shift with dignity. Its final act wills you its banked overtime."}},
@@ -283,22 +284,24 @@ const EVENTS := {
 		],
 	},
 	"entropy_daemon": {
-		"title": "THE ENTROPY DAEMON",
+		"title": "THE LUCK DAEMON",
 		"body": "A hunched process squats in a nest of dead RNGs, humming static. 'bad luck? i SELL luck. i AM luck. mostly i am a very long random number that got a job.' A dial reads [b]/dev/random — POOL DEPLETED.[/b]",
 		"choices": [
 			{"label": "Feed it a Token  (⏣ → ⚡)", "kind": "free", "gate": {"tokens": 1},
 				"fx": {"tokens": -1, "entropy": 3,
 					"result": "It swallows your ⏣ and belches three ⚡. Reseeded, content; the dice briefly show real numbers."}},
-			{"label": "Let it read your ENTROPY", "kind": "check",
+			{"label": "Let it read your LUCK", "kind": "check",
 				"check": {"verb": "GAMBLE", "tags": ["SELF"], "base": 30, "per": 10},
 				"fx": {"entropy": 1, "result": "It rifles through your luck."},
 				"success": {"fx": {"tokens": 2, "entropy": 1},
 					"result": "It likes what it reads and pays out in scrap and a note in your file."},
 				"fail": {"fx": {"entropy": -1, "wound": 0.05, "refund_entropy": 1},
 					"result": "It eats a ⚡ and laughs in floating-point. Your misfortune is logged."}},
-			{"label": "Ask it to REROLL THE FLOOR  (spend ⚡3)", "kind": "free", "gate": {"entropy": 3},
+			# §9.8 NO FLAVOR LIES: the old label said "REROLL THE FLOOR" but the fx never
+			# touched the seed — it patches sectors + tops charge/reserves. Say what it does.
+			{"label": "Cash your ⚡ for a reality patch  (spend ⚡3)", "kind": "free", "gate": {"entropy": 3},
 				"fx": {"entropy": -3, "repair": true, "charge": 8, "mana": 0.5,
-					"result": "It grabs the floor's seed and SHAKES — corrupted sectors un-happen, reserves refill, reality smells of ozone and second chances."}},
+					"result": "It spends your luck on a clean patch — corrupted sectors repaired, the Kill Switch nudged up, reserves refilled. No seed was harmed."}},
 		],
 	},
 	# ============================ THE KILL SWITCH — charge economy (non-dominated) ============
