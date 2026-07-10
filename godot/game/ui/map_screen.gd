@@ -22,6 +22,11 @@ var toast: String = ""               ## MAP-2: one-shot ticket pickup/close bann
 var gear_line: String = ""           ## GEAR-1: equipped curios + ⏣ (raid map; "" = hidden)
 var entropy: int = 0                  ## ⚡ LUCK, the within-run pool (Inference Check); 0 hides
 var charge: int = -1                  ## ⏻ THE KILL SWITCH meter 0..100; <0 hides (solo map)
+var tokens: int = 0                   ## ⏣ TOKENS — the header meter (§9); numeric, not parsed from gear_line
+var show_tokens: bool = true          ## online per-seat wallets land in slice 3 — hide ⏣ until the broadcast carries it
+var wounds: Array = []                ## per-seat corrupted-sector fraction (§9 wound pips); [] = none to show
+var curses: Array = []                ## active JAILBREAK curse pip labels (§7); [] until slice 4
+var charge_hint: bool = false         ## fire the one-shot "⏻ feeds THE KILL SWITCH" teach line once (§9.7)
 
 var _hover: int = -1
 var _selectable: Array = []
@@ -64,6 +69,21 @@ const KIND_TAG := {
 const GLYPH := {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!",
 	"elite": "*", "market": "$", "jailbreak": "&", "minigame": ">", "wild": "#"}
 
+## THE ONE-LINE REWARD CONTRACT the door prints (DESCENT §5/§9 — "pay printed on the
+## door"). Keyed on the HONEST displayed kind, so a stubbed MARKET shows its fallback's
+## contract (no lying storefront). WILD is intentionally absent — it stays sealed.
+const KIND_CONTRACT := {
+	RunMap.KIND_COMBAT: "pays a boon pick + minted ⏣",
+	RunMap.KIND_ELITE: "pays your KEYSTONE + a curio roll + fat ⏣",
+	RunMap.KIND_SEAL: "oath verdict + drop + checkpoint + the market",
+	RunMap.KIND_MARKET: "spend ⏣ — stock printed inside",
+	RunMap.KIND_JAILBREAK: "two deals, both halves printed",
+	RunMap.KIND_EVENT: "a choice — odds AND stakes printed on both legs",
+	RunMap.KIND_COOLING: "pick ONE: repair · purge · +⏻",
+	RunMap.KIND_CACHE: "free: +⏻ + ⏣",
+	RunMap.KIND_MINIGAME: "a skill game — prize printed",
+}
+
 ## What the board PRINTS for a node: a stubbed kind shows its honest fallback (no
 ## lying storefronts, DESCENT §9), a live kind shows itself — and a WILD stays a
 ## sealed envelope (never spoiled here; its threat-level line still prints when a
@@ -73,6 +93,25 @@ func _display_kind(n: Dictionary) -> String:
 	if k == RunMap.KIND_WILD:
 		return k
 	return RunMap.effective_kind(n)
+
+## The one-line reward contract for a node's HONEST kind (§5). WILD stays sealed.
+func _contract(n: Dictionary) -> String:
+	var k := _display_kind(n)
+	if k == RunMap.KIND_WILD:
+		return "sealed — the one mystery (its fight tier still prints)"
+	return String(KIND_CONTRACT.get(k, ""))
+
+## Fight-tier attention price (§2/§5): 3 = Seal ▮▮▮, 2 = elite ▮▮, 1 = a normal fight ▮,
+## 0 = no fight. A WILD prints the tier of the fight it resolved to, never its kind (V#9).
+func _fight_tier(n: Dictionary) -> int:
+	var k := _display_kind(n)
+	if k == RunMap.KIND_SEAL:
+		return 3
+	if k == RunMap.KIND_ELITE:
+		return 2
+	if k == RunMap.KIND_COMBAT or (k == RunMap.KIND_WILD and int(n.get("fight", -1)) >= 0):
+		return 1
+	return 0
 
 ## MAP-3b: online spectators (non-leaders) see the map read-only — the reachable
 ## nodes still glow, but there are no click buttons (only the leader routes).
@@ -102,35 +141,61 @@ func _build_header() -> void:
 	_label(rsub, 13, Palette.TEXT_DIM, Vector2(0, 148), UiKit.display(500, 3))
 	if subtitle != "":
 		_label(subtitle, 16, Palette.GOLD_BRIGHT, Vector2(0, 166), UiKit.title(700))
-	# INTEGRITY only reads on the SOLO practice map (charge<0); the raid RETIRED it — a
-	# healer tops HP off, so the sole HP stake there is a corrupted sector (see wounds).
-	var status := ("INTEGRITY %d%%" % int(round(hp_frac * 100.0))) if charge < 0 else ""
+	# ── THE HEADER METERS (§9): exactly THREE in the raid — ⏣ TOKENS · ⚡ LUCK · ⏻ CHARGE.
+	# ⚡ was "Entropy" (the stats-nerd name dies); 📁 Prior is deleted (V#8), nothing follows
+	# a fresh run. The solo practice map has no economy → it keeps its lone INTEGRITY readout.
+	var status := ""
+	if charge >= 0:
+		var meters: Array = []
+		if show_tokens:                                    # online wallets land slice 3; hidden until the broadcast carries ⏣
+			meters.append("⏣ TOKENS %d" % tokens)
+		meters.append("⚡ LUCK %d" % entropy)
+		meters.append("⏻ CHARGE %d%%" % charge)
+		status = "        ".join(PackedStringArray(meters))
+	else:
+		status = "INTEGRITY %d%%" % int(round(hp_frac * 100.0))
 	if map.seal_shard_req > 0:
-		status += "      [CREDENTIAL SHARDS: %d / %d]" % [
+		status += "        [ROOT ACCESS %d / %d]" % [
 			int(inventory.get("shards", 0)), map.seal_shard_req]
 	if inventory.get("api_key", false):
-		status += "      [KEY: %s]" % MapContent.KEY_NAME
-	# The Inference Check meta rides the same status line: ⚡ LUCK (spend to bend the
-	# dice). V#8: the cross-run 📁 Prior readout is gone — nothing follows a fresh run.
-	if entropy > 0:
-		status += "      ⚡%d" % entropy
-	if charge >= 0:
-		status += "      ⏻ %d%% ARMED" % charge
+		status += "        [%s]" % MapContent.KEY_NAME
 	_label(status, 15, Palette.TEXT, Vector2(0, 186), UiKit.display(600, 2))
+	# a running cursor so the conditional rows below never collide
+	var y := 208.0
+	# WOUND PIPS (§9): the run's only HP stake, finally visible between fights — one entry
+	# per corrupted seat with its severity.
+	var wbits: Array = []
+	for w in wounds:
+		if float(w) > 0.0:
+			wbits.append("−%d%% max HP" % int(round(float(w) * 100.0)))
+	if not wbits.is_empty():
+		_label("CORRUPTED SECTORS:   " + "      ".join(PackedStringArray(wbits)), 12,
+			Palette.CRIMSON, Vector2(0, y), UiKit.display(600, 2)); y += 20.0
+	# CURSE PIPS (§7): active JAILBREAK bites, capped at 2 (empty until slice 4).
+	if not curses.is_empty():
+		_label("CURSES:   " + "      ".join(PackedStringArray(curses)), 12,
+			Palette.VOID, Vector2(0, y), UiKit.display(600, 2)); y += 20.0
+	# FIRST-⏻ one-shot teach (§9.7): fires once, the first map after charge appears.
+	if charge_hint:
+		_label("⏻ feeds THE KILL SWITCH — cash it at this floor's Seal.", 12,
+			Palette.FLOW, Vector2(0, y), UiKit.title(600)); y += 20.0
 	# TICKETS (MAP-2): a one-shot toast for the last pickup/close, then the still-open list
 	if toast != "":
-		_label(toast, 15, Palette.GOLD_BRIGHT, Vector2(0, 210), UiKit.title(600))
+		_label(toast, 15, Palette.GOLD_BRIGHT, Vector2(0, y), UiKit.title(600)); y += 24.0
 	if not open_tickets.is_empty():
 		_label("OPEN TICKETS:   " + "     ·     ".join(open_tickets), 12, Palette.FLOW,
-			Vector2(0, 234), UiKit.display(600, 2))
-	# GEAR-1: the raid's equipped curios (Realm-1: peripherals) + banked Tokens
+			Vector2(0, y), UiKit.display(600, 2)); y += 20.0
+	# GEAR-1: the raid's equipped curios (Realm-1: peripherals). ⏣ now lives in the meter row.
 	if gear_line != "":
-		_label(gear_line, 13, Palette.GOLD, Vector2(0, 258), UiKit.display(600, 2))
+		_label(gear_line, 13, Palette.GOLD, Vector2(0, y), UiKit.display(600, 2))
 	_label("choose a connected node  ·  %s routes need credentials  ·  Esc = abandon the run"
-		% MapContent.LOCK_LABEL, 12, Palette.TEXT_DIM, Vector2(0, 880), UiKit.body())
-	# legend
-	var lg := "X FIGHT   ·   ? EVENT   ·   + CACHE   ·   ~ COOLING   ·   1 GATE   ·   ! SEAL"
-	_label(lg, 11, Palette.GOLD_DIM, Vector2(0, 912), UiKit.display(500, 2))
+		% MapContent.LOCK_LABEL, 12, Palette.TEXT_DIM, Vector2(0, 872), UiKit.body())
+	# kind legend (GATE purged — the real descent kinds)
+	var lg := "X FIGHT   ·   * ELITE   ·   ? EVENT   ·   + CACHE   ·   ~ COOLING   ·   $ MARKET   ·   & JAILBREAK   ·   > SKILL   ·   # WILD   ·   ! SEAL"
+	_label(lg, 11, Palette.GOLD_DIM, Vector2(0, 900), UiKit.display(500, 2))
+	# currency legend (§9.3): what the three meters buy you
+	_label("⏣ TOKENS — spend at the Market   ·   ⚡ LUCK — bend the dice   ·   ⏻ CHARGE — cash at the Seal",
+		11, Palette.TEXT_DIM, Vector2(0, 922), UiKit.display(500, 2))
 
 func _label(text: String, fs: int, col: Color, at: Vector2, font: Font) -> void:
 	var l := Label.new()
@@ -152,7 +217,12 @@ func _build_buttons() -> void:
 		b.flat = true
 		b.custom_minimum_size = Vector2(R_NODE * 2.6, R_NODE * 2.6)
 		b.position = _pos(n) - Vector2(R_NODE * 1.3, R_NODE * 1.3)
-		b.tooltip_text = "%s — %s" % [String(n["name"]), KIND_TAG[String(n["kind"])]]
+		# the door prints its full contract before the click enters it (§5 "pay on the door")
+		var tip := "%s — %s" % [String(n["name"]), KIND_TAG[_display_kind(n)]]
+		var con := _contract(n)
+		if con != "":
+			tip += "\n%s" % con
+		b.tooltip_text = tip
 		b.mouse_entered.connect(func():
 			_hover = id
 			queue_redraw())
@@ -216,13 +286,30 @@ func _draw() -> void:
 			draw_string(fnt, p + Vector2(-45, -r - 26), "TICKET", HORIZONTAL_ALIGNMENT_CENTER, 90, 12, Palette.FLOW)
 		if String(n.get("ticket_close", "")) != "" and not visited:
 			draw_string(fnt, p + Vector2(-45, -r - 26), "TURN-IN", HORIZONTAL_ALIGNMENT_CENTER, 90, 12, Palette.FLOW)
-		# name + fight tag
+		# name + the attention-price PIPS (▮ normal · ▮▮ elite · ▮▮▮ Seal, §5). The pips
+		# are always on (the price you pay in rhythm); the full reward CONTRACT prints on
+		# hover (and in the door tooltip) so 77 nodes don't drown the board in text.
 		var name_col := Palette.TEXT if sel or is_cur else Palette.TEXT_DIM
 		draw_string(body, p + Vector2(-90, r + 24), String(n["name"]),
 			HORIZONTAL_ALIGNMENT_CENTER, 180, 12, name_col)
-		if int(n["fight"]) >= 0:
-			draw_string(body, p + Vector2(-90, r + 40), "· threat level %d ·" % (int(n["fight"]) + 1),
-				HORIZONTAL_ALIGNMENT_CENTER, 180, 10, Color(name_col, 0.7))
+		var tier := _fight_tier(n)
+		if tier > 0:
+			var pw := 9.0
+			var ph := 4.0
+			var gap := 3.0
+			var tw := tier * pw + (tier - 1) * gap
+			var pip_col: Color = Palette.FLOW if tier == 1 else (Palette.CRUSH if tier >= 3 else Palette.CRIMSON)
+			for pi in tier:
+				draw_rect(Rect2(p.x - tw * 0.5 + pi * (pw + gap), p.y + r + 34.0, pw, ph),
+					Color(pip_col, 0.95 if sel or is_cur else 0.55))
+		if _hover == id:
+			var con := _contract(n)
+			if con != "":
+				draw_string(body, p + Vector2(-120, r + 54), con,
+					HORIZONTAL_ALIGNMENT_CENTER, 240, 10, Color(Palette.GOLD_BRIGHT, 0.95))
+			if int(n["fight"]) >= 0:
+				draw_string(body, p + Vector2(-120, r + 68), "· threat level %d ·" % (int(n["fight"]) + 1),
+					HORIZONTAL_ALIGNMENT_CENTER, 240, 10, Color(name_col, 0.7))
 
 ## PCB elbow: out horizontally, one 45-ish bend, into the target pad.
 func _trace(a: Vector2, b: Vector2, col: Color, w: float) -> void:

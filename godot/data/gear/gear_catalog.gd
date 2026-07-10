@@ -30,7 +30,7 @@ const ITEMS := {
 	},
 	"ticket_stub": {
 		"name": "Ticket Stub", "rarity": "haiku", "cls": "", "kind": "util",
-		"desc": "Closing a TICKET also repairs +10% party integrity and pays +1⏣.",
+		"desc": "Closing a TICKET also pays +2⏣.",
 		"flavor": "The subagent does the chores.",
 	},
 	"cooling_paste": {
