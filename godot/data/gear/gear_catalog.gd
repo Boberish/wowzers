@@ -62,7 +62,7 @@ const ITEMS := {
 	},
 	"hot_reload": {
 		"name": "Hot Reload", "rarity": "sonnet", "cls": "", "kind": "util",
-		"desc": "Rerolling a boon draft is FREE — reload the offer as many times as you like, no Tokens spent.",
+		"desc": "Grants 2 REGENERATE charges on equip — bank them to redraw a boon offer.",
 		"flavor": "Recompiled without restarting.",
 	},
 }

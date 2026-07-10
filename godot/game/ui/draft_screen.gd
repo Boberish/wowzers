@@ -10,7 +10,6 @@ signal boon_taken(boon: Dictionary)
 
 var _run                       # RunState
 var _offers: Array = []
-var _locked: Array = []        # LOCKED offer indices (held through rerolls)
 var _headline: String          # rendered verbatim ("THE GATEKEEPER FALLS", "SALVAGE — TAKE ONE")
 var _flavor: String
 var _extra: Array = []
@@ -18,8 +17,7 @@ var _extra_col: Color
 var _mid: VBoxContainer
 var _tokens_lbl: Label
 var _row: HBoxContainer
-var _reroll: Button
-var free_reroll: bool = false  ## CURIO Hot Reload: rerolls cost 0 (caller sets from equipped gear)
+var _reroll: Button            ## REGENERATE — spends a banked charge to redraw the row
 
 func _init(run, offers: Array, headline: String, flavor: String, extra_lines: Array = [],
 		extra_color: Color = Palette.STEEL) -> void:
@@ -89,7 +87,6 @@ func _rebuild() -> void:
 		forge.add_theme_font_override("font", UiKit.display(600, 2))
 		var card := RelicCard.new(String(b["title"]), String(b["desc"]), String(b["type"]),
 			Draft.rarity(b), i == 0 and Draft.matches(b, _run), String(b.get("slot", "")))
-		card.locked = i in _locked
 		card.taken.connect(_on_taken.bind(i))
 		col.add_child(card)
 		var up := Button.new()
@@ -102,20 +99,6 @@ func _rebuild() -> void:
 			up.disabled = true
 			up.modulate = Color(1, 1, 1, 0.35)
 		col.add_child(up)
-		var lk := Button.new()
-		lk.custom_minimum_size = Vector2(150, 30)
-		lk.add_theme_font_size_override("font_size", 12)
-		if i in _locked:
-			lk.text = "◆ LOCKED — release"
-			lk.pressed.connect(_on_unlock.bind(i))
-		elif _run.tokens >= Draft.LOCK_COST:
-			lk.text = "LOCK · %d ⏣" % Draft.LOCK_COST
-			lk.pressed.connect(_on_lock.bind(i))
-		else:
-			lk.text = "LOCK · %d ⏣" % Draft.LOCK_COST
-			lk.disabled = true
-			lk.modulate = Color(1, 1, 1, 0.35)
-		col.add_child(lk)
 		_row.add_child(col)
 		# the deal-in: each card arrives a beat after the last (rerolls re-deal too)
 		col.modulate.a = 0.0
@@ -123,30 +106,19 @@ func _rebuild() -> void:
 		tw.tween_interval(0.10 + 0.09 * float(i))
 		tw.tween_property(col, "modulate:a", 1.0, 0.22)
 	var t: int = _run.tokens
-	_tokens_lbl.text = "TOKENS · %d — spend them responsibly" % t
+	var rg: int = _run.regenerate
+	_tokens_lbl.text = "TOKENS · %d   —   REGENERATE · %d   —   spend them responsibly" % [t, rg]
 	_tokens_lbl.add_theme_color_override("font_color", Palette.GOLD if t > 0 else Palette.TEXT_DIM)
-	if free_reroll:
-		_reroll.text = "REROLL THE OFFER · FREE"
-		_reroll.disabled = false
-	else:
-		_reroll.text = "REROLL THE OFFER · %d ⏣" % Draft.REROLL_COST
-		_reroll.disabled = _run.tokens < Draft.REROLL_COST
+	# rerolls-out (§11 #3): the row is redrawn by a banked REGENERATE charge, not Tokens
+	_reroll.text = "REGENERATE THE OFFER  (%d left)" % rg
+	_reroll.disabled = rg <= 0
 
 func _on_taken(i: int) -> void:
 	boon_taken.emit(_offers[i])
 
-## LOCK: pay once to hold a card through rerolls (release is free, no refund).
-func _on_lock(i: int) -> void:
-	if Draft.lock(_run):
-		_locked.append(i)
-	_rebuild()
-
-func _on_unlock(i: int) -> void:
-	_locked.erase(i)
-	_rebuild()
-
+## REGENERATE: spend a banked charge to redraw the whole row (rerolls-out; no LOCK).
 func _on_reroll() -> void:
-	var next := Draft.reroll_kept(_run, _offers, _locked, free_reroll)
+	var next := Draft.reroll(_run)
 	if not next.is_empty():
 		_offers = next
 	_rebuild()

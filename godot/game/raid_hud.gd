@@ -632,7 +632,6 @@ func _on_net_draft() -> void:
 	_clear()
 	var ds := DraftScreen.new(_d.run, picks, "REFORGE — the kill reshapes your kit",
 		"Take one. Your raid is drafting too.", [], Palette.GOLD)
-	ds.free_reroll = _d.gear.has("hot_reload")  # CURIO Hot Reload
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(_d.run, boon)
 		_d.taken_boons.append(boon)
@@ -1610,6 +1609,9 @@ func _gear_equip(id: String, replace_i: int) -> void:
 	var it := GearCatalog.item(id)
 	if bool(it.get("active", false)):
 		_d.gear_charges[id] = int(it.get("charges", 1))
+	# CURIO Hot Reload — reframed (§6): grants 2 REGENERATE charges on equip (was free rerolls)
+	if id == "hot_reload" and _d.run != null:
+		_d.run.regenerate += 2
 
 ## The map header's curio strip ("" hides it before the first drop).
 func _gear_line() -> String:
@@ -1680,8 +1682,8 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	_screen = "draft"
 	_clear()
 	var extras: Array = []
-	if run.tokens > 0:
-		extras.append("%d Tokens banked — REROLL / LOCK a card." % run.tokens)
+	if run.tokens > 0 or run.regenerate > 0:
+		extras.append("%d ⏣ · %d REGENERATE — UPSELL a card or redraw the row." % [run.tokens, run.regenerate])
 	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
 		else String(SEAT_NAMES.get(key, "RAIDER"))
 	var headline := "REFORGE — the kill reshapes your kit" if mine \
@@ -1689,7 +1691,6 @@ func _show_seat_draft(key: String, done: Callable) -> void:
 	var flavor := "Take one — every piece forges into your set." if mine \
 		else "You command the build — the AI only drives the rotation."
 	var ds := DraftScreen.new(run, picks, headline, flavor, extras, Palette.GOLD)
-	ds.free_reroll = mine and _d.gear.has("hot_reload")  # CURIO Hot Reload (your seat only)
 	ds.boon_taken.connect(func(boon: Dictionary):
 		Draft.take(run, boon)
 		if mine:
