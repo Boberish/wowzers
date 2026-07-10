@@ -814,10 +814,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 02:00 · main (docs only) — **CLAIM: SLATE MACHINE row 6 — Well·DRAW branch slate**
-  (fresh sweep → `research/draw-sweep.md` → release/rhythm themes, sibling-distinct vs Brim §9 →
-  3 skeptics → `MENDER-PLAN.md` new § 🟡). Docs only; no code, no CARD-CATALOG rows.
-  *(slate-machine session, tick 01:57)*
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §10 (NEW) + §10.7 built-pool addendum +
+  `research/draw-sweep.md` (NEW) + ledger §C row — **SLATE MACHINE row 6: Well·DRAW branch slate
+  — DONE, four themes AT BILL'S VERDICT** (sibling law held: every theme on the release/hold
+  surface, zero landing/party overlap with Brim §9). **THE RAPIDS** (the Current named as a
+  ladder; ⚠ built Millrace vs pitched Flume — one capstone absorbs the other at the deck pass) ·
+  **THE VIGIL** (held heals — Patient Hand entry + the transformer promoted; archery tremble
+  telegraphs the gutter; GH extended-sustain "Second Hand") · **THE SKIM** (the undercook as a
+  chosen tool — never forgiven the p^1.5 price, paid in WAKES; the anti-Current pole = the
+  slate's pick-tension centerpiece vs Rapids) · **THE EDDY** (drift reads — osu press-and-follow;
+  Glass River keystone). **§10.7 BUILT-POOL ADDENDUM:** the deck banner's 24 built boons + rig
+  were missing from BOTH filing tables — all filed now; §9's 4th theme RENAMED Deep Well → **THE
+  PULSE** (a built shared boon owns that name); built Levee re-filed to Overflow. 3 skeptic
+  passes: 1 kill (the Whirlpool — Rekindle's job in a keystone costume), ~6 fixes. Ranking:
+  Vigil · Rapids · Eddy · Skim. *(slate-machine session, tick 01:57)*
 
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §9 (NEW) + `research/brim-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 5: Well·BRIM branch slate — DONE, four themes AT BILL'S

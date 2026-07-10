@@ -1,7 +1,9 @@
 # MENDER-PLAN — the direct-cast healer onto Framework v2 (the Well · twin graded specs BRIM / DRAW)
 
-> **2026-07-10:** the BRIM BRANCH SLATE (§9) is 🟡 AT VERDICT — verdicted material filed + four
-> themes (Low Catch · Overflow Engine · Glintsmith · Deep Well). Draw's slate is queue row 6.
+> **2026-07-10:** BOTH branch slates are 🟡 AT VERDICT — **BRIM §9** (Low Catch · Overflow
+> Engine · Glintsmith · the Pulse) and **DRAW §10** (the Rapids · the Vigil · the Skim · the
+> Eddy), plus the **§10.7 built-pool addendum** filing all 24 built boons (Millrace-vs-Flume
+> reconcile flagged for the deck passes).
 
 **Status:** 🟢 **BASE BUILT & MERGED 2026-07-07** (branch `mender-rework` → main). The reworked
 healer ships as a guarded class **`well`** (codename — Bill's name pick open) on the healer seat,
@@ -344,14 +346,14 @@ Ana's no-free-value) → 4 lenses → 4 themes → **3 skeptic passes (1 kill, ~
 |---|---|
 | THE BRINK creed 🔒5★ | **LOW CATCH** (the entry creed) |
 | FORESIGHT creed 🔒4★ | **GLINTSMITH** (play-ahead keeps the party topped) |
-| LEVEE / SHALLOWS creeds 🟡 (rework owed) | **DEEP WELL** candidates (Levee's dead refund hook → the pulse-refund rework below) |
+| LEVEE / SHALLOWS creeds 🟡 (rework owed) | **THE PULSE** candidates (Levee's dead refund hook → the pulse-refund rework below) |
 | ⭐ THE RESERVOIR module | **OVERFLOW ENGINE** (the transformer) |
 | TRIAGE PROTOCOL module | **LOW CATCH** |
 | BENEDICTION module | generic (any theme's 5th-pip rhythm) |
 | ✧ Glint 3-tier ladder (🟡 ledger) | **GLINTSMITH** (the spine) |
 | THE SHINING HOUR support sketch | **GLINTSMITH** (the TEAM card) |
 | Blindfold boon (B-V3 rider) | **GLINTSMITH** (the greed pole) |
-| Battery boon (Meditate remnant) | **DEEP WELL** |
+| Battery boon (Meditate remnant) | **THE PULSE** |
 | WHEN sketches (perfect-pour · catch ≤40% · spill) | Low Catch / Overflow / Glintsmith respectively |
 
 ### 9.3 THEME 1 — THE LOW CATCH · *the save is the point*
@@ -405,7 +407,8 @@ Glints. Knob: Glint grace-window on near-perfect landings.
 the Warden's BANNERMAN (aggro uptime) — the Glintsmith's buffs are AUTOMATIC procs of clean
 healing, no handoff, no uptime bar; third TEAM shape, recorded in the distinctness ledger.
 
-### 9.6 THEME 4 — THE DEEP WELL · *the vessel itself is the instrument*
+### 9.6 THEME 4 — THE PULSE · *the vessel itself is the instrument*
+*(renamed from "the Deep Well" — a built SHARED boon already carries that name, see §10.7)*
 
 **What its cards do:** the charge/pulse economy made a build — and the skeptics' bar was "no
 bread wearing a theme's costume," so every card here creates a DECISION: casting ON the pulse
@@ -427,7 +430,7 @@ is cast-RHYTHM — the Deep Well is REFILL-rhythm; distinct clocks, stated.
 ### 9.7 SLATE-LEVEL CHECKS + the pick
 
 **Spread:** crisis surfing (Low Catch) · waste banking (Overflow) · outward TEAM (Glintsmith) ·
-vessel economy (Deep Well) — four clocks (spikes · spill cycles · uptime · the pulse), none
+vessel economy (the Pulse) — four clocks (spikes · spill cycles · uptime · the pulse), none
 shared with Draw's Current (sibling distinctness stated per theme).
 **Skeptic record:** 3 passes · **1 kill** (**the Surgeon** — a Trauma-Center operation theme:
 chained multi-ally pour sequences as the core; killed because sequence-chaining re-invents
@@ -437,9 +440,9 @@ decisions-not-bread bar · blindfold homed as Glintsmith's greed pole · Ana-gre
 PRIME, no new button · Overflow fork stated as identity · Artesian crash healer-safe · TEAM
 distinctness vs Taproom/Bannerman recorded).
 **Skeptic ranking (pick-tension, strongest→weakest):** Low Catch · Overflow Engine · Glintsmith
-· Deep Well.
+· the Pulse.
 **Composition notes:** Low Catch + Overflow is the classic pair (crisis + banking — both love
-Cascade). Glintsmith + Deep Well is the metronome build (pulse-beat casts feeding Glint uptime).
+Cascade). Glintsmith + the Pulse is the metronome build (pulse-beat casts feeding Glint uptime).
 Low Catch + Glintsmith fight over band position (down vs topped) — legal, spicy, flagged.
 All four leave the book and the grade untouched.
 **Engine debts:** none new — Reservoir/Nerve/pips/Glint machinery is coded; Shining Hour is a
@@ -451,3 +454,158 @@ transformer candidate — the sibling owns holds).
 
 **Next:** Bill picks 2–3 themes → Phase-2 row D5 authors the Brim deck reshape around them
 (filing hard-copied, CARD-CATALOG rows, EASE knobs per theme), inside the ⚖ board verdicts.
+
+---
+
+## 10. THE DRAW BRANCH SLATE — four build-theme candidates 🟡 AT VERDICT (2026-07-10)
+
+**What this is** (SLATE-PLAN row 6; branch = build THEME). The sibling law is the hard wall:
+**Brim reads the party (§9); Draw reads your own hands** — every theme below lives on the
+release/rhythm/hold surface and none touches landings. Base kit untouched (manual completion ·
+the Current · the Still Point · the gutter); example cards are ILLUSTRATIONS — no CARD-CATALOG
+rows. **How it was made:** §§0–8 + the ⚖ Draw creed verdicts + fresh sweep
+`research/draw-sweep.md` (GH extended sustains · osu slider-follow · archery over-hold) →
+4 lenses → 4 themes → **3 skeptic passes (1 kill, ~6 fixes folded)**.
+
+### 10.1 THE FILING TABLE (verdicted Draw material → themes; zero orphans)
+
+| Existing (state) | Files under |
+|---|---|
+| THE CURRENT (base machinery) | **THE RAPIDS** (its named ladder) |
+| THE PATIENT HAND creed 🔒4★ | **THE VIGIL** (the entry creed) |
+| VIGIL transformer candidate (§1 🔮) | **THE VIGIL** (the module, promoted) |
+| THE LONG DRAW creed 🔒4★ | **THE VIGIL** / generic (slow-big suits holds) |
+| THE NARROWS creed 🟡 | **THE RAPIDS** (all-or-nothing suits speed) |
+| THE EDDY creed 🟡 | **THE EDDY** (the entry creed) |
+| THE STILL POINT (base tier) | **THE EDDY** (the hunt) / generic |
+| Undercook rule (base) | **THE SKIM** (the priced quick-sip, built on) |
+| WHEN sketches (clean-draw · undercook · held release) | Rapids / Skim / Vigil respectively |
+
+### 10.2 THEME 1 — THE RAPIDS · *never let the river slow*
+
+**What its cards do:** the Current named as a ladder — stack protection, speed payoffs, streak
+premiums. At Current 5 the Still Point hardens (base, self-balancing): the theme's ceiling is
+riding the hardest version of your own bar.
+**Dials addressed:** the Current (uptime/stacks) · the release (streak grades).
+**Example cards:** boon *Whitewater* (POWER) — heals +4% per Current stack · boon *Shoot the
+Gap* (GREED) — at Current 5, Still-Point tags heal ×1.3 (the hardened sliver is the payout) ·
+boon *Eddyline* (STRAT) — one undercook per 10s downgrades the Current by 1 instead of breaking
+it: a play, not a pardon — it costs the stack AND the sip is still weak.
+**Spectacle keystone:** **THE FLUME** — hold Current 5 for 12s and the river runs white: ~6s
+where every release is auto-clean and the party's bars visibly ride the flow; then the Current
+resets to 0 (earned, never toggled).
+**Greed/comfort + EASE knob:** streak-greed; comfort = ride at Current 2–3. Knob: Current
+ebb-grace (idle seconds before it fades).
+**Nearest neighbor:** Tempo's SWIFT theme (more-faster on offense) — this is the inward healer
+mirror; recorded. The Pulse (Brim §9) is REFILL-rhythm — the Rapids is CAST-rhythm.
+
+### 10.3 THEME 2 — THE VIGIL · *walk with the drawn arrow*
+
+**What its cards do:** the held-heal build — Patient Hand enters it; the promoted VIGIL module
+turns every overrun into a HELD state (walk with it, release on the spike, gutter if you camp).
+The archery steal: the held heal visibly TREMBLES toward its gutter — tension you read, never a
+hidden timer. The GH steal (module-tier): Flash-size casts stay available while holding.
+**Dials addressed:** the release (held) · the gutter curve · the Well (holds park charges).
+**Example cards:** module *THE VIGIL* ⭐ — overruns become held heals (~3s, tremble-telegraphed;
+release = instant, gutter = charge + cast wasted) · boon *Second Hand* (STRAT) — Flash remains
+castable while holding (the stance, not the lockout) · boon *White Knuckle Draw* (GREED) — a
+held heal releases +8% stronger per half-second held: ride the tremble to the brink ·
+keystone **LOOSED AT LAST** — a held heal released within 0.2s of the ally's hit lands as a
+PERFECT INTERCEPT: full heal + the overflow becomes a 2s shield (the archer's photo-finish).
+**Greed/comfort + EASE knob:** tremble-greed (holding longer); comfort = release early and
+plain. Knob: gutter onset delay.
+**Nearest neighbor + ledger flag:** FERMATA (offensive hold/release — cashes damage on ITS
+schedule); the Vigil holds a HEAL for someone else's worst moment — different job, same grammar
+family; recorded in the distinctness ledger.
+
+### 10.4 THEME 3 — THE SKIM · *a hundred shallow cups*
+
+**What its cards do:** the undercook made a chosen tool — the anti-Current pole. Skim builds
+never ride the Current (it stays broken, the cost stands); they get paid in volume: skimmed
+casts finish fast, and the theme's cards give sips WAKES (small trailing HoTs), never bigger
+sips for free. Triage tempo over rhythm — the deliberate opposite of everything else on the bar.
+**Dials addressed:** the release (early, priced) · the pour tempo.
+**Example cards:** boon *The Wake* (STRAT) — a skimmed heal leaves 30% of its skipped value as
+a 3s trickle · boon *Skipping Stone* (GREED) — every 3rd consecutive skim, the wake doubles;
+a full clean draw resets the count (commitment: stay shallow) · boon *Cold Water* (POWER) —
+skims cost 1 ◍ flat regardless of spell.
+**Spectacle keystone:** **THE SQUALL** — six wakes live at once burst into rain: every ally
+under a wake heals its remaining value instantly, the bars mist over.
+**Greed/comfort + EASE knob:** tempo-greed (spamming shallow under pressure); comfort = skim
+only when the spike demands. Knob: wake duration.
+**Skeptic fix folded:** the pardon-smell check — skims stay × p^1.5 ALWAYS (no card restores
+full value); the build is paid in wakes and tempo, never forgiven the sip.
+**Nearest neighbor:** Bloomweaver's MEADOW seed (many-small on gardens); the Skim is many-small
+on the CAST BAR — no planting, pure release tempo.
+
+### 10.5 THEME 4 — THE EDDY · *read the water every single cast*
+
+**What its cards do:** the drifting-band creed grown into the read build — the osu steal:
+press-and-FOLLOW. Bands drift; you track and tag them fresh every cast (anti-rhythm-memory,
+the reading pole of the spec). Still-Point hunting pays double here because the sliver moves.
+**Dials addressed:** the band (position/drift) · the Still Point.
+**Example cards:** creed *THE EDDY* (verdicted 🟡, the entry) — the band drifts cast-to-cast ·
+boon *Current Reading* (STRAT) — tagging the band in its first third of drift grants +1 Current
+(reading fast pays rhythm) · boon *Deep Eddy* (GREED) — drift range doubles, Still-Point tags
+×1.5 · keystone **THE GLASS RIVER** — three moving Still-Point tags in a row FREEZE the water:
+~5s where bands stop drifting and every release is Still-Point-graded (the reward for reading
+is stillness).
+**Greed/comfort + EASE knob:** drift-greed (wider wander); comfort = slow drift, wide band.
+Knob: drift speed.
+**Nearest neighbor:** the Matador (reads on the boss's DEFENSE stream — insight from
+not-pressing); the Eddy reads your OWN moving bar, every press. Recorded.
+
+### 10.6 SLATE-LEVEL CHECKS + the pick
+
+**Spread:** streak (Rapids) · hold/spike (Vigil) · volume/tempo (Skim) · fresh-read (Eddy) —
+four clocks; the Rapids/Skim polarity (protect the Current vs abandon it) is the slate's
+pick-tension centerpiece. Zero overlap with Brim §9 (landings/party surfaces untouched —
+sibling law held).
+**Skeptic record:** 3 passes · **1 kill** (**the Whirlpool** — a channel that drains the whole
+Well into one giant heal: it's Rekindle's job wearing a keystone, and the bank-and-dump shape
+is the Warden Payload's; died at the nearest-neighbor bar) · ~6 fixes folded (Skim pardon-check
+· Eddyline priced as downgrade-not-forgiveness · Vigil tremble made visible · Second Hand
+scoped to Flash only · Flume/Glass River earned-never-toggled · Rapids/Deep-Well clock
+distinction recorded).
+**Skeptic ranking (pick-tension, strongest→weakest):** Vigil · Rapids · Eddy · Skim.
+**Composition notes:** Vigil + Rapids is the classic pair (ride fast, hold the overrun);
+Vigil + Eddy is the hardest-hands build (moving bands AND held heals — flagged attention
+stress); Rapids + Skim is ILLEGAL-adjacent (the polarity — legal to draft, self-defeating;
+the deck pass should let the trio-test confirm they repel).
+**Engine debts:** none new — held-state is Patient Hand machinery; drift is a band parameter;
+wakes are small HoTs (coded idiom).
+**Skipped on purpose:** **the Whirlpool** (killed, above) · **a party-facing TEAM theme**
+(Brim's Glintsmith owns the healer's outward lane this round; Draw stays the inward spec by
+design) · **osu drift-ticks mid-cast** (micro-grades during one cast — real depth, too fiddly
+for v1; noted for the deck pass as an Eddy Opus candidate).
+
+**Next:** Bill picks 2–3 themes → Phase-2 row D6 authors the Draw deck reshape around them,
+inside the ⚖ board verdicts.
+
+### 10.7 THE BUILT-POOL ADDENDUM (both specs — corrects §9.2 + §10.1)
+
+The DECK banner (top of this doc) records **24 BUILT boons + built rig/keystones** the two
+filing tables above under-counted (they filed only the ⚖-verdicted creeds/modules/sketches).
+The built pool files as follows — **the Phase-2 deck passes (D5/D6) inherit THIS table and run
+the deck-creator BROKE/FADED/DEAD/OPENED sweep when themes land:**
+
+| Built card | Files under |
+|---|---|
+| _SHARED_ Deep Well · Steady Pulse · **Meditate** (battery) | **THE PULSE** (§9 — and the theme was RENAMED from "Deep Well" to clear this very boon's name) |
+| _SHARED_ The Kept Light · ✦ The Shining Hour (BUILT, not a sketch) | **GLINTSMITH** (§9) |
+| _SHARED_ Brink Bell (the emergency absorb) | **LOW CATCH** (§9) — ⚠ it is the lane's ONE pardon; the deck pass counts it against the ≤1-insurance law |
+| _SHARED_ Boiling Over (clutch damage dump) · Warm Rekindle | generic (rule-5 clutch · bread) |
+| _BRIM_ Overflowing Cup · Still Water | **OVERFLOW ENGINE** (§9) |
+| _BRIM_ **Low Catch** (built boon) | **LOW CATCH** (§9) — the theme is named FOR it; the boon becomes its bread rung |
+| _BRIM_ The Blindfold · **High Tide** (built keystone) | **GLINTSMITH** (§9) |
+| _BRIM_ Wide Brim · Second Ring · Cadence of Mend | generic pour bread — deck pass re-files by effect |
+| _DRAW_ **Strong Pull** · **The Millrace** (built keystone) | **THE RAPIDS** (§10) — ⚠ Millrace and the pitched FLUME compete for the same capstone slot; ONE absorbs the other at the deck pass |
+| _DRAW_ Short Pour · Loose Grip | **THE SKIM** (§10, by name — deck pass confirms by effect) |
+| _DRAW_ Deep Still · Last Drops | **THE EDDY** / **THE VIGIL** (§10, by effect at deck pass) |
+| _DRAW_ Cool Hand · Double Draw | generic release bread — deck pass re-files |
+| Built rig WHENs (Brim: Sweet Pour/Spillover/Low Catch · Draw: Clean Draw/High Water/Still Point) | map 1:1 onto §9/§10 themes (Spillover→Overflow · Low Catch→Low Catch · Still Point→Eddy etc.) |
+| Built creeds The Levee / The Shallows (coded versions differ from the §2 rework notes) | Levee (absorb-leaver) → **OVERFLOW ENGINE** adjacency, NOT the Pulse — the §9.2 Levee row is corrected by this table; Shallows (bright Glint glass) → **GLINTSMITH** |
+
+**Net effect:** every built card now files somewhere; the two slates' theme sets survive the
+full pool contact unchanged — the only casualties were the theme NAME (Deep Well → the Pulse)
+and the Levee's filing (Overflow, not the Pulse). Stated so the deck passes don't re-discover it.
