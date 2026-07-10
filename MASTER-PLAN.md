@@ -816,6 +816,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **CLAIM: DESCENT SLICE 1
+  — THE MAP BANG (Bill's go).** The one deliberate `raid_map_sim` re-baseline (DESCENT-PLAN §2/§3/
+  §5 + ledger §I): 4-floor FLOORS (Vorathek→F1 Seal, Rings 3-2-1-0) · rows 6/8/8/9 + FINAL quota
+  bags with the new node kinds (ELITE live · MARKET/JAILBREAK/MINIGAME flag-stubbed to honest
+  fallback kinds so map rng locks ONCE — interiors land in slices 3–5 · WILD live ~10%) · GATE
+  leftovers swept · map-seed-from-run-seed · gen invariants (market+elite reachability · pre-Seal
+  valley band · elite-not-beside-Seal) · grant ladder (module end F1 · re-wire end F2 · keystone
+  1-of-2 at first ELITE, guarded per class pool · oaths every Seal · NO 2nd module V#7) · ring-key
+  sites (salvage `1:` · oath stakes · filler clampi) · V#8 Prior term OUT of `map_check` +
+  `luck_profile.gd` deleted · then same-branch: packs-on-floors + enrage ~1.6× + fight ladder
+  (raid_sim re-baseline rides the same bang). Touches the §0 map-layer hotspot (`run_map` ·
+  `map_content` · `campaign_core` · `raid_map_sim`) + `raid_content` + `raid_hud` map region —
+  ⚠ `class-bands` worktree shares `raid_hud`: merge main often, stay out of the gauge region.
+  *(raid-rebuild session)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.11 (NEW) + **DECK-LAYOUT §5 LAW CHANGE** +
   CARD-CATALOG flips + ledger rows + artifact D0 tab — **TEMPO ABILITY AUDIT PASS 2 (Bill's
   verdicts on §17.10) — DONE, 🟡 AT BILL'S BOARD.** His steers: pass-1 spells *"not great"*,
