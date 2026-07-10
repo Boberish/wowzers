@@ -1289,8 +1289,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   recon confirmed gates still live on main). **First verdict in — V#11 ✅ (Bill, 07-10): shop
   purse = PER-SEAT EARNED WALLETS** (shared pot rejected as not-fun; your clean play mints YOUR
   ⏣ — the skill mint routes to the earning seat; the Draft-2.0 shared bank retires, UPSELL
-  spends your own; AI seats: player-directed shopping or AUTO default). 11 of 12 still open.
-  *(raid-rebuild session)*
+  spends your own; AI seats: player-directed shopping or AUTO default). **ALL 12 VERDICTS IN
+  (Bill, 07-10) → v1 LOCKED, ledger §I flipped 🔒:** V1–V6/V10/V12 at the recommendations ·
+  V7 NO 2nd module · V8 STANDING/Prior DELETED entirely (no fold — "messes up an otherwise
+  fresh run"; luck_profile/rift_prior.cfg/check-term die) · V9 WILD bumped ~10% (2/floor F2–4,
+  out of EVENT quota). WORLD-PLAN amend banners placed (4-floor instances row + Seal band
+  5/7/9/12). Build = post-purge, one map bang. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · main (docs only) — **THE DUNGEON REBUILD plan (Bill) — DONE, 🟡 AT BILL'S
   VERDICT.** The watcher loop worked as claimed: woke the moment `DESCENT-PLAN.md` hit HEAD

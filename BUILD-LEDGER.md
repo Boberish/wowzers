@@ -263,25 +263,30 @@ build-once seams that five separate class reworks and the endgame all need:
 | SIM-PLAN balance ladder S1–S5 + THE SOAK | 🔴 | **SIM-PLAN.md** (2026-07-10) | per-class policies (creed branches + module verbs) · `sim_util.gd` card-delta harness · `draft.gd`-driven build sampler · raid per-seat meters/ablation · `scripts/soak.sh` + digest | **Triggered, not scheduled:** S1 rides EACH class rework (card-visibility rule) · S3 cheap-anytime · S2 after 2nd creed-aware policy · S5 with tank/aggro rebaseline · S4 per class after DECK-LAYOUT reshape · soak last. No hard balance gates ever (determinism stays the only PASS/FAIL). |
 | Graphics — robot re-rig + 2D art pass | 💡/⏳ | MASTER §GRAPHICS | per-boss silhouettes via `Actor2D.make()` factory | Give gauges a shared base + stable obs contract first (P4). Classic-parry-perfect payoff = byte-gate. |
 
-### I. THE DESCENT REBUILD (`DESCENT-PLAN.md` — 🟡 the whole cluster at Bill's 12-verdict board §V, 2026-07-10)
+### I. THE DESCENT REBUILD (`DESCENT-PLAN.md` — 🔒 ALL 12 VERDICTS IN, Bill 2026-07-10; build post-purge)
+
+**Verdict record:** V1–V6/V10/V12 at the recommendations · V7 **NO 2nd module** · V8 **STANDING/
+Prior deleted entirely** (no fold — fresh runs stay fresh) · V9 **WILD ~10%** (2/floor on F2–4,
+out of EVENT quota) · V11 per-seat earned wallets. Numbers = tune-on-feel, not blockers.
 
 ⚠ **Sequencing:** land AFTER `purge-oldgame` merges (GATE-cut overlap). The map-layer changes are
 **ONE deliberate `raid_map_sim` re-baseline** — do the floor/quota/kind changes as one bang
 (walker + `CampaignCore.ticket_at` together · retire the one-gate assert · add elite/market-reachability
-+ valley-band + no-stacked-spikes invariants · add a per-fight ttk column).
++ valley-band + no-stacked-spikes invariants · add a per-fight ttk column · **drop the Prior term
+from `map_check.gd` in the same bang, V#8**).
 
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
-| 4-floor restructure (Vorathek→F1 Seal, Rings 3-2-1-0) | 🟡 V#1/#2 | DESCENT §1–2 | `raid_content.FLOORS`+`floor_fights`, `run_map` inputs, `_advance_floor` grant indices, oath stakes, salvage table | AMENDs WORLD-PLAN "3-Ring unchanged". ~5 ring-as-key sites. |
-| Node contracts + legibility UI pass | 🟡 V#6 | DESCENT §5/§9 | `map_screen`, `map_event_panel`, header meters/pips | Pay-on-the-door + fight-tier pips + both-legs check hints + renames (LUCK/STANDING/BACKUPS/REGENERATE). Kills raid integrity (ticket re-price rides here). |
-| PROMPT MARKET node + post-Seal market phase | 🟡 V#6 (**V#11 ✅ per-seat wallets**, Bill 07-10) | DESCENT §6 | new node kind, `run_state.gd:23` tokens→per-seat, `draft.gd` (mint input `state.diag`→`seat.diag` [already tracked, `combat_core:629`] + deposit to earner, UPSELL spends own), `raid_hud` (AI shop director + AUTO default), `gear_catalog` reframes | **= GEAR-3 absorbed** (§D row). **AI seats START EARNING** (today the player-mirror mint pays them nothing). 6-slot stock; `tokens@market` sim diag; serialization contract. |
-| THE JAILBREAK (printed curse deals) | 🟡 V#4 | DESCENT §7 | new node kind, `draft.gd` welded-downside, header curse pips, Cooling purge fork | **= TEETH curse-cards lands here** (§E row). No run-long timing curse — hard rule. |
-| Minigame nodes: CAPTCHA · BENCHMARK · SERVER ROOM · PATCH BAY (+2 reserved) | 🟡 V#5 | DESCENT §8 | new node kinds over `strike_judge`/lockstep, backdoor path | **BENCHMARK = TEETH CONTEST absorbed** (§E row). Bonus-tier pay only — always skippable. |
-| THE QUEUE + DEED/ESCORT ticket shapes + turn-in fork | 🟡 V#10 | DESCENT §10 | `map_content` tickets, `CampaignCore.ticket_at` + sim walker (divergence trap), `seat.diag` | One-grammar/two-ledgers verdict. ESCORT port inherits `escort-ticket` lane-law debt. SEV-1 parked v1.1. |
-| Packs on raid floors + enrage retighten (~1.6×) + the fight ladder | 🟡 V#2 | DESCENT §3 | `raid_content` packroll weights by floor, enrage configs | Deck-cycle law · 3-min trash cap. Rides the one re-baseline. |
-| Seal budget contract (5/7/9/12 min) | 🟡 V#12 | DESCENT §4 | (the later boss pass) | The contract the boss redo fills — structure beats, NEVER +HP. Not built by this cluster. |
-| Map-seed-from-run-seed | 🟡 | DESCENT §2 | `run_map` seeding, `RunDirector` | Replay-stable floors, checkpoint restore, co-op shared maps. Coordinate w/ P4 offline `run_seed` (in flight). |
-| Resource verdicts (LUCK · STANDING demote · BACKUPS · REGENERATE · integrity kill) | 🟡 V#6/#8 | DESCENT §9 | header UI, `map_fx`, `map_check` breakdown rows | Governance: 3 meters max, retire-one-to-add-one. |
+| 4-floor restructure (Vorathek→F1 Seal, Rings 3-2-1-0) | 🔒 | DESCENT §1–2 | `raid_content.FLOORS`+`floor_fights`, `run_map` inputs, `_advance_floor` grant indices, oath stakes, salvage table | WORLD-PLAN amended (banners in place 07-10). ~5 ring-as-key sites. NO 2nd module (V#7). |
+| Node contracts + legibility UI pass | 🔒 | DESCENT §5/§9 | `map_screen`, `map_event_panel`, header meters/pips | Pay-on-the-door + fight-tier pips + both-legs check hints + renames (LUCK/BACKUPS/REGENERATE/DEPRECATE). Kills raid integrity (ticket re-price rides here). |
+| PROMPT MARKET node + post-Seal market phase | 🔒 (V#11: per-seat wallets) | DESCENT §6 | new node kind, `run_state.gd:23` tokens→per-seat, `draft.gd` (mint input `state.diag`→`seat.diag` [already tracked, `combat_core:629`] + deposit to earner, UPSELL spends own), `raid_hud` (AI shop director + AUTO default), `gear_catalog` reframes | **= GEAR-3 absorbed** (§D row). **AI seats START EARNING** (today the player-mirror mint pays them nothing). 6-slot stock; `tokens@market` sim diag; serialization contract. |
+| THE JAILBREAK (printed curse deals) | 🔒 (V#4: mixed menu, lean gentle) | DESCENT §7 | new node kind, `draft.gd` welded-downside, header curse pips, Cooling purge fork | **= TEETH curse-cards lands here** (§E row). No run-long timing curse — hard rule. |
+| Minigame nodes: CAPTCHA · BENCHMARK · SERVER ROOM · PATCH BAY (+2 reserved) | 🔒 (V#5: best-of-N) | DESCENT §8 | new node kinds over `strike_judge`/lockstep, backdoor path | **BENCHMARK = TEETH CONTEST absorbed** (§E row). Bonus-tier pay only — always skippable. |
+| THE QUEUE + DEED/ESCORT ticket shapes + turn-in fork | 🔒 (V#10: SEV-1 parked v1.1) | DESCENT §10 | `map_content` tickets, `CampaignCore.ticket_at` + sim walker (divergence trap), `seat.diag` | One-grammar/two-ledgers verdict. ESCORT port inherits `escort-ticket` lane-law debt. |
+| Packs on raid floors + enrage retighten (~1.6×) + the fight ladder | 🔒 | DESCENT §3 | `raid_content` packroll weights by floor, enrage configs | Deck-cycle law · 3-min trash cap. Rides the one re-baseline. |
+| Seal budget contract (5/7/9/12 min) | 🔒 (V#12: ship structure at ~2h) | DESCENT §4 | (the later boss pass) | The contract the boss redo fills — structure beats, NEVER +HP. Not built by this cluster. |
+| Map-seed-from-run-seed | 🔒 | DESCENT §2 | `run_map` seeding, `RunDirector` | Replay-stable floors, checkpoint restore, co-op shared maps. Coordinate w/ P4 offline `run_seed` (in flight). |
+| Resource verdicts (LUCK · BACKUPS · REGENERATE · integrity kill · **Prior/STANDING DELETED, V#8**) | 🔒 | DESCENT §9 | header UI, `map_fx`, `map_check` breakdown rows (drop Prior term), DELETE `luck_profile.gd` + `rift_prior.cfg` I/O + the parked online-Prior follow-up | Governance: 3 meters max, retire-one-to-add-one. WILD quota 2/floor F2–4 (V#9 ~10%). |
 
 ### J. THE DUNGEON STRUCTURE (`DUNGEON-PLAN.md` — 🟡 the cluster at Bill's 8-verdict board §V, 2026-07-10)
 
@@ -306,7 +311,7 @@ to content work. Adds **ZERO rows to the `draft.gd` claim queue** by design.
 | MMO-feel levers | MASTER §OPEN-IDEAS | warband lending · Bastion bounty board · ghost-replay races · co-op cosmetic standing. Needs P4 roster persistence + replay files + W4 presence. |
 | Future realms | MASTER §OPEN-IDEAS | Bureaucracy · Undercroft · Deep · Clockwork Court · Kaiju Weather Station (each = Seals ladder + map skin). |
 | New-class seeds | MASTER §CLASSES | redline self-brink DPS · over-defend tank layer · imposed-rhythm caster. |
-| 2nd Module slot at Ring 1/0 | WORLD §INSTANCES | for long raids; run-pacing plumbing. **→ promoted to DESCENT V#7 (end of Floor 3).** |
+| ~~2nd Module slot at Ring 1/0~~ | WORLD §INSTANCES | **DECLINED (DESCENT V#7 ✅, Bill 07-10)** — one module per run stands; boons carry the late game. Dead, don't re-derive. |
 | Game title lock | MASTER §OPEN-IDEAS | UNPLUGGED / KILLSWITCH / Ctrl+Alt+DEFEAT / … |
 
 ---
@@ -315,11 +320,10 @@ to content work. Adds **ZERO rows to the `draft.gd` claim queue** by design.
 
 The 🟡 pull-list — open decisions that will rot the plan if left. Grouped:
 
-- **THE DESCENT REBUILD** — 11 of 12 still open at DESCENT-PLAN §V (4-floor promotion · length
-  dial · elective elites · curse bite · BENCHMARK scoring · names bundle · 2nd module · STANDING ·
-  WILD ration · SEV-1 timing · interim ship). **V#11 shop purse ✅ DECIDED 07-10: per-seat earned
-  wallets + player-directed AI shopping w/ AUTO default.** Subsumes the old Teeth feel-verdicts
-  for CONTEST scoring + curse magnitudes below.
+- ~~**THE DESCENT REBUILD**~~ — **✅ ALL 12 DECIDED (Bill, 07-10), cluster flipped 🔒 (§I).**
+  Notables: NO 2nd module (V7) · STANDING/Prior deleted entirely (V8) · WILD ~10% (V9) ·
+  per-seat wallets (V11). Also closes the old Teeth feel-verdicts for CONTEST scoring
+  (best-of-N) + curse magnitudes (mixed menu, lean gentle) below.
 - **THE SETTING (THEME-PLAN §6)** — 7 dials: origin (made-wonders recommended) · why-now ·
   rarity tier names · module rename · title · org · mystery volume. Unblocks the naming
   pass (§D row); riff-stage, keep riffing before ruling.
@@ -331,7 +335,7 @@ The 🟡 pull-list — open decisions that will rot the plan if left. Grouped:
 - **Twinfang** — "On the Beat" card.
 - **Curio Pool v2** — approved-but-not-final (~18 curios).
 - **CURIO ARMORY v3** — the ~40-row big slate at GEAR-CATALOG §ARMORY-v3 (keep ~15–20; 5 rows carry ⚠ flags needing a ruling).
-- **Teeth feel-verdicts** — CONTEST scoring rule · curse magnitudes · spells-reweight pilot class · Endless framing (Depth coordination).
+- **Teeth feel-verdicts** — ~~CONTEST scoring · curse magnitudes~~ (✅ closed by DESCENT V#5/V#4) · still open: spells-reweight pilot class · Endless framing (Depth coordination).
 - **Deck-reshape (per class)** — CD shape · 2-vs-3 branches · keystone generic-vs-category · map reward-legibility mix · curse-card × EASE interplay.
 - **Interrupt-by-ability** — which Tempo ability carries the kick.
 - **REFIT Phase 4** — the P4 claim table is at your verdict (§CODE AUDIT).

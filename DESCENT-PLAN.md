@@ -1,6 +1,9 @@
 # DESCENT-PLAN — THE RAID REBUILD (the descent spec v1)
 
-**Status: 🟡 AT BILL'S VERDICT (2026-07-10).** The zoom-out rebuild of the raid run structure
+**Status: ✅ v1 LOCKED — ALL 12 VERDICTS IN (Bill, 2026-07-10).** V1–V6/V10/V12 at the
+recommendations · **V7 NO second module** · **V8 STANDING/Prior DELETED entirely** (fresh runs
+stay fresh) · **V9 WILD bumped to ~10%** · V11 per-seat earned wallets. Design-locked,
+tune-on-feel for all numbers; **build lands AFTER `purge-oldgame` merges** (ledger §I). The zoom-out rebuild of the raid run structure
 Bill asked for ("the raid is all over the place — rebuild it from the ground up; keep the bosses
 for now"). Produced by a 14-agent workflow: 7 recon readers (as-built map code · quest-confusion
 audit · measured sim timings · zone TICKETS v2 · reward economy · genre references · parked
@@ -22,7 +25,15 @@ GAME-LOOPS L2/L3 stanzas update when verdicts land.
 
 ---
 
-## §V · THE VERDICT BOARD — twelve calls that are genuinely yours, Bill
+## §V · THE VERDICT BOARD — ✅ all twelve decided (Bill, 2026-07-10)
+
+**The record:** V1 (a) four floors · V2 (a) ~2h25 · V3 (a) elective elites · V4 (c) mixed curse
+menu, lean gentle · V5 (a) best-of-N · V6 approve all names (STANDING moot — V8 deletes the
+concept) · **V7 (b) NO second module** · **V8 DELETE STANDING/Prior entirely** — stronger than
+option (b): no fold into starting LUCK either, "it messes up an otherwise fresh run"; every run
+starts at baseline · V9 (a) **amended to ~10% WILD** · V10 (b) SEV-1 parked v1.1 · V11 (b)
+per-seat earned wallets · V12 (a) ship structure at ~2h. Original questions kept below for the
+record.
 
 1. **THE FOUR-FLOOR PROMOTION**
    *Question:* Make Vorathek the boss of a short new first floor, so every floor ends in a boss
@@ -80,30 +91,23 @@ GAME-LOOPS L2/L3 stanzas update when verdicts land.
    *Recommendation:* **Approve all.** Every one explains itself in the fiction instead of needing
    a tooltip — BACKUPS especially makes the wipe budget self-teaching.
 
-7. **SECOND MODULE SLOT**
-   *Question:* Grant a second module pick at the end of Floor 3 (WORLD-PLAN already sanctions one
-   for long raids at Ring 1/0)?
-   *Options:* (a) Yes. (b) No — one module per run, boons carry the late game.
-   *Recommendation:* **(a).** A 4-floor raid is exactly the "long raid" that clause was written
-   for, and Floor 4's 2.5–3 minute fights need a full deck to justify their length. It also gives
-   the Floor 3 boundary its own ceremony beat.
+7. **SECOND MODULE SLOT — ✅ DECIDED (Bill, 2026-07-10): (b) NO.** One module per run; boons
+   carry the late game. The recommendation (a Floor-3 second pick) is rejected; the WORLD-PLAN
+   long-raid sanction stays unused. Floor 4 deck depth comes from boons + the keystone.
 
-8. **STANDING: KEEP OR FOLD?**
-   *Question:* Keep STANDING (the mercy karma file) as a demoted, twice-shown thing — or delete
-   the concept and fold its perks into starting LUCK?
-   *Options:* (a) Keep demoted (shown at run start + the end-of-run bank toast only). (b) Fold
-   and delete — one less concept.
-   *Recommendation:* **(a).** Off the header it costs nothing, and "the facility remembers your
-   mercy" is a lovely quiet layer for the kid to discover. If it still confuses after the rename +
-   demotion, folding it later is a 20-minute change.
+8. **STANDING — ✅ DECIDED (Bill, 2026-07-10): DELETE ENTIRELY.** Stronger than option (b):
+   no fold into starting LUCK either — any cross-run carry "messes up an otherwise fresh run."
+   Every run starts at baseline. What dies: `luck_profile.gd` + `user://rift_prior.cfg`
+   persistence, the Prior term in the check breakdown, the run-start "+2⚡" carry, the
+   end-of-run bank toast, and the parked online-Prior follow-up. What stays: mercy choices in
+   events may still pay IN-RUN goods/flags; the in-run comeback pity keeps (it resets with the
+   run, so fresh stays fresh).
 
-9. **WILD NODES** *(the mystery ration)*
-   *Question:* Keep ~4% of nodes as "▚ WILD — unknown contents (fight tier still printed)", or go
-   100% legible?
-   *Options:* (a) Keep the ~4% spice. (b) Zero mystery.
-   *Recommendation:* **(a).** Every reference game keeps a small mystery slot (StS runs 22%!); at
-   4% with the fight tier printed it's a treat, not a trap — and it gives events/curses a place
-   to surprise without breaking the "pay on the door" promise everywhere else.
+9. **WILD NODES — ✅ DECIDED (Bill, 2026-07-10): (a) amended to ~10%** ("for spicy"). Quota
+   becomes 2 WILD per floor on floors 2–4 (0 on the teaching floor) ≈ 10% of a floor's mids.
+   The slots come out of the EVENT quota, not COMBAT — wilds often resolve as surprise
+   events/deals anyway, and the fight budget (§3) holds unchanged. Fight tier stays printed
+   even on WILD.
 
 10. **SEV-1 ESCALATION** *(the cross-floor ticket)*
     *Question:* Build the once-per-run ticket that's picked up on Floor 2, escalates each Ring,
@@ -242,9 +246,9 @@ printed risk.
 
 **Grant ladder on the 4-floor spine (DECK-LAYOUT §1 kept, mapped):** Creed at run start → rig
 wire after fight 1 (at the **PATCH BAY**, §8) → **Module at end of Floor 1** → **keystone 1-of-2
-at your first ELITE** (floors 2+) → free re-wire at end of Floor 2 → *(optional, Verdict #7)*
-second Module at end of Floor 3 → oaths at every Seal → Mythos pays META. `_advance_floor`'s
-baked grant indices move accordingly.
+at your first ELITE** (floors 2+) → free re-wire at end of Floor 2 → oaths at every Seal →
+Mythos pays META. *(V#7 ✅: NO second module — one per run, boons carry the late game.)*
+`_advance_floor`'s baked grant indices move accordingly.
 
 **Seeding fix (NEW):** the map seed derives from the descent's run seed, not the wall clock —
 replay-stable floors, checkpoint restore across app restarts, co-op shared maps.
@@ -275,7 +279,7 @@ replay-stable floors, checkpoint restore across app restarts, co-op shared maps.
 
 | | F1 RING 3 | F2 RING 2 | F3 RING 1 | F4 RING 0 |
 |---|---|---|---|---|
-| Deck entering | creed + rig | + module, ~5 boons | + keystone + re-wire, ~10 boons | + ~15 boons (+2nd module?) |
+| Deck entering | creed + rig | + module, ~5 boons | + keystone + re-wire, ~10 boons | + ~15 boons |
 | Normal fight (good) | 1–1.5 min (avg 1.25) | 1.5–2 (avg 1.75) | 2–2.5 (avg 2.25) | 2.5–3 (avg 2.75) |
 | Elite | — | ~4 min | ~5 min | ~6 min |
 | Seal | 5 min | 7 min | 9 min | 12 min |
@@ -334,7 +338,7 @@ Every node prints: **kind + one-line contract + attention pips (▮)** before en
 | 🏁 **BENCHMARK** | NEW | "Party skill game on one shared telegraph stream. Prize printed on the door." (§8) |
 | 🚪 **SERVER ROOM** | NEW | "Hidden behind the 401 backdoor. A jackpot roll — with a printed INTRUSION DETECTED risk %." (§8) |
 | 🔧 **PATCH BAY** | NEW (light re-host) | "Wire your rig." (The existing rig-wire + Floor-2 re-wire ceremonies get a place; §8.) |
-| ▚ **WILD** | NEW (~4%, Verdict #9) | The one rationed mystery — and even it prints its fight tier. |
+| ▚ **WILD** | NEW (~10%, V#9 ✅) | The one rationed mystery — and even it prints its fight tier. |
 | **GATE** (solo exams) | **CUT** | Ratifies THE PURGE in the map layer: `KIND_GATE`, the quota, `GATE_ENC`, the sim's one-gate assert all go. ELITE inherits the drop-roll site. |
 | Resource-gathering node | **CUT (never existed — settled)** | Keys, shards, tickets, and ⏻ already ARE the gathering game. A gather node would be a contract with no decision in it. |
 
@@ -344,13 +348,16 @@ Every node prints: **kind + one-line contract + attention pips (▮)** before en
 |---|---|---|---|
 | COMBAT | 7 | 7 | 9 |
 | ELITE | 0 | 2 | 2 |
-| EVENT | 2 | 3 | 3 |
+| EVENT | 2 | 2 | 2 |
 | COOLING | 1 | 1 | 2 |
 | CACHE | 0 | 1 | 1 |
 | MARKET | 1 | 1 | 1 |
 | JAILBREAK | 0 | 1 | 1 |
 | BENCHMARK / CAPTCHA | 1 (CAPTCHA — the teacher) | 1 (BENCHMARK) | 1 (rotate) |
-| WILD | 0 | 1 | 1 |
+| WILD | 0 | 2 | 2 |
+
+*(V#9 ✅: WILD at ~10% — the extra slot comes out of EVENT, not COMBAT, so the §3 fight budget
+holds; wilds often resolve as surprise events/deals anyway.)*
 
 ---
 
@@ -451,7 +458,7 @@ stream, exactly 4 seats, everything rides `(seed,spec)`: pillar-clean by constru
 |---|---|---|
 | ⏣ Tokens | **BUILT-KEEP → per-seat (V#11 ✅)** | "⏣ TOKENS — YOUR clean play mints them; spend at the PROMPT MARKET & drafts." Wallet per seat; the shared party pot retires. |
 | ⚡ Entropy | **BUILT-RESKIN → ⚡ LUCK** | Same math (nudge +8%/pip max 3, mulligan 2⚡ max 3). The stats-nerd name dies. |
-| 📁 Prior | **BUILT-RESKIN + demote → STANDING** | Off the header. Shown twice: run start ("your file precedes you: +2⚡") and the bank toast ("TRAINING SIGNAL RECORDED — STANDING 12. Grows when you show mercy."). |
+| 📁 Prior | **CUT — deleted entirely (V#8 ✅)** | Cross-run karma "messes up an otherwise fresh run." `luck_profile.gd` + `rift_prior.cfg` + the check-row + the carry + the toast all die; no fold into starting LUCK. In-run comeback pity keeps (resets with the run). |
 | ⏻ Charge | **BUILT-KEEP** | Legend line + one-shot first-gain tooltip: "⏻ feeds THE KILL SWITCH — cash it at this floor's Seal." Faucet curve retuned (the walker's sloppy-96% generosity is a known flag). |
 | Wounds | **BUILT-KEEP + readout** | Header pips: "▓ CORRUPTED SECTOR −20% max HP" per seat. The run's only HP stake, finally visible between fights. |
 | Integrity (raid) | **CUT — finish the kill** | Re-price the 5 tickets (dead heal/patch payloads) + the overtime_daemon wager (stakes a retired number — the warning is a bluff) into live goods. Drop the integrity row from raid check breakdowns. |
@@ -477,7 +484,7 @@ Pocket items (BACKUPS, REGENERATE, keys, schematics) live in a pocket row, not a
 | MYTHOS (finale) | **META payout** (XP/unlock progress + a carry-out) — never an in-run drop | — | NEW (locked design) |
 | MARKET | what the price tags say | — | NEW |
 | JAILBREAK | the printed deal | — | NEW |
-| EVENT | the printed choice fx | STANDING (mercy), flags that ripple | BUILT-KEEP |
+| EVENT | the printed choice fx | flags that ripple to later nodes | BUILT-KEEP |
 | COOLING | your pick: repair / purge / +15⏻ | — | BUILT-KEEP + NEW fork |
 | CACHE | +25⏻ + ⏣ | schematic | BUILT-KEEP |
 | BENCHMARK / CAPTCHA / SERVER ROOM | the printed prize | — | NEW |
@@ -556,7 +563,12 @@ ledgers.
 11. **Resource-gathering as a node concept** — formally dead (§5). **CUT**
 12. **The six frozen legacy solo events** — stay out of the raid pool permanently. **CUT**
 13. **Run-long timing curses** — never exist (§7 hard rule). **CUT (pre-emptive)**
-14. The standing dead list stays dead: no PvP, no crafting/materials, no dailies/lockouts/FOMO,
+14. **📁 Prior / STANDING — the whole cross-run karma concept (V#8 ✅)** — `luck_profile.gd`,
+    `user://rift_prior.cfg`, the check-breakdown row, the run-start carry, the bank toast, the
+    parked online-Prior follow-up. Fresh runs stay fresh. **CUT**
+15. **The second-module long-raid clause (V#7 ✅)** — declined for the raid; one module per
+    run stands. **CUT (declined)**
+16. The standing dead list stays dead: no PvP, no crafting/materials, no dailies/lockouts/FOMO,
     no account meta-currencies, no persistent power sold anywhere, no 1-to-x scaling, no cheap
     reroll creeping back.
 
@@ -569,9 +581,10 @@ ledgers.
   completability. Only inputs change.
 - **MapFx.apply** as the ONE fx applier; **CampaignCore** as the ONE campaign rulebook; the
   canonical `enter_node` order (visited→shard→ticket→key).
-- **The INFERENCE CHECK engine** whole: the % math (base + tags + aspect + role + STANDING floor
-  + pity + ⚡ nudges, clamp 5–95), the pure hashed die, branches, cross-node flags, wagers,
-  mulligans, the co-op seat-picker. Presentation changes only.
+- **The INFERENCE CHECK engine** whole: the % math (base + tags + aspect + role + in-run pity +
+  ⚡ nudges, clamp 5–95 — *the cross-run Prior term drops, V#8 ✅*), the pure hashed die,
+  branches, cross-node flags, wagers, mulligans, the co-op seat-picker. Presentation changes
+  only, plus the one term removal.
 - **THE KILL SWITCH**: charge faucets (cooling/cache/skirmish/events), the arming panel (already
   the best-explained piece in the game), SURGE/SHIELD/STALL via `RaidMarks`. Numbers retuned,
   mechanics untouched.
@@ -634,6 +647,9 @@ ledgers.
   `_advance_floor` grant indices all move.
 - Node-dict serialization contract: new kinds touch `to_dict`/`from_dict`/fingerprint/
   server-broadcast together, once.
+- **V#8 in code:** `map_check.gd` drops the Prior term (a small odds shift on every check —
+  fold it into the one re-baseline bang, not a separate reset); delete `luck_profile.gd` +
+  the `rift_prior.cfg` read/write + the P4 "online Prior" follow-up wherever it's parked.
 - The fight budget assumes players route to 1 elective elite per floor (by chance ~0.7) — if
   playtest shows skipping, the budget loses ~4–6 combat min and Verdict #3 gets revisited.
 - Ceremony time (~34 min of the 145 budget) is the one unmeasured band — no probe times
