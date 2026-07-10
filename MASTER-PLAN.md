@@ -814,6 +814,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 03:09 · main (docs only) — **CLAIM: DECK MACHINE row D2 — the Tank·DUELIST v2
+  revision.** v1 is at Bill's LIVE board (no verdicts yet) → the pass ships (1) the v1.1
+  RECONCILE (flow=aggro/EASE-fold/GUARD-fallout errata) + (2) pre-authored SWAP KITS for the
+  three §7 challengers, so any verdict outcome maps to a ready deck without another pass →
+  TANK-PLAN §9 🟡 + catalog rows. Design only. *(slate-machine session, deck tick 03:04)*
+
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §8 (NEW) + CARD-CATALOG Warden section (NEW) +
   ledger flip — **DECK MACHINE row D1: THE WARDEN DECK v1 — DONE, 🟡 AT BILL'S VERDICT.**
   Winners = §6's recorded ranking top-3 (**Payload · Slam · Rampart**). From-scratch authoring:
