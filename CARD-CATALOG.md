@@ -204,6 +204,28 @@ Feather Step (block cost = same knob) · Deep Pockets · Powder Keg · ✦ Hold 
 ---
 
 <a id="twinfang"></a>
+### DUELIST · D2 SWAP KITS (v2 revision, `TANK-PLAN.md §9` — 🟡 2026-07-10; winning kits flip ✅, losers park 🔮 with their slate)
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| **Cold Blood** (creed) | `coldblood` | STRAT | curated | 🟡 | M | Reads build INSIGHT from run start; feint tells louder. |
+| **The Late Answer** | `lateanswer` | GREED | H/S/O | 🟡 | M | Last-slice parry = double insight; a whiff there costs 2. |
+| **Toro** | `toro` | STRAT | H/S/O | 🟡 | M | A BAITED feint spends 1 insight to forgive the wind loss. |
+| **LA ESTOCADA** (keystone) | `estocada` | RULE | elite | 🟡 | M | Full insight → the stream holds its breath, the counter lands ×3. |
+| **Red Ledger** (creed) | `redledger` | STRAT | curated | 🟡 | S | Unavoidables bank ◆ (small) from run start. |
+| **Paid in Iron** | `paidiniron` | STRAT | H/S/O | 🟡 | S | Below 60% HP counters +12/18/25%. |
+| **The Deep Cut** | `deepcut` | GREED | H/S/O | 🟡 | S | Once/bank-cycle eat a normal bar on purpose: ◆◆ +3 wind; floor 25% HP. |
+| **CRIMSON DIVIDEND** (keystone) | `crimsondividend` | RULE | elite | 🟡 | S | Full-bank dump <40% HP ×2; the healer's refill pours into your next bank. |
+| **Storm Footing** (creed) | `stormfooting` | STRAT | curated | 🟡 | W | Clean weaves refund +1 wind from run start. |
+| **Eye of the Storm** | `eyestorm` | STRAT | H/S/O | 🟡 | W | A clean weave's riposte also banks ◆. |
+| **Thread the Needle** | `threadneedle` | GREED | H/S/O | 🟡 | W | Weave windows −15%, clean ripostes ×1.5. |
+| **Rolling Thunder** | `rollingthunder` | POWER | H/S/O | 🟡 | W | Riposte +20/30/40% (the kit's bread). |
+| **THE TEMPEST ANSWER** (keystone) | `tempestanswer` | RULE | elite | 🟡 | W | A survived flurry mirrors back as YOUR graded bar-string. |
+
+**v1.1 errata (fold on verdict):** Quick Wrists + Roll With It → the EASE dial (leave pool) ·
+FLOW module = 4th Floor-1 candidate · Hold the Line re-keys onto FLOW · GUARD trio resolved to
+the Warden (§8) · absorbs: Read the Room→Kit M · Blood Price/Overreach→Kit S (double-filed).
+
 ## TANK · THE WARDEN — **DECK v1 (D1) 🟡 AT VERDICT 2026-07-10** · base locked, 0 built
 
 Source of record: `TANK-PLAN.md §8` (themes **Payload · Slam · Rampart**, §6 ranking; Bill's ✅

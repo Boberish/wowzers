@@ -141,7 +141,7 @@ build-once seams that five separate class reworks and the endgame all need:
 | Duelist guarded base kit | 🔒 | TANK §4 | new guarded tank seat, bespoke PARRY+DODGE (no `unified_dodge`/ration) | Numbers→playtest. **Wait for Bill's verdict export blob.** A/B vs Bulwark default. |
 | Peel mechanics (progressive + grace-delay) | 🔒 | TANK §1c | aggro-% shape, victim dodge bar, TAUNT hard-override | Part of FLOW=AGGRO. Grace-delay = fixed tick offset (det-safe). |
 | Tank defensive signature CD ("the wall") | 💡 | TANK §1b, DECK-LAYOUT §5 | new ~1-min CD, carries dropped GUARD | Not yet designed. Both specs get one. |
-| Duelist deck v1 | 🟡 | TANK §3, CARD-CATALOG | kit-local layers, `_fw()` dispatch (Well idiom) | **Whole slate at Bill's board.** GUARD-drop fallout: 3 rig cards 🔮→Warden. **EASE-dial fallout: flat EASE boons (Quick Wrists/Roll With It) fold into one dial** (DECK-LAYOUT §4); The Veteran creed stays. |
+| Duelist deck v1 **+ v2 revision (D2, 2026-07-10)** | 🟡 | TANK §3 + **§9**, CARD-CATALOG | kit-local layers, `_fw()` dispatch (Well idiom) | **Whole slate at Bill's board** — §9 adds the v1.1 reconcile (EASE fold executed · FLOW = 4th Floor-1 candidate · Hold-the-Line→FLOW re-key) + 3 challenger SWAP KITS pre-authored (any pick = ready deck). GUARD trio resolved → Warden §8. Estocada/Reckoning-Stroke freeze-beat rhyme at Bill. |
 | FLOW module (aggro→damage upgrade) | 💡 | TANK §1b | new STRAT module | Competes for Floor-1 module slot. Reconcile at deck reshape. |
 | Duelist sims + carry | 🔒 | TANK §4.4 | new `duelist_sim`, `raid_sim --tank=` | After base + deck. |
 | Duelist HUD slice | 🔒 | TANK §4.5 | `raid_hud` timing instrument, own FLOW bar, shared aggro box | WSLg screenshot (headless can't `_draw`). Non-tanks get no flow bar. |

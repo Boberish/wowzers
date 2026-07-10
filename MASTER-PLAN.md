@@ -814,11 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 03:09 · main (docs only) — **CLAIM: DECK MACHINE row D2 — the Tank·DUELIST v2
-  revision.** v1 is at Bill's LIVE board (no verdicts yet) → the pass ships (1) the v1.1
-  RECONCILE (flow=aggro/EASE-fold/GUARD-fallout errata) + (2) pre-authored SWAP KITS for the
-  three §7 challengers, so any verdict outcome maps to a ready deck without another pass →
-  TANK-PLAN §9 🟡 + catalog rows. Design only. *(slate-machine session, deck tick 03:04)*
+- ☑ 2026-07-10 · main (docs only) · TANK-PLAN §9 (NEW) + CARD-CATALOG D2 swap-kit rows + ledger
+  flip — **DECK MACHINE row D2: THE DUELIST v2 — DONE, 🟡.** v1 is at Bill's LIVE board, so the
+  pass deliberately does NOT re-author: **① the v1.1 RECONCILE** (Quick Wrists + Roll With It →
+  the EASE dial per standing law · the FLOW module = 4th Floor-1 candidate, 3-of-4 offer
+  proposed · Hold the Line re-keys onto FLOW · GUARD trio resolved to Warden §8 · Crucible
+  peel-note · DUMP=carrier note) + **② three SWAP KITS pre-authored to card level** (M Matador:
+  Cold Blood/Late Answer/Toro/LA ESTOCADA · S Scarlet: Red Ledger/Paid in Iron/Deep Cut/CRIMSON
+  DIVIDEND · W Stormweave: Storm Footing/Eye of the Storm/Thread the Needle/Rolling Thunder/
+  TEMPEST ANSWER) — **any 2–3-ladder verdict maps to a ready deck, no re-pass.** Skeptic catch:
+  the Estocada/Reckoning-Stroke freeze-beat rhyme (two still-beat finishers roster-wide) —
+  recorded, Bill's call. 5 tension points (§9.4). Distinctness row 3. *(slate-machine session,
+  deck tick 03:04)*
 
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §8 (NEW) + CARD-CATALOG Warden section (NEW) +
   ledger flip — **DECK MACHINE row D1: THE WARDEN DECK v1 — DONE, 🟡 AT BILL'S VERDICT.**

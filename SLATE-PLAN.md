@@ -175,7 +175,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 |---|---|---|---|---|---|
 | D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` §17 | 🟡 | — | LANDED 07-10: DECK v3 around Wound·Swift·Finish (Bill's own archetypes; ✅ picks can swap → cheap re-run). 6 new boons + 2 creeds + Hemorrhage module + 2 keystones + THE SET PIECE CD; trim table + 7 tension points; catalog rows 🟡. Through-Line authored (drift closed). |
 | D1 | Tank · **Warden** | `TANK-PLAN.md` §8 | 🟡 | — | LANDED 07-10: DECK v1 around Payload·Slam·Rampart — 5 creeds (incl. MONOLITH wild) · 3 modules · 12 boons (🔮 trio re-homed 🟡) · 3 keystones · THE GATE CD. 1 kill (Iron Reserves), 5 tension points. |
-| D2 | Tank · **Duelist** | `TANK-PLAN.md` | 🔄 | 07-10 03:09 | Deck v1 already AT BILL'S BOARD — this pass is a **v2 REVISION** around the winning themes, not a parallel deck; carry v1 verdicts that exist by then. |
+| D2 | Tank · **Duelist** | `TANK-PLAN.md` §9 | 🟡 | — | LANDED 07-10: v1.1 reconcile (EASE fold · FLOW 4th module · aggro re-keys) + 3 pre-authored SWAP KITS (M/S/W, catalog rows 🟡) — any verdict outcome = ready deck, no re-pass. v1 board stays the gating event. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` | ⬜ | — | Double-size: lock the top CORE-MINIGAME pitch first, then author that spec's deck. |
 | D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` | ⬜ | — | Pays the owed §7.7 slices 3–5 card design. |
 | D5 | Well · **Brim** | `MENDER-PLAN.md` | ⬜ | — | Deck exists in code — this is the RESHAPE onto branches (DECK-LAYOUT Phase 2), absorb-don't-duplicate. |
@@ -191,6 +191,7 @@ whole decks):
 |---|---|---|---|
 | **Tempo (D0)** | Wound · Swift · Finish | chained bleed-eruption (Exsanguinate) · beat-doubling (Double Time) · echo-finisher (The Coda) | bleed-expiry rhythm (Arterial) · self-tightening windows (Quickstep) · combo decay-hold (Heavy Ink) |
 | **Warden (D1)** | Payload · Slam · Rampart | one colossal returning bar (Siege) · lane-shove (Breakwater) · rooted shield/shrinking bars (Immovable) | charge decay (Heavy Shipment) · full-price mains (Meet It Head-On) · pool brinkmanship (White Knuckles) |
+| **Duelist (D2)** | Headsman · Ironside · Ghost (default) + swap kits M/S/W | returning ◆-string (Avalanche) · gold-sliver parry (Impossible Parry) · slow-mo (Borrowed Time) · freeze-beat ×3 (Estocada ⚠ rhymes w/ Reckoning Stroke) · mirrored flurry (Tempest Answer) | full-bank exposure (All In) · winded blood-parry (Overreach) · last-slice fishing (Late Answer) · the self-cut (Deep Cut) |
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 
