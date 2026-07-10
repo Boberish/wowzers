@@ -178,7 +178,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D2 | Tank · **Duelist** | `TANK-PLAN.md` §9 | 🟡 | — | LANDED 07-10: v1.1 reconcile (EASE fold · FLOW 4th module · aggro re-keys) + 3 pre-authored SWAP KITS (M/S/W, catalog rows 🟡) — any verdict outcome = ready deck, no re-pass. v1 board stays the gating event. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` §4 | 🟡 | — | LANDED 07-10: ORCHARD CLOCK DECK v0 — PROVISIONAL on core A (Bill's core pick → free re-run): 4 creeds (WILD ROWS wild) · Almanac/Cider Press modules · 11 boons · 2 keystones · THE SEASON CD. Meadow = sibling pass after core locks. |
 | D4 | Alchemist · **Cask** | `ALCHEMIST-PLAN.md` §11 | 🟡 | — | LANDED 07-10: the locked §7 slate HARD-COPIED to catalog at ✅ (24 cards — the back-fill drift closed) + 3 additive kits at 🟡 (T/H/R; CLOSING TIME renamed from Last Call — collision caught) + EASE knobs + Solera×Recipe tune flag. |
-| D5 | Well · **Brim** | `MENDER-PLAN.md` | 🔄 | 07-10 03:54 | Deck exists in code — this is the RESHAPE onto branches (DECK-LAYOUT Phase 2), absorb-don't-duplicate. |
+| D5 | Well · **Brim** | `MENDER-PLAN.md` §11 | 🟡 | — | LANDED 07-10: reshape around Low Catch·Overflow·Glintsmith — built pool filed 🔨 (catalog back-fill done, shared+Brim), 6 new cards + 3 keystones 🟡, Wide Brim→EASE fold, 2 skeptic catches (Blind Pour killed as built-Blindfold dupe · Cool Head renamed). |
 | D6 | Well · **Draw** | `MENDER-PLAN.md` | ⬜ | — | Same; sibling-distinctness vs D5 is a hard gate. |
 | D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` | ⬜ | — | Reconcile with the §8 review-pass proposals — one merged deck, not two competing revisions. |
 | D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | ⬜ | — | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
@@ -194,6 +194,7 @@ whole decks):
 | **Duelist (D2)** | Headsman · Ironside · Ghost (default) + swap kits M/S/W | returning ◆-string (Avalanche) · gold-sliver parry (Impossible Parry) · slow-mo (Borrowed Time) · freeze-beat ×3 (Estocada ⚠ rhymes w/ Reckoning Stroke) · mirrored flurry (Tempest Answer) | full-bank exposure (All In) · winded blood-parry (Overreach) · last-slice fishing (Late Answer) · the self-cut (Deep Cut) |
 | **Bloomweaver (D3, core A prov.)** | Orchard lean + Sap engine + Wild read | whole-garden chord (Full Bloom) · standing golden arc ends-on-wilt (Orchard Eternal) | unripe cash-out (Forced Bloom) · peak-stacking (Harvest Moon) · overplanting attention (Overplanted) |
 | **Cask (D4)** | Blend Line · Gauntlet · Tap List (+kits T/H/R) | monstrous single cask (Century) · two-cask chord (Bottling Line) · band-freeze replay (Dynasty Pour) · shelf-dump Opening (Closing Time) | strain-stack pours (Momentum Pour) · mutual-taint twin casks (Rolling Boil) · off-recipe crash (Never Change) |
+| **Brim (D5)** | Low Catch · Overflow · Glintsmith | party-bar wave (Undertow) · Reservoir shield wall (Floodgate) · all-Glints crit hour (Gilded Hour) + built High Tide | deeper band (Knife's Edge) · costlier pours for fatter shields (Pressure Head) · preview-off (built Blindfold) |
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 

@@ -344,9 +344,41 @@ TAP LIST** (§9.1).
 _Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§8` (review-pass verdicts) + `§10`
 (ladder filing) + `godot/data/alchemist/*.gd` — D7's job._
 
-## THE WELL — 🔨 base built · deck 🔮 not authored
-_Stub — back-fill from `MENDER-PLAN.md` "BOARD VERDICTS" export once the deck is authored +
-`godot/data/well/*.gd`._
+## THE WELL — 🔨 deck BUILT (`500334f`) · **BRIM RESHAPE (D5) 🟡 2026-07-10** · Draw reshape = D6
+
+Source: `MENDER-PLAN.md` deck banner (built) + §9/§10.7 (filing) + §11 (the Brim reshape).
+Themes: **LOW CATCH · OVERFLOW ENGINE · GLINTSMITH** (the Pulse's cards wait, filed).
+*(The old "deck not authored" note was catalog-format drift — the deck was always built; rows
+land now. Shared + Brim below; Draw rows arrive with D6.)*
+
+| Card | id | Type | Rarity | St | Theme | One line |
+|---|---|---|---|---|---|---|
+| The Brink (creed) | `brink` | GREED | curated | 🔨 `500334f` | Low Catch (entry) | Heals scale on the bloodied; the band drops LOW. |
+| Foresight (creed) | `foresight` | STRAT | curated | 🔨 | Glintsmith-adj | Pours bank stacks while topped; a dip crashes them. |
+| The Levee (creed) | `levee` | EASE | curated | 🔨 | Overflow (entry) | Low band + pours leave an absorb; weaker Glint. |
+| The Shallows (creed) | `shallows` | STRAT | curated | 🔨 | Glintsmith (entry) | Tight high band, brighter Glint — glass. |
+| ⭐ The Reservoir (module) | `reservoir` | RULE | — | 🔨 | Overflow | Spill banks → SURGE shields → re-bank flywheel. |
+| Triage Protocol (module) | `triage` | STRAT | — | 🔨 | Low Catch | Bloodied allies build NERVE → auto LAST STAND. |
+| Benediction (module) | `benediction` | STRAT | — | 🔨 | Glintsmith | Good grades light pips; the 5th cashes a party BLOOM. |
+| Deep Well · Steady Pulse · Meditate · Warm Rekindle · Boiling Over · Second Ring · Cadence of Mend | — | mixed | H/S/O | 🔨 | generic | The shared/bread set (the Pulse's future material). |
+| The Kept Light | `keptlight` | POWER | H/S/O | 🔨 | Glintsmith | Glint lasts longer + extends. |
+| Brink Bell | `brinkbell` | EASE | H/S/O | 🔨 | Low Catch | Emergency absorb on an ally dropping low — **the counted pardon (1 total)**. |
+| ✦ The Shining Hour | `shininghour` | TEAM | H/S/O | 🔨 | Glintsmith | Warband +dmg while everyone is topped. |
+| Overflowing Cup · Still Water | — | STRAT | H/S/O | 🔨 | Overflow | The built spill pair. |
+| Low Catch (boon) | `lowcatch` | STRAT | H/S/O | 🔨 | Low Catch | The boon its theme is named for. |
+| The Blindfold | `blindfold` | GREED | H/S/O | 🔨 | Glintsmith | Preview OFF, bigger rewards — the greed pole (killed the D5 "Blind Pour" duplicate). |
+| High Tide (keystone) | `hightide` | RULE | elite | 🔨 | Glintsmith | A pour Glints the WHOLE party while topped. |
+| ~~Wide Brim~~ | `widebrim` | EASE | — | 🔨→**fold** | — | → the EASE dial (widener law) — leaves the pool at reshape. |
+| rig: Sweet Pour / Spillover / Low Catch | — | — | — | 🔨 | per theme | The built Brim WHENs. |
+| **Knife's Edge** | `knifesedge` | GREED | H/S/O | 🟡 | Low Catch | Band drops another 10%; catches +25%. |
+| **Cool Head** | `coolhead` | STRAT | H/S/O | 🟡 | Low Catch | A catch during a boss telegraph string refunds 1 ◍. *(Renamed — Brew P8 owns "Steady Under Fire".)* |
+| **THE UNDERTOW** (keystone) | `undertow` | RULE | elite | 🟡 | Low Catch | Three zero-spill catches pull the party's bars up 10% in one wave. |
+| **Runneth Over** | `runnethover` | STRAT | H/S/O | 🟡 | Overflow | Spill banks at 130% on Cascade. |
+| **Pressure Head** | `pressurehead` | GREED | H/S/O | 🟡 | Overflow | Reservoir over half: pours +1 ◍, Surge ×1.4. |
+| **THE FLOODGATE** (keystone) | `floodgate` | RULE | elite | 🟡 | Overflow | Full Reservoir opens as a party shield wall; absorbs re-bank at half. |
+| **Whetstone Waters** | `whetstonewaters` | POWER | H/S/O | 🟡 | Glintsmith | Glints +1s, stack to 2 allies. |
+| **The Primed Vein** | `primedvein` | STRAT | H/S/O | 🟡 | Glintsmith | PRIME an ally: next landing window ×1.5; a perfect there Glints the party 1s. |
+| **THE GILDED HOUR** (keystone) | `gildedhour` | RULE | elite | 🟡 | Glintsmith | All four Glints live: every ally's next clean answer crits. |
 
 ## BLOOMWEAVER — **ORCHARD CLOCK DECK v0 (D3) 🟡 PROVISIONAL 2026-07-10** · core unpicked
 

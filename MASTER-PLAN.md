@@ -814,11 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 03:54 · main (docs only) — **CLAIM: DECK MACHINE row D5 — the Well·BRIM deck
-  reshape** (top-3 = Low Catch · Overflow · Glintsmith per MENDER §9; built pool filed via
-  §10.7; BROKE/FADED/DEAD/OPENED sweep; catalog back-fill for shared+Brim built cards at 🔨) →
-  MENDER-PLAN §11 🟡 + catalog Well section. Design only. *(slate-machine session, deck tick
-  03:49)*
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §11 (NEW) + CARD-CATALOG Well section (NEW —
+  the shared+Brim back-fill, closing that ledger drift) + ledger row — **DECK MACHINE row D5:
+  THE BRIM RESHAPE — DONE, 🟡.** Winners = Low Catch · Overflow · Glintsmith (§9 ranking; the
+  Pulse's cards wait, filed). The sweep: BROKE none · FADED **Wide Brim → the EASE dial** ·
+  DEAD none · OPENED = the three lanes, and every one ENTERS from a BUILT creed (Brink/Levee/
+  Shallows — the reshape's luckiest fact). New at 🟡: Knife's Edge · **Cool Head** (renamed —
+  Brew P8 owns "Steady Under Fire") · Runneth Over · Pressure Head · Whetstone Waters · The
+  Primed Vein + keystones **THE UNDERTOW / THE FLOODGATE / THE GILDED HOUR** (pool = 4 with
+  built High Tide, theme-weighted offers). Skeptic kills/catches: **Blind Pour killed before
+  birth** (duplicate of the BUILT Blindfold) · Undertow-vs-Benediction rung distinction
+  recorded · Brink Bell stays the one counted pardon. EASE knobs listed. 4 tension points
+  (§11.5). *(slate-machine session, deck tick 03:49)*
 
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §11 (NEW) + CARD-CATALOG Cask section (NEW,
   35 rows) + ledger row — **DECK MACHINE row D4: THE CASK DECK ASSEMBLY — DONE.** The locked §7
