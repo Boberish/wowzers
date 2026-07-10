@@ -265,6 +265,11 @@ extends Resource
 @export var heavy_ink_floor: int = 3        ## HEAVY INK: combo above this counts
 @export var grand_pause_mult: float = 0.25  ## GRAND PAUSE: a full-combo (5/5) Eviscerate hits +this
 
+# --- D0 S2 · RESONANCE (3 drafted cards of ONE theme auto-light ONE rotational perk) ---
+@export var res_threshold: int = 3          ## cards of a theme (creed + module + boons) that light resonance
+@export var res_edge_pad: float = 0.15      ## EDGE resonance: the window holds ~this much wider for a beat after a crit
+@export var res_edge_hold_sec: float = 0.6  ## EDGE resonance: how long the "doesn't tighten after a crit" hold lasts
+
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap

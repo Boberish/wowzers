@@ -273,6 +273,30 @@ func _cash_wounds(s: CombatState, seat: Seat) -> void:
 		_rig_fire(s, seat, "deepcash")                                    # THE DEEP CASH rig WHEN
 	CombatCore.emit_event(s, {"t": "wound_cash", "n": n, "player": seat.is_player})
 
+## D0 S2 · RESONANCE — count drafted cards per theme (creed + modules + boons); at res_threshold
+## of ONE theme, light that theme's single rotational perk (Wound after-tick · Edge no-tighten ·
+## Finish phrase-mark). Computed ONCE per fight (the deck is fixed). Adds no damage at 0 themes.
+func _compute_resonance(seat: Seat) -> void:
+	var count := {"wound": 0, "edge": 0, "finish": 0}
+	var ct := String(_creed().get("theme", ""))
+	if count.has(ct):
+		count[ct] = int(count[ct]) + 1
+	for mid in modules:
+		if not bool(modules[mid]):
+			continue
+		var mt := String(TwinfangModules.get_module(String(mid)).get("theme", ""))
+		if count.has(mt):
+			count[mt] = int(count[mt]) + 1
+	for card in TwinfangBoons.spec_pool(aspect):
+		if _b(String(card.get("id", ""))):
+			var bt := String(card.get("theme", ""))
+			if count.has(bt):
+				count[bt] = int(count[bt]) + 1
+	seat.vars["res_wound"] = int(count["wound"]) >= cfg.res_threshold
+	seat.vars["res_edge"] = int(count["edge"]) >= cfg.res_threshold
+	seat.vars["res_finish"] = int(count["finish"]) >= cfg.res_threshold
+	seat.vars["res_counts"] = count
+
 # --- Tempo ACCELERANDO: the live rhythm window as a function of current Flow. Flow 0 =
 #     the base anchors; max Flow = the *_lo anchors; lerp between (Flow = BPM). Venom pins
 #     Flow at 0, so it always sees the base window (a steady beat, no accelerando). ONE
@@ -333,6 +357,10 @@ func _edge_window(seat: Seat) -> Array:
 	# single next window — imperceptible at tap pace). fencer_left counts the strikes still owed.
 	if _b("fencersLine") and int(seat.vars.get("fencer_left", 0)) > 0:
 		pad += cfg.fencer_pad
+	# EDGE RESONANCE (D0 S2): the window doesn't tighten on the beat after a crit — the hold flag is
+	# set on a crit and consumed by the next strike's grade read (no `s` here — a plain flag).
+	if bool(seat.vars.get("res_edge", false)) and bool(seat.vars.get("res_edge_hold", false)):
+		pad += cfg.res_edge_pad
 	# FIRST NOTE (Fermata boon): a draw begun after a 1.5s rest gets extra ENTRY runway.
 	if _fermata() and _b("firstNote") and bool(seat.vars.get("first_note_ready", false)):
 		pad += cfg.first_note_pad
@@ -727,6 +755,9 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	# D0 S1 · THE WOUND POT: tick the boss-frame bleeds + drain any Exsanguinate erupt (no-op
 	# with an empty pot → byte-identical for every non-Wound build).
 	if _tempo_family():
+		if not bool(seat.vars.get("res_computed", false)):
+			_compute_resonance(seat)                      # D0 S2 · RESONANCE: light the theme perks once
+			seat.vars["res_computed"] = true
 		_tick_wounds(s, seat)
 	# ARMORY (strong bell): the warm start hums — regen doubles for the first 10s.
 	if GearFx.bell_live(s, seat):
@@ -1041,6 +1072,8 @@ func _roll_crit(s: CombatState, seat: Seat, bullseye: bool, _is_perfect: bool) -
 	if int(seat.vars.get("rig_crit", 0)) > 0:      # COMBO RIG (§5) — Killing Edge charge
 		seat.vars["rig_crit"] = int(seat.vars["rig_crit"]) - 1
 		crit = true
+	if crit and bool(seat.vars.get("res_edge", false)):   # EDGE RESONANCE: hold the next window wider
+		seat.vars["res_edge_hold"] = true
 	return crit
 
 ## FERMATA — press to coil into shadow. Records the press tick; the strike resolves on RELEASE.
@@ -1139,6 +1172,10 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 	# F26: base Syncopation is COST-ONLY now — the Good→Perfect grade-up moves to a future Opus rune.
 	var perfect := grade >= G_PERFECT
 	var bullseye := grade == G_BULL
+	# EDGE RESONANCE (D0 S2): the after-crit widened window has now been read for grading — consume
+	# the hold (a fresh crit below re-sets it for the next beat).
+	if bool(seat.vars.get("res_edge_hold", false)):
+		seat.vars["res_edge_hold"] = false
 	seat.resource -= cost
 	if int(seat.vars.get("encore_left", 0)) > 0:       # the encore spends a beat per Strike
 		seat.vars["encore_left"] = int(seat.vars["encore_left"]) - 1
@@ -1367,6 +1404,8 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 	if _b("theCoda") and cp >= cfg.cp_max and _in_opening(s, seat):   # THE CODA (keystone): a free echoed finisher
 		_deal(s, seat, dmg, true, false, "finisher")
 		CombatCore.emit_event(s, {"t": "coda_echo", "player": seat.is_player})
+	if bool(seat.vars.get("res_finish", false)) and cp >= cfg.cp_max:   # FINISH RESONANCE: the phrase-mark read cue (view)
+		CombatCore.emit_event(s, {"t": "phrase_mark", "player": seat.is_player})
 	_dump_landed(s, seat, "finisher")     # THE OPENING: read-reward if it hit the window
 	CombatCore.emit_event(s, {"t": "finisher", "id": "eviscerate", "cp": cp})
 	return true
@@ -1596,6 +1635,11 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 
 	# CREED + MODULES (Tempo rework) — for the HUD combo board / verdict pops / policy
 	out["creed"] = creed_id
+	if seat.vars.has("res_counts"):                              # D0 S2 · RESONANCE (view: the build-panel chip)
+		out["resonance"] = seat.vars.get("res_counts", {})
+		out["res_wound"] = bool(seat.vars.get("res_wound", false))
+		out["res_edge"] = bool(seat.vars.get("res_edge", false))
+		out["res_finish"] = bool(seat.vars.get("res_finish", false))
 	out["creed_name"] = String(_creed().get("name", ""))
 	out["flow_value"] = _creed_flow_value()
 	out["window_locked"] = bool(seat.vars.get("window_locked", false))
