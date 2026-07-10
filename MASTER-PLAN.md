@@ -829,6 +829,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `meter` → main (`0859b2b`→`cce7c92`) · §SYSTEMS/§GRAPHICS · **METER L1 + ⚡AMPLIFY
+  — BUILT & MERGED (Bill: "go ahead").** The live meter's first level-up. **L1:** killed the
+  fragile class-accent switch → new `ClassKit.accent()` hook (built-in Color, no Palette import
+  in the data layer, sibling to `recap_spec()`), backfilled on all 5 kits — **fixes the live bug
+  where Alchemist + Well (the two default seats) rendered colorless**; compact rows got the
+  Recount look (rank # w/ gilded #1 · share% column · player-row wash · brighter bar edge). **L2
+  ⚡AMPLIFY:** new header-cycle mode reading `state.boon_meter` — "who enables the raid" (each
+  seat's own boon lift + a synthetic RAID row for the raid-amp pool Sunder/Glint/Debilitate),
+  drill a row → per-boon "≈ +X dmg/heal"; the live twin of STATS PAGE v2's BOON IMPACT.
+  **View-only / diag-family:** `ab-gate raid_sim` **BYTE-IDENTICAL PASS** (both clean runs, before
+  Bill paused the verify bar), project imports clean; visual `screenshot_meter` skipped per the
+  sim-pause. Ledger §G row → 🔨 `cce7c92`; METER-PLAN L1+AMPLIFY marked built. **Deferred:**
+  `src_label()` per-kit hook (`capitalize()` reads fine today) → L2 tail. **Next: L2 tail
+  (DISCIPLINE from `seat.diag` · row sparklines) or L3 segments/run-history.** *(meter session)*
+
 - ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **building
   `DUELIST-BRIEF.md` — S0 FLOW=AGGRO + taunt funeral → S1 Duelist base kit (→ S2 policy → S3
   sim → S4 HUD).** ⚠ **SCOPE STAGED (Bill, 2026-07-10):** the §A½ "Bulwark dies in the same
@@ -983,16 +998,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   visual probe. ⚠ COLLISION: `combat_core.gd` also claimed live by `../wow-rails` (tuning-sweep) —
   additive changes, merge main often, reconcile at merge. *(stats session)*
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `tuning-sweep`) — **CLAIM: TUNINGCONFIG LITERALS
-  SWEEP (REFIT P4's split-out follow-up; determinism law #5: no hard-coded balance literals).**
-  The sweep is SMALL — earlier passes moved most tuning; six real literals remain in
-  `combat_core.gd`: the fight-opening ability stagger (base 2.0 / step 1.5 / jitter 0.3 —
-  duplicated at create_state + pack entry, gets a shared helper), the silenced-cast re-check
-  (0.4s), the chained-target splash (0.28), the EMPOWER dmg_buff cap (0.55), the
-  taunt-answers-curse window (2.0s). All → `TuningConfig` @exports with identical defaults.
-  Encounter-data fallbacks (melee every/max) stay — they're data defaults, not engine balance.
-  BYTE-IDENTICAL bar: ab-gate raid_sim + twinfang_sim. *(rails session v2 — the twinfang kit
-  split remains the last P4 item after this)*
+- ☑ 2026-07-10 · `tuning-sweep` → main (`784e365`) — **TUNINGCONFIG LITERALS SWEEP: BUILT &
+  MERGED (REFIT P4's split-out follow-up; determinism law #5).** The last six engine hard-codes
+  in `combat_core.gd` → `TuningConfig` @exports with the exact old values as defaults:
+  `open_stagger_base/step/jitter` (the fight-opening ability spread — also DRY'd, create_state +
+  pack entry share ONE `_stagger_abilities` helper) · `silence_recheck` 0.4 · `chain_splash`
+  0.28 · `dmg_buff_cap` 0.55 · `curse_answer_window` 2.0. Encounter-data fallbacks (melee
+  every/max) stay — data defaults, not engine balance. GATES: **ab-gate raid_sim + twinfang_sim
+  BYTE-IDENTICAL PASS** (60 seeds, all four Seals) · merged-tree bar 36/38 green — the two
+  "fails" were externally killed heavies (Bill cleared the box), zero failure strings in either
+  log; both passed in full on the pre-merge tree. **REFIT P4 CLOSES** — the one remaining line
+  item (twinfang per-spec kit split) is DEFERRED INTO the Twinfang rework itself (same
+  restructure, zero merge-conflict with the class wave; noted on the P4 ledger row). *(rails
+  session v2 — END OF THE RAILS QUEUE)*
 
 - ☑ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW) — DONE,
   🟡 AT BILL'S 10-VERDICT BOARD (BOSS-PLAN §V).** Delivered: BOSS-PLAN.md (laws · taunt-removal
