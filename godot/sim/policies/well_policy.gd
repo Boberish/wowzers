@@ -195,6 +195,16 @@ func _lowest_frac(obs: Dictionary) -> float:
 			lo = minf(lo, float(p["frac"]))
 	return lo
 
+## The lowest living-ally party ENTRY ({} if none) — for aiming an off-hand cast.
+func _lowest_seat(obs: Dictionary) -> Dictionary:
+	var best: Dictionary = {}
+	for p in obs.get("party", []):
+		if p["dead"]:
+			continue
+		if best.is_empty() or float(p["frac"]) < float(best["frac"]):
+			best = p
+	return best
+
 ## Should the running draw cast be BANKED into a held heal instead of released now? Only when
 ## the hold is armed (⭐Vigil / Patient Hand), nobody is dying, and a danger hit is close enough
 ## to release the held heal into. Otherwise the cast releases normally (the streak/Current game).
@@ -206,13 +216,22 @@ func _bank_hold(obs: Dictionary) -> bool:
 	var tg: Dictionary = obs.get("telegraph", {})
 	return bool(tg.get("danger", false)) and float(tg.get("remaining", 9.0)) <= 2.5
 
-## A HELD heal is cocked: release it when a spike has landed (someone dipped) or just before
-## the gutter would waste it. Holding for the spike is the Vigil's whole play.
+## A HELD heal is cocked: keep it for the spike, but don't let a SECOND dip fall through —
+## SECOND HAND (when drafted) lets an instant off-hand Flash cover a moderate dip while the
+## hold stays cocked. A CRITICAL dip looses the full held heal now; the gutter always looses it.
 func _decide_held(obs: Dictionary, tick: int, casting: Dictionary) -> Dictionary:
 	var until := int(casting.get("held_until", -1))
 	if until >= 0 and until - tick <= 6:              # ~0.2s before the gutter — loose it
 		return {"type": "ability", "id": "release"}
-	if _lowest_frac(obs) < 0.55:                       # the spike landed — intercept it
+	var lo := _lowest_frac(obs)
+	if lo < 0.4:                                       # critical — the big held heal, full & instant
+		return {"type": "ability", "id": "release"}
+	# SECOND HAND: a moderate dip while holding — cover it with the off-hand flash, keep the hold.
+	if lo < 0.55 and bool(obs.get("secondhand", false)) and int(obs.get("charges", 0)) >= COST["flash"]:
+		var s := _lowest_seat(obs)
+		if not s.is_empty():
+			return {"type": "ability", "id": "flash", "target": s["seat"]}
+	if lo < 0.55:                                      # no off-hand available — loose the hold
 		return {"type": "ability", "id": "release"}
 	return {}
 
