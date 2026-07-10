@@ -57,7 +57,7 @@ const ITEMS := {
 	},
 	"hashgrinder": {
 		"name": "Hashgrinder Rig", "rarity": "sonnet", "cls": "", "kind": "util",
-		"desc": "All Token income is doubled, forever.",
+		"desc": "THE PROMPT MARKET is cheaper — every price −1⏣ (floor 1⏣).",
 		"flavor": "It mines while you fight.",
 	},
 	"hot_reload": {

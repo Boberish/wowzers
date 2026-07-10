@@ -28,6 +28,7 @@ var _rows: int = 8            ## the floor's lattice rows (FLOORS "rows")
 var _quota: Dictionary = {}   ## the floor's non-combat bag (FLOORS "quota")
 var _minigame: String = ""    ## the floor's skill-game flavor (FLOORS "minigame")
 var _charge_at_seal: Array = []   # ⏻ ECON diagnostic: charge banked when a Seal is reached
+var _tokens_at_market: Array = []  # ⏣ ECON diagnostic: tokens held when a MARKET is reached (§6)
 var _fight_ticks: Array = []      # TTK diagnostic: ticks of every WON fight this tier
 
 func _initialize() -> void:
@@ -49,6 +50,7 @@ func _initialize() -> void:
 		print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
 		_prove_determinism()
 		_charge_at_seal = []
+		_tokens_at_market = []
 		print("skill    clear%%   avg fights  avg fight sec  avg integrity(end)  losses at")
 		print("--------------------------------------------------------------------------")
 		for sk in SKILLS:
@@ -78,6 +80,10 @@ func _initialize() -> void:
 		var avg_ch := _avg_i(_charge_at_seal)
 		print("  ⏻ charge@Seal: avg %.0f · max %d · SURGE cut ~%.0f%% boss HP" % [
 			avg_ch, _max_i(_charge_at_seal), avg_ch / 100.0 * RaidMarks.HP_CUT_CAP * 100.0])
+		# ⏣ ECON (§6 shop scarcity): tokens held entering a MARKET (a flat ~3⏣/fight mint
+		# estimate — the real per-seat mint is HUD-side). Stock ≈ 20-25⏣ → afford ~2 of ~4.
+		print("  ⏣ tokens@market: avg %.0f · max %d" % [
+			_avg_i(_tokens_at_market), _max_i(_tokens_at_market)])
 	quit()
 
 func _avg_i(a: Array) -> float:
@@ -277,7 +283,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 	var map := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
 	var route := DetRng.new(seed * 7919 + 17)
 	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
-		"marks": {}, "charge": 0}
+		"marks": {}, "charge": 0, "tokens": 0}
 	var inv := {}
 	var pos := -1
 	var fights := 0
@@ -337,6 +343,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 						"trace": str(trace)}
 				if ekind != RunMap.KIND_SEAL:   # scavenge a breaker component (trash + elite)
 					carry["charge"] = mini(100, int(carry["charge"]) + MapFx.SKIRMISH_CHARGE)
+					carry["tokens"] = int(carry["tokens"]) + 3   # §6 flat per-fight mint estimate
 				if ekind == RunMap.KIND_SEAL:
 					return {"cleared": true, "fights": fights,
 						"integrity": _avg(carry["fracs"]), "loss_at": "", "trace": str(trace)}
@@ -367,6 +374,17 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				_apply_fx({"heal": MapContent.COOLING_HEAL, "mana": 1.0, "repair": true}, carry)
 			RunMap.KIND_CACHE:
 				_apply_fx({"draft": true}, carry)
+			RunMap.KIND_MARKET:
+				# §6 THE PROMPT MARKET (MARKET_LIVE): record the ⏣ held (scarcity diagnostic),
+				# then model a recovery spend — a PATCH when wounded (representative, not the UI).
+				_tokens_at_market.append(int(carry["tokens"]))
+				var any_wound := false
+				for w in carry["wounds"]:
+					if float(w) > 0.0:
+						any_wound = true
+				if int(carry["tokens"]) >= 5 and any_wound:
+					_apply_fx({"repair": true, "mana": 1.0}, carry)
+					carry["tokens"] = int(carry["tokens"]) - 5
 	return {"cleared": false, "fights": fights,
 		"integrity": _avg(carry["fracs"]), "loss_at": "walk_stuck", "trace": str(trace)}
 
