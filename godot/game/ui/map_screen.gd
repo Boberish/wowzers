@@ -20,8 +20,7 @@ var ring: int = -1                   ## MAP-2: current ring (drives realm title/
 var open_tickets: Array = []         ## MAP-2: titles of quests still open (header list)
 var toast: String = ""               ## MAP-2: one-shot ticket pickup/close banner
 var gear_line: String = ""           ## GEAR-1: equipped curios + ⏣ (raid map; "" = hidden)
-var entropy: int = 0                  ## ⚡ within-run luck pool (Inference Check); 0 hides
-var prior: int = 0                    ## 📁 across-run luck floor; 0 hides
+var entropy: int = 0                  ## ⚡ LUCK, the within-run pool (Inference Check); 0 hides
 var charge: int = -1                  ## ⏻ THE KILL SWITCH meter 0..100; <0 hides (solo map)
 
 var _hover: int = -1
@@ -39,14 +38,41 @@ static var KIND_COL := {
 	RunMap.KIND_CACHE: Palette.GOLD,
 	RunMap.KIND_COOLING: Palette.FLOW,
 	RunMap.KIND_SEAL: Palette.CRUSH,
+	RunMap.KIND_ELITE: Palette.CRUSH,
+	RunMap.KIND_MARKET: Palette.GOLD,
+	RunMap.KIND_JAILBREAK: Palette.VOID,
+	RunMap.KIND_MINIGAME: Palette.FLOW,
+	RunMap.KIND_WILD: Palette.TEXT_DIM,
 }
+## THE DESCENT REBUILD (§5/§9 legibility): the door prints the node's REAL face —
+## a stubbed market shows as its honest fallback (no lying storefronts); a WILD
+## stays sealed but prints its fight tier via the ▮ pips.
 const KIND_TAG := {
 	RunMap.KIND_COMBAT: "FIGHT",
 	RunMap.KIND_EVENT: "EVENT",
 	RunMap.KIND_CACHE: "CACHE",
 	RunMap.KIND_COOLING: "COOLING",
 	RunMap.KIND_SEAL: "SEAL",
+	RunMap.KIND_ELITE: "ELITE · REINFORCED",
+	RunMap.KIND_MARKET: "MARKET",
+	RunMap.KIND_JAILBREAK: "JAILBREAK",
+	RunMap.KIND_MINIGAME: "SKILL GAME",
+	RunMap.KIND_WILD: "▚ WILD",
 }
+
+## kind glyphs (plain ASCII — the bundled faces don't cover dingbats)
+const GLYPH := {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!",
+	"elite": "*", "market": "$", "jailbreak": "&", "minigame": ">", "wild": "#"}
+
+## What the board PRINTS for a node: a stubbed kind shows its honest fallback (no
+## lying storefronts, DESCENT §9), a live kind shows itself — and a WILD stays a
+## sealed envelope (never spoiled here; its threat-level line still prints when a
+## fight is inside, V#9).
+func _display_kind(n: Dictionary) -> String:
+	var k := String(n.get("kind", ""))
+	if k == RunMap.KIND_WILD:
+		return k
+	return RunMap.effective_kind(n)
 
 ## MAP-3b: online spectators (non-leaders) see the map read-only — the reachable
 ## nodes still glow, but there are no click buttons (only the leader routes).
@@ -84,10 +110,10 @@ func _build_header() -> void:
 			int(inventory.get("shards", 0)), map.seal_shard_req]
 	if inventory.get("api_key", false):
 		status += "      [KEY: %s]" % MapContent.KEY_NAME
-	# The Inference Check meta rides the same status line: ⚡ Entropy (spend to bias a
-	# roll) + 📁 Prior (your file, a floor on every check).
-	if entropy > 0 or prior > 0:
-		status += "      ⚡%d   📁%d(+%d%%)" % [entropy, prior, LuckProfile.prior_floor(prior)]
+	# The Inference Check meta rides the same status line: ⚡ LUCK (spend to bend the
+	# dice). V#8: the cross-run 📁 Prior readout is gone — nothing follows a fresh run.
+	if entropy > 0:
+		status += "      ⚡%d" % entropy
 	if charge >= 0:
 		status += "      ⏻ %d%% ARMED" % charge
 	_label(status, 15, Palette.TEXT, Vector2(0, 186), UiKit.display(600, 2))
@@ -159,7 +185,7 @@ func _draw() -> void:
 	for n in map.nodes:
 		var id := int(n["id"])
 		var p := _pos(n)
-		var kind := String(n["kind"])
+		var kind := _display_kind(n)
 		var col: Color = KIND_COL[kind]
 		var visited: bool = bool(n.get("visited", false))
 		var is_cur := id == current
@@ -179,7 +205,7 @@ func _draw() -> void:
 			var glow := Palette.GOLD if _hover != id else Palette.GOLD_BRIGHT
 			draw_arc(p, r + 8.0, 0, TAU, 40, Color(glow, 0.9), 2.0)
 		# kind glyph (plain ASCII — the bundled faces don't cover dingbats)
-		var glyph: String = {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!"}[kind]
+		var glyph: String = GLYPH.get(kind, "?")
 		draw_string(fnt, p + Vector2(-20, 7), glyph, HORIZONTAL_ALIGNMENT_CENTER, 40, 20,
 			Color(Palette.BG0, 0.95) if sel or is_cur else Color(Palette.BG0, 0.7))
 		# key badge — visible until picked up

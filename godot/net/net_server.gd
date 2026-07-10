@@ -257,11 +257,6 @@ func _handle(id: int, msg: Dictionary) -> void:
 			_join(id, msg)
 		"claim":
 			_claim(id, String(msg.get("seat", "")))
-			# v10: the client transmits its 📁 Prior tier (the dedicated server can't read a
-			# client's user:// file, so it TRUSTS + caps it). Folds into the seat's check floor.
-			var rm := _room_of(id)
-			if not rm.is_empty() and (rm.get("players", {}) as Dictionary).has(id):
-				rm["players"][id]["prior"] = clampi(int(msg.get("prior", 0)), 0, LuckProfile.PRIOR_CAP)
 		"unclaim":
 			_unclaim(id)
 		"aspect":
@@ -383,7 +378,7 @@ func _join(id: int, msg: Dictionary) -> void:
 		_send(id, {"t": "err", "msg": "room is full"})
 		return
 	_peers[id] = {"name": pname, "room": code}
-	room["players"][id] = {"name": pname, "seat": "", "aspect": "", "cls": "", "ready": false, "prior": 0}
+	room["players"][id] = {"name": pname, "seat": "", "aspect": "", "cls": "", "ready": false}
 	if room["host"] == 0 or not room["players"].has(room["host"]):
 		room["host"] = id
 	_log("%s joined %s" % [pname, code])
@@ -447,9 +442,8 @@ func _start_map(id: int) -> void:
 			_send(id, {"t": "err", "msg": "%s isn't ready" % pl["name"]})
 			return
 		seat_cfg[String(pl["seat"])] = {"aspect": String(pl["aspect"]), "ai": false,
-			"cls": String(pl.get("cls", "")), "prior": int(pl.get("prior", 0))}   # v10: trusted client Prior
+			"cls": String(pl.get("cls", ""))}
 	room["seat_cfg"] = seat_cfg
-	var leader_prior := int((room["players"] as Dictionary).get(room["host"], {}).get("prior", 0))
 	room["campaign"] = {
 		"map_seed": randi() & 0x7FFFFFFF, "floor": 0, "node": -1,
 		"inv": {}, "fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
@@ -459,28 +453,28 @@ func _start_map(id: int) -> void:
 		"draft_pending": [],         # human seats that still owe a pick this draft phase
 		"next_after_draft": "",      # "map" | "advance" — what to do once everyone's picked
 		# THE INFERENCE CHECK meta: ⚡ Entropy is server-owned & broadcast; flags ripple across
-		# nodes; check_fails drives comeback pity. Starting ⚡ scales off the LEADER's trusted
-		# 📁 Prior (v10); each seat's own Prior rides seat_cfg into its check floor.
-		"entropy": LuckProfile.starting_entropy(leader_prior), "flags": {}, "check_fails": 0,
+		# nodes; check_fails drives comeback pity. V#8: every descent opens on the same
+		# baseline ⚡ — the cross-run Prior layer is deleted.
+		"entropy": MapCheck.START_ENTROPY, "flags": {}, "check_fails": 0,
 		"marks": {},                 # a pending fight-altering mark (KILL SWITCH cash-out / curse)
-		"charge": clampi(leader_prior / 25, 0, 4),   # ⏻ THE KILL SWITCH — party-shared 0..100 meter
+		"charge": 0,   # ⏻ THE KILL SWITCH — party-shared 0..100 meter (V#8: no Prior pre-warm)
 	}
 	_build_floor_srv(room)
 	room["phase"] = "map"
 	_log("room %s DESCENT started (seed %d)" % [room["code"], int(room["campaign"]["map_seed"])])
 	_broadcast_map(room)
 
-## Generate the current ring's map. Online v1 carries NO personal GATE nodes
-## (extra_quota gains only the refit's +1 cooling/+1 cache); the ROOT floor keeps its
-## credential-shard gate + tickets. Rows ride FLOORS like the offline descent.
+## Generate the current ring's map — THE DESCENT REBUILD: the floor's whole
+## non-combat bag rides FLOORS "quota" (one truth with the offline HUD + sims);
+## the ROOT floor keeps its credential-shard gate + tickets.
 func _build_floor_srv(room: Dictionary) -> void:
 	var cp: Dictionary = room["campaign"]
 	var fl: Dictionary = RaidContent.FLOORS[int(cp["floor"])]
 	cp["fights"] = RaidContent.floor_fights(int(fl["ring"]))
 	cp["map"] = RunMap.generate(int(cp["map_seed"]) + int(cp["floor"]) * 101,
 		(cp["fights"] as Array).size(), MapContent.raid_event_ids(),
-		{RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1},
-		int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)))
+		{}, int(fl["shard_req"]), int(fl.get("tickets", 0)), int(fl.get("rows", 8)),
+		fl.get("quota", {}), String(fl.get("minigame", "")))
 	cp["node"] = -1
 	cp["inv"] = {}
 	cp["tickets"] = {}
@@ -514,16 +508,22 @@ func _enter_node_srv(room: Dictionary, node_id: int) -> void:
 		cp["toast"] = "API KEY acquired — 401 doors are yours."
 	_resolve_node_srv(room, n)
 
+## THE DESCENT REBUILD: the server resolves through the SAME effective-kind mapping
+## as the offline HUD — a WILD reveals its payload, stubbed interiors fall back to
+## their honest kind, an ELITE rides the combat path (v1 online: no packroll server-
+## side yet, so the elite is its captain fight — the offline promotion lands with the
+## server pack pass).
 func _resolve_node_srv(room: Dictionary, n: Dictionary) -> void:
 	var cp: Dictionary = room["campaign"]
-	match String(n["kind"]):
-		RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
-			room["map_fight"] = {"node": int(n["id"]), "is_seal": String(n["kind"]) == RunMap.KIND_SEAL}
+	var ek := RunMap.effective_kind(n)
+	match ek:
+		RunMap.KIND_COMBAT, RunMap.KIND_SEAL, RunMap.KIND_ELITE:
+			room["map_fight"] = {"node": int(n["id"]), "is_seal": ek == RunMap.KIND_SEAL}
 			# THE KILL SWITCH: at a Seal with ⏻ banked, offer the OVERCLOCK arming first
 			# (the leader cash-outs; the mark rides the pull). Else pull straight away.
 			var fights: Array = cp["fights"]
 			var enc: EncounterRes = fights[clampi(int(n["fight"]), 0, fights.size() - 1)]
-			if String(n["kind"]) == RunMap.KIND_SEAL and int(cp["charge"]) > 0:
+			if ek == RunMap.KIND_SEAL and int(cp["charge"]) > 0:
 				room["pending_arm"] = int(n["fight"])
 				_broadcast(room, {"t": "arming", "charge": int(cp["charge"]), "boss": String(enc.name)})
 			else:
@@ -694,7 +694,7 @@ func _map_ctx_srv(room: Dictionary, seat: String) -> Dictionary:
 	var boons: Dictionary = (cp.get("boons", {}) as Dictionary).get(seat, {})
 	var boon_tags := MapCheck.tags_for_boons(MapCheck.catalog_for(cls), aspect, boons)
 	return MapCheck.build_ctx(boon_tags, [], aspect, seat,
-		_avg_frac_srv(cp["fracs"]), int(cfg.get("prior", 0)), int(cp["entropy"]),
+		_avg_frac_srv(cp["fracs"]), int(cp["entropy"]),
 		int(cp["check_fails"]), cp["inv"], cp["flags"], 0)
 
 const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist"}
