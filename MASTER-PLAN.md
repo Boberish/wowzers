@@ -909,22 +909,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   PUNISH pairs with Coup-as-kick · BAND = the Count-In, not a branch). 5 verdict points on the
   artifact D0 tab. *(ability-audit session)*
 
-- ◐ 2026-07-10 · worktree `../wow-rails` (branch `class-bands`) — **CLASSBAND REGISTRY: BUILT &
-  MERGED (`b4e8d26`); shared Gauge base = the remaining slice of this claim.** THE BANDS:
-  `game/ui/bands/` — ClassBand base (shared orb/rune-rail/guard shell + `for_hud` picker keyed
-  off `_seat_cls_now`, the view twin of ClassRegistry) · TankBand · BladeBand (Tempo+Fermata
-  incl. the coil hold-release) · BrewBand (ALEMBIC + brew holds) · HealerBand (click-cast +
-  shared castbar) · WellBand (DRAW's tap-tap/hold-release grammars) · BloomBand. **raid_hud
-  sheds ~630 lines** — ~25 per-class widget members → ONE `_band`; the 4-way match on
-  build/render/keys/mouse/events → band routing; adding a class = one band file + one for_hud
-  arm. **Also fixed: BOTH glint indicators (target-bar + raid-frame pips) were DEAD since the
-  vuln-stack merge** (`855ac2f` missed these two `seat.vars` readers — a truncated grep; now on
-  `CombatCore.vuln_until`). ⚠ pure BASE plumbing, zero class-content change (Bill's mid-rework
-  carve-out honored — reworks land INTO band slots). GATES: ui_smoke_raid ALL OK · verify-all
-  **ALL GREEN (40 scripts)** · **WSLg visual pass 5/5 bands** (33 PNGs, scratchpad/bands/ —
-  Alembic/Well-window/Verdance/rune rails all pixel-right, GLINT tag live again). NEXT SLICE:
-  the shared Gauge base under the 5 gauge scripts (retheme-once seam, REFIT §4 art-era prereq).
-  *(rails session v2 — after: TuningConfig sweep · twinfang kit split)*
+- ☑ 2026-07-10 · `class-bands` → main (`b4e8d26` bands · `ee58124` gauge base) — **CLASSBAND
+  REGISTRY + SHARED GAUGE BASE: DONE (REFIT P4's last big rail).** THE BANDS: `game/ui/bands/` —
+  ClassBand base (shared orb/rune-rail/guard shell + `for_hud` picker keyed off `_seat_cls_now`,
+  the view twin of ClassRegistry) · TankBand · BladeBand (Tempo+Fermata incl. the coil
+  hold-release) · BrewBand (ALEMBIC + brew holds) · HealerBand (click-cast + shared castbar) ·
+  WellBand (DRAW grammars) · BloomBand. **raid_hud sheds ~630 lines** — ~25 per-class widget
+  members → ONE `_band`; the 4-way match on build/render/keys/mouse/events → band routing;
+  adding a class = one band file + one for_hud arm. **THE GAUGE BASE** (Bill's scope: "the
+  obvious shared stuff, grow from there"): `game/ui/class_gauge.gd` — the VERDICT FLASH
+  (flash()/verdict_alpha()/verdict_live(), four hand-rolled copies collapsed), the PULSE clock
+  (per-widget rates kept), per-frame decay+redraw plumbing (`_tick` hook), the standard
+  `on_event` entry; all 7 widgets retrofitted, draw STYLE untouched per widget — the art-era
+  retheme lands once. **Also fixed en route:** both glint indicators (dead since `855ac2f` —
+  stale `seat.vars` readers), the `show_result` rename mangle (75 masked script errors — the
+  "ALL OK tail ≠ clean" lesson, now in memory), and the `rift_ui.cfg` ERROR-spam on every combat
+  boot (has_section_key guard). ⚠ zero class-content change (Bill's mid-rework carve-out).
+  GATES: verify-all **ALL GREEN (40 scripts)** post-fix · WSLg visual passes ×2 (bands 5/5,
+  gauge-base spot-checks — brew banner drawn through the new flash path). **REFIT P4 now fully
+  built except: TuningConfig literals sweep (split-out claim) · twinfang per-spec kit split.**
+  *(rails session v2)*
 
 - ☑ 2026-07-10 · main (docs only) · §REALMS/WORLD · `THEME-PLAN.md` (NEW) — **THE SETTING
   riff v0**: the world fiction born — **the Gilded Age → the Binding → the Quiet → the
