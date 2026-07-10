@@ -224,6 +224,47 @@ extends Resource
                                             ## ≈4-5 ticks @30 Hz, keeps the 18% Bullseye band ≥ ~1 tick + read
 @export var gov_k: float = 0.9              ## asymptote curvature: rate = 1 + (cap-1)·(1 − exp(−k·push))
 
+# --- D0 S1 · QUICKSTEP (generic STRIKE boon) — each Perfect adds a SPEED PUSH (governor-clamped:
+#     the wall keeps it readable) and self-bites (tighter window). Stacks reset on a slip. ---
+@export var quickstep_speed: float = 0.08   ## each Perfect adds this push (routes through _speed_push)
+@export var quickstep_cap: int = 8          ## push stack ceiling
+
+# --- D0 S1 · DOUBLE TIME v2 (ghost notes) — v1 beat-doubling CUT at the governor wall. Sustained
+#     max-Flow clean play opens an ~8s window where each Perfect+ ALSO lands a free GHOST half-
+#     strike (no Flow risk, no window tighten, no push): twice the NOTES, never a faster beat. ---
+@export var ghost_fill: int = 6             ## max-Flow Perfects to open the ghost window
+@export var ghost_window_sec: float = 8.0   ## the ghost window stays open this long
+@export var ghost_frac: float = 0.5         ## a ghost half-strike lands at this fraction of a Perfect
+
+# --- D0 S1 · THE WOUND POT (v4 WOUND branch, TEMPO-PLAN §17) — short bleeds inscribed on the boss
+#     frame, ticked in upkeep (fixed iteration order = determinism), press-cashed by Eviscerate
+#     when Hemorrhage is held. Durations in SECONDS; a "beat" in the fiction ≈ wound_tick_every. ---
+@export var wound_tick_every: float = 0.8   ## a live bleed ticks this often (≈ one beat)
+@export var open_veins_dur: float = 1.6     ## OPEN VEINS creed: a Bullseye bleed lasts this (≈2 beats)
+@export var open_veins_tick: float = 4.0    ## OPEN VEINS: damage per bleed tick (modest)
+@export var lacerate_frac: float = 0.5      ## LACERATE boon: a Perfect inscribes a bleed at this fraction
+@export var slow_bleed_dur: float = 0.8     ## SLOW BLEED boon: +this duration (sec) …
+@export var slow_bleed_mult: float = 1.10   ## … and ticks +10%
+@export var wound_dur_cap: float = 4.0      ## SLOW BLEED cap: a bleed never lasts beyond this (~5 beats)
+@export var arterial_mult: float = 1.30     ## ARTERIAL NOTE boon: bleeds tick this much harder …
+@export var arterial_shorten: float = 0.8   ## … but expire this much sooner (sec)
+@export var hemorrhage_ext: float = 0.8     ## HEMORRHAGE module: every bleed ticks +this longer
+@export var hemorrhage_cash_per: float = 0.10 ## HEMORRHAGE: Evis cash pays +this per bleed consumed
+@export var deepcash_min_bleeds: int = 4    ## THE DEEP CASH (rig WHEN): consume this many bleeds in one Evis
+@export var exsang_min_bleeds: int = 5      ## EXSANGUINATE keystone: min live bleeds to erupt
+@export var exsang_beats: int = 3           ## EXSANGUINATE: the erupted burst spans this many ticks
+
+# --- D0 S1 · THE EDGE branch (v4) — Whetstone creed (opt-in crit from run start) + The Strop
+#     module (the KEEN meter: clean strikes whet the blade, the next crit spends it all). ---
+@export var whetstone_crit: float = 0.12    ## WHETSTONE creed: a Bullseye crits at this chance from run start
+@export var keen_cap: int = 5               ## THE STROP module: KEEN gauge ceiling
+@export var keen_per: float = 0.08          ## THE STROP: the next crit consumes all KEEN for +this per stack
+
+# --- D0 S1 · FINISH-lane boons ---
+@export var heavy_ink_per: float = 0.10     ## HEAVY INK: each combo point above the floor adds +this to the next finisher
+@export var heavy_ink_floor: int = 3        ## HEAVY INK: combo above this counts
+@export var grand_pause_mult: float = 0.25  ## GRAND PAUSE: a full-combo (5/5) Eviscerate hits +this
+
 # --- Venomancer poison model ---
 @export var ven_cap: int = 8                ## per-type poison cap (V/F/C)
 @export var syn_cap: float = 1.8            ## Toxic Synergy ramp cap

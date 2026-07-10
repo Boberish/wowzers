@@ -168,7 +168,7 @@ func _prove_opening(seeds: int) -> void:
 	var d2 := _run_one(17, "executioner", "tempo", 6, {}, true)
 	print("  determinism (openings on): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
 
-## S0 · THE SPEED GOVERNOR probe: run a max-speed build (Double Time @expert) and prove that no
+## S0 · THE SPEED GOVERNOR probe: run a max-speed build (Quickstep @expert) and prove that no
 ## matter how the overdrive stacks pile up, the ONE asymptotic wall holds — the live Perfect
 ## window never narrows below window_min and the earliest-strike interval never dips below
 ## swing_min ÷ beat_rate_cap. This is the engine-30 Hz "Bullseye stays readable" guarantee. Emits
@@ -182,7 +182,7 @@ func _prove_governor(seeds: int) -> void:
 	var sampled := 0
 	for seed in range(1, n + 1):
 		var s := TwinfangContent.make_state(seed, "tempo", cfg, tcfg, _encounter("executioner"),
-			{"doubleTime": true, "tightrope": true}, "drumline", {})
+			{"quickstep": true, "throughline": true}, "drumline", {})
 		var seat := s.seats[0]
 		var kit := seat.kit as TwinfangKit
 		var pol := seat.policy as TwinfangPolicy
@@ -196,7 +196,7 @@ func _prove_governor(seeds: int) -> void:
 					s.enqueue(s.tick + 1, seat, a)
 			CombatCore.update(s)
 			s.events.clear()
-			if int(seat.vars.get("overdrive", 0)) > 0:   # only sample while the governor is engaged
+			if int(seat.vars.get("quickstep", 0)) > 0:   # only sample while the governor is engaged
 				var w := kit._edge_window(seat)
 				min_win = minf(min_win, float(w[1]) - float(w[0]))
 				min_int = minf(min_int, kit._swing_min_sec(seat))
@@ -204,14 +204,14 @@ func _prove_governor(seeds: int) -> void:
 	var floor_int := tcfg.swing_min / tcfg.beat_rate_cap
 	var eps := 0.0006
 	var ok := sampled == 0 or (min_win >= tcfg.window_min - eps and min_int >= floor_int - eps)
-	print("GOVERNOR probe (Tempo doubleTime @expert, %d seeds — the speed wall):" % n)
+	print("GOVERNOR probe (Tempo quickstep @expert, %d seeds — the speed wall):" % n)
 	print("  samples %d  min window %.3fs (floor %.3f)  min interval %.3fs (floor %.3f)  -> %s" % [
 		sampled, min_win, tcfg.window_min, min_int, floor_int, ("PASS" if ok else "FAIL")])
 	if not ok:
 		print("  CHECK FAIL: the speed governor let a window/interval breach the wall")
 	# determinism: the governed max-speed build reproduces byte-for-byte
-	var d1 := _run_one(9, "executioner", "tempo", 0, {"doubleTime": true, "tightrope": true})
-	var d2 := _run_one(9, "executioner", "tempo", 0, {"doubleTime": true, "tightrope": true})
+	var d1 := _run_one(9, "executioner", "tempo", 0, {"quickstep": true, "throughline": true})
+	var d2 := _run_one(9, "executioner", "tempo", 0, {"quickstep": true, "throughline": true})
 	print("  determinism (governed speed build): %s" % ("PASS" if d1["checksum"] == d2["checksum"] else "FAIL"))
 
 ## TEMPO REWORK probe: the CREED risk gradient (Tempo / Executioner). Drumline (steady, −2
