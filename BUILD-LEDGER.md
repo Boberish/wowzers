@@ -269,30 +269,34 @@ build-once seams that five separate class reworks and the endgame all need:
 | **STATS PAGE v2 — the full post-fight report** | 🔨 `4b58d0b` (2026-07-10) | MASTER §COORD (stats claim) | `combat_core` (`meter_boon`/`_credit_amps`/`credit_boon_factors`/`_note_melee_victim`/`_sample_series` + uncontested-cast counter — ALL diag-family) · `combat_state`+`boss_state` (`boon_meter`/`series`/`last_melee_victim_i`) · `class_kit.recap_spec()` + twinfang/alch/well overrides · twinfang `_deal` boon-factor credit · `game/ui/stats_page.gd` NEW · `raid_hud` FULL REPORT button + `_show_stats_page` · `meter_probe [8]` · `screenshot_stats` NEW | **BUILT & MERGED.** Per-fight only (run recap deferred → row below). **BYTE-IDENTICAL** (diag-family; raid_sim+twinfang_sim serial A/B vs `3ec9a06`; meter_probe determinism + checksum unchanged). Boon impact: **Twinfang inline full**; Alchemist/Well proc-src + raid-amp paths (ramp/heal boons → SIM-PLAN S4 card-lift). **STANDING RULE:** every future kit rework adds its `credit_boon_factors` lines. ⚠ additive on `combat_core`/`combat_state`/`boss_state` — coexists with the `tuning-sweep` claim (no line overlap). |
 | Run-level recap (aggregate across the descent) | 🔴 | MASTER §COORD (stats claim, deferred) | `run_state` per-fight results accumulator · new run-summary screen on campaign-clear / wipe (fold each fight's totals+grades) · class-agnostic data | **Fast-follow to STATS PAGE v2** (Bill: per-fight first). Low drift; nothing persists combat stats past one fight today. |
 
-### I. THE DESCENT REBUILD (`DESCENT-PLAN.md` — 🔒 ALL 12 VERDICTS IN, Bill 2026-07-10; build post-purge)
+### I. THE DESCENT REBUILD (`DESCENT-PLAN.md` — SLICE 1 🔨 MERGED `ee18e05` 2026-07-10; slices 2–6 next)
 
 **Verdict record:** V1–V6/V10/V12 at the recommendations · V7 **NO 2nd module** · V8 **STANDING/
 Prior deleted entirely** (no fold — fresh runs stay fresh) · V9 **WILD ~10%** (2/floor on F2–4,
 out of EVENT quota) · V11 per-seat earned wallets. Numbers = tune-on-feel, not blockers.
 
-⚠ **Sequencing:** land AFTER `purge-oldgame` merges (GATE-cut overlap). The map-layer changes are
-**ONE deliberate `raid_map_sim` re-baseline** — do the floor/quota/kind changes as one bang
-(walker + `CampaignCore.ticket_at` together · retire the one-gate assert · add elite/market-reachability
-+ valley-band + no-stacked-spikes invariants · add a per-fight ttk column · **drop the Prior term
-from `map_check.gd` in the same bang, V#8**).
+**SLICE 1 = THE MAP BANG, shipped:** the one `raid_map_sim` re-baseline is DONE (walker +
+`CampaignCore` moved together · descent invariants proven in-sim · per-fight ttk column · Prior
+term dropped in the same bang · protocol v15 · solo `map_sim`/`raid_sim` byte-identical). The
+new node kinds exist ON the map now with honest stub interiors — slices 3–5 flip
+`RunMap.MARKET_LIVE / JAILBREAK_LIVE / MINIGAME_LIVE` without regenerating a single map.
 
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
-| 4-floor restructure (Vorathek→F1 Seal, Rings 3-2-1-0) | 🔒 | DESCENT §1–2 | `raid_content.FLOORS`+`floor_fights`, `run_map` inputs, `_advance_floor` grant indices, oath stakes, salvage table | WORLD-PLAN amended (banners in place 07-10). ~5 ring-as-key sites. NO 2nd module (V#7). |
-| Node contracts + legibility UI pass | 🔒 | DESCENT §5/§9 | `map_screen`, `map_event_panel`, header meters/pips | Pay-on-the-door + fight-tier pips + both-legs check hints + renames (LUCK/BACKUPS/REGENERATE/DEPRECATE). Kills raid integrity (ticket re-price rides here). |
-| PROMPT MARKET node + post-Seal market phase | 🔒 (V#11: per-seat wallets) | DESCENT §6 | new node kind, `run_state.gd:23` tokens→per-seat, `draft.gd` (mint input `state.diag`→`seat.diag` [already tracked, `combat_core:629`] + deposit to earner, UPSELL spends own), `raid_hud` (AI shop director + AUTO default), `gear_catalog` reframes | **= GEAR-3 absorbed** (§D row). **AI seats START EARNING** (today the player-mirror mint pays them nothing). 6-slot stock; `tokens@market` sim diag; serialization contract. |
-| THE JAILBREAK (printed curse deals) | 🔒 (V#4: mixed menu, lean gentle) | DESCENT §7 | new node kind, `draft.gd` welded-downside, header curse pips, Cooling purge fork | **= TEETH curse-cards lands here** (§E row). No run-long timing curse — hard rule. |
-| Minigame nodes: CAPTCHA · BENCHMARK · SERVER ROOM · PATCH BAY (+2 reserved) | 🔒 (V#5: best-of-N) | DESCENT §8 | new node kinds over `strike_judge`/lockstep, backdoor path | **BENCHMARK = TEETH CONTEST absorbed** (§E row). Bonus-tier pay only — always skippable. |
-| THE QUEUE + DEED/ESCORT ticket shapes + turn-in fork | 🔒 (V#10: SEV-1 parked v1.1) | DESCENT §10 | `map_content` tickets, `CampaignCore.ticket_at` + sim walker (divergence trap), `seat.diag` | One-grammar/two-ledgers verdict. ESCORT port inherits `escort-ticket` lane-law debt. |
-| Packs on raid floors + enrage retighten (~1.6×) + the fight ladder | 🔒 | DESCENT §3 | `raid_content` packroll weights by floor, enrage configs | Deck-cycle law · 3-min trash cap. Rides the one re-baseline. |
+| 4-floor restructure (Vorathek→F1 Seal, Rings 3-2-1-0) | 🔨 `ee18e05` | DESCENT §1–2 | `raid_content.FLOORS` (+quota/minigame/tier/packroll per row = the ONE source) · `run_map` · `raid_hud` · `net_server` · `raid_map_sim` | SHIPPED: rows 6/8/8/9, ring-1 split from the ROOT alias, salvage `1:`, grant ladder holds (module F1 · re-wire F2 · NO 2nd module V#7). |
+| ELITE node (REINFORCED trio + bounty + curio-roll drop event) | 🔨 `ee18e05` (keystone slot ⏳) | DESCENT §5 | `run_map`, `raid_hud` packroll/win path | SHIPPED elective + pinned-reachable. **Keystone 1-of-2 = reserved slot** — lands with the per-class deck slices (no class ships a granter-ready pool yet; §C elite-node row tracks it). |
+| WILD nodes (~10%, payload rolled at gen, tier printed) | 🔨 `ee18e05` | DESCENT §5 | `run_map`, resolve layers | SHIPPED (V#9). |
+| Node contracts + legibility UI pass — **SLICE 2, next** | 🔒 | DESCENT §5/§9 | `map_screen`, `map_event_panel`, header meters/pips | Kind faces/tags/glyphs shipped w/ slice 1; still owed: one-line contracts on doors + fight-tier ▮ pips + both-legs check hints + renames (LUCK/BACKUPS/REGENERATE/DEPRECATE) + **the raid integrity kill + ticket re-price**. |
+| PROMPT MARKET interior + post-Seal market phase — SLICE 3 | 🔒 (V#11: per-seat wallets) | DESCENT §6 | flip `RunMap.MARKET_LIVE`, `run_state` tokens→per-seat, `draft.gd` (mint `state.diag`→`seat.diag` + deposit to earner, UPSELL spends own), `raid_hud` (shop UI + AI director + AUTO), `gear_catalog` reframes | Node exists (stub=CACHE). **= GEAR-3 absorbed.** AI seats START EARNING. `tokens@market` sim diag. |
+| THE JAILBREAK interior — SLICE 4 | 🔒 (V#4: mixed, lean gentle) | DESCENT §7 | flip `JAILBREAK_LIVE`, deal content, `draft.gd` welded-downside, curse pips, Cooling purge fork | Node exists (stub=EVENT). **= TEETH curse-cards.** No run-long timing curse. |
+| Minigame interiors: CAPTCHA · BENCHMARK (+ SERVER ROOM · PATCH BAY · 2 reserved) — SLICE 5 | 🔒 (V#5: best-of-N) | DESCENT §8 | flip `MINIGAME_LIVE`, scoring over `strike_judge`/lockstep, backdoor room | Nodes exist (stub=EVENT, flavor field already rolled per floor). Bonus-tier pay only. |
+| THE QUEUE + DEED/ESCORT ticket shapes + turn-in fork — SLICE 6 | 🔒 (V#10: SEV-1 parked v1.1) | DESCENT §10 | `map_content` tickets, `CampaignCore.ticket_at` + sim walker, `seat.diag` | One-grammar/two-ledgers verdict. ESCORT port inherits `escort-ticket` lane-law debt. |
+| Packs on raid floors + enrage retighten + the fight ladder | 🔨 `ee18e05` (Forge enrages ⏳) | DESCENT §3 | `raid_content` packroll/FLOORS, skirmish enrages | SHIPPED: F1 55/35/10 → F4 15/45/40; skirmishes 150/175→95/110. **Forge body enrages untouched** (zone-shared — the balance pass owns them). |
 | Seal budget contract (5/7/9/12 min) | 🔒 (V#12: ship structure at ~2h) | DESCENT §4 | (the later boss pass) | The contract the boss redo fills — structure beats, NEVER +HP. Not built by this cluster. |
-| Map-seed-from-run-seed | 🔒 | DESCENT §2 | `run_map` seeding, `RunDirector` | Replay-stable floors, checkpoint restore, co-op shared maps. Coordinate w/ P4 offline `run_seed` (in flight). |
-| Resource verdicts (LUCK · BACKUPS · REGENERATE · integrity kill · **Prior/STANDING DELETED, V#8**) | 🔒 | DESCENT §9 | header UI, `map_fx`, `map_check` breakdown rows (drop Prior term), DELETE `luck_profile.gd` + `rift_prior.cfg` I/O + the parked online-Prior follow-up | Governance: 3 meters max, retire-one-to-add-one. WILD quota 2/floor F2–4 (V#9 ~10%). |
+| Map-seed-from-run-seed | 🔨 (was P4) | DESCENT §2 | — | Offline was ALREADY run_seed-derived (P4 rails); verified in slice 1. Online keeps the server-minted per-descent seed (deterministic within a descent; server has no profile). |
+| V#8 Prior/STANDING deletion | 🔨 `ee18e05` | DESCENT §9 | (14 files swept) | SHIPPED: `luck_profile.gd` deleted, baseline ⚡ open, prior fx→entropy, prior gate→entropy gate. Remaining §9 renames/meters ride slice 2. |
+| Server pack pass (online elite promotion + packs) | ⏳ | DESCENT §5 | `net_server` spec build | Online elite currently fights its captain solo (flagged in code); packs are offline-only today (pre-existing). |
+| Ceremony-time probe (the unmeasured ~34 min band) | 💡 | DESCENT §13 | new probe over menus/drafts | The one un-instrumented slice of the §1 time budget. |
 
 ### J. THE DUNGEON STRUCTURE (`DUNGEON-PLAN.md` — 🟡 the cluster at Bill's 8-verdict board §V, 2026-07-10)
 

@@ -922,20 +922,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
-- ☐ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **CLAIM: DESCENT SLICE 1
-  — THE MAP BANG (Bill's go).** The one deliberate `raid_map_sim` re-baseline (DESCENT-PLAN §2/§3/
-  §5 + ledger §I): 4-floor FLOORS (Vorathek→F1 Seal, Rings 3-2-1-0) · rows 6/8/8/9 + FINAL quota
-  bags with the new node kinds (ELITE live · MARKET/JAILBREAK/MINIGAME flag-stubbed to honest
-  fallback kinds so map rng locks ONCE — interiors land in slices 3–5 · WILD live ~10%) · GATE
-  leftovers swept · map-seed-from-run-seed · gen invariants (market+elite reachability · pre-Seal
-  valley band · elite-not-beside-Seal) · grant ladder (module end F1 · re-wire end F2 · keystone
-  1-of-2 at first ELITE, guarded per class pool · oaths every Seal · NO 2nd module V#7) · ring-key
-  sites (salvage `1:` · oath stakes · filler clampi) · V#8 Prior term OUT of `map_check` +
-  `luck_profile.gd` deleted · then same-branch: packs-on-floors + enrage ~1.6× + fight ladder
-  (raid_sim re-baseline rides the same bang). Touches the §0 map-layer hotspot (`run_map` ·
-  `map_content` · `campaign_core` · `raid_map_sim`) + `raid_content` + `raid_hud` map region —
-  ⚠ `class-bands` worktree shares `raid_hud`: merge main often, stay out of the gauge region.
-  *(raid-rebuild session)*
+- ☑ 2026-07-10 · worktree `../wow-descent-map` (branch `descent-map`) — **DESCENT SLICE 1 — THE
+  MAP BANG: MERGED to main (`ee18e05`), verify-all 40/40 GREEN ×2 (branch + merged tree).** The
+  one deliberate `raid_map_sim` re-baseline, delivered: **4-floor FLOORS** (Vorathek→F1 Seal,
+  Rings 3-2-1-0; rows 6/8/8/9 = 14/20/20/23 nodes) · **new node kinds** (ELITE live: REINFORCED
+  trio + ⏣ bounty + curio-roll drop event, keystone slot reserved for the deck slices ·
+  MARKET/JAILBREAK/MINIGAME flag-stubbed via `RunMap.effective_kind` to honest fallback kinds —
+  map rng locked ONCE, interiors flip flags in slices 3–5 · WILD live, payload rolled at gen,
+  tier printed) · **gen invariants proven in-sim** (pre-Seal valley band · elite placement laws ·
+  market+elite reachable from every route — `_prove_descent` 40 maps/floor PASS) · **V#8 Prior
+  DELETED end-to-end** (`luck_profile.gd` gone; profile/run_state/run_director/map_check/map_fx/
+  UI/net/8 probes swept; descents open on baseline ⚡; prior event-fx → entropy) · **THE FIGHT
+  LADDER** (per-floor packroll F1 55/35/10 → F4 15/45/40 · skirmish enrages 150/175→95/110 ·
+  filler tier per FLOORS row; Forge body enrages untouched — zone-shared, balance-pass item) ·
+  salvage `1:` row · protocol **v15**. Gates: solo `map_sim` + `raid_sim` **byte-identical**
+  (ab-gate); post-merge sanity green; +fixed the pre-existing red `ui_smoke_map` (stats-v2 FULL
+  REPORT button hung the walker — `b4d9ff3`). **Remaining slices:** 2 legibility UI (contracts/
+  pips/3-meters/renames/integrity kill) · 3 Market+wallets · 4 Jailbreak · 5 minigame interiors ·
+  6 QUEUE/tickets re-price · server pack pass · ceremony-time probe. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17.11 (NEW) + **DECK-LAYOUT §5 LAW CHANGE** +
   CARD-CATALOG flips + ledger rows + artifact D0 tab — **TEMPO ABILITY AUDIT PASS 2 (Bill's
