@@ -18,19 +18,12 @@ extends ClassKit
 
 var aspect: String = "wildgrove"
 var cfg: BloomweaverConfig
-var boons: Dictionary = {}
 var flourish: bool = false      ## Wildgrove garden bonus, recomputed each tick in upkeep
 var flourish_hi: bool = false   ## …and the field is LUSH (upgraded bonus)
 
 func _init(_aspect: String, _cfg: BloomweaverConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
-
-func _tt(s: CombatState, sec: float) -> int:
-	return CombatCore.to_ticks(sec, s.config.fixed_hz)
-
-func _b(id: String) -> bool:
-	return bool(boons.get(id, false))
 
 # --- boon-aware numbers ---
 func _seed_dur() -> float:

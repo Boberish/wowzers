@@ -6,14 +6,10 @@ extends ClassKit
 
 var aspect: String = "warden"          ## "warden" | "juggernaut"
 var cfg: BulwarkConfig
-var boons: Dictionary = {}             ## id -> true (acquired upgrades/relics)
 
 func _init(_aspect: String, _cfg: BulwarkConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
-
-func _b(id: String) -> bool:
-	return bool(boons.get(id, false))
 
 # effective (boon-modified) Momentum params
 func _mom_max() -> int:
@@ -30,9 +26,6 @@ func defense_active() -> float:
 	return _def()["active"] * (cfg.mod_wide_mult if _b("propWide") else 1.0)
 func defense_cd() -> float:
 	return _def()["cd"] * (cfg.mod_swift_mult if _b("propSwift") else 1.0)
-
-func _tt(s: CombatState, seconds: float) -> int:
-	return CombatCore.to_ticks(seconds, s.config.fixed_hz)
 
 # --- per-tick upkeep: exposed-window flag + Juggernaut Momentum decay ---
 func upkeep(s: CombatState, seat: Seat) -> void:

@@ -8,6 +8,24 @@
 class_name ClassKit
 extends RefCounted
 
+## The drafted deck every kit reads (REFIT P4 hoist — these were byte-identical
+## copies in all five kits). `boons`: drafted boon ids -> true (RaidNet.build folds
+## a spec's per-seat boons in here). `modules`: equipped UI Module ids -> true.
+var boons: Dictionary = {}
+var modules: Dictionary = {}
+
+## Boon / Module lookups — the guarded-no-op idiom's foundation: absent = false,
+## so an undrafted kit takes the vanilla path byte-identically.
+func _b(id: String) -> bool:
+	return bool(boons.get(id, false))
+
+func _m(id: String) -> bool:
+	return bool(modules.get(id, false))
+
+## Seconds -> engine ticks at the fight's fixed rate (integer tick is truth).
+func _tt(s: CombatState, sec: float) -> int:
+	return CombatCore.to_ticks(sec, s.config.fixed_hz)
+
 ## Per-tick upkeep (resource decay, buff bookkeeping). Runs early in update().
 func upkeep(_s: CombatState, _seat: Seat) -> void:
 	pass

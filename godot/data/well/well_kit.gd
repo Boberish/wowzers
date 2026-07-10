@@ -25,9 +25,7 @@ extends ClassKit
 
 var aspect: String = "brim"
 var cfg: WellConfig
-var boons: Dictionary = {}
 var creed_id: String = ""              ## the run's healing temperament ("" = none, byte-identical base)
-var modules: Dictionary = {}           ## equipped Floor-1 module id -> true (reservoir / triage / benediction)
 var rig: Dictionary = {}               ## the ONE Combo rig — {"when": id, "then": id}
 
 # on_heal grading stash (heal_unit doesn't return overheal; capture it during a graded cast)
@@ -37,15 +35,6 @@ var _grading_over: float = 0.0
 func _init(_aspect: String, _cfg: WellConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
-
-func _tt(s: CombatState, sec: float) -> int:
-	return CombatCore.to_ticks(sec, s.config.fixed_hz)
-
-func _b(id: String) -> bool:
-	return bool(boons.get(id, false))
-
-func _m(id: String) -> bool:
-	return bool(modules.get(id, false))
 
 ## A creed modifier, identity-defaulted. creed_id == "" returns the IDENTITY value, so every
 ## _cr read collapses to the base number and the deckless build stays byte-identical.

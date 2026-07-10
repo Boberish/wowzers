@@ -15,9 +15,7 @@ extends ClassKit
 
 var aspect: String = "brew"            ## working-name filler (the Brew IS the class)
 var cfg: AlchemistConfig
-var boons: Dictionary = {}             ## drafted boon ids -> true (AlchemistBoons)
 var creed_id: String = ""              ## the run's brewing posture ("" = none, byte-identical base)
-var modules: Dictionary = {}           ## equipped UI Modules id -> true (Third Reagent / Fermentation / Vessel)
 var rig: Dictionary = {}               ## the ONE Combo rig — {"when": id, "then": id}
 
 ## Reaction damage lands in discrete chunks on this cadence (ticks): threat/meter get
@@ -42,12 +40,6 @@ func defense_cd() -> float:
 ## single SPACE press (DODGE-PLAN.md 2026-07-08).
 func unified_dodge() -> bool:
 	return true
-
-func _b(id: String) -> bool:
-	return bool(boons.get(id, false))
-
-func _m(id: String) -> bool:
-	return bool(modules.get(id, false))
 
 ## THE CASK (§7) guard. aspect == "cask" is a brand-new code path; every Brew eval tests
 ## aspect == "brew" (or nothing), so widening never moves an existing checksum — the
@@ -359,9 +351,6 @@ func _catalyst(s: CombatState, seat: Seat) -> bool:
 	CombatCore._bump_diag(s, seat, "catalysts")
 	CombatCore.emit_event(s, {"t": "brew_catalyst", "player": seat.is_player, "seat": seat})
 	return true
-
-func _tt(s: CombatState, sec: float) -> int:
-	return CombatCore.to_ticks(sec, s.config.fixed_hz)
 
 func _start_charge(seat: Seat, side: String) -> bool:
 	if String(seat.vars.get("charging", "")) != "":

@@ -11,9 +11,7 @@ extends ClassKit
 
 var aspect: String = "tempo"           ## "tempo" | "venomancer" | "fermata"
 var cfg: TwinfangConfig
-var boons: Dictionary = {}             ## id -> true (drafted upgrades/relics/spells)
 var creed_id: String = "drumline"      ## TEMPO rework: the run's risk temperament (Tempo only)
-var modules: Dictionary = {}           ## TEMPO rework: equipped UI Modules, id -> true (Opening/Edge/…)
 var rig: Dictionary = {}               ## TEMPO §5: the run's ONE Combo rig — {"when": id, "then": id}
 
 # TEMPO REWORK · GRADED WINDOW (§2c): one landing zone, four tiers by centredness.
@@ -22,12 +20,6 @@ enum { G_MISS = 0, G_GOOD = 1, G_PERFECT = 2, G_BULL = 3 }
 func _init(_aspect: String, _cfg: TwinfangConfig) -> void:
 	aspect = _aspect
 	cfg = _cfg
-
-func _b(id: String) -> bool:
-	return bool(boons.get(id, false))
-
-func _m(id: String) -> bool:
-	return bool(modules.get(id, false))
 
 ## FERMATA (§13): the hold-release aspect. It IS Tempo's kit (Flow / combo / Coup / Opening /
 ## crit) — only the Strike changes (press→sharpen→release), so everything Flow-shaped is shared
@@ -153,9 +145,6 @@ func _creed_slip(s: CombatState, seat: Seat, force_shatter := false) -> void:
 		seat.vars["window_locked"] = true
 	CombatCore._bump_diag(s, seat, "slip")
 	CombatCore.emit_event(s, {"t": "creed_slip", "player": seat.is_player, "creed": creed_id})
-
-func _tt(s: CombatState, sec: float) -> int:
-	return CombatCore.to_ticks(sec, s.config.fixed_hz)
 
 # --------------------------------------------------------------------------
 # Flow / combo / resource helpers
