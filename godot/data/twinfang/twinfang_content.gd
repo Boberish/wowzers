@@ -132,7 +132,7 @@ static func run_encounters() -> Array:
 # --- seat ---
 
 static func _make_blade(aspect: String, tcfg: TwinfangConfig, boons: Dictionary,
-		creed := "drumline", mods := {}) -> Seat:
+		creed := "drumline", mods := {}, transform := "") -> Seat:
 	var u := Seat.new()
 	u.role = "dps"; u.unit_name = "The Twinfang"; u.is_player = true; u.fidelity = "full"
 	u.hp_max = tcfg.hp_max; u.hp = tcfg.hp_max
@@ -142,6 +142,7 @@ static func _make_blade(aspect: String, tcfg: TwinfangConfig, boons: Dictionary,
 	kit.boons = boons
 	kit.creed_id = creed                         # TEMPO rework: run-start risk temperament
 	kit.modules = mods                           # TEMPO rework: equipped UI Modules
+	kit.transform = transform                    # D0 S4: the run's ability transform (cadenza/rondo/tremolo)
 	u.kit = kit
 	u.policy = TwinfangPolicy.new()
 	u.vars = {"flow": 0, "cp": 0, "flow_decay_acc": 0, "last_strike_tick": -100000,
@@ -153,9 +154,9 @@ static func _make_blade(aspect: String, tcfg: TwinfangConfig, boons: Dictionary,
 ## Build a solo Twinfang fight (party of one) for `seed` and `aspect`.
 static func make_state(seed: int, aspect: String, cfg: TuningConfig,
 		tcfg: TwinfangConfig, enc: EncounterRes, boons: Dictionary = {},
-		creed := "drumline", mods := {}) -> CombatState:
+		creed := "drumline", mods := {}, transform := "") -> CombatState:
 	var s := CombatCore.create_state(enc, cfg, seed)
-	s.seats = [_make_blade(aspect, tcfg, boons, creed, mods)]
+	s.seats = [_make_blade(aspect, tcfg, boons, creed, mods, transform)]
 	s.loss_mode = "player"
 	return s
 
@@ -164,7 +165,9 @@ static func make_state(seed: int, aspect: String, cfg: TuningConfig,
 static func build_fight(run: RunState, seed: int) -> CombatState:
 	var creed: Variant = run.get("tf_creed")     # dynamic get — null until the pick UI adds it
 	var mods: Variant = run.get("tf_modules")
+	var xform: Variant = run.get("transform")    # D0 S4: the picked ability transform ("" = none)
 	return make_state(seed, run.aspect, make_config(), make_twinfang_config(),
 		run.current_encounter(), run.boons,
 		String(creed) if creed != null else "drumline",
-		mods if mods is Dictionary else {})
+		mods if mods is Dictionary else {},
+		String(xform) if xform != null else "")

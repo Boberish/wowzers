@@ -59,7 +59,11 @@ static func offerable(run) -> Array:
 		return []
 	var seen := {}
 	var out: Array = []
-	for b in cat.spec_pool(run.aspect) + cat.SHARED:
+	# D0 S4 · a held TRANSFORM gates its 2 sub-boons (doors) into later offers (Twinfang only).
+	var pool: Array = cat.spec_pool(run.aspect) + cat.SHARED
+	if String(run.char_class) == "twinfang" and String(run.transform) != "":
+		pool += TwinfangBoons.doors_for(String(run.transform))
+	for b in pool:
 		if seen.has(b["id"]):
 			continue
 		seen[b["id"]] = true

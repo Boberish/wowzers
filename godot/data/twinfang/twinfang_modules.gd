@@ -48,10 +48,16 @@ const MODULES := {
 		"blurb": "An external steady beat — land Strikes ON it for a bonus. (design)",
 		"built": false,
 	},
+	# --- D0 S1 · v4 branch modules (Tempo) — THE WOUND counter + THE EDGE keen meter ---
 	"hemorrhage": {
-		"name": "The Hemorrhage", "kicker": "Sustain", "gauge": "bleed",
-		"blurb": "Perfects open a stacking bleed; a dump reopens it for a spike. (design)",
-		"built": false,
+		"name": "The Hemorrhage", "kicker": "The wound counter", "gauge": "bleed",
+		"blurb": "The WOUND pot on the boss frame (count + total). Bleeds tick +1 beat longer, and Eviscerate may CASH the pot - consume every live bleed, pay its remaining value instantly +10% per bleed. Cash-now or let-it-tick is a per-Evis decision.",
+		"built": true, "aspect": "tempo", "theme": "wound",
+	},
+	"strop": {
+		"name": "The Strop", "kicker": "The KEEN meter", "gauge": "keen",
+		"blurb": "Consecutive Perfect-or-better strikes whet a KEEN gauge (cap 5); your next CRIT consumes all KEEN for +8% per stack. Spend it on a strike or hold it for a dump - crit timing becomes a decision. THE EDGE's module.",
+		"built": true, "aspect": "tempo", "theme": "edge",
 	},
 }
 
