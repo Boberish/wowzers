@@ -356,6 +356,41 @@ func _draw() -> void:
 			Palette.TEXT_DIM.darkened(0.2))
 
 ## COMPACT: ranked combatant bars (bar length ∝ the leader), total + rate.
+## series column base for the current mode's per-second sparkline. The 1 Hz series tracks only
+## cumulative damage (cols 2-5) and damage-taken (cols 6-9), so only dmg/taken modes get a trace;
+## heal/shield/amp/disc return -1 (no sparkline). Column for seat i is base + i.
+func _spark_col(m: String) -> int:
+	match m:
+		"dmg": return 2
+		"taken": return 6
+		_: return -1
+
+## A faint per-second trace behind a compact row — the shape of the seat's output over the fight,
+## from `series` (cumulative col `base+i`, differentiated to per-second, normalized to its own
+## peak). Low-alpha under the text so it adds life without clutter. Pure view; reads state.series.
+func _draw_spark(s: CombatState, i: int, base: int, rr: Rect2, acc: Color) -> void:
+	var ser: Array = s.series
+	if ser.size() < 3:
+		return
+	var col := base + i
+	if col >= (ser[0] as Array).size():
+		return
+	var vals: Array = []
+	var peak := 0.0
+	for k in range(1, ser.size()):
+		var dv := maxf(0.0, float((ser[k] as Array)[col]) - float((ser[k - 1] as Array)[col]))
+		vals.append(dv)
+		peak = maxf(peak, dv)
+	var n := vals.size()
+	if peak <= 0.0 or n < 2:
+		return
+	var pts := PackedVector2Array()
+	for k in n:
+		var fx := rr.position.x + rr.size.x * float(k) / float(n - 1)
+		var fy := rr.position.y + rr.size.y * (1.0 - float(vals[k]) / peak)
+		pts.append(Vector2(fx, fy))
+	draw_polyline(pts, Color(acc.r, acc.g, acc.b, 0.30), 1.0, true)
+
 func _draw_compact(s: CombatState, rk: Array, y: float) -> float:
 	var elapsed := maxf(s.time(), 1.0)
 	var top := (float(rk[0][1]) if not rk.is_empty() else 1.0)
@@ -380,6 +415,10 @@ func _draw_compact(s: CombatState, rk: Array, y: float) -> float:
 		if bw > 6.0:
 			draw_rect(Rect2(rr.position.x + bw - 2.0, rr.position.y, 2.0, rr.size.y),
 				Color(acc.r, acc.g, acc.b, 0.5))
+		# per-second sparkline (dmg/taken modes) — the shape of the fight, behind the text
+		var scol := _spark_col(mode)
+		if scol >= 0:
+			_draw_spark(s, i, scol, Rect2(8, y + 3.0, size.x - 118.0, ROW_C - 8.0), acc.lightened(0.15))
 		if not seat.alive():
 			draw_rect(rr, Color(0, 0, 0, 0.35))
 		var by := y + ROW_C - 8.0
