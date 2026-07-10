@@ -1348,3 +1348,103 @@ New GUARD (utility) lane: **Understudy** — auto-perfect-dodges the next author
 recharges ~25s · ladder 1/2/3 charges. Defense-QoL only — never feeds offense (dodge law intact).
 Replaces Swan Song (cut from the idea list). Fits the DODGE RATION pillar (3–8 beats/fight) and gives
 non-tank seats a "less defense juggling" draft option.
+
+---
+
+## 16. THE FERMATA BRANCH SLATE — v5 ladders filed + two additive themes 🟡 AT VERDICT (2026-07-10)
+
+**What this is** (SLATE-PLAN row 8, the queue's LAST slate; branch = build THEME). The v5 deck
+is BUILT (`FERMATA-V5-BRIEF.md` is the truth — its CUTS are law: Feint · Shadowstep · Deep Edge
+stay dead, nothing here resurrects them). This pass names the ladders the built deck already
+forms (PITCH #0) and pitches TWO additive themes — v5 is a tight deck; two honest themes beat
+three padded ones. Verb untouched (the Ramp & the Snap); example cards are ILLUSTRATIONS — no
+CARD-CATALOG rows. **Sibling wall:** none of this re-skins Tempo's §14 six (Wound/Finish/Swift/
+Edge/Punish/Band). **How it was made:** the v5 brief + §13 re-read + fresh sweep
+`research/fermata-sweep.md` (Superhot stillness · Guile charge economy) → 4 lenses → pitches →
+**3 skeptic passes (3 kills — the record so far — ~5 fixes folded)**.
+
+### 16.1 THE FILING TABLE — the v5 ladders, named (PITCH #0a/b/c)
+
+| Ladder | The fantasy | Built v5 cards that feed it |
+|---|---|---|
+| **#0a THE BRINKMAN** — live at the lip | the closer the cliff, the sharper the blade | the Long Ramp creed (entry) · theBrink meter · the Razor WHEN · Killing Whisper · Quiet Fuse |
+| **#0b THE RESTED BLADE** — the pause IS the move | stillness, then one perfect draw | First Note · the Rested WHEN · rest-bank Unseen Blade (keystone) · Composure · Restless Dark |
+| **#0c THE WINDOW-SETTER** — put the note where you want it | the stage obeys the knife | Stretto · Refrain · the widener carries (Wide Tempo/Fencer's Line/Rubato, entry-side law) · Eclipse near-chain (keystone) |
+| Minor lines (feed multiple) | — | the Mark module + Cold Cut (finisher economy — see the COLD HAND below) · Vanish/Veil-Warband (the one block card + the support) · Fleeting/Tutti creeds (temperament, any ladder) |
+
+Zero orphans; each ladder enters from a creed or base machinery (law 5 holds). The Superhot/
+Guile sweep confirms the shapes: every banked state here leaks or cliffs (Brink zeroes on snap ·
+Shades spend on release · the coil snaps past the lip) — nothing parks safely.
+
+### 16.2 ADDITIVE THEME 1 — THE AFTERIMAGE · *one draw, many shadows*
+
+**What its cards do:** the echo build — result multiplication, never press multiplication (the
+fewer-presses soul kept; Tempo's SWIFT owns press-count). Anchored by TWO CODED cards: Twin
+Echo (max-Flow releases echo 30%) and the Phantom keystone (Bull = phantom twin). New cards
+deepen the shadow: echoes of deeper releases echo harder; shadows stack on consecutive clean
+draws.
+**Dials addressed:** the release (echo riders keyed to grade/Flow) · Flow (the echo gate).
+**Example cards:** creed *The Doubled Dark* — Twin Echo's effect at half strength is your
+run-start baseline (entry law; the boon upgrades it) · boon *Deep Shadow* (POWER) — echoes
+inherit depth: a Bullseye's echo echoes at 45% instead of 30% · boon *Procession* (GREED) —
+each consecutive Perfect-or-deeper release adds +1 echo to the NEXT release (cap 3); any
+snap/unravel clears the procession · keystone **THE COMPANY OF KNIVES** — at full procession,
+your next Bullseye release brings the whole company: every banked echo lands as a visible
+blade-flight across the gate, each graded a half-step softer than the last.
+**Greed/comfort + EASE knob:** streak-greed (the procession); comfort = flat Twin-Echo value.
+Knob: procession-break grace (unravel doesn't clear at the comfort end; snap always does).
+**Nearest neighbor:** Tempo's SWIFT (more presses — this is more RESULTS per press) · the
+Cask's Twin Casks (two objects in flight — this is one strike, many images). Recorded.
+
+### 16.3 ADDITIVE THEME 2 — THE COLD HAND · *build shallow, cash branded*
+
+**What its cards do:** names the archetype the v5 deck implies but never ladders: the
+GOOD-band economy. Cold Cut pays shallow releases in CP; the Mark brands on Bulls; Evis cashes
+brands — so the build is a SPLIT HAND: deliberate shallow draws for CP volume (safe, fast, no
+Brink), then one branded Eviscerate cashed deep or in an Opening. The counter-axis to the
+Brinkman made a real ladder — the two builds read the same ramp opposite ways.
+**Dials addressed:** the release (shallow-on-purpose) · CP/Evis (the cash) · the Mark tiers.
+**Example cards:** creed *The Ledger* — Good-band releases +1 CP from run start (Cold Cut's
+baseline; the boon becomes its upgrade) · boon *Patient Books* (STRAT) — Evis at 5 CP consumes
+the Mark at +1 tier (cash a II as a III) · boon *No Flourishes* (GREED) — while your Brink is 0
+(never built), Evis +25%: commit to the shallow book, the lip pays you nothing · keystone
+**THE RECKONING STROKE** — an Evis that cashes a tier-III brand at 5 CP inside an Opening
+stops the sweep for a breath: one still frame, then the number (the accountant's guillotine).
+**Greed/comfort + EASE knob:** commitment-greed (No Flourishes locks you off the lip);
+comfort = mixed hands, smaller cashes. Knob: Good-band width (entry-side only, the widener law).
+**Nearest neighbor:** Tempo's FINISH (fewer-bigger presses — the Cold Hand is MANY-shallow +
+one cash) · the Prognosis's Called Shot (commitment greed on fight-arc — this commits to a
+GRAMMAR). Recorded.
+
+### 16.4 SLATE-LEVEL CHECKS + the pick
+
+**Spread (all five):** lip-greed (#0a) · rest economy (#0b) · window control (#0c) · echo
+spectacle (Afterimage) · shallow-build/branded-cash (Cold Hand) — five clocks; Brinkman vs
+Cold Hand is the slate's designed polarity (the same ramp read opposite ways — real
+pick-tension, stated).
+**Skeptic record:** 3 passes · **3 KILLS** (the slate's job was mostly to say no): **the
+Misdirection** (deliberate-unravel economy — built on the CUT Feint; resurrection without
+cause) · **the Unbroken Line** (dodge-then-re-draw chains — dodge-feeds-offense one step
+removed; Bill's rework cut that whole family) · **the Snap Dancer** (profit-from-snapping —
+the snap must stay a cliff, not a slide; Fleeting's snap-net is the only sanctioned softener)
+· ~5 fixes folded (Afterimage scoped to releases only, never autos · procession clears on
+snap ALWAYS · Cold Hand's No Flourishes gates on Brink-0 so the polarity is chosen, not
+accidental · Doubled Dark entry law · Reckoning Stroke earned-only).
+**Skeptic ranking (pick-tension, strongest→weakest):** Cold Hand · Afterimage.
+**Composition notes:** either additive theme + any #0 ladder composes; Cold Hand + Brinkman
+in one run is the two-handed read (legal, spicy — the trio test at the deck pass should
+confirm their cards repel per-draft); Afterimage + Rested Blade is the cinematic build (long
+stillness, then a company of knives).
+**Engine debts:** none — Twin Echo/Phantom/Mark/Cold Cut are coded; procession/ledger are
+kit-local counters.
+**Skipped on purpose:** the three kills above · **a TEAM theme** (Veil Over the Warband is
+the support card and Bill already has three TEAM shapes at verdict this cycle) · **charge
+partitioning as a theme** (keep-the-coil-through-X stays Opus-tier tech per the Vanish-Opus
+precedent — a card family, not a ladder) · **any far-window/Deep-Edge revival** (v5 deleted
+the far-fraction path; the widener law stands).
+
+**Next:** Bill picks (the additive themes are 0–2 alongside the #0 ladder naming) → Phase-2
+row D8 authors the v6 revision around the winners, inside the v5 verdicts.
+
+**⚡ PHASE 1 OF THE SLATE MACHINE DRAINS HERE** — all 9 queue rows 🟡. The deck machine
+(SLATE-PLAN §5–§6) opens on its next tick.

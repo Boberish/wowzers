@@ -814,11 +814,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 02:29 · main (docs only) — **CLAIM: SLATE MACHINE row 8 (FINAL) — Twinfang·FERMATA
-  challenger slate** (fresh sweep → `research/fermata-sweep.md` → v5-as-built ladders filed as
-  PITCH #0 (FERMATA-V5-BRIEF wins over §13) + additive themes, NO resurrections of v5 cuts →
-  3 skeptics → `TEMPO-PLAN.md` §16 🟡). Docs only; no code, no CARD-CATALOG rows. Phase 1 drains
-  after this row. *(slate-machine session, tick 02:27)*
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §16 (NEW) + `research/fermata-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 8 (FINAL): Twinfang·FERMATA challenger slate — DONE.
+  PHASE 1 DRAINED (all 9 rows 🟡).** The v5 build is the truth (its cuts are law): **filing**
+  (PITCH #0a/b/c — **THE BRINKMAN** lip-greed: Brink/Razor/Long-Ramp · **THE RESTED BLADE**
+  rest economy: First Note/Rested/rest-bank Unseen Blade (Superhot-validated) · **THE
+  WINDOW-SETTER** control: Stretto/Refrain/wideners/Eclipse; zero orphans) + **two additive
+  themes** (v5 is tight — two honest beats three padded): **THE AFTERIMAGE** (echo build on
+  coded Twin Echo + Phantom — result multiplication, never press multiplication; the
+  procession) · **THE COLD HAND** (the Good-band CP economy + branded Evis cash — the Brinkman's
+  designed polarity, the same ramp read opposite ways). 3 skeptic passes, **3 KILLS** (the
+  Misdirection = Feint resurrection · the Unbroken Line = dodge-feeds-offense once removed ·
+  the Snap Dancer = pays failing), ~5 fixes. Ranking: Cold Hand · Afterimage. The SLATE-loop
+  cron is deleted (queue drained); **the DECK MACHINE (SLATE-PLAN §5–§6) gate opens on its next
+  tick — D0 Tempo first.** *(slate-machine session, tick 02:27)*
 
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §10 (NEW) + `research/brew-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 7: Alchemist·BREW challenger slate — DONE.** The live deck
