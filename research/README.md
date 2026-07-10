@@ -26,6 +26,7 @@ EASE dial · rig WHEN→THEN · keystones · signature CD).
 | `bloom-sweep.md` | fresh sweep (PvZ economy/lanes · Wildfrost timers · Atomicrops' warning) | Bloomweaver class-slate fuel — garden-as-instrument grammars (2026-07-10) |
 | `cask-sweep.md` | fresh sweep (Potion Craft recipes · Overcooked pipelines · PoE flasks via KB) | Alchemist·Cask branch-slate fuel — filing + additive themes on a LOCKED deck (2026-07-10) |
 | `brim-sweep.md` | fresh sweep (Trauma Center graded chores · FFXIV green-DPS warning · Ana no-free-value) | Well·Brim branch-slate fuel — landing-grammar themes (2026-07-10) |
+| `draw-sweep.md` | fresh sweep (GH extended sustains · osu slider-follow · archery over-hold sway) | Well·Draw branch-slate fuel — release/hold-grammar themes (2026-07-10) |
 
 ## The uniform template (every file follows it)
 
