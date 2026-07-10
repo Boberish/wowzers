@@ -1748,9 +1748,9 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
 ## verdict 6): the Purist never draws a burst/detonation module (Fermentation, Vessel).
-func _fw_module_offer_ids(fw: String, creed: String) -> Array:
+func _fw_module_offer_ids(fw: String, creed: String, aspect := "") -> Array:
 	if fw == "well":
-		return WellModules.built_ids()         # no Well creed hides a module in v1
+		return WellModules.offer_ids(aspect)   # ⭐The Vigil is Draw-only; the rest read either spec
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -1868,7 +1868,7 @@ func _show_module_pick(done: Callable) -> void:
 		done.call()
 		return
 	var avail: Array = []
-	for id in _fw_module_offer_ids(fw, _d.run.creed):        # implemented + creed-allowed modules
+	for id in _fw_module_offer_ids(fw, _d.run.creed, String(_d.run.aspect)):   # implemented + creed/aspect-allowed
 		if not _d.run.modules.has(String(id)):
 			avail.append(String(id))
 	if avail.is_empty():
