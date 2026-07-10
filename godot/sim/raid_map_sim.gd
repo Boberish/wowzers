@@ -12,9 +12,9 @@ extends SceneTree
 const FIGHT_CAP_SEC := 420.0   ## past the deepest baked enrage (MYTHOS 355s) — a capped
                                ## fight must mean STUCK, never "would have won at 241s"
 const REBOOT_FRAC := 0.35
-## Mirrors the HUD's _build_floor quota exactly (THE DESCENT REFIT: +1 cooling/+1 cache
-## ride the 8-row floors).
-const FLOOR_QUOTA := {RunMap.KIND_COOLING: 1, RunMap.KIND_CACHE: 1}
+## THE DESCENT REBUILD: the floor's whole non-combat bag lives ON its FLOORS row
+## ("quota" → RunMap quota_override) — the sim reads the same source as the HUD and
+## the server, so the old hand-mirrored FLOOR_QUOTA divergence trap is dead.
 const SKILLS := [
 	{"label": "expert", "slack": 0.0, "lat": 0, "hlat": 0},
 	{"label": "good", "slack": 0.06, "lat": 6, "hlat": 6},
@@ -24,8 +24,11 @@ const SKILLS := [
 var _fights: Array = []
 var _shard_req: int = 0       ## credential-shard gate for the current floor (MAP-3c ROOT)
 var _n_tickets: int = 0       ## MAP-2 ticket quests placed on the current floor
-var _rows: int = 8            ## the floor's lattice rows (THE DESCENT REFIT — FLOORS "rows")
+var _rows: int = 8            ## the floor's lattice rows (FLOORS "rows")
+var _quota: Dictionary = {}   ## the floor's non-combat bag (FLOORS "quota")
+var _minigame: String = ""    ## the floor's skill-game flavor (FLOORS "minigame")
 var _charge_at_seal: Array = []   # ⏻ ECON diagnostic: charge banked when a Seal is reached
+var _fight_ticks: Array = []      # TTK diagnostic: ticks of every WON fight this tier
 
 func _initialize() -> void:
 	var seeds := int(SimUtil.arg("seeds", "60"))
@@ -38,19 +41,22 @@ func _initialize() -> void:
 		_shard_req = int(fl["shard_req"])
 		_n_tickets = int(fl.get("tickets", 0))
 		_rows = int(fl.get("rows", 8))
+		_quota = fl.get("quota", {})
+		_minigame = String(fl.get("minigame", ""))
 		var seal_name := String((_fights[_fights.size() - 1] as EncounterRes).name)
 		print("")
 		print("######## %s  →  Seal: %s ########" % [String(fl["title"]), seal_name])
 		print("fights: %s" % ", ".join(_fights.map(func(e): return String(e.name))))
 		_prove_determinism()
 		_charge_at_seal = []
-		print("skill    clear%%   avg fights  avg integrity(end)  losses at")
-		print("----------------------------------------------------------------")
+		print("skill    clear%%   avg fights  avg fight sec  avg integrity(end)  losses at")
+		print("--------------------------------------------------------------------------")
 		for sk in SKILLS:
 			var cleared := 0
 			var fight_sum := 0
 			var integ_sum := 0.0
 			var losses := {}
+			_fight_ticks = []
 			for seed in range(1, seeds + 1):
 				var r := _walk(seed, sk)
 				if r["cleared"]:
@@ -61,8 +67,12 @@ func _initialize() -> void:
 					losses[k] = int(losses.get(k, 0)) + 1
 				fight_sum += int(r["fights"])
 			var n := float(seeds)
-			print("%-7s  %5.1f%%      %5.2f            %5.2f          %s" % [
-				sk["label"], 100.0 * cleared / n, fight_sum / n,
+			# TTK: avg WON-fight wall-clock (DESCENT-PLAN §1 time-budget instrumentation)
+			var tick_sum := 0
+			for t in _fight_ticks: tick_sum += int(t)
+			var avg_sec := (float(tick_sum) / maxf(1.0, float(_fight_ticks.size()))) / 30.0
+			print("%-7s  %5.1f%%      %5.2f       %6.1fs           %5.2f          %s" % [
+				sk["label"], 100.0 * cleared / n, fight_sum / n, avg_sec,
 				(integ_sum / maxf(1.0, float(cleared))), SimUtil.fmt_causes(losses)])
 		# ⏻ ECON: avg charge banked when a Seal is reached, + the SURGE cut it buys
 		var avg_ch := _avg_i(_charge_at_seal)
@@ -84,9 +94,9 @@ func _max_i(a: Array) -> int:
 ## Same seed twice ⇒ identical map fingerprint AND identical full-run trace
 ## (visited nodes + every fight checksum) — the co-op/daily-seed guarantee.
 func _prove_determinism() -> void:
-	var fp1 := RunMap.generate(1, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows).fingerprint()
-	var fp2 := RunMap.generate(1, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows).fingerprint()
-	var fp3 := RunMap.generate(2, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows).fingerprint()
+	var fp1 := RunMap.generate(1, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame).fingerprint()
+	var fp2 := RunMap.generate(1, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame).fingerprint()
+	var fp3 := RunMap.generate(2, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame).fingerprint()
 	print("map determinism: seed1==seed1 -> %s · seed1 vs seed2 -> %s" % [
 		("PASS" if fp1 == fp2 else "FAIL"),
 		("differ (good)" if fp1 != fp3 else "IDENTICAL (suspect!)")])
@@ -99,7 +109,7 @@ func _prove_determinism() -> void:
 	# structure: every combat/seal node's fight index is valid; the Seal is the boss
 	var ok := true
 	for seed in range(1, 40):
-		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows)
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
 		for nd in m.nodes:
 			var fi := int(nd["fight"])
 			if String(nd["kind"]) == RunMap.KIND_SEAL and fi != _fights.size() - 1:
@@ -110,7 +120,70 @@ func _prove_determinism() -> void:
 		("PASS" if ok else "FAIL"), String((_fights[_fights.size() - 1] as EncounterRes).name)])
 	_prove_shard_gate(60)
 	_prove_tickets(40)
+	_prove_descent(40)
 	_prove_carry(50)
+
+## THE DESCENT REBUILD invariants (DESCENT-PLAN §2/§3, delivered by run_map's
+## constraint passes): (a) the last mid row always offers a non-fight valley;
+## (b) no ELITE in the last mid row; (c) no two ELITEs share an edge; (d) the
+## MARKET and (when quota'd) at least one ELITE are reachable from EVERY route —
+## BFS from each row-1 node with the key in hand.
+func _prove_descent(seeds: int) -> void:
+	if _quota.is_empty():
+		return
+	var ok_valley := true
+	var ok_elite := true
+	var ok_reach := true
+	for seed in range(1, seeds + 1):
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
+		var seal_row := int(m.node(m.seal_id)["row"])
+		var last_valley := false
+		var market_id := -1
+		var elite_ids: Array = []
+		var row1: Array = []
+		for nd in m.nodes:
+			var k := String(nd["kind"])
+			if int(nd["row"]) == seal_row - 1:
+				var fighty: bool = k == RunMap.KIND_COMBAT or k == RunMap.KIND_ELITE \
+					or (k == RunMap.KIND_WILD and String(nd.get("wild_kind", "")) == RunMap.KIND_COMBAT)
+				if not fighty:
+					last_valley = true
+				if k == RunMap.KIND_ELITE:
+					ok_elite = false            # (b) elite beside the Seal
+			if k == RunMap.KIND_MARKET:
+				market_id = int(nd["id"])
+			elif k == RunMap.KIND_ELITE:
+				elite_ids.append(int(nd["id"]))
+				for nx in nd["next"]:
+					if String(m.node(int(nx))["kind"]) == RunMap.KIND_ELITE:
+						ok_elite = false        # (c) stacked spikes
+			if int(nd["row"]) == 1:
+				row1.append(int(nd["id"]))
+		if not last_valley:
+			ok_valley = false
+		# (d) reachability from every committed lane (key in hand — locked edges open)
+		for start in row1:
+			var seen := {start: true}
+			var stack: Array = [start]
+			while not stack.is_empty():
+				var cur: int = stack.pop_back()
+				var nxt: Array = (m.node(cur)["next"] as Array) + (m.node(cur)["locked_next"] as Array)
+				for nx in nxt:
+					if not seen.has(int(nx)):
+						seen[int(nx)] = true
+						stack.append(int(nx))
+			if market_id >= 0 and not seen.has(market_id):
+				ok_reach = false
+			if not elite_ids.is_empty():
+				var any_elite := false
+				for eid in elite_ids:
+					if seen.has(int(eid)):
+						any_elite = true
+				if not any_elite:
+					ok_reach = false
+	print("descent invariants (%d maps): valley band %s · elite placement %s · market/elite reachable %s" % [
+		seeds, ("PASS" if ok_valley else "FAIL"), ("PASS" if ok_elite else "FAIL"),
+		("PASS" if ok_reach else "FAIL")])
 
 ## TICKETS (MAP-2): placement is deterministic, and every placed ticket is closeable
 ## by construction — pickup and turn-in share a lane with the turn-in strictly later,
@@ -122,7 +195,7 @@ func _prove_tickets(seeds: int) -> void:
 	var placed := 0
 	var closeable := 0
 	for seed in range(1, seeds + 1):
-		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows)
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
 		for tid in m.tickets:
 			placed += 1
 			var pu := -1
@@ -137,8 +210,8 @@ func _prove_tickets(seeds: int) -> void:
 				closeable += 1
 			else:
 				ok = false
-	var a := RunMap.generate(7, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows)
-	var b := RunMap.generate(7, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows)
+	var a := RunMap.generate(7, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
+	var b := RunMap.generate(7, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
 	var det: bool = str(a.tickets) == str(b.tickets) and a.fingerprint() == b.fingerprint()
 	print("tickets (%d maps, %d/floor): placement det %s · closeable %d/%d %s" % [
 		seeds, _n_tickets, ("PASS" if det else "FAIL"), closeable, placed,
@@ -152,7 +225,7 @@ func _prove_shard_gate(seeds: int) -> void:
 		return
 	var ok := true
 	for seed in range(1, seeds + 1):
-		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows)
+		var m := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
 		var seen := {}
 		var stack: Array = [[-1, 0]]                 # [from_id, shards] — start outside the map
 		var reached_seal := false
@@ -201,7 +274,7 @@ func _prove_carry(seeds: int) -> void:
 ## `carry` = {fracs: per-seat integrity, mana: the healer's fuel gauge} — mirrors
 ## the HUD's persistence exactly.
 func _walk(seed: int, sk: Dictionary) -> Dictionary:
-	var map := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), FLOOR_QUOTA, _shard_req, _n_tickets, _rows)
+	var map := RunMap.generate(seed, _fights.size(), MapContent.raid_event_ids(), {}, _shard_req, _n_tickets, _rows, _quota, _minigame)
 	var route := DetRng.new(seed * 7919 + 17)
 	var carry := {"fracs": [1.0, 1.0, 1.0, 1.0], "wounds": [0.0, 0.0, 0.0, 0.0], "mana": 1.0,
 		"marks": {}, "charge": 0}
@@ -239,14 +312,18 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				_apply_fx(MapContent.ticket(tclose).get("reward", {}), carry)
 				if closed >= map.tickets.size() and map.tickets.size() > 0:
 					_apply_fx(MapContent.SPRINT_RETRO_FX, carry)
-		match String(n["kind"]):
-			RunMap.KIND_COMBAT, RunMap.KIND_SEAL:
+		# THE DESCENT REBUILD: the walker resolves through the SAME effective-kind
+		# mapping as the HUD/server — WILD reveals its payload, stubbed interiors
+		# fall back honestly, ELITE fights its captain (the packroll is HUD-side).
+		var ekind := RunMap.effective_kind(n)
+		match ekind:
+			RunMap.KIND_COMBAT, RunMap.KIND_SEAL, RunMap.KIND_ELITE:
 				fights += 1
 				# THE KILL SWITCH: at a Seal, auto-cash-out the whole meter as an OVERCLOCK
 				# SURGE (mirrors the arming panel's spend-all) so the sim exercises the loop.
-				if String(n["kind"]) == RunMap.KIND_SEAL:
+				if ekind == RunMap.KIND_SEAL:
 					_charge_at_seal.append(int(carry["charge"]))   # econ diagnostic
-				if String(n["kind"]) == RunMap.KIND_SEAL and int(carry["charge"]) > 0:
+				if ekind == RunMap.KIND_SEAL and int(carry["charge"]) > 0:
 					var ch := int(carry["charge"])
 					(carry["marks"] as Dictionary).merge(
 						RaidMarks.overclock("surge", ch), true)
@@ -258,9 +335,9 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 						"integrity": _avg(carry["fracs"]),
 						"loss_at": String((_fights[int(n["fight"])] as EncounterRes).id),
 						"trace": str(trace)}
-				if String(n["kind"]) == RunMap.KIND_COMBAT:   # scavenge a breaker component
+				if ekind != RunMap.KIND_SEAL:   # scavenge a breaker component (trash + elite)
 					carry["charge"] = mini(100, int(carry["charge"]) + MapFx.SKIRMISH_CHARGE)
-				if String(n["kind"]) == RunMap.KIND_SEAL:
+				if ekind == RunMap.KIND_SEAL:
 					return {"cleared": true, "fights": fights,
 						"integrity": _avg(carry["fracs"]), "loss_at": "", "trace": str(trace)}
 			RunMap.KIND_EVENT:
@@ -270,7 +347,7 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				var ev := MapContent.event(String(n["event"]))
 				var chs: Array = ev.get("choices", [])
 				var ctx := MapCheck.build_ctx([], [], "", "tank", _avg(carry["fracs"]),
-					0, 0, event_fails, inv, {}, 0)
+					0, event_fails, inv, {}, 0)
 				var avail: Array = []
 				for ci in chs.size():
 					var cc: Dictionary = chs[ci]
@@ -336,6 +413,8 @@ func _fight(fight_seed: int, fi: int, carry: Dictionary, sk: Dictionary) -> Dict
 				if not a.is_empty():
 					s.enqueue(s.tick + 1, seat, a)
 		CombatCore.update(s)
+	if s.won:
+		_fight_ticks.append(s.tick)   # TTK diagnostic (won fights only)
 	if s.won:
 		for i in s.seats.size():
 			if i < fracs.size():

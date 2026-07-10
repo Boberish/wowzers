@@ -345,7 +345,25 @@ static func _ramp_fight(gi: int, grid_rows: int, n_fights: int) -> int:
 ## route can reach them (the same-lane spine + an adjacent crossing covers all lanes).
 func _descent_pass(grid: Array) -> void:
 	var last: int = grid.size() - 1
-	# (a) pre-Seal valley band: ≥1 non-fight kind in the last mid row
+	# (1) MARKET: pin to (row ≥ 1, lane 1) + force both crossings in — reachable from
+	# every committed lane. (2) the first ELITE: same treatment on a DIFFERENT row.
+	var market_id := _pin_reachable(grid, KIND_MARKET, -1)
+	var market_gi := -1 if market_id < 0 else int(nodes[market_id]["row"]) - 1
+	var pinned_elite := _pin_reachable(grid, KIND_ELITE, market_gi)
+	# (3) no ELITE in the last mid row — swap each out with an earlier combat
+	for l in LANES:
+		if String(nodes[grid[last][l]]["kind"]) == KIND_ELITE:
+			for gi in range(last - 1, -1, -1):
+				var moved := false
+				for l2 in LANES:
+					var c: Dictionary = nodes[grid[gi][l2]]
+					if String(c["kind"]) == KIND_COMBAT and int(c["id"]) != pinned_elite:
+						_swap_payload(nodes[grid[last][l]], c)
+						moved = true
+						break
+				if moved:
+					break
+	# (4) pre-Seal valley band: ≥1 non-fight kind in the last mid row
 	var has_valley := false
 	for l in LANES:
 		if not _fighty(nodes[grid[last][l]]):
@@ -354,26 +372,17 @@ func _descent_pass(grid: Array) -> void:
 		for gi in range(last - 1, -1, -1):
 			var done := false
 			for l in LANES:
-				if not _fighty(nodes[grid[gi][l]]) and String(nodes[grid[gi][l]]["kind"]) != KIND_MARKET:
-					_swap_payload(nodes[grid[gi][l]], nodes[grid[last][1]])
+				var src: Dictionary = nodes[grid[gi][l]]
+				if not _fighty(src) and String(src["kind"]) != KIND_MARKET:
+					_swap_payload(src, nodes[grid[last][1]])
 					done = true
 					break
 			if done:
 				break
-	# (b) no ELITE in the last mid row — swap each out with an earlier combat
-	for l in LANES:
-		if String(nodes[grid[last][l]]["kind"]) == KIND_ELITE:
-			for gi in range(last - 1, -1, -1):
-				var moved := false
-				for l2 in LANES:
-					if String(nodes[grid[gi][l2]]["kind"]) == KIND_COMBAT:
-						_swap_payload(nodes[grid[last][l]], nodes[grid[gi][l2]])
-						moved = true
-						break
-				if moved:
-					break
-	# (c) no two ELITEs sharing an edge — move the deeper one onto a combat slot
-	for pass_i in 3:
+	# (5) LAST: no two ELITEs sharing an edge — relocate the non-pinned one onto a
+	# combat slot that touches no elite (runs after every other move, so nothing
+	# re-breaks it; forced crossings from (1)/(2) are already in the edge set).
+	for pass_i in 4:
 		var moved_any := false
 		for gi in grid.size():
 			for l in LANES:
@@ -384,14 +393,15 @@ func _descent_pass(grid: Array) -> void:
 					var b: Dictionary = nodes[nid]
 					if String(b["kind"]) != KIND_ELITE:
 						continue
-					# relocate b to the first combat node not touching an elite
+					# move whichever of the pair is NOT the pinned elite
+					var mover: Dictionary = b if int(b["id"]) != pinned_elite else a
 					for gj in grid.size():
 						var placed := false
 						for l3 in LANES:
 							var c: Dictionary = nodes[grid[gj][l3]]
 							if String(c["kind"]) == KIND_COMBAT and gj != last \
 									and not _touches_elite(c):
-								_swap_payload(b, c)
+								_swap_payload(mover, c)
 								placed = true
 								moved_any = true
 								break
@@ -399,9 +409,6 @@ func _descent_pass(grid: Array) -> void:
 							break
 		if not moved_any:
 			break
-	# (d) MARKET + first ELITE: centre to the middle lane, force both crossings in
-	_centre_and_join(grid, KIND_MARKET)
-	_centre_and_join(grid, KIND_ELITE)
 
 func _fighty(n: Dictionary) -> bool:
 	var k := String(n["kind"])
@@ -417,25 +424,30 @@ func _touches_elite(n: Dictionary) -> bool:
 			return true
 	return false
 
-## Move the first node of `kind` into lane 1 of its row (payload swap), then force
-## the two adjacent-lane crossings into it, so the same-lane spine reaches it from
-## every lane. Rows are node-rows here; grid[gi] sits at node-row gi+1.
-func _centre_and_join(grid: Array, kind: String) -> void:
+## Pin the first node of `kind` to (grid row ≥ 1, lane 1) and force both adjacent
+## crossings into it: the same-lane spine reaches (row-1, any lane), and the forced
+## crossings carry every lane into the pinned node — reachable from EVERY route.
+## `avoid_gi` keeps two pinned kinds off one row (the second would displace the
+## first). Returns the pinned node id, or -1 when the kind isn't in this floor's bag.
+## Rows here are grid rows; grid[gi] sits at node-row gi+1.
+func _pin_reachable(grid: Array, kind: String, avoid_gi: int) -> int:
 	for gi in grid.size():
 		for l in LANES:
 			var n: Dictionary = nodes[grid[gi][l]]
 			if String(n["kind"]) != kind:
 				continue
-			var target: Dictionary = nodes[grid[gi][1]]
-			if l != 1:
+			# target row: deep enough to be routable (gi ≥ 1), never the last mid row
+			# (the valley band + elite-beside-Seal laws own that row), not the avoided row
+			var tg: int = clampi(gi, 1, grid.size() - 2)
+			if tg == avoid_gi:
+				tg = tg + 1 if tg + 1 <= grid.size() - 2 else tg - 1
+			var target: Dictionary = nodes[grid[tg][1]]
+			if int(target["id"]) != int(n["id"]):
 				_swap_payload(n, target)
-			# force crossings from the previous row's side lanes (entry already fans
-			# to every lane of grid row 0, so gi == 0 needs nothing)
-			if gi > 0:
-				_link(grid[gi - 1][0], grid[gi][1])
-				_link(grid[gi - 1][2], grid[gi][1])
-			return
-	# kind absent on this floor (e.g. F1 has no elite) — nothing to do
+			_link(grid[tg - 1][0], grid[tg][1])
+			_link(grid[tg - 1][2], grid[tg][1])
+			return int(target["id"])
+	return -1
 
 ## Exchange everything that makes a node "what it is" — position-bound payloads
 ## (key/shard/tickets) are placed AFTER this pass, and fight indices are recomputed

@@ -33,7 +33,7 @@ func _process(_d: float) -> bool:
 	return false
 
 func _test_wager_fold() -> void:
-	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 4, 0, {}, {}, 0)
+	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 4, 0, {}, {}, 0)
 	var wager: Dictionary = (MapContent.event("overtime_daemon")["choices"] as Array)[1]
 	_ok("overtime 'Bill it' is a WAGER staking integrity",
 		String(wager.get("kind", "")) == "wager" and String(wager["wager"]["stake"]) == "integrity")
@@ -46,7 +46,7 @@ func _test_wager_fold() -> void:
 	_ok("the wager stake (8% integrity) is folded into fx, win or lose", always)
 
 func _test_online_mulligan() -> void:
-	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 6, 0, {}, {}, 0)
+	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 6, 0, {}, {}, 0)
 	var chk_choice := {"kind": "check", "check": {"verb": "T", "tags": ["x"], "base": 20},
 		"success": {"fx": {"heal": 0.1}}, "fail": {"fx": {"hurt": 0.05}}}
 	# server resolves at attempt 2 with 1 nudge: spend = 1 + 2×2 = 5 → entropy_after = 6-5 = 1
@@ -61,7 +61,7 @@ func _test_online_mulligan() -> void:
 
 func _build_fail_panel() -> void:
 	# a base-20 check + ⚡6 in hand; find a seed where attempt 0 FAILS (roll ≥ 20)
-	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 0, 6, 0, {}, {}, 0)
+	var ctx := MapCheck.build_ctx([], [], "warden", "tank", 1.0, 6, 0, {}, {}, 0)
 	var chk := {"verb": "PROVE", "tags": ["x"], "base": 20}
 	var choice := {"kind": "check", "check": chk, "success": {"fx": {"heal": 0.1}},
 		"fail": {"fx": {"hurt": 0.05}, "result": "it fails"}}

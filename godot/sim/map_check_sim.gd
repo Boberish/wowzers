@@ -19,12 +19,12 @@ func _initialize() -> void:
 	quit(0 if fails == 0 else 1)
 
 # --- synthetic builds -----------------------------------------------------------
-func _ctx(n_guard: int, aspect := "warden", role := "tank", prior := 0, fails := 0,
+func _ctx(n_guard: int, aspect := "warden", role := "tank", fails := 0,
 		frac := 1.0, entropy := 0, inv := {}, flags := {}, tokens := 0) -> Dictionary:
 	var bt: Array = []
 	for i in n_guard:
 		bt.append(["guard"])
-	return MapCheck.build_ctx(bt, [], aspect, role, frac, prior, entropy, fails, inv, flags, tokens)
+	return MapCheck.build_ctx(bt, [], aspect, role, frac, entropy, fails, inv, flags, tokens)
 
 const FORCE := {"verb": "FORCE", "tags": ["guard"], "role": "tank", "aspects": ["warden"],
 	"base": 25, "per": 12, "cap": 5}
@@ -78,7 +78,7 @@ func _monotonicity() -> int:
 		and (both - base_only == 30)
 	# SELF reads the LARGEST single-tag cluster, not a sum
 	var self_chk := {"tags": ["SELF"], "base": 20, "per": 10, "cap": 5}
-	var mixed := MapCheck.build_ctx([["guard"], ["guard"], ["rage"]], [], "warden", "tank", 1.0, 0, 0, 0, {}, {}, 0)
+	var mixed := MapCheck.build_ctx([["guard"], ["guard"], ["rage"]], [], "warden", "tank", 1.0, 0, 0, {}, {}, 0)
 	var self_s := int(MapCheck.chance(self_chk, mixed)["strength"])
 	print("2. monotonicity: build-strength %s · aspect/role add once %s · SELF=max-cluster(2) %s" % [
 		_b(mono), _b(adds), _b(self_s == 2)])
@@ -86,8 +86,8 @@ func _monotonicity() -> int:
 
 # --- 3. clamp bounds --------------------------------------------------------------
 func _clamp() -> int:
-	# a fully-stacked build + max prior + pity + nudge still can't exceed the ceiling
-	var maxed := int(MapCheck.chance(FORCE, _ctx(9, "warden", "tank", 100, 9), 3)["p"])
+	# a fully-stacked build + max pity + nudge still can't exceed the ceiling (V#8: no prior)
+	var maxed := int(MapCheck.chance(FORCE, _ctx(9, "warden", "tank", 9), 3)["p"])
 	# a fully off-build (0 tags, wrong aspect/role, on a check with a punishing floor)
 	var off := int(MapCheck.chance({"tags": ["momentum"], "base": 25, "floor": 5, "ceil": 95},
 		_ctx(0, "warden", "tank"))["p"])
@@ -137,7 +137,7 @@ func _nudge() -> int:
 
 # --- 7. gates --------------------------------------------------------------------
 func _gates() -> int:
-	var have_key := _ctx(0, "warden", "tank", 0, 0, 1.0, 0, {"api_key": true})
+	var have_key := _ctx(0, "warden", "tank", 0, 1.0, 0, {"api_key": true})
 	var no_key := _ctx(0, "warden", "tank")
 	var ok := MapCheck.gate_ok({"item": "api_key"}, have_key) \
 		and not MapCheck.gate_ok({"item": "api_key"}, no_key) \
@@ -145,11 +145,10 @@ func _gates() -> int:
 		and not MapCheck.gate_ok({"tags": ["guard"], "min": 3}, _ctx(2)) \
 		and MapCheck.gate_ok({"aspect": "warden"}, _ctx(0, "warden")) \
 		and not MapCheck.gate_ok({"aspect": "jugg"}, _ctx(0, "warden")) \
-		and MapCheck.gate_ok({"entropy": 3}, _ctx(0, "warden", "tank", 0, 0, 1.0, 3)) \
-		and not MapCheck.gate_ok({"entropy": 3}, _ctx(0, "warden", "tank", 0, 0, 1.0, 2)) \
-		and MapCheck.gate_ok({"prior": 20}, _ctx(0, "warden", "tank", 20)) \
-		and MapCheck.gate_ok({"flag": "covered_shift"}, _ctx(0, "warden", "tank", 0, 0, 1.0, 0, {}, {"covered_shift": true}))
-	print("7. gates: item/tags/aspect/entropy/prior/flag all resolve %s" % _b(ok))
+		and MapCheck.gate_ok({"entropy": 3}, _ctx(0, "warden", "tank", 0, 1.0, 3)) \
+		and not MapCheck.gate_ok({"entropy": 3}, _ctx(0, "warden", "tank", 0, 1.0, 2)) \
+		and MapCheck.gate_ok({"flag": "covered_shift"}, _ctx(0, "warden", "tank", 0, 1.0, 0, {}, {"covered_shift": true}))
+	print("7. gates: item/tags/aspect/entropy/flag all resolve %s (prior gate died with V#8)" % _b(ok))
 	return 0 if ok else 1
 
 func _b(v: bool) -> String:
