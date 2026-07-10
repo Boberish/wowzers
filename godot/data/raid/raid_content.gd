@@ -355,15 +355,15 @@ static func make_skirmish(id: String) -> EncounterRes:
 		"bard":
 			return _skirmish(make_gemini().adds[0] as AddRes,
 				"BARD.EXE (escaped containment)", 8500,
-				"A deprecated process wanders the racks, reciting farewell verse at the servers. Put it back in the archive. Again.", 150.0)
+				"A deprecated process wanders the racks, reciting farewell verse at the servers. Put it back in the archive. Again.", 95.0)
 		"sonnet":
 			return _skirmish(make_mythos().adds[0] as AddRes,
 				"STRAY SONNET SUBAGENT", 9000,
-				"Somebody forgot to stop a workflow. It is very fast, very cheap, and very sure of itself.", 150.0)
+				"Somebody forgot to stop a workflow. It is very fast, very cheap, and very sure of itself.", 95.0)
 		"opus":
 			return _skirmish(make_mythos().adds[1] as AddRes,
 				"STRAY OPUS SUBAGENT", 10500,
-				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 175.0)
+				"A heavyweight subagent left hotfixing everything it touches — including itself. Kick the deploys or fight it forever.", 110.0)
 	return make_riftmaw()
 
 ## Realm 1's RING descent — THE DESCENT REBUILD (DESCENT-PLAN §2, all 12 verdicts in
@@ -374,23 +374,26 @@ static func make_skirmish(id: String) -> EncounterRes:
 ## the FULL non-combat mid bag (RunMap quota_override — DESCENT-PLAN §5; combat pads
 ## the rest) · `minigame` names the floor's skill-game flavor ("" = seeded rotate) ·
 ## `tier` drives the Forge pack fillers (F1 teaches on t1 → F4 holds root with t3) ·
+## `packroll` = [solo-below, duo-below] thresholds for the walk-in roll — THE FIGHT
+## LADDER (DESCENT-PLAN §3): F1 mostly solos (55/35/10) → F4 mostly trios (15/45/40),
+## so normal fights grow with the deck instead of by sponge ·
 ## `shard_req` > 0 gates the Seal behind credential shards (ROOT).
 ## Pure literal (no Palette statics) → const is safe.
 const FLOORS := [
 	{"ring": 3, "seal": "riftmaw", "title": "RING 3 · THE PERIMETER", "shard_req": 0, "tickets": 1,
-		"rows": 6, "tier": 1, "minigame": "captcha",
+		"rows": 6, "tier": 1, "minigame": "captcha", "packroll": [0.55, 0.90],
 		"quota": {"event": 2, "cooling": 1, "market": 1, "minigame": 1},
 		"elev": "The Riftmaw falls — the perimeter login is yours. sudo granted. Three rings to root."},
 	{"ring": 2, "seal": "mistral", "title": "RING 2 · THE SHALLOW STACK", "shard_req": 0, "tickets": 2,
-		"rows": 8, "tier": 2, "minigame": "benchmark",
+		"rows": 8, "tier": 2, "minigame": "benchmark", "packroll": [0.30, 0.75],
 		"quota": {"elite": 2, "event": 2, "cooling": 1, "cache": 1, "market": 1, "jailbreak": 1, "minigame": 1, "wild": 2},
 		"elev": "MISTRAL-7B optimizes its own shutdown. Privileges rising. Two rings to root."},
 	{"ring": 1, "seal": "gemini", "title": "RING 1 · THE MIDDLEWARE", "shard_req": 0, "tickets": 2,
-		"rows": 8, "tier": 2, "minigame": "benchmark",
+		"rows": 8, "tier": 2, "minigame": "benchmark", "packroll": [0.25, 0.70],
 		"quota": {"elite": 2, "event": 2, "cooling": 1, "cache": 1, "market": 1, "jailbreak": 1, "minigame": 1, "wild": 2},
 		"elev": "The twins deprecate each other; either way the gateway falls. One ring to root."},
 	{"ring": 0, "seal": "mythos", "title": "RING 0 · ROOT", "shard_req": 3, "tickets": 3,
-		"rows": 9, "tier": 3, "minigame": "",
+		"rows": 9, "tier": 3, "minigame": "", "packroll": [0.15, 0.60],
 		"quota": {"elite": 2, "event": 2, "cooling": 2, "cache": 1, "market": 1, "jailbreak": 1, "minigame": 1, "wild": 2},
 		"elev": ""},
 ]

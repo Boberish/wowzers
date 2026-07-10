@@ -1086,13 +1086,19 @@ func _roll_map_pack(fi: int, enc: EncounterRes) -> Array:
 	var rng := DetRng.new((_d.map.seed ^ (0x9A7B * (_d.node + 7))) & 0x7FFFFFFF)
 	# THE DESCENT REBUILD (§5): an ELITE node is a guaranteed REINFORCED trio — the
 	# mutator is printed on the door; entry/Seal stay authored, never rolled.
-	if String(_d.map.node(_d.node).get("kind", "")) == RunMap.KIND_ELITE:
+	# (bounds-guarded: the packroll probe samples synthetic node ids past the map)
+	if _d.node >= 0 and _d.node < _d.map.nodes.size() \
+			and String(_d.map.node(_d.node).get("kind", "")) == RunMap.KIND_ELITE:
 		return [_pack_filler(rng), _pack_filler(rng), String(enc.id)]
+	# THE FIGHT LADDER (DESCENT-PLAN §3): pack size scales with the floor via the
+	# FLOORS "packroll" thresholds — F1 mostly solos, F4 mostly trios; a normal
+	# fight grows because MORE happens, never because the same body gets spongier.
+	var pr: Array = RaidContent.FLOORS[_d.floor_i].get("packroll", [0.30, 0.75])
 	var r := rng.next_float()
-	if r < 0.30:
+	if r < float(pr[0]):
 		return []                        # a classic solo pull
 	var pack: Array = [_pack_filler(rng)]
-	if r >= 0.75:
+	if r >= float(pr[1]):
 		pack.append(_pack_filler(rng))
 	pack.append(String(enc.id))          # smalls → captain (the node's own body)
 	return pack

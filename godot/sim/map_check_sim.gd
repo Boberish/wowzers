@@ -112,10 +112,10 @@ func _bands() -> int:
 
 # --- 5. comeback pity (anti-frustration) -----------------------------------------
 func _anti_frustration() -> int:
-	var p0 := int(MapCheck.chance(FORCE, _ctx(1, "jugg", "blade", 0, 0))["p"])
+	var p0 := int(MapCheck.chance(FORCE, _ctx(1, "jugg", "blade", 0))["p"])
 	var p_streak := []
 	for f in range(0, 6):
-		p_streak.append(int(MapCheck.chance(FORCE, _ctx(1, "jugg", "blade", 0, f))["p"]))
+		p_streak.append(int(MapCheck.chance(FORCE, _ctx(1, "jugg", "blade", f))["p"]))
 	var rises: bool = int(p_streak[4]) > int(p_streak[0])
 	var capped: bool = (int(p_streak[4]) - int(p_streak[0])) == 32 and (int(p_streak[5]) - int(p_streak[0])) == 32   # +8×4 cap 32
 	print("5. anti-frustration: fail-streak lifts %d→%d %s · pity capped at +32 %s" % [
@@ -130,7 +130,7 @@ func _nudge() -> int:
 	var p3 := int(MapCheck.chance(FORCE, c, 3)["p"])
 	var p9 := int(MapCheck.chance(FORCE, c, 9)["p"])              # over-max clamps at 3 pts
 	var ok := (p1 - p0 == 8) and (p3 - p0 == 24) and (p9 == p3)
-	var ladder := MapCheck.nudge_ladder(FORCE, _ctx(2, "jugg", "blade", 0, 0, 1.0, 4))
+	var ladder := MapCheck.nudge_ladder(FORCE, _ctx(2, "jugg", "blade", 0, 1.0, 4))
 	print("6. nudge: +8/pt %s · caps at 3 pts (%d==%d) %s · ladder(⚡4)=%s" % [
 		_b(p1 - p0 == 8), p9, p3, _b(p9 == p3), str(ladder)])
 	return 0 if ok else 1
