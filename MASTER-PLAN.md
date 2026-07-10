@@ -1098,6 +1098,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
 
+- ☐ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **CLAIM: DESCENT SLICE 3 —
+  THE PROMPT MARKET + PER-SEAT WALLETS** (DESCENT §6, V#11; BUILD-LEDGER §I). Core: **per-seat
+  wallets** (`run_state` `tokens`→per-seat, `Draft.mint` `state.diag`→`seat.diag` deposit-to-
+  earner so AI seats START EARNING, UPSELL spends own wallet) · **the MARKET node interior**
+  (flip `RunMap.MARKET_LIVE`; 6-slot printed-price shop; buildable slots = CURIO×2 / PATCH+refuel
+  / DEPRECATE-boon / REGENERATE charge [builds the rerolls-out charge system]; **+1 BACKUP
+  DEFERRED** if the wipe budget isn't in code, **curse-purge DEFERRED** to Jailbreak slice 4) ·
+  **AI director + AUTO** shop spend · **post-Seal MARKET PHASE** (recovery-only) · **curio
+  reframes** (Hashgrinder→prices−1⏣, Hot Reload→2 REGENERATE) · `tokens@market` sim diag. ⚠
+  Touches the `draft.gd` + `raid_hud.gd` hotspots (coordinating w/ live tempo/tank/cask/well
+  worktrees — merge main often). rerolls-out is a SANCTIONED `draft_sim` re-baseline. Recon
+  workflow scoping buildable-vs-deferred now. *(raid-rebuild session)*
+
 - ☑ 2026-07-10 · worktree `../wow-descent-s2` (branch `descent-s2`) — **DESCENT SLICE 2 — THE
   LEGIBILITY UI PASS: MERGED to main (`1f5e051`), 2 commits, ZERO file collisions with the
   tuning-sweep merge landing alongside.** Built via a 6-reader recon workflow (the one that
