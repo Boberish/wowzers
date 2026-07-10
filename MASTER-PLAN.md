@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 04:09 · main (docs only) — **CLAIM: DECK MACHINE row D6 — the Well·DRAW deck
+  reshape** (top-3 = Vigil · Rapids · Eddy per MENDER §10; the Millrace-vs-Flume capstone
+  reconcile is the headline) → MENDER-PLAN §12 🟡 + catalog Draw rows. Design only.
+  *(slate-machine session, deck tick 04:04)*
+
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §11 (NEW) + CARD-CATALOG Well section (NEW —
   the shared+Brim back-fill, closing that ledger drift) + ledger row — **DECK MACHINE row D5:
   THE BRIM RESHAPE — DONE, 🟡.** Winners = Low Catch · Overflow · Glintsmith (§9 ranking; the
