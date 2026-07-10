@@ -685,3 +685,237 @@ two tank TEAM themes would split the same warband surface).
 
 **Next:** these three join the §3 verdict board — Bill picks 2–3 ladders TOTAL across
 incumbents + challengers → the Phase-2 deck pass (row D2) authors/revises around the winners.
+
+## §8 · THE WARDEN DECK v1 — full deck around PAYLOAD · SLAM · RAMPART 🟡 AT VERDICT (2026-07-10, Phase-2 D1)
+
+**What this is** (SLATE-PLAN row D1; deck-creator playbook end-to-end; design only). **Winners =
+the §6 skeptic ranking's top 3: THE PAYLOAD · THE SLAM · THE RAMPART** (your ✅ picks override —
+Bannerman/Thornback cards stay filed in §6 and swap in cheap). Unlike the Duelist this is
+FROM-SCRATCH authoring: the only inherited material is the 🔮 re-homed guard trio (Return to
+Sender · Cheap Iron · The Wall) + the 4 verified carries. Base kit untouched (§1b); numbers are
+first-cut `warden_*` knobs.
+
+### 8.0 DIALS + BUDGET
+
+**Dials:** THE READ · THE TAP · **THE HOLD** (Warden-only) · THE SLAM · THE WIND · THE BANK ·
+THE SPEND · THE LINE — plus **THE CHARGE (the Payload's new dial: the battery of prevented
+damage)**. **Budget:** buttons = BLOCK · SHIELD · DUMP · TAUNT + the owed signature CD ("the
+wall", §1b) = 5 of 7; nothing below adds one. Boons land at 12 (in-quota); modules 3 (one per
+theme); keystones 3.
+
+### 8.1 CREEDS (pick 1 · pool of 5 — quota shapes all present)
+
+| Creed | Type | Theme | Effect (one line) |
+|---|---|---|---|
+| **The Sentinel** | EASE | — (the learner) | Block grades ~30% wider · SLAM counter −25% · ◆ cap 4. Caps itself so you graduate out (the Veteran's shield-side twin). |
+| **Ballast** | STRAT | PAYLOAD entry | The battery is LIVE from run start (modest cap until the module deepens it); decays per §8.3 law. |
+| **The Drumhead** | GREED | SLAM entry | Slam chains grant +1 wind per link; the chain breaks on a graze (not on taps). |
+| **Deep Keel** | STRAT | RAMPART entry | Wind pool +20%, recharge unchanged — a bigger, heavier bar; holds run longer, droughts run longer. |
+| **THE MONOLITH** | RULE | **WILD** | **BLOCK is GONE** — the SHIELD is your only answer: every bar is HELD through (small ones drain little), taps don't exist. One button, pure hold-reading + drain economy — the mobile creed (the Dancer's shield-side mirror). |
+
+### 8.2 MODULES (Floor-1 pick 1-of-3 · one per theme, no transformer required)
+
+| Module | Type | Theme | Effect |
+|---|---|---|---|
+| **The Coil** | STRAT | PAYLOAD | The battery GAUGE renders (charge + decay arc); clean taps also feed it at 25%. The hurl decision lives here. |
+| **Aftershock** | STRAT | SLAM | A 2s window after every perfect SLAM where BLOCK taps cost 0 wind. The chain's breathing room — earned, rhythmic. |
+| **The Bulwark Stance** | GREED | RAMPART | The priced hold-all wall (the old base, §5): while HELD, every bar is blockable — but drain +40%. Opt into the fortress, pay in wind. |
+
+### 8.3 BOONS (12 · by dial-lane · each names its theme · ≥1 greed/lane · 0 pardons)
+
+**THE CHARGE (Payload's lane):**
+- **Return to Sender** [STRAT · re-homed 🔮→🟡, verbatim] — the shield stores 40/55/70% of
+  prevented damage and HURLS it back as a bar when it drops. The theme's seed.
+- **Heavy Shipment** [GREED] — battery capacity +50%, decay +50%: ride it big, cash it hot.
+- **Special Delivery** [STRAT] — a hurl released during a tall-bar wind-up pays ×1.25 (H/S/O:
+  1.25/1.35/1.5) — read the boss, time the throw.
+**THE SLAM:**
+- **Offensive Guard** [POWER] — after a perfect SHIELD, your next DUMP +15/22/30% (the MonHun
+  steal, named).
+- **Meet It Head-On** [GREED] — answering a small/normal bar with the MAIN (full wind price)
+  banks ◆ — chosen per bar, the chain-keeper's tax.
+- **Drumfire** [STRAT] — every 3rd consecutive clean SLAM banks ◆◆; a graze breaks the count
+  (taps never do). *(The Rally's every-3rd idiom on a different instrument — recorded.)*
+**THE HOLD / THE WIND (Rampart's lane):**
+- **Cheap Iron** [EASE · re-homed 🔮→🟡] — shield raises cost 45/50/55% less.
+- **Second Wind** [STRAT] — a hold RELEASED above half-pool refunds 2/3/4 wind — ending the
+  hold cleanly is a move.
+- **White Knuckles** [GREED] — below 25% wind your taps mitigate +15/20/25%, but a whiffed
+  press empties the pool: brinkmanship you opted into.
+- **The Push** [STRAT] — pay 2 wind (8s cooldown): the incoming bar is BLUNTED one size
+  (tall→normal→small). Proactive defense, chosen per use (the Vermintide push, priced).
+**THE BANK / THE SPEND (generic):**
+- **Deep Pockets** [POWER · carry] — ◆ cap +1 / +1 & start 1◆ / +2 & start 1◆.
+- **Powder Keg** [POWER · carry] — DUMP +20/30/40% per ◆.
+**Carries verified:** Feather Step (block-cost knob — subsumed by Cheap Iron's lane; offered
+class-wide, not double-stacked: pick-tension pair, both never in one offer... flag for the
+build) · ✦ Hold the Line = the SUPPORT (below).
+
+### 8.4 RIG (WHENs → the class THEN table: STRIKE/IRON/BREATH/PIP/BANNER)
+
+- **The Wall** [re-homed 🔮→🟡, premium ~3.5] — WHEN my shield eats a hit ≥15% max HP.
+- **The Long Hold** [NEW, ~2.5] — WHEN I hold through a FULL flurry without dropping.
+- **The Counterweight** [NEW, ~2.0] — WHEN I SLAM a tall bar (the Duelist's Tall Land shape on
+  the shield instrument — same class, shared table, fine).
+
+### 8.5 KEYSTONES (elite-only · pool of 3 · run 1 — all three from §6, engine-checked)
+
+- **THE SIEGE** [PAYLOAD] — at full charge your next SLAM launches the stored total as ONE
+  colossal returning bar across the gate; press it as it crosses = ×2. (One titan bar — the
+  Avalanche string's opposite, distinctness held.)
+- **BREAKWATER** [SLAM] — a perfect SLAM on a tall bar visibly SHOVES the next bar back down
+  the lane (the superior-block steal; same-instrument spectacle, no boss-side state).
+- **THE IMMOVABLE** [RAMPART] — survive a full flurry HOLD above a quarter pool → the shield
+  ROOTS ~4s (bars shrink as they arrive), then the drain debt lands. Earned, never a toggle.
+
+### 8.6 SUPPORT · SIGNATURE CD · EASE
+
+- **Support:** ✦ **Hold the Line** [TEAM · carry] — while THE LINE HOLDS (no unanswered real
+  hit 5s), warband +6/8/10%. At build: re-key the uptime read onto FLOW per §1d (aggro-visible).
+- **SIGNATURE CD (the owed "wall", §1b — first shape):** **THE GATE** — ~1-min CD: for 4s your
+  shield stretches over the warband (all seats' incoming −X%, where X scales with your CURRENT
+  wind %). Line it up with a boss window; a drained Warden opens a weak Gate — the CD amplifies
+  pool discipline, never button=damage. Carries the dropped-GUARD lineage.
+- **EASE dial knobs:** hold-drain grace (Rampart) · charge-decay grace (Payload) · slam-window
+  width (Slam — tapers with power) · block-grade threshold. Comfort free / bite +damage, per
+  DECK-LAYOUT §4.
+
+### 8.7 COHERENCE-GATE EVIDENCE
+
+**Dream drafts:** *PAYLOAD:* Ballast → The Coil → RtS + Heavy Shipment + Special Delivery →
+THE SIEGE — charge from run start → the gauge makes the hurl a read → capacity greed → the
+titan bar. Compounds ✓. *SLAM:* Drumhead → Aftershock → Offensive Guard + Meet It Head-On +
+Drumfire → BREAKWATER — chains feed wind → free-tap windows → ◆ engine → the shove. ✓
+*RAMPART:* Deep Keel → Bulwark Stance → Cheap Iron + Second Wind + White Knuckles + The Push →
+THE IMMOVABLE — big pool → hold-all pricing → economy mastery → the root. ✓ *Hybrid
+(Payload×Rampart, "the fortress"):* Bulwark Stance holds everything → everything held charges
+the battery → one Siege. Stated in §6, now draftable. ✓
+**Offer-trio spot-checks:** (Heavy Shipment | Meet It Head-On | White Knuckles) — three greeds,
+three pools ✓ · (RtS | Offensive Guard | Second Wind) — three builds ✓ · (Deep Pockets |
+Powder Keg | Cheap Iron) — three breads: FLAGGED, the build should weight offers so at most
+two breads share a trio (draft-weighting note, not a card change).
+**Overlap audit:** Cheap Iron vs Feather Step (same knob!) — resolved: never co-offered, flag
+at build ✓ · Second Wind vs Cheap Iron (refund vs discount — different moments: release vs
+raise) ✓ · each theme ≥3 exclusive ✓.
+**Anti-patterns:** RtS = stored PLAY not passive ✓ · no stat keystones · no new buttons (the
+Monolith REMOVES one — Dancer precedent) · caps stated · zero pardons (the partial-mit law
+keeps the healer fed; nothing here forgives) ✓.
+**AI-pilotability:** Payload = charge-%-and-boss-window thresholds · Slam = chain-length +
+commit pricing · Rampart = pool-floor management (the §6 note holds: all threshold policies,
+3 tiers natural). Sim cells named: `warden_sim --build=payload|slam|rampart`.
+
+### 8.8 SKEPTIC RECORD (3 passes)
+
+- **Draft-table:** killed **Iron Reserves** (battery-speed POWER bread — bread flooding; its
+  job lives in The Coil's 25% feed); found the three-bread trio → draft-weighting flag; pool
+  lands at 12.
+- **Repack:** the Monolith vs the old hold-all base — priced (drain economy exists now; it's a
+  CREED cost, not free); Drumfire vs the Duelist's Rally — same idiom, different instrument +
+  break condition, recorded in the distinctness ledger; the Siege/Avalanche split re-verified
+  (one titan bar vs a per-◆ string).
+- **Fight-clock:** Payload cycles ~15s at zone damage (decay keeps it honest) ✓ · the
+  Immovable needs authored flurries — every Seal stream has them; zone packs = the keystone
+  sleeps sometimes (acceptable for elite-tier) — noted honestly.
+
+### 8.9 OPEN TENSION POINTS (Bill's calls)
+
+1. **THE MONOLITH** — the one-button wild creed (the Dancer's mirror): ship in pool, or park
+   until the mobile pass? (Lean: ship — the pool needs its WILD and the phone case is real.)
+2. **THE GATE** — the signature-CD shape (wind-scaled warband wall). Accept? (Lean: yes.)
+3. **Feather Step vs Cheap Iron** — keep both with never-co-offered weighting, or fold Feather
+   Step to Duelist-only? (Lean: fold to Duelist-only; one block-cost card per spec.)
+4. **Drumfire/Rally rhyme** — acceptable sibling idiom or differentiate further? (Lean: accept.)
+5. All numbers (◆ cap, drain rates, charge caps) = first-cut knobs; the §1c flow-economy
+   playtest rule applies.
+
+**Next:** your verdicts → CARD-CATALOG statuses flip → the Warden build claim (§5 top item)
+codes it guarded after the Duelist base proves the frame (Wave-1 order unchanged).
+
+## §9 · THE DUELIST DECK v2 — the reconcile + the swap kits 🟡 AT VERDICT (2026-07-10, Phase-2 D2)
+
+**What this is** (SLATE-PLAN row D2). Deck v1 (§3) is at your LIVE board with no verdicts in
+yet — so this pass does NOT re-author it. It ships the two things a v2 owes: **①** the **v1.1
+RECONCILE** — errata for everything that moved under v1 since it was written (flow=aggro went
+BASE · the EASE-dial law · the GUARD fallout · §1d ripples), and **②** three **SWAP KITS** —
+the §7 challengers pre-authored to card level, so WHATEVER 2–3 ladders you pick, the deck is
+ready without another design pass. Incumbents (Headsman · Ironside · Ghost) stay the default
+top-3. Design only; catalog rows land 🟡.
+
+### 9.1 THE v1.1 RECONCILE (errata to §3 — fold on verdict, none change a card you've rated)
+
+1. **FLOW=AGGRO is BASE now (§1c)** — v1 predates the lock. The repurposed **FLOW module**
+   ("your flow ALSO ramps DUMP damage") becomes the **4th Floor-1 candidate** next to
+   Crucible/Scales/Whetstone. Modules quota is 2–3 → **tension point: offer 3-of-4 rolled, or
+   cut one** (lean: 3-of-4 rolled — the Floor-1 pick gets pick-tension for free).
+2. **EASE-dial fold (standing law, DECK-LAYOUT §4):** **Quick Wrists** and **Roll With It**
+   leave the boon pool; the ONE EASE dial card replaces them (knobs rolled from: parry-window
+   width · dodge-grade grace · wind-regen · The Veteran creed stays curated). Pool 15 → 13 + dial.
+3. **✦ Hold the Line** re-keys its uptime read onto FLOW (aggro-visible — §1d; same errata as
+   the Warden's copy).
+4. **GUARD fallout cross-ref:** Return to Sender · Cheap Iron · The Wall now live in the
+   WARDEN deck (§8, 🟡) — the 🔮 park is resolved; v1's SPEND lane stays DUMP-only.
+5. **Crucible note (§1d):** fills slower while the boss is peeled away — a natural aggro-skill
+   coupling, stated on the card at build.
+6. **Interrupt flag (§4.6):** ⚡DUMP is the tank's pillar-#3 carrier — no card change, noted.
+
+### 9.2 THE SWAP KITS (each = a ladder-shaped drop-in: entry creed + boons + keystone)
+
+**Swap rule:** picking a challenger REPLACES one incumbent ladder's exclusive cards; generics
+(Deep Pockets · Powder Keg · breads) stay. Kits are sized to the ladder they'd replace.
+
+**KIT M — THE MATADOR** *(natural swap: the Ghost, or a 4th ladder if you expand)*
+- creed **Cold Blood** [STRAT] — reads build INSIGHT from run start; feint tells read louder.
+- boon **The Late Answer** [GREED] — a parry landed in the window's last slice counts double
+  insight; a whiff there costs 2 (H/S/O: ×2/×2+1 wind/×3).
+- boon **Toro** [STRAT] — a BAITED feint spends 1 insight to forgive the wind loss — the
+  cape-flick, a play not a pardon (≤1 forgiveness in the kit ✓).
+- absorbs **Read the Room** (from the Ghost lane — its natural home).
+- keystone **LA ESTOCADA** — at full insight your next perfect parry is THE KILL READ: the
+  stream holds its breath one beat, then the counter lands ×3. *(⚠ rhyme recorded: the Cold
+  Hand's Reckoning Stroke (TEMPO §17) also freeze-frames — two still-beat finishers in the
+  roster; tension point 3.)*
+
+**KIT S — THE SCARLET TRADE** *(natural pair/swap: the Ironside — both monetize the bleed)*
+- creed **Red Ledger** [STRAT] — unavoidables bank ◆ (small) from run start.
+- boon **Paid in Iron** [STRAT] — below 60% HP your counters +12/18/25%.
+- boon **The Deep Cut** [GREED] — once per bank-cycle, voluntarily eat a normal bar unanswered:
+  banks ◆◆ +3 wind; never below 25% HP (the self-cut, chosen per use).
+- absorbs **Blood Price** + **Overreach** (double-filed from v1 lanes).
+- keystone **CRIMSON DIVIDEND** — a full-bank dump under 40% HP pays ×2, the gate floods red,
+  and the healer's refill of that dip visibly pours into your next bank (the duet spectacular).
+  *(Healer-workload pricing flagged for the build, per §7.)*
+
+**KIT W — THE STORMWEAVE** *(natural swap: the Ghost — same dial, flagged in §7)*
+- creed **Storm Footing** [STRAT] — clean weaves refund +1 wind from run start.
+- boon **Eye of the Storm** [STRAT] — a clean weave's riposte also banks ◆.
+- boon **Thread the Needle** [GREED] — weave windows tighten 15%, clean-weave ripostes ×1.5.
+- boon **Rolling Thunder** [POWER · NEW] — riposte damage +20/30/40% (the kit's bread rung).
+- keystone **THE TEMPEST ANSWER** — a clean weave through a full flurry mirrors it back: your
+  riposte comes out as the SAME bar-string reflected across the gate, each press graded.
+
+### 9.3 GATES + SKEPTICS (delta-scope — v1's own audit stands untouched)
+
+**Trios:** each kit internally trio-clean (1 creed + 3–4 boons never share an offer with 3
+breads) ✓. **Overlap:** Kit W + Ghost = the flagged same-dial pile (the swap rule makes it
+moot — W REPLACES Ghost unless you deliberately run both) · Kit S + Crucible = the bleed-fuel
+supermerge (legal, rich, healer-priced — stated). **Anti-patterns:** all §7 fixes carried
+(floors, opt-ins, ≤1 forgiveness); Rolling Thunder is the only new card this pass and it's
+honest bread. **Distinctness:** Estocada/Reckoning-Stroke freeze-beat rhyme RECORDED (tension
+point); Tempest-Answer vs Avalanche/Siege — mirrored STRING vs ◆-string vs titan-bar: three
+returning shapes, all different reads, ledger row updated. **AI:** insight/HP-floor/weave-entry
+thresholds — all 3-tier expressible (per §7).
+
+### 9.4 TENSION POINTS (Bill's calls)
+
+1. **The module question:** 3-of-4 rolled Floor-1 offer (Crucible/Scales/Whetstone/FLOW), or
+   cut one? (Lean: 3-of-4.)
+2. **The EASE fold** (Quick Wrists + Roll With It → the dial) — accept? (Lean: yes, standing law.)
+3. **The freeze-beat rhyme** — LA ESTOCADA vs the Reckoning Stroke: keep both (different
+   classes, similar drama) or re-skin one? (Lean: keep both, different enough in play.)
+4. **Swap semantics** — challengers REPLACE a ladder vs EXPAND to 4 ladders? (Lean: replace;
+   ~13-card pool can't feed 4 deep ladders.)
+5. Your v1 board verdicts remain the gating event — this § folds into §3 the moment the export
+   blob lands.
+
+**Next:** your picks (2–3 ladders total across the six) → fold: winning kits' rows flip 🟡→✅,
+losing kits park 🔮 with their slate; the build claim proceeds per §4 order unchanged.

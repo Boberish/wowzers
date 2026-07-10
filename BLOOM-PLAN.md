@@ -3,6 +3,8 @@
 **Status:** 🟡 **CLASS SLATE AT VERDICT (2026-07-10)** — four core-minigame candidates below;
 nothing is built; the frozen in-code Bloomweaver stays the placeholder until Bill picks a core
 (then: base kit → deck pass → build claims, the Well's guarded-class pattern).
+**+ §4 (same day): THE ORCHARD CLOCK DECK v0** — a PROVISIONAL deck on core A (the slate's #1)
+so the core verdict is concrete; picking B/C/D re-runs it free.
 
 **The frame (locked facts this slate obeys):**
 - **Seat: HEALER — the second option vs the Well.** The merge question is SETTLED (2026-07-06,
@@ -174,3 +176,115 @@ parked for WORLD/quest flavor).
 **Next:** Bill picks a core (+ optionally reorders its spec seeds) → base-kit brief + HTML feel
 tester (the Brim-tester pattern) → guarded class build → the deck pass (SLATE-PLAN Phase 2 row
 D3 authors the winning core's deck; the row is double-size by design).
+
+## §4 · THE ORCHARD CLOCK DECK v0 — provisional, on core A 🟡 (2026-07-10, Phase-2 D3)
+
+**⚠ Read the provisionality first.** You haven't picked a core (§2 A–D are all live). The deck
+machine's law is top-ranked-until-overridden, so this v0 is authored on **A · THE ORCHARD
+CLOCK** (the skeptics' #1, the RIPEN heir) — **it exists to make your core verdict CONCRETE**
+(here is what core A plays like at deck level), and if you pick B/C/D this section re-runs
+free. Scope: the CLASS layer + the ORCHARD spec-seed lean; MEADOW (the density sibling) gets
+its own pass after the core locks — the Well's twin-spec pattern. Design only; example
+numbers are first-cut `bloom_*` knobs; catalog rows land 🟡.
+
+### 4.0 DIALS + BUDGET
+
+**Dials:** the ARC (speed/phase per Growth) · the PEAK (window + harvest grade) · the STAGGER
+(how many arcs, how offset — the self-set skill) · the HARVEST (the cash press) · SAP (the
+economy) · the WILT (loss) · the TABLE (who's planted — the party surface).
+**Budget:** PLANT + HARVEST (the core 2) + dodge + signature CD = 4 of 7 ✓. Boons 11 ·
+modules 2 · keystones 2 · creeds 4.
+
+### 4.1 CREEDS (pick 1 · pool of 4)
+
+| Creed | Type | Effect |
+|---|---|---|
+| **Long Summer** | EASE | Arcs 20% slower, ripe windows 20% wider — the tempo of a Sunday gardener; damage-neutral, caps itself (the learner). |
+| **Hothouse** | GREED | Arcs run 25% faster and peaks pay +20% — the overclocked garden; more peaks, less time to breathe. |
+| **Mulchwork** | STRAT | A WILTED arc leaves MULCH: the next plant on that ally grows 30% faster and peaks +10%. Failure becomes tempo — a play, never a pardon (the wilt still lost its heal). |
+| **THE WILD ROWS** | RULE | **WILD** — you don't choose targets: the garden plants ITSELF (round-robin, deterministic); your whole skill is stagger-reading + harvest timing. Payoff: +1 concurrent arc cap. The one-button-brain creed. |
+
+### 4.2 MODULES (Floor-1 pick 1-of-2)
+
+| Module | Type | Effect |
+|---|---|---|
+| **The Almanac** | STRAT | The stagger PLANNER: a timeline strip showing the next ~8s of arc peaks; planting into a visible GAP slots the new arc there (assisted phase management). The gauge earns its pixels — every plant becomes a timeline read. |
+| **The Cider Press** | GREED | OVERRIPE harvests (past peak, before wilt) squeeze into SAP instead of healing — the waste→economy valve, opt-in; sloppy timing becomes a resource decision instead of a shrug. |
+
+### 4.3 BOONS (11 · by dial-lane)
+
+**THE ARC:** **Deep Roots** [POWER] peaks +15/22/30% · **Forced Bloom** [GREED, from the slate]
+harvest an unripe arc at FULL value once per plant-cycle; its next arc wilts 30% faster ·
+**Second Fruit** [RULE] a Bullseye harvest replants itself free.
+**THE PEAK:** **Harvest Moon** [GREED] peaks landed within 0.5s of each other pay +20% BOTH —
+the deliberate stagger-collapse (inverts the core skill on purpose, chosen per setup) ·
+**Heavy Bough** [POWER, the ORCHARD lean] while ≤2 arcs live, peaks +18/26/35%.
+**SAP:** **Sugar Run** [STRAT] Bullseye harvests +1 Sap · **Deep Cellar** [POWER] Sap cap +2 ·
+**Root Tithe** [GREED] plants cost +1 Sap, heal +25% — invest greed, chosen per plant.
+**THE STAGGER:** **Crop Rotation** [STRAT] a harvest grants the OLDEST live arc +10% ripeness
+(pull the web forward) · **Overplanted** [GREED] +1 concurrent arc cap but ALL arcs run 10%
+faster — attention greed.
+**THE TABLE:** **Companion Planting** [STRAT] two arcs on the SAME ally may overlap once;
+the second plants at half value (the double-down on the tank).
+*(Peak-width / wilt-grace comfort effects are NOT cards — they're the EASE dial's knobs, per
+the standing law.)*
+
+### 4.4 RIG (WHENs → class THEN table authored at build; healer-shaped THENs TBD)
+
+**The Clean Pick** (Bullseye harvest, ~1.2) · **The Full Table** (harvest while 4 arcs live,
+~3.0) · **The Rescue** (harvest a peak while its ally is under 40% HP, ~4.0 — the clutch WHEN).
+
+### 4.5 KEYSTONES (elite · pool 2 · run 1)
+
+- **FULL BLOOM** [from the slate] — three Bullseye harvests inside one boss telegraph cycle
+  ripen the WHOLE garden at once: one chord-press harvests everything, the field erupts, the
+  warband drinks the surplus.
+- **THE ORCHARD ETERNAL** — a Bullseye on THE FULL TABLE (4 arcs live) plants a GOLDEN ARC:
+  it never wilts and re-peaks every ~8s — until a WILT anywhere ends it (garden failure ends
+  the crown; never keyed to hits taken — the dodge-law stays clean).
+
+### 4.6 SUPPORT · CD · EASE
+
+- **Support:** ✦ **Harvest Home** [TEAM] — harvesting 3+ arcs within 2s feeds the warband
+  +damage for 3s: the feast is the buff.
+- **Signature CD:** **THE SEASON** — ~1min: for 6s all arcs grow at double speed and peaks
+  widen — align your orchard with the boss window you know is coming (amplifies planning,
+  never button=damage).
+- **EASE knobs:** arc-speed grace · peak width · wilt grace · concurrent-cap comfort.
+
+### 4.7 GATES + SKEPTICS (evidence)
+
+**Dream drafts:** *the ORCHARD:* Long Summer → Almanac → Heavy Bough + Deep Roots + Harvest
+Moon → FULL BLOOM (few fat arcs, planned peaks, one chord) ✓ · *the SAP ENGINE:* Hothouse →
+Cider Press → Root Tithe + Sugar Run + Deep Cellar → ORCHARD ETERNAL (overclock, squeeze the
+waste, crown the table) ✓ · *the WILD READ:* Wild Rows → Almanac → Crop Rotation + Overplanted
+→ Full Bloom (no sow choice, pure timeline skill) ✓.
+**Trios:** (Deep Roots | Deep Cellar | Heavy Bough) = three POWERs → offer-weighting flag
+(same fix as the Warden's) · (Forced Bloom | Harvest Moon | Root Tithe) = three greeds, three
+dials ✓.
+**Anti-patterns:** Mulchwork rewritten from a pardon ("wilts re-sprout") to a play (mulch
+tempo) during the pass · the Orchard Eternal originally ended on "an unanswered hit" —**fixed
+to end on a WILT** (nothing in this class prices hits taken; the Tempo-pass law holds) · Wild
+Rows passes the one-line test ("the garden plants itself") ✓ · caps stated ✓ · zero pardons ✓.
+**Distinctness (ledger updated):** stagger-family kinship with the Cask's Twin Casks recorded
+(self-owned batch pipelines vs ally-planted arcs; different stakes — wilts lose heals, dumps
+lose batches) · FULL BLOOM's everything-at-once chord vs the Bottling Line's two-cask tap —
+recorded, different scale + instrument · the Almanac timeline is the roster's first
+FORWARD-looking gauge (nothing else renders the future) — a genuinely new UI surface, flagged
+as its HUD cost.
+**AI:** plant-scheduler (gap-fill) + harvest-threshold policies — the §2 core-A note holds;
+3 tiers natural. Sim cells named: `bloom_sim --build=orchard|sap|wild`.
+
+### 4.8 TENSION POINTS (Bill's calls)
+
+1. **THE CORE PICK ITSELF** — this whole § is core-A concrete; picking B/C/D re-runs it free.
+2. **The Almanac's HUD cost** — the forward-timeline is new render surface (worth it? lean: yes,
+   it IS the phase-management fantasy made visible).
+3. **Harvest Moon** — the deliberate stagger-collapse inverts the core skill as greed (lean:
+   keep; it's the Tightrope-class "surf your own rule" card).
+4. **Meadow's pass timing** — sibling spec deck after the core locks + the base tester proves
+   (lean: yes, Well pattern).
+5. All numbers first-cut; the HTML feel-tester (Brim pattern) is the next gate after your pick.
+
+**Next:** your core pick → base-kit brief + feel tester → this deck (or its re-run) folds →
+build claim per the Well's guarded-class pattern.

@@ -204,6 +204,66 @@ Feather Step (block cost = same knob) · Deep Pockets · Powder Keg · ✦ Hold 
 ---
 
 <a id="twinfang"></a>
+### DUELIST · D2 SWAP KITS (v2 revision, `TANK-PLAN.md §9` — 🟡 2026-07-10; winning kits flip ✅, losers park 🔮 with their slate)
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| **Cold Blood** (creed) | `coldblood` | STRAT | curated | 🟡 | M | Reads build INSIGHT from run start; feint tells louder. |
+| **The Late Answer** | `lateanswer` | GREED | H/S/O | 🟡 | M | Last-slice parry = double insight; a whiff there costs 2. |
+| **Toro** | `toro` | STRAT | H/S/O | 🟡 | M | A BAITED feint spends 1 insight to forgive the wind loss. |
+| **LA ESTOCADA** (keystone) | `estocada` | RULE | elite | 🟡 | M | Full insight → the stream holds its breath, the counter lands ×3. |
+| **Red Ledger** (creed) | `redledger` | STRAT | curated | 🟡 | S | Unavoidables bank ◆ (small) from run start. |
+| **Paid in Iron** | `paidiniron` | STRAT | H/S/O | 🟡 | S | Below 60% HP counters +12/18/25%. |
+| **The Deep Cut** | `deepcut` | GREED | H/S/O | 🟡 | S | Once/bank-cycle eat a normal bar on purpose: ◆◆ +3 wind; floor 25% HP. |
+| **CRIMSON DIVIDEND** (keystone) | `crimsondividend` | RULE | elite | 🟡 | S | Full-bank dump <40% HP ×2; the healer's refill pours into your next bank. |
+| **Storm Footing** (creed) | `stormfooting` | STRAT | curated | 🟡 | W | Clean weaves refund +1 wind from run start. |
+| **Eye of the Storm** | `eyestorm` | STRAT | H/S/O | 🟡 | W | A clean weave's riposte also banks ◆. |
+| **Thread the Needle** | `threadneedle` | GREED | H/S/O | 🟡 | W | Weave windows −15%, clean ripostes ×1.5. |
+| **Rolling Thunder** | `rollingthunder` | POWER | H/S/O | 🟡 | W | Riposte +20/30/40% (the kit's bread). |
+| **THE TEMPEST ANSWER** (keystone) | `tempestanswer` | RULE | elite | 🟡 | W | A survived flurry mirrors back as YOUR graded bar-string. |
+
+**v1.1 errata (fold on verdict):** Quick Wrists + Roll With It → the EASE dial (leave pool) ·
+FLOW module = 4th Floor-1 candidate · Hold the Line re-keys onto FLOW · GUARD trio resolved to
+the Warden (§8) · absorbs: Read the Room→Kit M · Blood Price/Overreach→Kit S (double-filed).
+
+## TANK · THE WARDEN — **DECK v1 (D1) 🟡 AT VERDICT 2026-07-10** · base locked, 0 built
+
+Source of record: `TANK-PLAN.md §8` (themes **Payload · Slam · Rampart**, §6 ranking; Bill's ✅
+picks swap cheap). Dials: READ / TAP / **HOLD** / SLAM / WIND / BANK / SPEND / LINE / **CHARGE**.
+
+| Card | id | Type | Rarity | St | One line |
+|---|---|---|---|---|---|
+| **The Sentinel** (creed) | `sentinel` | EASE | curated | 🟡 | Blocks ~30% wider, slam counter −25%, ◆ cap 4 — the self-capping learner. |
+| **Ballast** (creed) | `ballast` | STRAT | curated | 🟡 | The battery live from run start — PAYLOAD entry. |
+| **The Drumhead** (creed) | `drumhead` | GREED | curated | 🟡 | Slam chains +1 wind/link; graze breaks — SLAM entry. |
+| **Deep Keel** (creed) | `deepkeel` | STRAT | curated | 🟡 | Pool +20%, recharge unchanged — RAMPART entry. |
+| **THE MONOLITH** (creed) | `monolith` | RULE | curated | 🟡 | **WILD: BLOCK is gone** — everything is HELD; one-button drain economy (the Dancer's mirror, mobile creed). |
+| **The Coil** (module) | `coil` | STRAT | — | 🟡 | The battery gauge; taps feed 25%. |
+| **Aftershock** (module) | `aftershock` | STRAT | — | 🟡 | 2s free-tap window after a perfect SLAM. |
+| **The Bulwark Stance** (module) | `bulwarkstance` | GREED | — | 🟡 | Hold-all wall, drain +40% (the old base, priced). |
+| **Return to Sender** | `returnsender` | STRAT | H/S/O | 🟡 | Re-homed 🔮→🟡 verbatim: stores 40/55/70% prevented, hurls back as a bar. |
+| **Heavy Shipment** | `heavyshipment` | GREED | H/S/O | 🟡 | Battery cap +50%, decay +50%. |
+| **Special Delivery** | `specialdelivery` | STRAT | H/S/O | 🟡 | Hurl during a tall wind-up ×1.25/1.35/1.5. |
+| **Offensive Guard** | `offguard` | POWER | H/S/O | 🟡 | Perfect SHIELD → next DUMP +15/22/30%. |
+| **Meet It Head-On** | `headon` | GREED | H/S/O | 🟡 | MAIN on small/normal (full wind) banks ◆. |
+| **Drumfire** | `drumfire` | STRAT | H/S/O | 🟡 | Every 3rd consecutive clean SLAM banks ◆◆; graze breaks. |
+| **Cheap Iron** | `cheapiron` | EASE | H/S/O | 🟡 | Re-homed 🔮→🟡: raises cost 45/50/55% less. |
+| **Second Wind** | `secondwind_w` | STRAT | H/S/O | 🟡 | Hold released above half-pool refunds 2/3/4 wind. |
+| **White Knuckles** | `whiteknuckles` | GREED | H/S/O | 🟡 | <25% wind: taps +15/20/25% mit; a whiff empties the pool. |
+| **The Push** | `push` | STRAT | H/S/O | 🟡 | Pay 2 wind (8s cd): blunt the incoming bar one size. |
+| **The Wall** (rig WHEN) | `wall` | — | — | 🟡 | Re-homed 🔮→🟡: shield eats a hit ≥15% max HP (~3.5). |
+| **The Long Hold** (rig WHEN) | `longhold` | — | — | 🟡 | Hold through a full flurry (~2.5). |
+| **The Counterweight** (rig WHEN) | `counterweight` | — | — | 🟡 | SLAM a tall bar (~2.0). |
+| **THE SIEGE** (keystone) | `siege` | RULE | elite | 🟡 | Full charge → one colossal returning bar; press ×2. |
+| **BREAKWATER** (keystone) | `breakwater` | RULE | elite | 🟡 | Perfect SLAM on tall SHOVES the next bar back down the lane. |
+| **THE IMMOVABLE** (keystone) | `immovable` | RULE | elite | 🟡 | Clean full-flurry hold → 4s root (bars shrink), then the drain debt. |
+| **THE GATE** (signature CD) | `gate` | TEAM | baseline | 🟡 | ~1-min: 4s warband wall scaled by your CURRENT wind % — the owed "wall" slot's first shape. |
+| ✦ Hold the Line (support) | `holdline` | TEAM | — | 🟡 | Carry; re-keyed onto FLOW at build (§1d). |
+
+**Carries:** Deep Pockets · Powder Keg verified; **Feather Step → proposed fold to Duelist-only**
+(Cheap Iron owns the Warden's block-cost knob — tension point 3). Killed in-pass: Iron Reserves
+(bread flooding).
+
 ## TWINFANG · TEMPO — 🔨 mostly built · **DECK v3 (D0) 🟡 AT VERDICT 2026-07-10**
 _Built pool: back-fill from `TEMPO-PLAN.md` Appendix A (code-linked ids + SHAs) +
 `godot/data/twinfang/*.gd` still owed. **The D0 deck pass (`TEMPO-PLAN.md §17`) proposes the rows
@@ -238,6 +298,38 @@ _Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§7` (Cask) + `§8` (
 ## THE WELL — 🔨 base built · deck 🔮 not authored
 _Stub — back-fill from `MENDER-PLAN.md` "BOARD VERDICTS" export once the deck is authored +
 `godot/data/well/*.gd`._
+
+## BLOOMWEAVER — **ORCHARD CLOCK DECK v0 (D3) 🟡 PROVISIONAL 2026-07-10** · core unpicked
+
+Source of record: `BLOOM-PLAN.md §4` (provisional on core A — Bill's core pick overrides; B/C/D
+→ free re-run). Dials: ARC / PEAK / STAGGER / HARVEST / SAP / WILT / TABLE.
+
+| Card | id | Type | Rarity | St | One line |
+|---|---|---|---|---|---|
+| **Long Summer** (creed) | `longsummer` | EASE | curated | 🟡 | Arcs 20% slower, windows 20% wider — the learner. |
+| **Hothouse** (creed) | `hothouse` | GREED | curated | 🟡 | Arcs 25% faster, peaks +20% — the overclocked garden. |
+| **Mulchwork** (creed) | `mulchwork` | STRAT | curated | 🟡 | Wilts leave MULCH: next plant there grows 30% faster, peaks +10%. |
+| **THE WILD ROWS** (creed) | `wildrows` | RULE | curated | 🟡 | **WILD:** the garden plants itself; your skill = stagger-reading + harvests; +1 arc cap. |
+| **The Almanac** (module) | `almanac` | STRAT | — | 🟡 | Forward timeline of the next ~8s of peaks; plants slot into gaps. |
+| **The Cider Press** (module) | `ciderpress` | GREED | — | 🟡 | Overripe harvests squeeze into SAP instead of healing. |
+| **Deep Roots** | `deeproots` | POWER | H/S/O | 🟡 | Peaks +15/22/30%. |
+| **Forced Bloom** | `forcedbloom` | GREED | H/S/O | 🟡 | One unripe harvest per cycle at full value; its next arc wilts 30% faster. |
+| **Second Fruit** | `secondfruit` | RULE | H/S/O | 🟡 | A Bullseye harvest replants itself free. |
+| **Harvest Moon** | `harvestmoon` | GREED | H/S/O | 🟡 | Peaks within 0.5s of each other pay +20% both — deliberate stagger-collapse. |
+| **Heavy Bough** | `heavybough` | POWER | H/S/O | 🟡 | While ≤2 arcs live, peaks +18/26/35% (the ORCHARD lean). |
+| **Sugar Run** | `sugarrun` | STRAT | H/S/O | 🟡 | Bullseye harvests +1 Sap. |
+| **Deep Cellar** | `deepcellar` | POWER | H/S/O | 🟡 | Sap cap +2. |
+| **Root Tithe** | `roottithe` | GREED | H/S/O | 🟡 | Plants cost +1 Sap, heal +25%. |
+| **Crop Rotation** | `croprotation` | STRAT | H/S/O | 🟡 | A harvest grants the oldest arc +10% ripeness. |
+| **Overplanted** | `overplanted` | GREED | H/S/O | 🟡 | +1 arc cap; ALL arcs 10% faster. |
+| **Companion Planting** | `companion` | STRAT | H/S/O | 🟡 | Two arcs may overlap on one ally; the 2nd at half value. |
+| **The Clean Pick** (rig) | `cleanpick` | — | — | 🟡 | WHEN: Bullseye harvest (~1.2). |
+| **The Full Table** (rig) | `fulltable` | — | — | 🟡 | WHEN: harvest at 4 live arcs (~3.0). |
+| **The Rescue** (rig) | `rescue` | — | — | 🟡 | WHEN: peak harvested on an ally <40% HP (~4.0). |
+| **FULL BLOOM** (keystone) | `fullbloom` | RULE | elite | 🟡 | 3 Bullseyes in one telegraph cycle → the whole garden ripens; one chord-press. |
+| **THE ORCHARD ETERNAL** (keystone) | `orchardeternal` | RULE | elite | 🟡 | A full-table Bullseye plants a GOLDEN arc (re-peaks ~8s) until any WILT ends it. |
+| ✦ **Harvest Home** (support) | `harvesthome` | TEAM | — | 🟡 | 3+ arcs harvested within 2s → warband +damage 3s. |
+| **THE SEASON** (signature CD) | `season` | STRAT | baseline | 🟡 | ~1min: 6s of double growth + wider peaks — align the orchard with the boss window. |
 
 ## FROZEN CLASSES (Bulwark / Bloomweaver)
 _Code slate only, not under active planning. Fill on demand from `godot/data/<class>/<class>_boons.gd`.

@@ -814,6 +814,49 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · BLOOM-PLAN §4 (NEW) + CARD-CATALOG Bloomweaver section
+  (NEW) + ledger row — **DECK MACHINE row D3: THE ORCHARD CLOCK DECK v0 — DONE, 🟡
+  PROVISIONAL.** Core unpicked, so the deck is authored on **A (the slate's #1)** to make the
+  core verdict CONCRETE — B/C/D pick = free re-run. 4 creeds (Long Summer EASE · Hothouse
+  GREED · Mulchwork — wilts→MULCH tempo, rewritten from a pardon mid-pass · **THE WILD ROWS
+  wild** — the garden plants itself) · 2 modules (**the Almanac** — the roster's FIRST
+  forward-timeline gauge, HUD cost flagged · the Cider Press waste→Sap valve) · 11 boons ·
+  3 rig WHENs (the Rescue = the clutch premium) · 2 keystones (FULL BLOOM chord · THE ORCHARD
+  ETERNAL — skeptic fix: the golden arc ends on a WILT, never on hits taken) · ✦ Harvest Home ·
+  **THE SEASON** CD · EASE knobs. Gates: 3 dream drafts · trio flag (three-POWER offer) ·
+  distinctness rows (Twin-Casks stagger kinship · Full-Bloom vs Bottling-Line recorded).
+  5 tension points (§4.8 — the core pick itself is #1). Meadow = sibling pass after the core
+  locks. *(slate-machine session, deck tick 03:19)*
+
+- ☑ 2026-07-10 · main (docs only) · TANK-PLAN §9 (NEW) + CARD-CATALOG D2 swap-kit rows + ledger
+  flip — **DECK MACHINE row D2: THE DUELIST v2 — DONE, 🟡.** v1 is at Bill's LIVE board, so the
+  pass deliberately does NOT re-author: **① the v1.1 RECONCILE** (Quick Wrists + Roll With It →
+  the EASE dial per standing law · the FLOW module = 4th Floor-1 candidate, 3-of-4 offer
+  proposed · Hold the Line re-keys onto FLOW · GUARD trio resolved to Warden §8 · Crucible
+  peel-note · DUMP=carrier note) + **② three SWAP KITS pre-authored to card level** (M Matador:
+  Cold Blood/Late Answer/Toro/LA ESTOCADA · S Scarlet: Red Ledger/Paid in Iron/Deep Cut/CRIMSON
+  DIVIDEND · W Stormweave: Storm Footing/Eye of the Storm/Thread the Needle/Rolling Thunder/
+  TEMPEST ANSWER) — **any 2–3-ladder verdict maps to a ready deck, no re-pass.** Skeptic catch:
+  the Estocada/Reckoning-Stroke freeze-beat rhyme (two still-beat finishers roster-wide) —
+  recorded, Bill's call. 5 tension points (§9.4). Distinctness row 3. *(slate-machine session,
+  deck tick 03:04)*
+
+- ☑ 2026-07-10 · main (docs only) · TANK-PLAN §8 (NEW) + CARD-CATALOG Warden section (NEW) +
+  ledger flip — **DECK MACHINE row D1: THE WARDEN DECK v1 — DONE, 🟡 AT BILL'S VERDICT.**
+  Winners = §6's recorded ranking top-3 (**Payload · Slam · Rampart**). From-scratch authoring:
+  5 creeds (Sentinel EASE · Ballast/Drumhead/Deep Keel theme entries · **THE MONOLITH wild** —
+  BLOCK deleted, one-button hold economy, the Dancer's mirror) · 3 modules (Coil · Aftershock ·
+  the priced Bulwark Stance) · 12 boons (**the 🔮 guard trio re-homed to 🟡**: Return to Sender ·
+  Cheap Iron · The Wall; new: Heavy Shipment/Special Delivery/Offensive Guard/Meet It Head-On/
+  Drumfire/Second Wind/White Knuckles/The Push) · 3 keystones (Siege · Breakwater · Immovable —
+  all engine-free) · **THE GATE** signature-CD (wind-scaled warband wall — the owed §1b slot) ·
+  EASE knobs. Gates run with evidence (4 dream drafts · trios flagged the three-bread offer ·
+  Feather-Step/Cheap-Iron collision → fold proposal · anti-patterns clean · AI thresholds).
+  3 skeptics: 1 kill (Iron Reserves — bread flooding), Drumfire/Rally rhyme recorded, Siege/
+  Avalanche re-verified. 5 tension points (§8.9 — Monolith ship? · the Gate · Feather-Step fold
+  · Drumfire rhyme · numbers=playtest). Distinctness-ledger row 2. *(slate-machine session,
+  deck tick 02:49)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `net-integrity`) — **CLAIM: NET-LAYER INTEGRITY
   HASH (audit 07-03 checksum-coverage finding, option b — the recommended additive path; REFIT §5
   disposition).** The desync detector only sees boss HP + tick (`combat_core.gd:72`); seat
