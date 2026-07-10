@@ -1448,3 +1448,181 @@ row D8 authors the v6 revision around the winners, inside the v5 verdicts.
 
 **⚡ PHASE 1 OF THE SLATE MACHINE DRAINS HERE** — all 9 queue rows 🟡. The deck machine
 (SLATE-PLAN §5–§6) opens on its next tick.
+
+---
+
+## 17. THE TEMPO DECK v3 — full deck around WOUND · SWIFT · FINISH 🟡 AT VERDICT (2026-07-10, Phase-2 D0)
+
+**What this is** (SLATE-PLAN row D0 — the first DECK MACHINE pass; deck-creator playbook
+followed end-to-end; design only, no code). **The winners:** no skeptic ranking was recorded in
+the corrected §14, so the pass takes the three archetypes BILL HIMSELF named in the correction
+("bleeds, fast attacks, slow big ones") = **THE WOUND · SWIFT · THE FINISH** — also the three
+most grounded (Finish/Swift mostly name built cards; Wound is the one new engine). **Your ✅
+picks override:** swap any winner and row D0 re-runs cheaply — the filing below keeps EDGE
+(the A7 crit package, untouched, still opt-in law), PUNISH, and BAND cards alive regardless.
+This is a REVISION of the built v2 pool (Appendix A) — every existing card is filed below;
+Bill's prior verdicts (cuts, caps, laws) carry forward untouched.
+
+### 17.0 DIALS + BUDGET (written first, per the playbook)
+
+**The dials a card may address:** the GRADE (Bull/Perfect/Good/Miss) · FLOW (0–6 + accelerando
++ crash) · ENERGY (base refunds) · COMBO→EVISCERATE (build-cash) · COUP (execute) · THE OPENING
+(class-base punish) · the BEAT (speed) · **the WOUND-POT (the one NEW dial: short bleeds on the
+boss frame, press-cashed)** · [module] Overdrive's fever · [opt-in] the A7 EDGE meter.
+**Budget:** touch targets unchanged (Strike · Eviscerate · Coup · dodge · signature CD when it
+lands = 5 of 7; nothing below adds a button) · boon pool target 10–16 (see the trim table —
+the honest count is the pass's one quota fight) · modules 2 · keystone pool grows to 5 with an
+offer rule (tension point 4).
+
+### 17.1 CREEDS (pick 1 · proposed pool of 5)
+
+| Creed | Type | Status | Effect (one line) |
+|---|---|---|---|
+| **Drumline** | EASE-ish | STANDS | slip −2 — the forgiving temperament (wider-window reward still owed). |
+| **Flourish** | GREED | STANDS | slip→0 Flow but +50%/Flow pt — the glass temperament. |
+| **Largo** | STRAT | STANDS | slow heavy beats, tighter windows, ×1.25 hits — **THE FINISH's entry.** |
+| **Uptempo** | GREED | **NEW** | the beat runs ~15% faster baseline and Perfects refund +2 energy — **SWIFT's entry.** The fast pole Largo never had; cap: the accelerando's existing asymptote (F8) is the ceiling, Uptempo never tightens windows further. |
+| **Open Veins** | STRAT | **NEW** | Bullseyes inscribe a BLEED from run start (2 beats, modest tick) — **THE WOUND's entry.** No counter UI at creed level (the module adds it); the pot just ticks. |
+| ~~Held Breath~~ | — | **PROPOSED PARK 🔮** | the slip-freeze temperament — niche since F17 made its lockout a crash event, and the pool needs the slot (quota 3–5). Bill's call. |
+
+*Quota check: forgiving (Drumline) ✓ · greed pole (Flourish) ✓ · rhythm-changers (Largo/Uptempo
+— the pace polarity) ✓ · **WILD creed: NONE** — Tempo still lacks a Tutti-class rewrite creed;
+deliberately NOT forced this pass (tension point 1).*
+
+### 17.2 MODULES (Floor-1 pick · pool of 2)
+
+| Module | Type | Status | Effect |
+|---|---|---|---|
+| ⭐ **Overdrive** | RULE | STANDS | max-Flow banks the multiplier → tap for FEVER → crash to a seed. Swift-adjacent but build-agnostic — untouched. |
+| **Hemorrhage** | STRAT | **NEW (builds the unbuilt `hemorrhage` data)** | the WOUND COUNTER: a visible pot on the boss frame (count + total); bleeds tick +1 beat longer; **Eviscerate may CASH the pot** (consumes all live bleeds, pays their remaining value instantly + 10% per bleed consumed). The gauge EARNS its pixels: cash-now-or-let-it-tick is a per-Evis decision. |
+
+*Floor-1 offer: Overdrive vs Hemorrhage vs none. The Wound plays fine bare (creed bleeds tick
+out unassisted); the module is where the CASH decision lives — chain intact: creed carries,
+module deepens.*
+
+### 17.3 BOONS (the pool, by dial-lane — 20 on the table, trim table below)
+
+**WOUND (new lane — ≥1 greed ✓, 0 insurance):**
+- **Lacerate** [STRAT · NEW] — Perfects also inscribe (half-value bleeds). Widens income beyond Bulls. H/S/O: half/two-thirds/full-value.
+- **Slow Bleed** [POWER · NEW] — bleeds last +1/+2/+2 beats & tick +10% (cap: 5 beats total).
+- **Arterial Note** [GREED · NEW] — bleeds tick +30/40/55% harder but expire 1 beat sooner: a hotter, shorter pot you must cash in rhythm.
+**STRIKE (SWIFT's lane — ≥1 greed ✓):**
+- Press the Advantage [POWER · STANDS, built] · Cold Open [STRAT · STANDS, built]
+- **Through-Line** [STRAT · AUTHORED (was design-owed)] — consecutive Perfect-or-better strikes +2%/stack, cap 5, reset on Miss (not on Good — Goods tread water). H/S/O per A1.
+- **Quickstep** [GREED · NEW] — each Perfect speeds your next window's arrival ~8% AND tightens it ~8% (self-bite for speed; caps at the F8 thumb floor; taper: never tightens below it).
+- On the Beat [GREED · CANDIDATE 🟡 (Bill's own, unverdicted)] — dumps fired inside the strike window take the window's grade multiplier.
+**FLOW (mixed/generic):**
+- Tightrope [GREED · STANDS] · Encore [STRAT · STANDS] · Shatterfall [STRAT · STANDS, pay-after-the-slap]
+- Momentum/`flowCap` [POWER · **PROPOSED PARK 🔮** — pure cap bread; Through-Line does its job with a pulse]
+**EVISCERATE (THE FINISH's lane — ≥1 greed ✓):**
+- Deep Cuts/`eviPlus` [POWER · STANDS] · Finish It/`execute` [POWER · STANDS] · Overkill [STRAT · STANDS] · Staccato Fury [STRAT · STANDS]
+- **Grand Pause** [STRAT · NEW] — an Eviscerate at EXACTLY max combo hits +25/30/35% (the cap law; §14's illustration priced down from +35 base).
+- **Heavy Ink** [GREED · NEW] — combo points above 3 each add +10% to the next finisher, and one decays per missed beat: hold the fat hand in rhythm or watch it drip.
+**COUP:**
+- Crescendo [POWER · STANDS] · Da Capo [POWER · **PROPOSED PARK 🔮** — seed bread, weakest trio-survivor]
+**ENERGY:**
+- Efficiency [POWER · STANDS — base refund exists; this is the boost]
+**GUARD (insurance, class total = 1 ✓):** Understudy [EASE · STANDS].
+
+**THE TRIM TABLE (the quota fight, Bill's call):** the honest pool above = 20. Proposed parks
+to land at 16: **Momentum/`flowCap`** · **Da Capo** · plus EITHER **Encore** or **Efficiency**
+(pick one to keep; the pass leans keep-Encore, park-Efficiency — base refunds already self-fuel)
+· and **On the Beat** stays a 🟡 candidate outside the count until you verdict it. Wideners
+(Wide Tempo · Fencer's Line · Rubato) are already OUT of the pool — folded into the EASE dial
+per the standing rule.
+
+### 17.4 RIG (WHENs — one addition)
+
+Existing WHENs/THENs stand (riff/bullseye/finale/punish/peak/coup · echo/secondwind/bloodletter/
+overcharge/expose; killingEdge rework note A3 stands). **NEW WHEN: "The Deep Cash" — WHEN I
+consume 4+ bleeds in one Eviscerate (~×4.5, inverse-frequency priced)** — the Wound's earned
+moment; only fires with the pot built (chooseable by construction). Bloodletter THEN naturally
+cross-feeds the Wound (it already bleeds).
+
+### 17.5 KEYSTONES (elite-only · pool of 5 · run 1)
+
+| Keystone | Ladder | Status | The spectacle |
+|---|---|---|---|
+| **Double Time** | SWIFT | STANDS (graduated, A8) | the beat DOUBLES for a stretch after sustained clean play. |
+| **THE CODA** | FINISH | **NEW** | a max-combo Eviscerate inside an Opening ECHOES as a second, free finisher — the double-hit fills the screen. |
+| **EXSANGUINATE** | WOUND | **NEW** | an Eviscerate consuming 5+ live bleeds ERUPTS: the pot detonates as a chained blood-burst across the next 3 beats. *(§14's boss-stagger rider is DROPPED — engine-free version ships; the stagger variant is a Seal-pillar question, not a card.)* |
+| Hone | EDGE (class) | STANDS (A7/A8) | unlocks the EDGE meter — the crit ladder's door. |
+| Syncopation | class | STANDS (A8) | max-Flow strikes cost 0 (runes per A1). |
+**Offer rule (new, tension point 4):** elite nodes offer 1-of-2 drawn theme-weighted (a Wound
+build sees Exsanguinate more often) — the Hades god-routing steal, map-legibility friendly.
+
+### 17.6 SUPPORT · CARRIES · SIGNATURE CD · EASE
+
+- **Support:** Battle Hymn STANDS (Flow-tier raid aura; application still rides the owed buff
+  channel — unchanged debt).
+- **Carries:** Understudy (the one insurance) · curio verdicts A4 unchanged.
+- **SIGNATURE CD (the owed DECK-LAYOUT §5 slot — first shape proposal):** **THE SET PIECE** —
+  ~1-min CD; pressing it MARKS the next 4 beats as a phrase; landing all 4 Perfect-or-better
+  cashes a finisher-grade flourish (auto-scaled to your build: bleeds pulse, combo refunds,
+  Flow locks 2s). Amplifies skill, never button=damage; the §14 Hoarder note honored (bank-the-
+  CD-by-nailing-beats). One knob: phrase length.
+- **EASE (the dial archetype, DECK-LAYOUT §4):** on drop, rolls 2–3 of: window width (the
+  folded wideners) · beat speed · Flow-crash grace · bleed duration (Wound) · finisher-beat
+  width (Finish). Player slides ONE toward COMFORT (free) or BITE (+damage). Knob list is the
+  deck's official EASE surface.
+
+### 17.7 COHERENCE-GATE EVIDENCE (run, not claimed)
+
+**Dream drafts (the archetype walkthroughs):**
+- *THE WOUND:* Open Veins → Hemorrhage → Lacerate + Slow Bleed + Arterial Note → Exsanguinate.
+  Bulls seed the pot → Perfects widen income → the module makes cashing a decision → Arterial
+  heats it → the keystone erupts it. Every step raises BOTH the pot and the pressure to cash
+  clean — compounds, never just adds. ✓
+- *SWIFT:* Uptempo → Overdrive → Press the Advantage + Quickstep + Through-Line → Double Time.
+  Faster beat → refunds feed the tempo → streaks stack → fever/doubling is the earned ceiling.
+  The build self-tightens (Quickstep) — the greed is the build. ✓
+- *THE FINISH:* Largo → (module-free or Overdrive) → Deep Cuts + Grand Pause + Heavy Ink +
+  Finish It → The Coda. Slow weighty hands → hold the fat combo against decay → cash exact-max
+  in an Opening → the echo doubles it. ✓
+- *Hybrid (Wound×Finish):* Open Veins + Largo's boons — the pot ticks while combo builds; one
+  Evis cashes both (§14's stated cross-feed, now draftable). ✓
+**Offer-trio spot-checks (dealt honestly):** (Lacerate | Quickstep | Deep Cuts) — three builds,
+no auto-pick ✓ · (Arterial Note | Heavy Ink | Tightrope) — three greeds on three surfaces ✓ ·
+(Da Capo | Cold Open | Slow Bleed) — Da Capo auto-skips in two of three builds → evidence FOR
+its park ✓ (the trio test found the trim).
+**Overlap audit:** Quickstep vs Double Time (both speed — boon rung vs keystone ceiling, same
+ladder: legal) · Through-Line vs Heavy Ink (streak-stack vs combo-hold: different dials, both
+GREED-adjacent — flagged as the deck's greed-density spot) · each theme ≥3 exclusive cards ✓.
+**Anti-pattern sweep:** no passive wind-ups · Hemorrhage's gauge creates a decision (cash) ✓ ·
+no stat keystones (Exsanguinate/Coda are spectacles) · no one-time bonuses · caps stated on all
+scalers · no new buttons · one insurance total · no luck-greed (every bite chosen). ✓
+**AI-pilotability:** Wound = pot-value + bleed-TTL cash thresholds · Swift = the existing
+streak/tempo policy params · Finish = combo-hold threshold + Opening sync (policy already times
+dumps). All three expressible at 3 tiers; sim cells named: `--build=wound|swift|finish`. ✓
+
+### 17.8 SKEPTIC RECORD (3 passes)
+
+- **Draft-table skeptic:** found the 20-card quota breach → the trim table; found Da Capo's
+  auto-skip → park; demanded Grand Pause price-down (+35→+25 base) — folded.
+- **Repack skeptic:** Wound vs Alchemist DoTs — bleeds are SHORT (beats), press-seeded,
+  press-cashed, no vials/no balance meter: distinct, and poison stays excluded ✓. Heavy Ink vs
+  Fermata's Brink (both standing meters) — Ink is combo-HELD value with per-beat decay, Brink
+  is release-grade stacks zeroed by a snap: different clocks, recorded in the distinctness
+  ledger. Exsanguinate's stagger rider = engine debt → DROPPED (engine-free version ships).
+- **Fight-clock skeptic:** bleeds die in short zone fights? — they're beat-scale (seconds),
+  the pot cycles 3–4 times in a 60s fight ✓; the Coda needs an Opening — every authored fight
+  has them ✓; Heavy Ink in a 7-node run arc — decay is per-missed-beat, not per-fight: no
+  cross-fight hoarding ✓.
+
+### 17.9 OPEN TENSION POINTS (the calls only Bill can make)
+
+1. **The WILD creed gap** — Tempo has no Tutti-class core-rewrite creed. Author one later, or
+   accept the gap? (Lean: later, with the mobile-layout pass — don't force it.)
+2. **The trim table** (17.3): park Momentum + Da Capo + one of Encore/Efficiency? (Lean: yes,
+   park all three named; 16-card pool.)
+3. **Held Breath → 🔮 park** to keep the creed pool at 5? (Lean: park.)
+4. **Keystone pool = 5 with theme-weighted 1-of-2 elite offers** — accept the offer rule?
+   (Lean: yes; it makes elite routing legible.)
+5. **THE SET PIECE** as Tempo's signature-CD shape? (Lean: yes — it's the strongest CD-shape
+   candidate the §14 pass surfaced.)
+6. **On the Beat** — your own candidate, still unverdicted; it slots into SWIFT's lane cleanly.
+7. **Winner swap** — if you'd rather have EDGE or PUNISH in over any of the three, say the
+   word: the filing keeps their cards warm and D0 re-runs cheap.
+
+**Next:** your verdicts → statuses flip in CARD-CATALOG (rows landed 🟡 this pass) → the build
+claim codes it kit-local + guarded (A/B byte-identical, sim cells per build, HUD after).
