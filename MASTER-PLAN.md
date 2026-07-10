@@ -814,6 +814,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 03:24 · main (docs only) — **CLAIM: DECK MACHINE row D3 — the Bloomweaver deck
+  v0** (provisional core = A THE ORCHARD CLOCK, the slate's #1; Bill's core pick overrides →
+  free re-run; the deck exists to make the core verdict CONCRETE) → BLOOM-PLAN §4 🟡 + catalog
+  section. Design only. *(slate-machine session, deck tick 03:19)*
+
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §9 (NEW) + CARD-CATALOG D2 swap-kit rows + ledger
   flip — **DECK MACHINE row D2: THE DUELIST v2 — DONE, 🟡.** v1 is at Bill's LIVE board, so the
   pass deliberately does NOT re-author: **① the v1.1 RECONCILE** (Quick Wrists + Roll With It →
