@@ -829,6 +829,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 · worktree `../wow-stats` (branch `stats-page`) · §SYSTEMS/§GRAPHICS — **CLAIM: STATS
+  PAGE v2 — the full post-fight report (Bill's direct ask; per-fight only, run recap deferred).**
+  Audit found ~80% already engine-truth (`state.meter` per-source, `seat.diag` grades, the shipped
+  `RecapPanel`/`MeterPanel`). Building the genuinely-missing layer: (1) engine accounting — new
+  `meter_boon` funnel + `s.boon_meter`, amplifier-boon credit folded ONCE in `damage_boss` at the
+  vuln stack, `aggro_pulled` event+diag on threat-overtake retarget, `kick_open_missed` on an
+  uncontested INTERRUPTIBLE cast, `s.series` 1 Hz sampler for the dmg-over-time graph (all
+  diag-family, NEVER checksummed); (2) per-kit boon-credit one-liners + a `ClassKit.recap_spec()`
+  hook, backfilled for the 3 ACTIVE kits (Twinfang/Alchemist/Well; frozen Bulwark/Bloomweaver
+  skipped) — the credit line becomes a STANDING RULE every future kit rework carries; (3) a new
+  `game/ui/stats_page.gd` FULL REPORT screen (% breakdowns · damage-mix share bars · dmg-over-time
+  graph · BOON IMPACT · MISSED-OPPORTUNITY top-3 · category grades), reached by a button on the
+  Reckoning + `_show_end`. BYTE-IDENTICAL bar: ab-gate raid/twinfang/alchemist/well_sim (all new
+  writes are diag-family); `meter_probe` gains a boon-bucket reconcile [8]; new `screenshot_stats`
+  visual probe. ⚠ COLLISION: `combat_core.gd` also claimed live by `../wow-rails` (tuning-sweep) —
+  additive changes, merge main often, reconcile at merge. *(stats session)*
+
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `tuning-sweep`) — **CLAIM: TUNINGCONFIG LITERALS
   SWEEP (REFIT P4's split-out follow-up; determinism law #5: no hard-coded balance literals).**
   The sweep is SMALL — earlier passes moved most tuning; six real literals remain in
