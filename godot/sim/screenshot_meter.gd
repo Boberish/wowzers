@@ -24,21 +24,21 @@ func _initialize() -> void:
 	steps = [
 		{"name": "meter_raid_compact", "scene": "res://game/raid_main.tscn",
 			"setup": func(h): h._launch("tank"),
-			"policy": func(): return RaidTankPolicy.new(),
+			"policy": func(): return DuelistPolicy.new(),
 			"ticks": 780, "pre": func(_h): MeterPanel.view_state = 0},
 		{"name": "meter_raid_detail", "scene": "res://game/raid_main.tscn",
 			"setup": func(h): h._launch("tank"),
-			"policy": func(): return RaidTankPolicy.new(),
+			"policy": func(): return DuelistPolicy.new(),
 			"ticks": 780, "pre": func(_h): MeterPanel.view_state = 1},
 		{"name": "meter_raid_healing", "scene": "res://game/raid_main.tscn",
 			"setup": func(h): h._launch("tank"),
-			"policy": func(): return RaidTankPolicy.new(),
+			"policy": func(): return DuelistPolicy.new(),
 			"ticks": 780, "pre": func(h):
 				MeterPanel.view_state = 0
 				h._meter.mode = "heal"},
 		{"name": "meter_raid_end", "scene": "res://game/raid_main.tscn",
 			"setup": func(h): h._launch("tank"),
-			"policy": func(): return RaidTankPolicy.new(),
+			"policy": func(): return DuelistPolicy.new(),
 			"ticks": 780, "pre": func(h):
 				var ctrl = h.get("_ctrl")
 				CombatCore.damage_boss(ctrl.state, ctrl.state.seats[0], ctrl.state.boss.hp + 10.0),

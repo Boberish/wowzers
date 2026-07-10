@@ -97,7 +97,7 @@ func reachable(from_id: int, inventory: Dictionary) -> Array:
 ## node); wild → its rolled payload on reveal. HUD, server, and sims all resolve
 ## through this ONE mapping.
 const MARKET_LIVE := true       ## slice 3 (PROMPT MARKET + per-seat wallets) — LIVE
-const JAILBREAK_LIVE := false   ## slice 4 (THE JAILBREAK printed deals)
+const JAILBREAK_LIVE := true    ## slice 4 (THE JAILBREAK printed deals) — LIVE
 const MINIGAME_LIVE := false    ## slice 5 (CAPTCHA / BENCHMARK)
 
 static func effective_kind(n: Dictionary) -> String:

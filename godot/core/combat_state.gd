@@ -37,9 +37,13 @@ var enrage_offset: float = 0.0      ## OVERCLOCK STALL (+s) / enrage-sooner curs
 ## extinction (no living tank / no living healer / no living dps → wipe).
 var loss_mode: String = "player"
 
-## Raid mode (R0): boss target selection runs off the threat table + taunts instead
-## of "first living tank". GUARDED — no solo content sets this, so every solo sim
-## stays byte-identical. See RAID-PLAN.md.
+## THE AGGRO SUBSYSTEM enable (FLOW=AGGRO, TANK-PLAN §1c). When on, the boss's target
+## is driven by the tank's FLOW (its clean-answer streak) + the progressive peel, instead
+## of "first living tank". The taunt is GONE — aggro is 100% passive (BOSS-PLAN §1). Set by
+## every game CONTENT builder (raid today; world/dungeon later — "universal, one habit").
+## GUARDED — the solo class-training sims don't set it, so they stay byte-identical; only
+## the ambient numbers scale by content, never how aggro works. (Field name kept from the
+## old threat era for byte-stability; it now means "the flow/peel aggro system is live".)
 var threat_enabled: bool = false
 
 ## Tick-stamped input queue. Nothing mutates state inside an input event; actions

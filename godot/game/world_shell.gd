@@ -164,7 +164,7 @@ func _show_class_select() -> void:
 	# [seat, class, name, icon, accent, blurb] — the healer SEAT has two classes
 	# (Well / Bloomweaver), so five cards map onto the four seats.
 	var cards := [
-		["tank", "bulwark", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
+		["tank", "duelist", "THE DUELIST", "guard", Palette.STEEL, "TANK · DODGE — dance the stream, parry the big ones, hit back. Play clean to HOLD its gaze (flow = aggro)."],
 		["blade", "twinfang", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
 		["caster", "alchemist", "THE ALCHEMIST", "envenom", Palette.REACT, "CASTER · BREW THE REACTION — charge the vial, feed two opposing poisons, RUPTURE the peak.  (The Brew · NEW)"],
 		["healer", "well", "THE WELL-TENDER", "laststand", Palette.GOLD_BRIGHT, "HEALER · POUR — discrete CHARGES, no mana; GRADE every heal (TARGET the landing / SPEED the release), and a perfect one GLINTS the ally you healed.  (Brim / Draw · NEW)"],

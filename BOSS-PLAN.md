@@ -1,6 +1,8 @@
 # BOSS-PLAN — THE SEAL REWORK v1 (the 4-boss redo: fill the timer contract with structure)
 
-**Status: 🟡 design at Bill's verdict board (§V), authored 2026-07-10 (boss-rework session).**
+**Status: ✅ ALL 11 VERDICTS DECIDED (Bill, 2026-07-10 — §V) · BUILDING per `BOSS-BRIEF.md`.**
+S0 (sim instrumentation) 🔨 built & gate-clean on `seal-rework`; S1–S5 turnkey, waiting on the
+tank-w1→main union merge (see BOSS-BRIEF §0 — all engine blocks resolved, mapped to real APIs).
 This is the pass DESCENT-PLAN §4 wrote the contract for: grow the 4 Seals from today's 2–3.3
 minutes to **5 / 7 / 9 / 12** — every added minute a STRUCTURE beat (phases · acts · adds ·
 dialogue breaks · new decisions), **never +HP sponge**. It also carries Bill's aggro decision
@@ -18,7 +20,16 @@ same numbers). Its beat-source map + budget (~3–8 answerable beats/non-tank se
 
 ---
 
-## §V · THE VERDICT BOARD — eleven decisions for Bill
+## §V · THE VERDICT BOARD — ✅ ALL ELEVEN DECIDED (Bill, 2026-07-10)
+
+**The record:** **V1–V10 ✅ DECIDED — all as RECOMMENDED** (Bill, 2026-07-10: *"v1–10 is build
+with your recs"*) · **V11 ✅ DECIDED (b)** — Vorathek gets the Chant kick (the kindergarten).
+So: V1 approve the four identities · V2(a) park Riftrot+Baleful (Chant un-parked by V11) ·
+V3 confirm the density ramp read-back · V4(a) Mistral stance = fixed timed cycle · V5(a)
+Gemini promotion = seeded-random · V6(a) breaks = Mythos ×2 curtains + Gemini mini-break ·
+V7(a) LISTENING is IN · V8(a) THE ESCALATION mark relay is IN · V9(a) aggro valve = perfect-MAIN
+flow spike + THE GAZE boon lane · V10(a) NEXT-BEATS ribbon PARKED to v2. **Gate ③ cleared — the
+recs ARE the build.** The original questions + rationale are kept below for the record.
 
 1. **THE FOUR IDENTITIES** *(approve/veto each — §6 has the full scripts)*
    **VORATHEK = THE AXE** (slow huge honest hits, the teaching loop — the raid's only silent

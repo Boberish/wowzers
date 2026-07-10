@@ -7,7 +7,7 @@
 extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -72,7 +72,7 @@ func _seat_cls_now() -> String:
 	if _seat_key == "healer": return _healer_cls
 	if _seat_key == "blade": return _blade_cls
 	if _seat_key == "caster": return _caster_cls
-	return String(SEAT_CLASS.get(_seat_key, "bulwark"))
+	return String(SEAT_CLASS.get(_seat_key, "duelist"))
 
 ## The spec's per-seat cfg for the human seat (carries its class so RaidNet builds the
 ## right kit + the lobby/sim/net all agree). Non-polymorphic seats keep their native class.
@@ -110,7 +110,7 @@ func _ensure_party() -> void:
 	for key in RaidNet.SEAT_KEYS:
 		if key == _seat_key or _d.party.has(key):
 			continue
-		var cls := String(SEAT_CLASS.get(key, "bulwark"))
+		var cls := String(SEAT_CLASS.get(key, "duelist"))
 		_d.party[key] = {"cls": cls, "aspect": RaidNet.default_aspect(key, cls)}
 
 ## ROSTER PERSISTENCE (REFIT P4): a stored raider is only adopted if its class/aspect
@@ -162,7 +162,7 @@ func _seat_boons_now() -> Dictionary:
 const ABILITY_NAMES := {
 	"cleave": "Cleave", "rampage": "Rampage", "fortify": "Fortify", "vindicate": "Vindicate",
 	"strike": "Strike", "eviscerate": "Eviscerate", "kick": "Kick", "envenom": "Envenom",
-	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry",
+	"coupdegrace": "Coup", "rupture": "Rupture", "flurry": "Flurry", "setpiece": "Set Piece",
 	"bolt": "Bolt", "fracture": "Fracture", "barrier": "Barrier", "overload": "Overload",
 	"quietus": "Quietus", "silence": "Silence", "counterspell": "Counterspell",
 }
@@ -748,6 +748,9 @@ func _start_map_run() -> void:
 	_d.flags = {}
 	_d.marks = {}
 	_d.charge = 0
+	_d.curses = []          # THE JAILBREAK: a fresh run carries no bites (§7)
+	_d.deprecate_uses = 0
+	_d.poisoned = {}        # DECK TAX: no poisoned abilities on a fresh run
 	_d.check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _d.gear_unlocks directly.
@@ -829,6 +832,13 @@ func _inject_boons(seat: Seat) -> void:
 				wk.creed_id = _d.run.creed
 			wk.modules = _d.run.modules.duplicate()
 			wk.rig = _d.run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
+		elif seat.kit is DuelistKit:
+			var dk := seat.kit as DuelistKit
+			if _d.run.creed != "":
+				dk.creed_id = _d.run.creed
+			dk.rig = _d.run.rig.duplicate()      # TANK-PLAN §3/rig: the wired Combo rig
+			# (DuelistKit reads modules via the shared kit.boons/modules dicts + _m())
+			dk.modules = _d.run.modules.duplicate()
 
 ## Generate the current ring's map (RaidContent.FLOORS[_d.floor_i]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.
@@ -885,6 +895,7 @@ func _show_map() -> void:
 	ms.charge = _d.charge
 	ms.tokens = _tokens_now()          # ⏣ meter (§9); offline = the real wallet
 	ms.wounds = _d.wounds              # per-seat corrupted sectors → header pips
+	ms.curses = _curse_pips()          # §7 JAILBREAK bites → header curse pips (cap 2)
 	# ⏻ one-shot teach: fire the first map after charge appears in this run
 	if _d.charge > 0 and not _charge_taught:
 		ms.charge_hint = true
@@ -965,10 +976,14 @@ func _resolve_node(n: Dictionary) -> void:
 		RunMap.KIND_EVENT:
 			_event_stop(n)
 		RunMap.KIND_COOLING:
-			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY,
-				[{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
-					"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}],
-				Palette.FLOW, _show_map)
+			# The campfire fork (§7): the second redundant curse exit — free purge if a bite is active.
+			var cool_choices: Array = [{"label": "THROTTLE  (+10 ⏻ toward the Kill Switch · ease the healer's reserves)",
+				"fx": CampaignCore.COOLING_FX.merged({"result": MapContent.COOLING_RESULT})}]
+			if not _d.curses.is_empty():
+				cool_choices.append({"label": "PURGE A CURSE  (vent one active JAILBREAK bite — free)",
+					"fx": {"purge_curse": true,
+						"result": "You route the corruption to /dev/null. The bite lifts."}})
+			_map_stop(MapContent.COOLING_TITLE, MapContent.COOLING_BODY, cool_choices, Palette.FLOW, _show_map)
 		RunMap.KIND_CACHE:
 			_map_stop(MapContent.CACHE_TITLE, MapContent.CACHE_BODY,
 				[{"label": "SALVAGE THE COMPONENT  (+25 ⏻)",
@@ -976,6 +991,8 @@ func _resolve_node(n: Dictionary) -> void:
 				Palette.GOLD, _show_map)
 		RunMap.KIND_MARKET:
 			_show_market(int(n["id"]), _show_map, false)
+		RunMap.KIND_JAILBREAK:
+			_show_jailbreak(int(n["id"]), _show_map)
 
 ## THE INFERENCE CHECK (offline). Builds a ctx from the human's build, prepares each
 ## choice (a check computes its % + breakdown; a gated choice greys if unmet), and hands
@@ -1172,7 +1189,14 @@ func _launch_map_fight(fi: int) -> void:
 			u.hp = u.hp_max
 			if u.role == "healer":    # the fuel gauge: mana carries between nodes (it bites now)
 				u.resource = roundf(u.resource_max * _d.mana)
+	_apply_curse_marks()        # §7: fold active HP/TIMING curse bites into the pending mark, tick them
 	_apply_next_fight_mark(s)   # the KILL SWITCH cash-out / a fight-curse weakens THIS boss, then clears
+	# §7 DECK TAX (offline): the human seat's kit fizzles any poisoned ability this fight. Empty
+	# set = byte-identical; only the piloted seat is poisoned (AI/sims/online carry none).
+	if not _d.poisoned.is_empty():
+		var hi: int = SEAT_IDX[_seat_key]
+		if hi < s.seats.size() and s.seats[hi].kit != null:
+			s.seats[hi].kit.poisoned = _d.poisoned.duplicate()
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1269,11 +1293,18 @@ func _apply_map_fx(fx: Dictionary) -> void:
 	# tokens live on the run purse, not cp — grant directly (Phase 1 checks use this)
 	if int(fx.get("tokens", 0)) != 0:
 		_gain_tokens(int(fx["tokens"]))
+	# §6/§7: REGENERATE charges + curse add/purge also live off-cp (on the run / _d.curses)
+	if int(fx.get("regenerate", 0)) != 0 and _d.run != null:
+		_d.run.regenerate += int(fx["regenerate"])
+	if fx.has("curse"):
+		_add_curse(fx["curse"] as Dictionary)          # a JAILBREAK bite / event-curse leg
+	if bool(fx.get("purge_curse", false)) and not _d.curses.is_empty():
+		_purge_curse(false)                             # the Cooling purge fork (§7) — vents the oldest
 
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 
 ## Which class this seat key plays (gear rows are class-marked by class name).
-const SEAT_CLS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const SEAT_CLS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 
 ## The human seat carries the run's equipped curios into a fight (offline map runs
 ## only — the seat starts each pull with fresh per-fight gear bookkeeping).
@@ -1293,6 +1324,7 @@ func _mint_seats() -> void:
 	if _ctrl == null or _ctrl.state == null:
 		return
 	var st = _ctrl.state
+	var mult := _mint_curse_mult()        # §7 ECONOMY TAX — a curse halves this fight's mint
 	for key in RaidNet.SEAT_KEYS:
 		var i: int = SEAT_IDX[key]
 		if i >= st.seats.size():
@@ -1300,11 +1332,12 @@ func _mint_seats() -> void:
 		var run: RunState = _d.run if key == _seat_key else (_d.ai_runs.get(key) as RunState)
 		if run == null:
 			continue
-		var minted := Draft.mint_diag(st.seats[i].diag, st.config, run.char_class)
+		var minted := int(Draft.mint_diag(st.seats[i].diag, st.config, run.char_class) * mult)
 		if key == _seat_key:
 			_gain_tokens(minted)          # your seat — Hashgrinder ×2 lives here
 		else:
 			run.tokens += minted          # the AI raider banks its own clean play
+	_tick_economy_curses()                # one tick per fight for mint/price bites
 
 func _gain_tokens(n: int) -> void:
 	# CURIO Hashgrinder reframed (§6): no longer doubles income — it discounts the MARKET
@@ -1328,6 +1361,7 @@ const MARKET_CURIO_PRICE := {"haiku": 6, "sonnet": 8, "opus": 10}
 
 func _market_price(base: int) -> int:
 	var p := int(round(float(base) * (1.0 + 0.30 * float(_d.floor_i))))
+	p += _price_curse_surcharge()         # §7 ECONOMY TAX — a JAILBREAK price curse marks up the shop
 	if _d.gear.has("hashgrinder"):        # CURIO Hashgrinder reframed (§6): prices −1⏣ (floor 1)
 		p = maxi(1, p - 1)
 	return p
@@ -1388,6 +1422,12 @@ func _show_market(node_id: int, done: Callable, recovery_only: bool) -> void:
 	stock.append({"kind": "backup", "title": "+1 BACKUP",
 		"desc": "an extra attempt — arrives with the wipe budget", "price": _market_price(10),
 		"disabled": true, "disabled_text": "SOON"})
+	# §7 DEPRECATE — pay to have LESS: purge one active JAILBREAK curse. Price escalates each
+	# use. Only offered while a curse is active (the slice-3 deferred slot, now live).
+	if not _d.curses.is_empty():
+		stock.append({"kind": "deprecate", "title": "DEPRECATE",
+			"desc": "purge one active curse — %s" % String((_d.curses[0] as Dictionary).get("label", "a bite")),
+			"price": _market_price(5 + 5 * _d.deprecate_uses)})
 
 	var buy := func(i: int) -> bool: return _market_buy(stock, i)
 	var leave := func() -> void:
@@ -1421,6 +1461,12 @@ func _market_buy(stock: Array, i: int) -> bool:
 		"patch":
 			_apply_map_fx({"repair": true, "mana": 1.0})
 			_toast_add("🛒  PATCH — sectors repaired, reserves topped")
+		"deprecate":
+			if _d.curses.is_empty():
+				return false
+			var gone: Dictionary = _purge_curse(true)   # pay to remove the run-length DECK curse first
+			_d.deprecate_uses += 1                # the NEXT DEPRECATE costs more
+			_toast_add("🛒  DEPRECATE — purged %s" % String(gone.get("label", "a curse")))
 		_:
 			return false
 	_d.run.tokens -= price
@@ -1452,6 +1498,160 @@ func _market_banter(key: String) -> String:
 		"caster": return "for science. and rerolls."
 		"healer": return "one for me, none for the printer on fire."
 	return "shopping."
+
+# ---------------------------------------------------------------- THE JAILBREAK — curses (§7)
+## Add an active curse (the JAILBREAK deals + event-curse legs route here). CAP 2; the HARD
+## RULE — no run-length TIMING curse — is enforced (a timing bite must be bounded). Returns
+## false when the cap is hit (the deal button greys; the player must DEPRECATE first).
+func _add_curse(c: Dictionary) -> bool:
+	if _d.curses.size() >= 2:
+		return false
+	if String(c.get("kind", "")) == "timing" and int(c.get("fights", 0)) <= 0:
+		return false                       # §7 HARD RULE: no run-long timing curse ever
+	_d.curses.append(c.duplicate(true))
+	if String(c.get("kind", "")) == "deck":
+		_d.poisoned[String(c.get("ability_id", ""))] = true   # DECK TAX: poison the named slot
+	return true
+
+## Remove one active curse (an EXIT: DEPRECATE / Cooling purge). `prefer_deck` targets the
+## run-length DECK curse first (what you PAY to remove); clearing it also lifts the poison.
+func _purge_curse(prefer_deck: bool) -> Dictionary:
+	if _d.curses.is_empty():
+		return {}
+	var idx := 0
+	if prefer_deck:
+		for i in _d.curses.size():
+			if String((_d.curses[i] as Dictionary).get("kind", "")) == "deck":
+				idx = i
+				break
+	var gone: Dictionary = _d.curses[idx]
+	_d.curses.remove_at(idx)
+	if String(gone.get("kind", "")) == "deck":
+		_d.poisoned.erase(String(gone.get("ability_id", "")))   # the slot un-poisons
+	return gone
+
+## Header pips (§7): one printed line per active bite. The render already ships (slice 2,
+## map_screen curses row) — this just composes the strings.
+func _curse_pips() -> Array:
+	var out: Array = []
+	for c in _d.curses:
+		out.append(String((c as Dictionary).get("label", "a curse")))
+	return out
+
+## Is a mint-halving curse active? (bites _mint_seats)
+func _mint_curse_mult() -> float:
+	for c in _d.curses:
+		if String((c as Dictionary).get("kind", "")) == "economy_mint" and int((c as Dictionary).get("fights", 0)) > 0:
+			return 0.5
+	return 1.0
+
+## The market price surcharge from active price curses (bites _market_price).
+func _price_curse_surcharge() -> int:
+	var s := 0
+	for c in _d.curses:
+		if String((c as Dictionary).get("kind", "")) == "economy_price" and int((c as Dictionary).get("fights", 0)) > 0:
+			s += int((c as Dictionary).get("mag", 0))
+	return s
+
+## At each fight LAUNCH: fold active HP/TIMING curse bites into the pending fight mark
+## (RaidMarks delivers them), then decrement — they're "next N fights" bites, consumed at
+## the start of each fight. Two HP curses sum (RaidMarks caps). Byte-identical when none.
+func _apply_curse_marks() -> void:
+	for c in _d.curses:
+		var cd: Dictionary = c
+		if int(cd.get("fights", 0)) <= 0:
+			continue
+		match String(cd.get("kind", "")):
+			"hp":
+				_d.marks["seat_hp_cut"] = float(_d.marks.get("seat_hp_cut", 0.0)) + float(cd.get("mag", 0.0))
+				cd["fights"] = int(cd["fights"]) - 1
+			"timing":
+				_d.marks["window_tighten"] = float(_d.marks.get("window_tighten", 0.0)) + float(cd.get("mag", 0.0))
+				cd["fights"] = int(cd["fights"]) - 1
+	_expire_curses()
+
+## Post-mint: decrement the economy curses (mint/price) — one tick per fight — and expire.
+func _tick_economy_curses() -> void:
+	for c in _d.curses:
+		var cd: Dictionary = c
+		var k := String(cd.get("kind", ""))
+		if (k == "economy_mint" or k == "economy_price") and int(cd.get("fights", 0)) > 0:
+			cd["fights"] = int(cd["fights"]) - 1
+	_expire_curses()
+
+## Drop expired bounded curses — but KEEP run-length ones (the DECK tax, deprecatable:true),
+## which never tick down: only DEPRECATE / the Cooling purge clears them.
+func _expire_curses() -> void:
+	var kept: Array = []
+	for c in _d.curses:
+		if int((c as Dictionary).get("fights", 0)) > 0 or bool((c as Dictionary).get("deprecatable", false)):
+			kept.append(c)
+	_d.curses = kept
+
+## The deal menu (§7, V#4 lean-gentle): a strong good + a bite in a DIFFERENT currency, both
+## bounded + printed. Two are rolled per node. Goods run over market value; bites are gentle.
+const _JAILBREAK_BODY := "A back-alley terminal blinks [b]UNSIGNED PATCH — INSTALL?[/b]  Two deals, both halves printed. Each is a strong good with a bite in a different currency — the best value in the raid IF you can eat the pain, and the pain lands wherever you route it. Walking away is free."
+const JAILBREAK_DEALS := [
+	{"label": "OVERCLOCK — take +45 ⏻", "fx": {"charge": 45,
+		"curse": {"kind": "timing", "label": "windows −10% next fight", "fights": 1, "mag": 0.10},
+		"result": "The Kill Switch surges — but your reflexes lag a beat next fight."}},
+	{"label": "SKIM THE TILL — take +8 ⏣", "fx": {"tokens": 8,
+		"curse": {"kind": "economy_mint", "label": "mint halved (2 fights)", "fights": 2, "mag": 0.0},
+		"result": "Fat stack, flagged account. The next two paydays run lean."}},
+	{"label": "HOT PATCH — bank +2 REGENERATE", "fx": {"regenerate": 2,
+		"curse": {"kind": "hp", "label": "a corrupted sector next fight", "fights": 1, "mag": 0.20},
+		"result": "Two reloads, one bruise. A sector corrupts — it auto-repairs after the next fight."}},
+	{"label": "PRICE GOUGE — take +55 ⏻", "fx": {"charge": 55,
+		"curse": {"kind": "economy_price", "label": "market +3⏣ (3 fights)", "fights": 3, "mag": 3.0},
+		"result": "Charged up, marked up — THE SCRAPER hears you're desperate and raises prices."}},
+	{"label": "DOUBLE OR NOTHING — take +11 ⏣", "fx": {"tokens": 11,
+		"curse": {"kind": "timing", "label": "windows −10% next 2 fights", "fights": 2, "mag": 0.10},
+		"result": "A fistful of ⏣ and a shakier hand for two fights. Route the pain."}},
+]
+
+## Build the DECK deal (§7): a strong good for a RUN-LENGTH poison on one of YOUR ability
+## slots — the one bite that never expires, cleared only by DEPRECATE (its whole reason to
+## exist). Returns {} when every slot is already poisoned (nothing left to bet).
+func _deck_deal(rng: DetRng) -> Dictionary:
+	if _d.run == null:
+		return {}
+	var open: Array = []
+	for a in _d.run.loadout:
+		var id := String(a)
+		if id != "" and not _d.poisoned.has(id):
+			open.append(id)
+	if open.is_empty():
+		return {}
+	var aid := String(open[int(rng.next_u32() % open.size())])
+	var nm := aid.capitalize()
+	return {"label": "BLACK-MARKET FIRMWARE — bank +3 REGENERATE",
+		"fx": {"regenerate": 3,
+			"curse": {"kind": "deck", "ability_id": aid, "deprecatable": true, "fights": 0,
+				"label": "DECK — %s POISONED (DEPRECATE at Market)" % nm},
+			"result": "Three reloads for a busted driver. %s jams until you pay THE SCRAPER to DEPRECATE it." % nm}}
+
+## THE JAILBREAK node (§7). Two deals rolled on a (map_seed, node) rng → replay-stable +
+## co-op-shared. Walking away is free. At cap 2 the cell is full (DEPRECATE/purge first).
+func _show_jailbreak(node_id: int, done: Callable) -> void:
+	var mseed: int = _d.map.seed if _d.map != null else 12345
+	var rng := DetRng.new((mseed * 1000003 + (node_id + 1) * 6971 + 5) & 0x7FFFFFFF)
+	var choices: Array = []
+	if _d.curses.size() >= 2:
+		choices.append({"label": "The cell is FULL — no room for another bite",
+			"fx": {"result": "Two curses already ride your file. DEPRECATE one at the Market — or vent it at a Cooling station — before you deal again."}})
+	else:
+		var pool := JAILBREAK_DEALS.duplicate()
+		var deck := _deck_deal(rng)         # DECK TAX (§7): the one run-length deal, if a slot is free
+		if not deck.is_empty():
+			pool.append(deck)
+		for _k in 2:
+			if pool.is_empty():
+				break
+			var d: Dictionary = pool.pop_at(int(rng.next_u32() % pool.size()))
+			choices.append({"label": String(d["label"]), "fx": (d["fx"] as Dictionary).duplicate(true)})
+	choices.append({"label": "WALK AWAY  (take no deal — free)",
+		"fx": {"result": "You keep your hands clean. THE JAILBREAK will be here if you change your mind."}})
+	_map_stop("THE JAILBREAK", _JAILBREAK_BODY, choices, Palette.VOID, done)
 
 # ---------------------------------------------------------------- GEAR-2 (Oaths)
 
@@ -1889,6 +2089,8 @@ func _fw() -> String:
 		return "alchemist"
 	if _seat_key == "healer" and _seat_cls_now() == "well":
 		return "well"
+	if _seat_key == "tank" and _seat_cls_now() == "duelist":
+		return "duelist"
 	return ""
 
 ## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
@@ -1897,6 +2099,8 @@ func _fw_creed_ids(fw: String) -> Array:
 		return AlchemistCreeds.v1_ids()
 	if fw == "well":
 		return WellCreeds.v1_ids(_aspect)      # per-spec pools (brim vs draw)
+	if fw == "duelist":
+		return DuelistCreeds.v1_ids()
 	return TwinfangCreeds.v1_ids()
 
 func _fw_creed(fw: String, id: String) -> Dictionary:
@@ -1904,6 +2108,8 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 		return AlchemistCreeds.get_creed(id)
 	if fw == "well":
 		return WellCreeds.get_creed(id)
+	if fw == "duelist":
+		return DuelistCreeds.get_creed(id)
 	return TwinfangCreeds.get_creed(id)
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
@@ -1911,6 +2117,8 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 func _fw_module_offer_ids(fw: String, creed: String, aspect := "") -> Array:
 	if fw == "well":
 		return WellModules.offer_ids(aspect)   # ⭐The Vigil is Draw-only; the rest read either spec
+	if fw == "duelist":
+		return DuelistModules.built_ids()
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -1926,6 +2134,8 @@ func _fw_module(fw: String, id: String) -> Dictionary:
 		return AlchemistModules.get_module(id)
 	if fw == "well":
 		return WellModules.get_module(id)
+	if fw == "duelist":
+		return DuelistModules.get_module(id)
 	return TwinfangModules.get_module(id)
 
 ## Rig data dispatch (both classes mirror the TwinfangRig static API).
@@ -1934,6 +2144,8 @@ func _fw_rig_when_table(fw: String) -> Dictionary:
 		return AlchemistRig.WHENS
 	if fw == "well":
 		return WellRig.WHENS
+	if fw == "duelist":
+		return DuelistRig.WHENS
 	return TwinfangRig.WHENS
 
 func _fw_rig_then_table(fw: String) -> Dictionary:
@@ -1941,6 +2153,8 @@ func _fw_rig_then_table(fw: String) -> Dictionary:
 		return AlchemistRig.THENS
 	if fw == "well":
 		return WellRig.THENS
+	if fw == "duelist":
+		return DuelistRig.THENS
 	return TwinfangRig.THENS
 
 func _fw_rig_describe(fw: String, w: String, t: String) -> String:
@@ -1948,6 +2162,8 @@ func _fw_rig_describe(fw: String, w: String, t: String) -> String:
 		return AlchemistRig.describe(w, t)
 	if fw == "well":
 		return WellRig.describe(w, t)
+	if fw == "duelist":
+		return DuelistRig.describe(w, t)
 	return TwinfangRig.describe(w, t)
 
 ## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
@@ -1960,6 +2176,8 @@ func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
 			if WellRig.when_spec(String(id)) == _aspect:
 				wp.append(id)
 		return {"whens": WellRig.offer(wp, rng, 3), "thens": WellRig.offer(WellRig.then_ids(), rng, 3)}
+	if fw == "duelist":
+		return {"whens": DuelistRig.offer(DuelistRig.base_when_ids(), rng, 3), "thens": DuelistRig.offer(DuelistRig.then_ids(), rng, 3)}
 	if fw != "alchemist":
 		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
 			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
@@ -2507,7 +2725,7 @@ func _verb_summary_lines() -> Array:
 						String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
 				return WellBoons.verb_summary(_d.run.boons, _aspect)
 			return BloomweaverBoons.verb_summary(_d.run.boons, _aspect)
-		_: return BulwarkBoons.guard_summary(_d.run.boons, _aspect)
+		_: return DuelistBoons.verb_summary(_d.run.boons, _aspect)
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
 ## so you can always see the run you've drafted. Offline descent only (_d.run present;
@@ -2623,14 +2841,14 @@ func _owned_boon_labels() -> Array:
 		return []
 	var pools: Array = []
 	match _seat_key:
-		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM, TwinfangBoons.TRANSFORM_DOORS]
+		"blade": pools = [TwinfangBoons.SHARED, TwinfangBoons.TEMPO, TwinfangBoons.VENOM, TwinfangBoons.TRANSFORM_DOORS, TwinfangBoons.DUOS]
 		"caster": pools = [AlchemistBoons.SHARED, AlchemistBoons.BREW]
 		"healer":
 			if _healer_cls == "bloomweaver":
 				pools = [BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN]
 			else:
 				pools = [WellBoons.SHARED, WellBoons.BRIM, WellBoons.DRAW]
-		_: pools = [BulwarkBoons.SHARED, BulwarkBoons.WARDEN, BulwarkBoons.JUGG]
+		_: pools = [DuelistBoons.POOL]
 	var out: Array = []
 	for pool in pools:
 		for b in pool:
@@ -2994,10 +3212,10 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 	var aggro_me := bool(obs.get("aggro_me", false))
 	match _seat_key:
 		"tank":
-			_aggro_warn.text = "IT TURNS ON YOUR RAID  —  CHALLENGE IT BACK  (T)"
+			_aggro_warn.text = "IT DRIFTS TO YOUR RAID  —  PLAY CLEAN, IT COMES BACK"
 			_aggro_warn.visible = not aggro_me and not s.over
 		"blade", "caster":
-			_aggro_warn.text = "IT'S HUNTING YOU  —  SURVIVE UNTIL THE TAUNT"
+			_aggro_warn.text = "IT'S HUNTING YOU  —  DODGE!"
 			_aggro_warn.visible = aggro_me and not s.over
 		_:
 			_aggro_warn.visible = false
@@ -3170,13 +3388,11 @@ func _handle_event(ev: Dictionary) -> void:
 				_big_text("KICK!", Palette.KICK, 34)
 			_dial.react("stagger")
 			_add_shake(5.0)
-		"taunt":
+		"duel_counter":                       # FLOW=AGGRO: the perfect-parry hit-back (the tank's "look at me")
 			if mine:
-				_big_text("CHALLENGED — IT'S YOURS!", Palette.GOLD_BRIGHT, 38)
-				_add_shake(5.0)
-				_dial.react("impact", 30.0)
-			elif _seat_key != "tank":
-				_big_text("taunted back", Palette.STEEL, 22, 0.5)
+				_big_text("COUNTER!", Palette.GOLD_BRIGHT, 34)
+				_add_shake(4.0)
+				_dial.react("impact", 24.0)
 		"threat_drop":
 			if mine:
 				_big_text("IT FORGETS YOU!" if _seat_key == "tank" else "ITS GAZE FALLS ON YOU!", Palette.CRIMSON, 42)

@@ -29,7 +29,8 @@ static func for_hud(h) -> ClassBand:
 		"alchemist": b = BrewBand.new()
 		"well": b = WellBand.new()
 		"bloomweaver": b = BloomBand.new()
-		_: b = TankBand.new()          # bulwark — and the old martial `_:` fallback
+		"duelist": b = DuelistBand.new()   # S4: FLOW/AGGRO orb + WIND bubble + ◆ pips + parry/dodge/dump
+		_: b = TankBand.new()          # bulwark fixture — and the old martial `_:` fallback
 	b.hud = h
 	return b
 

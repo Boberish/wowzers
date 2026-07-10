@@ -13,6 +13,9 @@ extends RefCounted
 ## a spec's per-seat boons in here). `modules`: equipped UI Module ids -> true.
 var boons: Dictionary = {}
 var modules: Dictionary = {}
+## THE JAILBREAK DECK TAX (§7): ability ids poisoned by a run-length curse — CombatCore
+## fizzles a pressed ability whose id is in here (offline only; empty = byte-identical).
+var poisoned: Dictionary = {}
 
 ## Boon / Module lookups — the guarded-no-op idiom's foundation: absent = false,
 ## so an undrafted kit takes the vanilla path byte-identically.
@@ -38,6 +41,16 @@ func on_defense_press(_s: CombatState, _seat: Seat) -> void:
 ## DEFENSIBLE swing (negate) and barrage beats, on one cooldown. Default false keeps
 ## the split "defense"/"dodge" verbs byte-identical for every class that hasn't moved.
 func unified_dodge() -> bool:
+	return false
+
+## BESPOKE DEFENSE (TANK-PLAN §1a, DUELIST-BRIEF S1): the tank runs its OWN graded parry +
+## dodge instead of the shared dodge ration / binary negate. When true, CombatCore routes
+## this seat's "defense" (PARRY main) and "dodge" (DODGE secondary) presses straight to the
+## kit (on_defense_press / on_dodge_press — the kit owns wind + its own answer windows), and
+## does NOT binary-negate a DEFENSIBLE swing aimed here: the hit flows through to _damage so
+## the kit's modify_incoming applies GRADED PARTIAL mitigation (the partial-mit law, cap .90 —
+## even a perfect leaks a sliver). Default false keeps every other class byte-identical.
+func bespoke_defense() -> bool:
 	return false
 
 ## A DEFENSIBLE swing was negated by a well-timed press. Default = pure negate

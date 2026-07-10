@@ -50,7 +50,6 @@ static func build_ctx(boon_tags: Array, gear_tags: Array, aspect: String, role: 
 ## can't use Draft.catalog(run)). Mirrors Draft.catalog's mapping.
 static func catalog_for(cls: String) -> Variant:
 	match cls:
-		"bulwark": return BulwarkBoons
 		"twinfang": return TwinfangBoons
 		"bloomweaver": return BloomweaverBoons
 	return null

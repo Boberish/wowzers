@@ -57,7 +57,7 @@ func _process(_d: float) -> bool:
 		_check(shell._screen == "class", "world door → class select")
 		return false
 	if step == 2:
-		shell._pick_class("tank", "bulwark")
+		shell._pick_class("tank", "duelist")
 		_check(shell._screen == "aspect", "class → aspect ceremony")
 		return false
 	if step == 3:

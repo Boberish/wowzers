@@ -57,7 +57,7 @@ func _process(_d: float) -> bool:
 			phase = 1
 		1:
 			cur._launch("tank")
-			pol = RaidTankPolicy.new()
+			pol = DuelistPolicy.new()
 			if "rng" in pol:
 				pol.rng = DetRng.new(4242)
 			last_tick = -1

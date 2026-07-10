@@ -21,16 +21,16 @@ static var _t: Dictionary = {}
 static func table() -> Dictionary:
 	if _t.is_empty():
 		_t = {
-			"bulwark": {
-				"seat": "tank", "display": "The Bulwark",
-				"aspects": ["warden", "juggernaut"], "default_aspect": "warden",
-				"kit": &"BulwarkKit",
+			"duelist": {
+				"seat": "tank", "display": "The Duelist",
+				"aspects": ["duelist"], "default_aspect": "duelist",
+				"kit": &"DuelistKit",
 				"make_seat": RaidContent._tank,
-				"start_run": RunState.start,
+				"start_run": RunState.start_duelist,
 				"policy": func(seed_v: int) -> Policy:
-					var p := RaidTankPolicy.new()
-					p.reaction_slack = RaidNet.ALLY_SLACK
-					p.rng = DetRng.new(seed_v * 2749 + 1337)
+					var p := DuelistPolicy.new()
+					p.latency_ticks = RaidNet.ALLY_LATENCY
+					p.rng = DetRng.new(seed_v * 2749 + 6737)   # NEW salt — never Bulwark's 1337 (byte-exact-history rule)
 					return p,
 			},
 			"twinfang": {

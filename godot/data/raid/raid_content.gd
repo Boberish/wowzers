@@ -476,15 +476,16 @@ static func run_encounters() -> Array:
 # --- seats (each is the solo factory's seat, minus is_player, plus a name) ---
 
 static func _tank(aspect: String) -> Seat:
-	var bcfg := BulwarkConfig.new()
+	# THE DUELIST — the dodge tank (TANK-PLAN, DUELIST-BRIEF). The Bulwark was retired as the
+	# playable tank (it survives only as a sim/gear-probe FIXTURE). FLOW + WIND + ◆ live in vars.
+	var dcfg := DuelistConfig.new()
 	var u := Seat.new()
-	u.role = "tank"; u.unit_name = "The Bulwark"; u.fidelity = "full"
-	u.hp_max = bcfg.hp_max; u.hp = bcfg.hp_max; u.dps = 0.0
-	u.resource = 0.0; u.resource_max = bcfg.rage_max
-	u.kit = BulwarkKit.new(aspect, bcfg)
-	u.policy = RaidTankPolicy.new()
-	u.vars = {"counter": 0, "momentum": 0, "mom_decay_acc": 0.0,
-		"last_aggro_tick": 0, "riposte_until_tick": 0}
+	u.role = "tank"; u.unit_name = "The Duelist"; u.fidelity = "full"
+	u.hp_max = dcfg.hp_max; u.hp = dcfg.hp_max; u.dps = 0.0
+	u.resource = 0.0; u.resource_max = 0.0
+	u.kit = DuelistKit.new(aspect, dcfg)
+	u.policy = DuelistPolicy.new()
+	u.vars = {"flow": dcfg.flow_start, "wind": dcfg.wind_max, "combo": 0}
 	return u
 
 static func _blade(aspect: String) -> Seat:
@@ -581,7 +582,7 @@ static func make_state(seed: int, enc: EncounterRes, aspects: Dictionary = {},
 	if pack.size() >= 2:
 		s.pack = pack
 	var seats := {
-		"tank": _tank(String(aspects.get("tank", "warden"))),
+		"tank": _tank(String(aspects.get("tank", "duelist"))),
 		"blade": _blade_seat(String(classes.get("blade", "twinfang")), String(aspects.get("blade", ""))),
 		"caster": _caster_seat(String(classes.get("caster", "alchemist")),
 			String(aspects.get("caster", ""))),

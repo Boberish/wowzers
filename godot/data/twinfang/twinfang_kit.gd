@@ -104,6 +104,10 @@ func _creed() -> Dictionary:
 func _transform() -> String:
 	return transform if _tempo_family() else ""
 
+## D0 S3 · true if a crit SOURCE is held (Whetstone creed / Heartseeker / Hone) — the Edge branch.
+func _has_crit_source() -> bool:
+	return _b("hone") or _b("heartseeker") or bool(_creed().get("whetstone", false))
+
 func _creed_flow_value() -> float:
 	if not _tempo_family():
 		return 1.0
@@ -269,6 +273,9 @@ func _cash_wounds(s: CombatState, seat: Seat) -> void:
 		var remaining := maxi(1, (int(w["end"]) - s.tick) / maxi(1, tick_ticks))
 		total += float(w["per"]) * float(remaining)
 	total *= (1.0 + cfg.hemorrhage_cash_per * float(n))
+	if bool(seat.vars.get("bcoda_armed", false)):        # BLOOD CODA duo: the cash pays the duo bonus too
+		total *= cfg.blood_coda_mult
+		seat.vars["bcoda_armed"] = false
 	seat.vars["wounds"] = []
 	if _b("exsanguinate") and n >= cfg.exsang_min_bleeds:
 		seat.vars["exsang_left"] = cfg.exsang_beats                       # ERUPT across the next 3 beats
@@ -537,6 +544,9 @@ func _deal(s: CombatState, seat: Seat, raw: float, flow_scaled: bool, crit: bool
 				d *= f_keen
 				bf.append([&"strop", f_keen])
 				seat.vars["keen"] = 0
+		if _tempo_family() and _b("redEdge"):             # THE RED EDGE duo: a crit pulses every live bleed
+			for w in (seat.vars.get("wounds", []) as Array):
+				_deal(s, seat, float(w["per"]), false, false, "bleed")
 	# THE OPENING: a dump landed in the boss's vulnerability window hits harder (graded
 	# by how centred on the sweet spot). Strikes/perfects are NOT dumps — they keep their
 	# own rhythm. All hits of a multi-hit dump (Flurry) share the same window.
@@ -808,7 +818,8 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	# Flow decays toward 0 between Perfects. Frozen while a Held-Breath window lock is active,
 	# and HELD NOTE (boon) pauses it while the boss winds up a swing (read the telegraph in peace).
 	var held := _b("heldNote") and s.telegraph != null
-	if _flow(seat) > 0 and not bool(seat.vars.get("window_locked", false)) and not held:
+	if _flow(seat) > 0 and not bool(seat.vars.get("window_locked", false)) and not held \
+			and s.tick >= int(seat.vars.get("sp_flowlock_until", 0)):   # SET PIECE flourish holds the tempo
 		var acc := int(seat.vars.get("flow_decay_acc", 0)) + 1
 		var every := _tt(s, cfg.flow_decay_every * (1.5 if _b("virtuoso") else 1.0))
 		if acc >= every:
@@ -1029,6 +1040,7 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 		"flurry":      return _flurry(s, seat)
 		"gracenote":   return _grace_note(s, seat)
 		"coda":        return _coda(s, seat)
+		"setpiece":    return _setpiece(s, seat)   # D0 S6 · the signature CD
 		"coupdegrace": return _coup(s, seat)
 		"rupture":     return _rupture(s, seat)
 	return false
@@ -1234,6 +1246,8 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 					if rtot >= float(seat.vars.get("rondo_hit", 0.0)) * 0.5 and not bool(seat.vars.get("rondo_when_fired", false)):
 						seat.vars["rondo_when_fired"] = true
 						_rig_fire(s, seat, "returnWhen")
+					if _b("reprise"):                            # THE REPRISE duo: the Return re-opens a bleed
+						_inscribe_wound(s, seat, cfg.open_veins_tick)
 			if _m("overdrive") and was_max and not fever:                     # OVERDRIVE: max-Flow Perfects fill the meter
 				var od2 := int(seat.vars.get("od_meter", 0)) + 1
 				if od2 >= cfg.overdrive_fill:
@@ -1314,6 +1328,15 @@ func _strike(s: CombatState, seat: Seat, from_release := false, coil_ticks := 0)
 			seat.vars["refrain_repeat"] = true               # REFRAIN: a Bullseye HOLDS the window — keep the shift,
 		else:                                              # so the next draw replays the same note (the repeat pays more)
 			seat.vars["window_shift"] = _roll_window_shift(s, seat)
+	# D0 S6 · THE SET PIECE: tally the marked phrase; a clean all-Perfect+ phrase cashes the flourish.
+	if _tempo_family() and bool(seat.vars.get("sp_armed", false)):
+		if perfect:
+			seat.vars["sp_hits"] = int(seat.vars.get("sp_hits", 0)) + 1
+		seat.vars["sp_left"] = int(seat.vars.get("sp_left", 0)) - 1
+		if int(seat.vars["sp_left"]) <= 0:
+			seat.vars["sp_armed"] = false
+			if int(seat.vars.get("sp_hits", 0)) >= cfg.setpiece_phrase:
+				_setpiece_cash(s, seat)
 	_gain_cp(seat, cp + (cfg.bull_bonus_cp if bullseye else 0))   # F15: a Bullseye grants extra combo (superset of Perfect)
 	if _b("strikeEnergy") and perfect:
 		_gain_energy(seat, cfg.efficiency_refund)                 # Efficiency: stacks ON TOP of the base refund
@@ -1417,7 +1440,17 @@ func _eviscerate(s: CombatState, seat: Seat) -> bool:
 	if _b("heavyInk"):
 		dmg *= (1.0 + cfg.heavy_ink_per * float(seat.vars.get("heavy_ink", 0)))
 		seat.vars["heavy_ink"] = 0
-	_deal(s, seat, dmg, true, false, "finisher")
+	# D0 S3 · DUOS — Blood Coda (Wound×Finish): a full-combo Evis cashing 4+ bleeds pays both ×mult;
+	# Grand Finale (Edge×Finish): a full-combo finisher with a crit build hot is a guaranteed crit.
+	var fin_crit := false
+	if _b("bloodCoda") and cp >= cfg.cp_max and _m("hemorrhage") \
+			and (seat.vars.get("wounds", []) as Array).size() >= cfg.deepcash_min_bleeds:
+		dmg *= cfg.blood_coda_mult
+		seat.vars["bcoda_armed"] = true              # the wound cash below pays the duo bonus too
+	if _b("grandFinale") and cp >= cfg.cp_max and _has_crit_source():
+		fin_crit = true
+		dmg *= (1.0 + cfg.grand_finale_bonus)
+	_deal(s, seat, dmg, true, fin_crit, "finisher")
 	seat.vars["cp"] = 0
 	if cp >= cfg.cp_max:
 		_rig_fire(s, seat, "finale")       # COMBO RIG (§5): a full 5-combo Eviscerate
@@ -1569,6 +1602,32 @@ func _coda(s: CombatState, seat: Seat) -> bool:
 	CombatCore.emit_event(s, {"t": "coda", "player": seat.is_player})
 	return true
 
+## D0 S6 · THE SET PIECE (signature CD) — press to MARK the next setpiece_phrase strikes as a phrase;
+## the tally lives in _strike, and a clean all-Perfect+ phrase cashes _setpiece_cash.
+func _setpiece(s: CombatState, seat: Seat) -> bool:
+	if not _tempo_family() or not cfg.setpiece_enabled:
+		return false
+	var a: Dictionary = cfg.abilities["setpiece"]
+	if s.tick < int(seat.cooldowns.get("setpiece", 0)) or bool(seat.vars.get("sp_armed", false)):
+		return false
+	seat.cooldowns["setpiece"] = s.tick + _tt(s, float(a["cd"]))
+	seat.vars["sp_armed"] = true
+	seat.vars["sp_left"] = cfg.setpiece_phrase
+	seat.vars["sp_hits"] = 0
+	CombatCore.emit_event(s, {"t": "setpiece_arm", "player": seat.is_player})
+	return true
+
+## The flourish: build-scaled — flow-scaled damage + a pulse on every live bleed (Wound) + a combo
+## refund (Finish) + a Flow-lock (hold the tempo through the payoff). Auto-fits whatever the build is.
+func _setpiece_cash(s: CombatState, seat: Seat) -> void:
+	_deal(s, seat, cfg.setpiece_flourish, true, false, "finisher")
+	for w in (seat.vars.get("wounds", []) as Array):
+		_deal(s, seat, float(w["per"]), false, false, "bleed")
+	_gain_cp(seat, cfg.setpiece_refund_cp)
+	seat.vars["sp_flowlock_until"] = s.tick + _tt(s, cfg.setpiece_flowlock_sec)
+	CombatCore._bump_diag(s, seat, "setpiece_cash")
+	CombatCore.emit_event(s, {"t": "setpiece_cash", "player": seat.is_player})
+
 func _coup(s: CombatState, seat: Seat) -> bool:
 	var a: Dictionary = cfg.abilities["coupdegrace"]
 	if s.tick < int(seat.cooldowns.get("coupdegrace", 0)):
@@ -1707,6 +1766,10 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"kick_ready": s.tick >= int(seat.cooldowns.get("kick", 0)),
 		"coup_ready": _tempo_family() and _flow(seat) >= (cfg.cadenza_min_flow if _transform() == "cadenza" else max_flow()) \
 			and s.tick >= int(seat.cooldowns.get("coupdegrace", 0)),
+		"setpiece_ready": _tempo_family() and cfg.setpiece_enabled \
+			and s.tick >= int(seat.cooldowns.get("setpiece", 0)) and not bool(seat.vars.get("sp_armed", false)),
+		"setpiece_armed": bool(seat.vars.get("sp_armed", false)),
+		"setpiece_left": int(seat.vars.get("sp_left", 0)),
 		"rupture_ready": aspect == "venomancer" and _venom_total(seat) >= 1 \
 			and s.tick >= int(seat.cooldowns.get("rupture", 0)),
 		"wheel": _wheel(seat),   # Venom poison wheel: 0=V 1=F 2=C, the lit (on-deck) lane

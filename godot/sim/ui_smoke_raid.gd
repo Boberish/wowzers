@@ -44,13 +44,15 @@ func _process(_delta: float) -> bool:
 	hud._inject_boons(bseat)
 	var bk := bseat.kit as TwinfangKit
 	assert(bk.creed_id == "flourish" and bk.modules.has("edge"), "creed+module fold into the blade kit")
-	# non-conforming seat is EMPTY: a tank skips both picks (done fires immediately, no screen)
+	# EVERY class is a framework class now (post-purge + the Duelist): the TANK (Duelist) shows
+	# the creed pick too — no seat "skips" it anymore.
 	hud._seat_key = "tank"
 	hud._d.run.creed = ""
 	hud._show_creed_pick(func(): flags.skip = true)
-	assert(flags.skip, "a non-blade seat skips the creed pick (empty page, per design)")
+	assert(hud._screen == "creed" and not flags.skip, "the DUELIST tank SHOWS the creed pick (a framework class)")
+	hud._d.run.creed = "veteran"
 	hud._seat_key = "blade"
-	print("TEMPO framework: creed pick + module pick + kit inject ok; non-framework seat skips clean")
+	print("TEMPO framework: creed pick + module pick + kit inject ok; the Duelist tank shows creeds too")
 
 	# WELL REWORK framework: the healer seat (class "well") snaps onto the SAME ceremony,
 	# with PER-SPEC creed pools + the deck folding into the WellKit (MENDER-PLAN §2-5).
@@ -169,11 +171,16 @@ func _process(_delta: float) -> bool:
 	hud._d.party["blade"]["aspect"] = "tempo"   # command the blade directly (probe-style)
 	print("party setup: ok toggles=%s/%s party=%s" % [str(cpa), str(cpc), str(hud._d.party)])
 	var cpd := _press(hud, "⚔")               # DESCEND
-	assert(cpd and String(hud._screen) == "map" and hud._d.ai_runs.size() == 3,
+	if hud._d.map == null:   # reworked player: descent opens on the creed ceremony — complete it
+		hud._d.run.creed = hud._fw_creed_ids(hud._fw())[0]
+		hud._build_floor()
+	assert(cpd and hud._d.map != null and hud._d.ai_runs.size() == 3,
 		"DESCEND didn't start the commanded descent")
 	print("commander descent: ok blade=%s healer=%s" % [
 		String((hud._d.ai_runs["blade"] as RunState).aspect),
 		String((hud._d.ai_runs["healer"] as RunState).char_class)])
+	if hud._d.run.rig.is_empty():   # reworked player: pre-wire the rig so the chain skips the rig-wire
+		hud._d.run.rig = {"when": hud._fw_rig_when_table(hud._fw()).keys()[0], "then": hud._fw_rig_then_table(hud._fw()).keys()[0]}
 	hud._show_boon_draft(hud._show_map)       # the chain: you, then each AI raider
 	var ctakes := 0
 	while String(hud._screen) == "draft" and ctakes < 8:
@@ -192,8 +199,11 @@ func _process(_delta: float) -> bool:
 	# Topology raid floor (MAP-3a): map screen -> entry fight -> back on the map,
 	# node fx (raid patch, refuel, wound repair), the privilege-elevated screen
 	hud._seat_key = "tank"
-	hud._aspect = "warden"
+	hud._aspect = "duelist"
 	hud._start_map_run()
+	if hud._d.map == null:   # the reworked Duelist tank opens on the creed ceremony — complete it
+		hud._d.run.creed = hud._fw_creed_ids(hud._fw())[0]
+		hud._build_floor()
 	print("raid map screen: ok (nodes=%d screen=%s)" % [hud._d.map.nodes.size(), hud._screen])
 	hud._enter_node(hud._d.map.entry_id)
 	# GEAR-2: the boss's Ledger page interposes — swear the first oath, then pull

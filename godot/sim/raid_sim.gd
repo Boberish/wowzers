@@ -62,7 +62,7 @@ func _initialize() -> void:
 	var blade_desc := "Twinfang(%s)" % (_baspect if _baspect != "" else "venomancer")
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
-	print("party: Bulwark(warden) / %s / %s / %s" % [blade_desc, caster_desc, healer_desc])
+	print("party: Duelist / %s / %s / %s" % [blade_desc, caster_desc, healer_desc])
 	if _dmg != 1.0 or _regen >= 0.0 or _fortify >= 0.0:
 		print("OVERRIDES:  dmg ×%.2f   regen %s   fortify %s   (live tweaks, not saved to files)" % [
 			_dmg, ("%.2f" % _regen if _regen >= 0.0 else "—"),
@@ -84,22 +84,22 @@ func _initialize() -> void:
 		# healer's decision ticks it had NOTHING worth casting. Low hlOver+low hlIdle+
 		# a mana floor that actually dips = the healer's resource is a real constraint;
 		# hlMana pinned near 100 with high hlIdle = the fight doesn't pressure the healer.
-		print("skill    win-rate   avg TTK(win)  taunts  kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  rez  losses")
+		print("skill    win-rate   avg TTK(win)  peels   kicks  healed  scaled  beatmiss  adds  hlMana hlOver hlIdle  rez  losses")
 		var inst_by_skill := {}                   # S0: per-skill instrumentation accumulators
 		for sk in _skills:
 			var wins := 0
 			var ttk_sum := 0.0
-			var agg := {"taunts": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
+			var agg := {"peels": 0.0, "kicks": 0.0, "healed": 0.0, "buff": 0.0,
 				"miss": 0.0, "adds": 0.0, "hmana": 0.0, "hover": 0.0, "hidle": 0.0, "rez": 0.0}
 			var causes := {}
 			var i_beats: Array = [{}, {}, {}, {}]   # S0: per-seat beat-budget sums
 			var i_casts := {}                       # S0: ability id -> cast count sum
 			var i_pf := 0.0; var i_as := 0.0; var i_vp := 0.0
 			for seed in range(seed0, seed0 + seeds):
-				var r := _run_one(String(b), seed, sk, true)
-				r["skill"] = sk["label"]; r["seed"] = seed; r["boss"] = b; r["probe"] = "taunt"
+				var r := _run_one(String(b), seed, sk)
+				r["skill"] = sk["label"]; r["seed"] = seed; r["boss"] = b; r["probe"] = "flow"
 				rows.append(r)
-				agg["taunts"] += float(int(r["taunts"]))
+				agg["peels"] += float(int(r["peels"]))
 				agg["kicks"] += float(int(r["kicks"]))
 				agg["healed"] += float(r["boss_healed"])
 				agg["buff"] += float(r["dmg_buff"])
@@ -120,7 +120,7 @@ func _initialize() -> void:
 			var avg := (ttk_sum / float(wins)) if wins > 0 else 0.0
 			var n := float(seeds)
 			print("%-7s  %6.1f%%   %8.1fs    %5.2f  %5.2f  %6.1f  %5.2f    %6.2f  %4.2f  %5.0f%% %5.0f%% %5.0f%%  %3.2f  %s" % [
-				sk["label"], wr, avg, agg["taunts"] / n, agg["kicks"] / n, agg["healed"] / n,
+				sk["label"], wr, avg, agg["peels"] / n, agg["kicks"] / n, agg["healed"] / n,
 				agg["buff"] / n, agg["miss"] / n, agg["adds"] / n,
 				agg["hmana"] / n, agg["hover"] / n, agg["hidle"] / n, agg["rez"] / n, SimUtil.fmt_causes(causes)])
 			inst_by_skill[sk["label"]] = {"beats": i_beats, "casts": i_casts,
@@ -128,8 +128,6 @@ func _initialize() -> void:
 		print("")
 		_print_instrumentation(String(b), enc, inst_by_skill)
 		print("")
-	if seed0 == 1 and _probes and (only == "" or only == "riftmaw"):
-		_prove_threat_gate(mini(seeds, 200))
 
 	_write_csv(SimUtil.arg("out", "res://out/raid_results.csv"), rows)
 	print("")
@@ -137,27 +135,7 @@ func _initialize() -> void:
 		ProjectSettings.globalize_path(SimUtil.arg("out", "res://out/raid_results.csv"))])
 	quit()
 
-## The threat probe: same party, same seeds, but the tank never taunts. If threat is
-## load-bearing, the Baleful Curse turns the boss loose on the dps and losses climb.
-func _prove_threat_gate(seeds: int) -> void:
-	var sk: Dictionary = SKILLS[1]
-	var wins_on := 0
-	var wins_off := 0
-	var dps_deaths_on := 0
-	var dps_deaths_off := 0
-	for seed in range(1, seeds + 1):
-		var a := _run_one("riftmaw", seed, sk, true)
-		var b := _run_one("riftmaw", seed, sk, false)
-		if a["won"]: wins_on += 1
-		if b["won"]: wins_off += 1
-		dps_deaths_on += int(a["dps_deaths"])
-		dps_deaths_off += int(b["dps_deaths"])
-	print("threat gate probe (riftmaw, good party, %d seeds): taunt ON %.1f%% (dps deaths %.2f/run)  |  taunt OFF %.1f%% (dps deaths %.2f/run)" % [
-		seeds, 100.0 * wins_on / seeds, float(dps_deaths_on) / seeds,
-		100.0 * wins_off / seeds, float(dps_deaths_off) / seeds])
-	print("  -> the taunt should carry a visible share of the win rate; if ON == OFF, threat isn't biting")
-
-func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> Dictionary:
+func _run_one(boss: String, seed: int, sk: Dictionary) -> Dictionary:
 	var enc := RaidContent.encounter_by_id(boss)
 	if _dmg != 1.0:
 		_scale_damage(enc)                               # --dmg override (fresh enc per run — no leak)
@@ -172,12 +150,11 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	var healer := s.seats[3]
 	if _regen >= 0.0:
 		healer.vars["regen_mult"] = _regen               # --regen override (mana dial)
-	if _fortify >= 0.0 and tank.kit is BulwarkKit:
-		(tank.kit as BulwarkKit).cfg.raid_self_heal_mult = _fortify   # --fortify override (tank-sustain dial)
-	var tp := tank.policy as RaidTankPolicy
-	tp.reaction_slack = float(sk["slack"])
-	tp.rng = DetRng.new(seed * 2749 + 1337)
-	tp.use_challenge = use_challenge
+	# --fortify is inert now: the Duelist has NO self-heal (partial-mit law); tank sustain
+	# is the healer duet + the flow/peel knobs (TuningConfig). Flag kept as a harmless no-op.
+	var tp := tank.policy as DuelistPolicy
+	tp.latency_ticks = int(sk["lat"])
+	tp.rng = DetRng.new(seed * 2749 + 6737)   # NEW salt — never Bulwark's 1337
 	if _brig != "" and blade.kit is TwinfangKit:      # wire the Combo rig for the probe
 		var parts := _brig.split(":")
 		if parts.size() == 2:
@@ -256,10 +233,12 @@ func _run(s: CombatState) -> Dictionary:
 		s.loss_cause = "timeout"
 	var dps_deaths := 0
 	var beat_miss := 0
+	var peels := 0
 	for seat in s.seats:
 		if seat.role == "dps" and not seat.alive():
 			dps_deaths += 1
 		beat_miss += int(seat.diag.get("miss", 0))
+		peels += int(seat.diag.get("aggro_pulled", 0))   # FLOW=AGGRO: times the boss strayed off the tank
 	var adds_killed := s.boss.adds_spawned.size() - (1 if s.boss.add_i >= 0 else 0)
 	# healer output from the meter (eff vs overheal) → % wasted; mana floor as % of pool.
 	var hrow: Dictionary = s.meter.get(s.seats.find(healer), {})
@@ -272,7 +251,7 @@ func _run(s: CombatState) -> Dictionary:
 		"boss_hp_left": s.boss.hp,
 		"boss_healed": s.boss.heal_total,
 		"dmg_buff": s.boss.dmg_buff,           # scaled: landed empower verses × buff
-		"taunts": int(s.seats[0].vars.get("taunts", 0)),
+		"peels": peels,                        # aggro pulls (the tank slipped below the lock floor)
 		"kicks": int(s.seats[2].vars.get("kicks", 0)),
 		"beat_miss": beat_miss,                # missed string beats, all four seats
 		"adds_killed": adds_killed,
@@ -335,9 +314,9 @@ func _healer_seat(s: CombatState) -> Seat:
 
 func _prove_determinism(boss: String) -> void:
 	var sk: Dictionary = SKILLS[0]
-	var a := _run_one(boss, 1, sk, true)
-	var b := _run_one(boss, 1, sk, true)
-	var c := _run_one(boss, 2, sk, true)
+	var a := _run_one(boss, 1, sk)
+	var b := _run_one(boss, 1, sk)
+	var c := _run_one(boss, 2, sk)
 	var repro: bool = (a["checksum"] == b["checksum"]) and (a["ttk_sec"] == b["ttk_sec"])
 	print("determinism %-8s seed1==seed1 -> %s  (checksum %d, TTK %.3fs, %s) · seed1 vs seed2 -> %s" % [
 		boss, ("PASS" if repro else "FAIL"), a["checksum"], a["ttk_sec"],
@@ -443,11 +422,11 @@ func _write_csv(path: String, rows: Array) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		push_error("cannot open %s" % path); return
-	f.store_line("boss,skill,seed,probe,won,ttk_sec,boss_hp_left,boss_healed,dmg_buff,taunts,kicks,beat_miss,adds_killed,dps_deaths,hl_mana_pct,hl_over_pct,hl_idle_pct,hl_eff,loss_cause,checksum")
+	f.store_line("boss,skill,seed,probe,won,ttk_sec,boss_hp_left,boss_healed,dmg_buff,peels,kicks,beat_miss,adds_killed,dps_deaths,hl_mana_pct,hl_over_pct,hl_idle_pct,hl_eff,loss_cause,checksum")
 	for r in rows:
 		f.store_line("%s,%s,%d,%s,%d,%.3f,%.1f,%.1f,%.2f,%d,%d,%d,%d,%d,%.1f,%.1f,%.1f,%.1f,%s,%d" % [
 			r["boss"], r["skill"], r["seed"], r["probe"], (1 if r["won"] else 0), r["ttk_sec"],
-			r["boss_hp_left"], r["boss_healed"], r["dmg_buff"], r["taunts"], r["kicks"],
+			r["boss_hp_left"], r["boss_healed"], r["dmg_buff"], r["peels"], r["kicks"],
 			r["beat_miss"], r["adds_killed"], r["dps_deaths"],
 			r["hl_mana_pct"], r["hl_over_pct"], r["hl_idle_pct"], r["hl_eff"],
 			r["loss_cause"], r["checksum"]])

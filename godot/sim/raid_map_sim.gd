@@ -385,6 +385,12 @@ func _walk(seed: int, sk: Dictionary) -> Dictionary:
 				if int(carry["tokens"]) >= 5 and any_wound:
 					_apply_fx({"repair": true, "mana": 1.0}, carry)
 					carry["tokens"] = int(carry["tokens"]) - 5
+			RunMap.KIND_JAILBREAK:
+				# §7 THE JAILBREAK (JAILBREAK_LIVE): model taking a gentle HP-tax deal — a good
+				# (⏻ charge toward the Kill Switch) for a small corrupted-sector bite. Representative
+				# of curse attrition; the full timing/economy/curse system is HUD-side, off-sim.
+				carry["charge"] = mini(100, int(carry["charge"]) + 45)
+				_apply_fx({"wound": 0.08}, carry)
 	return {"cleared": false, "fights": fights,
 		"integrity": _avg(carry["fracs"]), "loss_at": "walk_stuck", "trace": str(trace)}
 
@@ -402,9 +408,9 @@ func _fight(fight_seed: int, fi: int, carry: Dictionary, sk: Dictionary) -> Dict
 	# consume a pending fight-mark (KILL SWITCH cash-out / curse) via the SHARED applier
 	RaidMarks.apply(s, carry.get("marks", {}))
 	carry["marks"] = {}
-	var tp := s.seats[0].policy as RaidTankPolicy
-	tp.reaction_slack = float(sk["slack"])
-	tp.rng = DetRng.new(fight_seed * 2749 + 1337)
+	var tp := s.seats[0].policy as DuelistPolicy
+	tp.latency_ticks = int(sk["lat"])
+	tp.rng = DetRng.new(fight_seed * 2749 + 6737)
 	var bp := s.seats[1].policy as TwinfangPolicy
 	bp.latency_ticks = int(sk["lat"])
 	bp.rng = DetRng.new(fight_seed * 2749 + 2338)

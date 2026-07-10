@@ -19,7 +19,23 @@ class_name ClassCodex
 extends RefCounted
 
 const DATA := {
-# ============================================================ BULWARK · TANK
+"duelist": {
+	"name": "THE DUELIST", "role": "TANK · DODGE", "accent": "steel",
+	"verb": "Answer the stream — dodge the chip, parry the big ones, hit back.",
+	"fantasy": "The dodge tank. Low HP, fast swings — a build for a quick healer. The boss's melee + telegraphs ARE your bar-stream: DODGE the skinny bars, PARRY the tall ones. A PERFECT PARRY hits back (banks a \u25c6). Every answer leaks a sliver (no self-heal, ever). Play CLEAN and you hold the boss's gaze — FLOW is aggro; slip and it drifts to the warband (no taunt, the counter is your \"look at me\").",
+	"resources": [
+		{"name": "FLOW", "tint": "flow", "body": "Your clean-answer streak — and the boss's attention. \u2265 30% holds the boss on you; below, its swings start to PEEL to the squishies. A clean answer raises it, a whiff drops it, taking a hit NEVER lowers it. A perfect parry SPIKES it."},
+		{"name": "WIND", "tint": "steel", "body": "Fatigue — a small pool that recharges fast (the ninja bubble). Every dodge/parry costs it; dry = you can't answer. It's the leash, not a cooldown."},
+		{"name": "COMBO", "tint": "gold", "body": "\u25c6 banked by PERFECT PARRIES. Spend the bank with \u26a1 DUMP for pure damage (tanks are defense-rich, damage-poor)."},
+	],
+	"defense": {"name": "DODGE / PARRY", "key": "SPACE / F",
+		"body": "SPACE = DODGE (secondary): small/normal bars, any rating; leaks more the bigger the bar. F = PARRY (main): answers ANY size incl. tall, and a PERFECT parry hits back (counter + \u25c6). A flurry = WEAVE it (rapid dodges, all or eat it all). Feints: READ them, don't press."},
+	"moves": [
+		{"name": "Dump", "key": "1", "cost": "spend \u25c6 · 70/pip", "tag": "",
+			"body": "Cash the \u25c6 bank for a burst of pure damage. The tank's one offensive button — off-rhythm, when nothing's incoming."},
+	],
+},
+# ============================================================ BULWARK · TANK (sim/gear-probe FIXTURE — the Duelist is the playable tank)
 "bulwark": {
 	"name": "THE BULWARK", "role": "TANK · MITIGATE", "accent": "steel",
 	"verb": "Read the swing — bank the read, protect the streak, cash it.",

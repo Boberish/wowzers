@@ -100,6 +100,10 @@ func _tempo(obs: Dictionary, energy: float) -> Dictionary:
 			if int(obs.get("since_strike", 0)) >= int(float(obs.get("perfect_lo", 18)) * 0.9):
 				return _ab("eviscerate")   # press on the beat (graded)
 			return {}                      # combo's ready — hold this tick for the window
+	# D0 S6 · THE SET PIECE: arm the phrase when the CD is up and Flow is humming — then the normal
+	# strike logic below nails the marked beats (a clean run cashes the flourish).
+	if bool(obs.get("setpiece_ready", false)) and int(obs.get("flow", 0)) >= 3:
+		return _ab("setpiece")
 	var ofire := _open_fire(obs)   # 1 = punish NOW · 0 = hold for the opening · -1 = no opening
 	# Coup: spend max Flow INTO the opening for the spike; else cash it in the execute window.
 	if bool(obs.get("coup_ready", false)) and energy >= 42.0:

@@ -64,12 +64,12 @@ func setup(s: CombatState, aspects: Dictionary, cast: Array = [],
 		if i < cast.size():
 			var spec: Dictionary = cast[i]
 			key = String(spec.get("key", "tank"))
-			id = String(spec.get("id", "bulwark"))
+			id = String(spec.get("id", "duelist"))
 			aspect = String(spec.get("aspect", ""))
 		else:
 			key = RaidNet.SEAT_KEYS[i] if i < RaidNet.SEAT_KEYS.size() else "tank"
-			id = {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller",
-				"healer": "mender"}.get(key, "bulwark")
+			id = {"tank": "duelist", "blade": "twinfang", "caster": "alchemist",
+				"healer": "well"}.get(key, "duelist")
 			aspect = String(aspects.get(key, ""))
 		_seat_keys.append(key)
 		var a := Actor2D.make(id, aspect)
@@ -174,7 +174,7 @@ func sync(s: CombatState) -> void:
 			var cdur := maxf(1.0, float(seat.casting.get("dur_ticks", 1)))
 			a.windup("channel", clampf(float(s.tick - int(seat.casting.get("start_tick", s.tick))) / cdur, 0.0, 1.0))
 		elif seat.role == "tank" and seat.dodging_until_tick > s.tick:
-			a.windup("guard" if a is BulwarkRig2D else "channel", 1.0)
+			a.windup("channel", 1.0)
 		else:
 			a.clear_windup()
 		a.power_glow(clampf(seat.resource / maxf(1.0, seat.resource_max), 0.0, 1.0))

@@ -28,8 +28,11 @@ func _process(_delta: float) -> bool:
 	step += 1
 	if step == 1:
 		hud._seat_key = "tank"
-		hud._aspect = "warden"
-		hud._start_map_run()          # tank: creed pick skips straight to the floor
+		hud._aspect = "duelist"
+		hud._start_map_run()
+		if hud._d.map == null:   # the reworked Duelist tank opens on the creed ceremony — complete it
+			hud._d.run.creed = hud._fw_creed_ids(hud._fw())[0]
+			hud._build_floor()
 		# re-deal Floor 1 onto a fixed seed so the smoke's walk is reproducible
 		var fl: Dictionary = RaidContent.FLOORS[0]
 		hud._d.map = RunMap.generate(MAP_SEED, hud._d.fights.size(),

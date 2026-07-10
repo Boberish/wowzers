@@ -697,6 +697,23 @@ today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief
 beat-source map + 3–8 budget + ULTRATHINK carve-out stay canon). Steal catalog (Hades II ·
 StS1/2 · AtO · Punch-Out/Furi/Sekiro genre) in BOSS-PLAN §5; research run 2026-07-10 (7 agents).
 
+**S0 BASELINE — built & gate-clean on `seal-rework` (`d8bc675`, 2026-07-10, NOT yet merged —
+holds behind tank-w1 to dodge a `raid_sim.gd` conflict).** The pre-rework instrumentation
+(byte-identical to main: 24-row checksum diff clean, determinism PASS ×4) reads today's Seals
+at **good tier, 25 seeds** — this is the gap the rework fills:
+
+| Seal | TTK now | Contract | Gap | Non-tank beats now | Target | Read |
+|---|---|---|---|---|---|---|
+| VORATHEK | 160 s | 300 s | **−47%** | ~18 (blade/caster) | 3–5 | over budget (SEAL-PILLAR's finding, confirmed) + 7-mechanic overload |
+| MISTRAL | 122 s | 420 s | **−71%** | ~4 | 4–6 | shortest Seal, biggest relative gap (matches §4) |
+| GEMINI | 168 s | 540 s | **−69%** | ~8–9 (+6 tank feints) | 5–7 | mid; Double-Check feints already register |
+| MYTHOS | 203 s | 720 s | **−72%** | ~15 | 6–8 | finale most under-filled + over dodge-budget |
+
+Every Seal is far under the clock AND (V/MY) over the dodge ration — the rework adds *length*
+via structure while *cutting* the raw dodge load. S1+ (engine addenda, then the four fights)
+resumes when `wow-tank-w1` merges (flow/peels/taunt-delete land there; the boss build consumes
+them). Fresh 300-seed bands land per content slice.
+
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
 - **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — **still parked; BOSS-PLAN v1 deliberately needs no 2nd telegraph source.**
@@ -836,6 +853,45 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED `4e46e73`** · **TEMPO D0 FOLLOW-UP BUILT** (Bill's
+  board answers) — **On the Beat** back in the offer pool (kit code was already live) · **S3 THE
+  4 DUOS** (Blood Coda W×F · Red Edge W×E · Grand Finale E×F · Reprise Rondo×W — kit hooks +
+  `DUOS`/`theme_counts`/`armed_duos` folded into `Draft.offerable`: armed at ≥2 cards from EACH
+  theme, Reprise also needs Rondo; Opus slot, two-tone frame render deferred) · **S6 THE SET
+  PIECE** (the DECK-LAYOUT §5 signature-CD slot, first game-wide: a 4-strike phrase → build-scaled
+  flourish [flow-scaled dmg + bleed pulse + combo refund + 2s Flow-lock]; new base ability on the
+  Tempo/Fermata bar, `setpiece_enabled` A/B, policy arms it). Parse-clean + runtime smoke green
+  (0 errors, all 8 determinism cells PASS incl. flourish). **ONLY kick carriers remain deferred**
+  — gated on the interrupt-by-ability pillar (#3), not a Tempo verdict. *(commit `595ecd0`.)*
+
+- ◐ 2026-07-10 · worktree `../wow-seals` (branch `seal-rework`) — **CLAIM: THE SEAL REWORK
+  BUILD (`BOSS-BRIEF.md`) — S0 BUILT & GATE-CLEAN on the branch (`d8bc675`); S1+ blocked on
+  tank-w1.** Bill's go ("implement these bosses like the brief says"). **S0 done:** `raid_sim.gd`
+  instrumentation (beat-budget/seat · cast-source counts · TTK-vs-DESCENT-§4-contract with ±20%
+  flag · verse/kick baseline · act/valley timeline), all pure reads → **byte-identical** (main
+  vs S0 checksum diff clean 24 rows; determinism PASS ×4). Baseline recorded in §BOSSES (every
+  Seal −47…−72% under contract). **⚠ NOT merged — held behind tank-w1:** that Wave-1 branch
+  (still IN FLIGHT, at its S4) rewrites the SAME `raid_sim.gd` regions (`taunts→peels`, band
+  loop, `_run_one` sig, return dict) + owns the `combat_core`/`boss_state` reducer S1's addenda
+  need. Merging S0 now would hand tank-w1 a conflict on the file the brief flagged. **Order:
+  tank-w1 merges → rebase `seal-rework`, reconcile `raid_sim.gd` → S1 (E1–E9 guarded addenda)
+  → S2–S5 the four fights.** S2–S5 also need Bill's V1–V10 (recs = defaults) before authoring.
+  *(boss-build session — S0)*
+  **↳ pass 2 (2026-07-10, Bill: "tank build complete, verifying · v1–10 build with my recs"):**
+  **① VERDICTS — all 11 DECIDED (recs)**, BOSS-PLAN §V flipped, gate ③ cleared. **② tank-w1
+  RECON done → every engine block RESOLVED** (mapped to real APIs in BOSS-BRIEF §0a: flow =
+  `seat.vars["flow"]`/`_flow_aggro`; peel = `_aggro_peel(s,base)` at `combat_core.gd:1237` = the
+  path E5/E7 reuse; **THREAT_DROP already zeroes flow → S5 Compaction is pure data, zero engine**;
+  V#9 valve = `flow_spike .20` already built; taunt fully deleted). **③ THE REAL REMAINING GATE
+  = the UNION BASE:** tank-w1 is COMPLETE but forked from OLD main (merge-base `c6738ff`) and
+  NOT merged — neither base alone has both the descent fight-ladder (new-main) AND the flow
+  engine (tank-w1). S1 edits `combat_core` → needs the union. **Union forms when tank-w1 merges
+  main → main** (the tank session's reconcile — NOT front-run in seal-rework; a trial merge here
+  surfaced tank-w1↔new-main drift conflicts that are theirs to resolve). Verified: tank-w1's
+  `raid_content` delta is party-naming only, so S2–S5 content is conflict-free once the union
+  exists. **Turnkey after tank-w1 lands:** rebase seal-rework → re-apply S0 → S1–S5. *(pass 2 —
+  recon + verdicts)*
+
 - ☑ 2026-07-10 · main (docs only) · **`BOSS-BRIEF.md` (NEW) — THE SEAL-REWORK BUILD BRIEF,
   hand-off ready (Bill: "make a plan to implement this… after will hand it off to Opus").**
   BOSS-PLAN made buildable: **S0** sim instrumentation (byte-identical, claimable NOW) → **S1**
@@ -930,22 +986,45 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `src_label()` per-kit hook (`capitalize()` reads fine today) → L2 tail. **Next: L2 tail
   (DISCIPLINE from `seat.diag` · row sparklines) or L3 segments/run-history.** *(meter session)*
 
-- ☐ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **building
-  `DUELIST-BRIEF.md` — S0 FLOW=AGGRO + taunt funeral → S1 Duelist base kit (→ S2 policy → S3
-  sim → S4 HUD).** ⚠ **SCOPE STAGED (Bill, 2026-07-10):** the §A½ "Bulwark dies in the same
-  merge" HARD RULE is DEFERRED — discovery: Bulwark is the host fixture for `gear_probe`
-  (the whole GEAR/GearFx deed test), `meter_probe`, and `draft_sim`, all gated by
-  `verify-all.sh`, and `bulwark_kit._challenge()` calls the `taunt()` being deleted. So
-  Merge 1 = FLOW=AGGRO + **Duelist as the new playable tank DEFAULT**, with Bulwark kept
-  ALIVE as a guarded sim-only fixture (only its dead `_challenge`/taunt path removed);
-  the full Bulwark deletion + gear/meter/draft re-host is the immediate follow-up slice
-  (ledger §A½ Bulwark row stays 🔒). ⚙ **IMPLEMENTATION NOTE:** `threat_enabled` is KEPT and
-  repurposed as the aggro-subsystem enable (all game CONTENT sets it; raid today) rather than
-  ripped to always-on — the solo class-training sims (well/twinfang/alchemist) are multi-seat
-  threat-accumulating fights that would otherwise re-baseline + consume peel-rng, violating the
-  S1 "non-raid byte-identical" gate. Aggro stays universal in the game sense the brief intends.
-  Expect the documented raid re-baseline bang; non-raid + gear/meter/draft byte-identical.
-  *(tank-w1 build session)*
+- ☑ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD · **✅ LANDED ON MAIN
+  `62cc09e`** (FF; the Duelist is now the playable tank default — playtest-ready). **Merge resolution
+  (6 files, principled — newer system wins per side):** `combat_core.gd` → tank-w1 FLOW=AGGRO
+  (`taunt()` DELETED, no caller remained post-Bulwark) · `bulwark_kit.gd` → keep the delete ·
+  `meter_panel.gd` → main's `kit.accent()` hook + added `DuelistKit.accent()→STEEL` · `raid_hud.gd`
+  → combined (main's Draw `WellModules.offer_ids` + tank-w1 Duelist module branch) ·
+  `commander_probe.gd` → combined (main per-seat wallets + tank-w1 rig-wire) · `draft_sim.gd` →
+  main's rerolls-out (dropped tank-w1's dead `reroll_kept`/`lock` tests) · `verify-all.sh` → main's
+  probe superset. **`net_protocol` resolved coherent at v16** (superset of v15 descent — no
+  conflict materialized). **VERIFIED on main:** import clean · `ui_smoke_raid` ALL OK · `duelist_sim`
+  determinism PASS · `commander_probe`/`draft_sim`/`meter_probe` ALL OK. **⚠ FOLLOW-UP (not a
+  blocker):** the GEAR-2 "answer a Baleful Curse within 2s" deed lost its trigger — `curse_answered`
+  was only bumped inside the deleted `taunt()`; re-home to the flow-rebuild path when the Duelist
+  deck re-hosts the Bulwark GearFx cells. **UNBLOCKS:** `seal-rework` (rebase → re-apply S0 → S1–S5)
+  + DECK-TAX (`wow-deck-tax`, combat_core) — the union base is now formed. *(tank-w1 landing session)*
+- ☑ 2026-07-10 · worktree `../wow-tank-w1` (branch `tank-w1`) · WAVE-1 BUILD (landed `62cc09e`, above) · **BUILT + VERIFIED
+  on the branch — `DUELIST-BRIEF.md` S0–S8 IN FULL + the Bulwark deletion; MERGE PENDING conflict
+  resolution vs main's `tempo-d0`/`descent-s4`.** 6 commits: **S0** FLOW=AGGRO + taunt funeral
+  (taunt DELETED whole, passive flow + seeded progressive peel, `bespoke_defense()` seam, THREAT_DROP→
+  FLOW DUMP) · **S1** Duelist base kit (`data/duelist/*`, graded parry/dodge, height law, partial-mit
+  .90, WIND, ◆/DUMP, flow feed) + wired as the **playable tank default** (registry/raid/net v16/HUD/
+  world-shell/codex/draft) · **S2** DuelistPolicy 3 tiers · **S3** `duelist_sim` + raid_sim carry ·
+  **S4** DuelistBand + DuelistGauge (FLOW orb/WIND/◆ pips) · **S5** deck (Veteran/Wager/Bellows/
+  Dancer creeds · Crucible/Scales/Whetstone/Flow modules · 14-boon POOL + GAZE + Ease dial + Hold-
+  the-Line · 3 keystones · rig) · **S6** ⏱ EN GARDE signature CD · **S7** transforms Prise-de-Fer/
+  Remise/Flèche + doors + Floor-2 ceremony data + Dancer-excludes-parry law · **S8** per-Seal streams
+  = existing Seal texture (left to BOSS-PLAN). **⚙ Bill GO'd building the deck defaults (07-10) + the
+  Bulwark deletion (07-10):** Bulwark is GONE — the Duelist is the only tank; `gear_probe` retired
+  (its GearFx deed cells are Bulwark-kit-hosted → re-home to the Duelist deck later; GEAR code stays
+  live in twinfang_kit), `meter_probe`/`draft_sim`/`commander_probe`/`raid_boon_probe`/both UI smokes
+  re-hosted/updated for the reworked-tank creed+rig ceremony. **⚙ `threat_enabled` KEPT** (repurposed
+  as the aggro-subsystem enable; content sets it) so solo sims stay byte-identical. **VERIFIED:**
+  import clean · determinism PASS everywhere (raid + duelist + deckless + all decked builds) ·
+  `ab-gate twinfang_sim` **BYTE-IDENTICAL** · WSLg visual pass (full Duelist HUD renders) · GREEN:
+  registry/meter/draft_sim/commander/raid_boon/ui_smoke_raid/ui_smoke_map/raid_sim. Numbers first-cut
+  (playtest); the existing Seals over-damage the new tank = the documented re-baseline BOSS-PLAN
+  retunes. **⚠ MERGE:** main moved (tempo-d0 reworked `combat_core.gd`; descent-s4 touched `draft`/
+  `raid_content`/`net_protocol`) → the merge needs careful `combat_core.gd` (FLOW=AGGRO vs governor/
+  transforms) + `net_protocol` VERSION conflict resolution before landing. *(tank-w1 build session)*
 
 - ☑ 2026-07-10 · main (docs only) · **`WELL-DRAW-BRIEF.md` (NEW, root) — THE DRAW HEALER BUILD
   BRIEF** (Bill: *"make a plan to implement the draw healer, then ill hand it off to opus"*) +
@@ -1153,6 +1232,54 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `raid_hud` **combat region only** (post-fx node — ⚠ `descent-map` claim owns the map region of
   the same file; merging main often) + `stage2d/*` + new `game/art/actors/twinfang/`. *(this
   session)*
+
+- ☑ 2026-07-10 · worktree `../wow-deck-tax` (branch `deck-tax`) — **THE DECK TAX (offline) — the
+  JAILBREAK run-length ability-poison: MERGED to main (`7e5397f`).** The slice-4 deferred bite,
+  offline. A DECK deal poisons ONE ability slot run-length; it fizzles in combat until you pay the
+  Market to DEPRECATE it — the one curse that never expires on its own (giving DEPRECATE its teeth).
+  `class_kit.poisoned` id-set + a **one-line gate** in `combat_core` perform()'s ability branch
+  (fizzle + `poisoned_fizzle` diag + an `ability_poisoned` view event; empty set = **byte-identical**,
+  proven by ab-gate `twinfang_sim` PASS) · `run_director.poisoned` (persistent) ·
+  `raid_hud._launch_map_fight` injects the piloted seat's kit poison (AI/sims/online carry none) ·
+  a dynamic `_deck_deal` bets a named un-poisoned loadout slot · `_add_curse` sets the poison,
+  `_purge_curse` (DEPRECATE prefers the DECK curse, Cooling vents oldest) clears curse+poison ·
+  `_expire_curses` KEEPS run-length curses (they never tick) · `curse_probe` §G. **Merged the
+  tank-w1 landing mid-flight** (Duelist added / Bulwark+gear_probe deleted — clean auto-merge across
+  class_kit/combat_core/raid_hud; also dropped the dangling `gear_probe` the tank left in verify-all).
+  **Deferred:** online DECK (spec-thread the poisoned set through make_spec/RaidNet.build + a
+  protocol bump — rides the online curse system) · polish: an in-combat grey/flash on the poisoned
+  slot (the `ability_poisoned` event is emitted for it; the map header pip ships now). Verify:
+  import clean · `curse_probe` ALL OK · ab-gate `twinfang_sim` BYTE-IDENTICAL · `market_probe`/
+  `commander_probe` ALL OK · `ui_smoke_map` ALL PASS. *(raid-rebuild session)*
+
+- ☑ 2026-07-10 · worktree `../wow-descent-s4` (branch `descent-s4`) — **DESCENT SLICE 4 — THE
+  JAILBREAK (printed curse deals): MERGED to main (`a22c1ec`), 2 commits.** Built via a 5-reader
+  recon whose key find corrected my prior: **TIMING is buildable** — `make_config()` returns a
+  FRESH TuningConfig per fight and every grade reads its windows live, so a `window_tighten` mark
+  scaling `s.config.strike_*` is a real windows−10% tax with ZERO per-boss work. **4a the curse
+  engine (byte-identical when dormant):** `RaidMarks` gains two guarded keys on the proven
+  carry→mark channel — `seat_hp_cut` (HP tax; auto-repairs because a mark clears each fight) +
+  `window_tighten` (TIMING tax); `RunDirector.curses` (cap 2) + `deprecate_uses` (NOT in cp_view —
+  read directly like tokens, offline-only this slice); the `raid_hud` curse core (`_add_curse` w/
+  CAP 2 + the HARD RULE *no run-long TIMING curse*, `_curse_pips`, `_apply_curse_marks` fold+tick
+  at launch, ECONOMY hooks — mint-halve in `_mint_seats`, price surcharge in `_market_price`,
+  `_apply_map_fx` routes curse/regenerate/purge keys, the **DEPRECATE** market slot [the slice-3
+  deferred slot, escalating price] + the **Cooling purge** fork, `ms.curses` feed, descent-start
+  reset); `map_event_panel._fx_hint` prints the bite + charge/regenerate goods; new `curse_probe`
+  (in verify-all). **4b the node LIVE:** `JAILBREAK_LIVE=true`, KIND_JAILBREAK dispatch →
+  `_show_jailbreak` — two deals rolled on a (map_seed,node) rng via the proven `_map_stop` panel,
+  both halves printed, WALK AWAY free, cap-2 "cell full" (no free-good exploit); a 5-deal gentle
+  pool (V#4); `raid_map_sim` KIND_JAILBREAK walker case (sanctioned re-baseline). **Merged main
+  mid-build** (SEAL-REWORK S0 + tempo — raid_hud auto-merged clean). **Deferred:** DECK tax
+  (run-length ability-poison — the `perform()` gate is one line but the offline+online spec-thread
+  is the cost) · welded-downside DRAFT boons (② door) · event-curse legs (③) · online (safe no-op,
+  **NO protocol bump**). **Verify:** import clean · `curse_probe` ALL OK (engine + node
+  end-to-end: cap-2/HARD-RULE, ECONOMY+HP+TIMING bites, both exits, ticking, a deal grants
+  good+bite) · `market_probe`/`commander_probe`/`draft_sim` ALL OK · `ui_smoke_map` ALL PASS ·
+  `raid_map_sim` map-gen determinism PASS (the walker case is deterministic by construction). ⏳
+  **Deferred to a nightly run** (OOM-prone under concurrent load): `raid_map_sim` run-trace +
+  statistical re-baseline · full `verify-all` · `net_map_smoke`. **Next:** slice 5 (minigames:
+  CAPTCHA/BENCHMARK + extraction schematics) + the DECK-tax follow-up. *(raid-rebuild session)*
 
 - ☑ 2026-07-10 · worktree `../wow-descent-s3` (branch `descent-s3`) — **DESCENT SLICE 3 — THE
   PROMPT MARKET + PER-SEAT WALLETS: MERGED to main (`fd8b895`), 3 commits.** Built via a 6-reader

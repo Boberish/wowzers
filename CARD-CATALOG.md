@@ -289,10 +289,16 @@ picks swap cheap). Dials: READ / TAP / **HOLD** / SLAM / WIND / BANK / SPEND / L
 (Cheap Iron owns the Warden's block-cost knob — tension point 3). Killed in-pass: Iron Reserves
 (bread flooding).
 
-## TWINFANG · TEMPO — 🔨 v4 BUILT & MERGED 2026-07-10 (`63d4308`) · **DECK v4 (D0)** (build brief `TEMPO-D0-BRIEF.md`; duos + Set Piece deferred)
+## TWINFANG · TEMPO — 🔨 v4 BUILT & MERGED 2026-07-10 (`4e46e73`) · **DECK v4 (D0) — full slate incl. duos + Set Piece** (build brief `TEMPO-D0-BRIEF.md`)
 _Themes **WOUND · EDGE · FINISH (v4 LOCKED, §17.12 GO record)**; every card filed in `TEMPO-PLAN.md §17.3`._
 
-**⚒ D0 BUILT & MERGED 2026-07-10 (`63d4308`) — the SHAs the 🔨 rows below carry:**
+**⚒ FOLLOW-UP BUILT & MERGED 2026-07-10 (`4e46e73`, Bill's board):** **On the Beat** back IN the pool ·
+**S3 THE 4 DUOS** (Blood Coda · Red Edge · Grand Finale · Reprise — armed at ≥2 cards from each theme,
+Reprise also needs Rondo; folded into the draft + codex) · **S6 THE SET PIECE** (the signature-CD slot:
+a 4-strike phrase → build-scaled flourish; new base ability, `setpiece_enabled` A/B). Kick carriers stay
+deferred (gated on the interrupt-by-ability pillar, not a Tempo verdict). *(commit `595ecd0`.)*
+
+**⚒ D0 CORE BUILT & MERGED 2026-07-10 (`63d4308`) — the SHAs the 🔨 rows below carry:**
 - **S0 governor + S5 law reworks** `e9e83ae` — the one asymptotic speed wall (`beat_rate_cap`/`window_min`);
   `fencersLine` → next 3 strikes; `killingEdge` A3 rework (Edge or next-3-strikes crit).
 - **S1 deck data (v4)** `8906d84` — the Wound pot · KEEN meter · ghost-note Double Time v2 · trim
@@ -304,7 +310,7 @@ _Themes **WOUND · EDGE · FINISH (v4 LOCKED, §17.12 GO record)**; every card f
 - **Owed:** balance/gate sims (deferred per Bill 07-10) · HUD render of the new gauges (view-only fields
   landed) · live-raid RaidNet spec-carry of creed/modules/rig/transform (the standing class debt).
 
-**Cards (🔨 = built+merged this D0; 🟡 = deferred shelf — Set Piece · the 4 duos · Duo-system code):**
+**Cards (🔨 = built+merged; the deferred shelf is now empty except kick carriers — pillar-gated):**
 
 | Card | id | Type | Rarity | St | One line |
 |---|---|---|---|---|---|
@@ -321,7 +327,7 @@ _Themes **WOUND · EDGE · FINISH (v4 LOCKED, §17.12 GO record)**; every card f
 | **THE CODA** (keystone) | `theCoda` | RULE | elite | 🔨 | Max-combo Evis inside an Opening echoes as a second free finisher. |
 | **EXSANGUINATE** (keystone) | `exsanguinate` | RULE | elite | 🔨 | Evis consuming 5+ bleeds erupts as a 3-beat chained blood-burst (engine-free; no boss stagger). |
 | **The Deep Cash** (rig WHEN) | `deepcash` | — | — | 🔨 | WHEN I consume 4+ bleeds in one Evis (~×4.5). |
-| **THE SET PIECE** (signature CD) | `setPiece` | STRAT | baseline | 🟡 | ~1-min CD: marks a 4-beat PHRASE; all Perfect+ = a build-scaled flourish. The DECK-LAYOUT §5 slot's first shape. |
+| **THE SET PIECE** (signature CD) | `setPiece` | STRAT | baseline | 🔨 | ~1-min CD: marks a 4-beat PHRASE; all Perfect+ = a build-scaled flourish. The DECK-LAYOUT §5 slot's first shape. |
 
 **Ability audit — PASS 2 (`TEMPO-PLAN.md §17.11`, Bill's steer 2026-07-10 — transforms, not
 buttons; the ABILITY-LAW allowance is now +1 and Tempo leaves its slot EMPTY).** Pass-1 spell
@@ -345,11 +351,11 @@ The Rondo (spell) → REBORN below as a Coup TRANSFORM (id kept, button deleted)
 | **Whetstone** (creed) | `whetstone` | STRAT | curated | 🔨 | v4 EDGE entry: your Bullseyes can crit from run start (small %, ×2) — the creed IS the A7 opt-in. |
 | **The Strop** (module) | `strop` | STRAT | — | 🔨 | v4 EDGE module: Perfect+ strikes stack KEEN (gauge, cap 5); your next crit consumes all KEEN for +8%/stack. |
 | **Resonance** (system) | — | RULE | — | 🔨 | **APPROVED 07-10** ("yeah, no set bonus"): 3 cards of one theme auto-light that theme's ONE rotational perk — Wound: after-tick · Edge: a crit steadies the beat · Finish: phrase-mark. Brief slice S2. |
-| **THE DUO** (system) | — | RULE | — | ✅ | **APPROVED 07-10** ("yes we need this, make this rich and nice"): armed at ≥2 drafted cards from EACH of two themes → enters Opus offers, two-tone frame; rewards MIXING (resonance rewards depth — opposed pulls by design). Brief S3. |
-| **Blood Coda** (duo) | `bloodCoda` | RULE | H/S/O | 🟡 | Wound×Finish: an Evis cashing 4+ live bleeds at full combo pays both ×1.15/1.25/1.4 — the burst paints the phrase-mark red. |
-| **The Red Edge** (duo) | `redEdge` | RULE | H/S/O | 🟡 | Wound×Edge: every CRIT pulses ALL live bleeds one immediate extra tick — crit-fish while the pot is fat, against expiry. |
-| **Grand Finale** (duo) | `grandFinale` | RULE | H/S/O | 🟡 | Edge×Finish: a full-combo finisher with the crit build hot is a GUARANTEED crit +50% crit dmg; the screen holds a half-beat on the number. |
-| **The Reprise** (duo) | `reprise` | RULE | H/S/O | 🟡 | Rondo-transform×Wound: during the Return, each re-strike re-opens one expired bleed — transforms join the duo grammar. |
+| **THE DUO** (system) | — | RULE | — | 🔨 | **APPROVED 07-10** ("yes we need this, make this rich and nice"): armed at ≥2 drafted cards from EACH of two themes → enters Opus offers, two-tone frame; rewards MIXING (resonance rewards depth — opposed pulls by design). Brief S3. |
+| **Blood Coda** (duo) | `bloodCoda` | RULE | H/S/O | 🔨 | Wound×Finish: an Evis cashing 4+ live bleeds at full combo pays both ×1.15/1.25/1.4 — the burst paints the phrase-mark red. |
+| **The Red Edge** (duo) | `redEdge` | RULE | H/S/O | 🔨 | Wound×Edge: every CRIT pulses ALL live bleeds one immediate extra tick — crit-fish while the pot is fat, against expiry. |
+| **Grand Finale** (duo) | `grandFinale` | RULE | H/S/O | 🔨 | Edge×Finish: a full-combo finisher with the crit build hot is a GUARANTEED crit +50% crit dmg; the screen holds a half-beat on the number. |
+| **The Reprise** (duo) | `reprise` | RULE | H/S/O | 🔨 | Rondo-transform×Wound: during the Return, each re-strike re-opens one expired bleed — transforms join the duo grammar. |
 | **DOUBLE TIME v2** (keystone) | `doubleTime` | RULE | elite | 🔨 | v1 beat-doubling CUT at the governor wall; v2 = ~8s of optional ghost half-beat pips, each landed = a free half-strike. **v4 re-slots it CLASS-generic** (Syncopation's shelf, not a branch capstone). |
 
 **v4 branches ✅ LOCKED (GO, §17.12): WOUND · EDGE · FINISH; SWIFT demoted to generics** — Uptempo
