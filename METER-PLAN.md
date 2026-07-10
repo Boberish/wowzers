@@ -117,10 +117,16 @@ The richest untapped seams. Each is a new header-cycle mode reading existing sta
   (non-interactive) — the full grade breakdown stays on the stats page. **Note:** interrupts
   aren't per-seat in state (they're a HUD-side tally), so DISCIPLINE grades answers + strays,
   not kicks — a per-seat interrupt counter would be a small engine field (L2-tail follow-up).
-- ⏳ **Per-row sparkline.** A tiny live DPS trace per compact row from `series` — the shape of
-  the fight at a glance. **Next candidate** (the last L2-tail view-only item; series row layout
-  is `[tick, hp%, dmg0..3, taken0..3]`, differentiate for per-second like STATS PAGE's graph).
+- ✅ **Per-row sparkline — BUILT `a26a3cd`.** A faint per-second trace behind each compact row
+  (dmg/taken modes), read from `series` (cumulative col `base+i` → differentiated → normalized to
+  the seat's own peak), drawn low-alpha under the text so it adds "shape of the fight" texture
+  without crowding the columns. heal/shield/amp/disc have no series data → no sparkline.
 - **Verify:** same as L1 (all diag-family). **Files:** `meter_panel.gd` only. **Size: S–M.**
+
+**✅ L1 + all L2 view-only work is DONE** (6 modes + sparklines, `a26a3cd`). What's left on L2
+all needs a small **engine field** (so it's no longer pure view): per-seat interrupt counter,
+activity % (first/last-hit tick span), the `src_label()` prettifier (low-value — `capitalize()`
+reads today's sources fine). The next *substantial* level is **L3**.
 
 ### L3 — SEGMENTS & RUN HISTORY — Recount's killer feature (needs the deferred accumulator)
 Recount's Current / Overall / per-pull dropdown. This **is** the deferred run-recap

@@ -836,6 +836,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · `meter-spark` → main (`1924405`→`a26a3cd`) · §SYSTEMS/§GRAPHICS · **METER
+  SPARKLINES — BUILT & MERGED (Bill: "continue"). L1 + all L2 view-only work now DONE.** A faint
+  per-second trace behind each compact row in dmg/taken modes: reads `state.series` (cumulative
+  col `base+i` → differentiated to per-second → normalized to the seat's own peak), drawn
+  low-alpha under the text so it adds "shape of the fight" texture without crowding the columns
+  (heal/shield/amp/disc carry no series → no sparkline; all indices guarded, `<3` samples → no-op).
+  **The live meter is now 6 modes** (DAMAGE/HEALING/SHIELDING/TAKEN/⚡AMPLIFY/🎯DISCIPLINE) **+ row
+  sparklines.** View-only / diag-family; imports clean. **What's left on L2 all needs a small
+  engine field** (no longer pure view): per-seat interrupt counter · activity % · `src_label()`
+  prettifier (low-value). Ledger §G → 🔨 `a26a3cd`; METER-PLAN L2 sparkline ticked. **⚠ live
+  eyeball owed** — the byte gate + `screenshot_meter` are paused with the sim bar (`2ee8325`), and
+  headless can't render custom `_draw`. **Next substantial level: L3 segments/run-history** (first
+  slice that touches shared files `run_state`/`run_director` + wants a real verify pass).
+  *(meter session)*
+
 - ☑ 2026-07-10 · main (docs only) · BOSS-PLAN §1½ (NEW) + §V#11 + WORLD-PLAN §PILLARS #3 +
   CLAUDE.md pillar + ledger §A — **THE KICK CONTRACT (Bill's steer on the boss-rework recs;
   board grows 10→11 verdicts).** His calls folded in: **every class but healers carries ONE
