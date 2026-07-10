@@ -843,7 +843,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   + trims note) same commit. Both acquisition rules ride Bill's Tempo verdict ③.
   *(ability-pass session)*
 
-- ☐ 2026-07-10 · worktree `../wow-stats` (branch `stats-page`) · §SYSTEMS/§GRAPHICS — **CLAIM: STATS
+- ☑ 2026-07-10 · `stats-page` → main (`4b58d0b`) — **STATS PAGE v2: BUILT & MERGED.** THE FULL
+  REPORT behind THE RECKONING's "◆ FULL REPORT" button — per-seat tabs · OFFENSE/DEFENSE/DISCIPLINE
+  letter grades · PERFORMANCE BREAKDOWN (judgment %s · crit rate · times-hit · interrupts · aggro
+  strays) · DAMAGE MIX + TAKEN share bars ("89% autos") · BOON IMPACT (+ RAID AMPLIFIERS: Glint
+  ≈+585 / Sunder ≈+68 raid dmg, live) · MISSED-OPPORTUNITY top-3 (plain language) · per-spec rows
+  (`recap_spec`: Twinfang "82% sharp / openings / perfect strikes") · DAMAGE-OVER-TIME graph (boss
+  HP% + per-seat DPS). Engine all diag-family, NEVER checksummed: `meter_boon`/`boon_meter`,
+  amplifier credit folded once in `damage_boss`, `credit_boon_factors` + Twinfang inline credit,
+  aggro/stray + uncontested-cast counters (raid-only), `series` 1 Hz sampler. **VERIFIED:** raid_sim
+  + twinfang_sim **byte-identical** (serial A/B vs `3ec9a06`); `meter_probe` ALL OK (+[8] boon
+  reconcile: amp credit == extra dmg exactly, determinism folds boon_meter/series); `ui_smoke_raid`
+  ALL OK; `screenshot_stats` visual probe renders both tabs. Boon impact: Twinfang inline FULL ·
+  Alchemist/Well via proc-src + amp paths (ramp/heal boons → SIM-PLAN S4 card-lift). Ledger §G row
+  🔨 + deferred run-recap row 🔴. **STANDING RULE:** future kit reworks add their `credit_boon_factors`
+  lines. *(stats session)* — original claim text follows:
+  §SYSTEMS/§GRAPHICS — **CLAIM: STATS
   PAGE v2 — the full post-fight report (Bill's direct ask; per-fight only, run recap deferred).**
   Audit found ~80% already engine-truth (`state.meter` per-source, `seat.diag` grades, the shipped
   `RecapPanel`/`MeterPanel`). Building the genuinely-missing layer: (1) engine accounting — new
