@@ -163,33 +163,12 @@ static func build(spec: Dictionary, my_seat: String = "") -> CombatState:
 
 ## The standard AI raider for a seat — MUST be constructed identically everywhere
 ## (disconnect takeover swaps this in at an agreed tick on every replica).
+## Rides the CLASS REGISTRY (REFIT P4): a cls that doesn't belong to this seat
+## (or "") resolves to the seat's native class — the exact old ladder semantics;
+## the byte-exact per-class seed salts live on the registry table.
 static func make_policy(key: String, seed_v: int, cls: String = "") -> Policy:
-	match key:
-		"tank":
-			var tp := RaidTankPolicy.new()
-			tp.reaction_slack = ALLY_SLACK
-			tp.rng = DetRng.new(seed_v * 2749 + 1337)
-			return tp
-		"blade":
-			var bp := TwinfangPolicy.new()
-			bp.latency_ticks = ALLY_LATENCY
-			bp.rng = DetRng.new(seed_v * 2749 + 2338)
-			return bp
-		"caster":
-			var ap := AlchemistPolicy.new()
-			ap.latency_ticks = ALLY_LATENCY
-			ap.rng = DetRng.new(seed_v * 2749 + 3339)
-			return ap
-		_:
-			# healer — the Well (default) or the Bloomweaver
-			if cls == "bloomweaver":
-				var wp := BloomweaverPolicy.new()
-				wp.latency_ticks = ALLY_LATENCY
-				return wp
-			var lp := WellPolicy.new()
-			lp.latency_ticks = ALLY_LATENCY
-			lp.rng = DetRng.new(seed_v * 2749 + 5531)
-			return lp
+	var c := cls if ClassRegistry.seat_of(cls) == key else String(SEAT_CLASS.get(key, ""))
+	return ClassRegistry.make_policy(c, seed_v)
 
 ## One lockstep tick: enqueue this frame's human inputs, let AI seats act, update.
 ## `inputs` = Array of [seat_i:int, action:Dictionary]; the frame number must be

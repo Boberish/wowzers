@@ -280,7 +280,10 @@ func _show_party_setup() -> void:
 				clsb.text = "◈ " + cn
 				clsb.custom_minimum_size = Vector2(150, 32)
 				clsb.pressed.connect(func():
-					var nc: String = "bloomweaver" if cls == "well" else "well"
+					# cycle the seat's classes off the CLASS REGISTRY (a 3rd healer would
+					# appear here with zero UI work — the P4 seam this button exists for)
+					var pool: Array = ClassRegistry.classes_for_seat(String(key))
+					var nc: String = String(pool[(pool.find(cls) + 1) % pool.size()])
 					hud._d.party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
 					_show_party_setup())
 				row.add_child(clsb)

@@ -803,13 +803,9 @@ func _mint_run_seed() -> int:
 
 ## COMMANDER: a boon RunState for ANY seat (class starter by cls) — the commander
 ## drafts on behalf of the AI raiders, so they carry the same run machinery you do.
+## The starter ladder lives on the CLASS REGISTRY (unknown cls → the bulwark base).
 func _make_seat_run(cls: String, aspect: String, seed_v: int) -> RunState:
-	match cls:
-		"twinfang": return RunState.start_twinfang(aspect, seed_v)
-		"alchemist": return RunState.start_alchemist(aspect, seed_v)
-		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
-		"well": return RunState.start_well(aspect, seed_v)
-		_: return RunState.start(aspect, seed_v)
+	return ClassRegistry.start_run(cls, aspect, seed_v)
 
 ## Fold the human's drafted boons into their seat's kit (kits read `boons` via _b()).
 ## (Map pulls also ride ALL seats' boons through the spec — see _seat_boons_now;

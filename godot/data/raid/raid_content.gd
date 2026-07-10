@@ -508,18 +508,16 @@ static func _well(aspect: String) -> Seat:
 	u.vars = {"charges": wcfg.charges_max, "current": 0, "pulse_next": 0}
 	return u
 
-## Build the healer seat for whichever healer CLASS the seat carries (default WELL —
-## THE PURGE 2026-07-10: the old Mender is deleted; the reworked Well is the healer).
-## Aspect defaults per class: Well→brim, Bloomweaver→wildgrove.
+## Seat dispatch rides the CLASS REGISTRY (REFIT P4): the registry indexes the
+## per-class factories below; an unknown / wrong-seat cls falls back to the seat's
+## native class — the exact old ladder semantics (aspect "" → the class default).
 static func _healer_seat(cls: String, aspect: String) -> Seat:
-	if cls == "bloomweaver":
-		return _bloomweaver(aspect if aspect != "" else "wildgrove")
-	return _well(aspect if aspect != "" else "brim")
+	return ClassRegistry.make_seat(cls if ClassRegistry.seat_of(cls) == "healer" else "well", aspect)
 
 ## Build the blade seat (Twinfang is the only blade class — Reckoner deleted in THE
-## PURGE 2026-07-10; `cls` is accepted for spec compatibility and ignored).
-static func _blade_seat(_cls: String, aspect: String) -> Seat:
-	return _blade(aspect if aspect != "" else "venomancer")
+## PURGE 2026-07-10; other cls values fall back to it via the registry).
+static func _blade_seat(cls: String, aspect: String) -> Seat:
+	return ClassRegistry.make_seat(cls if ClassRegistry.seat_of(cls) == "blade" else "twinfang", aspect)
 
 ## THE caster-seat class: the Alchemist ("the Brew" — the patient poison/DoT DPS,
 ## ALCHEMIST-PLAN.md). Sole caster class since THE PURGE 2026-07-10 (Voidcaller deleted).
@@ -538,9 +536,9 @@ static func _alchemist(aspect: String) -> Seat:
 	return u
 
 ## Build the caster seat (Alchemist is the only caster class — Voidcaller deleted in
-## THE PURGE 2026-07-10; `cls` is accepted for spec compatibility and ignored).
-static func _caster_seat(_cls: String, aspect: String) -> Seat:
-	return _alchemist(aspect if aspect != "" else "brew")
+## THE PURGE 2026-07-10; other cls values fall back to it via the registry).
+static func _caster_seat(cls: String, aspect: String) -> Seat:
+	return ClassRegistry.make_seat(cls if ClassRegistry.seat_of(cls) == "caster" else "alchemist", aspect)
 
 ## Build a raid fight. `aspects` may override any seat's Aspect; `player` names the
 ## human seat ("tank"/"blade"/"caster"/"healer") for diag mirroring — every seat is
