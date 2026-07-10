@@ -21,7 +21,7 @@ const NAMES := {
 	"gauntlets": "GAUNTLETS", "greaves": "GREAVES",
 }
 
-## boon id -> slot, all five class pools (bulwark / twinfang / voidcaller / mender /
+## boon id -> slot, the class pools (bulwark / twinfang /
 ## bloomweaver). Unmapped future boons fall back onto tags (see slot_of).
 const MAP := {
 	# ---- BULWARK ----

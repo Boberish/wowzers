@@ -13,9 +13,7 @@ extends SceneTree
 
 const CLASSES := {
 	"bulwark": ["warden", "juggernaut"],
-	"mender": ["tidecaller", "brinkwarden"],
 	"twinfang": ["tempo", "venomancer"],
-	"voidcaller": ["disruptor", "silencer"],
 	"bloomweaver": ["wildgrove", "thornveil"],
 }
 
@@ -47,9 +45,7 @@ func _check(ok: bool, what: String) -> void:
 func _start(cls: String, aspect: String, seed_v: int) -> RunState:
 	match cls:
 		"bulwark": return RunState.start(aspect, seed_v)
-		"mender": return RunState.start_mender(aspect, seed_v)
 		"twinfang": return RunState.start_twinfang(aspect, seed_v)
-		"voidcaller": return RunState.start_voidcaller(aspect, seed_v)
 		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
 	return null
 
@@ -237,12 +233,12 @@ func _test_mint_table() -> void:
 	# scrappy but flawless-by-absence: only the flawless bonus
 	s.diag = {"perfect": 1, "graze": 4}
 	_check(Draft.mint(s, "twinfang") == 1, "flawless bonus alone (expect 1)")
-	# signature key is per class: mender dispels
-	s.diag = {"dispel": 8, "miss": 2}
-	_check(Draft.mint(s, "mender") == 2, "mender signature (expect 2)")
+	# signature key is per class: bloomweaver wards
+	s.diag = {"perfect_ward": 8, "miss": 2}
+	_check(Draft.mint(s, "bloomweaver") == 2, "bloomweaver signature (expect 2)")
 	# wrong class's signature earns nothing
 	s.diag = {"negate": 8, "miss": 2}
-	_check(Draft.mint(s, "mender") == 0, "signature is class-keyed (expect 0)")
+	_check(Draft.mint(s, "bloomweaver") == 0, "signature is class-keyed (expect 0)")
 
 ## The same seeded Bulwark fight (real policy) minted twice must agree — proves the
 ## mint source (state.diag) is deterministic end-to-end.

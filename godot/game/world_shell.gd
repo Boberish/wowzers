@@ -65,7 +65,7 @@ func _clear_shell_ui() -> void:
 	for c in _ui.get_children():
 		c.queue_free()
 
-## The dev jump-ins (CLAUDE.md run-book: raid / raidmap / gate / world / zone).
+## The dev jump-ins (CLAUDE.md run-book: raid / raidmap / world / zone).
 ## Moved verbatim off raid_hud._ready in P3.2a; `--fightlen=` stays HUD-side (it is
 ## an instance feel-scalar, parsed there before any pull).
 func drive_autostart(args: PackedStringArray) -> void:
@@ -74,13 +74,6 @@ func drive_autostart(args: PackedStringArray) -> void:
 			# THROWAWAY mobile touch spike (Twinfang·Tempo feel test). Native/editor entry;
 			# the web build boots it via the ?spike URL param (see _maybe_boot_spike_web).
 			_boot_mobile_spike()
-		elif a.begins_with("--autostart=gate"):
-			# --autostart=gate[:seat[:aspect]]  → straight into that seat's GATE exam
-			# (no map context: the end screen closes it — a dev/verify entry)
-			var gspec := a.substr("--autostart=".length()).split(":")
-			hud._seat_key = gspec[1] if gspec.size() > 1 and hud.SEAT_IDX.has(gspec[1]) else "tank"
-			hud._aspect = gspec[2] if gspec.size() > 2 else String((hud.ASPECTS[hud._seat_key][0] as Dictionary)["id"])
-			hud._launch_gate_fight()
 		elif a.begins_with("--autostart=raidmap"):
 			# --autostart=raidmap[:seat[:aspect]]  → straight onto the Topology floor
 			var mspec := a.substr("--autostart=".length()).split(":")
@@ -93,8 +86,6 @@ func drive_autostart(args: PackedStringArray) -> void:
 			hud._seat_key = wspec[1] if wspec.size() > 1 and hud.SEAT_IDX.has(wspec[1]) else "tank"
 			hud._aspect = wspec[2] if wspec.size() > 2 else String((hud.ASPECTS[hud._seat_key][0] as Dictionary)["id"])
 			hud._sync_healer_cls()
-			hud._sync_blade_cls()
-			hud._sync_caster_cls()
 			_show_atlas()
 		elif a.begins_with("--autostart=zone"):
 			# --autostart=zone[:seat[:aspect]]  → straight into ZONE 1 (the Gildfields)
@@ -102,8 +93,6 @@ func drive_autostart(args: PackedStringArray) -> void:
 			hud._seat_key = zspec[1] if zspec.size() > 1 and hud.SEAT_IDX.has(zspec[1]) else "tank"
 			hud._aspect = zspec[2] if zspec.size() > 2 else String((hud.ASPECTS[hud._seat_key][0] as Dictionary)["id"])
 			hud._sync_healer_cls()
-			hud._sync_blade_cls()
-			hud._sync_caster_cls()
 			hud._zone_id = WorldContent.ZONE1
 			if hud._world == null:
 				hud._world = WorldSave.load_save()
@@ -129,7 +118,6 @@ func _show_home() -> void:
 	hud._zone_live = false
 	hud._zone_id = ""
 	hud._party_ctx = ""
-	hud._gate_live = false
 	hud._online_map = false
 	hud._d.run = null                       # no descent = no boon run (fresh one per descent)
 	hud._d.ai_runs = {}                     # COMMANDER: the AI raiders' boon runs die with it
@@ -174,19 +162,16 @@ func _show_class_select() -> void:
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
 	UiKit.title_in(head, "you play one · AI raiders fill the other three seats", 14, Palette.TEXT_DIM)
 	# [seat, class, name, icon, accent, blurb] — the healer SEAT has two classes
-	# (Mender / Bloomweaver), so five cards map onto the four seats.
+	# (Well / Bloomweaver), so five cards map onto the four seats.
 	var cards := [
 		["tank", "bulwark", "THE BULWARK", "guard", Palette.STEEL, "TANK · MITIGATE — hold its gaze, parry its swings, CHALLENGE it back.  (Warden / Juggernaut)"],
 		["blade", "twinfang", "THE TWINFANG", "flurry", Palette.FLOW, "MELEE · DRIVE THE RHYTHM — perfect your strikes, never out-threat the tank.  (Tempo / Venomancer)"],
-		["blade", "reckoner", "THE RECKONER", "rampage", Palette.RAGE, "MELEE · COMMIT — an auto-swing you shape with two timed taps (wind × strike): huge hits, hyperarmor, and STAGGER.  (Colossus / Berserker)"],
-		["caster", "voidcaller", "THE VOIDCALLER", "overload", Palette.KICK, "CASTER · INTERRUPT — kick the boss's chants on the clean beat.  (Disruptor / Silencer)"],
 		["caster", "alchemist", "THE ALCHEMIST", "envenom", Palette.REACT, "CASTER · BREW THE REACTION — charge the vial, feed two opposing poisons, RUPTURE the peak.  (The Brew · NEW)"],
-		["healer", "mender", "THE MENDER", "surge", Palette.WIN, "HEALER · KEEP-ALIVE — react to the storm, click-cast big heals + shields.  (Tidecaller / Brinkwarden)"],
 		["healer", "well", "THE WELL-TENDER", "laststand", Palette.GOLD_BRIGHT, "HEALER · POUR — discrete CHARGES, no mana; GRADE every heal (TARGET the landing / SPEED the release), and a perfect one GLINTS the ally you healed.  (Brim / Draw · NEW)"],
 		["healer", "bloomweaver", "THE BLOOMWEAVER", "wildbloom", Palette.VERDANCE, "HEALER · ANTICIPATE — no mana; plant HoTs & wards AHEAD, bloom them on the spike.  (Wildgrove / Thornveil)"],
 	]
-	# AspectCard is a WIDE 680px card — STACK them vertically in a SCROLL box (8 cards over
-	# the four seats now exceed one screen; the scroll keeps every class reachable).
+	# AspectCard is a WIDE 680px card — STACK them vertically in a SCROLL box (the scroll
+	# keeps every class reachable as the roster grows).
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	UiKit.place(scroll, 0.5, 0.5, 0.5, 0.5, -360, -330, 360, 340)
@@ -213,8 +198,6 @@ func _show_raid_select(seat_id: String, aspect: String) -> void:
 	if hud._world_pending:              # THE WORLD (W1): the aspect ceremony opens the Atlas
 		hud._world_pending = false
 		hud._sync_healer_cls()
-		hud._sync_blade_cls()
-		hud._sync_caster_cls()
 		_show_atlas()
 		return
 	_screen = "raidpick"
@@ -291,25 +274,16 @@ func _show_party_setup() -> void:
 		lab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if mine else Palette.TEXT)
 		row.add_child(lab)
 		if not mine:
-			if key == "healer":     # polymorphic CLASS toggle (Mender → Well → Bloomweaver)
+			if key == "healer":     # polymorphic CLASS toggle (Well ⇄ Bloomweaver)
 				var clsb := Button.new()
-				var cn: String = {"bloomweaver": "BLOOMWEAVER", "well": "WELL"}.get(cls, "MENDER")
+				var cn: String = {"bloomweaver": "BLOOMWEAVER"}.get(cls, "WELL")
 				clsb.text = "◈ " + cn
 				clsb.custom_minimum_size = Vector2(150, 32)
 				clsb.pressed.connect(func():
-					var nc: String = {"mender": "well", "well": "bloomweaver", "bloomweaver": "mender"}.get(cls, "well")
+					var nc: String = "bloomweaver" if cls == "well" else "well"
 					hud._d.party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
 					_show_party_setup())
 				row.add_child(clsb)
-			if key == "caster":     # polymorphic CLASS toggle (Voidcaller ⇄ Alchemist)
-				var cclsb := Button.new()
-				cclsb.text = "◈ " + ("ALCHEMIST" if cls == "alchemist" else "VOIDCALLER")
-				cclsb.custom_minimum_size = Vector2(150, 32)
-				cclsb.pressed.connect(func():
-					var nc := "voidcaller" if cls == "alchemist" else "alchemist"
-					hud._d.party[key] = {"cls": nc, "aspect": RaidNet.default_aspect(String(key), nc)}
-					_show_party_setup())
-				row.add_child(cclsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 32)
@@ -371,7 +345,7 @@ func _start_map_pick(seat_id: String) -> void:
 	_show_aspect_pick(seat_id if hud.SEAT_IDX.has(seat_id) else "tank")
 
 ## Class-select card chosen. For the healer seat this also records WHICH healer class
-## (mender / bloomweaver) — the rest of the flow reads hud._healer_cls to pick aspects/band.
+## (well / bloomweaver) — the rest of the flow reads hud._healer_cls to pick aspects/band.
 func _pick_class(seat_id: String, cls: String) -> void:
 	if seat_id == "healer":
 		hud._healer_cls = cls
@@ -553,11 +527,6 @@ func _enter_zone_node(id: int) -> void:
 			_zone_stop(String(n["name"]), body,
 				[{"label": "MOVE IN", "fx": {"result": "The warband forms up."}}],
 				ZoneScreen.KIND_COL[String(n["kind"])], hud._launch_zone_fight.bind(n))
-		"gate":
-			var ex: Dictionary = GateContent.exam(hud._seat_key, hud._seat_cls_now())
-			_zone_stop(String(n["name"]), WorldContent.GATE_TEXT + "\n\n" + String(ex["body"]),
-				[{"label": "STEP THROUGH ALONE", "fx": {"result": String(ex["challenge"])}}],
-				Palette.GOLD_BRIGHT, hud._launch_zone_gate)
 		"event":
 			_zone_stop_event(n, WorldContent.event(String(n["event"])))
 		"choice":
@@ -763,36 +732,16 @@ func _show_lobby() -> void:
 			cb.pressed.connect(func(): hud._net.send({"t": "claim", "seat": key, "prior": hud._my_prior()}))
 			row.add_child(cb)
 		elif claimant == me:
-			if key == "healer":     # toggle the healer CLASS (Mender ⇄ Bloomweaver)
-				var mycls := String(me.get("cls", "mender"))
+			if key == "healer":     # toggle the healer CLASS (Well ⇄ Bloomweaver)
+				var mycls := String(me.get("cls", "well"))
 				var clsb := Button.new()
-				var mcn: String = {"bloomweaver": "BLOOMWEAVER", "well": "WELL"}.get(mycls, "MENDER")
+				var mcn: String = {"bloomweaver": "BLOOMWEAVER"}.get(mycls, "WELL")
 				clsb.text = "◈ " + mcn
 				clsb.custom_minimum_size = Vector2(150, 34)
 				clsb.pressed.connect(func():
-					var nc: String = {"mender": "well", "well": "bloomweaver", "bloomweaver": "mender"}.get(mycls, "well")
+					var nc: String = "bloomweaver" if mycls == "well" else "well"
 					hud._net.send({"t": "class", "cls": nc}))
 				row.add_child(clsb)
-			if key == "blade":      # toggle the blade CLASS (Twinfang ⇄ Reckoner)
-				var bcls := String(me.get("cls", "twinfang"))
-				if bcls == "":
-					bcls = "twinfang"
-				var bclsb := Button.new()
-				bclsb.text = "◈ " + ("RECKONER" if bcls == "reckoner" else "TWINFANG")
-				bclsb.custom_minimum_size = Vector2(150, 34)
-				bclsb.pressed.connect(func():
-					hud._net.send({"t": "class", "cls": "twinfang" if bcls == "reckoner" else "reckoner"}))
-				row.add_child(bclsb)
-			if key == "caster":     # toggle the caster CLASS (Voidcaller ⇄ Alchemist)
-				var ccls := String(me.get("cls", "voidcaller"))
-				if ccls == "":
-					ccls = "voidcaller"
-				var cclsb := Button.new()
-				cclsb.text = "◈ " + ("ALCHEMIST" if ccls == "alchemist" else "VOIDCALLER")
-				cclsb.custom_minimum_size = Vector2(150, 34)
-				cclsb.pressed.connect(func():
-					hud._net.send({"t": "class", "cls": "voidcaller" if ccls == "alchemist" else "alchemist"}))
-				row.add_child(cclsb)
 			var ab := Button.new()
 			ab.text = "ASPECT ⇄"
 			ab.custom_minimum_size = Vector2(110, 34)

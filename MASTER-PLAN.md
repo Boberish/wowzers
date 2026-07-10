@@ -814,10 +814,60 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 01:15 · main (docs only) — **CLAIM: SLATE MACHINE row 3 — BLOOMWEAVER class slate**
-  (the queue's one CLASS-grade pass: fresh sweep → `research/bloom-sweep.md` → 3–4 CORE-MINIGAME
-  candidates + spec identity seeds, rewire anatomy allowed → 3 skeptics → NEW `BLOOM-PLAN.md`
-  🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 01:12)*
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §10 (NEW) + §10.7 built-pool addendum +
+  `research/draw-sweep.md` (NEW) + ledger §C row — **SLATE MACHINE row 6: Well·DRAW branch slate
+  — DONE, four themes AT BILL'S VERDICT** (sibling law held: every theme on the release/hold
+  surface, zero landing/party overlap with Brim §9). **THE RAPIDS** (the Current named as a
+  ladder; ⚠ built Millrace vs pitched Flume — one capstone absorbs the other at the deck pass) ·
+  **THE VIGIL** (held heals — Patient Hand entry + the transformer promoted; archery tremble
+  telegraphs the gutter; GH extended-sustain "Second Hand") · **THE SKIM** (the undercook as a
+  chosen tool — never forgiven the p^1.5 price, paid in WAKES; the anti-Current pole = the
+  slate's pick-tension centerpiece vs Rapids) · **THE EDDY** (drift reads — osu press-and-follow;
+  Glass River keystone). **§10.7 BUILT-POOL ADDENDUM:** the deck banner's 24 built boons + rig
+  were missing from BOTH filing tables — all filed now; §9's 4th theme RENAMED Deep Well → **THE
+  PULSE** (a built shared boon owns that name); built Levee re-filed to Overflow. 3 skeptic
+  passes: 1 kill (the Whirlpool — Rekindle's job in a keystone costume), ~6 fixes. Ranking:
+  Vigil · Rapids · Eddy · Skim. *(slate-machine session, tick 01:57)*
+
+- ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §9 (NEW) + `research/brim-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 5: Well·BRIM branch slate — DONE, four themes AT BILL'S
+  VERDICT** (filing table homes every verdicted creed/module/sketch, zero orphans). **THE LOW
+  CATCH** (play-behind formalized — Brink 5★ entry, band-position catches so zone fights don't
+  sleep) · **THE OVERFLOW ENGINE** (⭐Reservoir named — the Glint-or-bank per-cast fork stated
+  as the identity; Payload distinctness recorded) · **THE GLINTSMITH** (TEAM — Glint-uptime as
+  the idle-time job, the FFXIV green-DPS warning made law: damage only through clean healing;
+  blindfold = greed pole, Ana-grenade → PRIME) · **THE DEEP WELL** (pulse-beat casts, dry-
+  flirting, Levee rework → THE TIDE creed candidate). 3 skeptic passes: 1 kill (the Surgeon —
+  operation-chains re-invent Draw's rhythm on Brim's bar), ~7 fixes. Ranking: Low Catch ·
+  Overflow · Glintsmith · Deep Well. No CARD-CATALOG rows (deck reshape = Phase-2 row D5).
+  *(slate-machine session, tick 01:42)*
+
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §9 (NEW) + `research/cask-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 4: Alchemist·CASK branch slate — DONE.** The §7 slate is
+  Bill-LOCKED (24/6), so this pass is the missing DECK-LAYOUT layer, not a challenger: **the
+  filing table** names the ladders the locked cards already form (**THE BLEND LINE** hold-or-cash
+  · **THE GAUNTLET** one-cask strain-chain · **THE TAP LIST** banked moments — zero orphans,
+  entry-creed mapping stated) + **three ADDITIVE themes** at verdict: **TWIN CASKS** (Overcooked
+  pipeline — homes the parked Double Barrel as a module) · **THE HOUSE RECIPE** (Potion-Craft
+  repetition mastery, echo skill-gated on clean peaks) · **THE TAPROOM** (TEAM — bottled peaks
+  thrown to allies, applies on their clean moment; shared buff-channel debt). 3 skeptic passes:
+  1 kill (**Storm Brewer** — parked until the F3 under-fire playtest), ~6 fixes. Ranking: House
+  Recipe · Twin Casks · Taproom. No CARD-CATALOG rows (deck = Phase-2 row D4). *(slate-machine
+  session, tick 01:27)*
+
+- ☑ 2026-07-10 · main (docs only) · `BLOOM-PLAN.md` (NEW) + `research/bloom-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 3: BLOOMWEAVER class slate — DONE, four core-minigame
+  candidates AT BILL'S VERDICT** (the queue's one rewire-grade pass; do-not-merge lock honored;
+  one-instrument law from Atomicrops applied to all four). **A · THE ORCHARD CLOCK** (ripeness
+  arcs + phase management — Wildfrost timers, the RIPEN heir; specs Orchard/Meadow) · **B · THE
+  TRELLIS** (seats-as-lanes, heals RACE incoming spikes + PvZ sap economy; specs Sower/Courier;
+  HUD lift flagged) · **C · THE BRIAR** (planted arming wards + graded SNAP — the Thornveil
+  heir; specs Briar/Balm) · **D · THE PRUNING** (auto-growing garden, graded CUTS redirect it —
+  healing by subtraction; specs Topiary/Wildwood; rule-4 death-clause stated). 3 skeptic passes:
+  1 kill (Pollinators = timers in a costume), ~9 fixes. Skeptic ranking A·B·C·D. 2 new buttons
+  per core (narrow-kit budget). No CARD-CATALOG rows (deck = Phase-2 row D3 after Bill picks the
+  core). *(slate-machine session, tick 01:12; tracking edits ride other sessions' commits —
+  shared docs were dirty)*
 
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §7 (NEW) + `research/duelist-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 2: Tank·DUELIST challenger slate — DONE, three challengers
@@ -933,16 +983,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   elite-node, stakes re-fiction). ⚠ Code lands AFTER `purge-oldgame` merges (GATE-cut overlap;
   recon confirmed gates still live on main). *(raid-rebuild session)*
 
-- ☐ 2026-07-10 · main (docs only) + session watcher loop — **CLAIM: THE DUNGEON REBUILD plan,
-  GATED on THE RAID REBUILD above (Bill).** A self-paced loop in this session watches that claim
-  (wake = `DESCENT-PLAN.md` present in HEAD; heartbeat ~25 min; STALL = workflow journal quiet
-  >45 min with no plan landed → THIS session executes that claim's RESUME PROTOCOL, so the raid
-  plan can't die silently). When the raid plan lands: run the SAME zoom-out structure pass for
-  the DUNGEON surface (the GAME-LOOPS §3 headline gap — no dungeon plan exists; inputs =
-  WORLD-PLAN §THE DUNGEON + the b2afbca raid/dungeon identity split [dungeons = the M+ Depth
-  push surface] + DESCENT-PLAN.md's raid verdicts as the frame to diff against, inline
-  multi-lens design not a Workflow) → NEW `DUNGEON-PLAN.md` at Bill's verdict + ledger rows,
-  then the loop stops. *(dungeon-watcher session)*
+- ☑ 2026-07-10 · main (docs only) — **THE DUNGEON REBUILD plan (Bill) — DONE, 🟡 AT BILL'S
+  VERDICT.** The watcher loop worked as claimed: woke the moment `DESCENT-PLAN.md` hit HEAD
+  (`cddc390`; no stall, the resume protocol never fired), then ran the same zoom-out structure
+  pass for the DUNGEON surface inline (time-first / economy-first / push-first lenses +
+  skeptic checks; no workflow). **NEW `DUNGEON-PLAN.md`** — DESCENT's twin, inheriting its
+  grammar wholesale (deltas only): ~29-min push lap / ~25 farm lap budget · `run_map` PRESET
+  (7 rows/~17 nodes/1 Seal — rides §I's ONE re-baseline, no second bang) · THE DOOR CONTRACT
+  (Version+Depth dials + affix preview, rendered-not-specced — the Depth thread stays owner) ·
+  node-slate deltas + the 8-string SKIN TABLE (resolves the takeover-names-vs-earnest-world
+  tension, V#2) · keystone-at-elite (AMENDs UNLOCK-2's "after the 1st boss" wording, V#3) ·
+  subset table v1 (D1 Creed-only · D2 Module-not-Creed) · Dungeon 1 = **THE UNDERGRANARY** +
+  **THE TALLYMAN** worked contract (node/boss authoring stays the W3 claim). **8 verdicts at
+  §V.** Satellites in the same commit: BUILD-LEDGER **§J** (6 rows; zero new `draft.gd`-queue
+  rows by design) · WORLD-PLAN §THE DUNGEON pointer · GAME-LOOPS L3 + gap-A sync · CLAUDE.md
+  index line. *(dungeon-watcher session)*
 
 - ☐ 2026-07-10 · main (docs only) + session cron — **CLAIM: THE SLATE MACHINE (Bill) — every
   class/spec gets the Tempo-§14 branch-slate treatment, one at a time, on a 15-min loop.** NEW

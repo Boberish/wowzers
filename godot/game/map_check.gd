@@ -51,8 +51,6 @@ static func catalog_for(cls: String) -> Variant:
 	match cls:
 		"bulwark": return BulwarkBoons
 		"twinfang": return TwinfangBoons
-		"voidcaller": return VoidcallerBoons
-		"mender": return MenderBoons
 		"bloomweaver": return BloomweaverBoons
 	return null
 

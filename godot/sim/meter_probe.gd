@@ -6,8 +6,8 @@
 ##       Σ meter == HP lost + everything the boss healed back.
 ##   [3] kit-direct path (Twinfang Venomancer: strikes + poison bypass damage_boss):
 ##       same reconciliation — a missed meter call in the kit fails this.
-##   [4] healer accounting (Mender vs Rendmaw): only the healer earns heal credit,
-##       HoT ticks land under their `src` (renew), overheal tracked beside.
+##   [4] healer accounting (raid Well): only the healer earns heal credit,
+##       sources labeled, overheal tracked beside.
 ##   [5] raid attribution (Vorathek): all four raiders metered, sources labeled,
 ##       tank takes hits, healing reconciles with the raid's actual HP gains.
 ##   [6] determinism: the same seed rebuilds the identical meter, byte for byte.
@@ -67,9 +67,11 @@ func _raid_state(seed: int) -> CombatState:
 	(s.seats[0].policy as RaidTankPolicy).rng = DetRng.new(seed * 2749 + 1337)
 	(s.seats[1].policy as TwinfangPolicy).latency_ticks = 4
 	(s.seats[1].policy as TwinfangPolicy).rng = DetRng.new(seed * 2749 + 2338)
-	(s.seats[2].policy as VoidcallerPolicy).latency_ticks = 4
-	(s.seats[2].policy as VoidcallerPolicy).rng = DetRng.new(seed * 2749 + 3339)
-	(s.seats[3].policy as MenderPolicy).latency_ticks = 5
+	(s.seats[2].policy as AlchemistPolicy).latency_ticks = 4
+	(s.seats[2].policy as AlchemistPolicy).rng = DetRng.new(seed * 2749 + 3339)
+	var hp := s.seats[3].policy as WellPolicy
+	hp.latency_ticks = 5
+	hp.rng = DetRng.new(seed * 2749 + 5531)
 	return s
 
 func _initialize() -> void:
@@ -104,25 +106,15 @@ func _initialize() -> void:
 			row.has("dmg") and row["dmg"].has(&"poison"),
 			"(srcs: %s)" % [row.get("dmg", {}).keys()])
 
-	# ---- [4] healer accounting (Mender vs Rendmaw) ----
-	var s4 := MenderContent.make_state(11, "tidecaller",
-		MenderContent.make_config(), MenderContent.make_mender_config(),
-		MenderContent.make_rendmaw(), {})
-	(s4.seats[0].policy as MenderPolicy).latency_ticks = 5
+	# ---- [4] healer accounting (the raid Well — post-purge healer) ----
+	var s4 := _raid_state(11)
 	_run(s4)
-	var healer_i := 0    # mender content: seat 0 is the healer
+	var healer_i := 3    # raid comp: seat 3 is the healer
 	var hrow: Dictionary = s4.meter.get(healer_i, {})
-	_check("mender heal credit", float(hrow.get("heal_total", 0.0)) > 0.0,
+	_check("well heal credit", float(hrow.get("heal_total", 0.0)) > 0.0,
 		"(healed %.0f, over %.0f)" % [hrow.get("heal_total", 0.0), hrow.get("over_total", 0.0)])
-	_check("mender HoT src labeled", hrow.get("heal", {}).has(&"renew"),
+	_check("well heal srcs labeled", (hrow.get("heal", {}) as Dictionary).size() >= 1,
 		"(srcs: %s)" % [hrow.get("heal", {}).keys()])
-	var only_healer := true
-	for i in s4.meter:
-		if i != healer_i and not (s4.meter[i].get("heal", {}) as Dictionary).is_empty():
-			only_healer = false
-	_check("only the healer heals (solo mender)", only_healer)
-	_check("party damage metered (statblock attack)",
-		_sum(s4, "dmg_total") > 0.0 and (s4.meter.get(1, {}).get("dmg", {}) as Dictionary).has(&"attack"))
 
 	# ---- [5] raid attribution (Vorathek, all four full-fidelity seats) ----
 	var s5 := _raid_state(17)
@@ -143,17 +135,8 @@ func _initialize() -> void:
 	_reconcile_dmg("raid/riftmaw seed 17", s5)
 
 	# ---- [6] SELF-heals are metered (the "self-sustain vs the healer" answer) ----
-	# Voidcaller: every landed kick self-heals int_heal — a full fight must show it.
-	var s6 := VoidcallerContent.make_state(9, "disruptor", VoidcallerContent.make_config(),
-		VoidcallerContent.make_voidcaller_config(), VoidcallerContent.make_priest(), {})
-	var vp := s6.seats[0].policy as VoidcallerPolicy
-	vp.latency_ticks = 4
-	vp.rng = DetRng.new(9 * 2749 + 1337)
-	_run(s6)
-	var vrow: Dictionary = s6.meter.get(0, {})
-	_check("voidcaller kick self-heal metered",
-		(vrow.get("heal", {}) as Dictionary).has(&"kick_heal"),
-		"(heal srcs: %s, total %.0f)" % [vrow.get("heal", {}).keys(), vrow.get("heal_total", 0.0)])
+	# (Voidcaller kick-heal sub-test retired 2026-07-10 — THE PURGE; the Bulwark
+	# Bloodthirst case below carries the self-heal accounting proof.)
 	# Bulwark: a Bloodthirst press on a hurt tank meters its lifesteal exactly.
 	var s8 := _bulwark_state(3, BulwarkContent.make_gatekeeper())
 	var bseat: Seat = s8.seats[0]

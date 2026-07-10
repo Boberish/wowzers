@@ -35,8 +35,8 @@ var pending_check := false     # awaiting the map toast after a check
 func _run_for(seat: String) -> RunState:
 	match seat:
 		"blade": return RunState.start_twinfang("venomancer")
-		"caster": return RunState.start_voidcaller("disruptor")
-		"healer": return RunState.start_mender("brinkwarden")
+		"caster": return RunState.start_alchemist("brew")
+		"healer": return RunState.start_well("brim")
 		_: return RunState.start("warden")
 
 func _initialize() -> void:

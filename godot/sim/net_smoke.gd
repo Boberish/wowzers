@@ -80,8 +80,7 @@ func _process(delta: float) -> bool:
 				phase = "claim"
 		"claim":
 			if _seat_of(ava, "Ava") == "blade" and _seat_of(bo, "Bo") == "healer":
-				ava["net"].send({"t": "class", "cls": "reckoner"})    # v11: the blade class toggle
-				ava["net"].send({"t": "aspect", "aspect": "colossus"})
+				ava["net"].send({"t": "aspect", "aspect": "tempo"})   # v13: aspect pick (class toggles are healer-only)
 				bo["net"].send({"t": "class", "cls": "bloomweaver"})   # v4: the second healer
 				bo["net"].send({"t": "aspect", "aspect": "wildgrove"})
 				_host().send({"t": "boss", "enc": "mistral"})   # v2: host picks Seal II
@@ -107,9 +106,6 @@ func _process(delta: float) -> bool:
 					_fail("replica mismatch after fight 1")
 				elif String(ca.encounter.id) != "mistral" or String(cb.encounter.id) != "mistral":
 					_fail("host Seal pick didn't reach the replicas (got %s/%s)" % [ca.encounter.id, cb.encounter.id])
-				elif _kit_name(ca.seats[1]) != "ReckonerKit" or _kit_name(cb.seats[1]) != "ReckonerKit":
-					_fail("online CLASS toggle didn't build a Reckoner blade (got %s/%s)" % [
-						_kit_name(ca.seats[1]), _kit_name(cb.seats[1])])
 				elif _kit_name(ca.seats[3]) != "BloomweaverKit" or _kit_name(cb.seats[3]) != "BloomweaverKit":
 					_fail("online CLASS toggle didn't build a Bloomweaver healer (got %s/%s)" % [
 						_kit_name(ca.seats[3]), _kit_name(cb.seats[3])])
@@ -188,9 +184,9 @@ func _drive(c: Dictionary, seat_key: String) -> void:
 			ctrl.human({"type": "ability",
 				"id": ("rampage" if float(obs.get("rage", 0.0)) >= 40.0 else "cleave")})
 	elif seat_key == "blade":
-		# the blade is a Reckoner here — drive the two-tap swing (wind → strike by phase)
-		var ph := int(p.vars.get("phase", 0))
-		ctrl.human({"type": "ability", "id": ("wind" if (ph == 0 or ph == 3) else "strike")})
+		# the blade is a Twinfang (tempo) — strike whenever the perfect window opens
+		if int(obs.get("since_strike", 0)) >= int(obs.get("perfect_lo", 18)):
+			ctrl.human({"type": "ability", "id": "strike"})
 	else:
 		# the healer is a Bloomweaver here — keep Growth rolling on the tank
 		if (obs.get("casting", {}) as Dictionary).is_empty() and bool(obs.get("gcd_ready", true)):

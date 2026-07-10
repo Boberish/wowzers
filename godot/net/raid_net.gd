@@ -7,11 +7,10 @@ class_name RaidNet
 extends RefCounted
 
 const SEAT_KEYS := ["tank", "blade", "caster", "healer"]
-const DEFAULT_ASPECT := {"tank": "warden", "blade": "venomancer", "caster": "disruptor", "healer": "tidecaller"}
-## Each seat's native CLASS. Only the healer seat is polymorphic today — it may be
-## "mender" (default, verified comp) or "bloomweaver" (the second healer). `cls` rides
-## the fight spec per seat; absent/default → the original state builds byte-identical.
-const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "voidcaller", "healer": "mender"}
+const DEFAULT_ASPECT := {"tank": "warden", "blade": "venomancer", "caster": "brew", "healer": "brim"}
+## Each seat's native CLASS (post-purge 2026-07-10). Only the healer seat is polymorphic —
+## "well" (default) or "bloomweaver". `cls` rides the fight spec per seat.
+const SEAT_CLASS := {"tank": "bulwark", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
 const ALLY_LATENCY := 5
 const ALLY_SLACK := 0.06
 
@@ -20,12 +19,6 @@ const ALLY_SLACK := 0.06
 static func default_aspect(key: String, cls: String) -> String:
 	if key == "healer" and cls == "bloomweaver":
 		return "wildgrove"
-	if key == "healer" and cls == "well":
-		return "brim"
-	if key == "blade" and cls == "reckoner":
-		return "colossus"
-	if key == "caster" and cls == "alchemist":
-		return "brew"
 	return String(DEFAULT_ASPECT.get(key, ""))
 
 ## Which healer class a seat is running (read off its kit) — so a disconnect takeover
@@ -41,8 +34,6 @@ static func cls_of(seat: Seat) -> String:
 		return "bloomweaver"
 	if gn == "WellKit":
 		return "well"
-	if gn == "ReckonerKit":
-		return "reckoner"
 	if gn == "AlchemistKit":
 		return "alchemist"
 	return ""
@@ -162,39 +153,25 @@ static func make_policy(key: String, seed_v: int, cls: String = "") -> Policy:
 			tp.rng = DetRng.new(seed_v * 2749 + 1337)
 			return tp
 		"blade":
-			if cls == "reckoner":
-				var rp := ReckonerPolicy.new()
-				rp.latency_ticks = ALLY_LATENCY
-				rp.rng = DetRng.new(seed_v * 2749 + 2338)
-				return rp
 			var bp := TwinfangPolicy.new()
 			bp.latency_ticks = ALLY_LATENCY
 			bp.rng = DetRng.new(seed_v * 2749 + 2338)
 			return bp
 		"caster":
-			if cls == "alchemist":
-				var ap := AlchemistPolicy.new()
-				ap.latency_ticks = ALLY_LATENCY
-				ap.rng = DetRng.new(seed_v * 2749 + 3339)
-				return ap
-			var cp := VoidcallerPolicy.new()
-			cp.latency_ticks = ALLY_LATENCY
-			cp.rng = DetRng.new(seed_v * 2749 + 3339)
-			return cp
+			var ap := AlchemistPolicy.new()
+			ap.latency_ticks = ALLY_LATENCY
+			ap.rng = DetRng.new(seed_v * 2749 + 3339)
+			return ap
 		_:
-			# healer — the reworked Well, the Bloomweaver, or the default Mender
-			if cls == "well":
-				var lp := WellPolicy.new()
-				lp.latency_ticks = ALLY_LATENCY
-				lp.rng = DetRng.new(seed_v * 2749 + 5531)
-				return lp
+			# healer — the Well (default) or the Bloomweaver
 			if cls == "bloomweaver":
 				var wp := BloomweaverPolicy.new()
 				wp.latency_ticks = ALLY_LATENCY
 				return wp
-			var mp := MenderPolicy.new()
-			mp.latency_ticks = ALLY_LATENCY
-			return mp
+			var lp := WellPolicy.new()
+			lp.latency_ticks = ALLY_LATENCY
+			lp.rng = DetRng.new(seed_v * 2749 + 5531)
+			return lp
 
 ## One lockstep tick: enqueue this frame's human inputs, let AI seats act, update.
 ## `inputs` = Array of [seat_i:int, action:Dictionary]; the frame number must be

@@ -15,7 +15,7 @@
 class_name NetProtocol
 extends RefCounted
 
-const VERSION := 12     # v12: blade seat CLASS choice online (Twinfang / Reckoner) — lobby toggle + server accepts a blade class msg. v11: THE KILL SWITCH — ⏻ charge + OVERCLOCK arm/cash-out at a Seal
+const VERSION := 13     # v13: THE PURGE — Voidcaller/Mender/Reckoner deleted; caster=Alchemist, healer=Well(default)/Bloomweaver; gates gone. v12: blade class toggle (dead). v11: THE KILL SWITCH — ⏻ charge + OVERCLOCK arm/cash-out at a Seal
 const DEFAULT_PORT := 9077
 const DEFAULT_ROOM := "RIFT"
 

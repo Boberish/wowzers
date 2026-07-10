@@ -1,5 +1,5 @@
 ## Headless RAID sim — all four Seals (see MASTER-PLAN §RAID SEALS): four
-## FULL-fidelity seats (Bulwark tank / Twinfang + Voidcaller dps / Mender healer),
+## FULL-fidelity seats (Bulwark tank / Twinfang + Alchemist dps / Well healer),
 ## one shared CombatState, threat + taunt live. Proves determinism per Seal, prints
 ## win-rate bands by uniform party skill with Seal-specific diagnostics (kick-chain
 ## verses, doom beats, add waves, hotfix healing), and probes that THREAT is
@@ -9,22 +9,22 @@
 ##   optional: --boss=riftmaw|mistral|gemini|mythos (default: all)
 extends SceneTree
 
-# Which healer CLASS fills the healer seat, and its aspect. Default = the verified
-# Mender comp (--healer=bloomweaver [--haspect=wildgrove|thornveil] runs the second
-# healer). Class-fixed to Mender everywhere else in the pipeline; this is the sim knob.
-var _healer_cls := "mender"
+# Which healer CLASS fills the healer seat, and its aspect. Default = the WELL
+# (post-purge comp; --healer=bloomweaver [--haspect=wildgrove|thornveil] runs the
+# second healer).
+var _healer_cls := "well"
 var _haspect := ""
 var _baspect := ""    # --blade=tempo runs the reworked Tempo blade (default = the venomancer comp)
 var _brig := ""       # --rig=when:then wires the blade's Combo rig (e.g. --rig=coup:overcharge)
-var _caster_cls := "voidcaller"   # --caster=alchemist runs the Brew in the caster seat
-                                  # (⚠ no kicker in the comp then — the blade carries kicks)
+var _caster_cls := "alchemist"    # the Brew is THE caster (post-purge)
+                                  # (⚠ NO kicker in the comp until interrupt-by-ability)
 
 # --- FAST-ITERATION + LIVE TUNING knobs (for playtest tweaking — see ./tune.sh) ---
 # During tuning you don't need 200 seeds or the correctness gates; you need a fast
 # read you can re-run after each tweak. These make that loop cheap:
 var _probes := true       # --probes=0  : skip determinism + threat-gate probes (they're gates, not tuning signals)
 var _dmg := 1.0           # --dmg=1.3   : scale ALL boss damage (melee/swings/novas/dots/beats) — the difficulty dial
-var _regen := -1.0        # --regen=0.5 : override the raid healer's mana regen_mult (the mana dial)
+var _regen := -1.0        # --regen=0.5 : legacy mana dial (inert on the charge-based Well; bites only for mana healers)
 var _fortify := -1.0      # --fortify=0.5: override the tank's raid Fortify self-heal mult (the tank-sustain dial)
 var _skills: Array = []   # --skills=good  or  --skills=good,sloppy  (default = all three)
 
@@ -39,23 +39,21 @@ func _initialize() -> void:
 	var seeds := int(SimUtil.arg("seeds", "200"))
 	var seed0 := int(SimUtil.arg("seed0", "1"))   # seed shard offset (scripts/psim.sh); 1 = a full run
 	var only := SimUtil.arg("boss", "")
-	_healer_cls = SimUtil.arg("healer", "mender")
+	_healer_cls = SimUtil.arg("healer", "well")
 	_haspect = SimUtil.arg("haspect", "")
 	_baspect = SimUtil.arg("blade", "")
 	_brig = SimUtil.arg("rig", "")
-	_caster_cls = SimUtil.arg("caster", "voidcaller")
+	_caster_cls = SimUtil.arg("caster", "alchemist")
 	_probes = SimUtil.arg("probes", "1") != "0"
 	_dmg = float(SimUtil.arg("dmg", "1"))
 	_regen = float(SimUtil.arg("regen", "-1"))
 	_fortify = float(SimUtil.arg("fortify", "-1"))
 	_skills = _pick_skills(SimUtil.arg("skills", ""))
 	var bosses: Array = ["riftmaw", "mistral", "gemini", "mythos"] if only == "" else [only]
-	var healer_desc := "Mender(%s)" % (_haspect if _haspect != "" else "tidecaller")
+	var healer_desc := "Well(%s)" % (_haspect if _haspect != "" else "brim")
 	if _healer_cls == "bloomweaver":
 		healer_desc = "Bloomweaver(%s)" % (_haspect if _haspect != "" else "wildgrove")
-	elif _healer_cls == "well":
-		healer_desc = "Well(%s)" % (_haspect if _haspect != "" else "brim")
-	var caster_desc := "Alchemist(brew)" if _caster_cls == "alchemist" else "Voidcaller(disruptor)"
+	var caster_desc := "Alchemist(brew)"
 	var blade_desc := "Twinfang(%s)" % (_baspect if _baspect != "" else "venomancer")
 	print("=== Project Rift — raid sim (the Seals) ===")
 	print("Godot ", Engine.get_version_info().get("string", "?"), "  | ", seeds, " seeds/cell")
@@ -172,24 +170,16 @@ func _run_one(boss: String, seed: int, sk: Dictionary, use_challenge: bool) -> D
 	var bp := blade.policy as TwinfangPolicy
 	bp.latency_ticks = int(sk["lat"])
 	bp.rng = DetRng.new(seed * 2749 + 2338)
-	# both caster classes expose latency_ticks (extends Policy); pick the real type
-	if caster.policy is AlchemistPolicy:
-		var ap := caster.policy as AlchemistPolicy
-		ap.latency_ticks = int(sk["lat"])
-		ap.rng = DetRng.new(seed * 2749 + 3339)
-	else:
-		var cp := caster.policy as VoidcallerPolicy
-		cp.latency_ticks = int(sk["lat"])
-		cp.rng = DetRng.new(seed * 2749 + 3339)
-	# every healer class exposes latency_ticks (extends Policy); pick the real type
+	var ap := caster.policy as AlchemistPolicy
+	ap.latency_ticks = int(sk["lat"])
+	ap.rng = DetRng.new(seed * 2749 + 3339)
+	# both healer classes expose latency_ticks (extends Policy); pick the real type
 	if healer.policy is BloomweaverPolicy:
 		(healer.policy as BloomweaverPolicy).latency_ticks = int(sk["hlat"])
-	elif healer.policy is WellPolicy:
+	else:
 		var lp := healer.policy as WellPolicy
 		lp.latency_ticks = int(sk["hlat"])
 		lp.rng = DetRng.new(seed * 2749 + 5531)
-	else:
-		(healer.policy as MenderPolicy).latency_ticks = int(sk["hlat"])
 	return _run(s)
 
 func _run(s: CombatState) -> Dictionary:

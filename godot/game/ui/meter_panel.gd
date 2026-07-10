@@ -107,8 +107,6 @@ func _accent(seat: Seat) -> Color:
 	match (String(scr.get_global_name()) if scr != null else ""):
 		"BulwarkKit": return Palette.GOLD
 		"TwinfangKit": return Palette.FLOW
-		"VoidcallerKit": return Palette.VOID
-		"MenderKit": return Palette.SPELL
 		"BloomweaverKit": return Palette.VERDANCE
 		_: return Palette.STEEL.darkened(0.15)
 

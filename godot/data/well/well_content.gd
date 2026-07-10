@@ -1,7 +1,7 @@
 ## WellContent — the party + encounters the reworked healer trains and sims against
 ## (a tank + 3 statblock DPS the healer keeps alive; a boss that pressures the group so
 ## there is something to heal AND a boss HP bar the Glint can measurably shorten). Built
-## in code, mirroring MenderContent's shape. Used by well_sim + the GATE exam.
+## in code. Used by well_sim (gates + MenderContent died in THE PURGE 2026-07-10).
 class_name WellContent
 extends RefCounted
 

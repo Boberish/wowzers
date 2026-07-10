@@ -39,7 +39,6 @@ static var KIND_COL := {
 	RunMap.KIND_CACHE: Palette.GOLD,
 	RunMap.KIND_COOLING: Palette.FLOW,
 	RunMap.KIND_SEAL: Palette.CRUSH,
-	RunMap.KIND_GATE: Palette.GOLD_BRIGHT,
 }
 const KIND_TAG := {
 	RunMap.KIND_COMBAT: "FIGHT",
@@ -47,7 +46,6 @@ const KIND_TAG := {
 	RunMap.KIND_CACHE: "CACHE",
 	RunMap.KIND_COOLING: "COOLING",
 	RunMap.KIND_SEAL: "SEAL",
-	RunMap.KIND_GATE: "GATE — one steps through alone",
 }
 
 ## MAP-3b: online spectators (non-leaders) see the map read-only — the reachable
@@ -181,7 +179,7 @@ func _draw() -> void:
 			var glow := Palette.GOLD if _hover != id else Palette.GOLD_BRIGHT
 			draw_arc(p, r + 8.0, 0, TAU, 40, Color(glow, 0.9), 2.0)
 		# kind glyph (plain ASCII — the bundled faces don't cover dingbats)
-		var glyph: String = {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!", "gate": "1"}[kind]
+		var glyph: String = {"combat": "X", "event": "?", "cache": "+", "cooling": "~", "seal": "!"}[kind]
 		draw_string(fnt, p + Vector2(-20, 7), glyph, HORIZONTAL_ALIGNMENT_CENTER, 40, 20,
 			Color(Palette.BG0, 0.95) if sel or is_cur else Color(Palette.BG0, 0.7))
 		# key badge — visible until picked up
