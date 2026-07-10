@@ -1026,6 +1026,7 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 	if seat.kit != null and d > 0.0:
 		seat.kit.on_damage_taken(s, seat, d, src, size)
 	if d > 0.0:
+		seat.vars["last_hit_tick"] = s.tick              # Loosed at Last reads it (guarded; unread otherwise)
 		meter_taken(s, seat, src, d, src != &"enrage")   # enrage is per-tick chip — totals only
 		_emit(s, {"t": "hurt", "seat": seat, "player": seat.is_player, "amt": int(d), "size": size})
 
