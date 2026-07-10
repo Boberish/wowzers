@@ -35,7 +35,7 @@ reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 | 5 | Well · **Brim** | branch slate | `MENDER-PLAN.md` §9 | 🟡 | — | LANDED 07-10: filing (zero orphans) + 4 themes (Low Catch · Overflow Engine · Glintsmith · Deep Well); 1 kill (Surgeon — Draw-rhythm collision), ~7 fixes. Bill picks 2–3. |
 | 6 | Well · **Draw** | branch slate | `MENDER-PLAN.md` §10 | 🟡 | — | LANDED 07-10: 4 themes (Rapids · Vigil · Skim · Eddy) + §10.7 built-pool addendum (all 24 built boons filed; §9's Deep Well theme → THE PULSE rename). 1 kill (Whirlpool), ~6 fixes. |
 | 7 | Alchemist · **Brew** | challenger slate | `ALCHEMIST-PLAN.md` §10 | 🟡 | — | LANDED 07-10: live pool filed (Slow Boil · Cannonade · Anchor, zero orphans; §8 proposals slot in) + 3 additive themes (Tightrope · Sidearm · Prognosis). 1 kill (Flash Boil — core-law), ~7 fixes. |
-| 8 | Twinfang · **Fermata** | challenger slate | `TEMPO-PLAN.md` new § | ⬜ | — | Deck v5 AT VERDICT = PITCH #0 (Cold Cut/Brink/Razor). Ramp/Snap verb locked — branches bend around it, never replace it. |
+| 8 | Twinfang · **Fermata** | challenger slate | `TEMPO-PLAN.md` new § | 🔄 | 07-10 02:29 | Deck v5 AT VERDICT = PITCH #0 (Cold Cut/Brink/Razor). Ramp/Snap verb locked — branches bend around it, never replace it. |
 
 ## 1. THE PASS (per target — generalized from the Tempo §14 run)
 
