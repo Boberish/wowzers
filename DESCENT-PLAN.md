@@ -121,6 +121,12 @@ GAME-LOOPS L2/L3 stanzas update when verdicts land.
     with banter; AUTO is the default for players who don't care. Consequence (one pooling rule
     for one currency): the Draft-2.0 shared token bank flips to per-seat everywhere — UPSELL
     spends YOUR wallet too. This edits the §12 KEEP line for Draft 2.0 accordingly.
+    **As-built finding (2026-07-10, code recon):** today there is ONE `run.tokens` pot
+    (`run_state.gd:23`) and `Draft.mint()` reads `state.diag` — the HUMAN player's mirror — so
+    AI seats currently earn nothing at all. Per-seat wallets therefore also mean **AI seats
+    start earning for their own play**. Cheap to build: per-seat grade counts already exist
+    (`seat.diag`, `combat_core.gd:629` — what the Reckoning and raid sims read); the mint just
+    re-routes its deposit from the run pot to the earning seat's wallet.
 
 12. **INTERIM ACCEPTANCE**
     *Question:* Ship this structure now at ~2 h (bosses still at today's 2–3 minute lengths,
@@ -378,7 +384,9 @@ Verdict #6.)
 its OWN wallet (clean play = more ⏣, personally). At the market the player shops for the AI
 seats from their wallets, or hits **AUTO** (default) and they spend their own with banter. One
 pooling rule everywhere: draft UPSELL spends your wallet too (the Draft-2.0 shared bank
-retires).
+retires). **AI seats earn too** — today only the human's grades mint (`Draft.mint` reads the
+player mirror); per-seat mint reads each seat's own `seat.diag`, so a clean AI raider shops
+like one.
 
 **The scarcity audit (re-run at 21 fights, per the judges):** faucets mint ~15–23⏣/floor (skill
 mint ~3⏣ × ~5 fights + salvage + oath purse + scrap) vs ~35–40⏣ of stock → **you afford ~2 of 6
@@ -602,8 +610,12 @@ ledgers.
 - **`draft.gd` claim queue** (BUILD-LEDGER §0 hotspot): REGENERATE charges, ⚠ welded-downside
   boons, elite curio rolls, Market stock + the already-queued rarity tier-roll engine / loot
   two-modes / EASE dial all land on the one roll pipeline — serialize claims, keep `draft_sim`
-  green. **V#11 ✅ adds:** the shared token bank → per-seat wallets (mint routes to the earning
-  seat; UPSELL spends the seat's own wallet; AI market spend = player-directed or AUTO).
+  green. **V#11 ✅ adds:** the shared token bank → per-seat wallets — `run.tokens`
+  (`run_state.gd:23`) becomes per-seat; `Draft.mint` switches its input from `state.diag` (the
+  human-only mirror — why AI seats earn nothing today) to each seat's `seat.diag`
+  (`combat_core.gd:629`, already tracked) and deposits to the earning seat; UPSELL spends the
+  seat's own wallet; AI market spend = player-directed or AUTO. Online: wallets ride the
+  campaign broadcast like tokens do today.
 - The Depth/endless parallel thread owns Depth — this plan deliberately does not touch it.
 - The ESCORT port depends on the unmerged zone slice (branch `escort-ticket`,
   `ESCORT_PREVIEW`) which still owes its lane-law reward — the raid port inherits that debt.
