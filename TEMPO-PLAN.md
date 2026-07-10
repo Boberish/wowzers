@@ -1626,3 +1626,77 @@ dumps). All three expressible at 3 tiers; sim cells named: `--build=wound|swift|
 
 **Next:** your verdicts → statuses flip in CARD-CATALOG (rows landed 🟡 this pass) → the build
 claim codes it kit-local + guarded (A/B byte-identical, sim cells per build, HUD after).
+
+---
+
+## 18. THE FERMATA DECK v6 — the assembly (v5 built + two kits) 🔨/🟡 (2026-07-10, Phase-2 D8 — the deck queue's LAST row)
+
+**What this is** (SLATE-PLAN row D8). The v5 deck is BUILT (`f5d5397` — the v5 brief is the
+truth) and the §16 slate named its ladders + pitched two additive themes. The v6 "revision" is
+therefore an ASSEMBLY: **①** the v5 pool → CARD-CATALOG at 🔨 with §16.1 ladder tags
+(Brinkman · Rested Blade · Window-Setter), **②** the two theme kits formalized at 🟡, **③** the
+reconciles. **One rename from the distinctness table:** the Cold Hand's entry creed "The
+Ledger" → **KEPT BOOKS** (the Duelist's Scarlet kit owns *Red Ledger* — creed-name family kept
+apart). Recorded, not new: the Reckoning-Stroke/Estocada freeze-beat rhyme is already at your
+board from D2.
+
+### 18.1 The assembly record
+
+- **v5 pool → 🔨 `f5d5397`, ladder-tagged:** creeds the Long Ramp [Brinkman entry] · the
+  Fleeting Shade [generic/snap-net] · the Long Night [Brinkman-adjacent] · Tutti [wild] —
+  modules ⭐Shadow Dance (no-snap fever) · the Mark [Cold-Hand-adjacent] — boons stretto +
+  refrain [Window-Setter] · coldCut [Cold Hand anchor] · theBrink + killingWhisper + quietFuse
+  [Brinkman] · firstNote + composure + restlessDark [Rested Blade] · vanish [the block card] ·
+  twinEcho + firstBlood [Afterimage anchors / generic] · ✦veilWarband [support] — rig rested ·
+  razor · unravel — keystones unseenBlade [Rested Blade] · eclipse [Window-Setter] · phantom
+  [Afterimage anchor].
+- **KIT A — THE AFTERIMAGE (🟡):** creed *The Doubled Dark* — Twin Echo's effect at half
+  strength as the run-start baseline · *Deep Shadow* [POWER] — echoes inherit depth (Bull
+  echoes at 45%) · *Procession* [GREED] — consecutive Perfect+ releases add +1 echo to the
+  NEXT release (cap 3); any snap/unravel clears · keystone **THE COMPANY OF KNIVES** — a full-
+  procession Bullseye brings every banked echo as a visible blade-flight, each graded a half-
+  step softer. *(Procession vs Tempo's Through-Line: same trigger family, different payoff —
+  echo-count vs +%/stack; recorded.)*
+- **KIT C — THE COLD HAND (🟡):** creed **Kept Books** [renamed] — Good-band releases +1 CP
+  from run start · *Patient Books* [STRAT] — Evis at 5 CP consumes the Mark at +1 tier ·
+  *No Flourishes* [GREED] — while your Brink is 0 (never built), Evis +25% · keystone **THE
+  RECKONING STROKE** — a tier-III-brand, 5-CP Evis inside an Opening: one still frame, then
+  the number.
+- **Keystone pool math:** built 3 (unseenBlade/eclipse/phantom) + 2 kit = 5 → the cap-5
+  theme-weighted offer rule (now proposed on four decks — accept once, it's the pattern).
+- **EASE knobs (Fermata):** window entry-pad (the widener law's safe side) · snap-lock grace ·
+  unravel-stagger grace · ghost... no — drift is Draw's; the fourth knob = min-coil comfort.
+
+### 18.2 Gates + skeptics (delta-scope)
+
+**Dream drafts:** *BRINKMAN:* Long Ramp → (Shadow Dance) → theBrink + killingWhisper +
+quietFuse → razor WHENs — deep lips, the Brink meter climbing, no-snap fever for the greed
+window ✓ · *COLD HAND:* Kept Books → the Mark → coldCut + Patient Books + No Flourishes →
+THE RECKONING STROKE (shallow book, branded cash — the Brinkman read backwards) ✓ ·
+*AFTERIMAGE:* The Doubled Dark → ⭐Shadow Dance → Deep Shadow + Procession + twinEcho →
+THE COMPANY OF KNIVES (one draw, a procession of shadows) ✓.
+**Trios:** (No Flourishes | theBrink | Procession) — three greeds on three meters, and No
+Flourishes literally REFUSES theBrink (the polarity is draft-visible) ✓ · (Deep Shadow |
+Patient Books | stretto) three STRAT/POWER builds ✓.
+**Skeptics:** the Kept-Books rename (Red-Ledger family) · Procession/Through-Line family
+recorded · No-Flourishes' Brink-0 gate re-checked (chosen commitment, not luck — you never
+build the meter, so the bonus is authored) ✓ · nothing prices snapping (the §16 law holds
+through both kits) ✓ · zero new buttons, zero pardons added (vanish stays the one block) ✓.
+**AI:** echo-procession = streak counter · Cold Hand = CP/brand thresholds — both on existing
+policy surfaces (the v5 policy already coils/releases at tiered timing).
+
+### 18.3 Tension points (Bill)
+
+1. Kit picks (§16 ranking: Cold Hand · Afterimage; 0–2 enter).
+2. **Kept Books rename** (veto restores "The Ledger").
+3. The cap-5 theme-weighted keystone rule — the fourth and last deck proposing it.
+4. The freeze-beat rhyme (D2's open point — if you re-skin one, the Reckoning Stroke is the
+   younger card).
+
+**Next:** your verdicts → catalog flips → the v6 build is a light slice on the built v5 kit
+(kits are boon-local + one creed each; the Company of Knives is the one render moment).
+
+---
+
+**⚡ THE DECK MACHINE DRAINS HERE** — all 9 deck rows 🟡/✅-ready at Bill's board. Both
+SLATE-PLAN queues are complete; the machine's crons are retired.
