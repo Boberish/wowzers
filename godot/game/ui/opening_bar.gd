@@ -33,7 +33,7 @@ const LEAD := 44.0              ## ticks of run-up drawn before the peak (~1.47s
 const TAIL := 16.0              ## ticks drawn after the peak (~0.53s)
 const PAD := 14.0
 
-func showverdict(r: String) -> void:
+func show_result(r: String) -> void:
 	flash(r, Palette.GOLD, HOLD)   # verdict slot on the ClassGauge base
 	verdict_x = _track_x(_tf(float(now_tick)))
 	if r == "peak":

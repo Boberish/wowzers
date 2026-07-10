@@ -49,7 +49,7 @@ var _press_off_ticks: float = 0.0  ## signed ticks off the aim line (+ = late of
 var _bull: bool = false        ## a Perfect landed within ~50ms of the aim line
 
 ## Called by the HUD when a Strike lands (drained from the combat event stream).
-func showverdict(r: String) -> void:
+func show_result(r: String) -> void:
 	flash(r, Color.WHITE, HOLD)   # verdict slot on the ClassGauge base
 	_press_f = _prev_prog     # the needle has already snapped back — remember where it was
 	# Snapshot the aim line WITH the press so an accelerando shift during the 0.55s hold
