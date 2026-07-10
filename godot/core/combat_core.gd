@@ -126,6 +126,13 @@ static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 				_answer_strike(s, seat)
 		"ability":
 			if seat.kit != null:
+				# THE JAILBREAK DECK TAX (§7): a poisoned ability fizzles — the press is eaten
+				# before on_action. Empty poisoned set (every sim + online) = byte-identical.
+				if seat.kit.poisoned.has(String(action.get("id", ""))):
+					seat.diag["poisoned_fizzle"] = int(seat.diag.get("poisoned_fizzle", 0)) + 1
+					_emit(s, {"t": "ability_poisoned", "player": seat.is_player, "seat": seat,
+						"id": String(action.get("id", ""))})
+					return
 				# on_action returns true only when the ability actually commits (past the
 				# GCD + resource gates). Emit a view-layer "ability_fired" then, so the HUD
 				# can spawn the cast VFX exactly when a press lands — not when it fizzles.

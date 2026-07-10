@@ -37,6 +37,8 @@ var charge: int = 0                ## ⏻ THE KILL SWITCH — a party-shared 0..
 # NOT in cp_view — read directly on _d like tokens (offline-only this slice; online = no-op).
 var curses: Array = []
 var deprecate_uses: int = 0        ## DEPRECATE price escalates each use (§6)
+var poisoned: Dictionary = {}      ## DECK TAX (§7): ability ids poisoned run-length (offline);
+                                   ## injected into the human seat's kit at each fight build
 var check_fails: int = 0           ## consecutive check fails → comeback pity
 
 # ---- GEAR-1 (Curios): run-scoped loot; only Ledger UNLOCKS persist (GearStore)

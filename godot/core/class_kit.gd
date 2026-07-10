@@ -13,6 +13,9 @@ extends RefCounted
 ## a spec's per-seat boons in here). `modules`: equipped UI Module ids -> true.
 var boons: Dictionary = {}
 var modules: Dictionary = {}
+## THE JAILBREAK DECK TAX (§7): ability ids poisoned by a run-length curse — CombatCore
+## fizzles a pressed ability whose id is in here (offline only; empty = byte-identical).
+var poisoned: Dictionary = {}
 
 ## Boon / Module lookups — the guarded-no-op idiom's foundation: absent = false,
 ## so an undrafted kit takes the vanilla path byte-identically.

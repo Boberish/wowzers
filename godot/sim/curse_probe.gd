@@ -109,6 +109,31 @@ func _process(_dt: float) -> bool:
 	hud._show_jailbreak(0, func(): _left = true)
 	_ck(_find(hud._ui, "MapEventPanel") != null, "F: _show_jailbreak opens a two-deal panel")
 
+	# ---- G. THE DECK TAX (run-length ability poison)
+	hud._d.curses = []
+	hud._d.poisoned = {}
+	var loadout: Array = hud._d.run.loadout
+	var aid: String = String(loadout[0]) if not loadout.is_empty() else "cleave"
+	_ck(hud._add_curse({"kind": "deck", "ability_id": aid, "deprecatable": true, "fights": 0,
+		"label": "DECK — poisoned"}),
+		"G: a DECK curse (run-length, non-timing) is allowed by the HARD RULE")
+	_ck(bool(hud._d.poisoned.get(aid, false)), "G: _add_curse poisons the named ability slot")
+	# it must NOT expire (fights=0 but deprecatable) — the whole point of DEPRECATE
+	hud._apply_curse_marks()
+	hud._tick_economy_curses()
+	_ck(hud._d.curses.size() == 1 and bool(hud._d.poisoned.get(aid, false)),
+		"G: the DECK curse PERSISTS through ticks (never expires on its own)")
+	# DEPRECATE clears both the curse AND the poison
+	hud._d.run.tokens = 99
+	hud._d.deprecate_uses = 0
+	var okd: bool = hud._market_buy([{"kind": "deprecate", "price": hud._market_price(5)}], 0)
+	_ck(okd and hud._d.curses.is_empty() and not hud._d.poisoned.has(aid),
+		"G: DEPRECATE lifts the DECK curse AND un-poisons the slot")
+	# _deck_deal names a real loadout ability
+	var dd: Dictionary = hud._deck_deal(DetRng.new(7))
+	_ck(not dd.is_empty() and String(((dd["fx"] as Dictionary)["curse"] as Dictionary)["ability_id"]) in loadout,
+		"G: _deck_deal bets a real, un-poisoned loadout slot")
+
 	print("CURSE PROBE: %s" % ("ALL OK" if fails == 0 else "%d FAIL" % fails))
 	quit(1 if fails > 0 else 0)
 	return true

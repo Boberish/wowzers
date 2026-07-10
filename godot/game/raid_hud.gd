@@ -750,6 +750,7 @@ func _start_map_run() -> void:
 	_d.charge = 0
 	_d.curses = []          # THE JAILBREAK: a fresh run carries no bites (§7)
 	_d.deprecate_uses = 0
+	_d.poisoned = {}        # DECK TAX: no poisoned abilities on a fresh run
 	_d.check_fails = 0
 	# GEAR-1: fresh run-scoped loot; the Ledger's permanent unlocks load from disk.
 	# Headless (smokes) stays disk-inert — tests inject _d.gear_unlocks directly.
@@ -1183,6 +1184,12 @@ func _launch_map_fight(fi: int) -> void:
 				u.resource = roundf(u.resource_max * _d.mana)
 	_apply_curse_marks()        # §7: fold active HP/TIMING curse bites into the pending mark, tick them
 	_apply_next_fight_mark(s)   # the KILL SWITCH cash-out / a fight-curse weakens THIS boss, then clears
+	# §7 DECK TAX (offline): the human seat's kit fizzles any poisoned ability this fight. Empty
+	# set = byte-identical; only the piloted seat is poisoned (AI/sims/online carry none).
+	if not _d.poisoned.is_empty():
+		var hi: int = SEAT_IDX[_seat_key]
+		if hi < s.seats.size() and s.seats[hi].kit != null:
+			s.seats[hi].kit.poisoned = _d.poisoned.duplicate()
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0
@@ -1285,7 +1292,7 @@ func _apply_map_fx(fx: Dictionary) -> void:
 	if fx.has("curse"):
 		_add_curse(fx["curse"] as Dictionary)          # a JAILBREAK bite / event-curse leg
 	if bool(fx.get("purge_curse", false)) and not _d.curses.is_empty():
-		_d.curses.pop_front()                           # the Cooling purge fork (§7)
+		_purge_curse(false)                             # the Cooling purge fork (§7) — vents the oldest
 
 # ---------------------------------------------------------------- GEAR-1 (Curios)
 
@@ -1450,7 +1457,7 @@ func _market_buy(stock: Array, i: int) -> bool:
 		"deprecate":
 			if _d.curses.is_empty():
 				return false
-			var gone: Dictionary = _d.curses.pop_front()
+			var gone: Dictionary = _purge_curse(true)   # pay to remove the run-length DECK curse first
 			_d.deprecate_uses += 1                # the NEXT DEPRECATE costs more
 			_toast_add("🛒  DEPRECATE — purged %s" % String(gone.get("label", "a curse")))
 		_:
@@ -1495,7 +1502,26 @@ func _add_curse(c: Dictionary) -> bool:
 	if String(c.get("kind", "")) == "timing" and int(c.get("fights", 0)) <= 0:
 		return false                       # §7 HARD RULE: no run-long timing curse ever
 	_d.curses.append(c.duplicate(true))
+	if String(c.get("kind", "")) == "deck":
+		_d.poisoned[String(c.get("ability_id", ""))] = true   # DECK TAX: poison the named slot
 	return true
+
+## Remove one active curse (an EXIT: DEPRECATE / Cooling purge). `prefer_deck` targets the
+## run-length DECK curse first (what you PAY to remove); clearing it also lifts the poison.
+func _purge_curse(prefer_deck: bool) -> Dictionary:
+	if _d.curses.is_empty():
+		return {}
+	var idx := 0
+	if prefer_deck:
+		for i in _d.curses.size():
+			if String((_d.curses[i] as Dictionary).get("kind", "")) == "deck":
+				idx = i
+				break
+	var gone: Dictionary = _d.curses[idx]
+	_d.curses.remove_at(idx)
+	if String(gone.get("kind", "")) == "deck":
+		_d.poisoned.erase(String(gone.get("ability_id", "")))   # the slot un-poisons
+	return gone
 
 ## Header pips (§7): one printed line per active bite. The render already ships (slice 2,
 ## map_screen curses row) — this just composes the strings.
@@ -1546,10 +1572,12 @@ func _tick_economy_curses() -> void:
 			cd["fights"] = int(cd["fights"]) - 1
 	_expire_curses()
 
+## Drop expired bounded curses — but KEEP run-length ones (the DECK tax, deprecatable:true),
+## which never tick down: only DEPRECATE / the Cooling purge clears them.
 func _expire_curses() -> void:
 	var kept: Array = []
 	for c in _d.curses:
-		if int((c as Dictionary).get("fights", 0)) > 0:
+		if int((c as Dictionary).get("fights", 0)) > 0 or bool((c as Dictionary).get("deprecatable", false)):
 			kept.append(c)
 	_d.curses = kept
 
@@ -1574,6 +1602,27 @@ const JAILBREAK_DEALS := [
 		"result": "A fistful of ⏣ and a shakier hand for two fights. Route the pain."}},
 ]
 
+## Build the DECK deal (§7): a strong good for a RUN-LENGTH poison on one of YOUR ability
+## slots — the one bite that never expires, cleared only by DEPRECATE (its whole reason to
+## exist). Returns {} when every slot is already poisoned (nothing left to bet).
+func _deck_deal(rng: DetRng) -> Dictionary:
+	if _d.run == null:
+		return {}
+	var open: Array = []
+	for a in _d.run.loadout:
+		var id := String(a)
+		if id != "" and not _d.poisoned.has(id):
+			open.append(id)
+	if open.is_empty():
+		return {}
+	var aid := String(open[int(rng.next_u32() % open.size())])
+	var nm := aid.capitalize()
+	return {"label": "BLACK-MARKET FIRMWARE — bank +3 REGENERATE",
+		"fx": {"regenerate": 3,
+			"curse": {"kind": "deck", "ability_id": aid, "deprecatable": true, "fights": 0,
+				"label": "DECK — %s POISONED (DEPRECATE at Market)" % nm},
+			"result": "Three reloads for a busted driver. %s jams until you pay THE SCRAPER to DEPRECATE it." % nm}}
+
 ## THE JAILBREAK node (§7). Two deals rolled on a (map_seed, node) rng → replay-stable +
 ## co-op-shared. Walking away is free. At cap 2 the cell is full (DEPRECATE/purge first).
 func _show_jailbreak(node_id: int, done: Callable) -> void:
@@ -1585,6 +1634,9 @@ func _show_jailbreak(node_id: int, done: Callable) -> void:
 			"fx": {"result": "Two curses already ride your file. DEPRECATE one at the Market — or vent it at a Cooling station — before you deal again."}})
 	else:
 		var pool := JAILBREAK_DEALS.duplicate()
+		var deck := _deck_deal(rng)         # DECK TAX (§7): the one run-length deal, if a slot is free
+		if not deck.is_empty():
+			pool.append(deck)
 		for _k in 2:
 			if pool.is_empty():
 				break
