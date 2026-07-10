@@ -105,7 +105,7 @@ static func strength(chk: Dictionary, ctx: Dictionary) -> int:
 static func chance(chk: Dictionary, ctx: Dictionary, nudge: int = 0) -> Dictionary:
 	var parts: Array = []
 	var base := int(chk.get("base", DEF_BASE))
-	parts.append(["eligibility base", base])
+	parts.append(["base odds", base])
 	var p := base
 
 	var s := strength(chk, ctx)
@@ -145,7 +145,7 @@ static func chance(chk: Dictionary, ctx: Dictionary, nudge: int = 0) -> Dictiona
 
 	var nb := mini(NUDGE_MAX, maxi(0, nudge)) * NUDGE_PER
 	if nb > 0:
-		parts.append(["⚡ entropy", nb]); p += nb
+		parts.append(["⚡ LUCK", nb]); p += nb
 
 	p = clampi(p, int(chk.get("floor", DEF_FLOOR)), int(chk.get("ceil", DEF_CEIL)))
 	return {"p": p, "parts": parts, "strength": s}

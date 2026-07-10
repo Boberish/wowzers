@@ -283,22 +283,24 @@ const EVENTS := {
 		],
 	},
 	"entropy_daemon": {
-		"title": "THE ENTROPY DAEMON",
+		"title": "THE LUCK DAEMON",
 		"body": "A hunched process squats in a nest of dead RNGs, humming static. 'bad luck? i SELL luck. i AM luck. mostly i am a very long random number that got a job.' A dial reads [b]/dev/random — POOL DEPLETED.[/b]",
 		"choices": [
 			{"label": "Feed it a Token  (⏣ → ⚡)", "kind": "free", "gate": {"tokens": 1},
 				"fx": {"tokens": -1, "entropy": 3,
 					"result": "It swallows your ⏣ and belches three ⚡. Reseeded, content; the dice briefly show real numbers."}},
-			{"label": "Let it read your ENTROPY", "kind": "check",
+			{"label": "Let it read your LUCK", "kind": "check",
 				"check": {"verb": "GAMBLE", "tags": ["SELF"], "base": 30, "per": 10},
 				"fx": {"entropy": 1, "result": "It rifles through your luck."},
 				"success": {"fx": {"tokens": 2, "entropy": 1},
 					"result": "It likes what it reads and pays out in scrap and a note in your file."},
 				"fail": {"fx": {"entropy": -1, "wound": 0.05, "refund_entropy": 1},
 					"result": "It eats a ⚡ and laughs in floating-point. Your misfortune is logged."}},
-			{"label": "Ask it to REROLL THE FLOOR  (spend ⚡3)", "kind": "free", "gate": {"entropy": 3},
+			# §9.8 NO FLAVOR LIES: the old label said "REROLL THE FLOOR" but the fx never
+			# touched the seed — it patches sectors + tops charge/reserves. Say what it does.
+			{"label": "Cash your ⚡ for a reality patch  (spend ⚡3)", "kind": "free", "gate": {"entropy": 3},
 				"fx": {"entropy": -3, "repair": true, "charge": 8, "mana": 0.5,
-					"result": "It grabs the floor's seed and SHAKES — corrupted sectors un-happen, reserves refill, reality smells of ozone and second chances."}},
+					"result": "It spends your luck on a clean patch — corrupted sectors repaired, the Kill Switch nudged up, reserves refilled. No seed was harmed."}},
 		],
 	},
 	# ============================ THE KILL SWITCH — charge economy (non-dominated) ============
