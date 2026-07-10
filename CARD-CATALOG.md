@@ -204,6 +204,44 @@ Feather Step (block cost = same knob) · Deep Pockets · Powder Keg · ✦ Hold 
 ---
 
 <a id="twinfang"></a>
+## TANK · THE WARDEN — **DECK v1 (D1) 🟡 AT VERDICT 2026-07-10** · base locked, 0 built
+
+Source of record: `TANK-PLAN.md §8` (themes **Payload · Slam · Rampart**, §6 ranking; Bill's ✅
+picks swap cheap). Dials: READ / TAP / **HOLD** / SLAM / WIND / BANK / SPEND / LINE / **CHARGE**.
+
+| Card | id | Type | Rarity | St | One line |
+|---|---|---|---|---|---|
+| **The Sentinel** (creed) | `sentinel` | EASE | curated | 🟡 | Blocks ~30% wider, slam counter −25%, ◆ cap 4 — the self-capping learner. |
+| **Ballast** (creed) | `ballast` | STRAT | curated | 🟡 | The battery live from run start — PAYLOAD entry. |
+| **The Drumhead** (creed) | `drumhead` | GREED | curated | 🟡 | Slam chains +1 wind/link; graze breaks — SLAM entry. |
+| **Deep Keel** (creed) | `deepkeel` | STRAT | curated | 🟡 | Pool +20%, recharge unchanged — RAMPART entry. |
+| **THE MONOLITH** (creed) | `monolith` | RULE | curated | 🟡 | **WILD: BLOCK is gone** — everything is HELD; one-button drain economy (the Dancer's mirror, mobile creed). |
+| **The Coil** (module) | `coil` | STRAT | — | 🟡 | The battery gauge; taps feed 25%. |
+| **Aftershock** (module) | `aftershock` | STRAT | — | 🟡 | 2s free-tap window after a perfect SLAM. |
+| **The Bulwark Stance** (module) | `bulwarkstance` | GREED | — | 🟡 | Hold-all wall, drain +40% (the old base, priced). |
+| **Return to Sender** | `returnsender` | STRAT | H/S/O | 🟡 | Re-homed 🔮→🟡 verbatim: stores 40/55/70% prevented, hurls back as a bar. |
+| **Heavy Shipment** | `heavyshipment` | GREED | H/S/O | 🟡 | Battery cap +50%, decay +50%. |
+| **Special Delivery** | `specialdelivery` | STRAT | H/S/O | 🟡 | Hurl during a tall wind-up ×1.25/1.35/1.5. |
+| **Offensive Guard** | `offguard` | POWER | H/S/O | 🟡 | Perfect SHIELD → next DUMP +15/22/30%. |
+| **Meet It Head-On** | `headon` | GREED | H/S/O | 🟡 | MAIN on small/normal (full wind) banks ◆. |
+| **Drumfire** | `drumfire` | STRAT | H/S/O | 🟡 | Every 3rd consecutive clean SLAM banks ◆◆; graze breaks. |
+| **Cheap Iron** | `cheapiron` | EASE | H/S/O | 🟡 | Re-homed 🔮→🟡: raises cost 45/50/55% less. |
+| **Second Wind** | `secondwind_w` | STRAT | H/S/O | 🟡 | Hold released above half-pool refunds 2/3/4 wind. |
+| **White Knuckles** | `whiteknuckles` | GREED | H/S/O | 🟡 | <25% wind: taps +15/20/25% mit; a whiff empties the pool. |
+| **The Push** | `push` | STRAT | H/S/O | 🟡 | Pay 2 wind (8s cd): blunt the incoming bar one size. |
+| **The Wall** (rig WHEN) | `wall` | — | — | 🟡 | Re-homed 🔮→🟡: shield eats a hit ≥15% max HP (~3.5). |
+| **The Long Hold** (rig WHEN) | `longhold` | — | — | 🟡 | Hold through a full flurry (~2.5). |
+| **The Counterweight** (rig WHEN) | `counterweight` | — | — | 🟡 | SLAM a tall bar (~2.0). |
+| **THE SIEGE** (keystone) | `siege` | RULE | elite | 🟡 | Full charge → one colossal returning bar; press ×2. |
+| **BREAKWATER** (keystone) | `breakwater` | RULE | elite | 🟡 | Perfect SLAM on tall SHOVES the next bar back down the lane. |
+| **THE IMMOVABLE** (keystone) | `immovable` | RULE | elite | 🟡 | Clean full-flurry hold → 4s root (bars shrink), then the drain debt. |
+| **THE GATE** (signature CD) | `gate` | TEAM | baseline | 🟡 | ~1-min: 4s warband wall scaled by your CURRENT wind % — the owed "wall" slot's first shape. |
+| ✦ Hold the Line (support) | `holdline` | TEAM | — | 🟡 | Carry; re-keyed onto FLOW at build (§1d). |
+
+**Carries:** Deep Pockets · Powder Keg verified; **Feather Step → proposed fold to Duelist-only**
+(Cheap Iron owns the Warden's block-cost knob — tension point 3). Killed in-pass: Iron Reserves
+(bread flooding).
+
 ## TWINFANG · TEMPO — 🔨 mostly built · **DECK v3 (D0) 🟡 AT VERDICT 2026-07-10**
 _Built pool: back-fill from `TEMPO-PLAN.md` Appendix A (code-linked ids + SHAs) +
 `godot/data/twinfang/*.gd` still owed. **The D0 deck pass (`TEMPO-PLAN.md §17`) proposes the rows

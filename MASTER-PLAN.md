@@ -814,10 +814,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 02:54 · main (docs only) — **CLAIM: DECK MACHINE row D1 — the Tank·WARDEN full
-  deck pass** (top-3 = Payload · Slam · Rampart per TANK §6 ranking; from-scratch authoring +
-  the 🔮 re-homed trio + carries; coherence gates + distinctness check + 3 skeptics → TANK-PLAN
-  §8 🟡 + CARD-CATALOG Warden rows 🟡). Design only. *(slate-machine session, deck tick 02:49)*
+- ☑ 2026-07-10 · main (docs only) · TANK-PLAN §8 (NEW) + CARD-CATALOG Warden section (NEW) +
+  ledger flip — **DECK MACHINE row D1: THE WARDEN DECK v1 — DONE, 🟡 AT BILL'S VERDICT.**
+  Winners = §6's recorded ranking top-3 (**Payload · Slam · Rampart**). From-scratch authoring:
+  5 creeds (Sentinel EASE · Ballast/Drumhead/Deep Keel theme entries · **THE MONOLITH wild** —
+  BLOCK deleted, one-button hold economy, the Dancer's mirror) · 3 modules (Coil · Aftershock ·
+  the priced Bulwark Stance) · 12 boons (**the 🔮 guard trio re-homed to 🟡**: Return to Sender ·
+  Cheap Iron · The Wall; new: Heavy Shipment/Special Delivery/Offensive Guard/Meet It Head-On/
+  Drumfire/Second Wind/White Knuckles/The Push) · 3 keystones (Siege · Breakwater · Immovable —
+  all engine-free) · **THE GATE** signature-CD (wind-scaled warband wall — the owed §1b slot) ·
+  EASE knobs. Gates run with evidence (4 dream drafts · trios flagged the three-bread offer ·
+  Feather-Step/Cheap-Iron collision → fold proposal · anti-patterns clean · AI thresholds).
+  3 skeptics: 1 kill (Iron Reserves — bread flooding), Drumfire/Rally rhyme recorded, Siege/
+  Avalanche re-verified. 5 tension points (§8.9 — Monolith ship? · the Gate · Feather-Step fold
+  · Drumfire rhyme · numbers=playtest). Distinctness-ledger row 2. *(slate-machine session,
+  deck tick 02:49)*
 
 - ☐ 2026-07-10 · worktree `../wow-rails` (branch `net-integrity`) — **CLAIM: NET-LAYER INTEGRITY
   HASH (audit 07-03 checksum-coverage finding, option b — the recommended additive path; REFIT §5
