@@ -1627,6 +1627,122 @@ dumps). All three expressible at 3 tiers; sim cells named: `--build=wound|swift|
 **Next:** your verdicts → statuses flip in CARD-CATALOG (rows landed 🟡 this pass) → the build
 claim codes it kit-local + guarded (A/B byte-identical, sim cells per build, HUD after).
 
+### 17.10 THE ABILITY AUDIT — Bill's D0 pass 🟡 AT VERDICT (2026-07-10)
+
+**Bill's audit (his asks, triaged):** the deck is solid but the ABILITIES aren't clean —
+everything keys to Eviscerate, *"nothing about coup and no other abilities"*; the ABILITY LAW
+leaves **+2 button slots** — design some, from a re-read of the other-games research; decide
+whether abilities are ISOLATED or MIX with boons (*"could even have a thing that if you have the
+ability it opens up extra boons"*); verdict the SET-BONUS idea (same-group boons/keystones pay
+small extras — or does that over-reward single-path builds?); and the SWIFT worry — *"double time
+and stuff… there are limits to how fast it can/should go"* — dial back or re-look at the other
+branch options. Ground re-read: `research/wow-retail.md` (rogue chassis · tier-set lesson ·
+Symbols-of-Death windup · Restless Blades) + `research/hades.md` (duo/legendary pulls · Infusion
+thresholds · Omega-hold) + §14/§15 live inputs. Board: the Slate-Machine artifact, D0 tab
+(AUDIT sections). One honest read first: the Evis-centring is half by design — Evis is the cash
+button for two of three themes — the fixes below give COUP its own story and add non-Evis moments.
+
+**A · THE +2 BUTTON BUDGET — the ability slate (4 candidates, hold ≤2).** Chassis today = Strike ·
+Evis · Coup · dodge + the Set Piece CD when it lands (5 of the hard-ceiling 7). New buttons enter
+ONLY through the existing doors (drafted spells `type:"spell"`, ≤1 module button) and every one
+must carry a WHEN, not just a WHAT (DECK-LAYOUT §5).
+- **SFORZANDO `sforzando` (STRAT, spell)** — arm it: your NEXT strike is the accent — land it
+  Perfect-or-better and it hits ×1.9 (H/S/O ×1.6/1.9/2.2) and pays the build's own currency
+  (Wound: double inscribe · Finish: +2 combo · Edge-if-Honed: +2 EDGE); a slipped accent fizzles
+  (energy lost). ~12s cd. The WHEN = the one beat YOU chose to accent (arm it into an Opening / a
+  full pot / a fat combo). ⚠ rhyme-flag vs the Set Piece (one note vs the 4-note phrase, 12s vs
+  ~1min) — if Bill feels overlap, Sforzando is the cut (or folds in as the Set Piece's Haiku rune).
+- **THE RONDO `rondo` (STRAT, spell)** — lights ONLY in the post-Coup valley (~6s while Flow
+  rebuilds from the seed): press ON a beat → an echo of the Coup you just cashed at 40/55/70%,
+  graded by the beat you land it on. Coup becomes a two-act story (cash → the theme returns) and
+  the crash valley becomes playable. Crescendo scales both; **Da Capo's proposed park REVERSES
+  into this card's door** (§B). Not press-on-cd by construction — valley-gated and beat-graded.
+- **THE COUNT-IN `countIn` (TEAM, spell)** — press during a boss wind-up: you call the beat —
+  every seat's next window widens ~20% and ally hits landed on your call echo a slice of your
+  Flow-mult. The §15 Conductor pitch at one-button scale = THE BAND's texture without spending a
+  branch. Debt: rides the owed raid buff channel (same as Battle Hymn).
+- **THE PICKUP `pickup` (GREED, spell)** — press between beats to pull your next window ~40%
+  earlier AND ~20% tighter: chosen, per-press speed (never a roll), governor-clamped (§D).
+  SWIFT-gated — only enters offers if SWIFT stays a picked theme.
+- **THE KICK — a role, not a button (the pillar-#3 carrier proposal):** **Eviscerate = the
+  standard interrupt** (a dump landed inside the verse's tight kick window IS the kick — the dump
+  tax, affordable at any combo) · **Coup = the premium kick** (a max-Flow cash that also kicks
+  staggers the verse longer). Grade-gated so deliberate-vs-accidental falls out of the grade
+  itself (§15 Counterpoint's live input); sims measure per the pillar bar. Answers "nothing about
+  Coup" at the ROLE level for zero buttons and closes BUILD-LEDGER's open "which Tempo ability
+  carries" once verdicted.
+
+**B · INTERACTION MODEL — abilities are DOORS (recommended), not islands.** Three options:
+1. *Isolated* — self-contained buttons, cards never mention them. Cheapest — but the deck's only
+   dead-end content, and a button no card feeds drifts toward press-on-cd (the law's anti-pattern).
+2. **DOORS (lean — Bill's own instinct, and the deck's precedent: Hone offer-gates the whole A7
+   crit package; Deathmark's cards entered the board only when equipped).** Holding an ability
+   (a) unlocks its 2 gated boons into later offers — never dead cards by construction; (b) adds
+   one rig WHEN to the wiring board (*WHEN I land the accent* ~×5.5 · *WHEN I Rondo ≥ half the
+   Coup* ~×6.0 — inverse-frequency priced like every WHEN); (c) the ability itself reads your
+   picked themes for its payoff currency (§A). Gated pairs (💡): Sforzando → *Fortissimo* (GREED —
+   accent window −20%, payoff +30%) · *Marcato* (STRAT — a Bullseye accent stretches the Opening
+   half a beat) ·· Rondo → *Second Theme* (POWER — echo tier up) · **Da Capo un-parked as the
+   door's sister** (+1 Flow seed is exactly this build's card) ·· Count-In → *Section Leader*
+   (TEAM — AI seats play tighter during your call) · *Tutti Chord* (GREED — all four seats land
+   the call → the boss takes +8% for one beat).
+3. *Full weave* — abilities × creeds/modules/keystones interaction matrix. Rejected: combinatorial
+   authoring + balance surface for a side layer; DOORS + the rig buy the synergy feel at a tenth
+   the cost.
+
+**C · SET BONUSES — verdict NO on stat sets; RESONANCE (+ optional DUO) instead.** The deck
+already pays path-commitment three ways — the synergy draft-slot pulls you deeper, elites offer
+theme-weighted keystones, map nodes advertise their theme — and branches are soft by law
+(committing already peaks higher than splitting). A passive 2pc/4pc stat set adds a FOURTH reward
+on the same behavior and creates the threshold trap: drafting a worse card just to complete the
+set (the auto-pick failure at slate level). The research says it plainly: WoW tier sets only work
+because they're ROTATIONAL (and seasonal); Hades pairs its mono-lane payoff (Legendary) against a
+cross-lane pull (Duo) so neither cages. So, two shaped versions of the "ding":
+- **RESONANCE 🟡 (lean yes)** — at **3 cards of one theme**, that theme's ONE authored perk
+  auto-lights (build-panel chip: *"WOUND 3/3 — resonance"*); rotational + tiny, one per theme,
+  never stacks: Wound — expiring bleeds leave one after-tick · Swift — a 5-Perfect streak pulses
+  2 energy · Finish — the exact-max Evis shows its phrase-mark (a read cue). The Hades-2 Infusion
+  steal, deterministic thresholds, zero hand-authored combos.
+- **THE DUO 💡 (the optional counterweight)** — 1–2 cross-theme capstone boons needing cards from
+  TWO themes (the Hades duo steal): *Blood Coda* (Wound+Finish) — an Evis cashing 4+ bleeds at
+  exactly max combo pays both bonuses ×1.25. Mixing keeps its own jackpot, so resonance never
+  reads as a single-path cage.
+
+**D · THE SPEED WALL — the governor + DOUBLE TIME v2 + the swap menu.** The worry is real, and
+it's the ENGINE's before it's the thumb's: the sim runs 30 Hz (≈33ms ticks). Double Time v1's
+deepest rune floors the window at 0.08s ≈ 2.4 ticks — the 18% Bullseye centre inside it is
+SUB-TICK (ungradeable), and mobile touch latency (the spike's +Nms gauge) eats the remainder.
+Stacked sources (Uptempo ×1.15 · Quickstep +8%/Perfect · the accelerando · fever · beat-doubling)
+each clamp alone (F8/F19) but MULTIPLY together — every speed build pins at the floor and the
+speed cards stop differing there (dead deltas at the top).
+- **THE SPEED GOVERNOR 🟡 (a law, not a card)** — one clamp pair on `twinfang_config`
+  (`beat_rate_cap` ~×1.6 base · `window_min` ~0.15s ≈ 4–5 ticks, keeping the Bullseye band ≥ ~1
+  tick + read margin); ALL speed sources route through ONE function and combine ASYMPTOTICALLY
+  (each extra source buys less near the wall — F8's asymptote generalized from the accelerando to
+  the SUM of sources), so stacks approach the ceiling but every card keeps a visible delta.
+  Numbers are sim knobs (`twinfang_sim --build=swift` cells).
+- **DOUBLE TIME v2 🟡 — ghost notes.** v1 "the beat doubles" is the wall-breaker — cut. v2:
+  sustained clean play opens ~8s where GHOST half-beat pips light BETWEEN your beats; each ghost
+  landed = a free bonus strike (half damage, no Flow risk, purely optional). "Double time"
+  musically = twice the NOTES — the beat never passes the governor and the player chooses the
+  density. Spectacle intact (the lane visibly fills); casuals ignore the ghosts; AI = optional
+  taps at tiered accuracy. (§15 Polyrhythm shrunk to keystone scale, exactly as its parking note
+  sanctioned.)
+- **The swap menu (D0 re-runs cheap — §17.9 point 7 stands):** SWIFT → **THE EDGE** (cheapest:
+  the A7 package is built, deck becomes all-quality, speed stays base accelerando; flag — its
+  capstone Hone is class-shared, not branch-authored) · SWIFT → **THE PUNISH** (Predator's Rest ·
+  Seize the Gap · Aftershock · THE GUILLOTINE — pairs exactly with Coup-as-kick and the Set
+  Piece; the structural pick if the audit itch is "abilities and Coup should matter") · **THE
+  BAND — don't branch it** (take the Count-In spell + Battle Hymn instead; the slate already
+  flagged it thinnest).
+
+**Verdict points (Bill):** ① which spells enter the pool (lean **Sforzando + Rondo**; Count-In if
+you want the team texture; Pickup only if SWIFT stays) · ② interaction model = **DOORS**? ·
+③ set bonuses: none / **resonance (lean)** / resonance + duo · ④ SWIFT: **governor + Double Time
+v2 (lean)** or swap → EDGE / PUNISH · ⑤ the kick carriers: **Evis standard + Coup premium**?
+Catalog rows landed 🟡/💡 this pass (CARD-TRACKING LAW); the BUILD-LEDGER D0 row + pillar-#3 row
+are amended in the same commit (LEDGER LAW).
+
 ---
 
 ## 18. THE FERMATA DECK v6 — the assembly (v5 built + two kits) 🔨/🟡 (2026-07-10, Phase-2 D8 — the deck queue's LAST row)
