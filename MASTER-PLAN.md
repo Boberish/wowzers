@@ -950,25 +950,30 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   NOTHING BUILT — every rung has a trigger tied to roster/deck stability (ledger §G row).
   *(sim-plan session)*
 
-- ☐ 2026-07-10 · worktree `../wow-rails` (branch `p4-rails`) — **CLAIM: REFIT P4 — THE INFRA
-  RAILS (Bill's go-code this session: "turn the plan into code — the core stuff, no class/boon
-  content; work around the others").** The non-class-facing P4 subset, serialized AWAY from the
-  live `purge-oldgame` worktree: (1) **SAVE UNIFICATION** — one versioned Profile aggregate
-  (`game/profile.gd`, WorldSave's pattern) owning world/gear/prior/binds/roster behind the
-  existing store APIs (GearStore/LuckProfile/WellBinds/BloomweaverBinds/WorldSave become thin
-  facades; one-time legacy-file import; `mender_binds` deliberately untouched — the purge deletes
-  it); (2) **Commander roster persistence** (the party survives sessions; class/aspect ids
-  validated against the codex on load so the purge's roster cuts self-heal); (3) **reproducible
-  offline `run_seed`** (profile-persisted seed stream, per-run sub-seeds derived closed-form — a
-  whole descent replays from one recorded integer; unlocks replay/ghost-races); (4) **split-law
-  guard** (`make_spec` context — zone fights structurally refuse `seat_boons`). Class-facing P4
-  items (class registry · ClassBand/Gauge base · vuln stack · twinfang kit split) DEFERRED until
-  the purge merges — this same session loop picks them up after, one at a time. Gates: verify-all
-  green · NEW `sim/profile_probe.gd` · class sims byte-identical (zero engine touch). **RESUME
-  PROTOCOL: a session cron re-arms the build every tick; if THIS session dies, a fresh session
-  reads this claim + the `../wow-rails` worktree state (commit-before-stop law — the tree is
-  always committed) and continues; when the rails land, the loop watches for the purge merge,
-  then takes the deferred P4 items.** *(rails session)*
+- ☑ 2026-07-10 · `p4-rails` → main (`b17ff52`) — **REFIT P4 — THE INFRA RAILS: BUILT & MERGED**
+  (Bill's go-code: "turn the plan into code — the core stuff, no class/boon content; work around
+  the others"). The non-class-facing P4 subset: (1) **SAVE UNIFICATION** — `game/profile.gd`, ONE
+  versioned corruption-tolerant aggregate at `user://rift_profile.cfg` owning
+  world/gear/prior/binds/roster/runs behind the existing store APIs (GearStore / LuckProfile /
+  WellBinds / BloomweaverBinds / WorldSave are thin facades — zero call-site churn); one-time
+  legacy-file import; headless disk-inert with a FIXED seed root; the one canonical serializer
+  lives on Profile (WorldSave delegates). (2) **Commander roster persistence** — `_ensure_party`
+  seeds from the Profile once per boot, party-screen CONFIRM commits; entries validate against
+  the LIVE seat/class tables, proven in anger same-day: rosters saved before THE PURGE self-heal
+  to the new defaults. (3) **Reproducible offline `run_seed`** — the descent mints ONE recorded
+  seed off the profile stream (root/counter/last_seed); drop_rng, floor topology, per-fight seeds
+  (folding floor/fight/NODE) and boon drafts derive closed-form — a whole run replays from one
+  integer (replay/ghost-race hook); zone + Seal pulls recorded too; online untouched.
+  (4) **Split-law guard** — `make_spec` ctx: a "zone" spec structurally refuses `seat_boons`,
+  normalizes byte-identical to the bare spec. NEW `sim/profile_probe.gd` (20 checks) +
+  `sim/splitlaw_probe.gd` (3) in verify-all. **Also fixed in the same merge: shell_probe /
+  menu_probe were RED ON MAIN since the purge merge** (dead GATE idiom · mender healer flow) —
+  re-pointed at the post-purge game (menu_probe walks the Well creed ceremony). GATES: full
+  verify-all on the merged tree — every sim/probe/smoke + both net smokes green (the two probe
+  fails in the run were these very fixes, verified green individually after). DEFERRED P4 items
+  (now unblocked by the purge merge, this session's loop takes them one at a time): net-layer
+  integrity hash (option b) → vuln stack (rebaseline) → class registry → ClassBand+Gauge base →
+  ClassKit hoists/TuningConfig sweep. *(rails session)*
 
 - ☑ 2026-07-10 · main (docs only) · TANK-PLAN §6 (NEW) + `research/warden-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 1: Tank·WARDEN branch slate — DONE, five themes AT BILL'S

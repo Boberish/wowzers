@@ -287,10 +287,23 @@ Each its own worktree/claim, in this order:
 - **Save unification:** one versioned Profile aggregate (WorldSave's pattern) owning
   world/gear/prior/binds/**roster**; version-check GearStore/LuckProfile/binds now (4-line
   copy); persist the Commander roster (also unblocks warband lending).
+  **✅ BUILT 2026-07-10 (`b17ff52`, the INFRA-RAILS merge):** `game/profile.gd` — ONE
+  versioned corruption-tolerant canonical-JSON aggregate at `user://rift_profile.cfg`
+  (+`runs` seed-stream domain); the five stores became thin facades (zero call-site
+  churn); one-time legacy import; headless disk-inert w/ FIXED seed root; roster
+  validates vs the live tables on load (self-healed through THE PURGE same day);
+  `sim/profile_probe.gd` (20 checks) guards it.
 - **Reproducible offline `run_seed`** (persisted seed, not wall-clock) — unlocks
   replay/ghost-races.
+  **✅ BUILT 2026-07-10 (`b17ff52`):** the descent mints ONE recorded seed off the
+  profile stream; drop_rng / floor topology / per-fight seeds (folding floor·fight·node)
+  / boon drafts derive closed-form — a run replays from one integer. Zone + Seal pulls
+  recorded too; online untouched (server mints, draft_rng already spec-seeded).
 - **Split-law guard:** make zone/world fight contexts structurally refuse `seat_boons`
   (assert or context enum in `make_spec`) so the pillar can't be violated silently.
+  **✅ BUILT 2026-07-10 (`b17ff52`):** `make_spec(..., ctx)` — a "zone" spec drops
+  seat_boons loudly and normalizes byte-identical to the bare spec; `sim/splitlaw_probe.gd`
+  guards all three behaviors.
 - **Per-spec kit split** for twinfang (shared base + Tempo/Fermata/Venom modules) before
   the next multi-spec class copies the 1,451-line shape.
 
