@@ -120,7 +120,7 @@ build-once seams that five separate class reworks and the endgame all need:
 
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
-| Generic boss-vulnerability stack | 🔒 | REFIT-P4 | `CombatCore.damage_boss`, `boss_state` | Build FIRST — TEAM-COMP + Depth + Well-glint ride it. Rebaseline. |
+| Generic boss-vulnerability stack | 🔨 `855ac2f` | REFIT-P4 | `CombatCore.add_vuln/vuln_mult` · `boss_state.vulns` · Well glint migrated · dead boss-level expose retired | BUILT — rebaseline landed (twinfang/alch ab-gates byte-identical; well/raid shifted on purpose). TEAM-COMP + Depth fold slots ready; `vuln_probe` guards. |
 | TEAM-COMP damage-schools | 🔒 | MASTER §OPEN-IDEAS | `damage_boss` amp, `ClassKit.school_of`, `EncounterRes` profiles, HUD pops | Rides vuln stack. Parked behind Commander per Bill. Byte-identical when profile empty. |
 | Interrupt-by-ability pillar | 🔒 | WORLD §PILLARS #3 | `AbilityRes.interrupts` flag, tight window, sim diag, HUD rune | Lands class-by-class w/ reworks (Tempo first). Replaces cut Voidcaller kick. Open Q: which Tempo ability carries. |
 | Aura-add / 2nd cast source | 🔴 | MASTER §BOSSES | engine 2nd telegraph source | Blocks R3 raid content; also eases the one-telegraph interrupt problem. |

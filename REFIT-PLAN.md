@@ -284,6 +284,11 @@ Each its own worktree/claim, in this order:
 - **ClassKit hoists** (`_b`/`_tt`/`_has_payloads`) + TuningConfig literals sweep.
 - **Generic boss-vulnerability stack** (sunder/debilitate/expose → one funnel) + route
   Well's glint through a proper hook (deliberate rebaseline — checksums shift).
+  **✅ BUILT 2026-07-10 (`855ac2f`):** `boss_state.vulns` windows + `CombatCore.add_vuln/
+  vuln_until/vuln_mult`, folded in `damage_boss` + the ally contrib; GLINT migrated
+  (co-op gap closed); dead boss-level expose retired; sunder/debilitate stay as scalars
+  at the same funnel. twinfang/alch ab-gates BYTE-IDENTICAL; well/raid = the rebaseline;
+  `sim/vuln_probe.gd` guards. TEAM-COMP + Depth fold slots ready.
 - **Save unification:** one versioned Profile aggregate (WorldSave's pattern) owning
   world/gear/prior/binds/**roster**; version-check GearStore/LuckProfile/binds now (4-line
   copy); persist the Commander roster (also unblocks warband lending).
