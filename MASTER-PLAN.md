@@ -814,10 +814,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 04:39 · main (docs only) — **CLAIM: DECK MACHINE row D8 (FINAL) — the Fermata v6
-  revision** (v5 built pool → catalog 🔨 · §16's two additive kits formalized 🟡 · reconciles).
-  The deck queue DRAINS after this row — the machine's cron retires. *(slate-machine session,
-  deck tick 04:34)*
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §18 (NEW) + CARD-CATALOG Fermata section (NEW) +
+  ledger flips — **DECK MACHINE row D8 (FINAL): THE FERMATA v6 — DONE. 🏁 BOTH MACHINES
+  COMPLETE: 9 slates + 9 decks, all 🟡 at Bill's board; crons retired.** D8 itself: v5 pool →
+  🔨 catalog (ladder-tagged Brinkman/Rested Blade/Window-Setter) + KIT A Afterimage (Doubled
+  Dark/Deep Shadow/Procession/THE COMPANY OF KNIVES — anchored on built twinEcho+phantom) +
+  KIT C Cold Hand (**Kept Books** — renamed from The Ledger, Duelist Red-Ledger family ·
+  Patient Books · No Flourishes · THE RECKONING STROKE) at 🟡. Keystone cap-5 theme-weighted
+  rule proposed the 4th time (accept once = the pattern). **The machine's full output:** every
+  class/spec has a slate + a deck at verdict · CARD-CATALOG back-fills closed (Cask/Brew/Well/
+  Fermata + new Warden/Bloom/Tempo/Duelist-kits sections) · 9-row cross-deck distinctness
+  ledger · 8 research sweeps · ~40 tension points consolidated per-deck. NEXT = Bill's
+  verdicts; the `/slate-loop` skill survives for re-runs. *(slate-machine session, deck tick
+  04:34)*
 
 - ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §12 (NEW) + CARD-CATALOG Brew section (NEW)
   + ledger row — **DECK MACHINE row D7: THE BREW ASSEMBLY — DONE, one merged board.** Built

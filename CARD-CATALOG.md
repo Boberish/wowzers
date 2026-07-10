@@ -85,7 +85,7 @@ support, spells). Every table has the same columns:
 | Class (spec) | Seat | Base | Deck status | Full slate |
 |---|---|---|---|---|
 | **Twinfang · Tempo** | rogue | 🔨 built | boons mostly 🔨, keystones/2nd-spec owed | [§ Twinfang](#twinfang) · `TEMPO-PLAN.md` |
-| **Twinfang · Fermata** | rogue | partial | EDGE core 🔒, deck v5 🟡 | `FERMATA-V5-BRIEF.md` |
+| **Twinfang · Fermata** | rogue | 🔨 built (`f5d5397`) | v5 pool 🔨 cataloged · v6 kits 🟡 (D8) | `FERMATA-V5-BRIEF.md` + `TEMPO-PLAN.md §16/§18` |
 | **Alchemist · Brew** | caster | 🔨 built | full slate 🔨; review-pass proposals 🟡 | `ALCHEMIST-PLAN.md` |
 | **Alchemist · Cask** | caster | 🔨 slices 1–2 | HUD/cards/balance owed | `ALCHEMIST-PLAN.md §7` |
 | **The Well** | healer | 🔨 built | **deck 🔮 not authored** | `MENDER-PLAN.md` |
@@ -290,6 +290,31 @@ below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
 
 **Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮 ·
 Efficiency 🔨→🔮 (or keep, park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate.
+
+## TWINFANG · FERMATA — 🔨 v5 BUILT (`f5d5397`) · **v6 KITS (D8) 🟡 2026-07-10**
+
+Source: `FERMATA-V5-BRIEF.md` (the build truth) + `TEMPO-PLAN.md §16` (ladders) + `§18`
+(assembly). Ladders: **BRINKMAN · RESTED BLADE · WINDOW-SETTER**.
+
+**v5 pool (🔨 `f5d5397`, ladder-tagged):** creeds the Long Ramp [Brinkman entry] · Fleeting
+Shade · Long Night · Tutti [wild] — modules ⭐Shadow Dance (no-snap fever) · the Mark — boons
+stretto/refrain [Window-Setter] · coldCut [Cold Hand anchor] · theBrink/killingWhisper/
+quietFuse [Brinkman] · firstNote/composure/restlessDark [Rested Blade] · vanish (the one
+block) · twinEcho/firstBlood · ✦veilWarband [TEAM] — rig rested/razor/unravel — keystones
+unseenBlade [Rested Blade] · eclipse [Window-Setter] · phantom [Afterimage anchor].
+
+**v6 kits (🟡 — §16 ranking: Cold Hand · Afterimage):**
+
+| Card | id | Type | Rarity | St | Kit | One line |
+|---|---|---|---|---|---|---|
+| The Doubled Dark (creed) | `doubleddark` | STRAT | curated | 🟡 | A | Twin Echo at half strength from run start. |
+| Deep Shadow | `deepshadow` | POWER | H/S/O | 🟡 | A | Echoes inherit depth — a Bull's echo echoes at 45%. |
+| Procession | `procession` | GREED | H/S/O | 🟡 | A | Consecutive Perfect+ releases add +1 echo to the NEXT (cap 3); snap/unravel clears. |
+| THE COMPANY OF KNIVES (keystone) | `companyknives` | RULE | elite | 🟡 | A | Full-procession Bullseye: every banked echo flies, graded half-steps softer. |
+| Kept Books (creed) | `keptbooks` | STRAT | curated | 🟡 | C | Good-band releases +1 CP from run start. *(Renamed from The Ledger — Duelist's Red Ledger family.)* |
+| Patient Books | `patientbooks` | STRAT | H/S/O | 🟡 | C | Evis at 5 CP consumes the Mark at +1 tier. |
+| No Flourishes | `noflourishes` | GREED | H/S/O | 🟡 | C | While your Brink is 0 (never built), Evis +25% — the chosen shallow book. |
+| THE RECKONING STROKE (keystone) | `reckoningstroke` | RULE | elite | 🟡 | C | Tier-III brand + 5 CP + an Opening: one still frame, then the number. *(Freeze-beat rhyme w/ Estocada — at Bill from D2.)* |
 
 ## ALCHEMIST · THE CASK — **✅ LOCKED SLATE (hard-copied D4, 2026-07-10) + additive kits 🟡**
 

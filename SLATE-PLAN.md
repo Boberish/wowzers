@@ -181,7 +181,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 | D5 | Well · **Brim** | `MENDER-PLAN.md` §11 | 🟡 | — | LANDED 07-10: reshape around Low Catch·Overflow·Glintsmith — built pool filed 🔨 (catalog back-fill done, shared+Brim), 6 new cards + 3 keystones 🟡, Wide Brim→EASE fold, 2 skeptic catches (Blind Pour killed as built-Blindfold dupe · Cool Head renamed). |
 | D6 | Well · **Draw** | `MENDER-PLAN.md` §12 | 🟡 | — | LANDED 07-10: reshape around Vigil·Rapids·Eddy — ⭐VIGIL module promoted · **Millrace demote proposal** (economy keystone fails the bar; Flume crowned) · Ride-the-Tremble rename · 9 new cards 🟡 · sibling gate held. |
 | D7 | Alchemist · **Brew** | `ALCHEMIST-PLAN.md` §12 | 🟡 | — | LANDED 07-10: ONE merged board — built pool 🔨 cataloged (ladder-tagged) · §8's 11 slotted 🟡 · kits G/P/S formalized (Silencer/Fusillade ⏸ pillar-parked) · keystone-pool math flagged (6 candidates vs pool law) · Muscle Memory rename. |
-| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` | 🔄 | 07-10 04:39 | v5 deck at verdict = the incumbent; v6 revision around winning themes. |
+| D8 | Twinfang · **Fermata** | `TEMPO-PLAN.md` §18 | 🟡 | — | LANDED 07-10: v5 pool 🔨 cataloged + kits A/C 🟡 (Kept Books rename; cap-5 keystone rule proposed 4th time). **DECK QUEUE DRAINED — the machine is COMPLETE.** |
 
 **Cross-deck DISTINCTNESS LEDGER** — each deck pass APPENDS its row here before writing cards,
 and checks its plans against every earlier row (the cheap cross-class overlap gate — no re-reading
@@ -197,6 +197,12 @@ whole decks):
 | **Brim (D5)** | Low Catch · Overflow · Glintsmith | party-bar wave (Undertow) · Reservoir shield wall (Floodgate) · all-Glints crit hour (Gilded Hour) + built High Tide | deeper band (Knife's Edge) · costlier pours for fatter shields (Pressure Head) · preview-off (built Blindfold) |
 | **Draw (D6)** | Vigil · Rapids · Eddy | perfect-intercept hold (Loosed at Last) · white river (Flume, crowned over demoted Millrace) · frozen bands (Glass River) | tremble-surfing (Ride the Tremble) · hardened-sliver fishing (Shoot the Gap) · doubled drift (Deep Eddy) |
 | **Brew (D7)** | Slow Boil · Cannonade · Anchor (+kits G/P/S) | counterphase pendulum swing (Pendulum) · milestone autopsy carry-forward (Autopsy Report) · §8's Red Line/Quicksilver/Seething Vial | zero-line fuel crash (The Save) · declared Rupture budget (Called Shot) · dart fuel-tax (Quick Draw) |
+| **Fermata (D8)** | Brinkman · Rested Blade · Window-Setter (+kits A/C) | blade-flight procession (Company of Knives) · still-frame number (Reckoning Stroke ⚠ rhyme) + built Dance/Eclipse/Phantom | procession streak (snap-cleared) · the never-built Brink (No Flourishes) · lip-riding (built theBrink/razor) |
+
+> **⚡ MACHINE COMPLETE (2026-07-10 ~04:45):** both queues drained — 9 slates + 9 decks, all 🟡
+> at Bill's board. Crons retired. Every card row lives in CARD-CATALOG; every decision trail in
+> the Coordination Log; cross-deck identity in the table above. What remains is VERDICTS (Bill)
+> → status flips → build claims.
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 
