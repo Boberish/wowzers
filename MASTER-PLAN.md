@@ -814,6 +814,12 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-10 02:39 · main (docs only) — **CLAIM: DECK MACHINE row D0 — the Twinfang·TEMPO full
+  deck pass** (SLATE-PLAN §6: deck-creator invoked, top-3 §14 themes unless Bill has ✅ picks,
+  existing pool filed as a REVISION, coherence gates + distinctness ledger + 3 skeptics →
+  TEMPO-PLAN §17 🟡 + CARD-CATALOG rows at 🟡). Design only — no code. *(slate-machine session,
+  deck tick 02:34)*
+
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §16 (NEW) + `research/fermata-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 8 (FINAL): Twinfang·FERMATA challenger slate — DONE.
   PHASE 1 DRAINED (all 9 rows 🟡).** The v5 build is the truth (its cuts are law): **filing**

@@ -173,7 +173,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 
 | # | Target | Deck lands in | Status | Claimed | Note |
 |---|---|---|---|---|---|
-| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` | ⬜ | — | Waits on the §14 REDO (row 0). Fold A1–A9 ledger verdicts + Through-Line/On-the-Beat drift in. |
+| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` | 🔄 | 07-10 02:39 | Waits on the §14 REDO (row 0) — ✓ landed. Fold A1–A9 ledger verdicts + Through-Line/On-the-Beat drift in. |
 | D1 | Tank · **Warden** | `TANK-PLAN.md` | ⬜ | — | Receives the 🔮 re-homed guard cards (ledger). No-dodge kit: EASE knobs live on BLOCK reads. |
 | D2 | Tank · **Duelist** | `TANK-PLAN.md` | ⬜ | — | Deck v1 already AT BILL'S BOARD — this pass is a **v2 REVISION** around the winning themes, not a parallel deck; carry v1 verdicts that exist by then. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` | ⬜ | — | Double-size: lock the top CORE-MINIGAME pitch first, then author that spec's deck. |
