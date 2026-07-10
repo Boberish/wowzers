@@ -34,8 +34,8 @@ reordered by Bill at any time; the loop always takes the FIRST ⬜ from the top.
 | 4 | Alchemist · **Cask** | branch slate | `ALCHEMIST-PLAN.md` §9 | 🟡 | — | LANDED 07-10: filing pass (locked pool → Blend Line · Gauntlet · Tap List, zero orphans) + 3 ADDITIVE themes (Twin Casks · House Recipe · Taproom); §7 verdicts untouched. 1 kill (Storm Brewer — F3 untested), ~6 fixes. |
 | 5 | Well · **Brim** | branch slate | `MENDER-PLAN.md` §9 | 🟡 | — | LANDED 07-10: filing (zero orphans) + 4 themes (Low Catch · Overflow Engine · Glintsmith · Deep Well); 1 kill (Surgeon — Draw-rhythm collision), ~7 fixes. Bill picks 2–3. |
 | 6 | Well · **Draw** | branch slate | `MENDER-PLAN.md` §10 | 🟡 | — | LANDED 07-10: 4 themes (Rapids · Vigil · Skim · Eddy) + §10.7 built-pool addendum (all 24 built boons filed; §9's Deep Well theme → THE PULSE rename). 1 kill (Whirlpool), ~6 fixes. |
-| 7 | Alchemist · **Brew** | challenger slate | `ALCHEMIST-PLAN.md` new § | ⬜ | — | Live deck + the §8 review pass (11 proposals 🟡) = a RICH incumbent — fold both in as PITCH #0 material; don't duplicate the review pass. |
-| 8 | Twinfang · **Fermata** | challenger slate | `TEMPO-PLAN.md` new § | ⬜ | — | Deck v5 AT VERDICT = PITCH #0 (Cold Cut/Brink/Razor). Ramp/Snap verb locked — branches bend around it, never replace it. |
+| 7 | Alchemist · **Brew** | challenger slate | `ALCHEMIST-PLAN.md` §10 | 🟡 | — | LANDED 07-10: live pool filed (Slow Boil · Cannonade · Anchor, zero orphans; §8 proposals slot in) + 3 additive themes (Tightrope · Sidearm · Prognosis). 1 kill (Flash Boil — core-law), ~7 fixes. |
+| 8 | Twinfang · **Fermata** | challenger slate | `TEMPO-PLAN.md` §16 | 🟡 | — | LANDED 07-10: v5 ladders filed (Brinkman · Rested Blade · Window-Setter) + 2 additive themes (Afterimage · Cold Hand). **3 kills** (Misdirection/Unbroken Line/Snap Dancer — all law-violations), ~5 fixes. **PHASE 1 DRAINED.** |
 
 ## 1. THE PASS (per target — generalized from the Tempo §14 run)
 
@@ -173,7 +173,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 
 | # | Target | Deck lands in | Status | Claimed | Note |
 |---|---|---|---|---|---|
-| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` | ⬜ | — | Waits on the §14 REDO (row 0). Fold A1–A9 ledger verdicts + Through-Line/On-the-Beat drift in. |
+| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` §17 | 🟡 | — | LANDED 07-10: DECK v3 around Wound·Swift·Finish (Bill's own archetypes; ✅ picks can swap → cheap re-run). 6 new boons + 2 creeds + Hemorrhage module + 2 keystones + THE SET PIECE CD; trim table + 7 tension points; catalog rows 🟡. Through-Line authored (drift closed). |
 | D1 | Tank · **Warden** | `TANK-PLAN.md` | ⬜ | — | Receives the 🔮 re-homed guard cards (ledger). No-dodge kit: EASE knobs live on BLOCK reads. |
 | D2 | Tank · **Duelist** | `TANK-PLAN.md` | ⬜ | — | Deck v1 already AT BILL'S BOARD — this pass is a **v2 REVISION** around the winning themes, not a parallel deck; carry v1 verdicts that exist by then. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` | ⬜ | — | Double-size: lock the top CORE-MINIGAME pitch first, then author that spec's deck. |
@@ -189,7 +189,7 @@ whole decks):
 
 | Target | The 3 themes | Keystone spectacle shapes | Greed bites (what the player risks) |
 |---|---|---|---|
-| *(first deck pass writes the first row)* | | | |
+| **Tempo (D0)** | Wound · Swift · Finish | chained bleed-eruption (Exsanguinate) · beat-doubling (Double Time) · echo-finisher (The Coda) | bleed-expiry rhythm (Arterial) · self-tightening windows (Quickstep) · combo decay-hold (Heavy Ink) |
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 

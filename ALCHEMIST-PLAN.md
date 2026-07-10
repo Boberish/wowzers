@@ -1,7 +1,9 @@
 # ALCHEMIST-PLAN — "The Brew" (the poison CLASS — split out of Twinfang 2026-07-06)
 
-> **2026-07-10:** the CASK BRANCH SLATE (§9) is 🟡 AT VERDICT — the locked §7 pool filed into 3
-> named ladders + three ADDITIVE theme pitches (Twin Casks · House Recipe · Taproom).
+> **2026-07-10:** BOTH branch slates are 🟡 AT VERDICT — **CASK §9** (locked pool filed: Blend
+> Line · Gauntlet · Tap List + additive Twin Casks · House Recipe · Taproom) and **BREW §10**
+> (live pool filed: Slow Boil · Cannonade · Anchor + additive Tightrope · Sidearm · Prognosis;
+> §8's 11 proposals slot INTO the ladders, untouched).
 
 **Status:** 🟢 **FULL CARD SLATE BUILT 2026-07-06** (`alch-cards` — all six slices coded on top of the base
 minigame: **4 Creeds · 3 Modules (incl. the ⭐ Reaction-Vessel) · the 6×6 Combo Rig · 18 Boons · 3 Spells**,
@@ -623,3 +625,123 @@ cards).
 **Next:** Bill ranks/picks the additive themes (0–3 of them) → Phase-2 row D4 authors the full
 Cask deck: the 9.1 filing hard-copied + the picked themes' cards designed to CARD-CATALOG rows,
 inside the locked §7 verdicts.
+
+---
+
+## 10. THE BREW BRANCH SLATE — live ladders filed + three additive themes 🟡 AT VERDICT (2026-07-10)
+
+**What this is** (SLATE-PLAN row 7; branch = build THEME). The live deck STANDS (§2–§4) and the
+§8 review pass already covers the card-level gaps (keystones · bullseye verb · greed count ·
+Fermentation) — **nothing here duplicates or re-opens either.** This pass adds the missing
+DECK-LAYOUT §3 layer: **①** the live pool FILED into named ladders (PITCH #0, proof the deck
+already coalesces) and **②** three ADDITIVE themes on clocks neither the deck nor §8 touches.
+Example cards are ILLUSTRATIONS — no CARD-CATALOG rows. **How it was made:** live pool + §8
+re-read + fresh sweep `research/brew-sweep.md` (Bomber Crew plate-spinning · WoW juking · the
+fight-arc gap) → 4 lenses → 3 pitches → **3 skeptic passes (1 kill, ~7 fixes folded)**.
+
+### 10.1 THE FILING TABLE — the live ladders, named (PITCH #0a/b/c)
+
+| Ladder | The fantasy | Live cards that feed it | §8 proposals that land in it |
+|---|---|---|---|
+| **#0a THE SLOW BOIL** — the eternal reaction | never stop cooking | Purist creed (entry) · Corrosive Blood · Deepening Rot · Perfect Emulsion · Preservative · Clinging Rot · ✦ Debilitator | P9 Brimming (its greed) · Seething Vial keystone (P5) |
+| **#0b THE CANNONADE** — bank, then erupt | the vessel is a cannon | Volatile Mix creed (entry) · ⭐ Reaction-Vessel · Rupturing · Chain Rupture · Catalyst · Reduction · Concentrate | Red Line keystone (P3) · P6 Fermentation hold-or-cash · P7 Strike the Seam |
+| **#0c THE ANCHOR** — one poison, fixed and perfect | precision against stillness | Anchorite creed (entry) · Clinging Rot (dual-files) · Killing Draught · Distilled Focus · Steady Pour | Quicksilver keystone (P4) · P2 Master's Draught |
+| Generic bread | — | Deep Cauldron · Quick Study · Practiced Hand · Spitfire · Decant | P1 Bullseye Pours (verb — feeds all) · P10 Fever creed (the open frantic slot) |
+
+Zero orphans; each ladder enters from a live creed (§2 law 5 holds without a card change). The
+deck pass (D7) inherits these names; §8's verdicts slot INTO them, not beside them.
+
+### 10.2 ADDITIVE THEME 1 — THE TIGHTROPE · *let it wobble, catch it late*
+
+**What its cards do:** the plate-spinner's greed — DELIBERATE imbalance. Let one side decay
+toward empty and CATCH it late (a sweet-band pour landed while that side is under a low
+threshold) for a premium. The min(V,R) core is untouched — you're not eased past the balance
+skill, you're paid for surfing its edge; the Balance lane's no-easing law stands.
+**Dials addressed:** the fuel (the low-catch threshold) · the vial (the catch pour). One-pour
+interactions only (the Bomber-Crew bar).
+**Example cards:** creed *The Wire-Walker* — low catches pay from run start; both-sides-low
+pays double (and risks everything) · boon *The Save* (GREED) — a catch under 2 units restores
++30% extra fuel to that side; letting a side hit ZERO drops Potency hard (the bite you walked
+into) · boon *Practiced Wobble* (STRAT) — after a low catch, the see-saw's balance window
+widens 15% for 4s (the recovery is earned, not given) · keystone **THE PENDULUM** — three low
+catches alternating sides in one Potency cycle set the brew SWINGING: ~6s where the reaction
+reads balance at ×1.5 and the bars visibly swing in counterphase.
+**Greed/comfort + EASE knob:** wobble-greed (how low you dare); comfort = steady even pours,
+cards dormant. Knob: low-catch threshold height.
+**Nearest neighbor:** the Cask's STRAIN weave (side-alternation pressure on POURS — a
+different surface: strain punishes repetition; the Tightrope pays depletion catches). The
+Matador (late answers on the defense stream) — this is late catches on your own fuel. Recorded.
+
+### 10.3 ADDITIVE THEME 2 — THE SIDEARM · *the dart between the drops* (pillar-#3 feeder)
+
+**What its cards do:** the weave made a build — Spitfire riders (darts landed while the
+reaction is fed and balanced), and DELIBERATE-KICK mastery when the interrupt flag lands
+(the Brew is the caster seat's designated carrier; juking's lesson — the kick is a priced
+mind-game, not a rotation button).
+**Dials addressed:** the weave (Spitfire cadence) · the reaction (dart riders read its state).
+**Example cards:** boon *Venom-Tipped* (STRAT) — a dart thrown during a fed, balanced reaction
+carries 20% of the reaction's tick as bonus · boon *Quick Draw* (GREED) — darts cost a beat of
+brew attention (the vial drains 1 during the throw): pay fuel for tempo, chosen per throw ·
+boon *The Silencer* (STRAT, pillar-gated) — a dart that lands the KICK inside the tight window
+refunds full Potency drain for 3s — deliberate-kick mastery as a draft card · keystone **THE
+FUSILLADE** — after a kicked cast, ~4s where every dart chains (each hit reloads the next);
+the boss's silence becomes your drumroll.
+**Greed/comfort + EASE knob:** tempo-greed (weaving darts into pour gaps); comfort = darts
+only when the brew is stable. Knob: dart brew-cost.
+**⚠ Dependency flagged honestly:** The Silencer + Fusillade key to the interrupt-by-ability
+flag — LOCKED design (WORLD pillar #3) but unbuilt engine; they enter the deck pass as
+designed-and-parked until the flag lands (unlike the killed F3-contingent Storm Brewer, the
+pillar is a committed decision, not an open feel question).
+**Nearest neighbor:** the Matador again (reads/baits — defense-side); the Sidearm is
+offense-weave + the kick. Tempo's Counterpoint interrupt angle died with §15 parking — this is
+now the roster's ONLY interrupt-mastery theme. Recorded.
+
+### 10.4 ADDITIVE THEME 3 — THE PROGNOSIS · *you know how this fight ends*
+
+**What its cards do:** the fight-arc reader — the roster's one untouched clock. Absorbs
+*Killing Draught* (execute lock) and *Last Call* (phase auto-cash) as its spine; new cards key
+to BOSS HP MILESTONES you prepare for: pre-stack before the 50% line, walk a ripe Rupture into
+the transition, open the fight with a diagnosis.
+**Dials addressed:** potency/rupture TIMING (against the boss's arc, not the brew's own wave).
+Zone-fight fix folded: keys to HP % milestones (every fight has HP); phase transitions are the
+raid-scale bonus, never the requirement.
+**Example cards:** creed *The Diagnostician* — the boss's next HP milestone is marked on its
+bar from run start; a Rupture landed within 2s of a milestone +15% · boon *Terminal Course*
+(POWER) — below 30%, Deepening Rot ramps twice as fast · boon *Called Shot* (GREED) — declare
+(auto, at fight start) your Rupture count for the fight; finish at-or-under it and each was
++20%; go over and the excess are −20% (commitment greed, self-authored) · keystone **THE
+AUTOPSY REPORT** — landing the killing blow with a Rupture inside a milestone window makes the
+NEXT fight this run open with +2 Potency (the prognosis carries forward).
+**Greed/comfort + EASE knob:** commitment-greed (Called Shot); comfort = milestone marks as
+free information. Knob: milestone-window width.
+**Nearest neighbor:** the Cask's Killing Vintage (execute rider — one card, not a theme);
+the House Recipe (commitment to a RECIPE; this commits to a FIGHT-READ). Recorded.
+
+### 10.5 SLATE-LEVEL CHECKS + the pick
+
+**Spread (all six):** eternal sustain (#0a) · bank-burst (#0b) · fixed-anchor precision (#0c) ·
+edge-surfing (Tightrope) · weave/kick (Sidearm) · fight-arc (Prognosis) — six clocks, none
+shared; the Tightrope/Slow-Boil pairing is the deliberate tension (steady vs wobble on the
+same reaction).
+**Skeptic record:** 3 passes · **1 kill** (**the Flash Boil** — a venom-lean tempo theme:
+it fights the min(V,R)×balance law head-on, and one-poison identity is the Anchor's; died at
+the core-law bar) · ~7 fixes folded (Tightrope zero-line bite · one-pour interaction bar on
+all three · Sidearm dependency split (live cards now, kick cards parked-not-contingent) ·
+Called Shot auto-declared so no UI button · Prognosis HP-not-phase base · Pendulum
+earned-never-toggled · Fusillade scoped to post-kick only).
+**Skeptic ranking (pick-tension, strongest→weakest):** Tightrope · Prognosis · Sidearm.
+**Composition notes:** Tightrope + #0a Slow Boil is the natural drama (the steady engine that
+dares wobble). Prognosis + #0b Cannonade aligns vessel dumps with milestones (clean). Sidearm
+composes with anything (it lives between pours) but its best cards wait on the pillar flag —
+whichever pick it joins, the deck pass ships its live cards and parks the kick cards.
+**Engine debts:** Sidearm's kick cards = the pillar-#3 flag (owed already, not new) ·
+Prognosis milestone marks = boss-bar UI chips (view-only) · Tightrope = kit-local thresholds.
+**Skipped on purpose:** **the Flash Boil** (killed, above) · **anything §8 covers** (keystones,
+bullseye pours, Fermentation, greed count — the review pass owns card-level fixes; this slate
+never re-proposes them) · **a Brew TEAM theme** (✦Debilitator is the class's support identity
+and the Taproom/Glintsmith/Bannerman already give Bill three TEAM shapes to judge — a fourth
+this round dilutes the verdict).
+
+**Next:** Bill picks additive themes (0–3) alongside his §8 verdicts → Phase-2 row D7 authors
+the Brew deck pass: the 10.1 filing hard-copied, §8 winners slotted into their ladders, picked
+themes' cards designed to CARD-CATALOG rows.

@@ -814,6 +814,50 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17 (NEW) + CARD-CATALOG D0 rows + ledger §C —
+  **DECK MACHINE row D0: THE TEMPO DECK v3 — DONE, 🟡 AT BILL'S VERDICT.** Winners = **WOUND ·
+  SWIFT · FINISH** (no ranking was recorded in the corrected §14, so the pass took Bill's own
+  correction examples — "bleeds, fast attacks, slow big ones"; his ✅ picks swap winners → cheap
+  re-run, EDGE/PUNISH/BAND cards stay filed). The REVISION: every built card filed (17.3); NEW =
+  Uptempo + Open Veins creeds (entry law per theme) · Hemorrhage module (the wound-pot CASH
+  decision) · Lacerate/Slow Bleed/Arterial Note/Quickstep/Grand Pause/Heavy Ink boons ·
+  Through-Line AUTHORED (A1 drift closed) · THE CODA + EXSANGUINATE keystones (stagger rider
+  dropped — engine-free) · the Deep Cash rig WHEN · **THE SET PIECE** signature-CD shape ·
+  the EASE knob list. Coherence gates run WITH EVIDENCE in-doc (dream drafts ×4 · trio
+  spot-checks found Da Capo's auto-skip · overlap audit · anti-pattern sweep · AI notes);
+  3 skeptics (quota breach → trim table · Brink-vs-Heavy-Ink distinctness recorded · zone-clock
+  checks). **7 tension points at Bill's board** (wild-creed gap · trims · Held Breath park ·
+  keystone offer rule · the CD · On the Beat · winner swaps). Distinctness-ledger row 1 written.
+  *(slate-machine session, deck tick 02:34)*
+
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §16 (NEW) + `research/fermata-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 8 (FINAL): Twinfang·FERMATA challenger slate — DONE.
+  PHASE 1 DRAINED (all 9 rows 🟡).** The v5 build is the truth (its cuts are law): **filing**
+  (PITCH #0a/b/c — **THE BRINKMAN** lip-greed: Brink/Razor/Long-Ramp · **THE RESTED BLADE**
+  rest economy: First Note/Rested/rest-bank Unseen Blade (Superhot-validated) · **THE
+  WINDOW-SETTER** control: Stretto/Refrain/wideners/Eclipse; zero orphans) + **two additive
+  themes** (v5 is tight — two honest beats three padded): **THE AFTERIMAGE** (echo build on
+  coded Twin Echo + Phantom — result multiplication, never press multiplication; the
+  procession) · **THE COLD HAND** (the Good-band CP economy + branded Evis cash — the Brinkman's
+  designed polarity, the same ramp read opposite ways). 3 skeptic passes, **3 KILLS** (the
+  Misdirection = Feint resurrection · the Unbroken Line = dodge-feeds-offense once removed ·
+  the Snap Dancer = pays failing), ~5 fixes. Ranking: Cold Hand · Afterimage. The SLATE-loop
+  cron is deleted (queue drained); **the DECK MACHINE (SLATE-PLAN §5–§6) gate opens on its next
+  tick — D0 Tempo first.** *(slate-machine session, tick 02:27)*
+
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §10 (NEW) + `research/brew-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 7: Alchemist·BREW challenger slate — DONE.** The live deck
+  + §8 stand untouched; the pass adds the ladder layer: **filing** (PITCH #0a/b/c — **THE SLOW
+  BOIL** Purist sustain · **THE CANNONADE** ⭐Vessel bank-burst · **THE ANCHOR** one-poison
+  precision; zero orphans, §8's 11 proposals slot INTO the ladders) + **three additive themes**:
+  **THE TIGHTROPE** (plate-spinner's greed — deliberate near-empty catches on the see-saw, min()
+  law untouched) · **THE SIDEARM** (Spitfire weave + deliberate-kick mastery — the roster's only
+  interrupt theme; kick cards parked on the committed pillar-#3 flag, split from live cards) ·
+  **THE PROGNOSIS** (the fight-arc clock — absorbs Killing Draught + Last Call; HP milestones
+  base, phases = raid bonus; Called Shot commitment greed). 3 skeptic passes: 1 kill (**the
+  Flash Boil** — venom-lean fights the min(V,R) core law), ~7 fixes. Ranking: Tightrope ·
+  Prognosis · Sidearm. *(slate-machine session, tick 02:12)*
+
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §10 (NEW) + §10.7 built-pool addendum +
   `research/draw-sweep.md` (NEW) + ledger §C row — **SLATE MACHINE row 6: Well·DRAW branch slate
   — DONE, four themes AT BILL'S VERDICT** (sibling law held: every theme on the release/hold
@@ -1011,8 +1055,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   deck-creator passes are separate claims after each verdict. *(slate-machine session — the loop
   runs here)*
 
-- ☐ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **CLAIM: THE
-  OLD-GAME PURGE + audit follow-ups (Bill).** (1) docs: record the purge decisions (GAME SHAPE
+- ☑ 2026-07-10 · docs on main + worktree `../wow-purge` (branch `purge-oldgame`) — **THE
+  OLD-GAME PURGE + audit follow-ups (Bill) — DONE, MERGED `0582294`.** Code: Voidcaller ·
+  Mender · Reckoner + the 15 solo exam bosses + the GATE node kind DELETED (~40 files edited,
+  3 class dirs + gate_content + policies/binds/gauges/probes removed); defaults flipped
+  caster→Alchemist(brew) · healer→Well(brim) (healer keeps the Well⇄Bloomweaver toggle);
+  Zone 1's THE THRESHOLD re-payloaded to a Forge elite; protocol **v13** (⚠ rebuild+redeploy
+  server with clients); Twinfang Warden/Executioner + kept-class solo bosses survive as SIM
+  FIXTURES only. **Full verify surface green** (35 harnesses: balance sims · probes · smokes ·
+  both net smokes, zero desyncs). **Bands re-baselined @60 seeds** (deliberate): riftmaw
+  100/100/0 · mistral 100/100/100 · gemini 100/100/28 · mythos 100/92/0 — good-tier IMPROVED
+  on deep Seals (the Well), **⚠ riftmaw sloppy 77→0 = watch item** (entry Seal stone-walls
+  the worst tier on the no-kicker comp — SEAL-PILLAR/healer-retune lever). Docs: purge
+  decisions recorded (GAME SHAPE amendment etc., commit `35d270c`), audit drift/stale fixes,
+  `archive/` born (5 docs), WORLD-PLAN §THE DUNGEON, ceremony-order in DECK-LAYOUT, ledger
+  §A½ rows (Bulwark-dies-with-Duelist pinned). ⚠ WSLg visual pass OWED (class-select /
+  party / lobby screens changed — headless can't render): Bill's next feel pass. *(this
+  session)* **CLAIM was:** (1) docs: record the purge decisions (GAME SHAPE
   amendment · roster · casting-pool cut · BREADTH/gear consequences), fix the loop-audit drift +
   stale blocks, archive retired docs → `archive/`, WORLD-PLAN §DUNGEON consolidation; (2) code:
   DELETE Voidcaller + Mender + Reckoner + the 15 solo bosses + the GATE node kind wholesale;

@@ -60,7 +60,7 @@ event-worthy* → 1-of-3 boon draft).
 - **Owners:** MASTER-PLAN §MAPS (the as-built truth: DAG gen · tickets · checks · gates · shard
   gates) · `WORLD-PLAN.md` §THE WORLD MODEL (zone nodes) · `PROGRESSION-PLAN.md` §Drops
   (drops-are-EVENTS) · `TEETH-PLAN.md` (CONTEST node · curse events — unbuilt).
-- **Status:** ✅ built deep (offline + online, protocol v11). Gaps: the post-fight ceremony
+- **Status:** ✅ built deep (offline + online, protocol v13 since THE PURGE). Gaps: the post-fight ceremony
   *order* lives only in code; "biting blessings" is a name with no design (§3 drift 3).
 
 ### L3 · THE RUN (30 min–3 h) — build a deck, spend it on a mountain
