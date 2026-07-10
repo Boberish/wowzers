@@ -122,23 +122,31 @@ you out* and wanders (reuses the existing THREAT_DROP = "context-window shift" f
   curses) blooms at raid intensity because the numbers are brutal there, not because the rule changed.
 - **The progressive peel (Bill's model):** aggro is a **%** (the tank's normalized flow). **≥ 30%** → the
   boss is locked on the top-threat seat (the tank). **< 30%** → each incoming attack has an **X% chance to
-  peel** to another seat, **X rising as aggro falls**. **0%** → fully **random** targeting. A **TAUNT** is
+  peel** to another seat, **X rising as aggro falls**. **0%** → fully **random** targeting. ~~A **TAUNT** is
   the hard override (grab it back a few seconds; everyone-has-a-taunt = a DPS can clutch-grab it, hot-potato
-  curses force swaps).
+  curses force swaps).~~ **⚠ AMENDED 2026-07-10 (Bill — `BOSS-PLAN.md §1`): THE TAUNT BUTTON IS DEAD, on
+  every seat.** Aggro is **100% passive**: the only way back is playing clean (flow re-climbs). The
+  skill-shaped valve: a **PERFECT MAIN grants a flow SPIKE** (the counter IS the "look at me"), plus an
+  aggro **boon lane** (LODESTONE · HARD STARE — 💡 in CARD-CATALOG). Taunt-swaps were judged WoW-import
+  risk-erasers; hot-potato choreography re-homes to boss-authored mechanics (the Mythos mark relay).
 - **Flow moves on SKILL, never on hits (Bill, locked):** clean answers raise flow; **un-clean answers**
   (miss / whiff / baited) drop it. **Taking damage NEVER lowers flow** — otherwise a tank under heavy fire
   spirals (hit → lose flow → peel → more hits). Flow measures *your play*, not your luck.
 - **A peel is telegraphed to the person who catches it (Bill, locked):** a peeled attack rides the
   **victim's OWN dodge bar** + a **warning cue** — so a stray hit is always dodgeable and never a surprise.
   A **small fixed GRACE-DELAY** before a peeled hit lands is the reaction window: the new victim reads the
-  warning and dodges, AND the tank can **TAUNT it back before it lands** (the peel's recovery valve). It's
+  warning and dodges~~, AND the tank can **TAUNT it back before it lands** (the peel's recovery valve)~~ —
+  **⚠ 2026-07-10: the grace-delay is the VICTIM'S window only** (no taunt-back exists); a peel always costs
+  the raid one real answer, which is the risk Bill wants live. It's
   **determinism-safe** — a fixed tick offset (not wall-clock), one telegraph still, melee keeps ticking; it
   just paces the fight a hair during peels. *(Does not break the scheduler.)*
 - **UI (Bill):** FLOW gets its **own dedicated bar** (tank only — it's the aggro driver). Everyone's aggro
   shows in a **small shared "aggro box"** = the built party victim-frame extended (a pip/bar per seat, gold
   = current target). Non-tanks have **no flow bar** (their aggro is passive) → no bar-bloat.
-- **Reuses the built threat engine wholesale** — `BossState.threat` (by seat index), `taunt_seat_i`,
-  `_threat_target()`, `THREAT_DROP`, the victim gold-frame + aggro-lost banner. We only **change the tank's
+- **Reuses the built threat engine wholesale** — `BossState.threat` (by seat index), ~~`taunt_seat_i`~~
+  *(dies with the button, 2026-07-10)*, `_threat_target()`, `THREAT_DROP` *(re-based as **FLOW DUMP** —
+  the curse zeroes the tank's flow, rebuild by playing clean; `BOSS-PLAN §1`)*, the victim gold-frame +
+  aggro-lost banner. We only **change the tank's
   threat SOURCE from damage → flow**; non-tanks keep low passive threat (damage/heals).
 - **No tank? it just degrades (Bill's "crazy stuff" for free):** aggro is universal, but **only the tank
   DRIVES it high** (via the flow minigame). Remove the tank → nobody drives it → aggro sits low → the peel
@@ -699,8 +707,9 @@ first-cut `warden_*` knobs.
 
 **Dials:** THE READ · THE TAP · **THE HOLD** (Warden-only) · THE SLAM · THE WIND · THE BANK ·
 THE SPEND · THE LINE — plus **THE CHARGE (the Payload's new dial: the battery of prevented
-damage)**. **Budget:** buttons = BLOCK · SHIELD · DUMP · TAUNT + the owed signature CD ("the
-wall", §1b) = 5 of 7; nothing below adds one. Boons land at 12 (in-quota); modules 3 (one per
+damage)**. **Budget:** buttons = BLOCK · SHIELD · DUMP ~~· TAUNT~~ *(deleted 2026-07-10,
+`BOSS-PLAN §1`)* + the owed signature CD ("the
+wall", §1b) = 4 of 7; nothing below adds one. Boons land at 12 (in-quota); modules 3 (one per
 theme); keystones 3.
 
 ### 8.1 CREEDS (pick 1 · pool of 5 — quota shapes all present)

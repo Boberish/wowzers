@@ -1,6 +1,13 @@
 # SEAL-PILLAR-PLAN — execution brief for the Seal Pillar Pass v1
 
-**Status: CLAIMABLE (authored 2026-07-06 with Bill; hand this doc to the executing agent).**
+**⚠ SUPERSEDED 2026-07-10 by `BOSS-PLAN.md` (THE SEAL REWORK).** Never executed as a tuning
+pass — Bill greenlit the full boss redo instead. What survives: **Phase A's instrumentation IS
+BOSS-PLAN Slice 0** (the beat-budget table + byte-identical gate), the ~3–8 beats/non-tank
+budget, the beat-source map below (still-accurate reference numbers), and the ULTRATHINK
+carve-out. Phase B's retune is moot — the rework re-authors the same numbers. Do NOT claim
+this doc; claim from `BOSS-PLAN.md §8`.
+
+**Status: ~~CLAIMABLE~~ SUPERSEDED (authored 2026-07-06 with Bill).**
 Claim it in MASTER-PLAN's Coordination Log, work in a worktree (`git worktree add
 ../wow-seal-pillars -b seal-pillars`), and read this WHOLE doc before touching anything.
 Companion context: `WORLD-PLAN.md` §COMBAT PILLARS (the why) · MASTER-PLAN §BOSSES (the

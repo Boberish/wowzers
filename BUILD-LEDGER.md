@@ -47,7 +47,7 @@ incoming load.
 |---|---|---|
 | `core/combat_core.gd` (1148) | FLOW=AGGRO rewire (threat, 44 refs) · dodge-unify finish (`:83-114`) · interrupt-by-ability flag · `perform()` input surface | **#1.** Aggro + dodge + interrupt all edit the reducer. Serialize. Aggro is a *deliberate* checksum rebaseline. |
 | `game/raid_hud.gd` (4496) | Every class gauge · aggro box (25 refs) · voidcaller (15) · two-verb hint (`:2414`) · per-seat `_verb()` (`:2181`) · tank/dodge/drop UI | Land **ClassBand registry + shared Gauge base (REFIT-P4) FIRST**, or the per-class meter wave makes this unmaintainable. |
-| `data/raid/raid_content.gd` (626) | Seal beat data · `threat_enabled` (`:625`) · melee/telegraph split (`:8`) · Seal-pillar · aura-add · Trial-Ladder Versions | The whole boss wave edits this. Serialize claims; each shifts fight checksums **on purpose**. |
+| `data/raid/raid_content.gd` (626) | Seal beat data · `threat_enabled` (`:625`) · melee/telegraph split (`:8`) · **THE SEAL REWORK (`BOSS-PLAN.md` S2–S5 — supersedes Seal-pillar)** · aura-add · Trial-Ladder Versions | The whole boss wave edits this. Serialize claims; each shifts fight checksums **on purpose**. ⚠ `wow-descent-map` owns it live — SEAL REWORK content lands only after that merge. |
 | `game/draft.gd` (+ `draft_sim`) | Rarity tier-roll engine · rerolls-out/REGENERATE · loot two-modes · curse cards→JAILBREAK deals · spells reweight · curio-pool v2 · EASE dial knob-roll · Market stock + shared bank (§I) | One draft/roll pipeline. Serialize claims; keep `draft_sim` green each merge. |
 | **map layer**: `game/run_map.gd` · `game/map_content.gd` · `game/campaign_core.gd` · `sim/raid_map_sim.gd` | **THE DESCENT REBUILD (§I)**: 4-floor inputs · new node kinds (MARKET/JAILBREAK/CAPTCHA/BENCHMARK/SERVER ROOM/PATCH BAY/WILD) · GATE retirement · ticket shapes/re-price · seed-from-run-seed | **ONE deliberate re-baseline bang** (§I header). Land AFTER `purge-oldgame`. New kinds touch `to_dict`/`from_dict`/fingerprint/server-broadcast together; walker + `CampaignCore.ticket_at` move together (divergence trap). |
 | `net/net_server.gd` (798) · `net/raid_net.gd` (220) | Online `(seed,spec)` spec-carry · Depth `spec.depth` · §4 MMO extraction | Versioned protocol — rebuild+redeploy coupled. **Class registry (P4) gates spec-carry of arbitrary builds.** |
@@ -63,15 +63,15 @@ behavior on purpose). Sequence them so the sim baseline resets **as few times as
 and re-pin `ab-gate.sh` baselines right after each:
 
 - Generic boss-vulnerability stack (REFIT-P4) — then TEAM-COMP + Depth + Well-glint ride it (one reset, not three).
-- FLOW=AGGRO rewire (tank wave).
-- Seal Pillar Pass v1 (dodge-ration nudge).
+- FLOW=AGGRO rewire (tank wave) — **now also deletes the taunt button outright (`BOSS-PLAN §1`, 2026-07-10)**.
+- ~~Seal Pillar Pass v1 (dodge-ration nudge)~~ → **THE SEAL REWORK (`BOSS-PLAN.md` §8, 2026-07-10)** — one bang per Seal slice S2–S5, untouched Seals byte-identical per slice; S0 instrumentation is byte-identical.
 - **THE DESCENT REBUILD map bang (§I)** — floors/quotas/kinds/seeding in ONE `raid_map_sim` re-baseline (post-purge).
 
 ### Stale / superseded code to RETIRE (not just add-around)
 
 | Old code | Where | Replaced by |
 |---|---|---|
-| Threat / aggro / taunt system | `threat_enabled` gate (`combat_state.gd:43`, default off) → `combat_core` (44) · `boss_state.gd:57-61` · `tuning_config.gd:56` · `bulwark_kit` Challenge · `raid_hud` T-CHALLENGE (25) · `raid_sim` (17) | **FLOW=AGGRO** (tank wave) — largest single collision surface |
+| Threat / aggro / taunt system | `threat_enabled` gate (`combat_state.gd:43`, default off) → `combat_core` (44) · `boss_state.gd:57-61` · `tuning_config.gd:56` · `bulwark_kit` Challenge · `raid_hud` T-CHALLENGE (25) · `raid_sim` (17) | **FLOW=AGGRO** (tank wave) — largest single collision surface. **⚠ 07-10: taunt = FULL DELETE (no repurpose — `CombatCore.taunt()`/`taunt_seat_i` die; aggro 100% passive, `BOSS-PLAN §1`); `BossState.threat`/`_threat_target()` survive re-sourced; THREAT_DROP re-bases as FLOW DUMP.** |
 | Two-verb dodge (SPACE+F) | `combat_core.gd:83-114` elif · stale "SPACE/F" in `class_codex` + `raid_hud:2414` hint | **dodge-unify** — done for twinfang/alch/well; owed for bulwark*/mender/bloomweaver/reckoner/voidcaller, per rework |
 | Voidcaller (full class, wired) | `data/voidcaller/*` + `raid_hud` (15) + run_state/draft/gauge | ~~frozen until interrupt-by-ability~~ → **DELETED NOW (THE PURGE 2026-07-10, §A½)** — Mender + Reckoner + solo bosses/gates go with it |
 | `verdance_gauge.gd:19-20` DEPRECATED compat vars | Bloomweaver gauge | Dead surface — delete on next Bloomweaver touch |
@@ -106,7 +106,7 @@ build-once seams that five separate class reworks and the endgame all need:
 
 **Wave 4 — DEPTH & TEETH** (`draft.gd` + map + Depth): CONTEST · loot two-modes · curse cards · spells pilot · event-crafting → Trial Ladder (proves scaling hooks) → RAID DEPTH (rides Trial Ladder + vuln stack) → Endless (a *door* on Depth, don't fork).
 
-**Wave 5 — BOSSES & ENDGAME:** Seal Pillar Pass v1 · aura-add second-cast-source · TEAM-COMP schools (rides vuln stack). *Boss-redo era for the 15 solo bosses is on HOLD — don't redesign now.*
+**Wave 5 — BOSSES & ENDGAME:** **THE SEAL REWORK (`BOSS-PLAN.md` — supersedes Seal Pillar Pass v1; S0 sim-side now, content S2–S5 after descent-map + Wave-1)** · aura-add second-cast-source (still parked — BOSS-PLAN v1 needs no 2nd telegraph source) · TEAM-COMP schools (rides vuln stack). *Boss-redo era for the 15 solo bosses is on HOLD — don't redesign now.*
 
 **Wave 6 — MMO SHELL:** Gateway / InstanceHost / CampaignEngine — only after P4 rails.
 
@@ -139,7 +139,7 @@ build-once seams that five separate class reworks and the endgame all need:
 |---|---|---|---|---|
 | FLOW=AGGRO universal rewire | 🔒 | TANK §1c/1d | built threat engine (source damage→flow), seeded peel roll, `raid_content.gd:8` | Numbers→playtest. Revises "aggro=raid-only" (`b2afbca`) → universal. Rips out `threat_enabled` system. |
 | Duelist guarded base kit | 🔒 | TANK §4 | new guarded tank seat, bespoke PARRY+DODGE (no `unified_dodge`/ration) | Numbers→playtest. **Wait for Bill's verdict export blob.** A/B vs Bulwark default. |
-| Peel mechanics (progressive + grace-delay) | 🔒 | TANK §1c | aggro-% shape, victim dodge bar, TAUNT hard-override | Part of FLOW=AGGRO. Grace-delay = fixed tick offset (det-safe). |
+| Peel mechanics (progressive + grace-delay) | 🔒 | TANK §1c **+ BOSS-PLAN §1** | aggro-% shape, victim dodge bar, ~~TAUNT hard-override~~ **NO TAUNT (07-10)** — valve = perfect-MAIN flow spike + THE GAZE boon lane | Part of FLOW=AGGRO. Grace-delay = the VICTIM'S window only (det-safe fixed tick offset). |
 | Tank defensive signature CD ("the wall") | 💡 | TANK §1b, DECK-LAYOUT §5 | new ~1-min CD, carries dropped GUARD | Not yet designed. Both specs get one. |
 | Duelist deck v1 **+ v2 revision (D2, 2026-07-10)** | 🟡 | TANK §3 + **§9**, CARD-CATALOG | kit-local layers, `_fw()` dispatch (Well idiom) | **Whole slate at Bill's board** — §9 adds the v1.1 reconcile (EASE fold executed · FLOW = 4th Floor-1 candidate · Hold-the-Line→FLOW re-key) + 3 challenger SWAP KITS pre-authored (any pick = ready deck). GUARD trio resolved → Warden §8. Estocada/Reckoning-Stroke freeze-beat rhyme at Bill. |
 | FLOW module (aggro→damage upgrade) | 💡 | TANK §1b | new STRAT module | Competes for Floor-1 module slot. Reconcile at deck reshape. |
@@ -246,9 +246,10 @@ build-once seams that five separate class reworks and the endgame all need:
 |---|---|---|---|---|
 | Trial Ladder ("Versions") | 🔴 | MASTER §MODES | `TuningConfig` + strings, version dial on door | Author the mechanic-adds. Proves Depth's scaling hooks. Unlocks VERSION-row gear. |
 | RAID DEPTH — infinite endgame | 🔒 | MASTER §MODES | `spec.depth` scalar, affix-intensity knob | Rides Trial Ladder + vuln stack. **Compress windows, never stat-inflate.** No persistent gear power. |
-| Seal Pillar Pass v1 (dodge-ration) | 🔒 | SEAL-PILLAR-PLAN | `raid_content` Seal beats, `raid_sim` Phase-A instrument | **Rebaseline.** HANDS OFF kick chains / Double-Check / ULTRATHINK. |
-| Boss-redo era (15 solo bosses) | ⏸ HOLD | MASTER §BOSSES | — | Bill unsure of end state — **do NOT redesign now.** Only 4 Seals maintained. |
-| OPUS Helpful/Harmless/Honest phases | 💡 | MASTER §BOSSES | `phase_res` | Open idea. |
+| ~~Seal Pillar Pass v1 (dodge-ration)~~ | ✂️ | SEAL-PILLAR-PLAN | — | **SUPERSEDED 2026-07-10 by THE SEAL REWORK (below)** — never executed; Phase A instrumentation absorbed as its S0. |
+| **THE SEAL REWORK v1 (the 4-boss redo)** | 🟡 | **`BOSS-PLAN.md`** (10 verdicts §V) | `raid_content` (all 4 Seals re-authored) · `combat_core`+`boss_state` (E1 gates · E2 stance · E3 BREAK · E5 mark · E6 deny-empower · E7 listening — all guarded) · `encounter_res`+new `SealTune` (E4) · `raid_sim` gates · `raid_hud` (stance sigil · countdown pips · break card · mark fuse) · `tune.sh` flags | Fills DESCENT §4 contract 5/7/9/12 **with structure, never +HP**. **Blocks on: `wow-descent-map` merge + Wave-1 FLOW=AGGRO/Duelist (taunt dies there).** S0 (sim-side, byte-identical) claimable now. One rebaseline bang per Seal slice; untouched Seals byte-identical per slice. ULTRATHINK untouched forever. |
+| Boss-redo era (15 solo bosses) | ⏸ HOLD | MASTER §BOSSES | — | Bill unsure of end state — **do NOT redesign now.** Only 4 Seals maintained (and reworked per BOSS-PLAN). |
+| ~~OPUS Helpful/Harmless/Honest phases~~ | ✂️ | MASTER §BOSSES | — | **FOLDED into BOSS-PLAN §6 Mythos THREE ACTS (2026-07-10).** |
 
 ### G. Infra / REFIT-P4 / server-MMO (`net_server` / `run_director` / `world_shell`)
 

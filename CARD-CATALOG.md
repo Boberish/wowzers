@@ -161,6 +161,12 @@ Three ladders: **Headsman** (bank-and-burst) · **Ironside** (guard engine) · *
 | **Read the Room** | STRAT | haiku | 🟡 | A READ: +1 wind, next counter +8/12/16%; O stacks ×2. |
 | **Roll With It** | EASE | haiku | 🟡 | Good dodge on tall: leak → 3s bleed, +0.5/0.7/1 wind (the lane's one pardon, dressed for the duet). |
 
+### Boons — LANE: THE GAZE (aggro — NEW 2026-07-10, `BOSS-PLAN §1` V#9; taunt button deleted, these are the insurance)
+| Card (id) | Type | Rarity | Status | Effect |
+|---|---|---|---|---|
+| **Lodestone** | STRAT | haiku | 💡 | Perfect MAIN restores ×2/×2.5/×3 the base flow spike (the taunt-shaped play, skill-gated — CARRY to Warden). |
+| **Hard Stare** | EASE | haiku | 💡 | Flow floor +10/15/20% — your aggro can never fully collapse (peels stay possible, random-targeting doesn't; CARRY to Warden). |
+
 ### Boons — LANE: THE BANK
 | Card (id) | Type | Rarity | Status | Effect |
 |---|---|---|---|---|

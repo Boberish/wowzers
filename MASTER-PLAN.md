@@ -663,40 +663,37 @@ combat pillars eventually — Bill isn't sure of the end state yet, so we do NOT
 recast through the Forge/casting-pool era). The only simmed, maintained bosses are **the 4 Seals**
 (`raid_sim`): Vorathek · MISTRAL · GEMINI · MYTHOS — and they get the pass below.
 
-**SEAL PILLAR PASS v1 — nudge the 4 Seals toward the pillars (design 2026-07-06 with Bill; CLAIMABLE).**
-**➡ Full execution brief for the claiming agent: `SEAL-PILLAR-PLAN.md`** (beat-source map with
-today's numbers, Phase A byte-identical instrumentation spec, per-Seal starting knobs, band
-targets, gates, env notes). The summary below stays as the section-of-record.
-Goal: "update what we have a bit closer to the end goal" — cheap, reversible tuning, NOT a rework.
-The pillar that bites today is **DODGE RATION** (WORLD-PLAN pillar 2): less footwork for dps/heals,
-tanks keep the densest; marquee moments survive.
-1. **Instrument BEFORE touching content:** add a per-seat **beat-budget diagnostic** to `raid_sim`
-   (answerable beats/run per seat per Seal, from the existing grade counters in `seat.diag`/events).
-   Print today's table first — the suspects are the rand-beat casts (Mixture of Fists · A/B Test ·
-   Agentic Fan-Out) and aoe string counts; **ULTRATHINK stays whole** (3 beats, the raid's best
-   moment — marquee, not weather).
-2. **Retune to budget (~3–8 answerable beats/fight for non-tank seats):** prefer lowering rand-beat
-   cast FREQUENCY (cooldowns) and victims-per-cast over deleting moments; tank strings
-   (Double-Check etc.) untouched. ⚠ M7.2's lesson runs in REVERSE here: removing beats un-freezes
-   scheduler time and SOFTENS the boss — retune each Seal's other cadence to keep the pressure
-   (don't let MYTHOS sloppy drift up from 43 to "free").
-3. **Interrupt content: HANDS OFF for now.** Kick chains stay tuned for the old kick verb
-   (~~the frozen Voidcaller still plays the caster seat~~ — **DELETED 2026-07-10 THE PURGE; the
-   Alchemist default carries NO kick, so verses go uncontested in the interim**); they retune when
-   **interrupt-by-ability** lands with the Framework-v2 reworks (WORLD-PLAN pillar 3 / W5) and
-   "who carries kicks" actually exists.
-4. **Deliberate re-baseline:** bands WILL shift — that's the point, not a regression. Fresh
-   300-seed bands per Seal recorded here; keep expert ≈100 and the MISTRAL→GEMINI→MYTHOS curve;
-   loose tiers must still lose. Blade seat is mid-rework (Tempo), so treat exact percentages as
-   indicative — gate hard on determinism + the beat-budget table, not on ±a few pp.
-**Acceptance:** `raid_sim` determinism PASS ×4 Seals; per-seat beat budgets within 3–8 non-tank
-(documented exceptions allowed, e.g. ULTRATHINK); difficulty curve preserved; `ui_smoke_raid` +
-`net_smoke` green; new bands + beat table recorded in this section.
+**THE SEAL REWORK v1 — the 4-boss redo (Bill's go 2026-07-10; 🟡 at his 10-verdict board).**
+**➡ THE spec: `BOSS-PLAN.md`** — fills the DESCENT §4 timer contract (**5 / 7 / 9 / 12 min**,
+today 2.7/2.0/2.9/3.3) with STRUCTURE, never +HP. The section-of-record in brief:
+- **Identities (§V#1):** VORATHEK = **THE AXE** (slow huge honest hits, the learnable teaching
+  loop, the raid's only silent boss) · MISTRAL = **THE EXPERTS** (tempo boss; visible
+  Mixture-of-Experts stance loop + interactive charge counter + visible FREE-TIER enrage) ·
+  GEMINI = **THE TWINS** (two alternating minds FLASH/PRO on one pool · feint capital ·
+  MODEL PROMOTION at 50% · BARD.EXE ×2 · one mini dialogue break) · MYTHOS = **THE THREE
+  ACTS** (Helpful→Harmless→Honest as real ability-set acts with dialogue curtains · LISTENING ·
+  THE ESCALATION mark relay · Compaction = flow dump · ULTRATHINK untouched forever).
+- **TAUNT BUTTON REMOVED (Bill, LOCKED — BOSS-PLAN §1):** aggro 100% passive, tank regains by
+  flow; valve = perfect-MAIN flow spike + aggro boon lane (LODESTONE/HARD STARE 💡);
+  THREAT_DROP re-based as FLOW DUMP; TANK-PLAN §1c/§8.0 + WORLD-PLAN + ledger amended.
+- **Tuning spine (§2):** every pacing number on per-Seal `SealTune` (E4) + tune.sh flags + sim
+  TTK/beat-budget/act-timeline gates — playtest-turnable without a playtest, nothing bakes.
+- **Density ramp (§3):** Seal I presents 1–2 raid answers (~3–5 beats), +1 type/beat per rung
+  to Mythos ~6–8; dodge kept everywhere, never heavy. Two-stream law: melee = invisible tank
+  tempo; all authored content = telegraphs in declared visual lanes (§4).
+- **Engine addenda (§7, all guarded):** E1 gated ability sets · E2 stance cycler · E3 BREAK
+  dialogue curtain · E4 SealTune · E5 mark relay (V#8) · E6 deny-race empower · E7 LISTENING.
+- **Build (§8):** S0 instrumentation (byte-identical, absorbs SEAL-PILLAR Phase A) → per-Seal
+  slices S2–S5 after `wow-descent-map` + Wave-1 flow-aggro merge — the 5th deliberate
+  re-baseline, one bang per slice, untouched Seals byte-identical per slice.
+**Supersedes `SEAL-PILLAR-PLAN.md`** (never executed; Phase A absorbed as Slice 0; its
+beat-source map + 3–8 budget + ULTRATHINK carve-out stay canon). Steal catalog (Hades II ·
+StS1/2 · AtO · Punch-Out/Furi/Sekiro genre) in BOSS-PLAN §5; research run 2026-07-10 (7 agents).
 
 **Next up:**
 - ~~Theme reskin of solo bosses~~ — DE-SCOPED 2026-07-02 (solo stays rift-fantasy; the AI identities moved to the Realm 1 casting pool, see §REALMS).
-- **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — design against `RAID-PLAN.md` R3.
-- **OPUS phase design** (Helpful/Harmless/Honest) — the raid finale deserves authored phases, not just the curse.
+- **Aura-add mechanic** (from Manastorm): a mid-fight elite that BUFFS the boss until killed — creates a real add-vs-boss decision AND attacks the R3 "one telegraph source" interrupt problem. Needs engine work (second cast source) — **still parked; BOSS-PLAN v1 deliberately needs no 2nd telegraph source.**
+- ~~**OPUS phase design** (Helpful/Harmless/Honest)~~ — **FOLDED into BOSS-PLAN §6 Mythos (2026-07-10)**: the three acts are the finale's spec now.
 **Open ideas:** boss "patch notes" as Trial-Ladder flavor; a Stable-Diffusion illusion miniboss (all feints, low HP).
 **Acceptance (fresh-slate era):** `raid_sim` determinism PASS, bands within intent, byte-identical for untouched Seals (solo-boss content is unsimmed until recast — see BOSS-REDO ERA note).
 
@@ -843,7 +840,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   BYTE-IDENTICAL bar: ab-gate raid_sim + twinfang_sim. *(rails session v2 — the twinfang kit
   split remains the last P4 item after this)*
 
-- ☐ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW).** Bill's
+- ☑ 2026-07-10 · main (docs only) — **CLAIM: THE SEAL REWORK PLAN (`BOSS-PLAN.md` NEW) — DONE,
+  🟡 AT BILL'S 10-VERDICT BOARD (BOSS-PLAN §V).** Delivered: BOSS-PLAN.md (laws · taunt-removal
+  aggro spec · SealTune tuning spine · density ramp · visual-grammar law · 15-steal catalog +
+  parked/rejected lists · 4 fight scripts to contract · 7 engine addenda · 6-slice build order);
+  ripples amended in the same commit (TANK-PLAN §1c ×3 + §8.0 budget · WORLD-PLAN §raid-identity ·
+  SEAL-PILLAR-PLAN superseded banner · MASTER §BOSSES rewritten · ledger rows · CARD-CATALOG
+  THE GAZE lane 💡×2 · CLAUDE.md index). Research: 7-agent workflow (engine inventory + constraint
+  sheet + Hades II/StS/AtO/duel-genre steals). Build gates: after `wow-descent-map` merge +
+  Wave-1 flow-aggro. *(boss-rework session)* — original claim text follows:
+  Bill's
   go (2026-07-10): the 4-Seal boss redo begins — fill the DESCENT §4 timer contract (5/7/9/12 min)
   with STRUCTURE (phases · adds · dialogue breaks), never +HP; update the Seals to the post-overhaul
   systems (flow-aggro peels · one-dodge · interrupt-by-ability posture · PACK engine); **Bill's
