@@ -173,7 +173,7 @@ claimable only when its §0 slate row is 🟡/✅ — a ⏭ slate skips its deck
 
 | # | Target | Deck lands in | Status | Claimed | Note |
 |---|---|---|---|---|---|
-| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` | 🔄 | 07-10 02:39 | Waits on the §14 REDO (row 0) — ✓ landed. Fold A1–A9 ledger verdicts + Through-Line/On-the-Beat drift in. |
+| D0 | Twinfang · **Tempo** | `TEMPO-PLAN.md` §17 | 🟡 | — | LANDED 07-10: DECK v3 around Wound·Swift·Finish (Bill's own archetypes; ✅ picks can swap → cheap re-run). 6 new boons + 2 creeds + Hemorrhage module + 2 keystones + THE SET PIECE CD; trim table + 7 tension points; catalog rows 🟡. Through-Line authored (drift closed). |
 | D1 | Tank · **Warden** | `TANK-PLAN.md` | ⬜ | — | Receives the 🔮 re-homed guard cards (ledger). No-dodge kit: EASE knobs live on BLOCK reads. |
 | D2 | Tank · **Duelist** | `TANK-PLAN.md` | ⬜ | — | Deck v1 already AT BILL'S BOARD — this pass is a **v2 REVISION** around the winning themes, not a parallel deck; carry v1 verdicts that exist by then. |
 | D3 | **Bloomweaver** | `BLOOM-PLAN.md` | ⬜ | — | Double-size: lock the top CORE-MINIGAME pitch first, then author that spec's deck. |
@@ -189,7 +189,7 @@ whole decks):
 
 | Target | The 3 themes | Keystone spectacle shapes | Greed bites (what the player risks) |
 |---|---|---|---|
-| *(first deck pass writes the first row)* | | | |
+| **Tempo (D0)** | Wound · Swift · Finish | chained bleed-eruption (Exsanguinate) · beat-doubling (Double Time) · echo-finisher (The Coda) | bleed-expiry rhythm (Arterial) · self-tightening windows (Quickstep) · combo decay-hold (Heavy Ink) |
 
 ## 6. THE DECK PASS (the deep prompt — one full deck, design only, NEVER code)
 

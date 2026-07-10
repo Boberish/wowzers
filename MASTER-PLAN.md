@@ -814,11 +814,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 02:39 · main (docs only) — **CLAIM: DECK MACHINE row D0 — the Twinfang·TEMPO full
-  deck pass** (SLATE-PLAN §6: deck-creator invoked, top-3 §14 themes unless Bill has ✅ picks,
-  existing pool filed as a REVISION, coherence gates + distinctness ledger + 3 skeptics →
-  TEMPO-PLAN §17 🟡 + CARD-CATALOG rows at 🟡). Design only — no code. *(slate-machine session,
-  deck tick 02:34)*
+- ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §17 (NEW) + CARD-CATALOG D0 rows + ledger §C —
+  **DECK MACHINE row D0: THE TEMPO DECK v3 — DONE, 🟡 AT BILL'S VERDICT.** Winners = **WOUND ·
+  SWIFT · FINISH** (no ranking was recorded in the corrected §14, so the pass took Bill's own
+  correction examples — "bleeds, fast attacks, slow big ones"; his ✅ picks swap winners → cheap
+  re-run, EDGE/PUNISH/BAND cards stay filed). The REVISION: every built card filed (17.3); NEW =
+  Uptempo + Open Veins creeds (entry law per theme) · Hemorrhage module (the wound-pot CASH
+  decision) · Lacerate/Slow Bleed/Arterial Note/Quickstep/Grand Pause/Heavy Ink boons ·
+  Through-Line AUTHORED (A1 drift closed) · THE CODA + EXSANGUINATE keystones (stagger rider
+  dropped — engine-free) · the Deep Cash rig WHEN · **THE SET PIECE** signature-CD shape ·
+  the EASE knob list. Coherence gates run WITH EVIDENCE in-doc (dream drafts ×4 · trio
+  spot-checks found Da Capo's auto-skip · overlap audit · anti-pattern sweep · AI notes);
+  3 skeptics (quota breach → trim table · Brink-vs-Heavy-Ink distinctness recorded · zone-clock
+  checks). **7 tension points at Bill's board** (wild-creed gap · trims · Held Breath park ·
+  keystone offer rule · the CD · On the Beat · winner swaps). Distinctness-ledger row 1 written.
+  *(slate-machine session, deck tick 02:34)*
 
 - ☑ 2026-07-10 · main (docs only) · TEMPO-PLAN §16 (NEW) + `research/fermata-sweep.md` (NEW) +
   ledger §C row — **SLATE MACHINE row 8 (FINAL): Twinfang·FERMATA challenger slate — DONE.

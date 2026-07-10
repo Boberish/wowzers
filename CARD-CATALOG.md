@@ -204,10 +204,32 @@ Feather Step (block cost = same knob) · Deep Pockets · Powder Keg · ✦ Hold 
 ---
 
 <a id="twinfang"></a>
-## TWINFANG · TEMPO — 🔨 mostly built · keystones + 2nd spec owed
-_Stub — back-fill from `TEMPO-PLAN.md` Appendix A "THE TEMPO CARD LEDGER" (already code-linked with
-ids + SHAs) + `godot/data/twinfang/*.gd`._ Boons/creeds/modules/rig defined in `twinfang_boons.gd`,
-`twinfang_creeds.gd`, `twinfang_modules.gd`, `twinfang_rig.gd`.
+## TWINFANG · TEMPO — 🔨 mostly built · **DECK v3 (D0) 🟡 AT VERDICT 2026-07-10**
+_Built pool: back-fill from `TEMPO-PLAN.md` Appendix A (code-linked ids + SHAs) +
+`godot/data/twinfang/*.gd` still owed. **The D0 deck pass (`TEMPO-PLAN.md §17`) proposes the rows
+below** — themes WOUND · SWIFT · FINISH; every built card filed in §17.3._
+
+**New / changed cards (D0 · all 🟡 at verdict):**
+
+| Card | id | Type | Rarity | St | One line |
+|---|---|---|---|---|---|
+| **Uptempo** (creed) | `uptempo` | GREED | curated | 🟡 | Beat ~15% faster baseline, Perfects refund +2 energy — SWIFT's entry; never tightens past the F8 floor. |
+| **Open Veins** (creed) | `openVeins` | STRAT | curated | 🟡 | Bullseyes inscribe a 2-beat BLEED from run start — THE WOUND's entry; no UI at creed level. |
+| **Hemorrhage** (module) | `hemorrhage` | STRAT | — | 🟡 | The wound counter on the boss frame; bleeds +1 beat; Eviscerate may CASH the pot (+10%/bleed consumed). Builds the unbuilt data. |
+| **Lacerate** | `lacerate` | STRAT | H/S/O | 🟡 | Perfects also inscribe (half/⅔/full-value bleeds). |
+| **Slow Bleed** | `slowBleed` | POWER | H/S/O | 🟡 | Bleeds +1/+2/+2 beats & +10% tick (cap 5 beats). |
+| **Arterial Note** | `arterialNote` | GREED | H/S/O | 🟡 | Bleeds +30/40/55% harder, expire 1 beat sooner. |
+| **Through-Line** | `throughline` | STRAT | H/S/O | 🟡 | AUTHORED (was design-owed): consecutive Perfect+ +2%/stack cap 5, reset on Miss. |
+| **Quickstep** | `quickstep` | GREED | H/S/O | 🟡 | Each Perfect speeds AND tightens (~8%) your next window; floor-clamped, taper law. |
+| **Grand Pause** | `grandPause` | STRAT | H/S/O | 🟡 | Eviscerate at EXACTLY max combo +25/30/35%. |
+| **Heavy Ink** | `heavyInk` | GREED | H/S/O | 🟡 | Combo pts >3 add +10% each to the next finisher; one decays per missed beat. |
+| **THE CODA** (keystone) | `theCoda` | RULE | elite | 🟡 | Max-combo Evis inside an Opening echoes as a second free finisher. |
+| **EXSANGUINATE** (keystone) | `exsanguinate` | RULE | elite | 🟡 | Evis consuming 5+ bleeds erupts as a 3-beat chained blood-burst (engine-free; no boss stagger). |
+| **The Deep Cash** (rig WHEN) | `deepcash` | — | — | 🟡 | WHEN I consume 4+ bleeds in one Evis (~×4.5). |
+| **THE SET PIECE** (signature CD) | `setPiece` | STRAT | baseline | 🟡 | ~1-min CD: marks a 4-beat PHRASE; all Perfect+ = a build-scaled flourish. The DECK-LAYOUT §5 slot's first shape. |
+
+**Status-change proposals (Bill's call, §17 trim table):** Momentum/`flowCap` 🔨→🔮 · Da Capo 🔨→🔮 ·
+Efficiency 🔨→🔮 (or keep, park Encore) · Held Breath (creed) 🔨→🔮 · On the Beat stays 🟡 candidate.
 
 ## ALCHEMIST · BREW / CASK — 🔨 built · review-pass proposals 🟡
 _Stub — back-fill from `ALCHEMIST-PLAN.md §4` (Brew) + `§7` (Cask) + `§8` (review-pass verdicts) +
