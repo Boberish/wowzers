@@ -814,10 +814,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-10 02:14 · main (docs only) — **CLAIM: SLATE MACHINE row 7 — Alchemist·BREW
-  challenger slate** (fresh sweep → `research/brew-sweep.md` → live-deck ladders filed as PITCH
-  #0 + additive themes that don't duplicate §8's 11 proposals → 3 skeptics → `ALCHEMIST-PLAN.md`
-  new § 🟡). Docs only; no code, no CARD-CATALOG rows. *(slate-machine session, tick 02:12)*
+- ☑ 2026-07-10 · main (docs only) · ALCHEMIST-PLAN §10 (NEW) + `research/brew-sweep.md` (NEW) +
+  ledger §C row — **SLATE MACHINE row 7: Alchemist·BREW challenger slate — DONE.** The live deck
+  + §8 stand untouched; the pass adds the ladder layer: **filing** (PITCH #0a/b/c — **THE SLOW
+  BOIL** Purist sustain · **THE CANNONADE** ⭐Vessel bank-burst · **THE ANCHOR** one-poison
+  precision; zero orphans, §8's 11 proposals slot INTO the ladders) + **three additive themes**:
+  **THE TIGHTROPE** (plate-spinner's greed — deliberate near-empty catches on the see-saw, min()
+  law untouched) · **THE SIDEARM** (Spitfire weave + deliberate-kick mastery — the roster's only
+  interrupt theme; kick cards parked on the committed pillar-#3 flag, split from live cards) ·
+  **THE PROGNOSIS** (the fight-arc clock — absorbs Killing Draught + Last Call; HP milestones
+  base, phases = raid bonus; Called Shot commitment greed). 3 skeptic passes: 1 kill (**the
+  Flash Boil** — venom-lean fights the min(V,R) core law), ~7 fixes. Ranking: Tightrope ·
+  Prognosis · Sidearm. *(slate-machine session, tick 02:12)*
 
 - ☑ 2026-07-10 · main (docs only) · MENDER-PLAN §10 (NEW) + §10.7 built-pool addendum +
   `research/draw-sweep.md` (NEW) + ledger §C row — **SLATE MACHINE row 6: Well·DRAW branch slate
