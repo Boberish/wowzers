@@ -43,6 +43,18 @@ func act(obs: Dictionary) -> Dictionary:
 		react += (rng.next_float() - 0.5) * (float(latency_ticks) / 30.0)
 	react = maxf(0.03, react)
 
+	# 0) THE RHYTHM bar (BOSS-PLAN §3½) — my visible auto-attack stream. Dodge it on the
+	#    read like any small bar (checked FIRST: a bar can impact mid-wind-up of a real
+	#    telegraph, and the sooner press wins). Falls through while it isn't due yet.
+	var ry: Dictionary = obs.get("rhythm", {})
+	if not ry.is_empty() and answering == "":
+		var rrem := float(ry.get("remaining", 99.0))
+		if rrem <= react:
+			if dodge_ready and wind >= dodge_cost:
+				return {"type": "dodge"}
+			if parry_ready and wind >= parry_cost:
+				return {"type": "defense"}               # wind-tight fallback
+
 	# 1) a single DEFENSIBLE buster aimed at me → PARRY (main): it's a big hit, and a perfect
 	#    parry hits back + banks ◆. Time it for the impact window.
 	if not tg.is_empty() and bool(tg.get("targets_me", false)) and bool(tg.get("defensible", false)):
@@ -87,8 +99,10 @@ func act(obs: Dictionary) -> Dictionary:
 	# 4) the melee chip — DODGE on its rhythm ALWAYS (the dense footwork IS the mitigation, and a
 	#    dodged bar feeds flow as a byproduct). Rate-limited to the melee cadence so it never starves
 	#    the wind pool; slower when sloppy (latency widens the gap → thinner flow → the peel gradient).
+	#    RHYTHM-LESS content only — a §3½ fight exposes the real bar (step 0) and this blind
+	#    metronome would just bleed wind between bars.
 	var min_gap := 26 + latency_ticks
-	if answering == "" and dodge_ready and wind >= dodge_cost + 1.0 \
+	if ry.is_empty() and answering == "" and dodge_ready and wind >= dodge_cost + 1.0 \
 			and tick - _last_dodge_tick >= min_gap:
 		_last_dodge_tick = tick
 		return {"type": "dodge"}

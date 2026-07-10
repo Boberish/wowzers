@@ -59,6 +59,18 @@ var entered_tick: int = 0
 var melee_timer: int = 1000000
 var ability_timer: Dictionary = {}     ## StringName ability id -> ticks until due
 
+## THE RHYTHM (BOSS-PLAN §3½) — the melee channel upgraded into the tank's visible,
+## dodgeable auto-attack stream. One swing in flight at a time: armed in a telegraph
+## GAP, resolves at rhythm_impact_tick through the same _damage path old melee used
+## (the kit funnel grades the press — it was always source-agnostic). Victim is an
+## INDEX (RefCounted-cycle safe, the absorb_owner_i idiom). -1 = nothing armed.
+## Only encounters whose melee dict carries a "rhythm" key ever write these —
+## every other fight is byte-identical by construction.
+var rhythm_victim_i: int = -1
+var rhythm_impact_tick: int = 0
+var rhythm_windup_ticks: int = 0
+var rhythm_dmg: float = 0.0
+
 ## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
 ## boss damage routes to add_hp, the main body's ability timers freeze, and the
 ## main HP can't drop (it CAN still be healed — kick the medic add). Untouched solo.

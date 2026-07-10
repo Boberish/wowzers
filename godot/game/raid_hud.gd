@@ -3127,7 +3127,34 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
+		# THE RHYTHM (BOSS-PLAN §3½): between real telegraphs the victim's own
+		# auto-attack bar rides the dial as a small classic swing — same sweep, same
+		# window flare, DODGE language. Per-seat by construction (observe() only
+		# hands the bar to its victim). No bar -> the dial rests as before.
+		var ry: Dictionary = obs.get("rhythm", {})
+		if not ry.is_empty():
+			var windup := maxf(0.001, float(ry.get("windup", 0.6)))
+			var rrem := float(ry.get("remaining", 0.0))
+			var dodge_ok := bool(obs.get("dodge_ready", true))
+			_dial.tg_active = true
+			_dial.tg_rhythm = true
+			_dial.tg_name = "the rhythm"
+			_dial.tg_frac = clampf(1.0 - rrem / windup, 0.0, 1.0)
+			_dial.tg_remaining = rrem
+			_dial.tg_size = int(ry.get("size", AbilityRes.Size.LIGHT))
+			_dial.tg_heal = false
+			_dial.tg_feint = false
+			_dial.tg_interruptible = false
+			_dial.tg_defensible = true
+			_dial.tg_strikes = []
+			var rzone := float(obs.get("def_zone", 0.3))
+			_dial.zone_frac = clampf(rzone / windup, 0.0, 1.0)
+			_dial.in_zone = rrem <= rzone and dodge_ok
+			_dial.dodge_ready = dodge_ok
+			_dial.def_ready = dodge_ok       # the rhythm is answered by the dodge
+			return
 		_dial.tg_active = false
+		_dial.tg_rhythm = false
 		_dial.tg_strikes = []
 		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
 		_dial.def_ready = bool(obs.get("defense_ready", true))
@@ -3135,6 +3162,7 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	var dur := float(s.telegraph.dur_ticks) * s.dt
 	var mine := bool(tg.get("targets_me", false))
 	_dial.tg_active = true
+	_dial.tg_rhythm = false
 	_dial.tg_name = s.telegraph.ability.name
 	if not mine and s.telegraph.target != null and not bool(tg.get("heal", false)):
 		_dial.tg_name = "%s → %s" % [s.telegraph.ability.name, s.telegraph.target.unit_name]

@@ -35,7 +35,11 @@ static func create_state(enc: EncounterRes, cfg: TuningConfig, seed: int) -> Com
 	s.boss.hp_max = float(enc.hp)
 	_stagger_abilities(s.boss, enc, cfg, s.rng)
 	if not enc.melee.is_empty():
-		s.boss.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), cfg.fixed_hz)
+		# THE RHYTHM (§3½): a rhythm fight arms its first bar almost immediately — the
+		# dodge-tank's dial must never open empty (the old melee waited a full cadence).
+		s.boss.melee_timer = to_ticks(cfg.rhythm_open_delay, cfg.fixed_hz) \
+			if enc.melee.has("rhythm") \
+			else to_ticks(float(enc.melee.get("every", 1.5)), cfg.fixed_hz)
 	return s
 
 ## Arm a boss body's ability timers with the staggered opening spread — create_state
@@ -208,6 +212,14 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	}
 	if s.threat_enabled:
 		base["aggro_me"] = _threat_target(s) == seat   # raid: am I the boss's victim?
+	# THE RHYTHM (§3½): the in-flight bar, visible ONLY to its victim — the tank reads
+	# its stream, a strayed DPS reads its own warning, nobody else sees anything.
+	if s.boss.rhythm_victim_i >= 0 and s.seats[s.boss.rhythm_victim_i] == seat:
+		base["rhythm"] = {
+			"remaining": float(s.boss.rhythm_impact_tick - s.tick) * s.dt,
+			"windup": float(s.boss.rhythm_windup_ticks) * s.dt,
+			"size": AbilityRes.Size.LIGHT,
+		}
 	if s.boss.add_i >= 0:
 		var ad: AddRes = s.encounter.adds[s.boss.add_i]
 		base["add"] = {"name": ad.name,
@@ -278,19 +290,25 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 
 	# Continuous, untelegraphed melee — keeps ticking even during a telegraph.
 	# While an add holds the field, its own melee (possibly none) replaces the boss's.
+	# THE RHYTHM (§3½): a melee dict carrying a "rhythm" key routes to the upgraded
+	# channel instead — same cadence/damage/peel, but each swing is a visible wind-up
+	# the victim can answer. Every rhythm-less fight takes the old path verbatim.
 	var melee: Dictionary = enc.melee if s.boss.add_i < 0 else (enc.adds[s.boss.add_i] as AddRes).melee
 	if not melee.is_empty():
-		s.boss.melee_timer -= 1
-		while s.boss.melee_timer <= 0:
-			var mn := float(melee.get("min", 10.0))
-			var mx := float(melee.get("max", 15.0))
-			var mtgt := _aggro_peel(s, _tank_seat(s)) if s.threat_enabled else _tank_target(s)
-			if mtgt == null:
-				mtgt = _tank_target(s)
-			_damage(s, mtgt, s.rng.next_range(mn, mx), &"melee")
-			if s.threat_enabled:                   # STATS PAGE v2 — aggro / stray-shot accounting
-				_note_melee_victim(s, mtgt)
-			s.boss.melee_timer += to_ticks(float(melee.get("every", 1.5)), s.config.fixed_hz)
+		if melee.has("rhythm"):
+			_tick_rhythm(s, melee)
+		else:
+			s.boss.melee_timer -= 1
+			while s.boss.melee_timer <= 0:
+				var mn := float(melee.get("min", 10.0))
+				var mx := float(melee.get("max", 15.0))
+				var mtgt := _aggro_peel(s, _tank_seat(s)) if s.threat_enabled else _tank_target(s)
+				if mtgt == null:
+					mtgt = _tank_target(s)
+				_damage(s, mtgt, s.rng.next_range(mn, mx), &"melee")
+				if s.threat_enabled:                   # STATS PAGE v2 — aggro / stray-shot accounting
+					_note_melee_victim(s, mtgt)
+				s.boss.melee_timer += to_ticks(float(melee.get("every", 1.5)), s.config.fixed_hz)
 
 	# A telegraph is winding up: advance it; resolve on completion. Ability timers
 	# are FROZEN meanwhile (faithful to the prototypes — only one swing at a time).
@@ -328,6 +346,48 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 		var gap := best.cd / maxf(0.01, ph.speed) + s.rng.next_float() * best.jitter
 		s.boss.ability_timer[best.id] = to_ticks(gap, s.config.fixed_hz)
 		_start_telegraph(s, best)
+
+## THE RHYTHM (BOSS-PLAN §3½) — the tank stream, riding the melee channel's rules:
+##  · RESOLVE at impact even during a telegraph (melee always kept ticking) — the
+##    victim's kit funnel grades whatever press is active (source-agnostic since M0).
+##  · ARM only in a telegraph GAP — the rhythm fills between the boss's real swings,
+##    so bars never stack presses (the WEAVE: one press answers one bar).
+##  · The victim rolls at ARM time via the same aggro peel old melee used, so the
+##    wind-up shows who is marked; a strayed bar winds up rhythm_stray_windup longer
+##    (the un-warned victim's reaction grace) and only the victim ever sees it.
+##  · Cadence: authored "every" ≈ the impact period (the wind-up folds into the
+##    countdown, floor 1 tick), so old melee numbers keep meaning what they said.
+static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
+	var hz := s.config.fixed_hz
+	if s.boss.rhythm_victim_i >= 0:                     # a swing is in flight
+		if s.tick < s.boss.rhythm_impact_tick:
+			return
+		var victim: Seat = s.seats[s.boss.rhythm_victim_i]
+		s.boss.rhythm_victim_i = -1
+		if victim.alive():                              # a bar aimed at the fallen fizzles
+			_damage(s, victim, s.boss.rhythm_dmg, &"rhythm", AbilityRes.Size.LIGHT)
+			if s.threat_enabled:                        # aggro / stray-shot accounting
+				_note_melee_victim(s, victim)
+		var period := to_ticks(float(melee.get("every", 1.5)), hz)
+		s.boss.melee_timer += maxi(1, period - s.boss.rhythm_windup_ticks)
+		return
+	if s.telegraph != null:                             # gap-fill: never arm under a real swing
+		return
+	s.boss.melee_timer -= 1
+	if s.boss.melee_timer > 0:
+		return
+	var victim := _aggro_peel(s, _tank_seat(s)) if s.threat_enabled else _tank_target(s)
+	if victim == null:
+		victim = _tank_target(s)
+	if victim == null:
+		return
+	var windup := float(melee.get("rhythm", 0.6))
+	if victim != _tank_seat(s):
+		windup *= s.config.rhythm_stray_windup
+	s.boss.rhythm_victim_i = s.seats.find(victim)
+	s.boss.rhythm_windup_ticks = maxi(1, to_ticks(windup, hz))
+	s.boss.rhythm_impact_tick = s.tick + s.boss.rhythm_windup_ticks
+	s.boss.rhythm_dmg = s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0)))
 
 ## Begin a telegraph for `ab` — shared by the scheduler and chain links. Its
 ## rand_target beats roll their victims NOW so the wind-up shows who is marked.

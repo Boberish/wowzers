@@ -38,6 +38,11 @@ extends Resource
 @export var dmg_buff_cap: float = 0.55         ## EMPOWER_BOSS permanent-buff ceiling (+55%)
 @export var curse_answer_window: float = 2.0   ## a taunt within this of a THREAT_DROP answers the curse
 
+# --- THE RHYTHM (BOSS-PLAN §3½; only melee dicts carrying a "rhythm" key read these —
+#     every other fight is byte-identical) ---
+@export var rhythm_open_delay: float = 0.5     ## first rhythm bar arms this many seconds in (kills the empty opening)
+@export var rhythm_stray_windup: float = 1.6   ## a strayed (aggro-peel) bar winds up this much LONGER (the victim's reaction grace)
+
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
 @export var sunder_max: float = 5.0            ## pip ceiling
