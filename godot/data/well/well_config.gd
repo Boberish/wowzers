@@ -33,6 +33,17 @@ extends Resource
 @export var glint_mult: float = 1.40       ## glinted ally deals ×this damage
 @export var glint_dur: float = 4.0         ## seconds
 
+# --- SKIN (the water's film — the missing-heal base cast, MENDER §13.2). Grades like every
+#     cast; for skin_dur seconds the ally's incoming hits SOFTEN — a share DEFERS into a drip
+#     over skin_drip_sec. Never absorbs, never heals: every point still arrives, just LATE.
+#     Draw-graded / Brim-plain (§0). ALL guarded: no skin cast ⇒ no seat ever gets the drip
+#     fields ⇒ the reducer's skin branch is a dead -1 compare ⇒ byte-identical. ---
+@export var skin_dur: float = 6.0          ## seconds the film clings to the ally
+@export var skin_drip_sec: float = 3.0     ## a deferred chunk drips over this many seconds
+@export var skin_defer_clean: float = 0.35 ## CLEAN release: this fraction of each hit defers
+@export var skin_defer_plain: float = 0.20 ## plain/overrun/undercook (and every Brim cast): softer
+@export var skin_defer_still: float = 0.45 ## STILL POINT: the deepest film (+ a Glint, superset law)
+
 # --- THE DECK (creeds/modules/boons/rig — MENDER-PLAN §2-5). ALL guarded: an empty creed
 #     + no modules + no boons + no rig reproduce the base numbers, so the base build stays
 #     byte-identical (the sim gate). Creed multipliers live on WellCreeds; these are the
@@ -84,6 +95,7 @@ extends Resource
 @export var book: Dictionary = {
 	"flash":    {"name": "Flash Heal", "key": "1", "charges": 2, "cast": 1.5, "heal": 70.0,  "target": true},
 	"mend":     {"name": "Mend",       "key": "2", "charges": 1, "cast": 2.6, "heal": 95.0,  "target": true},
+	"skin":     {"name": "Skin",       "key": "e", "charges": 1, "cast": 1.4,                "target": true, "skin": true},
 	"cascade":  {"name": "Cascade",    "key": "3", "charges": 3, "cast": 2.0, "heal": 45.0,  "target": false, "aoe": 3,  "cd": 8.0},
 	"spring":   {"name": "Wellspring", "key": "4", "charges": 4, "cast": 2.5, "heal": 55.0,  "target": false, "aoe": 99, "cd": 22.0},
 	"dispel":   {"name": "Dispel",     "key": "q", "charges": 0, "cast": 0.0,                "target": true,  "offgcd": true, "cd": 8.0, "dispel": true},
@@ -96,4 +108,4 @@ extends Resource
 ## The bar for an Aspect. Both specs share the whole book — the aspect only changes how
 ## the graded window reads, not the buttons.
 func loadout(_aspect: String) -> Array:
-	return ["flash", "mend", "cascade", "spring", "dispel", "rekindle"]
+	return ["flash", "mend", "skin", "cascade", "spring", "dispel", "rekindle"]

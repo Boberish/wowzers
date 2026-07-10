@@ -55,6 +55,7 @@ static func update(s: CombatState) -> void:
 		if seat.kit != null and seat.alive():
 			seat.kit.upkeep(s, seat)
 	_apply_seat_effects(s)                 # 2b. HoTs heal, DoTs tick, wards expire
+	_tick_skin(s)                          # 2b′. SKIN drip — deferred damage arrives late (guarded)
 	if s.boss.sunder > 0.0:                # 2c. SUNDER bleeds toward 0 (guarded — only the tank feeds it)
 		s.boss.sunder = maxf(0.0, s.boss.sunder - s.config.sunder_decay * s.dt)
 	if s.boss.debilitate > 0.0:            # DEBILITATE bleeds toward 0 (guarded — only the Alchemist feeds it)
@@ -999,6 +1000,23 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 			meter_shield(s, hseat, &"ward", eaten)      # mitigation, tracked apart from heals
 			if hseat != null and hseat.kit != null:
 				hseat.kit.on_absorb(s, hseat, seat, eaten, emptied)
+	# SKIN (the Well's film — MENDER §13.2): a share of a landed hit DEFERS into a slow drip
+	# instead of arriving now — the immediate `d` softens, the deferred chunk is drained later
+	# by _tick_skin as LATE damage (never re-mitigated, never pardoned — the film re-times).
+	# Guarded: a seat that was never skinned has no skin_until_tick (-1) ⇒ no-op ⇒ byte-identical.
+	if d > 0.0 and s.tick < int(seat.vars.get("skin_until_tick", -1)):
+		var sfrac := float(seat.vars.get("skin_frac", 0.0))
+		if sfrac > 0.0:
+			var chunk := d * sfrac
+			d -= chunk
+			var dticks := maxi(1, int(seat.vars.get("skin_drip_ticks", 1)))
+			var drip: Array = seat.vars.get("skin_drip", [])
+			drip.append({"rem": chunk, "per": chunk / float(dticks), "src": src})
+			seat.vars["skin_drip"] = drip
+			var sci := int(seat.vars.get("skin_caster_i", -1))   # credit the film's caster (recap-only)
+			if sci >= 0 and sci < s.seats.size():
+				var cs: Seat = s.seats[sci]
+				cs.vars["skin_deferred"] = float(cs.vars.get("skin_deferred", 0.0)) + chunk
 	var pre_frac := seat.hp / maxf(1.0, seat.hp_max)   # GEAR-2: dip detector reads the crossing
 	seat.hp -= d
 	if seat.hp < 0.0:
@@ -1010,6 +1028,33 @@ static func _damage(s: CombatState, seat: Seat, amt: float, src: StringName,
 	if d > 0.0:
 		meter_taken(s, seat, src, d, src != &"enrage")   # enrage is per-tick chip — totals only
 		_emit(s, {"t": "hurt", "seat": seat, "player": seat.is_player, "amt": int(d), "size": size})
+
+## SKIN drip drain (MENDER §13.2): the deferred chunks arrive as LATE damage, drained linearly
+## over ~skin_drip_sec. Applied OUTSIDE _damage on purpose — the film never re-softens its own
+## drip and never re-mitigates it; it re-TIMES damage, it does not delete it (a drip can still
+## kill). Guarded: only a seat that was actually skinned carries `skin_drip`, so an unused SKIN
+## touches nothing and stays byte-identical. Chunks drain in append order (deterministic).
+static func _tick_skin(s: CombatState) -> void:
+	for seat in s.seats:
+		if not seat.alive() or not seat.vars.has("skin_drip"):
+			continue
+		var drip: Array = seat.vars["skin_drip"]
+		if drip.is_empty():
+			continue
+		var kept: Array = []
+		for chunk in drip:
+			var take := minf(float(chunk["rem"]), float(chunk["per"]))
+			if take <= 0.0:
+				continue
+			seat.hp -= take
+			if seat.hp < 0.0:
+				seat.hp = 0.0
+			meter_taken(s, seat, StringName(chunk["src"]), take, false)   # honest source, totals-only
+			var rem := float(chunk["rem"]) - take
+			if rem > 0.01:
+				chunk["rem"] = rem
+				kept.append(chunk)
+		seat.vars["skin_drip"] = kept
 
 ## Win condition (stat-block allies): boss loses Σ (living ally.dps * f(hp%)) * dt.
 static func _apply_group_damage(s: CombatState, dt: float) -> void:

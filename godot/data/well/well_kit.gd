@@ -319,6 +319,8 @@ func _resolve(s: CombatState, seat: Seat, id: String, target: Seat, mode: String
 	match id:
 		"flash", "mend":
 			_direct_heal(s, seat, target, float(sp["heal"]) * mult * shm, id, mode)
+		"skin":
+			_apply_skin(s, seat, target, mode)              # the water's film — heals 0, defers damage
 		"cascade":
 			_heal_lowest(s, seat, int(sp.get("aoe", 3)), float(sp["heal"]) * mult * shm, id)
 			_draw_feedback(s, seat, mode, null)             # AoE: Current only, no Glint (base)
@@ -409,6 +411,31 @@ func _on_pour(s: CombatState, seat: Seat, target: Seat, eff: float, frac_before:
 	seat.vars["pour_chain"] = int(seat.vars.get("pour_chain", 0)) + 1
 	# BENEDICTION module: a good grade lights a pip.
 	_bene_pip(s, seat)
+
+## SKIN (the water's film — MENDER §13.2): the missing-heal cast. Sets a per-seat DEFERRAL on
+## the ally for skin_dur seconds — the grade sizes the fraction (Draw grades the release; Brim
+## casts it plain via mode "land"). It heals ZERO and blocks ZERO: the reducer's _tick_skin
+## drains the deferred chunks later as real damage. The Still Point also fires the Glint (the
+## F15 superset law). A graded Draw release feeds the Current like any clean/still draw — one
+## grammar, the whole reason it's a cast and not a free proc.
+func _apply_skin(s: CombatState, seat: Seat, target: Seat, mode: String) -> void:
+	if target == null or not target.alive():
+		return
+	var frac := cfg.skin_defer_plain
+	match mode:
+		"still": frac = cfg.skin_defer_still
+		"clean": frac = cfg.skin_defer_clean
+		_:       frac = cfg.skin_defer_plain   # land (Brim) · overrun · under · held · instant
+	target.vars["skin_until_tick"] = s.tick + _tt(s, cfg.skin_dur)
+	target.vars["skin_frac"] = frac
+	target.vars["skin_drip_ticks"] = maxi(1, _tt(s, cfg.skin_drip_sec))
+	target.vars["skin_caster_i"] = s.seats.find(seat)   # index — cycle-safe co-op credit
+	if mode == "still":
+		_glint(s, target)
+	CombatCore._bump_diag(s, seat, "well_skin")
+	CombatCore._emit(s, {"t": "well_skin", "seat": target, "caster": seat, "player": seat.is_player, "frac": frac})
+	if aspect == "draw":
+		_draw_feedback(s, seat, mode, null)   # a graded skin release rides the Current/rig economy
 
 ## OVERFLOWING CUP boon: a share of the spill isn't wasted — it heals the most-hurt ally.
 func _on_spill(s: CombatState, seat: Seat, over: float) -> void:
@@ -573,6 +600,15 @@ func _add_absorb(s: CombatState, target: Seat, amt: float, caster: Seat) -> void
 	target.absorb_owner_i = s.seats.find(caster)            # co-op credit (index — cycle-safe)
 	target.ward_until_tick = maxi(target.ward_until_tick, s.tick + _tt(s, 12.0))
 
+## The still-pending deferred damage on an ally (the drip yet to land) — the HUD reads it to
+## draw the film's trailing wound. 0.0 when the ally was never skinned (byte-neutral read).
+func _skin_pending(u: Seat) -> float:
+	var drip: Array = u.vars.get("skin_drip", [])
+	var pending := 0.0
+	for chunk in drip:
+		pending += float(chunk.get("rem", 0.0))
+	return pending
+
 func _all_topped(s: CombatState, _seat: Seat, frac: float) -> bool:
 	for u in s.seats:
 		if u.role == "healer":
@@ -641,9 +677,11 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var party: Array = []
 	for u in s.seats:
 		if u.role != "healer" or (s.threat_enabled and u == seat):
+			var skinned := s.tick < int(u.vars.get("skin_until_tick", -1))
 			party.append({"seat": u, "name": u.unit_name, "role": u.role,
 				"frac": u.hp_frac(), "hp": u.hp, "max": u.hp_max, "absorb": u.absorb,
-				"debuff": not u.debuff.is_empty(), "hots": u.hots.size(), "dead": not u.alive()})
+				"debuff": not u.debuff.is_empty(), "hots": u.hots.size(), "dead": not u.alive(),
+				"skin": skinned, "skin_drip": _skin_pending(u)})
 	var o := {
 		"tick": s.tick,
 		"aspect": aspect,
@@ -690,6 +728,11 @@ func recap_spec(_s: CombatState, seat: Seat) -> Array:
 		rows.append({"label": "Pours", "value": str(int(d.get("well_pour", 0))), "hint": "charged heals cast"})
 	if int(d.get("dispel", 0)) > 0:
 		rows.append({"label": "Dispels", "value": str(int(d.get("dispel", 0))), "hint": ""})
+	if int(d.get("well_skin", 0)) > 0:
+		rows.append({"label": "Skins", "value": str(int(d.get("well_skin", 0))), "hint": "films cast"})
+	var deferred := int(seat.vars.get("skin_deferred", 0.0))
+	if deferred > 0:
+		rows.append({"label": "Damage re-timed", "value": str(deferred), "hint": "deferred by Skin"})
 	var cur := int(seat.vars.get("charges", -1))
 	if cur >= 0:
 		rows.append({"label": "Charges left", "value": str(cur), "hint": "at the final bell"})
