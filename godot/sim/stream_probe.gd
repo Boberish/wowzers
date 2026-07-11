@@ -23,6 +23,8 @@ func _initialize() -> void:
 	_probe_fight("dense", DuelistContent.make_dense(), 11, ticks)
 	_probe_fight("spike", DuelistContent.make_spike(), 12, ticks)
 	_probe_seal(ticks)
+	print("continuity metrics (v3, Slice 1 — PRINTED not asserted; Slice 2 flips to hard):")
+	_probe_seals_continuity(mini(ticks, 1200))       # all 4 Seals + immutability/no-reuse HARD
 	_probe_freshness()
 	if _fails == 0:
 		print("STREAM PROBE: ALL OK")
@@ -56,8 +58,19 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 	var seq: Array = []                               # publish order of (id, kind)
 	var last_real := ""                               # grammar memory (busters)
 	var opener_checked := false
+	var blank := 0                                    # consecutive empty-runway ticks
+	var max_blank := 0                                # the felt "second between generations"
+	var min_runway := 1.0e9                           # shortest non-LATE impact-publish lead
 	while not s.over and s.tick < ticks:
 		var obs := CombatCore.observe(s, tank)
+		# --- continuity METRIC (Slice 1: printed, not asserted) ---
+		var so_m: Dictionary = obs.get("stream", {})
+		if so_m.has("bars"):
+			if (so_m["bars"] as Array).is_empty():
+				blank += 1
+				max_blank = maxi(max_blank, blank)
+			else:
+				blank = 0
 		var a: Dictionary = tank.policy.act(obs)
 		if not a.is_empty():
 			CombatCore.perform(s, tank, a)
@@ -70,8 +83,15 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 			present[id] = true
 			var snap := {"kind": b["kind"], "disguise": b["disguise"], "impact": b["impact_tick"],
 				"victim": b["victim_i"], "dmg": b["dmg"], "late": b["late"]}
+			if resolved.has(id):
+				# NO-REUSED-ID (LAW): ids are monotonic (stream_seq) and never come back —
+				# a reused id would bind a juice tween to the wrong comet.
+				_fail("%s: bar id %d REUSED after it resolved/shattered" % [label, id])
 			if not ledger.has(id):
 				ledger[id] = snap
+				if not bool(b["late"]):
+					min_runway = minf(min_runway,
+						float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt)
 				kinds[String(b["kind"])] = int(kinds.get(String(b["kind"]), 0)) + 1
 				seq.append([id, String(b["kind"])])
 				# grammar: feint never the opener · no double buster
@@ -125,8 +145,10 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 	for want in (["auto", "heavy", "feint"] if label == "spike" else ["auto", "heavy", "feint", "flurry", "eat"]):
 		if int(kinds.get(want, 0)) == 0:
 			_fail("%s: kind '%s' never published in %d ticks" % [label, want, ticks])
+	var runway_s := ("%.2fs" % min_runway) if min_runway < 1.0e9 else "n/a"
 	print("  %s: %d bars over %d ticks (over=%s), kinds=%s — laws hold"
 		% [label, ledger.size(), s.tick, s.over, kinds])
+	print("    continuity: max-blank=%.2fs  min-runway=%s" % [float(max_blank) * s.dt, runway_s])
 
 ## A real Seal (Vorathek carries the stream + globals + casts): laws under raid content.
 func _probe_seal(ticks: int) -> void:
@@ -158,6 +180,75 @@ func _probe_seal(ticks: int) -> void:
 				_fail("seal: bar %d MUTATED after publish" % id)
 		s.events.clear()
 	print("  seal(riftmaw): %d bars published — immutability holds" % ledger.size())
+
+## CONTINUITY across all four Seals under the full raid. HARD: immutability + no-reused-id.
+## PRINTED (not asserted, Slice 1): max-blank-streak in the tank's answerable runway (the
+## felt "second between generations") + min non-LATE runway (impact−publish; a comet born
+## short of the mouth). Slice 2 retires the barrier and flips these to hard gates.
+func _probe_seals_continuity(ticks: int) -> void:
+	for boss in ["riftmaw", "mistral", "gemini", "mythos"]:
+		var enc := RaidContent.encounter_by_id(boss)
+		var s := RaidContent.make_state(53, enc, {}, "tank",
+			{"healer": "well", "caster": "alchemist"})
+		var tank: Seat = s.seats[0]                    # make_state always seats the tank first
+		if tank == null or tank.role != "tank":
+			_fail("seal %s: no tank seat" % boss)
+			continue
+		var tp := tank.policy as DuelistPolicy
+		if tp != null:
+			tp.latency_ticks = 0
+			tp.rng = DetRng.new(53 * 11 + 7)
+		_continuity("seal:" + boss, s, tank, ticks)
+
+## Walk one state, HARD-asserting immutability + no-reused-id; print the continuity metrics.
+func _continuity(label: String, s: CombatState, tank: Seat, ticks: int) -> void:
+	var ledger := {}                                  # id -> committed snapshot (immutability)
+	var retired := {}                                 # id -> true (left the stream — reuse guard)
+	var t0 := s.tick
+	var blank := 0
+	var max_blank := 0
+	var min_runway := 1.0e9
+	var saw_stream := false
+	while not s.over and s.tick < t0 + ticks:
+		var obs := CombatCore.observe(s, tank)
+		var so: Dictionary = obs.get("stream", {})
+		if so.has("bars"):
+			saw_stream = true
+			if (so["bars"] as Array).is_empty():
+				blank += 1
+				max_blank = maxi(max_blank, blank)
+			else:
+				blank = 0
+		var a: Dictionary = tank.policy.act(obs)
+		if not a.is_empty():
+			CombatCore.perform(s, tank, a)
+		CombatCore.update(s)
+		var present := {}
+		for b_v in s.boss.stream:
+			var b: Dictionary = b_v
+			var id := int(b["id"])
+			present[id] = true
+			var snap := str([b["kind"], b["disguise"], b["impact_tick"], b["victim_i"], b["dmg"], b["late"]])
+			if retired.has(id):
+				_fail("%s: bar id %d REUSED after it left the stream" % [label, id])
+			elif not ledger.has(id):
+				ledger[id] = snap
+				if not bool(b["late"]):
+					min_runway = minf(min_runway,
+						float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt)
+			elif String(ledger[id]) != snap:
+				_fail("%s: bar %d MUTATED after publish" % [label, id])
+		for id in ledger:
+			if not present.has(id):
+				retired[id] = true
+		s.events.clear()
+	if not saw_stream:
+		print("  %s: no rhythm stream shipped (rhythm-less lane) — %d bars committed"
+			% [label, ledger.size()])
+		return
+	var runway_s := ("%.2fs" % min_runway) if min_runway < 1.0e9 else "n/a"
+	print("  %s: max-blank=%.2fs  min-runway=%s  (%d bars, immutable, no reuse)"
+		% [label, float(max_blank) * s.dt, runway_s, ledger.size()])
 
 ## Freshness: different seeds → different sequences; the same seed → byte-identical.
 func _probe_freshness() -> void:

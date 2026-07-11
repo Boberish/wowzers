@@ -10,8 +10,8 @@
 ## FEINT = a disguise wearing a real shape + word, PURPLE is the only tell · FLURRY beat
 ## cluster (WEAVE — the channel mode-swaps) · EAT skull (brace). LATE bars pop in mid-track
 ## with a flash (THE SPEED LAW: difficulty is WHEN a bar appears, never how fast it moves;
-## whole-flow tempo shifts ride the eased `tempo` multiplier — everything compresses
-## together).
+## px/s is CONSTANT — whole-flow tempo is baked into each bar's impact_tick at publish, so
+## a faster tempo shows as comets with closer etas, never a render-side rescale — TANK-V3).
 ##
 ## THE GATE is the game-wide grading target (GRADING COHERENCE LAW): steel GRAZE band →
 ## gold GOOD → mint PERFECT → bright-gold BULLSEYE center, identical in reading to the
@@ -21,13 +21,10 @@ class_name AnswerChannel
 extends Control
 
 const PURPLE := Color("b072c9")            # the feint tell (Palette.RELIC)
-const GLOBAL_COL := Color("e0b23a")        # the boss's move (Palette.EXPOSE amber-gold)
 
 # --- fed by the band every frame (view data straight off observe()) ---
 var bars: Array = []                       ## committed stream bars: {id,kind,purple,eta,late,flurry_i,flurry_n}
-var global_bar: Dictionary = {}            ## the live GLOBAL beat: {eta} ({} = none)
-var buster_bar: Dictionary = {}            ## a telegraph buster aimed at me: {eta, purple} ({} = none)
-var tempo: float = 1.0                     ## whole-flow multiplier (eased below — no jumps)
+var tempo: float = 1.0                     ## whole-flow multiplier (TANK-V3: baked into impact_tick at publish, kept as a no-op input field)
 var flurry: bool = false                   ## FLURRY MODE (border + label + bg tint)
 var aggro_lost: bool = false               ## stream paused because the boss hunts another
 var horizon: float = 3.0                   ## the engine's publish lead (mouth = this many sec out)
@@ -37,7 +34,6 @@ var win_good: float = 0.30
 var win_graze: float = 0.50
 var parry_window: float = 0.10
 
-var _tempo_vis: float = 1.0                ## eased toward tempo (a snap would jump every comet)
 var _seen: Dictionary = {}                 ## bar id -> true (late-flash bookkeeping)
 var _flashes: Array = []                   ## [{x, t}] LATE pop-in rings
 var _stamps: Array = []                    ## [{txt, col, t}] verdict pops at the gate
@@ -49,7 +45,6 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _process(delta: float) -> void:
-	_tempo_vis = lerpf(_tempo_vis, maxf(0.25, tempo), minf(1.0, delta * 3.0))
 	_spin += delta * 2.2
 	for f in _flashes:
 		f["t"] += delta
@@ -91,7 +86,10 @@ func _gate_x() -> float:
 	return size.x - 78.0
 
 func _pps() -> float:
-	return (_gate_x() - 26.0) / maxf(0.5, horizon) * _tempo_vis
+	# CONSTANT px/s (TANK-V3, NG2): x is a pure function of eta — no global rescale can shift
+	# comets relative to each other. Whole-flow tempo is already baked into impact_tick at
+	# publish, so denser tempo shows as closer etas, never a render-side stretch.
+	return (_gate_x() - 26.0) / maxf(0.5, horizon)
 
 func _bar_x(eta: float) -> float:
 	return _gate_x() - eta * _pps()
@@ -152,20 +150,9 @@ func _draw() -> void:
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
 		_comet(x, cy, String(b.get("kind", "auto")), bool(b.get("purple", false)),
 			int(b.get("flurry_i", 0)), font)
-	# --- the live telegraph riding the channel: a GLOBAL (boss colors, DODGE) or a
-	#     targeted BUSTER (tank colors, PARRY) — both fully committed at start ---
-	if not global_bar.is_empty():
-		var gx2 := _bar_x(float(global_bar.get("eta", 0.0)))
-		if gx2 > 10.0 and gx2 < w - 10.0:
-			_octagon(gx2, cy, 19.0, GLOBAL_COL, Palette.GOLD_BRIGHT)
-			_word(font, gx2, cy, "DODGE", Palette.GOLD_BRIGHT)
-	if not buster_bar.is_empty():
-		var bx := _bar_x(float(buster_bar.get("eta", 0.0)))
-		if bx > 10.0 and bx < w - 10.0:
-			var purple := bool(buster_bar.get("purple", false))
-			_octagon(bx, cy, 18.0, PURPLE if purple else Palette.CRUSH,
-				PURPLE.lightened(0.3) if purple else Palette.CRIMSON)
-			_word(font, bx, cy, "PARRY", PURPLE if purple else Palette.CRIMSON)
+	# TANK-V3: the octagon projection is GONE. Raid-wide GLOBALS + targeted BUSTERS render on
+	# the SHARED JUDGE (boss surface), answered by the fall-through press — the channel draws
+	# ONLY the committed melee stream (one widget, one source of truth, NG1).
 	# --- LATE flashes ---
 	for f_v in _flashes:
 		var f: Dictionary = f_v
@@ -184,12 +171,12 @@ func _draw() -> void:
 	for i in _rail.size():
 		var col2 := _family_col(_rail[i])
 		draw_rect(Rect2(w - 14, h - 12.0 - float(i) * 9.0, 7, 6), col2)
-	# --- the quiet states ---
-	if bars.is_empty() and global_bar.is_empty() and buster_bar.is_empty() and _shards.is_empty():
-		var msg := "AGGRO LOST — IT HUNTS ANOTHER" if aggro_lost else ""
-		if msg != "":
-			draw_string(font, Vector2(w * 0.5 - 120, cy + 4), msg,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Palette.CRIMSON.lerp(Palette.TEXT_DIM, 0.3))
+	# --- the quiet glass: no committed melee this instant. The channel no longer goes blank
+	#     on aggro loss (peeled comets still ride it translucent), and boss GLOBALS/CASTS live
+	#     on the judge — so an empty channel just means the melee runway is momentarily clear. ---
+	if bars.is_empty() and _shards.is_empty():
+		draw_string(font, Vector2(w * 0.5 - 32, cy + 4), "— HOLD —",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Palette.TEXT_DIM)
 
 func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color) -> void:
 	col.a = 0.5

@@ -21,12 +21,10 @@ func build() -> void:
 	gauge = DuelistGauge.new()
 	UiKit.place(gauge, 0.5, 1, 0.5, 1, -200, -245, 200, -180)
 	hud._shake_root.add_child(gauge)
-	# THE CHANNEL — bottom-center, where the tank's eyes live. Everything answerable rides
-	# it, one bar at a time; the boss's SPELLS stay on the cast bar (footwork ≠ spellwork).
-	# The shared judge hides for this seat entirely — the channel IS the tank's instrument
-	# (the judge's resting ghost was photobombing behind it, WSLg pass 2026-07-11).
-	if hud._judge != null:
-		hud._judge.visible = false
+	# THE CHANNEL — bottom-center, where the tank's eyes live. It draws ONLY the committed
+	# melee stream (footwork). TANK-V3: the SHARED JUDGE stays visible for this seat and now
+	# carries the raid-wide GLOBALS + CASTS (the octagon projection is deleted); the judge's
+	# gap-frame ghost is fixed at the source (raid_hud _seat_judge_window feed-or-deactivate).
 	channel = AnswerChannel.new()
 	UiKit.place(channel, 0.5, 1, 0.5, 1, -370, -412, 370, -288)
 	hud._shake_root.add_child(channel)
@@ -93,22 +91,9 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	channel.win_good = float(obs.get("win_good", 0.30))
 	channel.win_graze = float(obs.get("win_graze", 0.50))
 	channel.parry_window = float(obs.get("parry_window", 0.10))
-	# the live telegraph riding the channel: a targeted BUSTER (parry) or a GLOBAL beat (dodge)
-	channel.buster_bar = {}
-	channel.global_bar = {}
-	var tg: Dictionary = obs.get("telegraph", {})
-	if not tg.is_empty():
-		var beats: Array = tg.get("strikes", [])
-		if beats.is_empty():
-			if bool(tg.get("defensible", false)) and bool(tg.get("targets_me", false)):
-				channel.buster_bar = {"eta": float(tg.get("remaining", 0.0)),
-					"purple": bool(tg.get("feint", false))}
-		else:
-			for bt_v in beats:
-				var bt: Dictionary = bt_v
-				if not bool(bt.get("resolved", false)) and (bool(bt.get("aoe", false)) or bool(bt.get("mine", false))):
-					channel.global_bar = {"eta": float(bt.get("remaining", 0.0))}
-					break
+	# TANK-V3: GLOBALS + BUSTERS no longer project onto the channel — they render on the
+	# shared JUDGE (raid_hud._render_dial tank branch feeds it), answered by the fall-through
+	# press. The channel is fed ONLY the committed melee stream above (NG1: one source).
 	dump_rune.affordable = int(obs.get("combo", 0)) > 0
 	dump_rune.usable = bool(obs.get("gcd_ready", true))
 	engarde_rune.usable = bool(obs.get("engarde_ready", false))

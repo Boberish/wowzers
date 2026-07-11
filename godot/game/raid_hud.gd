@@ -3143,6 +3143,10 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 		_dial.tg_strikes = []
 		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
 		_dial.def_ready = bool(obs.get("defense_ready", true))
+		# R5 FIX (feed-or-deactivate is UNCONDITIONAL, NG6): a gap frame must still feed the
+		# judge so its deactivation branch runs — otherwise it redraws a frozen ghost comet.
+		if _judge != null:
+			_judge.feed(s, obs, _seat_judge_window(obs))
 		return
 	var dur := float(s.telegraph.dur_ticks) * s.dt
 	var mine := bool(tg.get("targets_me", false))
@@ -3173,12 +3177,16 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 				_castbar.kind = "brace"
 				_castbar.window = 0.0
 	if tank_channel:
-		# the band's AnswerChannel draws the tank's globals/busters itself — the dial
-		# never arms a press for the tank; readiness still renders (rune gates).
+		# TANK-V3: the channel draws only the committed melee stream. Raid-wide GLOBALS + CASTS
+		# now render on the SHARED JUDGE for the tank too (the octagon projection is deleted),
+		# answered by the fall-through press. The big dial stays boss spectacle — tg_active
+		# stays false so the dial never arms a tank press.
 		_dial.tg_active = false
 		_dial.tg_strikes = []
 		_dial.def_ready = bool(obs.get("defense_ready", true))
 		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
+		if _judge != null:
+			_judge.feed(s, obs, _seat_judge_window(obs))
 		return
 	_dial.tg_active = true
 	_dial.tg_name = s.telegraph.ability.name
@@ -3211,15 +3219,19 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
 	if _judge != null and not is_cast:
-		var jw := 0.0
-		match _seat_key:
-			"caster":
-				jw = float(obs.get("clean_zone", 0.62))
-			"healer":
-				jw = 0.0
-			_:
-				jw = float(obs.get("def_zone", 0.3))
-		_judge.feed(s, obs, jw)
+		_judge.feed(s, obs, _seat_judge_window(obs))
+
+## The seat's classic answer window fed to the shared StrikeJudge (caster=clean zone /
+## healer=none / tank+blade=def zone). Extracted so the gap-frame + tank branches can feed
+## the judge with the same window (R5 feed-or-deactivate, NG6).
+func _seat_judge_window(obs: Dictionary) -> float:
+	match _seat_key:
+		"caster":
+			return float(obs.get("clean_zone", 0.62))
+		"healer":
+			return 0.0
+		_:
+			return float(obs.get("def_zone", 0.3))
 
 func _render_frames(s: CombatState, obs: Dictionary) -> void:
 	var victim := CombatCore._threat_target(s)
