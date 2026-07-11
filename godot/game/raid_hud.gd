@@ -8,7 +8,7 @@ extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
 const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
-const BUILD_STAMP := "build 2026-07-11 · RHYTHM LANE v1"
+const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1"
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -3137,10 +3137,14 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
-		# THE RHYTHM (BOSS-PLAN §3½): between real telegraphs the victim's own
-		# auto-attack bar rides the dial as a small classic swing — same sweep, same
-		# window flare, DODGE language. Per-seat by construction (observe() only
-		# hands the bar to its victim). No bar -> the dial rests as before.
+		# §3½ THE ONE BAR: on gap frames the Judgment Channel carries the tank's
+		# rhythm stream (empty lane = the judge's resting ghost — this also finally
+		# feeds the judge's own deactivation branch, which the early return starved).
+		if _judge != null:
+			_judge.feed_rhythm(s, obs.get("rhythm_lane", {}),
+				bool(obs.get("dodge_ready", true)), float(obs.get("def_zone", 0.3)))
+		# A strayed victim (any other class) keeps the sudden dial warning below —
+		# for them, sudden is correct. The duelist's stream lives on the judge.
 		# (§3½ v2) the DUELIST's stream lives on its RhythmLane — the dial stays a
 		# globals-only instrument for the tank. A strayed victim (any other class)
 		# keeps the sudden dial warning: for them, sudden is correct.

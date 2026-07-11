@@ -68,6 +68,8 @@ var _classic_closed := true   ## a negate/stagger already explained this classic
 var _classic_defensible := false
 var _classic_feint := false
 var _last_rem := {}           ## beat idx -> last known remaining (stamp placement)
+var _rhythm_armed := false    ## §3½ ONE BAR: a rhythm swing is in flight
+var _rhythm_answered := false ## it got a duel_answer verdict (else its end = a MISS)
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -119,6 +121,61 @@ func feed(s: CombatState, obs: Dictionary, classic_window: float) -> void:
 		_feed_classic(tg, obs, classic_window)
 	else:
 		_feed_string(beats_src, obs)
+
+## §3½ THE ONE BAR: between real telegraphs the tank's auto-attack stream rides THIS
+## channel — same gate, same bands, same comets, same verdicts. `lane` comes from
+## observe()'s tank-only rhythm_lane telemetry: armed -> the real swing's comet;
+## unarmed -> the projected NEXT swing glides in (eta = timer + windup, so the comet
+## transitions seamlessly into the armed swing — nothing ever pops). A real telegraph
+## simply takes the channel back (feed() overwrites) — globals and the rhythm share
+## one instrument, which is the whole point. Empty lane = the old resting ghost.
+func feed_rhythm(s: CombatState, lane: Dictionary, dodge_ok: bool, zone: float) -> void:
+	_perfect_w = s.config.strike_perfect
+	_good_w = s.config.strike_good
+	_graze_w = s.config.strike_graze
+	if lane.is_empty():
+		if _active:
+			_close_classic_if_unexplained()
+			_linger = maxf(_linger, 0.7)
+		_active = false
+		_beats = []
+		_combo_n = 0
+		_rhythm_armed = false
+		return
+	if _active and _kind != "rhythm":      # leaving a real telegraph for the stream
+		_close_classic_if_unexplained()
+		_seen.clear()
+		_last_rem.clear()
+		_tg_tick = -1
+	var armed := bool(lane.get("armed", false))
+	var mine_now := bool(lane.get("mine", true))
+	# an armed bar of MINE ended with no verdict -> it landed (the eaten-bar miss)
+	if _kind == "rhythm" and _rhythm_armed and not armed and _mine and not _rhythm_answered:
+		_judge_miss()
+	if armed and not _rhythm_armed:
+		_rhythm_answered = false
+	_rhythm_armed = armed
+	_active = true
+	_kind = "rhythm"
+	_classic_defensible = true             # the gold answer-window band (else-branch)
+	_classic_closed = true                 # the classic closer never re-judges the stream
+	_next_feint = false
+	_combo_n = 0
+	_beats = []
+	_size = AbilityRes.Size.LIGHT
+	_window = zone
+	_press_ok = dodge_ok
+	_dur = maxf(0.05, float(lane.get("windup", 0.6)))
+	if armed:
+		_mine = mine_now
+		_rem = float(lane.get("remaining", 0.0))
+		_name = "THE RHYTHM" if mine_now else "THE RHYTHM — PEELED"
+	else:
+		# projection: it's my NEXT swing (eta >= windup > window, so the live-window
+		# flare can never light early)
+		_mine = true
+		_rem = float(lane.get("next_eta", 0.0))
+		_name = "THE RHYTHM"
 
 func _feed_classic(tg: Dictionary, obs: Dictionary, classic_window: float) -> void:
 	_beats = []
@@ -242,6 +299,27 @@ func on_event(ev: Dictionary) -> void:
 					_set_verdict("READ — held it", Palette.RELIC)
 				StrikeRes.Grade.MISS:
 					_judge_miss()
+		"duel_answer":
+			# the Duelist funnel's press verdict (rhythm bars + its classic swings —
+			# string beats already arrive as strike_graded)
+			if _kind == "string" or not _active:
+				return
+			_rhythm_answered = true
+			_classic_closed = true
+			var dv := "DODGE" if _kind == "rhythm" else verb
+			match int(ev.get("grade", 0)):
+				StrikeRes.Grade.PERFECT:
+					_stamp(_rem, Palette.GOLD_BRIGHT, true)
+					_push_history(Palette.GOLD_BRIGHT, false, true)
+					_set_verdict("PERFECT %s" % dv, Palette.GOLD_BRIGHT)
+				StrikeRes.Grade.GOOD:
+					_stamp(_rem, Palette.GOLD, false)
+					_push_history(Palette.GOLD, false, false)
+					_set_verdict("%s!" % dv, Palette.GOLD)
+				_:
+					_stamp(_rem, Palette.STEEL, false)
+					_push_history(Palette.STEEL, false, false)
+					_set_verdict("GRAZE — half", Palette.STEEL)
 		"dodge_whiff":
 			_stamp(minf(_rem, _view_secs()), Palette.CRIMSON.darkened(0.1), false)
 			_push_history(Palette.CRIMSON.darkened(0.2), true, false)
@@ -631,7 +709,7 @@ func _draw_verdict_line(tx: float, tw: float, ty: float, th: float, font: Font) 
 	elif not _mine:
 		cue = "not yours — watch"
 	elif _in_window():
-		cue = ">>  %s  <<" % ("DODGE" if _kind == "string" else verb)
+		cue = ">>  %s  <<" % ("DODGE" if _kind == "string" or _kind == "rhythm" else verb)
 		cc = Palette.GOLD_BRIGHT
 		cc.a = 0.6 + 0.4 * sin(_pulse * 2.0)
 	elif not _press_ok:

@@ -8,7 +8,6 @@ class_name DuelistBand
 extends ClassBand
 
 var gauge: DuelistGauge
-var lane: RhythmLane
 var parry_rune: AbilityRune
 var dodge_rune: AbilityRune
 var dump_rune: AbilityRune
@@ -20,11 +19,11 @@ func build() -> void:
 	gauge = DuelistGauge.new()
 	UiKit.place(gauge, 0.5, 1, 0.5, 1, -200, -245, 200, -180)
 	hud._shake_root.add_child(gauge)
-	# THE RHYTHM LANE (§3½ v2): the auto-attack stream as permanent furniture, above
-	# the gauge where the tank's eyes already live. Self-hides in rhythm-less fights.
-	lane = RhythmLane.new()
-	UiKit.place(lane, 0.5, 1, 0.5, 1, -310, -302, 310, -254)
-	hud._shake_root.add_child(lane)
+	# §3½ THE ONE BAR: the tank answers EVERYTHING on the one Judgment Channel —
+	# re-seat it bottom-center (where the tank's eyes live), wider. Globals and the
+	# rhythm stream take turns on it; smalls read DODGE, bigs PARRY, fakes DON'T.
+	if hud._judge != null:
+		UiKit.place(hud._judge, 0.5, 1, 0.5, 1, -320, -388, 320, -284)
 	var row: HBoxContainer = hud._rune_row(-380.0, 380.0)
 	# DODGE (secondary, SPACE) — the bread
 	dodge_rune = AbilityRune.new()
@@ -85,9 +84,6 @@ func render(_s: CombatState, p: Seat, obs: Dictionary) -> void:
 	engarde_rune.cd_frac = clampf(float(eg - _s.tick) / float(CombatCore.to_ticks(60.0, _s.config.fixed_hz)), 0.0, 1.0)
 	# THE DANCER: the parry button is gone — grey the parry rune (SPACE does it all)
 	parry_rune.usable = not bool(obs.get("no_parry", false))
-	# the lane: feed the stream telemetry (armed bar / projected next / paused / strayed)
-	lane.visible = obs.has("rhythm_lane")
-	lane.feed(obs.get("rhythm_lane", {}), bool(obs.get("dodge_ready", true)))
 
 func key_pressed(code: int) -> void:
 	match code:
@@ -99,10 +95,6 @@ func key_pressed(code: int) -> void:
 			hud._ctrl.human({"type": "ability", "id": "dump"})
 		KEY_4:
 			hud._ctrl.human({"type": "ability", "id": "engarde"})
-
-func on_event(ev: Dictionary, mine: bool) -> void:
-	if mine and String(ev.get("t", "")) == "duel_answer" and lane != null:
-		lane.flash_grade(int(ev.get("grade", StrikeRes.Grade.GRAZE)))
 
 ## Mouse grammar (Bill, 2026-07-11): LEFT CLICK = DODGE · RIGHT CLICK = PARRY.
 ## Clicks that land on real buttons (pause / the runes / dev) keep their click —

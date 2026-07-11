@@ -32,7 +32,7 @@ func _process(_d: float) -> bool:
 			root.add_child(cur)
 			phase = 1
 		1:
-			cur._launch("tank", "duelist", "forge:takeover:swarm:1:301")
+			cur._launch("tank", "duelist", "forge:takeover:swarm:2:402")
 			pol = DuelistPolicy.new()
 			pol.latency_ticks = 4
 			pol.rng = DetRng.new(777)
@@ -57,14 +57,17 @@ func _process(_d: float) -> bool:
 			var me = ctrl.player()
 			if me != null:
 				var lane: Dictionary = CombatCore.observe(s, me).get("rhythm_lane", {})
-				if not lane.is_empty():
+				if not lane.is_empty() and s.telegraph == null:
 					if bool(lane.get("armed", false)) and float(lane.get("remaining", 9.0)) < 0.3:
-						_shoot("state_armed_zone")
-					elif not bool(lane.get("armed", false)) and not bool(lane.get("paused", false)):
-						_shoot("state_gap_next")
-					if bool(lane.get("paused", false)):
-						_shoot("state_paused_telegraph")
-			if got.size() >= 8 or s.over or s.tick > 2400:
+						_shoot("rhythm_armed")
+					elif not bool(lane.get("armed", false)):
+						_shoot("rhythm_next")
+				if s.telegraph != null:
+					match String(s.telegraph.ability.id):
+						"f_snap": _shoot("snap_parry")
+						"f_bluff": _shoot("bluff_feint")
+						"f_nip": _shoot("string_beats")
+			if got.size() >= 10 or s.over or s.tick > 3600:
 				phase = 3
 		3:
 			print("LANE SHOTS DONE -> ", out_dir, "  ", got.keys())
