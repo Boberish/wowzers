@@ -55,7 +55,7 @@ func build() -> void:
 func _hint() -> String:
 	var verb := "click/tap to heal — LAND it in the gold band (no spill) = POUR" if hud._aspect == "brim" \
 		else "click/tap starts the cast — click/tap AGAIN (or hold & release) in the window = CLEAN"
-	return "Hover an ally · L flash · R mend · Mid cascade · Sh+L spring · Sh+R dispel · 1-4 keys · %s · SPACE dodge" % verb
+	return "Hover an ally · L flash · R mend · Mid cascade · Sh+L spring · Sh+R dispel · Ctrl+R/E skin · 1-4 keys · %s · SPACE dodge" % verb
 
 func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var g := well_gauge
@@ -67,9 +67,40 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	g.charges_max = int(obs.get("charges_max", 12))
 	g.current = int(obs.get("current", 0))
 	g.current_max = int(obs.get("current_max", 5))
+	g.current_haste = float(obs.get("current_haste", 0.06))
+	g.millrace_ready = bool(obs.get("millrace_ready", false))
 	# the SHARED cast channel (with DRAW's release window baked in at build)
 	var casting: Dictionary = obs.get("casting", {})
 	render_castbar(s, casting, hud._wcfg.book)
+	# DRAW: feed the channel the LIVE per-cast geometry + banked state, so the DRAWN window is the
+	# one the kit grades — THE EDDY's window now moves; Narrows/Long-Draw/Deep-Still widths correct;
+	# the BANKED (Patient Hand / ⭐Vigil) held heal reads as spendable, not as a finished cast.
+	if hud._aspect == "draw" and castbar != null:
+		var cc := castbar
+		cc.frozen = bool(obs.get("frozen", false))
+		cc.flume = bool(obs.get("flume", false))
+		if obs.has("draw_lo"):                                   # a live draw cast — drifted geometry
+			cc.zone_lo = float(obs["draw_lo"]); cc.zone_hi = float(obs["draw_hi"])
+			cc.mark_lo = float(obs["still_lo"]); cc.mark_hi = float(obs["still_hi"])
+			cc.cr_hi = float(obs.get("cr_hi", -1.0))
+		else:                                                   # idle track — deck-adjusted, undrifted
+			var db := float(obs.get("draw_band", hud._wcfg.draw_band))
+			var sw := float(obs.get("still_point", hud._wcfg.still_point))
+			var sp_c := 1.0 - db * 0.5
+			cc.zone_lo = 1.0 - db; cc.zone_hi = -1.0
+			cc.mark_lo = sp_c - sw * 0.5; cc.mark_hi = sp_c + sw * 0.5
+			cc.cr_hi = -1.0
+		cc.held = bool(obs.get("held", false))
+		if cc.held:
+			var t := int(obs.get("tick", 0))
+			var hs := int(obs.get("held_start", t))
+			var hu := int(obs.get("held_until", t))
+			cc.held_frac = clampf(float(t - hs) / maxf(1.0, float(hu - hs)), 0.0, 1.0)
+			cc.held_left = maxf(0.0, float(hu - t) / 30.0)
+			cc.tremble_frac = float(obs.get("tremble_frac", -1.0))
+			cc.loosed_ready = bool(obs.get("loosed_ready", false))
+		else:
+			cc.held_left = -1.0; cc.tremble_frac = -1.0; cc.loosed_ready = false
 	# THE TARGET BAR: the cast's target while casting, else the hovered/focused ally.
 	# Brim aims the pour here (band + the in-flight heal's ghost landing).
 	var tgt: Seat = casting.get("target") if not casting.is_empty() else null
@@ -110,6 +141,17 @@ func key_pressed(code: int) -> void:
 				hold_key = code
 				hold_ms = Time.get_ticks_msec()
 			hud._cast(id)
+		KEY_E:
+			# SKIN — a graded DRAW cast like 1-4 (the advertised [E] keycap, now wired): a press
+			# while casting = the release; else arm the hold + start it on the hovered ally.
+			if hud._aspect == "draw" and not hud._ctrl.player().casting.is_empty():
+				hold_key = -1
+				hud._ctrl.human({"type": "ability", "id": "release"})
+				return
+			if hud._aspect == "draw":
+				hold_key = code
+				hold_ms = Time.get_ticks_msec()
+			hud._cast("skin")
 		KEY_Q: hud._cast("dispel")
 		KEY_R: hud._cast("rekindle")
 

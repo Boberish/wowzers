@@ -43,6 +43,8 @@ var is_you: bool = false         ## the player's own card: gilded name
 var read_mode: String = ""       ## Mender aspect read overlay: "" | "tide" | "brink"
 var ripe: bool = false           ## Bloomweaver: this ally's Growth is in the harvest window
 var glint: bool = false          ## Well: this ally is GLINTING (a perfect heal — bonus damage)
+var skinned: bool = false        ## Well/DRAW: this ally wears SKIN (the water's film — defers hits)
+var skin_pending_frac: float = 0.0  ## the still-to-arrive deferred wound (frac of max HP)
 var brim_line: float = 0.0       ## Well/BRIM: the pour window start (0 = off) — always visible
 var read_a: float = 0.60         ## Tidecaller waterline (keep bars above it)
 var read_b: float = 0.40         ## Brinkwarden band top (catch bars inside 0.15..read_b)
@@ -240,6 +242,16 @@ func _draw() -> void:
 			if gw > 0.5:
 				draw_rect(Rect2(bx + fw + aw, by + 2, gw, barh - 4),
 					Color(Palette.WIN.r, Palette.WIN.g, Palette.WIN.b, 0.28))
+		# SKIN's DEFERRED WOUND — the re-timed damage still to arrive (WATER blue, so it reads
+		# as a slow drip, NOT the immediate crimson bite): a thin slice at the fill's edge.
+		if skin_pending_frac > 0.0:
+			var dw := minf(fw, barw * skin_pending_frac)
+			if dw > 0.5:
+				var drect := Rect2(bx + fw - dw, by, dw, barh)
+				var da := 0.30 + 0.12 * (0.5 + 0.5 * sin(_pulse * 1.6))
+				draw_rect(drect, Color(Palette.WATER.r, Palette.WATER.g, Palette.WATER.b, da))
+				_stripes(drect, Color(Palette.WATER.lightened(0.25).r, Palette.WATER.lightened(0.25).g,
+					Palette.WATER.lightened(0.25).b, da + 0.18), 8.0, 1.5)
 		# INCOMING DAMAGE — hazard-striped slice, right-anchored on the EFFECTIVE bar
 		# end (fill + shield): the swing eats shield first, then HP — the dodge read.
 		if incoming_dmg_frac > 0.0:
@@ -337,6 +349,12 @@ func _draw() -> void:
 		gc.a = 0.55 + 0.35 * sin(_pulse * 3.2)
 		draw_string(ThemeDB.fallback_font, Vector2(bx + 2.0, 12.0), "✦ GLINT",
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, gc)
+	# SKIN — the water's film: a soft WATER-blue rim on the card (distinct from the gold glint)
+	# so you can see which ally is protected and re-time your triage around it.
+	if skinned and not dead:
+		var fc := Palette.WATER
+		fc.a = 0.30 + 0.16 * sin(_pulse * 1.8)
+		draw_rect(Rect2(1.5, 1.5, w - 3.0, h - 3.0), fc, false, 1.5)
 
 	# dispellable debuff: a pulsing crimson wax seal with its own countdown ring.
 	# On the XL card it takes the first column of the chip row (timer beneath, in

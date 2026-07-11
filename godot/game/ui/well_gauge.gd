@@ -23,6 +23,8 @@ var charges: int = 12
 var charges_max: int = 12
 var current: int = 0
 var current_max: int = 5
+var current_haste: float = 0.06    ## per-stack cast-time cut (fed from obs; drives the readout)
+var millrace_ready: bool = false   ## THE MILLRACE: the next cast is free — flag it by the pips
 # the target bar
 var t_show: bool = false
 var t_name: String = ""
@@ -86,8 +88,13 @@ func on_event(ev: Dictionary) -> void:
 		"well_millrace":  _flash("MILLRACE — a free cast", Palette.GOLD_BRIGHT)
 		"well_meditate":  _flash("MEDITATE — the Well refills", Palette.WATER)
 		"well_boil":      _flash("BOILING OVER — %d!" % int(ev.get("amt", 0)), Palette.BLOOD)
-		"well_held":      _flash("HELD — release on the spike", Palette.GOLD_BRIGHT)
+		"well_held":      _flash("BANKED — tap/click to release on the spike", Palette.GOLD_BRIGHT)
 		"well_gutter":    _flash("GUTTERED — the hold slipped", Palette.THORN)
+		# D6 keystones / boons — fire-moment reads (paired with the cast-channel state cues)
+		"well_flume":       _flash("WHITE WATER — every release is free!", Palette.WATER)
+		"well_glassriver":  _flash("GLASS RIVER — the water stills", Palette.WATER)
+		"well_intercept":   _flash("INTERCEPT — loosed at last", Palette.GOLD_BRIGHT)
+		"well_eddyline":    _flash("EDDYLINE — held the current", Palette.WATER)
 
 func _flash(msg: String, col: Color) -> void:
 	flash(msg, col, 1.4)   # verdict slot on the ClassGauge base
@@ -201,8 +208,12 @@ func _draw() -> void:
 		if current > 0:
 			UiKit.text_shadowed(self, UiKit.display(650, 1),
 				Vector2(px0 + float(current_max) * (chw + 7.0) + 10.0, ccy + 4.0),
-				"+%d%% CAST SPEED" % int(current * 6), HORIZONTAL_ALIGNMENT_LEFT, -1, 12,
-				Palette.WATER.lightened(0.35))
+				"−%d%% CAST TIME" % int(round(current_haste * float(current) * 100.0)),
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Palette.WATER.lightened(0.35))
+		if millrace_ready:   # THE MILLRACE: next cast is free — flag it before you press
+			UiKit.text_shadowed(self, UiKit.display(700, 1),
+				Vector2(px0 + float(current_max) * (chw + 7.0) + 10.0, ccy - 9.0),
+				"NEXT FREE", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Palette.GOLD_BRIGHT)
 		yy += 20.0
 
 	# ---- THE TARGET BAR: the ally under your hands, writ large ----
