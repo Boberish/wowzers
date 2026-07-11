@@ -32,7 +32,7 @@ func _process(_d: float) -> bool:
 			root.add_child(cur)
 			phase = 1
 		1:
-			cur._launch("tank", "duelist", "forge:takeover:swarm:2:402")
+			cur._launch("tank", "duelist", "forge:takeover:swarm:1:301")
 			pol = DuelistPolicy.new()
 			pol.latency_ticks = 4
 			pol.rng = DetRng.new(777)
@@ -62,7 +62,7 @@ func _process(_d: float) -> bool:
 						_shoot("rhythm_armed")
 					elif not bool(lane.get("armed", false)):
 						_shoot("rhythm_next")
-				if s.telegraph != null:
+				if s.telegraph != null and s.tick - s.telegraph.start_tick > 12:
 					match String(s.telegraph.ability.id):
 						"f_snap": _shoot("snap_parry")
 						"f_bluff": _shoot("bluff_feint")

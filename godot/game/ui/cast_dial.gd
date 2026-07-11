@@ -26,6 +26,14 @@ var tg_heal: bool = false          # boss is self-healing — out-damage or stag
 var tg_interruptible: bool = false # it's a cast you can Kick outright (Voidcaller/Twinfang)
 var tg_feint: bool = false         # it's a Feint — HOLD; guarding it is the bait
 var tg_rhythm: bool = false        # THE RHYTHM (§3½): the victim's own auto-attack bar riding the dial
+var size_verbs: bool = false       # §3½ height law words (the Duelist): small = DODGE, HEAVY+ = PARRY
+
+func _prompt_verb() -> String:
+	if tg_rhythm:
+		return "DODGE"
+	if size_verbs:
+		return "PARRY" if tg_size >= AbilityRes.Size.HEAVY else "DODGE"
+	return verb
 var zone_frac: float = 0.3        # fraction of the cast that is the window
 var in_zone: bool = false
 var def_ready: bool = true        # is the defensive press off cooldown?
@@ -240,7 +248,7 @@ func _draw() -> void:
 		elif tg_feint:
 			prompt = "FEINT — DON'T PRESS!"; pcol = Palette.RELIC
 		elif in_zone:
-			prompt = ">> %s <<" % ("DODGE" if tg_rhythm else verb); pcol = Palette.GOLD_BRIGHT
+			prompt = ">> %s <<" % _prompt_verb(); pcol = Palette.GOLD_BRIGHT
 		elif tg_interruptible:
 			prompt = "%s — interrupt!" % verb; pcol = Palette.KICK
 		elif tg_heal:
@@ -248,7 +256,7 @@ func _draw() -> void:
 		elif tg_defensible and not def_ready:
 			prompt = ("dodge locked" if tg_rhythm else "guard recharging"); pcol = Palette.CRIMSON.darkened(0.2)
 		elif tg_defensible:
-			prompt = "%s on the flash" % ("DODGE" if tg_rhythm else verb)
+			prompt = "%s on the flash" % _prompt_verb()
 		else:
 			prompt = "UNAVOIDABLE"; pcol = Palette.CRIMSON
 		UiKit.text_shadowed(self, font, Vector2(0.0, ty + 38.0), prompt,

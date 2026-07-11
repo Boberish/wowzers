@@ -22,7 +22,10 @@
 class_name StrikeJudge
 extends Control
 
-const PPS := 250.0            ## approach speed, px per second — THE timing constant
+var pps := 250.0              ## approach speed, px per second — THE timing constant
+                              ## (per-instance since ONE BAR: the tank's wide channel
+                              ## runs faster so its short-lead rhythm enters at the mouth)
+var size_verbs := false       ## §3½ height law words: small bars say DODGE, HEAVY+ say PARRY
 const STAMP_HOLD := 0.8       ## seconds a verdict stamp stays on the channel
 const VERDICT_HOLD := 0.85
 const HIST_MAX := 8
@@ -306,7 +309,7 @@ func on_event(ev: Dictionary) -> void:
 				return
 			_rhythm_answered = true
 			_classic_closed = true
-			var dv := "DODGE" if _kind == "rhythm" else verb
+			var dv := "PARRY" if String(ev.get("kind", "dodge")) == "parry" else "DODGE"
 			match int(ev.get("grade", 0)):
 				StrikeRes.Grade.PERFECT:
 					_stamp(_rem, Palette.GOLD_BRIGHT, true)
@@ -392,7 +395,7 @@ func _track(): # -> [tx, tw, gx, ty, th]
 
 func _view_secs() -> float:
 	var t = _track()
-	return maxf(0.4, (float(t[2]) - float(t[0]) - 10.0) / PPS)
+	return maxf(0.4, (float(t[2]) - float(t[0]) - 10.0) / pps)
 
 ## remaining seconds -> channel x (comets fly left -> right into the gate)
 func _x_of(rem: float) -> float:
@@ -508,6 +511,15 @@ func _draw() -> void:
 
 	_draw_verdict_line(tx, tw, ty, th, font)
 	_draw_history(tx + tw, ty + th + 16.0)
+
+## The cue word for the CURRENT thing: strings/rhythm are always the dodge-bread;
+## a classic swing speaks by the height law when size_verbs is on (the Duelist).
+func _cue_verb() -> String:
+	if _kind == "string" or _kind == "rhythm":
+		return "DODGE"
+	if size_verbs and _kind == "classic":
+		return "PARRY" if _size >= AbilityRes.Size.HEAVY else "DODGE"
+	return verb
 
 func _accent() -> Color:
 	match _kind:
@@ -709,7 +721,7 @@ func _draw_verdict_line(tx: float, tw: float, ty: float, th: float, font: Font) 
 	elif not _mine:
 		cue = "not yours — watch"
 	elif _in_window():
-		cue = ">>  %s  <<" % ("DODGE" if _kind == "string" or _kind == "rhythm" else verb)
+		cue = ">>  %s  <<" % _cue_verb()
 		cc = Palette.GOLD_BRIGHT
 		cc.a = 0.6 + 0.4 * sin(_pulse * 2.0)
 	elif not _press_ok:

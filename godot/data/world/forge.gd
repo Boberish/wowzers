@@ -121,15 +121,15 @@ static func _moves(body: String, tk: Dictionary, rng: DetRng) -> Array:
 		"swarm":
 			# §3½ pilot: + the BIG parry bar the body was missing (the parry half of the
 			# tank minigame must exist in fight 1) and its FAKE-BIG twin at tier >= 2.
-			var sw: Array = [
+			# §3½ grammar law (Bill 2026-07-11): EVERY body, EVERY tier fields the full
+			# tank alphabet — smalls (rhythm+swing) · a BIG parry · a FAKE-BIG feint.
+			return [
 				_string(&"f_nip", "Nipping Cloud", 30.0 * dmg, 1.7 * cast, 7.5 * cd, rng, 3 + xb, 0.30, false),
 				_nova(&"f_scatter", "Chaff Burst", 26.0 * dmg, 1.5 * cast, 9.0 * cd),
 				_swing(&"f_harry", "Harrying Bites", AbilityRes.Size.LIGHT, 34.0 * dmg, 1.1 * cast, 6.0 * cd, false, false),
-				_swing(&"f_snap", "Carapace Snap", AbilityRes.Size.CRUSH, 74.0 * dmg, 1.6 * cast, 11.0 * cd, true, false),
+				_swing(&"f_snap", "Carapace Snap", AbilityRes.Size.CRUSH, 74.0 * dmg, 1.6 * cast, 9.0 * cd, true, false),
+				_swing(&"f_bluff", "Chitin Bluff", AbilityRes.Size.CRUSH, 58.0 * dmg, 1.4 * cast, 10.0 * cd, false, true),
 			]
-			if xb >= 1:
-				sw.append(_swing(&"f_bluff", "Chitin Bluff", AbilityRes.Size.CRUSH, 58.0 * dmg, 1.4 * cast, 9.0 * cd, false, true))
-			return sw
 		"stalker": return [
 			_swing(&"f_feint", "Scythe Feint", AbilityRes.Size.HEAVY, 52.0 * dmg, 1.3 * cast, 8.0 * cd, false, true),
 			_swing(&"f_lunge", "Hedge Lunge", AbilityRes.Size.HEAVY, 60.0 * dmg, 1.5 * cast, 9.5 * cd, true, false),
@@ -139,11 +139,14 @@ static func _moves(body: String, tk: Dictionary, rng: DetRng) -> Array:
 			_chant(&"f_reap", "Reaping Verse", 300.0, 2.6 * cast, 11.0 * cd),
 			_nova(&"f_dirge", "Dirge of the Rows", 34.0 * dmg, 2.0 * cast, 10.0 * cd),
 			_chant(&"f_gather", "Gathering Hymn", 220.0, 2.1 * cast, 8.5 * cd),
+			_swing(&"f_censer", "Censer Backhand", AbilityRes.Size.HEAVY, 58.0 * dmg, 1.4 * cast, 9.5 * cd, false, false),
+			_swing(&"f_cadence", "Broken Cadence", AbilityRes.Size.HEAVY, 46.0 * dmg, 1.3 * cast, 11.0 * cd, false, true),
 		]
 		"brute": return [
 			_swing(&"f_crush", "Cartwheel Crush", AbilityRes.Size.CRUSH, 88.0 * dmg, 1.8 * cast, 10.0 * cd, true, false),
 			_swing(&"f_over", "Overhand Reap", AbilityRes.Size.HEAVY, 64.0 * dmg, 1.4 * cast, 7.5 * cd, false, false),
 			_nova(&"f_quake", "Threshing Slam", 42.0 * dmg, 2.2 * cast, 12.0 * cd),
+			_swing(&"f_windup", "False Wind-Up", AbilityRes.Size.CRUSH, 66.0 * dmg, 1.5 * cast, 11.5 * cd, false, true),
 		]
 	return []
 

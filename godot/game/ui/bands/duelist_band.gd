@@ -24,6 +24,10 @@ func build() -> void:
 	# rhythm stream take turns on it; smalls read DODGE, bigs PARRY, fakes DON'T.
 	if hud._judge != null:
 		UiKit.place(hud._judge, 0.5, 1, 0.5, 1, -320, -388, 320, -284)
+		hud._judge.pps = 420.0            # wide channel + short-lead bars: enter at the mouth
+		hud._judge.size_verbs = true      # height law words: smalls DODGE · HEAVY+ PARRY
+	if hud._dial != null:
+		hud._dial.size_verbs = true       # the dial speaks the same law (no more PARRY-for-smalls)
 	var row: HBoxContainer = hud._rune_row(-380.0, 380.0)
 	# DODGE (secondary, SPACE) — the bread
 	dodge_rune = AbilityRune.new()
