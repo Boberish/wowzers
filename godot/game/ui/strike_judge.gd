@@ -22,15 +22,7 @@
 class_name StrikeJudge
 extends Control
 
-## AAA feedback (Bill 2026-07-11): every verdict also fires here so the band can slam
-## it center-screen. `family`: perfect | good | graze | hit | baited | read.
-signal verdict(txt: String, family: String)
-
-var pps := 250.0              ## approach speed, px per second — THE timing constant
-                              ## (per-instance since ONE BAR: the tank's wide channel
-                              ## runs faster so its short-lead rhythm enters at the mouth)
-var size_verbs := false       ## §3½ height law words: small bars say DODGE, HEAVY+ say PARRY
-var big := false              ## BIG display mode (the tank): taller track, larger comets/fonts
+const PPS := 250.0            ## approach speed, px per second — THE timing constant
 const STAMP_HOLD := 0.8       ## seconds a verdict stamp stays on the channel
 const VERDICT_HOLD := 0.85
 const HIST_MAX := 8
@@ -76,8 +68,6 @@ var _classic_closed := true   ## a negate/stagger already explained this classic
 var _classic_defensible := false
 var _classic_feint := false
 var _last_rem := {}           ## beat idx -> last known remaining (stamp placement)
-var _rhythm_armed := false    ## §3½ ONE BAR: a rhythm swing is in flight
-var _rhythm_answered := false ## it got a duel_answer verdict (else its end = a MISS)
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -129,62 +119,6 @@ func feed(s: CombatState, obs: Dictionary, classic_window: float) -> void:
 		_feed_classic(tg, obs, classic_window)
 	else:
 		_feed_string(beats_src, obs)
-
-## §3½ THE ONE BAR: between real telegraphs the tank's auto-attack stream rides THIS
-## channel — same gate, same bands, same comets, same verdicts. `lane` comes from
-## observe()'s tank-only rhythm_lane telemetry: armed -> the real swing's comet;
-## unarmed -> the projected NEXT swing glides in (eta = timer + windup, so the comet
-## transitions seamlessly into the armed swing — nothing ever pops). A real telegraph
-## simply takes the channel back (feed() overwrites) — globals and the rhythm share
-## one instrument, which is the whole point. Empty lane = the old resting ghost.
-func feed_rhythm(s: CombatState, lane: Dictionary, dodge_ok: bool, zone: float) -> void:
-	_perfect_w = s.config.strike_perfect
-	_good_w = s.config.strike_good
-	_graze_w = s.config.strike_graze
-	if lane.is_empty():
-		if _active:
-			_close_classic_if_unexplained()
-			_linger = maxf(_linger, 0.7)
-		_active = false
-		_beats = []
-		_combo_n = 0
-		_rhythm_armed = false
-		return
-	if _active and _kind != "rhythm":      # leaving a real telegraph for the stream
-		_close_classic_if_unexplained()
-		_seen.clear()
-		_last_rem.clear()
-		_tg_tick = -1
-	# armed == a bar is coming at ME (the stream only carries the tank's own bars now; a peeled
-	# swing is an undodgeable hit that never reaches this channel — see observe()).
-	var armed := bool(lane.get("armed", false))
-	# an armed bar of MINE ended with no verdict -> it landed (the eaten-bar miss)
-	if _kind == "rhythm" and _rhythm_armed and not armed and _mine and not _rhythm_answered:
-		_judge_miss()
-	if armed and not _rhythm_armed:
-		_rhythm_answered = false
-	_rhythm_armed = armed
-	_active = true
-	_kind = "rhythm"
-	_classic_defensible = true             # the gold answer-window band (else-branch)
-	_classic_closed = true                 # the classic closer never re-judges the stream
-	_next_feint = false
-	_combo_n = 0
-	_beats = []
-	_size = int(lane.get("size", AbilityRes.Size.LIGHT))
-	_window = zone
-	_press_ok = dodge_ok
-	_dur = maxf(0.05, float(lane.get("windup", 0.6)))
-	_mine = true                           # the stream only ever shows the tank's own bars
-	if armed:
-		_rem = float(lane.get("remaining", 0.0))
-		_name = "THE RHYTHM"
-	else:
-		# projection: it's my NEXT swing (eta >= windup > window, so the live-window
-		# flare can never light early)
-		_mine = true
-		_rem = float(lane.get("next_eta", 0.0))
-		_name = "THE RHYTHM"
 
 func _feed_classic(tg: Dictionary, obs: Dictionary, classic_window: float) -> void:
 	_beats = []
@@ -308,27 +242,6 @@ func on_event(ev: Dictionary) -> void:
 					_set_verdict("READ — held it", Palette.RELIC)
 				StrikeRes.Grade.MISS:
 					_judge_miss()
-		"duel_answer":
-			# the Duelist funnel's press verdict (rhythm bars + its classic swings —
-			# string beats already arrive as strike_graded)
-			if _kind == "string" or not _active:
-				return
-			_rhythm_answered = true
-			_classic_closed = true
-			var dv := "PARRY" if String(ev.get("kind", "dodge")) == "parry" else "DODGE"
-			match int(ev.get("grade", 0)):
-				StrikeRes.Grade.PERFECT:
-					_stamp(_rem, Palette.GOLD_BRIGHT, true)
-					_push_history(Palette.GOLD_BRIGHT, false, true)
-					_set_verdict("PERFECT %s" % dv, Palette.GOLD_BRIGHT)
-				StrikeRes.Grade.GOOD:
-					_stamp(_rem, Palette.GOLD, false)
-					_push_history(Palette.GOLD, false, false)
-					_set_verdict("%s!" % dv, Palette.GOLD)
-				_:
-					_stamp(_rem, Palette.STEEL, false)
-					_push_history(Palette.STEEL, false, false)
-					_set_verdict("GRAZE — half", Palette.STEEL)
 		"dodge_whiff":
 			_stamp(minf(_rem, _view_secs()), Palette.CRIMSON.darkened(0.1), false)
 			_push_history(Palette.CRIMSON.darkened(0.2), true, false)
@@ -385,16 +298,6 @@ func _set_verdict(v: String, col: Color) -> void:
 	_verdict = v
 	_verdict_col = col
 	_verdict_t = VERDICT_HOLD
-	var fam := "read"
-	if col == Palette.GOLD_BRIGHT:
-		fam = "perfect"
-	elif col == Palette.GOLD:
-		fam = "good"
-	elif col == Palette.STEEL:
-		fam = "graze"
-	elif col == Palette.CRIMSON or col == Palette.CRIMSON.darkened(0.1):
-		fam = "baited" if v.begins_with("BAITED") else "hit"
-	verdict.emit(v, fam)
 
 func _push_history(col: Color, hollow: bool, big: bool) -> void:
 	_history.append({"col": col, "hollow": hollow, "big": big})
@@ -407,13 +310,11 @@ func _push_history(col: Color, hollow: bool, big: bool) -> void:
 func _track(): # -> [tx, tw, gx, ty, th]
 	var tx := 14.0
 	var tw := size.x - 28.0
-	if big:
-		return [tx, tw, tx + tw - 24.0, 28.0, 46.0]
 	return [tx, tw, tx + tw - 22.0, 8.0 if compact else 26.0, 36.0 if compact else 34.0]
 
 func _view_secs() -> float:
 	var t = _track()
-	return maxf(0.4, (float(t[2]) - float(t[0]) - 10.0) / pps)
+	return maxf(0.4, (float(t[2]) - float(t[0]) - 10.0) / PPS)
 
 ## remaining seconds -> channel x (comets fly left -> right into the gate)
 func _x_of(rem: float) -> float:
@@ -530,17 +431,6 @@ func _draw() -> void:
 	_draw_verdict_line(tx, tw, ty, th, font)
 	_draw_history(tx + tw, ty + th + 16.0)
 
-## The cue word for the CURRENT thing: strings/rhythm are always the dodge-bread;
-## a classic swing speaks by the height law when size_verbs is on (the Duelist).
-func _cue_verb() -> String:
-	if _kind == "string" or _kind == "rhythm":
-		if size_verbs and (_next_size() if _kind == "string" else _size) >= AbilityRes.Size.HEAVY:
-			return "PARRY"
-		return "DODGE"
-	if size_verbs and _kind == "classic":
-		return "PARRY" if _size >= AbilityRes.Size.HEAVY else "DODGE"
-	return verb
-
 func _accent() -> Color:
 	match _kind:
 		"feint": return Palette.RELIC
@@ -570,7 +460,15 @@ func _in_window() -> bool:
 func _draw_bands(tx: float, gx: float, ty: float, th: float) -> void:
 	var dim := 1.0 if _mine else 0.32
 	if _next_feint:
-		return   # a feint gets NO bands and NO veil — the hollow purple gem is the read (Bill 2026-07-11)
+		var fx := _x_of(minf(_graze_w * 1.6, _view_secs()))
+		var fw := gx - fx
+		var fc := Palette.RELIC
+		fc.a = 0.13 * dim
+		draw_rect(Rect2(fx, ty + 2, fw, th - 4), fc)
+		for hx in range(0, int(fw), 12):
+			draw_line(Vector2(fx + float(hx), ty + th - 3.0), Vector2(fx + float(hx) + 8.0, ty + 3.0),
+				Color(Palette.RELIC.r, Palette.RELIC.g, Palette.RELIC.b, 0.28 * dim), 1.6, true)
+		return
 	if _kind == "heal" or _kind == "empower" or _kind == "brace":
 		return
 	var live := _in_window()
@@ -652,28 +550,27 @@ func _comet(at: Vector2, rem: float, view: float, sz: int, feint: bool, aoe: boo
 	var dim := 1.0 if mine else 0.35
 	if parked: # still out of view: waits at the mouth of the channel, dimmed
 		col.a = 0.35 * dim + 0.1 * sin(_pulse * 2.0)
-		_gem_shaped(at + Vector2(4.0, 0.0), sz, col, feint, false)
+		_gem_diamond(at + Vector2(4.0, 0.0), 6.0, col, feint)
 		var cd := Palette.TEXT_DIM
 		cd.a = 0.8 * dim
 		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(at.x - 2.0, ty - 8.0),
 			"%.1f" % rem, HORIZONTAL_ALIGNMENT_LEFT, 80.0, UiKit.SIZE["CAPTION"], cd)
 		return
-	# motion trail (heavier hits drag a taller wake)
+	# motion trail
 	var trail := minf(34.0, at.x - 16.0)
-	var wake := 12.0 - 3.0 * float(mini(sz, 3))
 	if trail > 3.0:
 		for k in 5:
 			var seg := trail / 5.0
 			var tcol := col
 			tcol.a = (0.04 + 0.05 * float(k)) * dim
-			draw_rect(Rect2(at.x - trail + seg * float(k), ty + wake * 0.5, seg, th - wake), tcol)
+			draw_rect(Rect2(at.x - trail + seg * float(k), ty + 6.0, seg, th - 12.0), tcol)
 	var near := rem <= _good_w and mine and not feint
 	if near:
 		var halo := col.lightened(0.3)
 		halo.a = 0.30 + 0.22 * sin(_pulse * 2.2)
-		draw_circle(at, 13.0 + 3.0 * float(mini(sz, 3)), halo)
+		draw_circle(at, 13.0, halo)
 	col.a = dim
-	_gem_shaped(at, sz, col, feint, near)
+	_gem_diamond(at, 8.0 if near else 7.0, col, feint)
 	if aoe:
 		var rc := col
 		rc.a = 0.55 * dim
@@ -683,47 +580,6 @@ func _comet(at: Vector2, rem: float, view: float, sz: int, feint: bool, aoe: boo
 		vc.a = 0.75
 		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(at.x - 40.0, ty - 8.0),
 			"→ " + victim, HORIZONTAL_ALIGNMENT_CENTER, 80.0, UiKit.SIZE["CAPTION"], vc)
-
-## §3½ THE SHAPE ALPHABET (Bill 2026-07-11): read the answer off the SILHOUETTE —
-## small diamond = the dodge-bread · wide HEXAGON = HEAVY, parry it · BIG spiked
-## OCTAGON = CRUSH, the commit · hollow purple = feint, hold. Color stays the size
-## law; the shape carries it at a glance.
-func _gem_shaped(at: Vector2, sz: int, col: Color, feint: bool, near: bool) -> void:
-	var k := 1.35 if big else 1.0          # BIG mode: the tank reads comets from the corner of an eye
-	if feint:
-		_gem_diamond(at, 7.5 * k, col, true)
-		return
-	match sz:
-		AbilityRes.Size.CRUSH:
-			_gem_poly(at, 8, (13.0 if near else 12.0) * k, col, _pulse * 0.30, true)
-		AbilityRes.Size.HEAVY:
-			_gem_poly(at, 6, (10.0 if near else 9.0) * k, col, 0.0, false)
-		_:
-			_gem_diamond(at, (6.0 if near else 5.0) * k, col, false)
-
-## A filled n-gon gem: dark socket · body · gold rim · specular. CRUSH spikes get a
-## slow menace-spin + a heavy outline so the biggest hit is unmistakable.
-func _gem_poly(at: Vector2, n: int, r: float, col: Color, rot: float, spiked: bool) -> void:
-	var pts := PackedVector2Array()
-	for i in n:
-		var a := rot + TAU * float(i) / float(n)
-		pts.append(at + Vector2(cos(a), sin(a)) * r)
-	var sock := PackedVector2Array()
-	for i in n:
-		var a := rot + TAU * float(i) / float(n)
-		sock.append(at + Vector2(cos(a), sin(a)) * (r + 1.5))
-	draw_colored_polygon(sock, Color(0, 0, 0, 0.6))
-	draw_colored_polygon(pts, col)
-	var rim := Palette.GOLD
-	rim.a = col.a
-	for i in n:
-		draw_line(pts[i], pts[(i + 1) % n], rim, 1.4, true)
-	if spiked:
-		for i in n:
-			var a := rot + TAU * (float(i) + 0.5) / float(n)
-			var d := Vector2(cos(a), sin(a))
-			draw_line(at + d * r, at + d * (r + 4.5), rim, 1.6, true)
-	draw_circle(at + Vector2(-r * 0.3, -r * 0.3), r * 0.22, Color(1, 1, 1, 0.5 * col.a))
 
 func _comet_color(sz: int) -> Color:
 	match _kind:
@@ -775,7 +631,7 @@ func _draw_verdict_line(tx: float, tw: float, ty: float, th: float, font: Font) 
 	elif not _mine:
 		cue = "not yours — watch"
 	elif _in_window():
-		cue = ">>  %s  <<" % _cue_verb()
+		cue = ">>  %s  <<" % ("DODGE" if _kind == "string" else verb)
 		cc = Palette.GOLD_BRIGHT
 		cc.a = 0.6 + 0.4 * sin(_pulse * 2.0)
 	elif not _press_ok:

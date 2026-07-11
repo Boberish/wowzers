@@ -2089,8 +2089,8 @@ func _fw() -> String:
 		return "alchemist"
 	if _seat_key == "healer" and _seat_cls_now() == "well":
 		return "well"
-	if _seat_key == "tank" and _seat_cls_now() == "duelist":
-		return "duelist"
+	# TANK-V2: the Duelist runs DECKLESS (no creed pick / module floor / rig board) until
+	# the deck re-lands per-verdict after Bill's base playtest (TANK-PLAN §0).
 	return ""
 
 ## Creed data dispatch (both classes mirror the TwinfangCreeds static API).
@@ -2099,8 +2099,6 @@ func _fw_creed_ids(fw: String) -> Array:
 		return AlchemistCreeds.v1_ids()
 	if fw == "well":
 		return WellCreeds.v1_ids(_aspect)      # per-spec pools (brim vs draw)
-	if fw == "duelist":
-		return DuelistCreeds.v1_ids()
 	return TwinfangCreeds.v1_ids()
 
 func _fw_creed(fw: String, id: String) -> Dictionary:
@@ -2108,8 +2106,6 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 		return AlchemistCreeds.get_creed(id)
 	if fw == "well":
 		return WellCreeds.get_creed(id)
-	if fw == "duelist":
-		return DuelistCreeds.get_creed(id)
 	return TwinfangCreeds.get_creed(id)
 
 ## Module data dispatch. `_fw_module_offer_ids` applies creed-aware filtering (ALCHEMIST
@@ -2117,8 +2113,6 @@ func _fw_creed(fw: String, id: String) -> Dictionary:
 func _fw_module_offer_ids(fw: String, creed: String, aspect := "") -> Array:
 	if fw == "well":
 		return WellModules.offer_ids(aspect)   # ⭐The Vigil is Draw-only; the rest read either spec
-	if fw == "duelist":
-		return DuelistModules.built_ids()
 	if fw != "alchemist":
 		return TwinfangModules.built_ids()
 	var out: Array = []
@@ -2134,8 +2128,6 @@ func _fw_module(fw: String, id: String) -> Dictionary:
 		return AlchemistModules.get_module(id)
 	if fw == "well":
 		return WellModules.get_module(id)
-	if fw == "duelist":
-		return DuelistModules.get_module(id)
 	return TwinfangModules.get_module(id)
 
 ## Rig data dispatch (both classes mirror the TwinfangRig static API).
@@ -2144,8 +2136,6 @@ func _fw_rig_when_table(fw: String) -> Dictionary:
 		return AlchemistRig.WHENS
 	if fw == "well":
 		return WellRig.WHENS
-	if fw == "duelist":
-		return DuelistRig.WHENS
 	return TwinfangRig.WHENS
 
 func _fw_rig_then_table(fw: String) -> Dictionary:
@@ -2153,8 +2143,6 @@ func _fw_rig_then_table(fw: String) -> Dictionary:
 		return AlchemistRig.THENS
 	if fw == "well":
 		return WellRig.THENS
-	if fw == "duelist":
-		return DuelistRig.THENS
 	return TwinfangRig.THENS
 
 func _fw_rig_describe(fw: String, w: String, t: String) -> String:
@@ -2162,8 +2150,6 @@ func _fw_rig_describe(fw: String, w: String, t: String) -> String:
 		return AlchemistRig.describe(w, t)
 	if fw == "well":
 		return WellRig.describe(w, t)
-	if fw == "duelist":
-		return DuelistRig.describe(w, t)
 	return TwinfangRig.describe(w, t)
 
 ## The 3-of-N WHEN + THEN offers for the wiring board, creed-filtered (verdict 6: the Purist
@@ -2176,8 +2162,6 @@ func _fw_rig_offered(fw: String, creed: String, rng) -> Dictionary:
 			if WellRig.when_spec(String(id)) == _aspect:
 				wp.append(id)
 		return {"whens": WellRig.offer(wp, rng, 3), "thens": WellRig.offer(WellRig.then_ids(), rng, 3)}
-	if fw == "duelist":
-		return {"whens": DuelistRig.offer(DuelistRig.base_when_ids(), rng, 3), "thens": DuelistRig.offer(DuelistRig.then_ids(), rng, 3)}
 	if fw != "alchemist":
 		return {"whens": TwinfangRig.offer(TwinfangRig.when_ids(), rng, 3),
 			"thens": TwinfangRig.offer(TwinfangRig.then_ids(), rng, 3)}
@@ -2740,7 +2724,7 @@ func _verb_summary_lines() -> Array:
 						String(_d.run.rig.get("when", "")), String(_d.run.rig.get("then", "")))]
 				return WellBoons.verb_summary(_d.run.boons, _aspect)
 			return BloomweaverBoons.verb_summary(_d.run.boons, _aspect)
-		_: return DuelistBoons.verb_summary(_d.run.boons, _aspect)
+		_: return []   # TANK-V2: the Duelist is DECKLESS until the deck re-lands post-playtest
 
 ## BUILD PANEL: a compact top-right readout of the assembled verb + drafted boons —
 ## so you can always see the run you've drafted. Offline descent only (_d.run present;
@@ -2863,7 +2847,7 @@ func _owned_boon_labels() -> Array:
 				pools = [BloomweaverBoons.SHARED, BloomweaverBoons.GROVE, BloomweaverBoons.THORN]
 			else:
 				pools = [WellBoons.SHARED, WellBoons.BRIM, WellBoons.DRAW]
-		_: pools = [DuelistBoons.POOL]
+		_: pools = []   # TANK-V2: deckless Duelist — no boon pool until the deck re-lands
 	var out: Array = []
 	for pool in pools:
 		for b in pool:
@@ -3140,22 +3124,18 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 		_dial.boss_name = s.encounter.name
 		_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
+	# TANK-V2 (TANK-PLAN §0): the Duelist's footwork lives on THE CHANNEL (its band's own
+	# AnswerChannel — fed straight from observe(), never through the shared judge/dial).
+	# The big dial stays boss spectacle for the tank; the cast bar serves every seat.
+	var tank_channel := String(_seat_cls_now()) == "duelist"
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
-		# §3½ THE ONE BAR: on gap frames the Judgment Channel carries the tank's
-		# rhythm stream (empty lane = the judge's resting ghost — this also finally
-		# feeds the judge's own deactivation branch, which the early return starved).
-		if _judge != null:
-			_judge.feed_rhythm(s, obs.get("rhythm_lane", {}),
-				bool(obs.get("dodge_ready", true)), float(obs.get("def_zone", 0.3)))
 		if _castbar != null:
 			_castbar.active = false
-		# LOST-AGGRO = UNDODGEABLE (Bill 2026-07-11): a strayed rhythm bar is an unavoidable hit
-		# on whoever pulled it — no dodge prompt on the dial (there's nothing to press). The
-		# aggro banner below is the whole tell: "it's on you, ride it out." Simplified from the
-		# old fake dodge-dial that a non-tank could never actually answer.
+		# LOST-AGGRO = UNDODGEABLE (cdd008f, kept): a strayed stream bar is an unavoidable
+		# hit on whoever pulled it — no dodge prompt anywhere (there's nothing to press);
+		# the aggro banner is the whole tell.
 		_dial.tg_active = false
-		_dial.tg_rhythm = false
 		_dial.tg_strikes = []
 		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
 		_dial.def_ready = bool(obs.get("defense_ready", true))
@@ -3188,13 +3168,15 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 			else:
 				_castbar.kind = "brace"
 				_castbar.window = 0.0
-	if is_cast and _judge != null:
-		# footwork channel stays on the stream (frozen mid-cast — honest) instead of
-		# being hijacked by the spell
-		_judge.feed_rhythm(s, obs.get("rhythm_lane", {}),
-			bool(obs.get("dodge_ready", true)), float(obs.get("def_zone", 0.3)))
+	if tank_channel:
+		# the band's AnswerChannel draws the tank's globals/busters itself — the dial
+		# never arms a press for the tank; readiness still renders (rune gates).
+		_dial.tg_active = false
+		_dial.tg_strikes = []
+		_dial.def_ready = bool(obs.get("defense_ready", true))
+		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
+		return
 	_dial.tg_active = true
-	_dial.tg_rhythm = false
 	_dial.tg_name = s.telegraph.ability.name
 	if not mine and s.telegraph.target != null and not bool(tg.get("heal", false)):
 		_dial.tg_name = "%s → %s" % [s.telegraph.ability.name, s.telegraph.target.unit_name]
@@ -3402,6 +3384,16 @@ func _handle_event(ev: Dictionary) -> void:
 			# walk-in banner. The plate/dial rebind free (they read s.encounter live).
 			BossIntro.play(_ui, "%s   ·   %d / %d" % [String(ev.get("name", "")),
 				int(ev.get("i", 0)) + 1, int(ev.get("n", 0))])
+		"aggro_pulled":
+			# THE LOUD PEEL (TANK-PLAN §0): aggro loss is a PARTY moment — everyone sees
+			# it, the gold pip snaps (is_target reads _threat_target live), the victim's
+			# hunted banner rides _aggro_warn, and nobody can answer it. Fires only when
+			# the victim CHANGES (the engine gates it), so it can't spam per swing.
+			var vseat: Seat = ev.get("seat", null)
+			_big_text("AGGRO LOST — IT HUNTS %s" % (String(vseat.unit_name).to_upper() if vseat != null else "ANOTHER"),
+				Palette.CRIMSON, 30, 0.9)
+			_add_shake(5.0)
+			_flash_frame(vseat, Palette.GOLD_BRIGHT)
 		"negate":
 			# seat-less negates are string-impact echoes; strike_graded already
 			# judged that press — don't double-pop over it

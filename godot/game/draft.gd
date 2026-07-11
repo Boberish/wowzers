@@ -22,7 +22,8 @@ const SIG_KEY := {"duelist": "counter", "twinfang": "perfect_strike",
 
 static func catalog(run) -> Variant:
 	match String(run.char_class):
-		"duelist": return DuelistBoons
+		# TANK-V2 (TANK-PLAN §0): the Duelist is DECKLESS — no catalog = empty offers
+		# (offerable() returns [] on null); the deck re-lands post-playtest.
 		"twinfang": return TwinfangBoons
 		"bloomweaver": return BloomweaverBoons
 		"alchemist": return AlchemistBoons

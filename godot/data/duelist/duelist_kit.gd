@@ -329,6 +329,12 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"engarde_ready": s.tick >= int(seat.cooldowns.get("engarde", 0)),
 		"engarde_live": _engarde_live(s, seat),
 		"flurry": CombatCore.stream_flurry_active(s, seat),
+		# the gate's grading geometry (THE CHANNEL draws exactly these — one source of truth)
+		"win_bullseye": cfg.dodge_bullseye,
+		"win_perfect": cfg.dodge_perfect,
+		"win_good": cfg.dodge_good,
+		"win_graze": cfg.answer_active,
+		"parry_window": cfg.parry_window,
 	}
 
 func recap_spec(_s: CombatState, seat: Seat) -> Array:
