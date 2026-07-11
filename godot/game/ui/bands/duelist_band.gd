@@ -8,6 +8,7 @@ class_name DuelistBand
 extends ClassBand
 
 var gauge: DuelistGauge
+var slam: VerdictSlam
 var parry_rune: AbilityRune
 var dodge_rune: AbilityRune
 var dump_rune: AbilityRune
@@ -23,9 +24,17 @@ func build() -> void:
 	# re-seat it bottom-center (where the tank's eyes live), wider. Globals and the
 	# rhythm stream take turns on it; smalls read DODGE, bigs PARRY, fakes DON'T.
 	if hud._judge != null:
-		UiKit.place(hud._judge, 0.5, 1, 0.5, 1, -320, -388, 320, -284)
+		# BIG channel (AAA pass): taller track, bigger comets, wider footprint
+		UiKit.place(hud._judge, 0.5, 1, 0.5, 1, -370, -412, 370, -288)
 		hud._judge.pps = 420.0            # wide channel + short-lead bars: enter at the mouth
 		hud._judge.size_verbs = true      # height law words: smalls DODGE · HEAVY+ PARRY
+		hud._judge.big = true
+		# THE VERDICT SLAM: every graded press hits center-screen — PERFECT blazes,
+		# a MISS bleeds at the edges and shakes the room. The tank always knows.
+		slam = VerdictSlam.new()
+		slam.set_anchors_preset(Control.PRESET_FULL_RECT)   # place THEN add (the UI law)
+		hud._shake_root.add_child(slam)
+		hud._judge.verdict.connect(_on_verdict)
 	if hud._dial != null:
 		hud._dial.size_verbs = true       # the dial speaks the same law (no more PARRY-for-smalls)
 	var row: HBoxContainer = hud._rune_row(-380.0, 380.0)
@@ -99,6 +108,16 @@ func key_pressed(code: int) -> void:
 			hud._ctrl.human({"type": "ability", "id": "dump"})
 		KEY_4:
 			hud._ctrl.human({"type": "ability", "id": "engarde"})
+
+## A verdict fired on the channel — slam it big, and let a miss rattle the room.
+func _on_verdict(txt: String, family: String) -> void:
+	if slam == null:
+		return
+	slam.slam(txt, family)
+	if family == "hit":
+		hud._shake_amt = maxf(hud._shake_amt, 7.0)
+	elif family == "perfect":
+		hud._shake_amt = maxf(hud._shake_amt, 2.0)
 
 ## Mouse grammar (Bill, 2026-07-11): LEFT CLICK = DODGE · RIGHT CLICK = PARRY.
 ## Clicks that land on real buttons (pause / the runes / dev) keep their click —

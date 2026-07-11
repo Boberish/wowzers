@@ -9,9 +9,14 @@ func _init() -> void:
 
 var wind: float = 10.0
 var wind_max: float = 10.0
-var combo: int = 0
+var combo: int = 0:
+	set(v):
+		if v > combo:
+			_pop = 1.0          # a ◆ banked — punch the pips
+		combo = v
 var combo_max: int = 5
 var fumbling: bool = false
+var _pop: float = 0.0          ## pip-bank punch, decays per frame
 
 func _draw() -> void:
 	# --- WIND: a slim bubble bar (the fast-recharge fatigue leash) ---
@@ -26,7 +31,8 @@ func _draw() -> void:
 	draw_rect(Rect2(bx, by, bw * frac, 10.0), wc)
 	draw_rect(Rect2(bx, by, bw, 10.0), Palette.GOLD_DIM, false, 1.0)
 
-	# --- ◆ COMBO pips (banked by perfect parries) ---
+	# --- ◆ COMBO pips (banked by perfect parries) — the newest banks with a PUNCH ---
+	_pop = maxf(0.0, _pop - 0.05)
 	var y2 := size.y * 0.72
 	var n := maxi(1, combo_max)
 	var spacing := minf(size.x / float(n + 1), 30.0)
@@ -36,7 +42,19 @@ func _draw() -> void:
 		var col: Color = Palette.GOLD_BRIGHT if lit else Palette.BG0
 		if lit and combo >= combo_max:
 			col.a = 0.6 + 0.35 * sin(pulse * 2.0)    # full bank pulses (ready to DUMP)
-		_diamond(Vector2(x, y2), 9.0, col)
+		var r := 9.0
+		if lit and i == combo - 1 and _pop > 0.0:
+			r += 7.0 * _pop                          # the fresh ◆ lands big and settles
+			var halo := Palette.GOLD_BRIGHT
+			halo.a = 0.5 * _pop
+			draw_arc(Vector2(x, y2), r + 5.0, 0.0, TAU, 20, halo, 2.0, true)
+		_diamond(Vector2(x, y2), r, col)
+	# --- DRY WIND warning: too tired to answer = say it out loud ---
+	if not fumbling and wind < 2.6:
+		var wcol := Palette.CRIMSON
+		wcol.a = 0.55 + 0.4 * sin(pulse * 3.0)
+		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(0.0, size.y * 0.34 - 16.0),
+			"WINDED — breathe", HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, wcol)
 
 func _diamond(c: Vector2, r: float, col: Color) -> void:
 	var pts := PackedVector2Array([

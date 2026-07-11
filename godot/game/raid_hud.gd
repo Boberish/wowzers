@@ -8,7 +8,7 @@ extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
 const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
-const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1.3 · CASTBAR"
+const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1.4 · TANK JUICE"
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 

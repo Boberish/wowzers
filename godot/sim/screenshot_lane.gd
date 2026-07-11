@@ -62,11 +62,17 @@ func _process(_d: float) -> bool:
 						_shoot("heavy_bar")
 					elif not bool(lane.get("armed", false)):
 						_shoot("rhythm_next")
-				if s.telegraph != null and s.tick - s.telegraph.start_tick > 12:
-					if s.telegraph.ability.response == AbilityRes.Response.INTERRUPTIBLE:
-						_shoot("castbar_chant")
-					elif s.telegraph.ability.effect == AbilityRes.Effect.DMG_ALL or s.telegraph.ability.effect == AbilityRes.Effect.NOVA:
-						_shoot("castbar_nova")
+				# AAA slam proof: fire, let it render a couple frames, THEN shoot
+				if s.tick >= 120 and not got.has("fired_p") and cur._band != null and cur._band.slam != null:
+					got["fired_p"] = true
+					cur._band.slam.slam("PERFECT PARRY  ×3", "perfect")
+				elif got.has("fired_p") and s.tick >= 126 and not got.has("slam_perfect"):
+					_shoot("slam_perfect")
+				if s.tick >= 260 and not got.has("fired_h") and cur._band != null and cur._band.slam != null:
+					got["fired_h"] = true
+					cur._band.slam.slam("HIT", "hit")
+				elif got.has("fired_h") and s.tick >= 266 and not got.has("slam_hit"):
+					_shoot("slam_hit")
 			if got.size() >= 10 or s.over or s.tick > 3600:
 				phase = 3
 		3:

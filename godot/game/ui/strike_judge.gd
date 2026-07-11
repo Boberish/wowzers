@@ -22,10 +22,15 @@
 class_name StrikeJudge
 extends Control
 
+## AAA feedback (Bill 2026-07-11): every verdict also fires here so the band can slam
+## it center-screen. `family`: perfect | good | graze | hit | baited | read.
+signal verdict(txt: String, family: String)
+
 var pps := 250.0              ## approach speed, px per second — THE timing constant
                               ## (per-instance since ONE BAR: the tank's wide channel
                               ## runs faster so its short-lead rhythm enters at the mouth)
 var size_verbs := false       ## §3½ height law words: small bars say DODGE, HEAVY+ say PARRY
+var big := false              ## BIG display mode (the tank): taller track, larger comets/fonts
 const STAMP_HOLD := 0.8       ## seconds a verdict stamp stays on the channel
 const VERDICT_HOLD := 0.85
 const HIST_MAX := 8
@@ -379,6 +384,16 @@ func _set_verdict(v: String, col: Color) -> void:
 	_verdict = v
 	_verdict_col = col
 	_verdict_t = VERDICT_HOLD
+	var fam := "read"
+	if col == Palette.GOLD_BRIGHT:
+		fam = "perfect"
+	elif col == Palette.GOLD:
+		fam = "good"
+	elif col == Palette.STEEL:
+		fam = "graze"
+	elif col == Palette.CRIMSON or col == Palette.CRIMSON.darkened(0.1):
+		fam = "baited" if v.begins_with("BAITED") else "hit"
+	verdict.emit(v, fam)
 
 func _push_history(col: Color, hollow: bool, big: bool) -> void:
 	_history.append({"col": col, "hollow": hollow, "big": big})
@@ -391,6 +406,8 @@ func _push_history(col: Color, hollow: bool, big: bool) -> void:
 func _track(): # -> [tx, tw, gx, ty, th]
 	var tx := 14.0
 	var tw := size.x - 28.0
+	if big:
+		return [tx, tw, tx + tw - 24.0, 28.0, 46.0]
 	return [tx, tw, tx + tw - 22.0, 8.0 if compact else 26.0, 36.0 if compact else 34.0]
 
 func _view_secs() -> float:
@@ -671,16 +688,17 @@ func _comet(at: Vector2, rem: float, view: float, sz: int, feint: bool, aoe: boo
 ## OCTAGON = CRUSH, the commit · hollow purple = feint, hold. Color stays the size
 ## law; the shape carries it at a glance.
 func _gem_shaped(at: Vector2, sz: int, col: Color, feint: bool, near: bool) -> void:
+	var k := 1.35 if big else 1.0          # BIG mode: the tank reads comets from the corner of an eye
 	if feint:
-		_gem_diamond(at, 7.5, col, true)
+		_gem_diamond(at, 7.5 * k, col, true)
 		return
 	match sz:
 		AbilityRes.Size.CRUSH:
-			_gem_poly(at, 8, 13.0 if near else 12.0, col, _pulse * 0.30, true)
+			_gem_poly(at, 8, (13.0 if near else 12.0) * k, col, _pulse * 0.30, true)
 		AbilityRes.Size.HEAVY:
-			_gem_poly(at, 6, 10.0 if near else 9.0, col, 0.0, false)
+			_gem_poly(at, 6, (10.0 if near else 9.0) * k, col, 0.0, false)
 		_:
-			_gem_diamond(at, 6.0 if near else 5.0, col, false)
+			_gem_diamond(at, (6.0 if near else 5.0) * k, col, false)
 
 ## A filled n-gon gem: dark socket · body · gold rim · specular. CRUSH spikes get a
 ## slow menace-spin + a heavy outline so the biggest hit is unmistakable.
