@@ -1921,6 +1921,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `duelist-binds` (worktree `../wow-binds`) — **Duelist rebind (Bill) — MERGED `1a03d33`.**
+  1 / SPACE / LEFT-CLICK = DODGE · 2 / RIGHT-CLICK = PARRY (F stays a legacy alias) · 3 = ⚡ DUMP ·
+  4 = ⏱ EN GARDE. Band mouse grammar (hovered-BaseButton guard stops pause/rune double-fires);
+  chips + hint + codex updated. View-only — engine untouched; ui_smoke_raid ALL OK; WSLg verified.
+  ⚠ gotcha re-confirmed: `:=` off an untyped hud reference = Variant-inference parse error that
+  cascades ("Failed to compile depended scripts") — type the var explicitly. *(this session)*
+
 - ☑ 2026-07-10 · docs on main + worktree `../wow-rhythm` (branch `tank-rhythm`) — **DONE, MERGED `3096098`: THE
   TANK STREAM = THE RHYTHM (Bill's playtest verdict + design, `BOSS-PLAN §3½` NEW).** Bill
   playtested Duelist v1 in the descent fight 1 (forge swarm): ~4 invisible melee hits before the
