@@ -857,7 +857,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ◐ 2026-07-11 · worktree `../wow-tank-v2` (branch `tank-v2`) — **CLAIM: THE TANK-V2 REWRITE**
+- ☑ 2026-07-11 · `../wow-tank-v2` → **MERGED `5af4927` (ff)** · **THE TANK-V2 REWRITE — BUILT.**
+  All slices landed: S1 engine+kit bang (`30008b6` — THE STREAM committed-timeline replaces
+  rhythm_*; kit rewritten deckless on the v3 matrix, tick-native, BULLSEYE ladder; BARRAGE
+  RETIREMENT + `dodge_recovery` 0.35→0.8) · S2+S3 (`answer_channel.gd` NEW — the game's one
+  answer instrument; strike_judge/cast_dial RESTORED pre-tank; new band + STREAM TUNER (F9,
+  dev) + verdict-slam carry + the loud AGGRO LOST peel moment) · S4 (`stream_probe` NEW =
+  the law suite: immutability/barrier/grammar/obs-invariants/freshness ALL OK; fresh-every-
+  pull seed fold; sim metrics on the v3 ladder) · protocol v16→17. **verify-all: 40 ok /
+  1 fail — `map_advance_probe`, which is BROKEN ON MAIN TOO (seal_id Nil, descent-era
+  staleness; ⚠ descent thread owns it)**; draft_sim + commander_probe re-pointed at the
+  deckless world (duelist rows ride the Alchemist; REFORGE chain skips the deckless human).
+  **NEXT: Bill's playtest = the feel gate** (numbers are knobs: `duel_*`, stream profile
+  dicts, F9 tuner) → then S5 deck re-land per-verdict + S6 per-Seal texture/busters/LATE
+  authoring. ⚠ Seal thread: stream density on Seals runs THIN under the barrier (six ability
+  timers keep the earliest-fire close) — an S6/SealTune knob, the barrier is law. ⚠ WSLg
+  screenshot pass owed (`screenshot_duelist_raid` re-scoped to the channel checklist).
+  *(the tank-v2 rewrite — S1–S4 + swap)*
+  **↳ the original claim (kept for the record):**
   (Bill: tank-w1 broke the game — *"plan the rewrite of the tank and the global dodge UI FROM
   THE BASE, no patching… i dont want tech debt"*). Requirements confirmed question-by-question →
   **TANK-PLAN §0 THE CHANNEL CONTRACT v3** (this commit) = design of record: committed attack

@@ -1,9 +1,11 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
-**Status (2026-07-11): 🔴 THE TANK-V2 REWRITE IN FLIGHT — see §0 THE CHANNEL CONTRACT v3 (the design
-of record; wins any diff below).** tank-w1 (`62cc09e` + ONE BAR v1→v1.5) broke the game; Bill ordered a
-ground-up rewrite of kit + engine stream + UI (worktree `../wow-tank-v2`). The pre-rewrite status below
-is kept for history:
+**Status (2026-07-11): 🔨 THE TANK-V2 REWRITE BUILT & MERGED `5af4927` — see §0 THE CHANNEL CONTRACT
+v3 (the design of record; wins any diff below). Bill's playtest = the feel gate; every number is a
+knob (`duel_*` config · per-body stream profiles · the F9 STREAM TUNER). Deck re-lands per-verdict
+AFTER the playtest (S5); per-Seal texture/busters/LATE authoring = S6.** tank-w1 (`62cc09e` + ONE BAR
+v1→v1.5) broke the game; this rewrite replaced it from the base. The pre-rewrite status below is kept
+for history:
 
 **Status (pre-rewrite):** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
 VERDICT + 3 challenger themes (§7) joined that board 2026-07-10; Warden BRANCH SLATE (§6, 5 themes)
