@@ -857,6 +857,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-11 · `../wow-well-ui` → **MERGED `b9a43d9`** · **THE DRAW HUD DESYNC SWEEP** (Bill:
+  *"the window moving creed doesnt move the window, and i couldnt figure out how to spend my
+  banked heal… make a workflow to check the boon/creed etc and make sure these work"*). Ran a
+  37-agent audit workflow (MAP→VERIFY→adversarial REFUTE→SYNTH) over the Draw spec's kit→observe→
+  render→input chain — **21 confirmed defects, both reported bugs root-caused as kit↔UI desyncs,
+  not mechanic bugs.** **BUG A (Eddy window):** the drifted clean-band centre was a grading-only
+  local in `_release`, never exposed; the render band was set ONCE from raw config → the graded
+  window drifted while the drawn one stayed pinned. Fixed (PLUMBING A): `_eddy_centre()` shared by
+  grade + observe; per-cast `draw_lo/hi·still_lo/hi·cr_hi` in observe; `cast_channel` `zone_hi`
+  right-edge bound (drift is left-only); `well_band` feeds them per frame — **byte-identical
+  grading** (eddy build checksum unchanged vs parent). Same stroke fixes Narrows/Long-Draw/
+  Deep-Still WIDTHS. **BUG B (banked heal):** the held cast rendered as a finished cast; added
+  (PLUMBING B) a persistent 'BANKED — TAP/CLICK to RELEASE' plaque + gutter countdown + trembling
+  needle pinned to the sliver. **Siblings:** SKIN film + deferred-wound on ally frames (Well-gated,
+  view-only), KEY_E skin, current-haste label, Millrace pip, flume/frozen/glassriver/intercept/
+  eddyline cues, + 2 guarded reducer fixes (Loosed absorb 12s→2s dead-config; eddyline SAVE emits
+  its own event). **Scope: healer-path only — the global dodge bar / global-UI rework untouched**
+  (concurrent session's lane, honored). Gates: parse · determinism PASS (well base/eddy/loaded +
+  raid 4 Seals) · base+eddy byte-identical · `ui_smoke_raid` ALL OK. **⚠ `_draw` pixels need a
+  WSLg screenshot pass — Bill's visual verdict on the new cues.** ledger §C row updated. *(the
+  Draw HUD audit + fix)*
+
 - ☑ 2026-07-10 · `../wow-tempo-d0` → **MERGED `4e46e73`** · **TEMPO D0 FOLLOW-UP BUILT** (Bill's
   board answers) — **On the Beat** back in the offer pool (kit code was already live) · **S3 THE
   4 DUOS** (Blood Coda W×F · Red Edge W×E · Grand Finale E×F · Reprise Rondo×W — kit hooks +
