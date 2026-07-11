@@ -8,7 +8,7 @@ extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
 const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
-const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1.5 · STREAM FIX"
+const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1.6 · PEEL = NO DODGE"
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -3152,30 +3152,10 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 				bool(obs.get("dodge_ready", true)), float(obs.get("def_zone", 0.3)))
 		if _castbar != null:
 			_castbar.active = false
-		# A strayed victim (any other class) keeps the sudden dial warning below —
-		# for them, sudden is correct. The duelist's stream lives on the judge.
-		var ry: Dictionary = obs.get("rhythm", {})
-		if not ry.is_empty() and _seat_cls_now() != "duelist":
-			var windup := maxf(0.001, float(ry.get("windup", 0.6)))
-			var rrem := float(ry.get("remaining", 0.0))
-			var dodge_ok := bool(obs.get("dodge_ready", true))
-			_dial.tg_active = true
-			_dial.tg_rhythm = true
-			_dial.tg_name = "the rhythm"
-			_dial.tg_frac = clampf(1.0 - rrem / windup, 0.0, 1.0)
-			_dial.tg_remaining = rrem
-			_dial.tg_size = int(ry.get("size", AbilityRes.Size.LIGHT))
-			_dial.tg_heal = false
-			_dial.tg_feint = false
-			_dial.tg_interruptible = false
-			_dial.tg_defensible = true
-			_dial.tg_strikes = []
-			var rzone := float(obs.get("def_zone", 0.3))
-			_dial.zone_frac = clampf(rzone / windup, 0.0, 1.0)
-			_dial.in_zone = rrem <= rzone and dodge_ok
-			_dial.dodge_ready = dodge_ok
-			_dial.def_ready = dodge_ok       # the rhythm is answered by the dodge
-			return
+		# LOST-AGGRO = UNDODGEABLE (Bill 2026-07-11): a strayed rhythm bar is an unavoidable hit
+		# on whoever pulled it — no dodge prompt on the dial (there's nothing to press). The
+		# aggro banner below is the whole tell: "it's on you, ride it out." Simplified from the
+		# old fake dodge-dial that a non-tank could never actually answer.
 		_dial.tg_active = false
 		_dial.tg_rhythm = false
 		_dial.tg_strikes = []
@@ -3297,7 +3277,7 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 			_aggro_warn.text = "IT DRIFTS TO YOUR RAID  —  PLAY CLEAN, IT COMES BACK"
 			_aggro_warn.visible = not aggro_me and not s.over
 		"blade", "caster":
-			_aggro_warn.text = "IT'S HUNTING YOU  —  DODGE!"
+			_aggro_warn.text = "IT'S HUNTING YOU  —  CAN'T DODGE, RIDE IT OUT"
 			_aggro_warn.visible = aggro_me and not s.over
 		_:
 			_aggro_warn.visible = false

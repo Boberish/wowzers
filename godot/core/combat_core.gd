@@ -226,7 +226,11 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	# gates it, so every rhythm-less fight ships an obs without the key (byte-free).
 	var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 		else (s.encounter.adds[s.boss.add_i] as AddRes).melee
 	if lane_melee.has("rhythm") and seat == _tank_seat(s):
-		var armed := s.boss.rhythm_victim_i >= 0
+		# LOST-AGGRO = UNDODGEABLE (Bill 2026-07-11): the stream is the TANK's own bars only.
+		# A peeled swing (victim != tank) is an undodgeable hit on a raider — it never shows on
+		# this channel as a dodge-comet (the aggro banner carries it). `armed` = a bar is coming
+		# at ME; a peel simply pauses the tank's stream until aggro drifts back.
+		var armed := s.boss.rhythm_victim_i >= 0 and s.seats[s.boss.rhythm_victim_i] == seat
 		var lane := {
 			"armed": armed,
 			"paused": s.telegraph != null,
@@ -234,7 +238,7 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			"windup": float(lane_melee.get("rhythm", 0.6)),
 		}
 		if armed:
-			lane["mine"] = s.seats[s.boss.rhythm_victim_i] == seat
+			lane["mine"] = true
 			lane["remaining"] = float(s.boss.rhythm_impact_tick - s.tick) * s.dt
 			lane["windup"] = float(s.boss.rhythm_windup_ticks) * s.dt
 			lane["size"] = s.boss.rhythm_size
@@ -384,9 +388,9 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 ##    victim's kit funnel grades whatever press is active (source-agnostic since M0).
 ##  · ARM only in a telegraph GAP — the rhythm fills between the boss's real swings,
 ##    so bars never stack presses (the WEAVE: one press answers one bar).
-##  · The victim rolls at ARM time via the same aggro peel old melee used, so the
-##    wind-up shows who is marked; a strayed bar winds up rhythm_stray_windup longer
-##    (the un-warned victim's reaction grace) and only the victim ever sees it.
+##  · The victim rolls at ARM time via the same aggro peel old melee used. A bar aimed at
+##    the tank is a dodgeable stream comet; a PEELED bar (victim != tank) is an UNDODGEABLE
+##    hit — same cadence, no grace, and it never shows on the tank's channel (aggro banner).
 ##  · Cadence: authored "every" ≈ the impact period (the wind-up folds into the
 ##    countdown, floor 1 tick), so old melee numbers keep meaning what they said.
 static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
@@ -428,14 +432,13 @@ static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
 		victim = _tank_target(s)
 	if victim == null:
 		return
-	# commit the pre-rolled bar: base windup, TALL if it was pre-rolled HEAVY, then the
-	# strayed-victim reaction grace (view assumes mine, so a peel is the only remaining nudge)
+	# commit the pre-rolled bar: base windup, TALL if it was pre-rolled HEAVY. A peeled bar is
+	# an UNDODGEABLE hit (nobody can answer it), so it gets no special "reaction grace" windup —
+	# same cadence as any other swing, it just lands on whoever lost/pulled aggro.
 	var sz := s.boss.rhythm_next_size
 	var windup := float(melee.get("rhythm", 0.6))
 	if sz == AbilityRes.Size.HEAVY:
 		windup *= 1.35
-	if victim != _tank_seat(s):
-		windup *= s.config.rhythm_stray_windup
 	s.boss.rhythm_size = sz
 	s.boss.rhythm_next_size = AbilityRes.Size.NONE
 	s.boss.rhythm_victim_i = s.seats.find(victim)
