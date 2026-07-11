@@ -1921,6 +1921,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `tank-juice` (worktree `../wow-juice`) — **AAA TANK FEEDBACK — MERGED `2b006f2`.**
+  Bill: full-on effects/clarity/feedback — the tank must KNOW missed-vs-perfect. BUILT:
+  `verdict_slam.gd` (NEW) — center-screen verdict slams: PERFECT huge gold + 12-ray burst +
+  rings + STREAK ×N · HIT crimson + edge-vignette pulse + shake · BAITED purple mock; judge
+  emits a typed `verdict` signal (band wires slam + shake). Judge BIG mode (tank): taller
+  track, comets ×1.35, wider footprint. DuelistGauge: ◆ banks punch-pop + halo; 'WINDED —
+  breathe' dry-wind pulse. ⚠ gotcha RE-PROVEN + added to the pile: PRESET_FULL_RECT set in
+  _ready (after add_child) = zero-rect silent no-draw — place-then-add always. Gates: gemini
+  byte-identical · both smokes · WSLg 'PERFECT PARRY ×3' slam live over a CRUSH-octagon channel
+  moment. STAMP → ONE BAR v1.4 · TANK JUICE. *(this session)*
+
 - ☑ 2026-07-11 · `boss-castbar` (worktree `../wow-castbar`) — **THE BOSS CAST BAR (the
   declutter split) — MERGED `56f6cd1`.** Bill's taxonomy verdict: the dodge bar held too many
   different things — his mental model is small auto · big auto · global dodge · fake (+ kick),
