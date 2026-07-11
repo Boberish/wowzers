@@ -8,7 +8,7 @@ extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
 const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
-const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1.2"
+const BUILD_STAMP := "build 2026-07-11 · ONE BAR v1.3 · CASTBAR"
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -241,6 +241,7 @@ var _fx: Control
 var _bar: BossBar
 var _dial: BossCastDial
 var _judge: StrikeJudge
+var _castbar: BossCastBar          ## the boss's SPELL bar (Bill 2026-07-11): heal/empower/kick/brace live here
 var _meter: MeterPanel          # the raid DPS/HPS meter (M cycles views)
 var _recap_stats := {}          # view-side fight tallies for THE RECKONING
 var _frames: Array = []            ## [{seat, frame}]
@@ -2530,6 +2531,12 @@ func _build_combat(s: CombatState) -> void:
 	_bar = BossBar.new()
 	UiKit.place(_bar, 0.5, 0, 0.5, 0, -340, 52, 340, 104)
 	_shake_root.add_child(_bar)
+	# THE BOSS CAST BAR (Bill 2026-07-11 — the declutter): everything the boss CASTS
+	# (self-heal · empower · kickable verse · unavoidable nova) reads HERE, under its
+	# HP — the Judgment Channel below is footwork ONLY. Hidden while nothing casts.
+	_castbar = BossCastBar.new()
+	UiKit.place(_castbar, 0.5, 0, 0.5, 0, -270, 112, 270, 158)
+	_shake_root.add_child(_castbar)
 
 	_dial = BossCastDial.new()
 	_dial.verb = _verb()
@@ -3143,11 +3150,10 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 		if _judge != null:
 			_judge.feed_rhythm(s, obs.get("rhythm_lane", {}),
 				bool(obs.get("dodge_ready", true)), float(obs.get("def_zone", 0.3)))
+		if _castbar != null:
+			_castbar.active = false
 		# A strayed victim (any other class) keeps the sudden dial warning below —
 		# for them, sudden is correct. The duelist's stream lives on the judge.
-		# (§3½ v2) the DUELIST's stream lives on its RhythmLane — the dial stays a
-		# globals-only instrument for the tank. A strayed victim (any other class)
-		# keeps the sudden dial warning: for them, sudden is correct.
 		var ry: Dictionary = obs.get("rhythm", {})
 		if not ry.is_empty() and _seat_cls_now() != "duelist":
 			var windup := maxf(0.001, float(ry.get("windup", 0.6)))
@@ -3178,6 +3184,37 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 		return
 	var dur := float(s.telegraph.dur_ticks) * s.dt
 	var mine := bool(tg.get("targets_me", false))
+	# THE SPLIT (Bill 2026-07-11): a CAST (heal / empower / kickable verse / unavoidable
+	# nova — no timed press for THIS seat's footwork) rides the BOSS CAST BAR; the
+	# Judgment Channel keeps carrying the rhythm stream underneath, uninterrupted.
+	var is_cast: bool = bool(tg.get("heal", false)) or bool(tg.get("empower", false)) \
+		or bool(tg.get("interruptible", false)) \
+		or (not bool(tg.get("defensible", false)) and tg.get("strikes", []).is_empty() \
+			and not bool(tg.get("feint", false)))
+	if _castbar != null:
+		_castbar.active = is_cast
+		if is_cast:
+			_castbar.boss_name = s.encounter.name
+			_castbar.cast_name = s.telegraph.ability.name
+			_castbar.frac = (dur - float(tg.get("remaining", 0.0))) / maxf(dur, 0.001)
+			_castbar.remaining = float(tg.get("remaining", 0.0))
+			if bool(tg.get("heal", false)):
+				_castbar.kind = "heal"
+			elif bool(tg.get("empower", false)):
+				_castbar.kind = "empower"
+			elif bool(tg.get("interruptible", false)):
+				_castbar.kind = "kick"
+				_castbar.window = float(obs.get("clean_zone", 0.62))
+				_castbar.kickable_seat = false   # pillar #3: nobody carries a kick yet
+				_castbar.in_zone = _castbar.remaining <= _castbar.window
+			else:
+				_castbar.kind = "brace"
+				_castbar.window = 0.0
+	if is_cast and _judge != null:
+		# footwork channel stays on the stream (frozen mid-cast — honest) instead of
+		# being hijacked by the spell
+		_judge.feed_rhythm(s, obs.get("rhythm_lane", {}),
+			bool(obs.get("dodge_ready", true)), float(obs.get("def_zone", 0.3)))
 	_dial.tg_active = true
 	_dial.tg_rhythm = false
 	_dial.tg_name = s.telegraph.ability.name
@@ -3209,7 +3246,7 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.feed_strikes(tg, dur, bool(obs.get("dodge_ready", true)), s.config.strike_good, s.config.strike_perfect)
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
-	if _judge != null:
+	if _judge != null and not is_cast:
 		var jw := 0.0
 		match _seat_key:
 			"caster":
@@ -3364,6 +3401,8 @@ func _handle_event(ev: Dictionary) -> void:
 	var mine := bool(ev.get("player", false))
 	if _judge != null:
 		_judge.on_event(ev)        # the Judgment Channel stamps its verdicts
+	if _castbar != null:
+		_castbar.on_event(ev)      # kick / deny pops on the boss cast bar
 	if _band != null:
 		_band.on_event(ev, mine)   # gauge juice (ALEMBIC / WELL verdict banners + history)
 	RecapPanel.track(_recap_stats, ev)

@@ -250,7 +250,7 @@ func _draw() -> void:
 		elif in_zone:
 			prompt = ">> %s <<" % _prompt_verb(); pcol = Palette.GOLD_BRIGHT
 		elif tg_interruptible:
-			prompt = "%s — interrupt!" % verb; pcol = Palette.KICK
+			prompt = "casting — the bar above"; pcol = Palette.TEXT_DIM   # the CAST BAR owns the response cue
 		elif tg_heal:
 			prompt = "HEALING — BURN IT DOWN"; pcol = Palette.WIN
 		elif tg_defensible and not def_ready:

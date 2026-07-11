@@ -63,10 +63,10 @@ func _process(_d: float) -> bool:
 					elif not bool(lane.get("armed", false)):
 						_shoot("rhythm_next")
 				if s.telegraph != null and s.tick - s.telegraph.start_tick > 12:
-					match String(s.telegraph.ability.id):
-						"f_snap": _shoot("snap_parry")
-						"f_bluff": _shoot("bluff_feint")
-						"f_nip": _shoot("string_beats")
+					if s.telegraph.ability.response == AbilityRes.Response.INTERRUPTIBLE:
+						_shoot("castbar_chant")
+					elif s.telegraph.ability.effect == AbilityRes.Effect.DMG_ALL or s.telegraph.ability.effect == AbilityRes.Effect.NOVA:
+						_shoot("castbar_nova")
 			if got.size() >= 10 or s.over or s.tick > 3600:
 				phase = 3
 		3:
