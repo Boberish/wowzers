@@ -263,6 +263,19 @@ func on_action(s: CombatState, seat: Seat, id: StringName, target: Seat = null) 
 
 ## DRAW's release: grade the timing and resolve early. Also releases a HELD (Patient Hand)
 ## heal instantly. No-op in BRIM with no held cast.
+## THE EDDY's drifted clean-band centre — the SINGLE source of truth shared by the grade
+## (_release) and the render read (observe()), so the drawn window can never desync from the
+## graded one. Base centre = 1 - band/2 (the band ends at the bar's right edge); the Eddy creed
+## drifts it LEFT deterministically from the cast's start tick; frozen (Glass River) stops drift.
+func _eddy_centre(start: int, band: float, frozen: bool) -> float:
+	var centre := 1.0 - band * 0.5
+	if _cr_b("eddy") and not frozen:
+		var rng := 0.16 * (cfg.deepeddy_drift_mult if _b("deepEddy") else 1.0)
+		var h := (start * 2654435761) & 0xFFFFFF
+		var drift := (float(h) / float(0xFFFFFF) - 0.5) * rng
+		centre = clampf(centre + drift, 0.5, 1.0 - band * 0.5)
+	return centre
+
 func _release(s: CombatState, seat: Seat) -> bool:
 	if seat.casting.is_empty():
 		return false
@@ -281,17 +294,11 @@ func _release(s: CombatState, seat: Seat) -> bool:
 	var id := String(c["id"])
 	var tgt: Seat = c.get("target")
 	var band := _draw_band()
-	var centre := 1.0 - band * 0.5
 	# THE GLASS RIVER (keystone): while the water is FROZEN, the drift stops.
 	var frozen := s.tick < int(seat.vars.get("glassriver_until", -1))
-	# THE EDDY (creed): the clean band's centre drifts a little each cast — derived from the
-	# cast's start tick (deterministic, no RNG), so you read it live but can't memorise it.
-	# DEEP EDDY boon widens the wander.
-	if _cr_b("eddy") and not frozen:
-		var rng := 0.16 * (cfg.deepeddy_drift_mult if _b("deepEddy") else 1.0)
-		var h := (start * 2654435761) & 0xFFFFFF
-		var drift := (float(h) / float(0xFFFFFF) - 0.5) * rng
-		centre = clampf(centre + drift, 0.5, 1.0 - band * 0.5)
+	# THE EDDY (creed) drifts the clean band's centre (deterministic from start tick). ONE source
+	# of truth (_eddy_centre) so the GRADE here and the RENDER read in observe() can never diverge.
+	var centre := _eddy_centre(start, band, frozen)
 	seat.casting = {}
 	var lo := centre - band * 0.5
 	var in_band := p >= lo and p <= centre + band * 0.5
@@ -348,7 +355,7 @@ func _release_held(s: CombatState, seat: Seat, c: Dictionary) -> bool:
 	if intercept and htgt != null and htgt.alive():
 		var sp: Dictionary = cfg.book.get(hid, {})
 		var absorb := float(sp.get("heal", 0.0)) * mult * cfg.loosed_shield_frac
-		_add_absorb(s, htgt, absorb, seat)
+		_add_absorb(s, htgt, absorb, seat, cfg.loosed_shield_sec)   # a SHORT 2s intercept shield
 		CombatCore._emit(s, {"t": "well_intercept", "seat": htgt, "caster": seat, "player": seat.is_player})
 	return true
 
@@ -568,13 +575,16 @@ func _draw_feedback(s: CombatState, seat: Seat, mode: String, target: Seat) -> v
 		"under":
 			# EDDYLINE (boon): once per 10s an undercook DOWNGRADES the Current by 1 instead of
 			# breaking it — costs the stack, and the sip still lands weak (a play, not a pardon).
+			# A SAVE reads as its own event (well_eddyline), never the plain Current-break flash.
 			if _b("eddyline") and s.tick >= int(seat.vars.get("eddyline_next", 0)) \
 					and int(seat.vars.get("current", 0)) > 0:
 				seat.vars["current"] = int(seat.vars.get("current", 0)) - 1
 				seat.vars["eddyline_next"] = s.tick + _tt(s, cfg.eddyline_cd)
-			elif not _b("shortPour"):                        # SHORT POUR: the quick-sip keeps the Current
-				_current_break(seat)
-			CombatCore._emit(s, {"t": "well_under", "seat": seat, "player": seat.is_player})
+				CombatCore._emit(s, {"t": "well_eddyline", "seat": seat, "player": seat.is_player})
+			else:
+				if not _b("shortPour"):                      # SHORT POUR: the quick-sip keeps the Current
+					_current_break(seat)
+				CombatCore._emit(s, {"t": "well_under", "seat": seat, "player": seat.is_player})
 		_:
 			pass                                             # overrun / instant / held: plain, Current untouched
 
@@ -698,12 +708,12 @@ func _do_heal(s: CombatState, target: Seat, amt: float, caster: Seat, src: Strin
 	if target != null and target.alive() and amt > 0.0:
 		CombatCore.heal_unit(s, target, amt, caster, src)
 
-func _add_absorb(s: CombatState, target: Seat, amt: float, caster: Seat) -> void:
+func _add_absorb(s: CombatState, target: Seat, amt: float, caster: Seat, secs: float = 12.0) -> void:
 	if target == null or not target.alive() or amt <= 0.0:
 		return
 	target.absorb = minf(target.absorb + roundf(amt), target.hp_max)
 	target.absorb_owner_i = s.seats.find(caster)            # co-op credit (index — cycle-safe)
-	target.ward_until_tick = maxi(target.ward_until_tick, s.tick + _tt(s, 12.0))
+	target.ward_until_tick = maxi(target.ward_until_tick, s.tick + _tt(s, secs))
 
 ## The still-pending deferred damage on an ally (the drip yet to land) — the HUD reads it to
 ## draw the film's trailing wound. 0.0 when the ally was never skinned (byte-neutral read).
@@ -808,7 +818,11 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"blindfold": _b("blindfold"),
 		"flume": s.tick < int(seat.vars.get("flume_until", -1)),       # RAPIDS: white water
 		"frozen": s.tick < int(seat.vars.get("glassriver_until", -1)), # EDDY: still water
+		"current_haste": cfg.current_haste,                            # per-stack cast-time cut (readout)
 	}
+	# THE MILLRACE: signal the next cast is free so the HUD can flag it before you press.
+	if _b("theMillrace"):
+		o["millrace_ready"] = _millrace_free(seat)
 	# deck gauges (only meaningful when the module/creed is equipped — the HUD reads them then)
 	if _m("reservoir"):
 		o["reserve"] = float(seat.vars.get("reserve", 0.0))
@@ -832,6 +846,31 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		o["cast_start"] = int(c["start_tick"])
 		o["cast_dur"] = dur
 		o["cast_p"] = clampf(float(s.tick - int(c["start_tick"])) / float(dur), 0.0, 1.0)
+		# PER-CAST BAND GEOMETRY (DRAW) — the drifted, deck-adjusted release window so the HUD
+		# draws the SAME window the kit grades (fixes THE EDDY not moving + Narrows/Long-Draw/
+		# Deep-Still/Deep-Eddy widths). Read-only; mirrors _release exactly (shares _eddy_centre).
+		if aspect == "draw":
+			var band := _draw_band()
+			var frz := s.tick < int(seat.vars.get("glassriver_until", -1))
+			var centre := _eddy_centre(int(c["start_tick"]), band, frz)
+			var sw := _still_width()
+			o["draw_lo"] = centre - band * 0.5
+			o["draw_hi"] = centre + band * 0.5           # true clean upper edge (< 1.0 when drifted)
+			o["still_lo"] = centre - sw * 0.5
+			o["still_hi"] = centre + sw * 0.5
+			# CURRENT READING's fast-read sub-region (band's first third), when it can pay.
+			if _b("currentReading") and not frz and not (s.tick < int(seat.vars.get("flume_until", -1))):
+				o["cr_hi"] = (centre - band * 0.5) + band * cfg.currentreading_third
+			# RIDE THE TREMBLE cap meter (0..1) + LOOSED AT LAST intercept-ready, when held.
+			if bool(c.get("held", false)):
+				if _b("rideTremble"):
+					var halves := float(s.tick - int(c.get("held_start", s.tick))) / maxf(1.0, float(_tt(s, 0.5)))
+					o["tremble_frac"] = clampf((cfg.ridetremble_per * halves) / maxf(0.001, cfg.ridetremble_cap), 0.0, 1.0)
+				if _b("loosedAtLast"):
+					var htgt: Seat = c.get("target")
+					if htgt != null:
+						var lh := int(htgt.vars.get("last_hit_tick", -999999))
+						o["loosed_ready"] = lh >= 0 and (s.tick - lh) <= _tt(s, cfg.loosed_window)
 	return o
 
 ## STATS PAGE v2 — the Well's spec rows for the FULL REPORT: pours cast, dispels, and the

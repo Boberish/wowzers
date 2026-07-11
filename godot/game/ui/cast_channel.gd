@@ -30,9 +30,19 @@ var spell_id: String = "":
 ## `show_idle_track` keeps the empty channel + window faintly visible between casts,
 ## so the window can be learned before the cast is live.
 var zone_lo: float = -1.0
+var zone_hi: float = -1.0           ## clean-band RIGHT edge (DRAW/Eddy: < 1.0 when drifted; -1 = extend to bar end)
 var mark_lo: float = -1.0
 var mark_hi: float = -1.0
+var cr_hi: float = -1.0             ## Current Reading fast-read sub-region upper edge (-1 = none)
 var show_idle_track: bool = false
+# --- DRAW banked/held state (Patient Hand / ⭐Vigil) — a cocked heal, spent by releasing ---
+var held: bool = false             ## a heal is BANKED in the hand (not a finished cast)
+var held_frac: float = 0.0         ## 0 just-banked → 1 about to gutter (tremble amplitude)
+var held_left: float = -1.0        ## seconds until the hold gutters (countdown; -1 = n/a)
+var tremble_frac: float = -1.0     ## RIDE THE TREMBLE cap meter 0..1 (-1 = boon absent)
+var loosed_ready: bool = false     ## LOOSED AT LAST: releasing NOW would land the intercept
+var frozen: bool = false           ## THE GLASS RIVER: the water is frozen — every release is Still
+var flume: bool = false            ## THE FLUME: white water — every release auto-grades Clean
 
 func _gui_input(event: InputEvent) -> void:
 	if zone_lo >= 0.0 and event is InputEventMouseButton and event.pressed \
@@ -119,11 +129,19 @@ func _draw() -> void:
 				accent.lightened(0.14), accent.darkened(0.45))
 			draw_rect(Rect2(bar.position + Vector2(1, 1), Vector2(maxf(fw - 2.0, 0.0), bar.size.y * 0.30)),
 				Color(1, 1, 1, 0.13))
-			UiKit.glow(self, Vector2(bar.position.x + fw, bar.position.y + bar.size.y * 0.5),
-				bar.size.y * 1.0, Color(accent.lightened(0.4).r, accent.lightened(0.4).g,
-				accent.lightened(0.4).b, 0.45))
-			draw_rect(Rect2(bar.position.x + fw - 2.0, bar.position.y + 1.0, 2.0, bar.size.y - 2.0),
-				accent.lightened(0.55))
+			# the far-right leading edge is the live cast's cursor — SUPPRESS it while BANKED, so
+			# the full bar stops reading as an overshoot and the pinned sliver-needle leads instead.
+			if not held:
+				UiKit.glow(self, Vector2(bar.position.x + fw, bar.position.y + bar.size.y * 0.5),
+					bar.size.y * 1.0, Color(accent.lightened(0.4).r, accent.lightened(0.4).g,
+					accent.lightened(0.4).b, 0.45))
+				draw_rect(Rect2(bar.position.x + fw - 2.0, bar.position.y + 1.0, 2.0, bar.size.y - 2.0),
+					accent.lightened(0.55))
+		# BANKED / WHITE-WATER wash: recolor the whole channel so its state reads at a glance.
+		if held:
+			draw_rect(bar, Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.10))
+		elif flume:
+			draw_rect(bar, Color(Palette.WATER.r, Palette.WATER.g, Palette.WATER.b, 0.14))
 		# bevel frame (lit top-left)
 		draw_line(bar.position, Vector2(bar.end.x, bar.position.y),
 			Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.85), 1.5, true)
@@ -149,8 +167,16 @@ func _draw() -> void:
 		# approach, gold the instant it crosses into the release window.
 		if zone_lo >= 0.0:
 			var px := bar.position.x + fw
-			var in_zone := frac >= zone_lo
+			var in_zone := frac >= zone_lo and (zone_hi < 0.0 or frac <= zone_hi)
 			var nc := Palette.GOLD_BRIGHT if in_zone else Color(0.93, 0.96, 1.0)
+			if held:
+				# BANKED: pin the needle onto the Still sliver (never the far-right edge — that
+				# read as an overshoot) and TREMBLE, harder as the gutter nears (Vigil's read).
+				var sc := (clampf(mark_lo, 0.0, 1.0) + clampf(mark_hi, 0.0, 1.0)) * 0.5 \
+					if (mark_lo >= 0.0 and mark_hi > mark_lo) else clampf(zone_lo, 0.0, 1.0)
+				px = bar.position.x + bar.size.x * sc \
+					+ sin(_pulse * (8.0 + 20.0 * held_frac)) * (1.0 + 3.0 * held_frac) * s
+				nc = Palette.GOLD_BRIGHT if loosed_ready else Palette.WATER.lightened(0.3)
 			var ng := nc
 			ng.a = 0.30
 			draw_line(Vector2(px, bar.position.y - 6.0 * s), Vector2(px, bar.end.y + 4.0 * s), ng, 6.0 * s * 0.6, true)
@@ -185,9 +211,13 @@ func _draw_window(bar: Rect2, s: float, a: float, live: bool) -> void:
 	if zone_lo < 0.0:
 		return
 	var zx := bar.position.x + bar.size.x * clampf(zone_lo, 0.0, 1.0)
-	var zone := Rect2(zx, bar.position.y + 1.0, bar.end.x - zx, bar.size.y - 2.0)
-	var hot := live and frac >= zone_lo
-	var st := Palette.STEEL
+	# PLUMBING A: bound the clean band's RIGHT edge at zone_hi (< 1.0 when THE EDDY drifts the
+	# centre left) — default -1 keeps the old extend-to-bar-end (BRIM/Bloom/idle byte-identical).
+	var zright := bar.end.x if zone_hi < 0.0 else bar.position.x + bar.size.x * clampf(zone_hi, 0.0, 1.0)
+	var zone := Rect2(zx, bar.position.y + 1.0, maxf(zright - zx, 1.0), bar.size.y - 2.0)
+	var hot := live and frac >= zone_lo and (zone_hi < 0.0 or frac <= zone_hi)
+	# FROZEN (Glass River) glazes the window blue; STEEL otherwise.
+	var st := Palette.WATER if frozen else Palette.STEEL
 	# the zone glass — a cool vertical gradient that flares while the needle is inside
 	var za := (0.46 + 0.10 * sin(_pulse * 5.0) if hot else 0.28) * a
 	UiKit.grad_rect(self, zone, Color(st.r, st.g, st.b, za), Color(st.r, st.g, st.b, za * 0.35))
@@ -216,14 +246,42 @@ func _draw_window(bar: Rect2, s: float, a: float, live: bool) -> void:
 		var gem_c := Vector2(mx + mw * 0.5, bar.position.y - 8.0 * s)
 		UiKit.glow(self, gem_c, 9.0 * s, Color(g.r, g.g, g.b, (0.36 + 0.16 * sin(_pulse * 2.2)) * a))
 		_gold_gem(gem_c, 4.5 * s, a)
+	# CURRENT READING: the fast-read sub-region (band's first third) — a brighter hatch.
+	if live and cr_hi >= 0.0 and cr_hi > zone_lo:
+		var cx := bar.position.x + bar.size.x * clampf(cr_hi, 0.0, 1.0)
+		var cc := Palette.WATER
+		draw_rect(Rect2(zx, bar.position.y + 1.0, maxf(cx - zx, 1.0), (bar.size.y - 2.0) * 0.34),
+			Color(cc.r, cc.g, cc.b, 0.30 * a))
+		draw_line(Vector2(cx, bar.position.y), Vector2(cx, bar.end.y), Color(cc.r, cc.g, cc.b, 0.55 * a), 1.0, true)
 	# captions — the big graded bar only (the Well); classic healers never see these
 	if s > 1.4:
-		UiKit.engraved_plaque(self, Vector2(zx + zone.size.x * 0.5, bar.end.y + 13.0), "RELEASE WINDOW", hot, 9)
-		if hot:
-			var rc := Palette.GOLD_BRIGHT
-			rc.a = (0.75 + 0.25 * sin(_pulse * 6.0)) * a
-			UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(zx - 96.0, bar.position.y - 10.0),
-				"RELEASE ▸", HORIZONTAL_ALIGNMENT_RIGHT, 90.0, UiKit.SIZE["LABEL"], rc)
+		if held:
+			# BANKED heal: a persistent, unmistakable spend prompt + the gutter countdown —
+			# never the ambiguous live "RELEASE WINDOW" that reads as an overrun.
+			var lbl := "BANKED — TAP / CLICK to RELEASE"
+			if loosed_ready:
+				lbl = "INTERCEPT — LOOSE IT NOW ▸"
+			UiKit.engraved_plaque(self, Vector2(bar.position.x + bar.size.x * 0.5, bar.end.y + 13.0), lbl, true, 10)
+			if held_left >= 0.0:
+				UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(bar.end.x - 4.0, bar.position.y - 11.0),
+					"gutter %.1fs" % held_left, HORIZONTAL_ALIGNMENT_RIGHT, 96.0, UiKit.SIZE["CAPTION"],
+					Palette.THORN if held_frac > 0.66 else Palette.TEXT)
+			if tremble_frac >= 0.0:   # RIDE THE TREMBLE cap meter
+				var mw := 70.0
+				var mx := bar.position.x
+				draw_rect(Rect2(mx, bar.end.y + 26.0, mw, 4.0), Color(0, 0, 0, 0.5))
+				draw_rect(Rect2(mx, bar.end.y + 26.0, mw * clampf(tremble_frac, 0, 1), 4.0), Palette.GOLD_BRIGHT)
+		elif frozen:
+			UiKit.engraved_plaque(self, Vector2(zx + zone.size.x * 0.5, bar.end.y + 13.0), "GLASS — release = STILL", true, 9)
+		elif flume:
+			UiKit.engraved_plaque(self, Vector2(bar.position.x + bar.size.x * 0.5, bar.end.y + 13.0), "WHITE WATER — release FREE", true, 9)
+		else:
+			UiKit.engraved_plaque(self, Vector2(zx + zone.size.x * 0.5, bar.end.y + 13.0), "RELEASE WINDOW", hot, 9)
+			if hot:
+				var rc := Palette.GOLD_BRIGHT
+				rc.a = (0.75 + 0.25 * sin(_pulse * 6.0)) * a
+				UiKit.text_shadowed(self, UiKit.display(700, 2), Vector2(zx - 96.0, bar.position.y - 10.0),
+					"RELEASE ▸", HORIZONTAL_ALIGNMENT_RIGHT, 90.0, UiKit.SIZE["LABEL"], rc)
 
 func _gold_gem(at: Vector2, r: float, a: float) -> void:
 	var pts := PackedVector2Array([at + Vector2(0, -r), at + Vector2(r * 0.75, 0),

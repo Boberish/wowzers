@@ -3262,6 +3262,18 @@ func _render_frames(s: CombatState, obs: Dictionary) -> void:
 		fr.incoming_lethal = false
 		fr.ripe = false                      # Bloomweaver drives this per-frame below
 		fr.glint = CombatCore.vuln_until(s, s.seats.find(seat), &"glint") >= 0   # Well: this ally is glinting (rides the vuln stack since 855ac2f)
+		# Well/DRAW SKIN — the film + its still-pending deferred wound (Well-gated, view-only;
+		# byte-neutral: reads seat.vars with defaults, never touches state/checksum).
+		if _healer_cls == "well":
+			fr.skinned = s.tick < int(seat.vars.get("skin_until_tick", -1))
+			var _drip: Array = seat.vars.get("skin_drip", [])
+			var _pend := 0.0
+			for _ch in _drip:
+				_pend += float(_ch.get("rem", 0.0))
+			fr.skin_pending_frac = _pend / maxf(seat.hp_max, 1.0)
+		else:
+			fr.skinned = false
+			fr.skin_pending_frac = 0.0
 		# Well/BRIM: the pour window lives on EVERY frame, always (the aim IS the party bars)
 		fr.brim_line = _wcfg.brim_band if (_seat_key == "healer" and _healer_cls == "well" \
 			and _aspect == "brim" and _wcfg != null) else 0.0
