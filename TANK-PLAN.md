@@ -1,5 +1,21 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
+**Status (2026-07-12): 🔨 THE TANK-V3 REBUILD BUILT on branch `tank-v3` (slices S1 `717b2a2` → S5) —
+attempt 3. tank-v2 (`5af4927`) was still fully buggy in play (notes not showing / flicker / pop-all-over
+/ sync wrong) AND broke the other three classes; v3 is the from-the-spec rebuild against §0 THE CHANNEL
+CONTRACT v3 (FINAL BUILD SPEC — Design C two surfaces: channel = committed melee, judge/cast bar = raid
+globals+casts; full unification REJECTED, DEC-1). What v3 fixed: the STREAM barrier is RETIRED so the
+melee flows through every global (the #1 hitch); the octagon projection + render-side `_tempo_vis` are
+deleted so comet x is a pure function of eta (no pop/flicker/jump); the judge feed-or-deactivate is
+unconditional (the frozen-ghost that broke blade/caster/healer, fixed at source); and THE MERGE-BACK
+GATE v2 skipped is honored — `dodge_recovery` reverted 0.8→0.35, the barrage un-collapsed to one beat
+per hit, rhythm melee added to Mistral+Gemini. One protocol version carries the whole rebaseline: **v18**.
+Verification (S5): `stream_probe` ALL OK incl. the forced-multi-step process-order probe (req 33);
+net_smoke/net_map_smoke checksum-identical over loopback; WSLg render confirmed (tank + Alchemist);
+`verify-all` SEEDS=300 green with all four classes in one merge. **Bill's per-Seal playtest = the feel
+gate.** Deck re-lands per-verdict later; per-Seal texture/busters/LATE authoring = S6.
+The tank-v2 status below is kept for history:**
+
 **Status (2026-07-11): 🔨 THE TANK-V2 REWRITE BUILT & MERGED `5af4927` — see §0 THE CHANNEL CONTRACT
 v3 (the design of record; wins any diff below). Bill's playtest = the feel gate; every number is a
 knob (`duel_*` config · per-body stream profiles · the F9 STREAM TUNER). Deck re-lands per-verdict

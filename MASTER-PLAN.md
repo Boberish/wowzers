@@ -857,15 +857,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ⏳ 2026-07-11 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3, Bill).**
-  Bill's tank-v2 playtest: upcoming notes NOT showing · whole notes flicker in/out · elements pop
-  up all over (not just late) · sync weird · "fully buggy, not one thing" · other classes suspected
-  broken by the merge. Scope check: AAA bar, tens of thousands of players — logically perfect and
-  robust, no patch-on-patch. Opus agent workflow: behavior-contract recovery (the INTENT, not the
-  v2 tech plan — learn what it got wrong) + current-code audit + builds-1/2 autopsy + class-
-  regression hunt + symptom repro → root-cause synthesis → 3-architect design + judge synthesis →
-  sequential build slices on the branch (quick gates only, per Bill's verify law) → verify-all
-  final gate + class restore proof. *(this session)*
+- ☑ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3) — BUILT,
+  all 5 slices on the branch, ready for merge.** Design of record = TANK-PLAN §0 THE CHANNEL CONTRACT
+  v3 (FINAL BUILD SPEC): Design C two surfaces (channel = committed melee · judge/cast bar = raid
+  globals+casts), full A/B unification REJECTED (DEC-1). Slices: **S1 `717b2a2`** law-suite probe +
+  byte-free UI fixes (octagon projection + `_tempo_vis` deleted → constant pps; judge feed-or-
+  deactivate unconditional = the frozen-ghost fix at source for ALL seats; NO protocol bump) · **S2
+  `e99d2ae`** continuity — the STREAM barrier RETIRED, publishing unconditional to horizon (kills the
+  #1 "second between generations" hitch), `stream_breathe` forward-compat knob, protocol **v17→v18** ·
+  **S3 `bdd72a7`** cross-class restoration = THE MERGE-BACK GATE v2 skipped (`dodge_recovery` 0.8→0.35
+  revert · BARRAGE un-collapse = PILLAR #2 ration · rhythm melee on Mistral+Gemini) · **S4 `dfa1d38`**
+  vocabulary/legality matrix/LATE floor+cap/claim tie-break + landed-parry mit .95 restored (was
+  silently clamped to .90) · **S5 (this commit)** net + final verification: `stream_probe` ALL OK incl.
+  the forced-multi-step process-order probe (req 33 — real controller catch-up drain → single coherent
+  comet slide, no jump); `server/preflight.sh` OK; net_smoke/net_map_smoke checksum-identical over
+  loopback (v18); WSLg render confirmed (tank + Alchemist — no octagon, no frozen ghost, casts on the
+  cast bar); `verify-all` SEEDS=300 GREEN with all four classes' sims in one merge; BUILD_STAMP →
+  TANK-V3 (v18). ⚠ §7 items 1-3 are a DELIBERATE non-byte-identical re-baseline (the retirement WAS
+  the regression) — re-pin checksums, don't chase the diff. **Bill's per-Seal playtest = the feel gate**
+  (per-Seal texture/busters/LATE authoring = S6; deck re-land = later). *(this session)*
 
 - ☑ 2026-07-11 · `../wow-tank-v2` → **MERGED `5af4927` (ff)** · **THE TANK-V2 REWRITE — BUILT.**
   All slices landed: S1 engine+kit bang (`30008b6` — THE STREAM committed-timeline replaces

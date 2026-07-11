@@ -30,6 +30,7 @@ func _initialize() -> void:
 	_probe_seals_continuity(mini(ticks, 1200))       # all 4 Seals + immutability/no-reuse/continuity HARD
 	_probe_freshness()
 	_probe_claim_tiebreak()
+	_probe_process_order()
 	if _fails == 0:
 		print("STREAM PROBE: ALL OK")
 	else:
@@ -415,6 +416,71 @@ func _probe_claim_tiebreak() -> void:
 	if not kit._press_claims(s, tank, here):
 		_fail("claim: a bar beyond ±answer_claim must not steal the claim from the in-range bar")
 	print("  claim tie-break: same-impact→lowest id · nearest wins · feint yields · out-of-range ignored — holds")
+
+## req 33 (§8) — PROCESS-ORDER COHERENCE (tank-v3 S5): the real CombatController drains N ticks
+## in ONE catch-up frame, and only THEN does the HUD read observe() once. Because every comet's
+## x is a pure function of (impact_tick, s.tick) through a CONSTANT pps (answer_channel `_pps`),
+## a multi-step frame slides every live comet by the SAME delta — no comet jumps relative to
+## another, and no comet lands where a mid-drain render would have put it. This drives the actual
+## CombatController._process with a big delta and asserts the single coherent slide on the real
+## AnswerChannel geometry (the regression test for "elements pop up all over" under a frame hitch).
+func _probe_process_order() -> void:
+	var s := _mk(DuelistContent.make_dense(), 71, 0)
+	var ctrl := CombatController.new()
+	ctrl.begin(s, 0)                                   # tank = human seat 0, its policy removed → no press
+	var chan := AnswerChannel.new()
+	chan.size = Vector2(740.0, 124.0)                  # the band's placement (duelist_band: -370..370 × -412..-288)
+	chan.horizon = s.config.stream_horizon
+	# warm up with single-tick frames until several comets ride the runway
+	var guard := 0
+	while s.boss.stream.size() < 3 and not s.over and guard < 800:
+		ctrl._process(s.dt)
+		s.events.clear()
+		guard += 1
+	if s.boss.stream.size() < 2 or s.over:
+		_fail("process-order: could not warm up >=2 live comets")
+		ctrl.free(); chan.free(); return
+	var before := _comet_xs(s, s.seats[0], chan)
+	# THE CATCH-UP FRAME: one _process with a big real-time delta drains several ticks at once,
+	# then a single render reads observe(). The controller NEVER renders mid-drain (its contract).
+	var t_before := s.tick
+	ctrl._process(0.2)                                 # ~6 ticks (0.2s / (1/30)) in one frame
+	var n_drained := s.tick - t_before
+	s.events.clear()
+	if n_drained < 3:
+		_fail("process-order: the catch-up frame drained only %d ticks (expected a multi-step frame)" % n_drained)
+	var after := _comet_xs(s, s.seats[0], chan)
+	var pps := chan._pps()
+	var want := float(n_drained) * s.dt * pps          # one coherent slide toward the gate
+	var deltas: Array = []
+	for id in before:
+		if after.has(id):                              # only comets that survived the drain (didn't resolve)
+			deltas.append(float(after[id]) - float(before[id]))
+	if deltas.size() < 2:
+		_fail("process-order: <2 comets survived the %d-tick catch-up to compare" % n_drained)
+		ctrl.free(); chan.free(); return
+	var lo: float = deltas[0]
+	var hi: float = deltas[0]
+	for d in deltas:
+		lo = minf(lo, float(d)); hi = maxf(hi, float(d))
+	if hi - lo > 0.5:                                  # sub-pixel: every comet moves as ONE
+		_fail("process-order: comets slid by DIFFERENT deltas (%.3f..%.3f px) — a mid-drain render jump" % [lo, hi])
+	if absf((lo + hi) * 0.5 - want) > 1.0:
+		_fail("process-order: comet slide %.2fpx != expected %.2fpx over %d ticks (x not affine in eta — pps not constant?)"
+			% [(lo + hi) * 0.5, want, n_drained])
+	print("  process-order (req 33): %d comets · %d-tick catch-up → single coherent slide %.2fpx (want %.2f) — no jump"
+		% [deltas.size(), n_drained, (lo + hi) * 0.5, want])
+	ctrl.free(); chan.free()
+
+## The render's comet-x for every live bar, straight through the real AnswerChannel geometry.
+func _comet_xs(s: CombatState, tank: Seat, chan: AnswerChannel) -> Dictionary:
+	var obs := CombatCore.observe(s, tank)
+	var stream: Dictionary = obs.get("stream", {})
+	var out := {}
+	for b_v in stream.get("bars", []):
+		var b: Dictionary = b_v
+		out[int(b["id"])] = chan._bar_x(float(b["eta"]))
+	return out
 
 func _sequence(seed_v: int) -> Array:
 	var s := _mk(DuelistContent.make_dense(), seed_v, 0)
