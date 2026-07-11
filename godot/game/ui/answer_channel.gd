@@ -37,6 +37,13 @@ var win_good: float = 0.30
 var win_graze: float = 0.50
 var parry_window: float = 0.10
 
+var tick_frac: float = 0.0                 ## the controller's accumulator fraction (0..1) — comets
+                                           ## interpolate BETWEEN 30 Hz ticks (pass 2: stepped motion
+                                           ## read as input lag against tight windows)
+var late_slack: float = 0.15               ## bars hold the gate this long after touch (late presses)
+
+const TICK_DT := 1.0 / 30.0                ## the fixed timestep IS the law (CLAUDE.md)
+
 var _tempo_vis: float = 1.0                ## eased toward tempo (a snap would jump every comet)
 var _seen: Dictionary = {}                 ## bar id -> true (late-flash bookkeeping)
 var _flashes: Array = []                   ## [{x, t}] LATE pop-in rings
@@ -94,7 +101,8 @@ func _pps() -> float:
 	return (_gate_x() - 26.0) / maxf(0.5, horizon) * _tempo_vis
 
 func _bar_x(eta: float) -> float:
-	return _gate_x() - eta * _pps()
+	# interpolate between engine ticks (eta only changes at 30 Hz; the screen runs faster)
+	return _gate_x() - (eta - tick_frac * TICK_DT) * _pps()
 
 func _draw() -> void:
 	var w := size.x
@@ -121,11 +129,14 @@ func _draw() -> void:
 	var gx := _gate_x()
 	var pps := _pps()
 	var bh := h - 26.0
+	# SYMMETRIC bands (THE TWINFANG MODEL): the same grade a hair early or a hair late —
+	# the late side is bounded by the resolve slack, so it draws shorter past the line.
 	_gate_band(gx, cy, bh, win_graze * pps, Palette.STEEL.darkened(0.55))
 	_gate_band(gx, cy, bh, win_good * pps, Palette.GOLD.darkened(0.25))
 	_gate_band(gx, cy, bh, win_perfect * pps, Palette.PERFECT.darkened(0.1))
 	_gate_band(gx, cy, bh, win_bullseye * pps, Palette.GOLD_BRIGHT)
-	draw_rect(Rect2(gx - parry_window * pps, cy - bh * 0.5 - 4, 2.0, 8.0), Palette.STEEL)
+	draw_rect(Rect2(gx - parry_window * pps, cy - bh * 0.5 - 4,
+		minf(parry_window, late_slack) * pps + parry_window * pps, 3.0), Palette.STEEL)
 	draw_line(Vector2(gx, cy - bh * 0.5 - 6), Vector2(gx, cy + bh * 0.5 + 6), Palette.TEXT, 2.0)
 	# --- SHATTER shards (dead publisher's bars breaking) ---
 	for sh_v in _shards:
@@ -142,7 +153,7 @@ func _draw() -> void:
 	for b_v in bars:
 		var b: Dictionary = b_v
 		var eta := float(b.get("eta", 0.0))
-		var x := _bar_x(eta)
+		var x := minf(_bar_x(eta), gx)                 # a resolving bar HOLDS the gate (the slack)
 		if x < 10.0 or x > w - 10.0:
 			continue
 		var id := int(b.get("id", -1))
@@ -151,7 +162,8 @@ func _draw() -> void:
 			if bool(b.get("late", false)):
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
 		_comet(x, cy, String(b.get("kind", "auto")), bool(b.get("purple", false)),
-			int(b.get("flurry_i", 0)), font)
+			int(b.get("flurry_i", 0)), font,
+			bool(b.get("peeled", false)), bool(b.get("answered", false)))
 	# --- the live telegraph riding the channel: a GLOBAL (boss colors, DODGE) or a
 	#     targeted BUSTER (tank colors, PARRY) — both fully committed at start ---
 	if not global_bar.is_empty():
@@ -193,35 +205,54 @@ func _draw() -> void:
 
 func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color) -> void:
 	col.a = 0.5
-	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx, bh), col)
+	var right := minf(wpx, late_slack * _pps())            # the late half, slack-bounded
+	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx + right, bh), col)
 
 ## One committed comet. Shape = the kind's costume; purple tints a FEINT's disguise.
-func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font) -> void:
+## PEELED (pass 2): drawn translucent with a crimson hunt-tick — it hunts a raider, the
+## tank still answers it for flow. ANSWERED: dimmed hollow, its word gone (it's done).
+func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
+		peeled := false, answered := false) -> void:
+	var fade := 1.0
+	if answered:
+		fade = 0.30
+	elif peeled:
+		fade = 0.55
 	match kind:
 		"heavy":
-			_hexagon(x, cy, 15.0, PURPLE if purple else Palette.HEAVY)
-			_bullseye_dot(x, cy, 15.0)
-			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.HEAVY)
+			_hexagon(x, cy, 15.0, _f(PURPLE if purple else Palette.HEAVY, fade))
+			if not answered:
+				_bullseye_dot(x, cy, 15.0)
+				_word(font, x, cy, "PARRY", _f(PURPLE if purple else Palette.HEAVY, fade))
 		"buster":
-			_octagon(x, cy, 18.0, PURPLE if purple else Palette.CRUSH,
-				PURPLE.lightened(0.3) if purple else Palette.CRIMSON)
-			_bullseye_dot(x, cy, 18.0)
-			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.CRIMSON)
+			_octagon(x, cy, 18.0, _f(PURPLE if purple else Palette.CRUSH, fade),
+				_f(PURPLE.lightened(0.3) if purple else Palette.CRIMSON, fade))
+			if not answered:
+				_bullseye_dot(x, cy, 18.0)
+				_word(font, x, cy, "PARRY", _f(PURPLE if purple else Palette.CRIMSON, fade))
 		"eat":
-			var col := Palette.TEXT_DIM
+			var col := _f(Palette.TEXT_DIM, fade)
 			_diamond(x, cy, 13.0, col)
 			draw_line(Vector2(x - 5, cy - 5), Vector2(x + 5, cy + 5), Palette.BG0, 2.0)
 			draw_line(Vector2(x + 5, cy - 5), Vector2(x - 5, cy + 5), Palette.BG0, 2.0)
-			_word(font, x, cy, "EAT", col)
+			if not answered:
+				_word(font, x, cy, "EAT", col)
 		"flurry":
-			var col2 := PURPLE if purple else Palette.FLOW
+			var col2 := _f(PURPLE if purple else Palette.FLOW, fade)
 			draw_circle(Vector2(x, cy), 6.5, col2)
 			draw_arc(Vector2(x, cy), 9.0, 0, TAU, 14, col2.darkened(0.3), 1.5)
-			if flurry_i == 0:
+			if flurry_i == 0 and not answered:
 				_word(font, x, cy, "WEAVE", col2)
 		_:
-			_diamond(x, cy, 11.0, PURPLE if purple else Palette.LIGHT)
-			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.LIGHT)
+			_diamond(x, cy, 11.0, _f(PURPLE if purple else Palette.LIGHT, fade))
+			if not answered:
+				_word(font, x, cy, "DODGE", _f(PURPLE if purple else Palette.LIGHT, fade))
+	if peeled and not answered:
+		draw_line(Vector2(x - 4, cy + 18), Vector2(x + 4, cy + 18), Palette.CRIMSON, 2.0)
+
+func _f(col: Color, fade: float) -> Color:
+	col.a *= fade
+	return col
 
 ## The mint center-dot: "a BULLSEYE dodge answers this" (heavy/buster only).
 func _bullseye_dot(x: float, cy: float, r: float) -> void:

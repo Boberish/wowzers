@@ -80,7 +80,10 @@ var stream_tempo: float = 1.0          ## whole-flow speed multiplier (SPEED LAW
                                        ## publish cadence together; per-bar variance is forbidden)
 var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.)
 var stream_resolving: Dictionary = {}  ## the bar mid-resolve — the kit funnel reads flurry
-                                       ## group/index here (cleared the same tick; never checksummed)
+                                       ## group/index + the claimed answer here (cleared same tick)
+var stream_answers: Dictionary = {}    ## bar id -> {kind, grade} — press-time claims (THE TWINFANG
+                                       ## MODEL: judged at the press, applied at resolve). Lives
+                                       ## BESIDE the committed bars, so LAW 1 immutability holds.
 
 ## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
 ## boss damage routes to add_hp, the main body's ability timers freeze, and the
