@@ -1921,6 +1921,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `bar-grammar` (worktree `../wow-grammar`) — **THE GRAMMAR PASS — MERGED `ebc5122`.**
+  Bill's fight-1 read: only smalls, no bigs/fakes; cues said DODGE for everything then randomly
+  PARRY; comets spawn mid-channel. FIXES: (1) full alphabet EVERY body EVERY tier (swarm bluff
+  un-gated + snap cd 11→9 · chanter +Censer Backhand/+Broken Cadence · brute +False Wind-Up;
+  stalker already complete); (2) height-law WORDS — judge+dial `size_verbs` (smalls DODGE ·
+  HEAVY+ PARRY) + duel_answer verdicts echo ev.kind (the button actually pressed); (3) judge
+  `pps` per-instance (const→var), Duelist channel 420 px/s so short-lead bars enter at the mouth.
+  STAMP → ONE BAR v1.1. Gates: forge_sim ALL PASS · riftmaw byte-identical · raid smoke OK · WSLg
+  Chitin-Bluff veil live in fight-1 t1. *(this session)*
+
 - ☑ 2026-07-11 · `one-bar` (worktree `../wow-onebar`) — **THE ONE BAR — MERGED `60c866b`.** Bill:
   lane works, but tank had TWO dodge bars — reuse the global one. RhythmLane DELETED; StrikeJudge
   gains the `rhythm` kind (feed_rhythm) — the stream and the globals take turns on the ONE Judgment
