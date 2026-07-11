@@ -1929,7 +1929,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   = the stream — armed comet → impact gate, gaps show the projected NEXT swing, wind-ups dim but
   never remove, grade flashes + history gems + crimson eaten + grey PEELED. observe() gains
   tank-only `rhythm_lane` telemetry (gated on the melee rhythm key). + combat BUILD STAMP
-  ("build 2026-07-11 · RHYTHM LANE v1") to settle stale-client questions forever. GATES: all三
+  ("build 2026-07-11 · RHYTHM LANE v1") to settle stale-client questions forever. GATES: all 3
   checksums unchanged (view+observe only) · both smokes green · WSLg: lane in 5 consecutive
   frames + armed/gap/paused states. NEXT: Bill relaunches FRESH (stamp visible top-left =
   new build) → feel verdict on lane size/position/cadence. *(this session)*
