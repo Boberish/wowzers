@@ -92,10 +92,9 @@ func _process(_d: float) -> bool:
 		"D: the AI run matches the command (twinfang/tempo)")
 	hud._d.run.tokens = 5   # YOUR wallet; the AI raiders keep their own (no shared bank now)
 	rb.tokens = 3           # the blade AI's own wallet — must NOT be clobbered by the human's
-	# The tank is now the DUELIST — a reworked (framework) class, so its FIRST draft wires the
-	# Combo rig before boons. Pre-wire it here to isolate the COMMANDER boon-chain test from the
-	# rig-wire step (which the rig_wire screenshot probe covers).
-	hud._d.run.rig = {"when": "tall_land", "then": "strike"}
+	# TANK-V2 (TANK-PLAN §0): the human tank is the DECKLESS Duelist — its REFORGE is
+	# SKIPPED by design (empty catalog), so the chain is the 3 AI drafts then done. The
+	# human-pick leg of this test rides again when the deck re-lands post-playtest.
 	var seen: Array = []
 	hud._show_boon_draft(func(): seen.append("done"))
 	var guard := 0
@@ -110,17 +109,17 @@ func _process(_d: float) -> bool:
 		seen.append(String((ds._run as RunState).char_class))
 		ds.emit_signal("boon_taken", ds._offers[0])
 		guard += 1
-	_ck(seen.size() == 5 and String(seen[4]) == "done" and String(seen[0]) == "duelist",
-		"D: chain = your REFORGE then 3 AI drafts then done (%s)" % str(seen))
+	_ck(seen.size() == 4 and String(seen[3]) == "done" and not seen.has("duelist"),
+		"D: chain = 3 AI drafts then done, the deckless human SKIPPED (%s)" % str(seen))
 	var ai_boons := 0
 	for k in hud._d.ai_runs:
 		ai_boons += (hud._d.ai_runs[k] as RunState).boons.size()
 	_ck(ai_boons == 3, "D: each AI raider took exactly one boon (n=%d)" % ai_boons)
-	_ck(hud._d.run.boons.size() == 1, "D: your own pick landed too")
+	_ck(hud._d.run.boons.size() == 0, "D: the deckless human took nothing (by design)")
 	_ck(hud._d.run.tokens == 5, "D: YOUR wallet untouched by AI drafts (per-seat, 5)")
 	_ck(rb.tokens == 3, "D: the blade AI's own wallet is independent (3, not mirrored from yours)")
-	_ck(hud._seat_boons_now().size() == 4,
-		"D: all four seats' boons ride the next pull's spec")
+	_ck(hud._seat_boons_now().size() == 3,
+		"D: the 3 AI raiders' boons ride the next pull's spec (empty sets are omitted — the deckless tank has none)")
 
 	print("COMMANDER PROBE: %s (fails=%d)" % [("ALL OK" if fails == 0 else "FAIL"), fails])
 	quit(1 if fails > 0 else 0)

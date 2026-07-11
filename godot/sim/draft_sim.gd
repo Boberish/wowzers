@@ -12,7 +12,10 @@
 extends SceneTree
 
 const CLASSES := {
-	"duelist": ["duelist"],
+	# TANK-V2 (TANK-PLAN §0): the Duelist is DECKLESS (empty catalog by design) — its
+	# draft-flow rows ride the Alchemist until the deck re-lands post-playtest. The
+	# duelist MINT rows below stay (minting reads diag, not the catalog).
+	"alchemist": ["brew"],
 	"twinfang": ["tempo", "venomancer"],
 	"bloomweaver": ["wildgrove", "thornveil"],
 }
@@ -44,7 +47,7 @@ func _check(ok: bool, what: String) -> void:
 
 func _start(cls: String, aspect: String, seed_v: int) -> RunState:
 	match cls:
-		"duelist": return RunState.start_duelist(aspect, seed_v)
+		"alchemist": return RunState.start_alchemist(aspect, seed_v)
 		"twinfang": return RunState.start_twinfang(aspect, seed_v)
 		"bloomweaver": return RunState.start_bloomweaver(aspect, seed_v)
 	return null
