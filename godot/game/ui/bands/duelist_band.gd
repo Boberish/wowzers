@@ -23,6 +23,10 @@ func build() -> void:
 	hud._shake_root.add_child(gauge)
 	# THE CHANNEL — bottom-center, where the tank's eyes live. Everything answerable rides
 	# it, one bar at a time; the boss's SPELLS stay on the cast bar (footwork ≠ spellwork).
+	# The shared judge hides for this seat entirely — the channel IS the tank's instrument
+	# (the judge's resting ghost was photobombing behind it, WSLg pass 2026-07-11).
+	if hud._judge != null:
+		hud._judge.visible = false
 	channel = AnswerChannel.new()
 	UiKit.place(channel, 0.5, 1, 0.5, 1, -370, -412, 370, -288)
 	hud._shake_root.add_child(channel)
