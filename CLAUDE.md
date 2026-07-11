@@ -75,6 +75,10 @@ re-baseline, slices S0–S5, leans = defaults, 2026-07-10) ·
 `REFIT-PLAN.md` (structural audit v2 →
 the Shell Refit: fix plan + target architecture, 2026-07-07) · `TEETH-PLAN.md` (the depth-&-teeth pass — CONTEST skill-nodes · draftable spells ·
 loot rolls · event-crafting · curse cards · endless door; rerolls-out, 2026-07-08) ·
+`ENDLESS-PLAN.md` (**THE BLIND DESCENT — the endless mode design v1**: fog-of-war maze
+floors · honest info economy (VANTAGE/CHARTS/SCOUT) · free backtracking + dead-ends-always-
+pay · the HUNTER as a per-floor printed term · stair/plunge descent riding `spec.depth`
+untouched; ⚠ NOT AI-themed; 🟡 at Bill's 8-verdict board §V, 2026-07-11) ·
 `SIM-PLAN.md` (the balance ladder — two-speed sims: quick gate + weekly SOAK/digest; S1–S5
 card-visibility rule · creed matrix · card delta · build sampler+lift · raid ablation; planned
 NOT built, triggers per rung, 2026-07-10) ·

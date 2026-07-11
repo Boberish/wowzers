@@ -857,6 +857,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-11 · main (docs only) · **`ENDLESS-PLAN.md` NEW** / TEETH §ENDLESS / LEDGER §E —
+  **ENDLESS MODE DESIGNED: THE BLIND DESCENT (Bill's fog-of-war pitch).** Bill: dungeon-crawler
+  fog of war — see only adjacent rooms, find "the end", dead ends, turn around and go back.
+  Design v1: the third door (raid=campaign · dungeon=push lap · **endless=which-way-and-how-
+  greedy**) — small maze floors (~10–16 rooms, corridor→warren as Depth texture) under fog ·
+  **honest info economy** (silhouette tells · VANTAGE rooms · CHARTS as loot · SCOUT ⏻ spend;
+  Bill CUT the lying-signposts idea) · **free backtracking through cleared rooms** (Bill-liked;
+  anti-tedium law: wrong turns cost decisions, never time) · **dead-ends-always-pay law** ·
+  **the HUNTER as a per-floor printed term** (Bill: "some levels, not all-or-nothing") —
+  QUIET/HUNTED read on the stair before you descend, exploration-fed clock, kill-it-to-quiet-
+  the-floor · stairs/plunge exits, guardian every 3rd floor, runs start at rung 0, standing =
+  deepest floor cleared (own page) · **⚠ NOT AI-themed (Bill)** — skin candidates WANDERING
+  ESTATE / FIRST DIG / UNDERVAULT at §V-8. TEETH's don't-fork-Depth rule honored (rides
+  `spec.depth`, zero new math). 🟡 at Bill's 8-verdict board §V; slices S0–S4 after DESCENT §I's
+  map bang. No code touched. *(endless design session)*
 - ⏳ 2026-07-11 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3, Bill).**
   Bill's tank-v2 playtest: upcoming notes NOT showing · whole notes flicker in/out · elements pop
   up all over (not just late) · sync weird · "fully buggy, not one thing" · other classes suspected
