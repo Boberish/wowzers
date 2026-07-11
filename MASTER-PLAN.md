@@ -1921,6 +1921,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `rhythm-lane` (worktree `../wow-lane`) — **THE RHYTHM LANE v1 — MERGED `ae0c0f0`.**
+  Bill: "still no auto attacks, only globals, glitchy — audit the whole implementation." The e2e
+  audit (real descent path, human seat) proved the ENGINE fires but the v1 PRESENTATION was the
+  bug: the dial-borrowed bar was on screen ~30% in sub-second blips = a 1Hz strobe reading as
+  "another global, glitching". REBUILD: dial = globals only; `RhythmLane` (bottom-center, permanent)
+  = the stream — armed comet → impact gate, gaps show the projected NEXT swing, wind-ups dim but
+  never remove, grade flashes + history gems + crimson eaten + grey PEELED. observe() gains
+  tank-only `rhythm_lane` telemetry (gated on the melee rhythm key). + combat BUILD STAMP
+  ("build 2026-07-11 · RHYTHM LANE v1") to settle stale-client questions forever. GATES: all三
+  checksums unchanged (view+observe only) · both smokes green · WSLg: lane in 5 consecutive
+  frames + armed/gap/paused states. NEXT: Bill relaunches FRESH (stamp visible top-left =
+  new build) → feel verdict on lane size/position/cadence. *(this session)*
+
 - ☑ 2026-07-11 · `rhythm-coverage` (worktree `../wow-rhythm2`) — **THE RHYTHM: full walk-in
   coverage + pack fix — MERGED `a6ab9ae`.** Bill's re-test read "no changes" — root causes: (a) only
   the SWARM body carried the rhythm (fresh map rolls open on stalker/skirmish walk-ins = the old
