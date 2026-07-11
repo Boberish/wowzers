@@ -120,33 +120,38 @@ func modify_incoming(s: CombatState, seat: Seat, dmg: float, source: StringName,
 	if source == &"enrage" or source == &"debuff":
 		return dmg
 	if source == &"eat":
-		return dmg                                        # unavoidable: whole, and it never eats the press
+		return dmg                                        # EAT takes no press (legality) — whole, never consumes one
 	if source == &"flurry":
 		return _flurry_beat(s, seat, dmg)
 	var kind := String(seat.vars.get("ans_kind", ""))
 	if kind == "":
-		if size >= AbilityRes.Size.HEAVY:                 # letting a big one through costs aggro
-			_slip(s, seat)
-			CombatCore._bump_diag(s, seat, "miss")
-		return _engarde_wall(s, seat, dmg)
+		return _unanswered(s, seat, dmg, size)
 	var age := s.tick - int(seat.vars.get("ans_tick", -100000))
 	if age < 0 or age > _tt(s, cfg.answer_active):
 		seat.vars["ans_kind"] = ""
 		return _engarde_wall(s, seat, dmg)
-	seat.vars["ans_kind"] = ""                            # one press answers one bar
-	# WHAT is this bar? (the v3 matrix) — stream autos ride source &"rhythm"; a telegraph
-	# aimed at ME with no beats = a BUSTER on the cast channel (parry rules, like a heavy);
-	# an aoe beat = a GLOBAL (dodge-only for every seat, never parried, no size leak).
+	# DEC-14 CLAIM TIE-BREAK: is THIS bar the one the active press should answer? If a nearer /
+	# earlier / lower-id bar is still pending in claim range, leave the press open for it and eat
+	# this one (prevents a press being spent on the wrong bar — e.g. a real bar beside a feint).
+	var bar: Dictionary = s.boss.stream_resolving
+	if not bar.is_empty() and not _press_claims(s, seat, bar):
+		return _unanswered(s, seat, dmg, size)
+	seat.vars["ans_kind"] = ""                            # one press answers one bar (this bar won the claim)
+	# WHAT is this bar? (the v3 matrix) — stream autos ride source &"rhythm"; a telegraph aimed
+	# at ME with no beats = a BUSTER on the cast channel (parry rules, like a heavy); an aoe beat
+	# = a GLOBAL (dodge-only for every seat, never parried, no size leak).
 	var is_global := source != &"rhythm" and not (s.telegraph != null \
 		and s.telegraph.ability.strikes.is_empty() and s.telegraph.target == seat)
-	if is_global:
-		if kind == "parry":                               # you don't parry a room-wide blast
-			_slip(s, seat)
-			CombatCore._bump_diag(s, seat, "miss")
-			CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-				"kind": "parry", "grade": StrikeRes.Grade.MISS, "size": size})
-			return _engarde_wall(s, seat, dmg)
-		var grade := _dodge_grade(s, age)
+	# DEC-15 LEGALITY MATRIX — one explicit gate before grading; an illegal press leaks whole.
+	var grade := _dodge_grade(s, age) if kind == "dodge" else StrikeRes.Grade.BULLSEYE
+	if not _answer_legal(kind, size, is_global, grade):
+		_slip(s, seat)
+		CombatCore._bump_diag(s, seat, "miss")
+		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+			"kind": kind, "grade": StrikeRes.Grade.MISS, "size": size})
+		return _engarde_wall(s, seat, dmg)
+	# legal → grade + mitigate:
+	if is_global:                                         # room-wide dodge: graded, NO size leak
 		_add_flow(s, seat, _flow_gain(s, grade))
 		CombatCore._bump_diag(s, seat, StrikeRes.grade_name(grade))
 		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
@@ -156,6 +161,50 @@ func modify_incoming(s: CombatState, seat: Seat, dmg: float, source: StringName,
 		return _engarde_wall(s, seat, dmg * (1.0 - _parry_result(s, seat, age, size)))
 	return _engarde_wall(s, seat, dmg * (1.0 - _dodge_result(s, seat, age, size)))
 
+## The unanswered path: no valid press covered this bar — letting a big one through costs aggro.
+func _unanswered(s: CombatState, seat: Seat, dmg: float, size: int) -> float:
+	if size >= AbilityRes.Size.HEAVY:
+		_slip(s, seat)
+		CombatCore._bump_diag(s, seat, "miss")
+	return _engarde_wall(s, seat, dmg)
+
+## DEC-14 claim tie-break. Among every bar aimed at this seat within ±answer_claim of now, the
+## press answers the nearest |impact−now|, then the earliest impact, then the lowest id. Returns
+## whether `bar` (the one being resolved/judged, already popped from the stream) is that winner:
+## a strictly-better claim target still pending in the stream means `bar` is NOT it. EAT bars are
+## excluded (they take no press). Deterministic, rng-free; `bar` self-comparison never rejects.
+func _press_claims(s: CombatState, seat: Seat, bar: Dictionary) -> bool:
+	var my_i := s.seats.find(seat)
+	var claim := _tt(s, cfg.answer_claim)
+	var w_dist := absi(int(bar["impact_tick"]) - s.tick)
+	var w_imp := int(bar["impact_tick"])
+	var w_id := int(bar["id"])
+	for b_v in s.boss.stream:
+		var b: Dictionary = b_v
+		if int(b["victim_i"]) != my_i or String(b["kind"]) == "eat":
+			continue
+		var imp := int(b["impact_tick"])
+		var d := absi(imp - s.tick)
+		if d > claim:
+			continue
+		var bid := int(b["id"])
+		if d < w_dist or (d == w_dist and imp < w_imp) \
+				or (d == w_dist and imp == w_imp and bid < w_id):
+			return false                                  # a better claim target is still pending
+	return true
+
+## DEC-15 legality: reject an illegal press before grading. GLOBAL = dodge only (parry never);
+## AUTO = parry or dodge any grade; HEAVY/BUSTER = parry, or dodge at BULLSEYE only. (EAT never
+## reaches here — source==eat returns above; FEINT is judged in on_stream_bar.)
+func _answer_legal(kind: String, size: int, is_global: bool, grade: int) -> bool:
+	if is_global:
+		return kind == "dodge"
+	if kind == "parry":
+		return true
+	if size >= AbilityRes.Size.HEAVY:
+		return grade == StrikeRes.Grade.BULLSEYE
+	return true
+
 ## PARRY — binary: the land or the miss. A land on ANY size aimed at you; the top payout.
 func _parry_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
 	if age <= _tt(s, cfg.parry_window):
@@ -164,23 +213,20 @@ func _parry_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
 		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
 			"kind": "parry", "grade": StrikeRes.Grade.BULLSEYE, "size": size})
 		_counter(s, seat, size)
-		return clampf(cfg.mit_parry_land, 0.0, cfg.mit_cap)
+		# DEC-6: a LANDED PARRY is the one explicit ABOVE-cap payout — mit_cap is the DODGE/partial
+		# ceiling, not the parry's. It still leaks a sliver (mit_parry_land < 1.0; never full-negate).
+		return minf(cfg.mit_parry_land, 0.99)
 	_slip(s, seat)
 	CombatCore._bump_diag(s, seat, "miss")
 	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
 		"kind": "parry", "grade": StrikeRes.Grade.MISS, "size": size})
 	return clampf(cfg.mit_parry_miss, 0.0, cfg.mit_cap)
 
-## DODGE — graded on the one ladder. AUTO: any grade. HEAVY/BUSTER: BULLSEYE only —
-## any lesser dodge is the wrong answer and leaks whole (parry was the call).
+## DODGE — graded on the one ladder. AUTO: any grade. HEAVY/BUSTER: reaches here only at
+## BULLSEYE (the legality matrix already rejected any lesser dodge on a big bar). The power
+## leak still applies, so parry stays the preferred answer on the big ones.
 func _dodge_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
 	var grade := _dodge_grade(s, age)
-	if size >= AbilityRes.Size.HEAVY and grade != StrikeRes.Grade.BULLSEYE:
-		_slip(s, seat)
-		CombatCore._bump_diag(s, seat, "miss")
-		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-			"kind": "dodge", "grade": StrikeRes.Grade.MISS, "size": size})
-		return 0.0
 	var mit := _dodge_mit(grade)
 	if size > AbilityRes.Size.LIGHT:
 		mit -= cfg.dodge_leak_per_size * float(size - AbilityRes.Size.LIGHT)
@@ -241,13 +287,17 @@ func _flurry_beat(s: CombatState, seat: Seat, dmg: float) -> float:
 		CombatCore._emit(s, {"t": "duel_weave_blown", "player": seat.is_player, "seat": seat})
 	return _engarde_wall(s, seat, dmg)                    # eat it all
 
-## FEINT judgment + EAT bookkeeping (the engine routes non-damage bars here).
+## FEINT judgment + EAT bookkeeping (the engine routes non-damage bars here). EAT here is the
+## authored tank-specific channel comet (DEC-10) — a distinct event from the raid-wide BRACE that
+## rides the cast bar for every seat; the two never share a path.
 func on_stream_bar(s: CombatState, seat: Seat, bar: Dictionary) -> void:
 	match String(bar.get("kind", "")):
 		"feint":
 			var kind := String(seat.vars.get("ans_kind", ""))
 			var age := s.tick - int(seat.vars.get("ans_tick", -100000))
-			if kind != "" and age >= 0 and age <= _tt(s, cfg.answer_active):
+			# DEC-14: a press only BAITS on this feint if the feint is the nearest claim target;
+			# if a nearer real bar is pending, the press belonged to it → this feint was a READ.
+			if kind != "" and age >= 0 and age <= _tt(s, cfg.answer_active) and _press_claims(s, seat, bar):
 				seat.vars["ans_kind"] = ""                # the press took the bait
 				seat.vars["fumble_until"] = s.tick + _tt(s, cfg.fumble_recover)
 				_slip(s, seat)

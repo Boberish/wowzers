@@ -76,6 +76,8 @@ var stream_next_impact: int = -1       ## cadence chain head: the NEXT unpublish
 var stream_after_cast: bool = true     ## grammar: the first bar after a telegraph (or the pull) stays plain
 var stream_flurry_cd_until: int = 0    ## grammar: min spacing between flurry bursts
 var stream_last_eat_tick: int = -100000## grammar: no back-to-back unavoidables
+var stream_late_count: int = 0         ## per-fight LATE tally (DEC-11 rate cap; persists across
+                                       ## pack bodies — one budget per fight, reset only per pull)
 var stream_tempo: float = 1.0          ## whole-flow speed multiplier (SPEED LAW: view pacing +
                                        ## publish cadence together; per-bar variance is forbidden)
 var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.)

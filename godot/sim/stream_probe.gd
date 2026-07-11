@@ -29,6 +29,7 @@ func _initialize() -> void:
 	print("continuity (v3, Slice 2 — HARD: publish never halts / no mid-rhythm blank / born at the mouth):")
 	_probe_seals_continuity(mini(ticks, 1200))       # all 4 Seals + immutability/no-reuse/continuity HARD
 	_probe_freshness()
+	_probe_claim_tiebreak()
 	if _fails == 0:
 		print("STREAM PROBE: ALL OK")
 	else:
@@ -72,6 +73,8 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 	var runway_floor := s.config.rhythm_open_delay + every - 0.10
 	var restart_ticks := CombatCore.to_ticks(s.config.rhythm_open_delay + every, s.config.fixed_hz) + 3
 	var min_runway := 1.0e9                           # shortest non-LATE impact-publish lead
+	var late_first := {}                              # id -> true (first obs appearance recorded — LATE floor)
+	var fl_span := {}                                 # flurry_group -> [lo_impact, hi_impact] (LATE-in-flurry guard)
 	while not s.over and s.tick < ticks:
 		var obs := CombatCore.observe(s, tank)
 		# --- continuity: obs-blank PRINTED (peel-inclusive); committed-blank HARD ---
@@ -113,6 +116,25 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 				_fail("%s: bar id %d REUSED after it resolved/shattered" % [label, id])
 			if not ledger.has(id):
 				ledger[id] = snap
+				# LATE guards (tank-v3 S4 / DEC-11): a LATE bar is never a flurry beat and never
+				# lands inside a flurry block. Flurry spans accumulate in impact order, so every
+				# lower-impact block is known by the time a LATE bar publishes.
+				var fg := int(b["flurry_group"])
+				if fg >= 0:
+					var fimp := int(b["impact_tick"])
+					if fl_span.has(fg):
+						var sp: Array = fl_span[fg]
+						fl_span[fg] = [mini(int(sp[0]), fimp), maxi(int(sp[1]), fimp)]
+					else:
+						fl_span[fg] = [fimp, fimp]
+				if bool(b["late"]):
+					if int(b["flurry_n"]) > 0:
+						_fail("%s: a LATE bar %d is a FLURRY beat" % [label, id])
+					var limp := int(b["impact_tick"])
+					for g in fl_span:
+						var sp2: Array = fl_span[g]
+						if limp >= int(sp2[0]) and limp <= int(sp2[1]):
+							_fail("%s: a LATE bar %d impacts INSIDE flurry block %s" % [label, id, g])
 				if not bool(b["late"]):
 					min_runway = minf(min_runway,
 						float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt)
@@ -156,9 +178,16 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 					_fail("%s: obs shipped a PEELED bar %d" % [label, oid])
 				if String(truth["kind"]) == "feint" and String(ob["kind"]) == "feint":
 					_fail("%s: obs shipped a feint's TRUE kind (bar %d)" % [label, oid])
+				var floored_lead := maxf(s.config.stream_late_lead, s.config.stream_late_min_travel)
 				if bool(truth["late"]) \
-						and float(int(truth["impact"]) - s.tick) * s.dt > s.config.stream_late_lead + s.dt:
+						and float(int(truth["impact"]) - s.tick) * s.dt > floored_lead + s.dt:
 					_fail("%s: LATE bar %d shipped before its pop-in lead" % [label, oid])
+				# DEC-11 fairness floor: a LATE pop always leaves >= stream_late_min_travel of runway.
+				if bool(truth["late"]) and not late_first.has(oid):
+					late_first[oid] = true
+					if float(ob["eta"]) < s.config.stream_late_min_travel - 2.0 * s.dt:
+						_fail("%s: LATE bar %d popped with only %.2fs travel (< min %.2fs)"
+							% [label, oid, float(ob["eta"]), s.config.stream_late_min_travel])
 		s.events.clear()
 	# coverage: the training profiles must exercise the alphabet
 	for want in (["auto", "heavy", "feint"] if label == "spike" else ["auto", "heavy", "feint", "flurry", "eat"]):
@@ -336,6 +365,56 @@ func _probe_freshness() -> void:
 	if str(a) == str(b):
 		_fail("freshness: two pulls (different seeds) produced the IDENTICAL sequence")
 	print("  freshness: seed41==seed41, seed41!=seed42 — holds")
+
+## DEC-14 claim tie-break (tank-v3 S4): with a press active and >1 bar in ±answer_claim, the kit's
+## claim funnel picks nearest |impact−now| → earliest impact → lowest id. Drives `_press_claims`
+## directly on hand-placed bars (the deterministic core of "the press answers the RIGHT bar").
+func _probe_claim_tiebreak() -> void:
+	var s := _mk(DuelistContent.make_dense(), 99, 0)
+	var tank: Seat = s.seats[0]
+	var kit := tank.kit as DuelistKit
+	if kit == null:
+		_fail("claim: the tank carries no DuelistKit")
+		return
+	CombatCore.update(s)                              # settle onto a real tick
+	s.boss.stream.clear()                             # take control of the candidate set
+	var t := s.tick
+	var claim := CombatCore.to_ticks(kit.cfg.answer_claim, s.config.fixed_hz)
+	var _bar := func(id_v: int, kind_v: String, imp_v: int) -> Dictionary:
+		return {"id": id_v, "kind": kind_v, "disguise": ("heavy" if kind_v == "feint" else kind_v),
+			"publish_tick": t, "impact_tick": imp_v, "victim_i": 0, "dmg": 10.0, "late": false,
+			"flurry_group": -1, "flurry_i": 0, "flurry_n": 0}
+	# A — two bars at the SAME impact in range: the lowest id claims, the other yields.
+	var a0: Dictionary = _bar.call(500, "auto", t + int(claim / 2))
+	var a1: Dictionary = _bar.call(501, "auto", t + int(claim / 2))
+	s.boss.stream = [a0, a1]
+	if not kit._press_claims(s, tank, a0):
+		_fail("claim: same-impact — lowest-id bar 500 should WIN the press")
+	if kit._press_claims(s, tank, a1):
+		_fail("claim: same-impact — bar 501 should YIELD (500 wins the tie-break)")
+	# B — different impacts: the NEARER impact wins even with the higher id.
+	var near: Dictionary = _bar.call(601, "auto", t + 3)
+	var far: Dictionary = _bar.call(600, "heavy", t + int(claim) - 1)
+	s.boss.stream = [near, far]
+	if not kit._press_claims(s, tank, near):
+		_fail("claim: the NEARER bar (601) should WIN over the farther one")
+	if kit._press_claims(s, tank, far):
+		_fail("claim: the farther bar (600) should YIELD while a nearer one is in range")
+	# C — a real bar nearer than a feint: the feint must NOT claim (→ READ, not BAITED).
+	var real: Dictionary = _bar.call(700, "auto", t + 2)
+	var feint: Dictionary = _bar.call(701, "feint", t + 5)
+	s.boss.stream = [real, feint]
+	if kit._press_claims(s, tank, feint):
+		_fail("claim: a FEINT must yield to a nearer real bar (DEC-14 — no false bait)")
+	if not kit._press_claims(s, tank, real):
+		_fail("claim: the nearer real bar should claim over the feint")
+	# D — out of ±answer_claim: a bar beyond the range is not a rival claim.
+	var here: Dictionary = _bar.call(800, "auto", t + 1)
+	var beyond: Dictionary = _bar.call(799, "auto", t + int(claim) + 4)
+	s.boss.stream = [here, beyond]
+	if not kit._press_claims(s, tank, here):
+		_fail("claim: a bar beyond ±answer_claim must not steal the claim from the in-range bar")
+	print("  claim tie-break: same-impact→lowest id · nearest wins · feint yields · out-of-range ignored — holds")
 
 func _sequence(seed_v: int) -> Array:
 	var s := _mk(DuelistContent.make_dense(), seed_v, 0)

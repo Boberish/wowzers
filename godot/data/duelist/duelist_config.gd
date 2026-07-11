@@ -26,15 +26,21 @@ extends Resource
 #     window IS the bullseye-tight commitment). DODGE is GRADED: bullseye ⊂ perfect ⊂ good,
 #     graze out to answer_active. ---
 @export var answer_active: float = 0.50    ## the answer stays open this long after the press
+@export var answer_claim: float = 0.30     ## DEC-14 claim range: a press answers a bar within
+                                           ## ±this of now; among several, the tie-break picks nearest
+                                           ## |impact−now| → earliest impact → lowest id (deterministic)
 @export var parry_window: float = 0.10     ## land window (~3 ticks) — binary, the commit
 @export var dodge_bullseye: float = 0.07   ## the dead-center read (~2 ticks) — answers heavy/buster
 @export var dodge_perfect: float = 0.14
 @export var dodge_good: float = 0.30
 
-# --- MITIGATION (fraction REMOVED). Cap .90 (a sliver always leaks). The v3 matrix:
+# --- MITIGATION (fraction REMOVED). THE SINGLE MIT AUTHORITY (DEC-6): DODGE tops out at
+#     BULLSEYE = .85, strictly UNDER the partial-mit cap .90 (a sliver always leaks — the healer
+#     is never bored); a LANDED PARRY = .95 is the one explicit ABOVE-cap payout, the reward for
+#     the binary commit. The v3 legality matrix (enforced in the kit's claim funnel before grading):
 #     AUTO = parry or dodge any grade · HEAVY/BUSTER = parry, or dodge at BULLSEYE only
 #     (and the power leak still applies — parry stays preferred on the big ones) ·
-#     GLOBALS never reach this funnel (dodge-only for every seat, telegraph-side). ---
+#     GLOBALS = dodge-only if one reaches this funnel (parry rejected); EAT takes no press. ---
 @export var mit_parry_land: float = 0.95
 @export var mit_parry_miss: float = 0.18   ## a pressed-but-out-of-window parry keeps a token cut
 @export var mit_dodge_bullseye: float = 0.85

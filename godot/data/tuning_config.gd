@@ -46,6 +46,10 @@ extends Resource
 @export var stream_answer_clear: float = 0.30  ## RETIRED (tank-v3 S2): the barrier is gone; no longer read by the publisher
 @export var stream_flurry_cd: float = 10.0     ## min spacing between texture-rolled flurry bursts
 @export var stream_late_lead: float = 0.55     ## a LATE bar pops in this many seconds before impact
+@export var stream_late_min_travel: float = 0.4## DEC-11 fairness floor: a LATE pop is guaranteed at
+                                               ## least this much remaining travel (obs lead = max(lead, this))
+@export var stream_late_cap: int = 8           ## DEC-11 per-fight LATE budget (a SealTune knob; a melee
+                                               ## dict may override with "late_cap"); beyond it, bars ship on-time
 
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---

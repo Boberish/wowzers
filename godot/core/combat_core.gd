@@ -223,7 +223,8 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 		else (s.encounter.adds[s.boss.add_i] as AddRes).melee
 	if lane_melee.has("rhythm") and seat == _tank_seat(s):
 		var my_i := s.seats.find(seat)
-		var late_lead := to_ticks(s.config.stream_late_lead, s.config.fixed_hz)
+		# DEC-11 fairness floor: a LATE pop always leaves >= stream_late_min_travel of runway
+		var late_lead := to_ticks(maxf(s.config.stream_late_lead, s.config.stream_late_min_travel), s.config.fixed_hz)
 		var bars: Array = []
 		for b_v in s.boss.stream:
 			var b: Dictionary = b_v
@@ -507,8 +508,17 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 				_stream_push(s, melee, "flurry", imp + flurry_gap * i, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
 			s.boss.stream_next_impact = imp + flurry_gap * (flurry_n - 1) + period
 		else:
+			# LATE roll (DEC-11): the rng draw is UNCONDITIONAL on late_odds>0 so the draw order
+			# is cap-independent (byte-stable replay); the cap only gates the *outcome*. Guards:
+			#   · never on an eat · never in a flurry block (this branch is non-flurry by
+			#     construction — flurry bars ship late=false above, so a LATE bar can never land
+			#     inside a flurry group) · a per-fight budget (SealTune "late_cap" / config default).
 			var late := kind != "eat" and float(melee.get("late_odds", 0.0)) > 0.0 \
 				and s.rng.next_float() < float(melee.get("late_odds", 0.0))
+			var late_cap := int(melee.get("late_cap", s.config.stream_late_cap))
+			late = late and s.boss.stream_late_count < late_cap
+			if late:
+				s.boss.stream_late_count += 1
 			_stream_push(s, melee, kind, imp, 1.0, late, -1, 0, 0)
 			s.boss.stream_next_impact = imp + period
 		if String(melee.get("jig_mode", "")) != "none":
