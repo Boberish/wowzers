@@ -1921,6 +1921,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `rhythm-fix` (worktree `../wow-rhythm-fix`) — **TANK-STREAM COMET GLITCH FIXED —
+  MERGED `d7d8a2c`.** Bill: icons appear then vanish and pop in "in the middle on a line with a
+  circle flashing around it," on ALL tank fights — a real bug, NOT clutter (he corrected an earlier
+  mis-triage). ROOT (proven with a headless lane probe): the Judgment Channel projected a flat
+  ~0.9s lead drawn as a LIGHT diamond, but the bar's size+windup were rolled at ARM → every HEAVY
+  bar (35% odds) JUMPED ~98px backward AND morphed diamond→hexagon the instant it armed; aggro
+  peels jumped 200-300px. `50349a6` lit heavy_odds/jig across the roster, so it went everywhere.
+  FIX: pre-roll the next bar's SIZE at the START of its approach (rolled at resolve, so the 1-tick
+  gap after a HEAVY bar still shows the shape a frame early) and project its TRUE size+windup — the
+  comet now glides in seamless, which is exactly what the code's own comment already promised. One
+  new BossState field (`rhythm_next_size`); the size rng draw just moves a few ticks earlier. PROOF:
+  MINE-bar jumps 7→0, MINE shape-flips →0 (riftmaw + mythos); every residual nudge is a dim
+  mine=false PEEL bar. GATES: determinism PASS · gemini (no stream) BYTE-IDENTICAL `4635155925447111502`
+  (non-rhythm untouched by construction) · riftmaw deliberate re-baseline `8723130924775573198`→
+  `2317005574163013085`, expert WR ~68-73% held · forge_sim ALL PASS · raid smoke ALL OK. STAMP →
+  ONE BAR v1.5 · STREAM FIX. **Open follow-ups for Bill:** (a) pre-roll the VICTIM too → seamless
+  peel bars (shifts when aggro is sampled — its own verdict); (b) his LATE-BAR idea: an intentional
+  per-bar flag to skip the mouth-entry so some attacks pop late as a reaction test (the good version
+  of what was glitching). *(this session)*
+
 - ☑ 2026-07-11 · `tank-juice` (worktree `../wow-juice`) — **AAA TANK FEEDBACK — MERGED `2b006f2`.**
   Bill: full-on effects/clarity/feedback — the tank must KNOW missed-vs-perfect. BUILT:
   `verdict_slam.gd` (NEW) — center-screen verdict slams: PERFECT huge gold + 12-ray burst +
