@@ -884,6 +884,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   timers keep the earliest-fire close) — an S6/SealTune knob, the barrier is law. ⚠ WSLg
   screenshot pass owed (`screenshot_duelist_raid` re-scoped to the channel checklist).
   *(the tank-v2 rewrite — S1–S4 + swap)*
+  **↳ PASS 2 (2026-07-11, Bill's live playtest) — MERGED `8d77cbe`.** Four reports, four
+  fixes: **① "laggy/imprecise presses" → THE TWINFANG PRESS MODEL** (Bill: *"the twinfang
+  is super good, do that"*): a press CLAIMS the nearest bar and is judged INSTANTLY,
+  SYMMETRIC around gate-touch (|off|/claim on the blade's own fractions, ±ms readout on
+  every stamp); bars resolve `stream_resolve_slack` (0.15s) after touch so hair-late
+  presses connect; comets interpolate between 30 Hz ticks. The old press-opens-a-window,
+  judged-at-impact, early-side-only model = the perceived lag. **② "not seeing all the
+  notes" → THE PEEL REWORKED (Bill's rule):** the tank sees + answers EVERY bar; a peeled
+  bar (translucent, hunt-ticked) damages its victim undodgeable, but the tank's clean
+  answers still pay flow/counters — **answering peeled bars IS the aggro comeback**
+  (supersedes the cdd008f stream-pause). **③ "aggro gone in 3 hits" → EASY AGGRO first
+  cut:** slip .14→.05 · decay .05→.02 · lock floor .30→.15 · start .55→.75 (sloppy sim
+  tank now HOLDS the boss; tune later). **④ "the blade froze — the bug is global" → a real
+  tank-v2 regression:** the shared judge must be fed on EVERY live telegraph INCLUDING
+  CASTS (its kick/cast windows live there — the pre-tank contract); the pass-1 `not
+  is_cast` guard starved it mid-cast. Gates: stream_probe ALL OK (peeled-flag invariant) ·
+  duelist_sim det PASS · ui_smoke_raid ALL OK. *(pass 2 — the playtest fixes)*
   **↳ the original claim (kept for the record):**
   (Bill: tank-w1 broke the game — *"plan the rewrite of the tank and the global dodge UI FROM
   THE BASE, no patching… i dont want tech debt"*). Requirements confirmed question-by-question →
