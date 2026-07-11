@@ -1921,6 +1921,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `boss-castbar` (worktree `../wow-castbar`) — **THE BOSS CAST BAR (the
+  declutter split) — MERGED `56f6cd1`.** Bill's taxonomy verdict: the dodge bar held too many
+  different things — his mental model is small auto · big auto · global dodge · fake (+ kick),
+  and the boss's SPELLS don't belong in footwork. BUILT: `boss_cast_bar.gd` (NEW, under the
+  boss HP, every seat): heal=BURN IT DOWN · empower=IT GROWS · kickable verse (window band +
+  'uncontested — no kicker' until interrupt-by-ability lands) · nova=BRACE; glyph medallion ·
+  fill · countdown · kick/deny pops. Judgment Channel = FOOTWORK ONLY, and keeps streaming the
+  rhythm WHILE the boss casts (no more channel hijack). Dial's wrong 'PARRY — interrupt!' cue
+  deferred to the cast bar. Gates: gemini byte-identical · both smokes · WSLg Devouring-Chant-
+  on-castbar + rhythm-under shot. STAMP → ONE BAR v1.3 · CASTBAR. *(this session — model note:
+  session restarted on Fable for the UI pass.)*
+
 - ☑ 2026-07-11 · `stream-texture` (worktree `../wow-texture`) — **SHAPES + HUMAN CADENCE +
   SEALS I & IV — MERGED `50349a6`.** Bill: bigs indistinguishable from smalls (all tiny gold
   diamonds) · pattern too metronomic · kill the purple veil · put the stream on the first big
