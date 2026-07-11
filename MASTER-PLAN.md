@@ -857,6 +857,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ⏳ 2026-07-11 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3, Bill).**
+  Bill's tank-v2 playtest: upcoming notes NOT showing · whole notes flicker in/out · elements pop
+  up all over (not just late) · sync weird · "fully buggy, not one thing" · other classes suspected
+  broken by the merge. Scope check: AAA bar, tens of thousands of players — logically perfect and
+  robust, no patch-on-patch. Opus agent workflow: behavior-contract recovery (the INTENT, not the
+  v2 tech plan — learn what it got wrong) + current-code audit + builds-1/2 autopsy + class-
+  regression hunt + symptom repro → root-cause synthesis → 3-architect design + judge synthesis →
+  sequential build slices on the branch (quick gates only, per Bill's verify law) → verify-all
+  final gate + class restore proof. *(this session)*
+
 - ☑ 2026-07-11 · `../wow-tank-v2` → **MERGED `5af4927` (ff)** · **THE TANK-V2 REWRITE — BUILT.**
   All slices landed: S1 engine+kit bang (`30008b6` — THE STREAM committed-timeline replaces
   rhythm_*; kit rewritten deckless on the v3 matrix, tick-native, BULLSEYE ladder; BARRAGE
