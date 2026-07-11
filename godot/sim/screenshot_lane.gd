@@ -32,7 +32,7 @@ func _process(_d: float) -> bool:
 			root.add_child(cur)
 			phase = 1
 		1:
-			cur._launch("tank", "duelist", "forge:takeover:swarm:1:301")
+			cur._launch("tank", "duelist")
 			pol = DuelistPolicy.new()
 			pol.latency_ticks = 4
 			pol.rng = DetRng.new(777)
@@ -58,8 +58,8 @@ func _process(_d: float) -> bool:
 			if me != null:
 				var lane: Dictionary = CombatCore.observe(s, me).get("rhythm_lane", {})
 				if not lane.is_empty() and s.telegraph == null:
-					if bool(lane.get("armed", false)) and float(lane.get("remaining", 9.0)) < 0.3:
-						_shoot("rhythm_armed")
+					if bool(lane.get("armed", false)) and int(lane.get("size", 1)) >= 2:
+						_shoot("heavy_bar")
 					elif not bool(lane.get("armed", false)):
 						_shoot("rhythm_next")
 				if s.telegraph != null and s.tick - s.telegraph.start_tick > 12:

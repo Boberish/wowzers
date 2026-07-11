@@ -50,6 +50,10 @@ func act(obs: Dictionary) -> Dictionary:
 	if not ry.is_empty() and answering == "":
 		var rrem := float(ry.get("remaining", 99.0))
 		if rrem <= react:
+			# height law: a TALL rhythm bar wants the PARRY (better mit + the counter)
+			if int(ry.get("size", 1)) >= AbilityRes.Size.HEAVY \
+					and parry_ready and wind >= parry_cost:
+				return {"type": "defense"}
 			if dodge_ready and wind >= dodge_cost:
 				return {"type": "dodge"}
 			if parry_ready and wind >= parry_cost:

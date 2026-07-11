@@ -93,7 +93,9 @@ static func make_riftmaw() -> EncounterRes:
 	# IS the healer's core job + the honest mana tax. Tuned up from the solo-era 30-42,
 	# but GENTLY — Vorathek is the teaching Seal (Ring 3, the Shallow Stack). The later
 	# Seals (Gemini/Mythos) are where the melee + dodge punishment ramps hard.
-	e.melee = {"every": 1.05, "min": 34.0, "max": 44.0}
+	# §3½ THE TANK STREAM (Bill 2026-07-11): Vorathek's stream goes VISIBLE — slow,
+	# tall, honest (§3 texture row): broad wind-ups, a third of the bars come in TALL.
+	e.melee = {"every": 1.25, "min": 34.0, "max": 44.0, "rhythm": 0.85, "jig": 0.25, "heavy_odds": 0.35}
 	e.enrage_at = 225.0                           # BASELEN: enrage tracks the ×2.5 pool
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
@@ -262,7 +264,9 @@ static func make_mythos() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"mythos"; e.name = "CLAUDE MYTHOS, the Final Compute"; e.hp = 47500   # BASELEN ×2.5
 	e.intro = "The final Seal. Kick its Chain-of-Thought before the Conclusion scales, scatter from the Agentic Fan-Out, and when it delegates, the subagents are YOUR problem — the OPUS one will hotfix its master's HP. Survive ULTRATHINK. It is very sorry about ULTRATHINK."
-	e.melee = {"every": 1.0, "min": 26.0, "max": 36.0}
+	# §3½ THE TANK STREAM (Bill 2026-07-11): Mythos runs the DENSE end of the §3
+	# texture — quick bars, the widest jitter, talls mixed in (all shapes).
+	e.melee = {"every": 1.0, "min": 26.0, "max": 36.0, "rhythm": 0.5, "jig": 0.40, "heavy_odds": 0.20}
 	e.enrage_at = 355.0                           # USAGE LIMIT REACHED (BASELEN ×2.5)
 	# Phases: Helpful -> Harmless -> Honest (it drops all pretense)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0

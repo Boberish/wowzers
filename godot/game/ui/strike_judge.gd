@@ -165,7 +165,7 @@ func feed_rhythm(s: CombatState, lane: Dictionary, dodge_ok: bool, zone: float) 
 	_next_feint = false
 	_combo_n = 0
 	_beats = []
-	_size = AbilityRes.Size.LIGHT
+	_size = int(lane.get("size", AbilityRes.Size.LIGHT))
 	_window = zone
 	_press_ok = dodge_ok
 	_dur = maxf(0.05, float(lane.get("windup", 0.6)))
@@ -516,6 +516,8 @@ func _draw() -> void:
 ## a classic swing speaks by the height law when size_verbs is on (the Duelist).
 func _cue_verb() -> String:
 	if _kind == "string" or _kind == "rhythm":
+		if size_verbs and (_next_size() if _kind == "string" else _size) >= AbilityRes.Size.HEAVY:
+			return "PARRY"
 		return "DODGE"
 	if size_verbs and _kind == "classic":
 		return "PARRY" if _size >= AbilityRes.Size.HEAVY else "DODGE"
@@ -550,15 +552,7 @@ func _in_window() -> bool:
 func _draw_bands(tx: float, gx: float, ty: float, th: float) -> void:
 	var dim := 1.0 if _mine else 0.32
 	if _next_feint:
-		var fx := _x_of(minf(_graze_w * 1.6, _view_secs()))
-		var fw := gx - fx
-		var fc := Palette.RELIC
-		fc.a = 0.13 * dim
-		draw_rect(Rect2(fx, ty + 2, fw, th - 4), fc)
-		for hx in range(0, int(fw), 12):
-			draw_line(Vector2(fx + float(hx), ty + th - 3.0), Vector2(fx + float(hx) + 8.0, ty + 3.0),
-				Color(Palette.RELIC.r, Palette.RELIC.g, Palette.RELIC.b, 0.28 * dim), 1.6, true)
-		return
+		return   # a feint gets NO bands and NO veil — the hollow purple gem is the read (Bill 2026-07-11)
 	if _kind == "heal" or _kind == "empower" or _kind == "brace":
 		return
 	var live := _in_window()
@@ -640,27 +634,28 @@ func _comet(at: Vector2, rem: float, view: float, sz: int, feint: bool, aoe: boo
 	var dim := 1.0 if mine else 0.35
 	if parked: # still out of view: waits at the mouth of the channel, dimmed
 		col.a = 0.35 * dim + 0.1 * sin(_pulse * 2.0)
-		_gem_diamond(at + Vector2(4.0, 0.0), 6.0, col, feint)
+		_gem_shaped(at + Vector2(4.0, 0.0), sz, col, feint, false)
 		var cd := Palette.TEXT_DIM
 		cd.a = 0.8 * dim
 		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(at.x - 2.0, ty - 8.0),
 			"%.1f" % rem, HORIZONTAL_ALIGNMENT_LEFT, 80.0, UiKit.SIZE["CAPTION"], cd)
 		return
-	# motion trail
+	# motion trail (heavier hits drag a taller wake)
 	var trail := minf(34.0, at.x - 16.0)
+	var wake := 12.0 - 3.0 * float(mini(sz, 3))
 	if trail > 3.0:
 		for k in 5:
 			var seg := trail / 5.0
 			var tcol := col
 			tcol.a = (0.04 + 0.05 * float(k)) * dim
-			draw_rect(Rect2(at.x - trail + seg * float(k), ty + 6.0, seg, th - 12.0), tcol)
+			draw_rect(Rect2(at.x - trail + seg * float(k), ty + wake * 0.5, seg, th - wake), tcol)
 	var near := rem <= _good_w and mine and not feint
 	if near:
 		var halo := col.lightened(0.3)
 		halo.a = 0.30 + 0.22 * sin(_pulse * 2.2)
-		draw_circle(at, 13.0, halo)
+		draw_circle(at, 13.0 + 3.0 * float(mini(sz, 3)), halo)
 	col.a = dim
-	_gem_diamond(at, 8.0 if near else 7.0, col, feint)
+	_gem_shaped(at, sz, col, feint, near)
 	if aoe:
 		var rc := col
 		rc.a = 0.55 * dim
@@ -670,6 +665,46 @@ func _comet(at: Vector2, rem: float, view: float, sz: int, feint: bool, aoe: boo
 		vc.a = 0.75
 		UiKit.text_shadowed(self, ThemeDB.fallback_font, Vector2(at.x - 40.0, ty - 8.0),
 			"→ " + victim, HORIZONTAL_ALIGNMENT_CENTER, 80.0, UiKit.SIZE["CAPTION"], vc)
+
+## §3½ THE SHAPE ALPHABET (Bill 2026-07-11): read the answer off the SILHOUETTE —
+## small diamond = the dodge-bread · wide HEXAGON = HEAVY, parry it · BIG spiked
+## OCTAGON = CRUSH, the commit · hollow purple = feint, hold. Color stays the size
+## law; the shape carries it at a glance.
+func _gem_shaped(at: Vector2, sz: int, col: Color, feint: bool, near: bool) -> void:
+	if feint:
+		_gem_diamond(at, 7.5, col, true)
+		return
+	match sz:
+		AbilityRes.Size.CRUSH:
+			_gem_poly(at, 8, 13.0 if near else 12.0, col, _pulse * 0.30, true)
+		AbilityRes.Size.HEAVY:
+			_gem_poly(at, 6, 10.0 if near else 9.0, col, 0.0, false)
+		_:
+			_gem_diamond(at, 6.0 if near else 5.0, col, false)
+
+## A filled n-gon gem: dark socket · body · gold rim · specular. CRUSH spikes get a
+## slow menace-spin + a heavy outline so the biggest hit is unmistakable.
+func _gem_poly(at: Vector2, n: int, r: float, col: Color, rot: float, spiked: bool) -> void:
+	var pts := PackedVector2Array()
+	for i in n:
+		var a := rot + TAU * float(i) / float(n)
+		pts.append(at + Vector2(cos(a), sin(a)) * r)
+	var sock := PackedVector2Array()
+	for i in n:
+		var a := rot + TAU * float(i) / float(n)
+		sock.append(at + Vector2(cos(a), sin(a)) * (r + 1.5))
+	draw_colored_polygon(sock, Color(0, 0, 0, 0.6))
+	draw_colored_polygon(pts, col)
+	var rim := Palette.GOLD
+	rim.a = col.a
+	for i in n:
+		draw_line(pts[i], pts[(i + 1) % n], rim, 1.4, true)
+	if spiked:
+		for i in n:
+			var a := rot + TAU * (float(i) + 0.5) / float(n)
+			var d := Vector2(cos(a), sin(a))
+			draw_line(at + d * r, at + d * (r + 4.5), rim, 1.6, true)
+	draw_circle(at + Vector2(-r * 0.3, -r * 0.3), r * 0.22, Color(1, 1, 1, 0.5 * col.a))
 
 func _comet_color(sz: int) -> Color:
 	match _kind:

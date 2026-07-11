@@ -218,7 +218,7 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 		base["rhythm"] = {
 			"remaining": float(s.boss.rhythm_impact_tick - s.tick) * s.dt,
 			"windup": float(s.boss.rhythm_windup_ticks) * s.dt,
-			"size": AbilityRes.Size.LIGHT,
+			"size": s.boss.rhythm_size,
 		}
 	# THE RHYTHM LANE (§3½ presentation v2): the TANK owns the stream's telemetry — a
 	# persistent lane needs the next swing's ETA even while nothing is armed, and needs
@@ -237,6 +237,7 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			lane["mine"] = s.seats[s.boss.rhythm_victim_i] == seat
 			lane["remaining"] = float(s.boss.rhythm_impact_tick - s.tick) * s.dt
 			lane["windup"] = float(s.boss.rhythm_windup_ticks) * s.dt
+			lane["size"] = s.boss.rhythm_size
 		else:
 			# projected impact of the NEXT swing (timer counts only in gaps; the lane
 			# shows it frozen while paused — honest, and it never vanishes)
@@ -388,10 +389,14 @@ static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
 		var victim: Seat = s.seats[s.boss.rhythm_victim_i]
 		s.boss.rhythm_victim_i = -1
 		if victim.alive():                              # a bar aimed at the fallen fizzles
-			_damage(s, victim, s.boss.rhythm_dmg, &"rhythm", AbilityRes.Size.LIGHT)
+			_damage(s, victim, s.boss.rhythm_dmg, &"rhythm", s.boss.rhythm_size)
 			if s.threat_enabled:                        # aggro / stray-shot accounting
 				_note_melee_victim(s, victim)
+		# the beat is HUMAN, not a metronome: "jig" jitters the re-arm ±(jig×period)
 		var period := to_ticks(float(melee.get("every", 1.5)), hz)
+		var jig := float(melee.get("jig", 0.0))
+		if jig > 0.0:
+			period = int(round(float(period) * (1.0 + (s.rng.next_float() - 0.5) * 2.0 * jig)))
 		s.boss.melee_timer += maxi(1, period - s.boss.rhythm_windup_ticks)
 		return
 	if s.telegraph != null:                             # gap-fill: never arm under a real swing
@@ -407,10 +412,20 @@ static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
 	var windup := float(melee.get("rhythm", 0.6))
 	if victim != _tank_seat(s):
 		windup *= s.config.rhythm_stray_windup
+	# "heavy_odds": some bars come in TALL — a HEAVY parry bar with a broader tell
+	# and a heavier payload (§3 stream texture: Vorathek tall/honest → Mythos all shapes)
+	var sz := AbilityRes.Size.LIGHT
+	var ho := float(melee.get("heavy_odds", 0.0))
+	if ho > 0.0 and s.rng.next_float() < ho:
+		sz = AbilityRes.Size.HEAVY
+		windup *= 1.35
+	s.boss.rhythm_size = sz
 	s.boss.rhythm_victim_i = s.seats.find(victim)
 	s.boss.rhythm_windup_ticks = maxi(1, to_ticks(windup, hz))
 	s.boss.rhythm_impact_tick = s.tick + s.boss.rhythm_windup_ticks
 	s.boss.rhythm_dmg = s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0)))
+	if sz == AbilityRes.Size.HEAVY:
+		s.boss.rhythm_dmg = roundf(s.boss.rhythm_dmg * 1.45)
 
 ## Begin a telegraph for `ab` — shared by the scheduler and chain links. Its
 ## rand_target beats roll their victims NOW so the wind-up shows who is marked.
@@ -1341,6 +1356,7 @@ static func _pack_advance(s: CombatState) -> void:
 	b.rhythm_impact_tick = 0
 	b.rhythm_windup_ticks = 0
 	b.rhythm_dmg = 0.0
+	b.rhythm_size = 1
 	_stagger_abilities(b, enc, s.config, s.rng)
 	if not enc.melee.is_empty():
 		# §3½: a rhythm member opens its stream right after the walk-in grace

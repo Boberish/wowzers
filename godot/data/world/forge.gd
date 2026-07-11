@@ -19,10 +19,10 @@ const BODIES := ["swarm", "stalker", "chanter", "brute"]
 ## lightweight the pack quota-roll has waited for — a swarm·swarm·brute trio lands
 ## mid-fight-sized, not Seal-sized.
 const BODY := {
-	"swarm":   {"hp": 4600, "melee": {"every": 1.1, "min": 22.0, "max": 30.0, "rhythm": 0.55}, "enrage": 140.0},   # §3½ pilot: THE RHYTHM (visible dodgeable stream — cadence eased, per-hit raised, most of it answerable)
-	"stalker": {"hp": 7200, "melee": {"every": 1.3, "min": 26.0, "max": 36.0, "rhythm": 0.6}, "enrage": 165.0},
-	"chanter": {"hp": 6800, "melee": {"every": 1.5, "min": 22.0, "max": 30.0, "rhythm": 0.65}, "enrage": 170.0},
-	"brute":   {"hp": 9600, "melee": {"every": 1.7, "min": 40.0, "max": 54.0, "rhythm": 0.75}, "enrage": 190.0},
+	"swarm":   {"hp": 4600, "melee": {"every": 1.1, "min": 22.0, "max": 30.0, "rhythm": 0.55, "jig": 0.30, "heavy_odds": 0.12}, "enrage": 140.0},   # §3½ pilot: THE RHYTHM (visible dodgeable stream — cadence eased, per-hit raised, most of it answerable)
+	"stalker": {"hp": 7200, "melee": {"every": 1.3, "min": 26.0, "max": 36.0, "rhythm": 0.6, "jig": 0.35, "heavy_odds": 0.18}, "enrage": 165.0},
+	"chanter": {"hp": 6800, "melee": {"every": 1.5, "min": 22.0, "max": 30.0, "rhythm": 0.65, "jig": 0.30, "heavy_odds": 0.12}, "enrage": 170.0},
+	"brute":   {"hp": 9600, "melee": {"every": 1.7, "min": 40.0, "max": 54.0, "rhythm": 0.75, "jig": 0.25, "heavy_odds": 0.25}, "enrage": 190.0},
 }
 
 ## Tier knobs: windows tighten (cast_mult), cadence quickens (cd_mult), strings grow

@@ -70,6 +70,7 @@ var rhythm_victim_i: int = -1
 var rhythm_impact_tick: int = 0
 var rhythm_windup_ticks: int = 0
 var rhythm_dmg: float = 0.0
+var rhythm_size: int = 1               ## AbilityRes.Size of the armed swing (heavy_odds roll)
 
 ## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
 ## boss damage routes to add_hp, the main body's ability timers freeze, and the
