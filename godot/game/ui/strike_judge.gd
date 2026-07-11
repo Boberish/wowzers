@@ -155,8 +155,9 @@ func feed_rhythm(s: CombatState, lane: Dictionary, dodge_ok: bool, zone: float) 
 		_seen.clear()
 		_last_rem.clear()
 		_tg_tick = -1
+	# armed == a bar is coming at ME (the stream only carries the tank's own bars now; a peeled
+	# swing is an undodgeable hit that never reaches this channel — see observe()).
 	var armed := bool(lane.get("armed", false))
-	var mine_now := bool(lane.get("mine", true))
 	# an armed bar of MINE ended with no verdict -> it landed (the eaten-bar miss)
 	if _kind == "rhythm" and _rhythm_armed and not armed and _mine and not _rhythm_answered:
 		_judge_miss()
@@ -174,10 +175,10 @@ func feed_rhythm(s: CombatState, lane: Dictionary, dodge_ok: bool, zone: float) 
 	_window = zone
 	_press_ok = dodge_ok
 	_dur = maxf(0.05, float(lane.get("windup", 0.6)))
+	_mine = true                           # the stream only ever shows the tank's own bars
 	if armed:
-		_mine = mine_now
 		_rem = float(lane.get("remaining", 0.0))
-		_name = "THE RHYTHM" if mine_now else "THE RHYTHM — PEELED"
+		_name = "THE RHYTHM"
 	else:
 		# projection: it's my NEXT swing (eta >= windup > window, so the live-window
 		# flare can never light early)

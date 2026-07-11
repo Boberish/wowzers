@@ -41,7 +41,6 @@ extends Resource
 # --- THE RHYTHM (BOSS-PLAN §3½; only melee dicts carrying a "rhythm" key read these —
 #     every other fight is byte-identical) ---
 @export var rhythm_open_delay: float = 0.5     ## first rhythm bar arms this many seconds in (kills the empty opening)
-@export var rhythm_stray_windup: float = 1.6   ## a strayed (aggro-peel) bar winds up this much LONGER (the victim's reaction grace)
 
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
