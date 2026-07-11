@@ -81,6 +81,10 @@ var stream_tempo: float = 1.0          ## whole-flow speed multiplier (SPEED LAW
 var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.)
 var stream_resolving: Dictionary = {}  ## the bar mid-resolve — the kit funnel reads flurry
                                        ## group/index here (cleared the same tick; never checksummed)
+var stream_snap: Dictionary = {}       ## DEBUG-ONLY immutability ledger (id -> [impact,dmg,victim,kind]),
+                                       ## written only under OS.is_debug_build(); the resolve asserts
+                                       ## a bar never changed publish->resolve (R12). Never checksummed,
+                                       ## never read by gameplay ⇒ byte-neutral to the sim/net contract.
 
 ## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
 ## boss damage routes to add_hp, the main body's ability timers freeze, and the

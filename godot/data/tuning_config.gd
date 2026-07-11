@@ -42,8 +42,8 @@ extends Resource
 #     every other fight is byte-identical) ---
 @export var rhythm_open_delay: float = 0.5     ## first stream bar lands this many seconds after the pull
 @export var stream_horizon: float = 3.0        ## publish lead: bars commit this far ahead (the visible runway)
-@export var stream_gap_after_cast: float = 0.6 ## min lead for the first bar published after a global resolves
-@export var stream_answer_clear: float = 0.30  ## a bar's answer must clear the barrier by this much
+@export var stream_gap_after_cast: float = 0.6 ## RETIRED (tank-v3 S2): the barrier is gone; publishing no longer reads this
+@export var stream_answer_clear: float = 0.30  ## RETIRED (tank-v3 S2): the barrier is gone; no longer read by the publisher
 @export var stream_flurry_cd: float = 10.0     ## min spacing between texture-rolled flurry bursts
 @export var stream_late_lead: float = 0.55     ## a LATE bar pops in this many seconds before impact
 

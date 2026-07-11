@@ -382,10 +382,10 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 ##  · PUBLISH: a bar is appended (kind/victim/damage/late all final) once its impact enters
 ##    the horizon, and never mutated after. Victim rolls the aggro peel AT PUBLISH — flow
 ##    changes steer future bars, never in-flight ones.
-##  · BARRIER: never publish a bar that could land inside a global's answer window — the
-##    earliest possible telegraph start is derivable from the ability timers (they only
-##    ever FREEZE, so "assume they run" is conservative). While a telegraph is in flight,
-##    publishing holds entirely; the stream visibly thins before a big move.
+##  · CONTINUITY (barrier RETIRED, tank-v3 S2): publishing is unconditional up to the
+##    horizon and NEVER reads s.telegraph or an ability timer — the melee keeps flowing
+##    through every global (no seam, no drain, no post-cast dead beat). Scripted quiet
+##    windows around a big-dodge/kick are authored via `stream_breathe`, not a halt.
 ##  · RESOLVE: at impact_tick, through the same _damage path old melee used (the victim
 ##    kit's modify_incoming grades whatever press is active — source-agnostic since M0).
 ##    Feints deal nothing (judged BAITED/READ via the kit hook); unavoidables skip grading.
@@ -404,6 +404,14 @@ static func _stream_resolve_due(s: CombatState) -> void:
 		if s.tick < int(bar["impact_tick"]):
 			return
 		s.boss.stream.remove_at(0)
+		if OS.is_debug_build():                          # R12: a bar NEVER changes publish->resolve
+			var _bid := int(bar["id"])
+			if s.boss.stream_snap.has(_bid):
+				var _snap: Array = s.boss.stream_snap[_bid]
+				assert(int(bar["impact_tick"]) == int(_snap[0]) and is_equal_approx(float(bar["dmg"]), float(_snap[1])) \
+						and int(bar["victim_i"]) == int(_snap[2]) and String(bar["kind"]) == String(_snap[3]),
+					"stream bar %d MUTATED between publish and resolve" % _bid)
+				s.boss.stream_snap.erase(_bid)
 		var vi := int(bar["victim_i"])
 		if vi < 0 or vi >= s.seats.size():
 			continue
@@ -436,25 +444,14 @@ static func _stream_size(kind: String) -> int:
 		"buster": return AbilityRes.Size.CRUSH
 		_: return AbilityRes.Size.LIGHT
 
-## The earliest tick a NEW telegraph could start (-1 = one is in flight right now).
-## Timers only FREEZE (never jump ahead), so treating them as live is conservative.
-static func _stream_barrier(s: CombatState) -> int:
-	if s.telegraph != null:
-		return -1
-	if s.boss.ability_timer.is_empty():
-		return s.tick + (1 << 24)
-	var m := 1 << 24
-	for id in s.boss.ability_timer:
-		m = mini(m, maxi(0, int(s.boss.ability_timer[id])))
-	return s.tick + m
-
-## Publish committed bars up to min(horizon, the barrier). All rng draws happen here,
-## in a fixed order per bar: slot-type roll → (disguise) → damage → jig → late → victim.
+## Publish committed bars up to the horizon. Publishing is UNCONDITIONAL — it never reads
+## s.telegraph or an ability timer (barrier RETIRED, tank-v3 S2 / TANK-PLAN §2): the melee
+## keeps flowing through every global (CLAUDE.md scheduler law: "melee keeps ticking"), so
+## there is no seam to hitch at. Per-Seal thinning around a scripted big-dodge/kick window
+## is authored via `stream_breathe`, not a reactive halt. All rng draws happen here, in a
+## fixed order per bar: slot-type roll → (disguise) → damage → jig → late → victim.
 static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 	var hz := s.config.fixed_hz
-	var barrier := _stream_barrier(s)
-	if barrier < 0:
-		return                                          # a global is in flight — hold
 	var horizon := s.tick + to_ticks(s.config.stream_horizon, hz)
 	if s.boss.stream_next_impact < 0:                   # the pull's first bar
 		s.boss.stream_next_impact = s.tick + to_ticks(s.config.rhythm_open_delay + float(melee.get("every", 1.5)), hz)
@@ -464,8 +461,8 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 	if tk != null and s.tick < int(tk.vars.get("engarde_until", 0)):
 		tempo *= 1.25
 	while true:
-		var imp := maxi(s.boss.stream_next_impact, s.tick + to_ticks(s.config.stream_gap_after_cast, hz))
-		if imp > horizon or imp + to_ticks(s.config.stream_answer_clear, hz) > barrier:
+		var imp := s.boss.stream_next_impact
+		if imp > horizon:
 			return
 		var period := maxi(2, int(round(float(to_ticks(float(melee.get("every", 1.5)), hz)) / maxf(0.25, tempo))))
 		# --- slot type: the odds ladder picks a CANDIDATE (one float draw, cumulative
@@ -493,10 +490,9 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 		# grammar guards (each failure degrades to the plain auto):
 		if s.boss.stream_after_cast and s.boss.stream.is_empty():
 			kind = "auto"                               # the bar after a global stays plain
-		elif kind == "flurry" and (s.tick < s.boss.stream_flurry_cd_until \
-				or imp + flurry_gap * (flurry_n - 1) + to_ticks(s.config.stream_answer_clear, hz) > barrier):
-			# the burst may run past the HORIZON (bars just enter the mouth later — the
-			# horizon is a visibility guarantee, not a cap) but never past the BARRIER
+		elif kind == "flurry" and s.tick < s.boss.stream_flurry_cd_until:
+			# the burst may run past the HORIZON — bars just enter the mouth later; the
+			# horizon is a visibility guarantee, not a cap
 			kind = "auto"
 		elif kind == "feint" and s.boss.stream_seq == 0:
 			kind = "auto"                               # never the fight's opener
@@ -536,12 +532,15 @@ static func _stream_push(s: CombatState, melee: Dictionary, kind: String, impact
 		victim = _tank_target(s)
 	if victim == null:
 		return
+	var victim_i := s.seats.find(victim)
 	s.boss.stream.append({
 		"id": s.boss.stream_seq, "kind": kind, "disguise": disguise,
 		"publish_tick": s.tick, "impact_tick": impact,
-		"victim_i": s.seats.find(victim), "dmg": dmg, "late": late,
+		"victim_i": victim_i, "dmg": dmg, "late": late,
 		"flurry_group": flurry_group, "flurry_i": flurry_i, "flurry_n": flurry_n,
 	})
+	if OS.is_debug_build():                              # R12: byte-neutral immutability ledger
+		s.boss.stream_snap[s.boss.stream_seq] = [impact, dmg, victim_i, kind]
 	s.boss.stream_seq += 1
 	s.boss.stream_last_kind = kind
 	if kind == "eat":
@@ -566,7 +565,17 @@ static func stream_inject(s: CombatState, kind: String, delay: float, dmg: float
 			at = i
 			break
 	s.boss.stream.insert(at, bar)
+	if OS.is_debug_build():                              # R12: byte-neutral immutability ledger
+		s.boss.stream_snap[s.boss.stream_seq] = [int(bar["impact_tick"]), float(bar["dmg"]), int(bar["victim_i"]), kind]
 	s.boss.stream_seq += 1
+
+## AUTHORED THINNING (tank-v3 S2 / TANK-PLAN §2): a per-Seal script pushes the next
+## generated impact past `after_impact_tick + gap_ticks`, keeping the channel quiet through
+## a scripted big-dodge/kick window so the tank's press is free for the global. Only advances
+## the existing cadence head (byte-safe; no new persistent state). No default caller ⇒ no
+## thinning ⇒ full flow. The ready knob for when interrupt-by-ability lands (COMBAT PILLAR #3).
+static func stream_breathe(s: CombatState, after_impact_tick: int, gap_ticks: int) -> void:
+	s.boss.stream_next_impact = maxi(s.boss.stream_next_impact, after_impact_tick + gap_ticks)
 
 ## The publisher's body died / left the field: its committed, unresolved bars SHATTER
 ## (killing the attacker cancels its swings — a RULE, so the immutability contract holds).
@@ -574,6 +583,8 @@ static func _stream_shatter(s: CombatState) -> void:
 	if s.boss.stream.is_empty():
 		return
 	s.boss.stream.clear()
+	if OS.is_debug_build():                              # shattered bars never resolve — drop their ledger
+		s.boss.stream_snap.clear()
 	s.boss.stream_next_impact = -1
 	s.boss.stream_after_cast = true
 	_emit(s, {"t": "stream_shatter"})
