@@ -67,32 +67,31 @@ static func _curse(id: StringName, name: String, cast: float, cd: float, jitter:
 	a.cast = cast; a.cd = cd; a.jitter = jitter
 	return a
 
-## BARRAGE RETIREMENT (TANK-PLAN §0, 2026-07-11): multi-beat dodge-strings are DEAD game-wide —
-## one-dodge classes can't weave them (the 0.35s chain-cd they were built for is retired too).
-## The builder keeps its signature (every Seal's ability list is untouched) but COLLAPSES the
-## beats to ONE — the boss's big move, one dodge, every seat. The single beat lands at the
-## LAST beat's moment (the full wind-up survives), carries the WHOLE amount (total damage to
-## a seat that missed everything is unchanged), and wears the biggest size in the string.
-## Feint beats vanish here — raid-side fakes come back per-Seal via the stream (S6).
+## BARRAGE RESTORED (tank-v3 S3 / TANK-PLAN §7 item 2, 2026-07-11): the v17 collapse-to-one
+## folded every Seal's multi-beat string into a single beat — that string WAS the non-tank
+## DODGE RATION, and its loss let the boss chew undodged seats (dps_wipes) and starved the
+## channel of shape. Un-collapsed: one StrikeRes per NON-FEINT beat, at its authored `at`,
+## carrying that beat's own `frac` (total-to-a-missed-seat unchanged) and size/guard. The
+## authored `at`s are always >= dodge_recovery (0.35s) apart, so a one-dodge seat can weave
+## every beat — COMBAT PILLAR #2's 3–8 authored dodge-beats/fight. Feints stay OUT raid-side
+## (they return per-Seal via the stream, S6; a feint beat carries frac 0 anyway).
 static func _barrage(id: StringName, name: String, amount: float,
 		cast: float, cd: float, jitter: float, beats: Array) -> AbilityRes:
 	var a := AbilityRes.new()
 	a.id = id; a.name = name; a.tag = "Barrage"
-	a.effect = AbilityRes.Effect.DMG_ALL          # ignored — the beat carries the payload
+	a.effect = AbilityRes.Effect.DMG_ALL          # ignored — each beat carries its own payload
 	a.amount = amount
 	a.cast = cast; a.cd = cd; a.jitter = jitter
-	var at := 1.0
-	var size := AbilityRes.Size.LIGHT
 	for b in beats:
-		if not bool(b.get("feint", false)):
-			at = maxf(at, float(b.get("at", 1.0)))
-			size = maxi(size, int(b.get("size", AbilityRes.Size.HEAVY)))
-	var st := StrikeRes.new()
-	st.at = at
-	st.amount_frac = 1.0
-	st.size = size
-	st.aoe = true
-	a.strikes.append(st)
+		if bool(b.get("feint", false)):
+			continue
+		var st := StrikeRes.new()
+		st.at = float(b.get("at", 1.0))
+		st.amount_frac = float(b.get("frac", 0.0))
+		st.size = int(b.get("size", AbilityRes.Size.HEAVY))
+		st.guard = int(b.get("guard", StrikeRes.Guard.DODGEABLE))
+		st.aoe = true
+		a.strikes.append(st)
 	return a
 
 static func make_riftmaw() -> EncounterRes:
@@ -166,39 +165,54 @@ static func _rand_barrage(id: StringName, name: String, amount: float,
 		(st as StrikeRes).rand_target = true
 	return a
 
-## The DOOM cast: a long quiet wind-up, then a burst of near-lethal aoe beats at
-## the very end — everyone dodges each beat personally or dies.
+## The DOOM cast: a long quiet wind-up, then a near-lethal aoe finish — the raid-wide
+## BRACE (DEC-10): ONE big unavoidable beat every seat answers together, NOT a multi-dodge
+## flurry. Unlike the ration-bearing barrages, the doom stays COLLAPSED (spec §7 item 2
+## lists _barrage/_tank_string/_rand_barrage — not _doom): un-collapsing it turned
+## ULTRATHINK into 3 lethal aoe beats the streaming tank couldn't weave, dropping mythos
+## below its baseline. The multi-beat doom returns as a scripted cast-bar BRACE per-Seal at
+## S6. Lands at the last beat's `at` (full wind-up), carries the whole amount, biggest size.
 static func _doom(id: StringName, name: String, amount: float,
 		cast: float, cd: float, jitter: float, beats: Array) -> AbilityRes:
-	var a := _barrage(id, name, amount, cast, cd, jitter, beats)
-	a.tag = "SURVIVE IT"
-	a.danger = true
-	return a
-
-## A tank combo — BARRAGE RETIREMENT (§0): the multi-beat tank string collapses to its ONE
-## heaviest real beat (the buster moment). The tank's multi-hit fantasy lives in the STREAM's
-## FLURRY MODE now; per-Seal signature busters get properly re-authored at S6 (stream_inject).
-static func _tank_string(id: StringName, name: String, amount: float,
-		cast: float, cd: float, jitter: float, beats: Array) -> AbilityRes:
 	var a := AbilityRes.new()
-	a.id = id; a.name = name; a.tag = "Combo"
-	a.effect = AbilityRes.Effect.DMG_TARGET      # ignored — the beat carries the payload
+	a.id = id; a.name = name; a.tag = "SURVIVE IT"
+	a.effect = AbilityRes.Effect.DMG_ALL          # ignored — the beat carries the payload
 	a.amount = amount
-	a.cast = cast; a.cd = cd; a.jitter = jitter
+	a.cast = cast; a.cd = cd; a.jitter = jitter; a.danger = true
 	var at := 1.0
 	var size := AbilityRes.Size.LIGHT
-	var guard := StrikeRes.Guard.DODGEABLE
 	for b in beats:
-		if not bool(b.get("feint", false)) and int(b.get("size", AbilityRes.Size.HEAVY)) >= size:
-			at = float(b.get("at", 1.0))
-			size = int(b.get("size", AbilityRes.Size.HEAVY))
-			guard = int(b.get("guard", StrikeRes.Guard.DODGEABLE))
+		at = maxf(at, float(b.get("at", 1.0)))
+		size = maxi(size, int(b.get("size", AbilityRes.Size.HEAVY)))
 	var st := StrikeRes.new()
 	st.at = at
 	st.amount_frac = 1.0
 	st.size = size
-	st.guard = guard
+	st.aoe = true
 	a.strikes.append(st)
+	return a
+
+## A tank combo — RESTORED (tank-v3 S3): the multi-beat tank string is un-collapsed the same
+## way the barrage is, one StrikeRes per NON-FEINT beat at its authored `at`, carrying its own
+## frac/size/guard. DMG_TARGET (tank-only, not aoe) so every beat lands on the boss's victim;
+## the tank answers them on the judge. Feints stay OUT raid-side (they return per-Seal via the
+## stream, S6) — matching the barrage's non-feint rule so both builders share one grammar.
+static func _tank_string(id: StringName, name: String, amount: float,
+		cast: float, cd: float, jitter: float, beats: Array) -> AbilityRes:
+	var a := AbilityRes.new()
+	a.id = id; a.name = name; a.tag = "Combo"
+	a.effect = AbilityRes.Effect.DMG_TARGET      # ignored — each beat carries its own payload
+	a.amount = amount
+	a.cast = cast; a.cd = cd; a.jitter = jitter
+	for b in beats:
+		if bool(b.get("feint", false)):
+			continue
+		var st := StrikeRes.new()
+		st.at = float(b.get("at", 1.0))
+		st.amount_frac = float(b.get("frac", 0.0))
+		st.size = int(b.get("size", AbilityRes.Size.HEAVY))
+		st.guard = int(b.get("guard", StrikeRes.Guard.DODGEABLE))
+		a.strikes.append(st)
 	return a
 
 static func _add_wave(at: float, id: StringName, name: String, hp: int,
@@ -213,7 +227,12 @@ static func make_mistral() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"mistral"; e.name = "MISTRAL-7B, Le Golem Efficace"; e.hp = 33750   # BASELEN ×2.5
 	e.intro = "Seal II. A small, efficient murder machine — open weights, open fists. Kick its license recital, dodge the Mixture of Fists, and remember: it runs on one GPU and unlimited confidence."
-	e.melee = {"every": 1.1, "min": 34.0, "max": 44.0}   # was 26-36; a pushover at 100/100/100 needed a floor of pressure
+	# §3½ THE TANK STREAM (tank-v3 S3 / §7 item 3, DEC-4): Mistral was shipping NO rhythm key,
+	# so the tank's channel was BLANK on this Seal — the tank couldn't answer melee, couldn't
+	# build flow, and the boss peeled onto the dps (the 27%-win / high-peel regression). Add a
+	# rhythm profile so the channel is populated on every Seal (one tank code path). Efficient
+	# and quick (fast `every`), a touch fewer talls than the teaching Seal — Mistral's texture.
+	e.melee = {"every": 1.1, "min": 34.0, "max": 44.0, "rhythm": 0.75, "jig": 0.28, "heavy_odds": 0.30}   # was 26-36; a pushover at 100/100/100 needed a floor of pressure
 	e.enrage_at = 237.5                           # FREE TIER EXCEEDED (BASELEN ×2.5)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.55; p1.mult = 1.12; p1.speed = 1.08
@@ -238,7 +257,11 @@ static func make_gemini() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"gemini"; e.name = "GEMINI ULTRA, the Twin Constellation"; e.hp = 41250   # BASELEN ×2.5
 	e.intro = "Seal III. Two minds, one chassis, several answers. HOLD when it hallucinates a swing, kick the Overview before the twins merge — and when BARD.EXE resurfaces, put it back in the archive."
-	e.melee = {"every": 1.1, "min": 27.0, "max": 37.0}
+	# §3½ THE TANK STREAM (tank-v3 S3 / §7 item 3, DEC-4): Gemini too shipped NO rhythm key —
+	# the 0%-win-at-expert Seal (dps_wipe=40, ~49 peels: a blank channel = no flow = the boss
+	# never locked on the tank). Add a rhythm profile between the teaching Seal and Mythos:
+	# mid cadence, mid talls, wider jig than Mistral — the twin-minds texture.
+	e.melee = {"every": 1.1, "min": 27.0, "max": 37.0, "rhythm": 0.6, "jig": 0.35, "heavy_odds": 0.25}
 	e.enrage_at = 270.0                           # BASELEN ×2.5
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1

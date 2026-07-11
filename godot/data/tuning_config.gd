@@ -63,9 +63,11 @@ extends Resource
 @export var strike_perfect: float = 0.14
 @export var strike_good: float = 0.34
 @export var strike_graze: float = 0.50
-@export var dodge_recovery: float = 0.8    ## min gap between dodge presses (BARRAGE RETIREMENT 2026-07-11:
-                                           ## was 0.35 — that speed existed only to chain multi-beat strings,
-                                           ## which are retired; first cut ~0.8, Bill's playtest knob)
+@export var dodge_recovery: float = 0.35   ## min gap between dodge presses (tank-v3 S3 / §7 item 1:
+                                           ## REVERTED 0.8 -> 0.35. The barrage un-collapse restores the
+                                           ## non-tank multi-beat DODGE RATION (authored beats >= this gap
+                                           ## apart), so a one-dodge seat must weave at the 0.35s cadence
+                                           ## again. The tank's own leash is WIND, not this shared constant.)
 @export var dodge_whiff_cd: float = 1.3    ## lockout for a press that answered nothing (or took a feint beat's bait)
 @export var graze_mult: float = 0.5        ## damage fraction still taken on a GRAZE of a DODGEABLE beat
 # BLOCKABLE beats: damage fraction that lands anyway, by grade (partial even when perfect).

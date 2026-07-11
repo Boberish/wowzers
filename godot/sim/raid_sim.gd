@@ -396,6 +396,28 @@ func _print_instrumentation(boss: String, enc: EncounterRes, by_skill: Dictionar
 			float(acc["good"]) / n, float(acc["graze"]) / n, float(acc["miss"]) / n,
 			float(acc["feints"]) / n])
 
+	# S3 GATE (tank-v3 §7 item 2 / COMBAT PILLAR #2): the barrage un-collapse must put
+	# >= 3 authored dodge beats/fight in front of EACH non-tank seat (the restored DODGE
+	# RATION). This is a CONTENT-DENSITY check, so it reads the EXPERT tier (clean play =
+	# the fight runs its full length and presents its whole authored budget) — the sloppier
+	# tiers deflate it by dying early, which is the un-tuned-kit survival axis, not the
+	# ration. `presented` = beats resolved to a seat (perfect+good+graze+miss); the min
+	# across blade/caster/healer is the gate scalar.
+	var rref: String = "expert" if by_skill.has("expert") else ref
+	var rd: Dictionary = by_skill[rref]
+	var rn: float = maxf(1.0, float(rd["n"]))
+	var ration_min := INF
+	var ration_line := "    [S3] non-tank dodge ration/fight (@%s): " % rref
+	for racc in rd["beats"]:
+		if racc.is_empty() or String(racc.get("label", "")) == "tank":
+			continue
+		var rat := float(racc["presented"]) / rn
+		ration_line += " %s %.1f" % [racc["label"], rat]
+		ration_min = minf(ration_min, rat)
+	if ration_min < INF:
+		ration_line += "   (min %.1f, floor 3.0)  %s" % [ration_min, ("PASS" if ration_min >= 3.0 else "FAIL")]
+	print(ration_line)
+
 	# 3 · cast-source counts (verses tagged) + the §1½ verse baseline
 	var verse_ids := {}
 	for ab in enc.abilities:
