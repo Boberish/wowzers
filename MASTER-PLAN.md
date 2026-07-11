@@ -1921,6 +1921,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `stream-texture` (worktree `../wow-texture`) — **SHAPES + HUMAN CADENCE +
+  SEALS I & IV — MERGED `50349a6`.** Bill: bigs indistinguishable from smalls (all tiny gold
+  diamonds) · pattern too metronomic · kill the purple veil · put the stream on the first big
+  boss + the last. BUILT: judge SHAPE ALPHABET (small diamond / HEAVY hexagon / CRUSH spiked
+  spinning octagon / hollow-purple feint; wakes+halos scale) · feint veil REMOVED · melee `jig`
+  (re-arm jitter) + `heavy_odds` (TALL bars: windup ×1.35, dmg ×1.45, PARRY cue, policy parries)
+  on all forge bodies + fixtures · **VORATHEK stream ON** (1.25/0.85/35% talls — §3 slow·tall·
+  honest) · **MYTHOS stream ON** (0.5 windup/jig .40/20% — dense·all shapes). ⚠ wow-seals
+  heads-up: raid_content riftmaw+mythos melee dicts touched (1 line each); Mistral/Gemini
+  BYTE-IDENTICAL (gemini 4635155925447111502 = main). **Riftmaw DELIBERATE re-baseline
+  8723130924775573198: seed-1 tank_death@50s → WIN@193s · expert 0→73.3% win · good-tier
+  tank_death 57→9** (rest dps/enrage — seal-track debt). forge ALL PASS · duelist det PASS
+  (new checksums 6543973726267971811/463140136036467795) · smoke OK. STAMP → ONE BAR v1.2.
+  *(this session)*
+
 - ☑ 2026-07-11 · `bar-grammar` (worktree `../wow-grammar`) — **THE GRAMMAR PASS — MERGED `ebc5122`.**
   Bill's fight-1 read: only smalls, no bigs/fakes; cues said DODGE for everything then randomly
   PARRY; comets spawn mid-channel. FIXES: (1) full alphabet EVERY body EVERY tier (swarm bluff
