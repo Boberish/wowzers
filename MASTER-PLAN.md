@@ -1921,6 +1921,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `rhythm-coverage` (worktree `../wow-rhythm2`) — **THE RHYTHM: full walk-in
+  coverage + pack fix — MERGED `a6ab9ae`.** Bill's re-test read "no changes" — root causes: (a) only
+  the SWARM body carried the rhythm (fresh map rolls open on stalker/skirmish walk-ins = the old
+  invisible chip = the lottery), (b) \_pack_advance never cleared rhythm_* (stale armed swing
+  carried across members) nor honored rhythm_open_delay. FIX: stalker 0.6 / chanter 0.65 /
+  brute 0.75 wind-ups + skirmish COPIES (sonnet/bard/opus 0.6; Seal add dicts untouched via
+  duplicate) + pack-advance reset. Seals stay old-style (seal-rework owns them). GATES: forge_sim
+  ALL PASS · raid_sim riftmaw byte-identical · both HUD smokes green. ⚠ stale-instance suspicion
+  open: Bill's client may predate the merges — the tell is the rune chips (1/2/3/4 = new,
+  SPC/F/1/2 = stale; a running Godot never hot-reloads). *(this session)*
+
 - ☑ 2026-07-11 · `duelist-binds` (worktree `../wow-binds`) — **Duelist rebind (Bill) — MERGED `1a03d33`.**
   1 / SPACE / LEFT-CLICK = DODGE · 2 / RIGHT-CLICK = PARRY (F stays a legacy alias) · 3 = ⚡ DUMP ·
   4 = ⏱ EN GARDE. Band mouse grammar (hovered-BaseButton guard stops pause/rune double-fires);
