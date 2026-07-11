@@ -59,21 +59,28 @@ var entered_tick: int = 0
 var melee_timer: int = 1000000
 var ability_timer: Dictionary = {}     ## StringName ability id -> ticks until due
 
-## THE RHYTHM (BOSS-PLAN §3½) — the melee channel upgraded into the tank's visible,
-## dodgeable auto-attack stream. One swing in flight at a time: armed in a telegraph
-## GAP, resolves at rhythm_impact_tick through the same _damage path old melee used
-## (the kit funnel grades the press — it was always source-agnostic). Victim is an
-## INDEX (RefCounted-cycle safe, the absorb_owner_i idiom). -1 = nothing armed.
-## Only encounters whose melee dict carries a "rhythm" key ever write these —
-## every other fight is byte-identical by construction.
-var rhythm_victim_i: int = -1
-var rhythm_impact_tick: int = 0
-var rhythm_windup_ticks: int = 0
-var rhythm_dmg: float = 0.0
-var rhythm_size: int = 1               ## AbilityRes.Size of the armed swing (heavy_odds roll)
-var rhythm_next_size: int = 0          ## NONE=unplanned; pre-rolled at the NEXT bar's approach start
-                                       ## so the projected comet shows its TRUE shape/lead — no arm-time
-                                       ## morph or position JUMP (Bill 2026-07-11 stream-glitch fix)
+## THE STREAM (TANK-PLAN §0 — tank-v2) — the committed attack timeline. LAW 1: the
+## engine PUBLISHES every bar (kind/impact tick/victim/damage, all rolled at publish
+## time from state.rng in fixed order) the moment it enters the visible horizon, and
+## NEVER mutates it after — the UI draws entries verbatim, so nothing can pop, morph,
+## or jump. Victims are INDICES (RefCounted-cycle safe, the absorb_owner_i idiom).
+## Bars vanish only by RESOLVING (impact) or SHATTERING (their body died — a rule,
+## not a mutation). Only encounters whose melee dict carries a "rhythm" key ever
+## write these — every other fight is byte-identical by construction.
+## Bar entry: {id:int, kind:String (auto/heavy/buster/feint/eat/flurry),
+##   disguise:String (feints: the costume kind), publish_tick:int, impact_tick:int,
+##   victim_i:int, dmg:float, late:bool, flurry_i:int, flurry_n:int}
+var stream: Array = []                 ## committed unresolved bars, ordered by impact_tick
+var stream_seq: int = 0                ## stable per-bar id (UI keys + the immutability probe)
+var stream_next_impact: int = -1       ## cadence chain head: the NEXT unpublished bar's impact tick
+var stream_after_cast: bool = true     ## grammar: the first bar after a telegraph (or the pull) stays plain
+var stream_flurry_cd_until: int = 0    ## grammar: min spacing between flurry bursts
+var stream_last_eat_tick: int = -100000## grammar: no back-to-back unavoidables
+var stream_tempo: float = 1.0          ## whole-flow speed multiplier (SPEED LAW: view pacing +
+                                       ## publish cadence together; per-bar variance is forbidden)
+var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.)
+var stream_resolving: Dictionary = {}  ## the bar mid-resolve — the kit funnel reads flurry
+                                       ## group/index here (cleared the same tick; never checksummed)
 
 ## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
 ## boss damage routes to add_hp, the main body's ability timers freeze, and the

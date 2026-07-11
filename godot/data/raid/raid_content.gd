@@ -67,21 +67,32 @@ static func _curse(id: StringName, name: String, cast: float, cd: float, jitter:
 	a.cast = cast; a.cd = cd; a.jitter = jitter
 	return a
 
+## BARRAGE RETIREMENT (TANK-PLAN §0, 2026-07-11): multi-beat dodge-strings are DEAD game-wide —
+## one-dodge classes can't weave them (the 0.35s chain-cd they were built for is retired too).
+## The builder keeps its signature (every Seal's ability list is untouched) but COLLAPSES the
+## beats to ONE — the boss's big move, one dodge, every seat. The single beat lands at the
+## LAST beat's moment (the full wind-up survives), carries the WHOLE amount (total damage to
+## a seat that missed everything is unchanged), and wears the biggest size in the string.
+## Feint beats vanish here — raid-side fakes come back per-Seal via the stream (S6).
 static func _barrage(id: StringName, name: String, amount: float,
 		cast: float, cd: float, jitter: float, beats: Array) -> AbilityRes:
 	var a := AbilityRes.new()
 	a.id = id; a.name = name; a.tag = "Barrage"
-	a.effect = AbilityRes.Effect.DMG_ALL          # ignored — beats carry the payload
+	a.effect = AbilityRes.Effect.DMG_ALL          # ignored — the beat carries the payload
 	a.amount = amount
 	a.cast = cast; a.cd = cd; a.jitter = jitter
+	var at := 1.0
+	var size := AbilityRes.Size.LIGHT
 	for b in beats:
-		var st := StrikeRes.new()
-		st.at = float(b.get("at", 1.0))
-		st.amount_frac = float(b.get("frac", 0.0))
-		st.size = int(b.get("size", AbilityRes.Size.HEAVY))
-		st.feint = bool(b.get("feint", false))     # honour a fake beat like the solo twins do
-		st.aoe = true
-		a.strikes.append(st)
+		if not bool(b.get("feint", false)):
+			at = maxf(at, float(b.get("at", 1.0)))
+			size = maxi(size, int(b.get("size", AbilityRes.Size.HEAVY)))
+	var st := StrikeRes.new()
+	st.at = at
+	st.amount_frac = 1.0
+	st.size = size
+	st.aoe = true
+	a.strikes.append(st)
 	return a
 
 static func make_riftmaw() -> EncounterRes:
@@ -164,22 +175,30 @@ static func _doom(id: StringName, name: String, amount: float,
 	a.danger = true
 	return a
 
-## A tank-string with a hallucinated (feint) beat. `beats` may carry feint/guard.
+## A tank combo — BARRAGE RETIREMENT (§0): the multi-beat tank string collapses to its ONE
+## heaviest real beat (the buster moment). The tank's multi-hit fantasy lives in the STREAM's
+## FLURRY MODE now; per-Seal signature busters get properly re-authored at S6 (stream_inject).
 static func _tank_string(id: StringName, name: String, amount: float,
 		cast: float, cd: float, jitter: float, beats: Array) -> AbilityRes:
 	var a := AbilityRes.new()
 	a.id = id; a.name = name; a.tag = "Combo"
-	a.effect = AbilityRes.Effect.DMG_TARGET      # ignored — beats carry the payload
+	a.effect = AbilityRes.Effect.DMG_TARGET      # ignored — the beat carries the payload
 	a.amount = amount
 	a.cast = cast; a.cd = cd; a.jitter = jitter
+	var at := 1.0
+	var size := AbilityRes.Size.LIGHT
+	var guard := StrikeRes.Guard.DODGEABLE
 	for b in beats:
-		var st := StrikeRes.new()
-		st.at = float(b.get("at", 1.0))
-		st.amount_frac = float(b.get("frac", 0.0))
-		st.size = int(b.get("size", AbilityRes.Size.HEAVY))
-		st.feint = bool(b.get("feint", false))
-		st.guard = int(b.get("guard", StrikeRes.Guard.DODGEABLE))
-		a.strikes.append(st)
+		if not bool(b.get("feint", false)) and int(b.get("size", AbilityRes.Size.HEAVY)) >= size:
+			at = float(b.get("at", 1.0))
+			size = int(b.get("size", AbilityRes.Size.HEAVY))
+			guard = int(b.get("guard", StrikeRes.Guard.DODGEABLE))
+	var st := StrikeRes.new()
+	st.at = at
+	st.amount_frac = 1.0
+	st.size = size
+	st.guard = guard
+	a.strikes.append(st)
 	return a
 
 static func _add_wave(at: float, id: StringName, name: String, hp: int,

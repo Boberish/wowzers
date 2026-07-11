@@ -76,6 +76,13 @@ func on_strike_result(_s: CombatState, _seat: Seat, _ability: AbilityRes,
 		_strike: StrikeRes, _grade: int) -> void:
 	pass
 
+## THE STREAM (TANK-PLAN §0): a non-damage stream bar reached this seat — a FEINT
+## (judge the read: press in window = BAITED, hold = READ) or an EAT (bookkeeping
+## only; the damage rides _damage separately). `bar` is the committed entry, read-only.
+## Default: no reaction (byte-identical for every non-stream class).
+func on_stream_bar(_s: CombatState, _seat: Seat, _bar: Dictionary) -> void:
+	pass
+
 ## Execute a class ability by id, optionally aimed at `target` (click-cast heals).
 ## Return true if it fired (consumed resources/GCD).
 func on_action(_s: CombatState, _seat: Seat, _id: StringName, _target: Seat = null) -> bool:

@@ -835,12 +835,10 @@ func _inject_boons(seat: Seat) -> void:
 			wk.modules = _d.run.modules.duplicate()
 			wk.rig = _d.run.rig.duplicate()      # MENDER-PLAN §4/rig: the wired Combo rig
 		elif seat.kit is DuelistKit:
-			var dk := seat.kit as DuelistKit
-			if _d.run.creed != "":
-				dk.creed_id = _d.run.creed
-			dk.rig = _d.run.rig.duplicate()      # TANK-PLAN §3/rig: the wired Combo rig
-			# (DuelistKit reads modules via the shared kit.boons/modules dicts + _m())
-			dk.modules = _d.run.modules.duplicate()
+			# TANK-V2 (TANK-PLAN §0): the rebuilt Duelist ships DECKLESS — no creed/rig/module
+			# fields exist on the kit yet. The deck re-lands per-verdict after Bill's base
+			# playtest; the shared boons dict above already flowed (and stays empty).
+			pass
 
 ## Generate the current ring's map (RaidContent.FLOORS[_d.floor_i]). The party's carried
 ## integrity/wounds/mana are UNTOUCHED here — only _start_map_run resets them.

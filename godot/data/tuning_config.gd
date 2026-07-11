@@ -38,9 +38,14 @@ extends Resource
 @export var dmg_buff_cap: float = 0.55         ## EMPOWER_BOSS permanent-buff ceiling (+55%)
 @export var curse_answer_window: float = 2.0   ## a taunt within this of a THREAT_DROP answers the curse
 
-# --- THE RHYTHM (BOSS-PLAN §3½; only melee dicts carrying a "rhythm" key read these —
+# --- THE STREAM (TANK-PLAN §0, tank-v2; only melee dicts carrying a "rhythm" key read these —
 #     every other fight is byte-identical) ---
-@export var rhythm_open_delay: float = 0.5     ## first rhythm bar arms this many seconds in (kills the empty opening)
+@export var rhythm_open_delay: float = 0.5     ## first stream bar lands this many seconds after the pull
+@export var stream_horizon: float = 3.0        ## publish lead: bars commit this far ahead (the visible runway)
+@export var stream_gap_after_cast: float = 0.6 ## min lead for the first bar published after a global resolves
+@export var stream_answer_clear: float = 0.30  ## a bar's answer must clear the barrier by this much
+@export var stream_flurry_cd: float = 10.0     ## min spacing between texture-rolled flurry bursts
+@export var stream_late_lead: float = 0.55     ## a LATE bar pops in this many seconds before impact
 
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
@@ -58,7 +63,9 @@ extends Resource
 @export var strike_perfect: float = 0.14
 @export var strike_good: float = 0.34
 @export var strike_graze: float = 0.50
-@export var dodge_recovery: float = 0.35   ## min gap between dodge presses
+@export var dodge_recovery: float = 0.8    ## min gap between dodge presses (BARRAGE RETIREMENT 2026-07-11:
+                                           ## was 0.35 — that speed existed only to chain multi-beat strings,
+                                           ## which are retired; first cut ~0.8, Bill's playtest knob)
 @export var dodge_whiff_cd: float = 1.3    ## lockout for a press that answered nothing (or took a feint beat's bait)
 @export var graze_mult: float = 0.5        ## damage fraction still taken on a GRAZE of a DODGEABLE beat
 # BLOCKABLE beats: damage fraction that lands anyway, by grade (partial even when perfect).

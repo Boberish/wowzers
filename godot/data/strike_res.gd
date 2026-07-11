@@ -14,8 +14,10 @@ enum Guard {
 }
 
 ## Press-timing verdict for one seat against one beat. PERFECT/GOOD/GRAZE/BAITED
-## are judged at the press; MISS/READ at the beat's impact.
-enum Grade { MISS, GRAZE, GOOD, PERFECT, BAITED, READ }
+## are judged at the press; MISS/READ at the beat's impact. BULLSEYE (tank-v2,
+## GRADING COHERENCE LAW) = the dead-center read ABOVE perfect — appended so no
+## existing value shifts; the one game-wide ladder is GRAZE<GOOD<PERFECT<BULLSEYE.
+enum Grade { MISS, GRAZE, GOOD, PERFECT, BAITED, READ, BULLSEYE }
 
 @export var at: float = 1.0           ## impact moment, seconds from telegraph start
 @export var amount_frac: float = 1.0  ## this beat's share of the ability's `amount`
@@ -31,4 +33,4 @@ enum Grade { MISS, GRAZE, GOOD, PERFECT, BAITED, READ }
 
 ## Grade name for diagnostics / event labels.
 static func grade_name(g: int) -> String:
-	return ["miss", "graze", "good", "perfect", "baited", "read"][clampi(g, 0, 5)]
+	return ["miss", "graze", "good", "perfect", "baited", "read", "bullseye"][clampi(g, 0, 6)]

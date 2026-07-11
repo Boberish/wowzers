@@ -212,50 +212,41 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	}
 	if s.threat_enabled:
 		base["aggro_me"] = _threat_target(s) == seat   # raid: am I the boss's victim?
-	# THE RHYTHM (§3½): the in-flight bar, visible ONLY to its victim — the tank reads
-	# its stream, a strayed DPS reads its own warning, nobody else sees anything.
-	if s.boss.rhythm_victim_i >= 0 and s.seats[s.boss.rhythm_victim_i] == seat:
-		base["rhythm"] = {
-			"remaining": float(s.boss.rhythm_impact_tick - s.tick) * s.dt,
-			"windup": float(s.boss.rhythm_windup_ticks) * s.dt,
-			"size": s.boss.rhythm_size,
-		}
-	# THE RHYTHM LANE (§3½ presentation v2): the TANK owns the stream's telemetry — a
-	# persistent lane needs the next swing's ETA even while nothing is armed, and needs
-	# to know when its stream strays (aggro legibility). View data only; the melee dict
-	# gates it, so every rhythm-less fight ships an obs without the key (byte-free).
+	# THE STREAM (TANK-PLAN §0 — tank-v2): the committed timeline, shipped verbatim and
+	# visible ONLY to the tank, filtered to bars the tank can answer (victim == me). A
+	# PEELED bar never ships — the stream visibly PAUSES on aggro loss (cdd008f kept; the
+	# aggro banner carries the victim's warning). LATE bars ship only inside their pop-in
+	# lead (the reaction test). FEINTS ship their DISGUISE + the purple flag — exactly the
+	# tell a human sees, so policies read the same information the player does; the true
+	# kind stays engine-side. View data only; the melee dict gates the key (rhythm-less
+	# fights ship an obs without it, byte-free).
 	var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 		else (s.encounter.adds[s.boss.add_i] as AddRes).melee
 	if lane_melee.has("rhythm") and seat == _tank_seat(s):
-		# LOST-AGGRO = UNDODGEABLE (Bill 2026-07-11): the stream is the TANK's own bars only.
-		# A peeled swing (victim != tank) is an undodgeable hit on a raider — it never shows on
-		# this channel as a dodge-comet (the aggro banner carries it). `armed` = a bar is coming
-		# at ME; a peel simply pauses the tank's stream until aggro drifts back.
-		var armed := s.boss.rhythm_victim_i >= 0 and s.seats[s.boss.rhythm_victim_i] == seat
-		var lane := {
-			"armed": armed,
+		var my_i := s.seats.find(seat)
+		var late_lead := to_ticks(s.config.stream_late_lead, s.config.fixed_hz)
+		var bars: Array = []
+		for b_v in s.boss.stream:
+			var b: Dictionary = b_v
+			if int(b["victim_i"]) != my_i:
+				continue
+			if bool(b["late"]) and int(b["impact_tick"]) - s.tick > late_lead:
+				continue
+			bars.append({
+				"id": int(b["id"]),
+				"kind": (String(b["disguise"]) if String(b["kind"]) == "feint" else String(b["kind"])),
+				"purple": String(b["kind"]) == "feint",
+				"eta": float(int(b["impact_tick"]) - s.tick) * s.dt,
+				"lead": float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt,
+				"late": bool(b["late"]),
+				"flurry_i": int(b["flurry_i"]), "flurry_n": int(b["flurry_n"]),
+			})
+		base["stream"] = {
+			"bars": bars,
+			"tempo": s.boss.stream_tempo,
+			"flurry": stream_flurry_active(s, seat),
 			"paused": s.telegraph != null,
 			"cadence": float(lane_melee.get("every", 1.5)),
-			"windup": float(lane_melee.get("rhythm", 0.6)),
 		}
-		if armed:
-			lane["mine"] = true
-			lane["remaining"] = float(s.boss.rhythm_impact_tick - s.tick) * s.dt
-			lane["windup"] = float(s.boss.rhythm_windup_ticks) * s.dt
-			lane["size"] = s.boss.rhythm_size
-		else:
-			# projected impact of the NEXT swing (timer counts only in gaps; the lane
-			# shows it frozen while paused — honest, and it never vanishes). Uses the
-			# PRE-ROLLED size + its windup so the projected comet is the true shape at the
-			# true lead — it glides continuously into the armed bar (mine); a later aggro
-			# peel is the only thing that can still nudge it. Mirrors the arm math exactly.
-			var nsz: int = s.boss.rhythm_next_size
-			var wproj := float(lane_melee.get("rhythm", 0.6))
-			if nsz == AbilityRes.Size.HEAVY:
-				wproj *= 1.35
-			lane["size"] = nsz if nsz != AbilityRes.Size.NONE else AbilityRes.Size.LIGHT
-			lane["next_eta"] = float(maxi(0, s.boss.melee_timer) \
-				+ maxi(1, to_ticks(wproj, s.config.fixed_hz))) * s.dt
-		base["rhythm_lane"] = lane
 	if s.boss.add_i >= 0:
 		var ad: AddRes = s.encounter.adds[s.boss.add_i]
 		base["add"] = {"name": ad.name,
@@ -332,7 +323,7 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 	var melee: Dictionary = enc.melee if s.boss.add_i < 0 else (enc.adds[s.boss.add_i] as AddRes).melee
 	if not melee.is_empty():
 		if melee.has("rhythm"):
-			_tick_rhythm(s, melee)
+			_tick_stream(s, melee)
 		else:
 			s.boss.melee_timer -= 1
 			while s.boss.melee_timer <= 0:
@@ -383,77 +374,208 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 		s.boss.ability_timer[best.id] = to_ticks(gap, s.config.fixed_hz)
 		_start_telegraph(s, best)
 
-## THE RHYTHM (BOSS-PLAN §3½) — the tank stream, riding the melee channel's rules:
-##  · RESOLVE at impact even during a telegraph (melee always kept ticking) — the
-##    victim's kit funnel grades whatever press is active (source-agnostic since M0).
-##  · ARM only in a telegraph GAP — the rhythm fills between the boss's real swings,
-##    so bars never stack presses (the WEAVE: one press answers one bar).
-##  · The victim rolls at ARM time via the same aggro peel old melee used. A bar aimed at
-##    the tank is a dodgeable stream comet; a PEELED bar (victim != tank) is an UNDODGEABLE
-##    hit — same cadence, no grace, and it never shows on the tank's channel (aggro banner).
-##  · Cadence: authored "every" ≈ the impact period (the wind-up folds into the
-##    countdown, floor 1 tick), so old melee numbers keep meaning what they said.
-static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
-	var hz := s.config.fixed_hz
-	if s.boss.rhythm_victim_i >= 0:                     # a swing is in flight
-		if s.tick < s.boss.rhythm_impact_tick:
+## THE STREAM (TANK-PLAN §0 — tank-v2). LAW 1: the engine publishes a COMMITTED timeline;
+## the UI only draws it. Two writers share it: the boss script (authored globals stay on the
+## telegraph machinery; authored BUSTER injections ride stream_inject) and this texture
+## generator (per-body profile in the melee dict, rolled bar-by-bar at PUBLISH time from
+## state.rng in fixed draw order, under grammar). Rules:
+##  · PUBLISH: a bar is appended (kind/victim/damage/late all final) once its impact enters
+##    the horizon, and never mutated after. Victim rolls the aggro peel AT PUBLISH — flow
+##    changes steer future bars, never in-flight ones.
+##  · BARRIER: never publish a bar that could land inside a global's answer window — the
+##    earliest possible telegraph start is derivable from the ability timers (they only
+##    ever FREEZE, so "assume they run" is conservative). While a telegraph is in flight,
+##    publishing holds entirely; the stream visibly thins before a big move.
+##  · RESOLVE: at impact_tick, through the same _damage path old melee used (the victim
+##    kit's modify_incoming grades whatever press is active — source-agnostic since M0).
+##    Feints deal nothing (judged BAITED/READ via the kit hook); unavoidables skip grading.
+##  · A PEELED bar (victim != tank) is an UNDODGEABLE hit and never ships in the tank's
+##    obs — the stream visibly PAUSES on aggro loss (cdd008f, kept).
+##  · Texture profile keys (all optional): every · jig · min/max · heavy_odds · crush_odds ·
+##    feint_odds · eat_odds · flurry_odds · flurry_n · flurry_gap · flurry_frac · late_odds ·
+##    rhythm (= the LATE bar's pop-in lead, sec — also the stream opt-in key).
+static func _tick_stream(s: CombatState, melee: Dictionary) -> void:
+	_stream_resolve_due(s)
+	_stream_publish(s, melee)
+
+static func _stream_resolve_due(s: CombatState) -> void:
+	while not s.boss.stream.is_empty():
+		var bar: Dictionary = s.boss.stream[0]
+		if s.tick < int(bar["impact_tick"]):
 			return
-		var victim: Seat = s.seats[s.boss.rhythm_victim_i]
-		s.boss.rhythm_victim_i = -1
-		if victim.alive():                              # a bar aimed at the fallen fizzles
-			_damage(s, victim, s.boss.rhythm_dmg, &"rhythm", s.boss.rhythm_size)
-			if s.threat_enabled:                        # aggro / stray-shot accounting
-				_note_melee_victim(s, victim)
-		# the beat is HUMAN, not a metronome: "jig" jitters the re-arm ±(jig×period)
-		var period := to_ticks(float(melee.get("every", 1.5)), hz)
-		var jig := float(melee.get("jig", 0.0))
-		if jig > 0.0:
-			period = int(round(float(period) * (1.0 + (s.rng.next_float() - 0.5) * 2.0 * jig)))
-		s.boss.melee_timer += maxi(1, period - s.boss.rhythm_windup_ticks)
-		# PRE-ROLL the NEXT bar's SIZE right here, the instant this one resolves — so even a
-		# collapsed 1-tick gap (which follows a HEAVY bar) still shows the true shape for a
-		# frame before arming. The gap-phase roll below only covers the fight's FIRST bar.
-		s.boss.rhythm_next_size = _roll_rhythm_size(s, melee)
-		return
-	if s.telegraph != null:                             # gap-fill: never arm under a real swing
-		return
-	# PRE-ROLL (Bill 2026-07-11 stream-glitch fix): the NEXT bar's SIZE is decided at the
-	# START of its approach, not at arm. The projected comet then shows its TRUE shape and
-	# lead from the mouth — no diamond→HEAVY morph and no position JUMP the instant it arms
-	# (the old code guessed LIGHT + base-windup, then corrected on arm = the "icon pops in
-	# the middle / flashes" glitch). This branch seeds the FIRST bar (nothing resolved yet).
-	if s.boss.rhythm_next_size == AbilityRes.Size.NONE:
-		s.boss.rhythm_next_size = _roll_rhythm_size(s, melee)
-	s.boss.melee_timer -= 1
-	if s.boss.melee_timer > 0:
-		return
+		s.boss.stream.remove_at(0)
+		var vi := int(bar["victim_i"])
+		if vi < 0 or vi >= s.seats.size():
+			continue
+		var victim: Seat = s.seats[vi]
+		if not victim.alive():
+			continue                                    # a bar aimed at the fallen fizzles
+		s.boss.stream_after_cast = false
+		var kind := String(bar["kind"])
+		if kind == "feint":
+			if victim.kit != null:
+				victim.kit.on_stream_bar(s, victim, bar)  # BAITED vs READ is the kit's judgment
+			continue                                    # a fake deals nothing
+		if kind == "eat":
+			if victim.kit != null:
+				victim.kit.on_stream_bar(s, victim, bar)
+			_damage(s, victim, float(bar["dmg"]), &"eat", AbilityRes.Size.NONE)
+		else:
+			# auto/heavy/buster/flurry — the kit funnel grades the active press. The bar
+			# being resolved is exposed for the funnel (flurry groups, buster reads).
+			s.boss.stream_resolving = bar
+			var src := &"flurry" if kind == "flurry" else &"rhythm"
+			_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
+			s.boss.stream_resolving = {}
+		if s.threat_enabled:                            # aggro / stray-shot accounting
+			_note_melee_victim(s, victim)
+
+static func _stream_size(kind: String) -> int:
+	match kind:
+		"heavy": return AbilityRes.Size.HEAVY
+		"buster": return AbilityRes.Size.CRUSH
+		_: return AbilityRes.Size.LIGHT
+
+## The earliest tick a NEW telegraph could start (-1 = one is in flight right now).
+## Timers only FREEZE (never jump ahead), so treating them as live is conservative.
+static func _stream_barrier(s: CombatState) -> int:
+	if s.telegraph != null:
+		return -1
+	if s.boss.ability_timer.is_empty():
+		return s.tick + (1 << 24)
+	var m := 1 << 24
+	for id in s.boss.ability_timer:
+		m = mini(m, maxi(0, int(s.boss.ability_timer[id])))
+	return s.tick + m
+
+## Publish committed bars up to min(horizon, the barrier). All rng draws happen here,
+## in a fixed order per bar: slot-type roll → (disguise) → damage → jig → late → victim.
+static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
+	var hz := s.config.fixed_hz
+	var barrier := _stream_barrier(s)
+	if barrier < 0:
+		return                                          # a global is in flight — hold
+	var horizon := s.tick + to_ticks(s.config.stream_horizon, hz)
+	if s.boss.stream_next_impact < 0:                   # the pull's first bar
+		s.boss.stream_next_impact = s.tick + to_ticks(s.config.rhythm_open_delay + float(melee.get("every", 1.5)), hz)
+	# tempo: EN GARDE invites a denser stream; stream_tempo compresses everything together
+	var tempo := s.boss.stream_tempo
+	var tk := _tank_seat(s)
+	if tk != null and s.tick < int(tk.vars.get("engarde_until", 0)):
+		tempo *= 1.25
+	while true:
+		var imp := maxi(s.boss.stream_next_impact, s.tick + to_ticks(s.config.stream_gap_after_cast, hz))
+		if imp > horizon or imp + to_ticks(s.config.stream_answer_clear, hz) > barrier:
+			return
+		var period := maxi(2, int(round(float(to_ticks(float(melee.get("every", 1.5)), hz)) / maxf(0.25, tempo))))
+		# --- slot type (grammar first, then the odds ladder — ONE float draw) ---
+		var kind := "auto"
+		var roll := s.rng.next_float()
+		var fl_odds := float(melee.get("flurry_odds", 0.0))
+		var fe_odds := float(melee.get("feint_odds", 0.0))
+		var ea_odds := float(melee.get("eat_odds", 0.0))
+		var cr_odds := float(melee.get("crush_odds", 0.0))
+		var he_odds := float(melee.get("heavy_odds", 0.0))
+		var fresh := s.boss.stream_after_cast and s.boss.stream.is_empty()
+		var flurry_n := maxi(2, int(melee.get("flurry_n", 4)))
+		var flurry_gap := to_ticks(float(melee.get("flurry_gap", 0.35)) / maxf(0.25, tempo), hz)
+		var flurry_fits := imp + flurry_gap * (flurry_n - 1) + to_ticks(s.config.stream_answer_clear, hz) <= mini(horizon, barrier)
+		if fresh:
+			kind = "auto"                               # the bar after a global stays plain
+		elif roll < fl_odds and s.tick >= s.boss.stream_flurry_cd_until and flurry_fits:
+			kind = "flurry"
+		elif roll < fl_odds + fe_odds and s.boss.stream_seq > 0:
+			kind = "feint"                              # never the fight's opener
+		elif roll < fl_odds + fe_odds + ea_odds and s.tick - s.boss.stream_last_eat_tick > period * 2:
+			kind = "eat"
+		elif roll < fl_odds + fe_odds + ea_odds + cr_odds and String(s.boss.stream_last_kind) != "buster":
+			kind = "buster"                             # texture-rolled crush (authored ones ride stream_inject)
+		elif roll < fl_odds + fe_odds + ea_odds + cr_odds + he_odds:
+			kind = "heavy"
+		if kind == "flurry":
+			s.boss.stream_flurry_cd_until = s.tick + to_ticks(s.config.stream_flurry_cd, hz)
+			var group := s.boss.stream_seq
+			for i in range(flurry_n):
+				_stream_push(s, melee, "flurry", imp + flurry_gap * i, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
+			s.boss.stream_next_impact = imp + flurry_gap * (flurry_n - 1) + period
+		else:
+			var late := kind != "eat" and float(melee.get("late_odds", 0.0)) > 0.0 \
+				and s.rng.next_float() < float(melee.get("late_odds", 0.0))
+			_stream_push(s, melee, kind, imp, 1.0, late, -1, 0, 0)
+			s.boss.stream_next_impact = imp + period
+		if String(melee.get("jig_mode", "")) != "none":
+			var jig := float(melee.get("jig", 0.0))
+			if jig > 0.0:
+				s.boss.stream_next_impact += int(round(float(period) * (s.rng.next_float() - 0.5) * 2.0 * jig))
+
+## Append ONE committed bar. Damage + disguise + victim are all final here (LAW 1).
+static func _stream_push(s: CombatState, melee: Dictionary, kind: String, impact: int,
+		dmg_frac: float, late: bool, flurry_group: int, flurry_i: int, flurry_n: int) -> void:
+	var dmg := s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0))) * dmg_frac
+	match kind:
+		"heavy": dmg = roundf(dmg * 1.45)
+		"buster": dmg = roundf(dmg * 2.0)
+		"feint": dmg = 0.0
+	var disguise := kind
+	if kind == "feint":
+		disguise = "heavy" if s.rng.next_float() < 0.5 else "auto"
 	var victim := _aggro_peel(s, _tank_seat(s)) if s.threat_enabled else _tank_target(s)
 	if victim == null:
 		victim = _tank_target(s)
 	if victim == null:
 		return
-	# commit the pre-rolled bar: base windup, TALL if it was pre-rolled HEAVY. A peeled bar is
-	# an UNDODGEABLE hit (nobody can answer it), so it gets no special "reaction grace" windup —
-	# same cadence as any other swing, it just lands on whoever lost/pulled aggro.
-	var sz := s.boss.rhythm_next_size
-	var windup := float(melee.get("rhythm", 0.6))
-	if sz == AbilityRes.Size.HEAVY:
-		windup *= 1.35
-	s.boss.rhythm_size = sz
-	s.boss.rhythm_next_size = AbilityRes.Size.NONE
-	s.boss.rhythm_victim_i = s.seats.find(victim)
-	s.boss.rhythm_windup_ticks = maxi(1, to_ticks(windup, hz))
-	s.boss.rhythm_impact_tick = s.tick + s.boss.rhythm_windup_ticks
-	s.boss.rhythm_dmg = s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0)))
-	if sz == AbilityRes.Size.HEAVY:
-		s.boss.rhythm_dmg = roundf(s.boss.rhythm_dmg * 1.45)
+	s.boss.stream.append({
+		"id": s.boss.stream_seq, "kind": kind, "disguise": disguise,
+		"publish_tick": s.tick, "impact_tick": impact,
+		"victim_i": s.seats.find(victim), "dmg": dmg, "late": late,
+		"flurry_group": flurry_group, "flurry_i": flurry_i, "flurry_n": flurry_n,
+	})
+	s.boss.stream_seq += 1
+	s.boss.stream_last_kind = kind
+	if kind == "eat":
+		s.boss.stream_last_eat_tick = impact
 
-## "heavy_odds": some bars come in TALL — a HEAVY parry bar with a broader tell and heavier
-## payload (§3 stream texture). One rng draw; owned here so the pre-roll (approach start) and
-## the fallback seed use the identical draw, and the size is known before the comet appears.
-static func _roll_rhythm_size(s: CombatState, melee: Dictionary) -> int:
-	var ho := float(melee.get("heavy_odds", 0.0))
-	return AbilityRes.Size.HEAVY if (ho > 0.0 and s.rng.next_float() < ho) else AbilityRes.Size.LIGHT
+## AUTHORED INJECTION (writer 1, per-Seal S6): the boss script drops a specific bar into
+## the stream at `delay` seconds out — the phase-2 signature overhead, the LATE reaction
+## test. Same committed contract as every generated bar.
+static func stream_inject(s: CombatState, kind: String, delay: float, dmg: float, late := false) -> void:
+	var victim := _aggro_peel(s, _tank_seat(s)) if s.threat_enabled else _tank_target(s)
+	if victim == null:
+		return
+	var bar := {
+		"id": s.boss.stream_seq, "kind": kind, "disguise": kind,
+		"publish_tick": s.tick, "impact_tick": s.tick + to_ticks(delay, s.config.fixed_hz),
+		"victim_i": s.seats.find(victim), "dmg": dmg, "late": late,
+		"flurry_group": -1, "flurry_i": 0, "flurry_n": 0,
+	}
+	var at := s.boss.stream.size()                      # keep impact order
+	for i in s.boss.stream.size():
+		if int((s.boss.stream[i] as Dictionary)["impact_tick"]) > int(bar["impact_tick"]):
+			at = i
+			break
+	s.boss.stream.insert(at, bar)
+	s.boss.stream_seq += 1
+
+## The publisher's body died / left the field: its committed, unresolved bars SHATTER
+## (killing the attacker cancels its swings — a RULE, so the immutability contract holds).
+static func _stream_shatter(s: CombatState) -> void:
+	if s.boss.stream.is_empty():
+		return
+	s.boss.stream.clear()
+	s.boss.stream_next_impact = -1
+	s.boss.stream_after_cast = true
+	_emit(s, {"t": "stream_shatter"})
+
+## FLURRY MODE is live while an unresolved flurry bar is close (the kit reads this:
+## wind-free dodge-only weaving; the channel mode-swaps on the same read).
+static func stream_flurry_active(s: CombatState, seat: Seat) -> bool:
+	var i := s.seats.find(seat)
+	for b_v in s.boss.stream:
+		var b: Dictionary = b_v
+		if String(b["kind"]) == "flurry" and int(b["victim_i"]) == i \
+				and int(b["impact_tick"]) - s.tick <= to_ticks(1.0, s.config.fixed_hz):
+			return true
+	return false
 
 ## Begin a telegraph for `ab` — shared by the scheduler and chain links. Its
 ## rand_target beats roll their victims NOW so the wind-up shows who is marked.
@@ -487,6 +609,7 @@ static func _update_form(s: CombatState) -> void:
 			s.boss.add_i = -1
 			s.boss.add_hp = 0.0
 			s.boss.add_hp_max = 0.0
+			_stream_shatter(s)      # the fallen add's committed bars die with it (a rule, not a mutation)
 			if not enc.melee.is_empty():
 				s.boss.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
 			_emit(s, {"t": "add_down", "id": down.id, "name": down.name})
@@ -507,6 +630,7 @@ static func _update_form(s: CombatState) -> void:
 				j += 1
 			if not ad.melee.is_empty():
 				s.boss.melee_timer = to_ticks(float(ad.melee.get("every", 1.5)), s.config.fixed_hz)
+			_stream_shatter(s)      # the withdrawing body's bars shatter; the add publishes fresh
 			_emit(s, {"t": "add_spawn", "id": ad.id, "name": ad.name})
 			return
 
@@ -1380,12 +1504,11 @@ static func _pack_advance(s: CombatState) -> void:
 	b.add_hp_max = 0.0
 	b.adds_spawned = {}
 	b.entered_tick = s.tick                 # walk-in grace + per-member enrage key off this
-	b.rhythm_victim_i = -1                  # §3½: the dead member's armed swing dies with it
-	b.rhythm_impact_tick = 0
-	b.rhythm_windup_ticks = 0
-	b.rhythm_dmg = 0.0
-	b.rhythm_size = 1
-	b.rhythm_next_size = 0                  # NONE: the new member re-rolls its first bar's shape
+	_stream_shatter(s)                      # the dead member's committed bars SHATTER with it;
+	b.stream_tempo = 1.0                    # the walk-in gap breathes, then the next body's
+	b.stream_last_kind = ""                 # profile publishes fresh (field-holder = the writer)
+	b.stream_last_eat_tick = -100000
+	b.stream_flurry_cd_until = 0
 	_stagger_abilities(b, enc, s.config, s.rng)
 	if not enc.melee.is_empty():
 		# §3½: a rhythm member opens its stream right after the walk-in grace
