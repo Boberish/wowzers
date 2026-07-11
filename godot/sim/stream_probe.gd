@@ -106,15 +106,16 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 					_fail("%s: bar %d impacts INSIDE telegraph window (tick %d <= %d)"
 						% [label, int(b2["id"]), int(b2["impact_tick"]), tg_end])
 					break
-		# --- obs invariants ---
+		# --- obs invariants (pass 2: EVERY bar ships — peeled ones flagged, the tank
+		#     answers them for flow while the victim eats the damage) ---
 		var stream_obs: Dictionary = obs.get("stream", {})
 		for ob_v in stream_obs.get("bars", []):
 			var ob: Dictionary = ob_v
 			var oid := int(ob["id"])
 			if ledger.has(oid):
 				var truth: Dictionary = ledger[oid]
-				if int(truth["victim"]) != 0:
-					_fail("%s: obs shipped a PEELED bar %d" % [label, oid])
+				if bool(ob.get("peeled", false)) != (int(truth["victim"]) != 0):
+					_fail("%s: bar %d peeled flag lies (victim=%s)" % [label, oid, truth["victim"]])
 				if String(truth["kind"]) == "feint" and String(ob["kind"]) == "feint":
 					_fail("%s: obs shipped a feint's TRUE kind (bar %d)" % [label, oid])
 				if bool(truth["late"]) \

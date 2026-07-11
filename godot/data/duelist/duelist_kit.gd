@@ -95,7 +95,10 @@ func on_dodge_press(s: CombatState, seat: Seat) -> void:
 		return
 	_press(s, seat, "dodge", cfg.dodge_cost, cfg.dodge_recover)
 
-## Open an answer window if wind + recovery allow; else FUMBLE (the dry press).
+## The press: pay wind/recovery, then CLAIM instantly (THE TWINFANG MODEL — judged at the
+## press, symmetric around the bar's gate-touch, verdict fires NOW). If no stream bar is in
+## claim range, the press stays open as a telegraph answer (busters/globals keep the
+## forgiving open-window model); with neither, it's a whiff.
 func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: float) -> void:
 	if s.tick < int(seat.vars.get("fumble_until", 0)):
 		return
@@ -110,19 +113,94 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 		return
 	seat.vars["wind"] = _wind(seat) - cost
 	seat.vars[ready_key] = s.tick + _tt(s, recover)
-	seat.vars["ans_kind"] = kind
-	seat.vars["ans_tick"] = s.tick
 	CombatCore._emit(s, {"t": ("duel_parry" if kind == "parry" else "duel_dodge"),
 		"player": seat.is_player, "seat": seat})
+	if _claim(s, seat, kind):
+		seat.vars["ans_kind"] = ""                        # the press was consumed by its bar
+		return
+	# no stream bar in range — leave the answer open for the telegraph path
+	seat.vars["ans_kind"] = kind
+	seat.vars["ans_tick"] = s.tick
 
-# --- the mitigation funnel: every incoming BAR is graded + mitigated here -------
+## Find the nearest unanswered, claimable bar within ±answer_claim of NOW (late side
+## bounded by the resolve slack) and judge the press against it. Returns true if a bar
+## (real or fake) consumed the press. Peeled bars claim too — that's the aggro comeback.
+func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
+	var claim := _tt(s, cfg.answer_claim)
+	var late := CombatCore.to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
+	var best: Dictionary = {}
+	var best_d := 1 << 30
+	for b_v in s.boss.stream:
+		var b: Dictionary = b_v
+		var bk := String(b["kind"])
+		if bk == "eat":
+			continue                                      # unavoidable — never eats a press
+		if bk == "flurry" and kind == "parry":
+			continue                                      # the weave is dodge-only
+		if s.boss.stream_answers.has(int(b["id"])):
+			continue
+		var delta := s.tick - int(b["impact_tick"])       # + = late of the gate
+		if delta > late or -delta > claim:
+			continue
+		if absi(delta) < best_d:
+			best_d = absi(delta)
+			best = b
+	if best.is_empty():
+		return false
+	var id := int(best["id"])
+	var bk := String(best["kind"])
+	if bk == "feint":
+		# the press took the bait — judged NOW (the purple was the tell)
+		s.boss.stream_answers[id] = {"kind": kind, "grade": StrikeRes.Grade.BAITED}
+		seat.vars["fumble_until"] = s.tick + _tt(s, cfg.fumble_recover)
+		_slip(s, seat)
+		CombatCore._bump_diag(s, seat, "baited")
+		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+			"kind": kind, "grade": StrikeRes.Grade.BAITED, "size": AbilityRes.Size.LIGHT,
+			"off_ms": best_d * 33})
+		return true
+	var size := CombatCore._stream_size(bk)
+	var grade := StrikeRes.Grade.MISS
+	if kind == "parry":
+		grade = StrikeRes.Grade.BULLSEYE if best_d <= _tt(s, cfg.parry_land) else StrikeRes.Grade.MISS
+	else:
+		var p := float(best_d) / maxf(1.0, float(claim))  # 0 at the gate line … 1 at the edge
+		if p <= cfg.grade_bull_frac:
+			grade = StrikeRes.Grade.BULLSEYE
+		elif p <= cfg.grade_perfect_frac:
+			grade = StrikeRes.Grade.PERFECT
+		elif p <= cfg.grade_good_frac:
+			grade = StrikeRes.Grade.GOOD
+		else:
+			grade = StrikeRes.Grade.GRAZE
+		if size >= AbilityRes.Size.HEAVY and grade != StrikeRes.Grade.BULLSEYE:
+			grade = StrikeRes.Grade.MISS                  # heavy/buster: bullseye-dodge only
+	s.boss.stream_answers[id] = {"kind": kind, "grade": grade}
+	# the payoffs land NOW — instant feedback is the whole point (and on a PEELED bar
+	# this is exactly the comeback: clean answers rebuild flow while a raider tanks it)
+	if grade == StrikeRes.Grade.MISS:
+		_slip(s, seat)
+		CombatCore._bump_diag(s, seat, "miss")
+	else:
+		_add_flow(s, seat, _flow_gain(s, grade))
+		CombatCore._bump_diag(s, seat, "land" if (kind == "parry") else StrikeRes.grade_name(grade))
+		if kind == "parry":
+			_counter(s, seat, size)
+	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+		"kind": ("weave" if bk == "flurry" else kind), "grade": grade, "size": size,
+		"off_ms": best_d * 33})
+	return true
+
+# --- the mitigation funnel. STREAM bars were judged AT THE PRESS (stream_answers) —
+#     resolve just applies the stored grade. Telegraph busters/globals keep the
+#     open-window model below. ---
 func modify_incoming(s: CombatState, seat: Seat, dmg: float, source: StringName, size: int) -> float:
 	if source == &"enrage" or source == &"debuff":
 		return dmg
 	if source == &"eat":
 		return dmg                                        # unavoidable: whole, and it never eats the press
-	if source == &"flurry":
-		return _flurry_beat(s, seat, dmg)
+	if source == &"rhythm" or source == &"flurry":
+		return _engarde_wall(s, seat, dmg * (1.0 - _stream_settle(s, seat, source, size)))
 	var kind := String(seat.vars.get("ans_kind", ""))
 	if kind == "":
 		if size >= AbilityRes.Size.HEAVY:                 # letting a big one through costs aggro
@@ -156,9 +234,10 @@ func modify_incoming(s: CombatState, seat: Seat, dmg: float, source: StringName,
 		return _engarde_wall(s, seat, dmg * (1.0 - _parry_result(s, seat, age, size)))
 	return _engarde_wall(s, seat, dmg * (1.0 - _dodge_result(s, seat, age, size)))
 
-## PARRY — binary: the land or the miss. A land on ANY size aimed at you; the top payout.
+## TELEGRAPH-path PARRY (busters on the cast machinery — the open-window model stays for
+## these big slow reads): binary land/miss graded by press age at resolve.
 func _parry_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
-	if age <= _tt(s, cfg.parry_window):
+	if age <= _tt(s, cfg.parry_land) * 2:                 # the window is one-sided here — double it
 		_add_flow(s, seat, s.config.flow_gain_perfect)
 		CombatCore._bump_diag(s, seat, "land")
 		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
@@ -171,8 +250,7 @@ func _parry_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
 		"kind": "parry", "grade": StrikeRes.Grade.MISS, "size": size})
 	return clampf(cfg.mit_parry_miss, 0.0, cfg.mit_cap)
 
-## DODGE — graded on the one ladder. AUTO: any grade. HEAVY/BUSTER: BULLSEYE only —
-## any lesser dodge is the wrong answer and leaks whole (parry was the call).
+## TELEGRAPH-path DODGE: graded by press age; heavy/buster still demand the BULLSEYE.
 func _dodge_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
 	var grade := _dodge_grade(s, age)
 	if size >= AbilityRes.Size.HEAVY and grade != StrikeRes.Grade.BULLSEYE:
@@ -189,6 +267,52 @@ func _dodge_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
 	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
 		"kind": "dodge", "grade": grade, "size": size})
 	return clampf(mit, 0.0, cfg.mit_cap)
+
+## Settle a resolving STREAM bar against its press-time answer (payoffs/verdicts already
+## fired at the press — this only converts the stored grade into mitigation + handles the
+## unanswered-bar bookkeeping and the weave group).
+func _stream_settle(s: CombatState, seat: Seat, source: StringName, size: int) -> float:
+	var bar: Dictionary = s.boss.stream_resolving
+	if source == &"flurry":
+		return _flurry_settle(s, seat, bar)
+	var akind := String(bar.get("ans_kind", ""))
+	var grade := int(bar.get("ans_grade", -1))
+	if akind == "":
+		if size >= AbilityRes.Size.HEAVY:                 # letting a big one through costs aggro
+			_slip(s, seat)
+			CombatCore._bump_diag(s, seat, "miss")
+		return 0.0
+	if grade == StrikeRes.Grade.MISS:
+		return clampf(cfg.mit_parry_miss if akind == "parry" else 0.0, 0.0, cfg.mit_cap)
+	if akind == "parry":
+		return clampf(cfg.mit_parry_land, 0.0, cfg.mit_cap)
+	var mit := _dodge_mit(grade)
+	if size > AbilityRes.Size.LIGHT:
+		mit -= cfg.dodge_leak_per_size * float(size - AbilityRes.Size.LIGHT)
+	return clampf(mit, 0.0, cfg.mit_cap)
+
+## The weave group: an unanswered/missed beat BLOWS it (the rest land whole); the last
+## beat of an unblown group pays the free RIPOSTE. Flow for clean beats was paid at press.
+func _flurry_settle(s: CombatState, seat: Seat, bar: Dictionary) -> float:
+	var group := int(bar.get("flurry_group", -1))
+	var blown := int(seat.vars.get("flurry_blown", -1)) == group
+	var akind := String(bar.get("ans_kind", ""))
+	var grade := int(bar.get("ans_grade", -1))
+	var clean := akind != "" and grade != StrikeRes.Grade.MISS and grade != StrikeRes.Grade.BAITED
+	if not clean or blown:
+		if not blown:
+			seat.vars["flurry_blown"] = group
+			_slip(s, seat)
+			CombatCore._bump_diag(s, seat, "miss")
+			CombatCore._emit(s, {"t": "duel_weave_blown", "player": seat.is_player, "seat": seat})
+		return 0.0
+	if int(bar.get("flurry_i", 0)) == int(bar.get("flurry_n", 1)) - 1:
+		CombatCore.damage_boss(s, seat, cfg.counter_dmg * cfg.flurry_riposte_mult, &"riposte")
+		_bank(seat, 1)
+		_add_flow(s, seat, s.config.flow_gain_perfect)
+		CombatCore._bump_diag(s, seat, "riposte")
+		CombatCore._emit(s, {"t": "duel_riposte", "player": seat.is_player, "seat": seat})
+	return _dodge_mit(grade)
 
 func _dodge_grade(s: CombatState, age: int) -> int:
 	if age <= _tt(s, cfg.dodge_bullseye):
@@ -212,56 +336,30 @@ func _flow_gain(s: CombatState, grade: int) -> float:
 		StrikeRes.Grade.GOOD: return s.config.flow_gain_good
 		_: return s.config.flow_gain_graze
 
-## FLURRY MODE beat: dodge-in-window answers it; the first missed beat BLOWS the group
-## (the rest land whole); the last clean beat of an unblown group pays the free RIPOSTE.
-func _flurry_beat(s: CombatState, seat: Seat, dmg: float) -> float:
-	var bar: Dictionary = s.boss.stream_resolving
-	var group := int(bar.get("flurry_group", -1))
-	var blown := int(seat.vars.get("flurry_blown", -1)) == group
-	var kind := String(seat.vars.get("ans_kind", ""))
-	var age := s.tick - int(seat.vars.get("ans_tick", -100000))
-	var answered := kind == "dodge" and age >= 0 and age <= _tt(s, cfg.dodge_good)
-	if answered and not blown:
-		seat.vars["ans_kind"] = ""
-		var grade := _dodge_grade(s, age)
-		CombatCore._bump_diag(s, seat, StrikeRes.grade_name(grade))
-		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-			"kind": "weave", "grade": grade, "size": AbilityRes.Size.LIGHT})
-		if int(bar.get("flurry_i", 0)) == int(bar.get("flurry_n", 1)) - 1:
-			CombatCore.damage_boss(s, seat, cfg.counter_dmg * cfg.flurry_riposte_mult, &"riposte")
-			_bank(seat, 1)
-			_add_flow(s, seat, s.config.flow_gain_perfect)
-			CombatCore._bump_diag(s, seat, "riposte")
-			CombatCore._emit(s, {"t": "duel_riposte", "player": seat.is_player, "seat": seat})
-		return _engarde_wall(s, seat, dmg * (1.0 - _dodge_mit(_dodge_grade(s, age))))
-	if not blown:                                         # the first miss blows the weave
-		seat.vars["flurry_blown"] = group
-		_slip(s, seat)
-		CombatCore._bump_diag(s, seat, "miss")
-		CombatCore._emit(s, {"t": "duel_weave_blown", "player": seat.is_player, "seat": seat})
-	return _engarde_wall(s, seat, dmg)                    # eat it all
-
-## FEINT judgment + EAT bookkeeping (the engine routes non-damage bars here).
+## Non-funnel stream bookkeeping (the engine routes here): an UNCLAIMED feint = the READ ·
+## an eat = the brace · a PEELED damage bar = settle the tank's weave/miss state (the
+## victim eats the damage; the tank's press-time payoffs already fired — the comeback).
 func on_stream_bar(s: CombatState, seat: Seat, bar: Dictionary) -> void:
 	match String(bar.get("kind", "")):
 		"feint":
-			var kind := String(seat.vars.get("ans_kind", ""))
-			var age := s.tick - int(seat.vars.get("ans_tick", -100000))
-			if kind != "" and age >= 0 and age <= _tt(s, cfg.answer_active):
-				seat.vars["ans_kind"] = ""                # the press took the bait
-				seat.vars["fumble_until"] = s.tick + _tt(s, cfg.fumble_recover)
-				_slip(s, seat)
-				CombatCore._bump_diag(s, seat, "baited")
-				CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-					"kind": kind, "grade": StrikeRes.Grade.BAITED, "size": AbilityRes.Size.LIGHT})
-			else:
-				_add_flow(s, seat, s.config.flow_gain_graze)
-				CombatCore._bump_diag(s, seat, "read")
-				CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-					"kind": "hold", "grade": StrikeRes.Grade.READ, "size": AbilityRes.Size.LIGHT})
+			_add_flow(s, seat, s.config.flow_gain_graze)
+			CombatCore._bump_diag(s, seat, "read")
+			CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+				"kind": "hold", "grade": StrikeRes.Grade.READ, "size": AbilityRes.Size.LIGHT})
 		"eat":
 			CombatCore._bump_diag(s, seat, "eaten")
 			CombatCore._emit(s, {"t": "duel_eat", "player": seat.is_player, "seat": seat})
+		"flurry":
+			var prev := s.boss.stream_resolving
+			s.boss.stream_resolving = bar
+			_flurry_settle(s, seat, bar)                  # group state only; damage is the victim's
+			s.boss.stream_resolving = prev
+		_:
+			# peeled auto/heavy/buster: an unanswered big one still costs aggro discipline
+			if String(bar.get("ans_kind", "")) == "" \
+					and CombatCore._stream_size(String(bar.get("kind", ""))) >= AbilityRes.Size.HEAVY:
+				_slip(s, seat)
+				CombatCore._bump_diag(s, seat, "miss")
 
 ## EN GARDE's wall: while the challenge holds, leaks + slivers are HALVED. Base = no-op.
 func _engarde_wall(s: CombatState, seat: Seat, leaked: float) -> float:
@@ -329,12 +427,13 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"engarde_ready": s.tick >= int(seat.cooldowns.get("engarde", 0)),
 		"engarde_live": _engarde_live(s, seat),
 		"flurry": CombatCore.stream_flurry_active(s, seat),
-		# the gate's grading geometry (THE CHANNEL draws exactly these — one source of truth)
-		"win_bullseye": cfg.dodge_bullseye,
-		"win_perfect": cfg.dodge_perfect,
-		"win_good": cfg.dodge_good,
-		"win_graze": cfg.answer_active,
-		"parry_window": cfg.parry_window,
+		# the gate's grading geometry (THE CHANNEL draws exactly these — one source of
+		# truth; THE TWINFANG MODEL: fractions of the claim range, symmetric)
+		"win_bullseye": cfg.answer_claim * cfg.grade_bull_frac,
+		"win_perfect": cfg.answer_claim * cfg.grade_perfect_frac,
+		"win_good": cfg.answer_claim * cfg.grade_good_frac,
+		"win_graze": cfg.answer_claim,
+		"parry_window": cfg.parry_land,
 	}
 
 func recap_spec(_s: CombatState, seat: Seat) -> Array:

@@ -93,6 +93,8 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	channel.win_good = float(obs.get("win_good", 0.30))
 	channel.win_graze = float(obs.get("win_graze", 0.50))
 	channel.parry_window = float(obs.get("parry_window", 0.10))
+	channel.late_slack = s.config.stream_resolve_slack
+	channel.tick_frac = clampf(hud._ctrl._accum / s.dt, 0.0, 1.0)   # smooth 60 fps comets
 	# the live telegraph riding the channel: a targeted BUSTER (parry) or a GLOBAL beat (dodge)
 	channel.buster_bar = {}
 	channel.global_bar = {}
@@ -150,7 +152,8 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		return
 	match String(ev.get("t", "")):
 		"duel_answer":
-			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)))
+			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)),
+				int(ev.get("off_ms", -1)))
 		"duel_counter":
 			channel.stamp("COUNTER +◆", "bullseye")
 		"duel_riposte":
@@ -174,22 +177,24 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 			channel.shatter()
 
 ## One graded answer → the stamp (always) + the slam (the moments that deserve the room).
-func _verdict(kind: String, grade: int, size: int) -> void:
+## The ±ms readout rides the stamp — the blade's honesty idiom (you SEE your offset).
+func _verdict(kind: String, grade: int, size: int, off_ms := -1) -> void:
+	var ms := ("  %+dms" % off_ms) if off_ms >= 0 else ""
 	match grade:
 		StrikeRes.Grade.BULLSEYE:
 			if kind == "parry":
-				channel.stamp("PARRY!", "bullseye")
+				channel.stamp("PARRY!" + ms, "bullseye")
 				slam.slam("PARRY!", "perfect")
 			else:
-				channel.stamp("BULLSEYE!", "bullseye")
+				channel.stamp("BULLSEYE!" + ms, "bullseye")
 				slam.slam("BULLSEYE!", "perfect")
 			hud._shake_amt = maxf(hud._shake_amt, 2.0)
 		StrikeRes.Grade.PERFECT:
-			channel.stamp("PERFECT", "perfect")
+			channel.stamp("PERFECT" + ms, "perfect")
 		StrikeRes.Grade.GOOD:
-			channel.stamp("GOOD", "good")
+			channel.stamp("GOOD" + ms, "good")
 		StrikeRes.Grade.GRAZE:
-			channel.stamp("GRAZE", "graze")
+			channel.stamp("GRAZE" + ms, "graze")
 		StrikeRes.Grade.BAITED:
 			channel.stamp("BAITED!", "baited")
 			slam.slam("BAITED", "baited")

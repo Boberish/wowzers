@@ -227,8 +227,6 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 		var bars: Array = []
 		for b_v in s.boss.stream:
 			var b: Dictionary = b_v
-			if int(b["victim_i"]) != my_i:
-				continue
 			if bool(b["late"]) and int(b["impact_tick"]) - s.tick > late_lead:
 				continue
 			bars.append({
@@ -238,6 +236,10 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 				"eta": float(int(b["impact_tick"]) - s.tick) * s.dt,
 				"lead": float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt,
 				"late": bool(b["late"]),
+				# THE PEEL, reworked (Bill pass 2): every bar SHOWS — a peeled one is marked
+				# (its damage hunts the victim; the tank still answers it for flow/aggro)
+				"peeled": int(b["victim_i"]) != my_i,
+				"answered": s.boss.stream_answers.has(int(b["id"])),
 				"flurry_i": int(b["flurry_i"]), "flurry_n": int(b["flurry_n"]),
 			})
 		base["stream"] = {
@@ -398,12 +400,24 @@ static func _tick_stream(s: CombatState, melee: Dictionary) -> void:
 	_stream_resolve_due(s)
 	_stream_publish(s, melee)
 
+## Resolve due bars. THE TWINFANG MODEL (Bill 2026-07-11 pass 2): presses were already
+## judged AT THE PRESS (stream_answers) — resolution just applies the stored outcome.
+## Damage bars hold for stream_resolve_slack past gate-touch so a hair-late press still
+## claims them (symmetric grading); feints/eats resolve at impact (nothing to mitigate).
+## THE PEEL, reworked (Bill pass 2): the TANK sees and answers EVERY bar — a peeled bar's
+## damage lands on its victim (undodgeable for THEM), but the tank's clean answer still
+## pays flow/counters. Answering peeled bars IS the aggro comeback.
 static func _stream_resolve_due(s: CombatState) -> void:
+	var slack := to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
 	while not s.boss.stream.is_empty():
 		var bar: Dictionary = s.boss.stream[0]
-		if s.tick < int(bar["impact_tick"]):
+		var kind := String(bar["kind"])
+		var hold := 0 if (kind == "feint" or kind == "eat") else slack
+		if s.tick < int(bar["impact_tick"]) + hold:
 			return
 		s.boss.stream.remove_at(0)
+		var ans: Dictionary = s.boss.stream_answers.get(int(bar["id"]), {})
+		s.boss.stream_answers.erase(int(bar["id"]))
 		var vi := int(bar["victim_i"])
 		if vi < 0 or vi >= s.seats.size():
 			continue
@@ -411,21 +425,31 @@ static func _stream_resolve_due(s: CombatState) -> void:
 		if not victim.alive():
 			continue                                    # a bar aimed at the fallen fizzles
 		s.boss.stream_after_cast = false
-		var kind := String(bar["kind"])
+		var tank := _tank_seat(s)
 		if kind == "feint":
-			if victim.kit != null:
-				victim.kit.on_stream_bar(s, victim, bar)  # BAITED vs READ is the kit's judgment
+			# a claimed feint was punished (BAITED) at the press; unclaimed = the READ
+			if ans.is_empty() and tank != null and tank.kit != null:
+				tank.kit.on_stream_bar(s, tank, bar)
 			continue                                    # a fake deals nothing
 		if kind == "eat":
-			if victim.kit != null:
-				victim.kit.on_stream_bar(s, victim, bar)
+			if tank != null and tank.kit != null:
+				tank.kit.on_stream_bar(s, tank, bar)    # the BRACE bookkeeping
 			_damage(s, victim, float(bar["dmg"]), &"eat", AbilityRes.Size.NONE)
 		else:
-			# auto/heavy/buster/flurry — the kit funnel grades the active press. The bar
-			# being resolved is exposed for the funnel (flurry groups, buster reads).
-			s.boss.stream_resolving = bar
+			# auto/heavy/buster/flurry — the funnel applies the press-time answer.
+			var rb := bar.duplicate()
+			rb["ans_kind"] = String(ans.get("kind", ""))
+			rb["ans_grade"] = int(ans.get("grade", -1))
+			s.boss.stream_resolving = rb
 			var src := &"flurry" if kind == "flurry" else &"rhythm"
-			_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
+			if victim == tank:
+				_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
+			else:
+				# PEELED: the tank's kit settles the weave/miss bookkeeping, the victim
+				# eats the bar whole (their own kit isn't the duelist funnel).
+				if tank != null and tank.kit != null and tank.alive():
+					tank.kit.on_stream_bar(s, tank, rb)
+				_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
 			s.boss.stream_resolving = {}
 		if s.threat_enabled:                            # aggro / stray-shot accounting
 			_note_melee_victim(s, victim)
@@ -574,17 +598,18 @@ static func _stream_shatter(s: CombatState) -> void:
 	if s.boss.stream.is_empty():
 		return
 	s.boss.stream.clear()
+	s.boss.stream_answers.clear()
 	s.boss.stream_next_impact = -1
 	s.boss.stream_after_cast = true
 	_emit(s, {"t": "stream_shatter"})
 
 ## FLURRY MODE is live while an unresolved flurry bar is close (the kit reads this:
-## wind-free dodge-only weaving; the channel mode-swaps on the same read).
-static func stream_flurry_active(s: CombatState, seat: Seat) -> bool:
-	var i := s.seats.find(seat)
+## wind-free dodge-only weaving; the channel mode-swaps on the same read). Peeled beats
+## count too — the tank weaves the WHOLE burst (pass 2: the tank answers everything).
+static func stream_flurry_active(s: CombatState, _seat: Seat) -> bool:
 	for b_v in s.boss.stream:
 		var b: Dictionary = b_v
-		if String(b["kind"]) == "flurry" and int(b["victim_i"]) == i \
+		if String(b["kind"]) == "flurry" \
 				and int(b["impact_tick"]) - s.tick <= to_ticks(1.0, s.config.fixed_hz):
 			return true
 	return false

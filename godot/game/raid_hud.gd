@@ -3210,7 +3210,11 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.feed_strikes(tg, dur, bool(obs.get("dodge_ready", true)), s.config.strike_good, s.config.strike_perfect)
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
-	if _judge != null and not is_cast:
+	if _judge != null:
+		# fed on EVERY live telegraph, CASTS INCLUDED — the exact pre-tank contract (the
+		# judge carries the kick/cast windows for these seats; gating it on is_cast starved
+		# it mid-cast and froze the blade's comets — Bill's pass-2 report). The cast bar
+		# above is an ADDITIVE surface for non-tank seats, not the judge's replacement.
 		var jw := 0.0
 		match _seat_key:
 			"caster":

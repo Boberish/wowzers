@@ -46,6 +46,9 @@ extends Resource
 @export var stream_answer_clear: float = 0.30  ## a bar's answer must clear the barrier by this much
 @export var stream_flurry_cd: float = 10.0     ## min spacing between texture-rolled flurry bursts
 @export var stream_late_lead: float = 0.55     ## a LATE bar pops in this many seconds before impact
+@export var stream_resolve_slack: float = 0.15 ## damage bars resolve this long AFTER gate-touch, so a
+                                               ## hair-late press still finds its bar (THE TWINFANG MODEL:
+                                               ## symmetric press grading — Bill 2026-07-11 pass 2)
 
 # --- SUNDER (tank break meter; only the Bulwark feeds boss.sunder, so this is inert for
 #     every other class/fight — boss.sunder stays 0 → the amplifier is a guarded no-op). ---
@@ -77,13 +80,17 @@ extends Resource
 # --- FLOW=AGGRO (threat_enabled fights only; ignored by all solo content). TANK-PLAN §1c:
 #     the tank's FLOW (0..1) is the boss's attention. RULES locked, NUMBERS = playtest
 #     (first thing a live slice tunes — build-process-two-track). No taunt exists. ---
-@export var flow_lock_floor: float = 0.30    ## flow ≥ this → boss locked on the tank; below → peel
-@export var flow_gain_perfect: float = 0.10  ## a PERFECT answer adds this much flow
-@export var flow_gain_good: float = 0.06     ## a GOOD answer
-@export var flow_gain_graze: float = 0.02    ## a GRAZE / a held READ
-@export var flow_slip: float = 0.14          ## an un-clean answer (miss/whiff/baited) DROPS flow
-@export var flow_spike: float = 0.20         ## a PERFECT MAIN (parry) grants this bonus flow — the valve
-@export var flow_decay: float = 0.05         ## flow drifts down this much/sec (hold it by playing clean)
+## EASY AGGRO first cut (Bill 2026-07-11 pass 2: "i lose aggro after 3 hits… way the other
+## way, easy aggro for now, tune later"): slips sting a third as hard, drift crawls, the
+## lock floor is halved, answers refill faster — losing the boss now takes a real losing
+## STREAK (~10 straight slips), and any clean play claws it back. All knobs.
+@export var flow_lock_floor: float = 0.15    ## flow ≥ this → boss locked on the tank; below → peel
+@export var flow_gain_perfect: float = 0.10  ## a BULLSEYE/PERFECT answer adds this much flow
+@export var flow_gain_good: float = 0.08     ## a GOOD answer
+@export var flow_gain_graze: float = 0.04    ## a GRAZE / a held READ
+@export var flow_slip: float = 0.05          ## an un-clean answer (miss/whiff/baited) DROPS flow
+@export var flow_spike: float = 0.20         ## a LANDED PARRY grants this bonus flow — the valve
+@export var flow_decay: float = 0.02         ## flow drifts down this much/sec (hold it by playing clean)
 
 # --- Draft 2.0 token mint (game layer reads state.diag at fight end — see game/draft.gd;
 #     diag is deterministic and never in the checksum, so these can't shift combat) ---
