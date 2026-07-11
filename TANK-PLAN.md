@@ -1,6 +1,11 @@
 # TANK-PLAN — the tank seat's class onto Framework v2 (two kits: THE DUELIST / THE WARDEN)
 
-**Status:** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
+**Status (2026-07-11): 🔴 THE TANK-V2 REWRITE IN FLIGHT — see §0 THE CHANNEL CONTRACT v3 (the design
+of record; wins any diff below).** tank-w1 (`62cc09e` + ONE BAR v1→v1.5) broke the game; Bill ordered a
+ground-up rewrite of kit + engine stream + UI (worktree `../wow-tank-v2`). The pre-rewrite status below
+is kept for history:
+
+**Status (pre-rewrite):** 🟢 **BASE MINIGAME LOCKED (2026-07-09) — feel/numbers via playtest; Duelist deck v1 AT BILL'S
 VERDICT + 3 challenger themes (§7) joined that board 2026-07-10; Warden BRANCH SLATE (§6, 5 themes)
 🟡 AT VERDICT 2026-07-10; DUELIST ABILITY PASS (§10 — 3 transforms + EN GARDE CD, the Tempo §17.11
 treatment) 🟡 AT VERDICT 2026-07-10.** Locked this session: the two specs matched to 2 buttons (§1b) · **FLOW = the AGGRO meter,
@@ -19,6 +24,118 @@ changes. Two rules it makes explicit (§1a): the two kits are the **dodge tank**
 the tank runs its OWN dense defensive stream and **skips the universal dodge** every other seat gets —
 so parry cleanly reclaims the now-free F, and no card is affected. (Plain words — "move"/"answer",
 not "verb" — jargon dropped per the deck-creator pass.)
+
+## §0 · THE CHANNEL CONTRACT v3 (Bill, 2026-07-11) — THE TANK-V2 REWRITE · design of record
+
+**Why this section exists:** tank-w1 (`62cc09e` + the ONE BAR v1→v1.5 patch chain) broke the
+game. Bill's call: **full rewrite from the base — kit + engine stream + UI — no patching, no
+tech debt.** Root causes: the presentation was never specified; the tank UI forked the shared
+StrikeJudge in place; the engine rolled bar size/victim at ARM time while the UI projected
+ahead (the pop/morph/jump comet bug class). This contract was confirmed with Bill question by
+question on 2026-07-11 and **wins any diff with §1/§1b/§1c below** (their game-design core
+survives; specifics amended here). Build slices + gates: the tank-v2 plan (ledger §B).
+
+### LAW 1 — the engine publishes a committed timeline; the UI only draws it
+- The engine commits every incoming attack — impact tick, kind/size, victim, flags — the
+  moment it enters the visible horizon (~3s), rolled from the seeded stream RNG at PUBLISH
+  time, **immutable after publish**. The UI has ZERO prediction logic: comets spawn at the
+  channel mouth fully formed and slide at constant px/s into the gate. Nothing can pop,
+  morph, or jump — the truth never changes.
+- Victim (incl. the aggro-peel roll) is decided AT PUBLISH; flow changes affect future bars.
+- Publish respects a **barrier**: no auto may land inside a predicted global's answer window
+  (earliest-possible ability fire is derivable from ability timers — conservative, safe).
+  The stream visibly thins before a big move; nothing ever overlaps; one press = one bar.
+
+### LAW 2 — ONE channel, one bar at the gate
+Everything the tank answers rides ONE bottom-center channel (its own NEW widget — never a
+mode-fork of a shared one). Boss SPELLS (incl. future kicks) stay on the cast bar under boss
+HP — footwork ≠ spellwork. One grading target at the gate (no dual lanes).
+
+### THE VOCABULARY + ANSWER MATRIX (v3 — light auto deleted, three sizes total)
+| Bar | Shape · color | Word | PARRY | DODGE |
+|---|---|---|---|---|
+| AUTO | diamond | PARRY | ✓ (land/miss) | ✓ any grade |
+| HEAVY | hexagon | PARRY | ✓ | **BULLSEYE only** |
+| TANK BUSTER (authored) | spiked octagon · tank colors | PARRY | ✓ | **BULLSEYE only** |
+| GLOBAL (boss's big move) | spiked octagon · boss colors | DODGE | **never** | ✓ any grade (every seat) |
+| FEINT | **disguised as any real bar** · purple tint = the only tell | (lies) | — | — (press = BAITED · ignore = READ; may arrive LATE) |
+| UNAVOIDABLE | skull-marked | EAT | — | — (brace; healer moment) |
+
+**Reading law (two lines):** *the word is the recommended answer; purple means don't.* The
+gate shows every legal answer (grading bands per bar + a tiny dodge glyph on the center dot
+where dodge is bullseye-only). NO barrage/string beats — retired game-wide (see ripples).
+
+### GRADING — one game-wide ladder (coherence law)
+**GRAZE (steel) < GOOD (gold) < PERFECT (mint) < BULLSEYE (bright gold)** — Twinfang's
+built ladder, names + colors + "tighter toward center = more" identical in every class. The
+tank gate is drawn as the SAME banded target the Twinfang rhythm bar uses; the verdict slam
+uses the same tier names ("BULLSEYE!").
+- **DODGE = the graded button** (1 wind): mit graze .28 / good .55 / perfect .80 /
+  bullseye .85 (+ power leak on heavy/buster) — first cuts, all `duel_*` knobs.
+- **PARRY = binary by identity** (3.5 wind, land or miss): the ~60ms window is 2 ticks —
+  grading is TICK-NATIVE, never float-ms. Land = mit .95 + COUNTER hit-back + ◆ bank + flow
+  spike. Miss = token .18 mit, full wind spent, flow drops. Parry is the damage/aggro
+  engine; dodge is the economy play — a real choice, parry never pushed.
+- HIT (never pressed) = full damage; flow drops for the missed answer, never for damage
+  itself. BAITED = flow drop + brief lockout. READ = clean, small flow tick.
+
+### THE STREAM — one timeline, two writers
+- **Writer 1, the boss script (authored):** globals on ability timers (unchanged machinery);
+  TANK-BUSTER injections at scripted beats (per-Seal, slice S6); LATE placements.
+- **Writer 2, the texture generator (per-boss, seeded):** every BODY (boss/add/pack member)
+  carries a **texture profile** — cadence `every`, `jig`, heavy/feint/flurry/unavoidable/
+  late odds, flurry length, damage band, per-phase overrides — and the bar-by-bar sequence
+  is rolled at publish under **grammar rules** (no HEAVY/CRUSH first after a global · no
+  flurry against a global · breathing gap after big mechanics · no two busters back-to-back
+  · no feint as the fight's opener). Authored texture, generated sequence.
+- **Freshness:** stream seed = `(run seed, fight, pull counter)` — every re-pull rolls a
+  new sequence; the same pull replays byte-identical.
+- **Packs:** field-holder = the active writer (profiles from a small preset library —
+  swarm/bruiser/heavy — + per-body overrides; heat-carry/enrage = phase overrides). On a
+  body's death/advance its published-unresolved bars **SHATTER** (killing the attacker
+  cancels its swings — a rule, not a mutation); walk-in gap before the next opener.
+
+### SPEED LAW + LATE bars
+All comets share ONE speed at any moment — per-bar speed variance is forbidden (bars would
+collide/reorder). Per-bar difficulty = the **LATE bar**: normal speed, skips the mouth,
+pops in at ~40–60% of the track with a flash cue, keeps its type's word/answer.
+**Whole-flow tempo shifts ARE allowed**: a global stream-tempo multiplier (eased ramps) for
+phases / EN GARDE (+25%) / frenzy — the runway compresses together, deterministic.
+
+### FLURRY = A MODE, not a bar
+The channel visibly mode-swaps (color/border + "FLURRY!"), the WHOLE flow speeds up for its
+duration (tempo multiplier, never per-note), beats fast and close. Inside: **dodge only ·
+parry disabled · wind NOT used** — pure execution, don't miss one; all-or-nothing stands,
+clean weave = free RIPOSTE; tempo eases back after. No LATE bars inside a flurry.
+
+### THE PEEL (aggro loss) — loud, unanswerable, legible
+Lost-aggro attacks are UNDODGEABLE (merged `cdd008f`, kept): the stream carries ONLY bars
+the tank can answer, so on a peel the tank's stream simply **PAUSES** (the tank's tell) +
+an **AGGRO LOST** cue everyone sees + the aggro-box pip snaps gold to the victim + the
+victim's "IT'S HUNTING YOU — CAN'T DODGE, RIDE IT OUT" banner. **Supersedes §1c/§1d "peel
+rides the victim's own dodge bar + grace-delay" — that rule is DEAD.** No ghost bars.
+
+### BINDS + OFF-CHANNEL SURFACES
+Binds (kept from `1a03d33`): **1/SPACE/LMB = DODGE · 2/RMB = PARRY · 3 = ⚡DUMP · 4 = ⏱EN
+GARDE.** The tank never opts into the universal dodge cd — WIND is the leash. Off-channel:
+cast bar · verdict slam (+streak, miss vignette) · grade rail · WIND bubble ("WINDED"
+pulse) · ◆ pips · FLOW bar with the 30% lock-line (tank only) · party aggro box.
+Keep-list is provisional (Bill: "keep it all for now, can remove later if too much").
+
+### CROSS-CLASS RIPPLES (decided here, executed in tank-v2)
+- **BARRAGE RETIREMENT (game-wide):** multi-beat dodge strings are an old artifact — one-
+  dodge classes can't weave them. Retire from all boss content (string beats → single
+  globals); the non-tank dial loses `feed_strikes`. The tank FLURRY is unaffected.
+- **Non-tank dodge cd RAISED:** 0.35s recovery existed to chain barrages — first cut
+  ~0.8s recovery (whiff 1.3s stays ≥), final value = Bill's playtest knob.
+- **THE CHANNEL IS GLOBAL:** the new widget is class-agnostic — the game's ONE answer
+  instrument. Tank = first client; other classes migrate later ("others after"), the dial
+  keeps spells only. Grading ladder + colors identical everywhere from day one.
+- **Tunability:** all stream numbers are data (profiles + `TuningConfig`); a dev-only
+  STREAM TUNER overlay live-tunes the active profile mid-fight and prints the dict back.
+- **Deck:** tank-v2 ships DECKLESS (draft offers no duelist cards, must not crash); the
+  deck re-lands per-verdict AFTER Bill's base playtest (two-track law). Catalog untouched
+  (already 🟡 at verdict — the un-verdicted 62cc09e defaults die with the old kit).
 
 ## §1 · THE LOCKED CORE (round 5 — full history in MASTER-PLAN §CLASSES 2026-07-07)
 

@@ -2,6 +2,13 @@
 
 **Status:** 🟢 BUILT (branch `dodge-unify`, 2026-07-08) — **scoped to the active roster per Bill's live call.**
 
+**⚠ AMENDED 2026-07-11 (TANK-PLAN §0 — the tank-v2 rewrite):** the **barrage premise is DEAD** — Bill:
+multi-beat dodge strings are an old artifact ("we removed fast dodge… they can't deal with barrage well
+anyways"); all barrage/string content retires game-wide (string beats → single globals). Consequently the
+**one-dodge cd goes BACK UP**: the flat 0.35s recovery existed to chain barrages — first cut **~0.8s
+recovery** (whiff 1.3s stays), final number = Bill's playtest knob. One dodge on SPACE stays the law.
+Executed in the tank-v2 bang (ledger §B).
+
 **What shipped (Bill, direct 2026-07-08):** the two input verbs collapse into ONE spacebar dodge for the
 THREE active classes only — **Twinfang (Tempo/Fermata/Venom), Alchemist (the Brew), Well (Brim/Draw)**.
 One press now answers BOTH a single DEFENSIBLE swing (instant negate) AND barrage-string beats, on ONE

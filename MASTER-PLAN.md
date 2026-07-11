@@ -857,6 +857,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ◐ 2026-07-11 · worktree `../wow-tank-v2` (branch `tank-v2`) — **CLAIM: THE TANK-V2 REWRITE**
+  (Bill: tank-w1 broke the game — *"plan the rewrite of the tank and the global dodge UI FROM
+  THE BASE, no patching… i dont want tech debt"*). Requirements confirmed question-by-question →
+  **TANK-PLAN §0 THE CHANNEL CONTRACT v3** (this commit) = design of record: committed attack
+  timeline (engine publishes, UI draws — kills the pop/morph bug class) · ONE channel, NEW
+  class-agnostic widget (`answer_channel.gd` — the game's one answer instrument, tank first) ·
+  vocabulary v3 (no light bar · bullseye-dodge on heavy/buster · octagon double-duty · disguised
+  purple feints, LATE-able · FLURRY = channel mode, no wind, dodge-only) · game-wide grading
+  ladder GRAZE<GOOD<PERFECT<BULLSEYE (Twinfang coherence) · speed law (one shared px/s; LATE
+  bars; whole-flow tempo shifts OK) · two writers (authored globals/busters + per-body texture
+  profiles under grammar, pull-counter freshness) · pack field-holder writes + shatter handover ·
+  peel = loud AGGRO LOST (keeps `cdd008f`). **Cross-class: BARRAGE/STRING BEATS RETIRED
+  GAME-WIDE + non-tank `dodge_recovery` 0.35→~0.8 first cut** (DODGE-PLAN amended; BOSS-PLAN §3½
+  superseded — ⚠ seal thread: hold string/texture authoring until tank-v2 lands). Slices: S0
+  docs (this) → S1 engine+kit bang → S2 channel+band+tuner+reverts → S3 feedback layer → S4
+  policy/probes → ONE swap merge (deckless; deck re-lands post-playtest). Old duelist/tank-w1
+  implementation dies in the swap. Verify: fast probes per slice, full verify-all ONCE at the
+  end (Bill's call). *(the tank-v2 rewrite — S0)*
+
 - ☑ 2026-07-11 · `../wow-well-ui` → **MERGED `b9a43d9`** · **THE DRAW HUD DESYNC SWEEP** (Bill:
   *"the window moving creed doesnt move the window, and i couldnt figure out how to spend my
   banked heal… make a workflow to check the boon/creed etc and make sure these work"*). Ran a

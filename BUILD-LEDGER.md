@@ -135,8 +135,17 @@ build-once seams that five separate class reworks and the endgame all need:
 
 ### B. Tank rework + FLOW=AGGRO (Wave 1 — co-dependent) · ⚒ build brief: `DUELIST-BRIEF.md` (2026-07-10 — slices S0–S8; S0–S4 verdict-free, S5–S7 gate on Bill's §3 board + §10.6)
 
+**⚠ 2026-07-11 — THE TANK-V2 REWRITE (Bill: the tank-w1 build broke the game — full rewrite, no
+patching).** Design of record = **TANK-PLAN §0 THE CHANNEL CONTRACT v3**. The 🔨 `62cc09e` rows below
+are the implementation being REPLACED (design intent mostly survives; §0 wins diffs). New rows:
+
 | Item | St | Specced | Touches | Blocks on / note |
 |---|---|---|---|---|
+| **TANK-V2 · engine+kit bang (committed timeline + rewritten kit)** | 🔴 in flight | **TANK §0** | `core/boss_state.gd` (rhythm_*→stream timeline) · `core/combat_core.gd` (two-writer publish, barrier, flurry mode, pack shatter) · new `data/duelist/*` (v3 matrix, tick-native grading, bullseye ladder) · `data/tuning_config.gd` (stream knobs + `dodge_recovery` raise) | Worktree `../wow-tank-v2`. ONE swap merge (main never tankless). Deliberate checksum rebaseline; non-rhythm encounters byte-identical. |
+| **TANK-V2 · THE CHANNEL (global answer widget) + band + STREAM TUNER** | 🔴 in flight | TANK §0 | NEW `game/ui/answer_channel.gd` (class-agnostic) + new `duelist_band.gd` + tuner overlay · REVERT `strike_judge.gd`/`cast_dial.gd` tank modes · `raid_hud.gd` seams · delete old duelist widgets | The channel is the game's ONE answer instrument (tank first, classes migrate later). |
+| **BARRAGE RETIREMENT + dodge-cd raise (cross-class)** | 🔴 in flight | TANK §0 + DODGE-PLAN amendment | boss content strings→single globals · `cast_dial.feed_strikes` deleted · `dodge_recovery` 0.35→~0.8 | ⚠ Collides with `seal-rework` content authoring — Seal thread HOLDS §3-texture/string work until tank-v2 lands. |
+| TANK-V2 · deck re-land (post-playtest) | ⏳ | TANK §3/§9/§10 boards | kit-local card layers on the NEW kit | tank-v2 ships DECKLESS; Bill's base playtest verdict gates this. Catalog stays 🟡 (62cc09e defaults die un-verdicted). |
+| TANK-V2 · per-Seal texture profiles + busters + LATE authoring | ⏳ | TANK §0 (S6) + BOSS-PLAN §3 | per-body profile dicts in Seal/forge content | After swap merge; Seal rework consumes. |
 | FLOW=AGGRO universal rewire | 🔨 `62cc09e` | TANK §1c/1d | built threat engine (source damage→flow), seeded peel roll, `raid_content.gd:8` | Numbers→playtest. Revises "aggro=raid-only" (`b2afbca`) → universal. Rips out `threat_enabled` system. |
 | Duelist guarded base kit | 🔨 `62cc09e` | TANK §4 + **brief S1** | new `data/duelist/*`, bespoke PARRY+DODGE (no `unified_dodge`/ration) | Numbers→playtest. **Verdict-free (base carries no cards — brief §0; the board gate moved to the deck slices S5–S7).** A/B on-branch; Bulwark dies at the same merge (§A½). |
 | Peel mechanics (progressive + grace-delay) | 🔨 `62cc09e` | TANK §1c **+ BOSS-PLAN §1** | aggro-% shape, victim dodge bar, ~~TAUNT hard-override~~ **NO TAUNT (07-10)** — valve = perfect-MAIN flow spike + THE GAZE boon lane | Part of FLOW=AGGRO. Grace-delay = the VICTIM'S window only (det-safe fixed tick offset). |

@@ -285,6 +285,15 @@ STAKES, never deletes the motion. ULTRATHINK keeps all 3 beats at Mythos, whole,
 
 ## 3½ · THE TANK STREAM = THE RHYTHM (Bill, 2026-07-10 — the base layer, LOCKED)
 
+**⚠ SUPERSEDED 2026-07-11 by TANK-PLAN §0 THE CHANNEL CONTRACT v3 (the tank-v2 rewrite).** The
+rhythm concept survives but the implementation + presentation below are being REPLACED: committed
+attack timeline (publish-time rolling, no arm-time morphs) · two writers (authored globals/busters +
+per-body texture profiles under grammar) · vocabulary v3 (no light bar; bullseye-dodge; disguised
+purple feints; FLURRY = a channel mode) · game-wide grading ladder GRAZE<GOOD<PERFECT<BULLSEYE.
+**⚠ FOR THE SEAL THREAD: BARRAGE/STRING DODGE BEATS ARE RETIRED GAME-WIDE** (SHARED STRING row below
+is dead — author single globals instead); non-tank dodge cd rises (~0.8s first cut). Per-Seal stream
+authoring = tank-v2 S6 (texture profile + busters per Seal) — hold §3-texture work until tank-v2 lands.
+
 §3 names a "tank stream" but the engine never defined one — today the stream is
 **untelegraphed melee chip**: the tank eats ~4 invisible hits before the first real telegraph
 (open_stagger 2.0s vs melee every ~0.8–1.1s), the dial sits empty most of the fight, and the
