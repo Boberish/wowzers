@@ -220,6 +220,29 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			"windup": float(s.boss.rhythm_windup_ticks) * s.dt,
 			"size": AbilityRes.Size.LIGHT,
 		}
+	# THE RHYTHM LANE (§3½ presentation v2): the TANK owns the stream's telemetry — a
+	# persistent lane needs the next swing's ETA even while nothing is armed, and needs
+	# to know when its stream strays (aggro legibility). View data only; the melee dict
+	# gates it, so every rhythm-less fight ships an obs without the key (byte-free).
+	var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 		else (s.encounter.adds[s.boss.add_i] as AddRes).melee
+	if lane_melee.has("rhythm") and seat == _tank_seat(s):
+		var armed := s.boss.rhythm_victim_i >= 0
+		var lane := {
+			"armed": armed,
+			"paused": s.telegraph != null,
+			"cadence": float(lane_melee.get("every", 1.5)),
+			"windup": float(lane_melee.get("rhythm", 0.6)),
+		}
+		if armed:
+			lane["mine"] = s.seats[s.boss.rhythm_victim_i] == seat
+			lane["remaining"] = float(s.boss.rhythm_impact_tick - s.tick) * s.dt
+			lane["windup"] = float(s.boss.rhythm_windup_ticks) * s.dt
+		else:
+			# projected impact of the NEXT swing (timer counts only in gaps; the lane
+			# shows it frozen while paused — honest, and it never vanishes)
+			lane["next_eta"] = float(maxi(0, s.boss.melee_timer) + to_ticks(
+				float(lane_melee.get("rhythm", 0.6)), s.config.fixed_hz)) * s.dt
+		base["rhythm_lane"] = lane
 	if s.boss.add_i >= 0:
 		var ad: AddRes = s.encounter.adds[s.boss.add_i]
 		base["add"] = {"name": ad.name,

@@ -8,6 +8,7 @@ extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
 const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
+const BUILD_STAMP := "build 2026-07-11 · RHYTHM LANE v1"
 const SEAT_NAMES := {"tank": "THE BULWARK", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -2607,6 +2608,15 @@ func _build_combat(s: CombatState) -> void:
 	_band = ClassBand.for_hud(self)   # the class's instrument cluster (REFIT P4)
 	_band.build()
 
+	# BUILD STAMP (Bill 2026-07-11): which build am I actually running? Settles every
+	# "did the sync take?" question at a glance. Bump on each playtest sync.
+	var stamp := Label.new()
+	stamp.text = BUILD_STAMP
+	stamp.add_theme_font_size_override("font_size", 11)
+	stamp.add_theme_color_override("font_color", Color(1, 1, 1, 0.35))
+	UiKit.place(stamp, 0, 0, 0, 0, 16, 52, 220, 72)
+	_ui.add_child(stamp)
+
 	_fx = Control.new()
 	_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3131,8 +3141,11 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 		# auto-attack bar rides the dial as a small classic swing — same sweep, same
 		# window flare, DODGE language. Per-seat by construction (observe() only
 		# hands the bar to its victim). No bar -> the dial rests as before.
+		# (§3½ v2) the DUELIST's stream lives on its RhythmLane — the dial stays a
+		# globals-only instrument for the tank. A strayed victim (any other class)
+		# keeps the sudden dial warning: for them, sudden is correct.
 		var ry: Dictionary = obs.get("rhythm", {})
-		if not ry.is_empty():
+		if not ry.is_empty() and _seat_cls_now() != "duelist":
 			var windup := maxf(0.001, float(ry.get("windup", 0.6)))
 			var rrem := float(ry.get("remaining", 0.0))
 			var dodge_ok := bool(obs.get("dodge_ready", true))
