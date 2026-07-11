@@ -28,8 +28,8 @@ const DATA := {
 		{"name": "WIND", "tint": "steel", "body": "Fatigue — a small pool that recharges fast (the ninja bubble). Every dodge/parry costs it; dry = you can't answer. It's the leash, not a cooldown."},
 		{"name": "COMBO", "tint": "gold", "body": "\u25c6 banked by PERFECT PARRIES. Spend the bank with \u26a1 DUMP for pure damage (tanks are defense-rich, damage-poor)."},
 	],
-	"defense": {"name": "DODGE / PARRY", "key": "SPACE / F",
-		"body": "SPACE = DODGE (secondary): small/normal bars, any rating; leaks more the bigger the bar. F = PARRY (main): answers ANY size incl. tall, and a PERFECT parry hits back (counter + \u25c6). A flurry = WEAVE it (rapid dodges, all or eat it all). Feints: READ them, don't press."},
+	"defense": {"name": "DODGE / PARRY", "key": "1·SPACE·LMB / 2·RMB",
+		"body": "1 / SPACE / LEFT CLICK = DODGE (secondary): small/normal bars, any rating; leaks more the bigger the bar. 2 / RIGHT CLICK = PARRY (main): answers ANY size incl. tall, and a PERFECT parry hits back (counter + \u25c6). A flurry = WEAVE it (rapid dodges, all or eat it all). Feints: READ them, don't press."},
 	"moves": [
 		{"name": "Dump", "key": "1", "cost": "spend \u25c6 · 70/pip", "tag": "",
 			"body": "Cash the \u25c6 bank for a burst of pure damage. The tank's one offensive button — off-rhythm, when nothing's incoming."},

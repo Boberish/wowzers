@@ -23,19 +23,19 @@ func build() -> void:
 	# DODGE (secondary, SPACE) — the bread
 	dodge_rune = AbilityRune.new()
 	dodge_rune.label = "Dodge"
-	dodge_rune.key_label = "SPC"
+	dodge_rune.key_num = 1
 	dodge_rune.icon_id = "dodge"
 	dodge_rune.accent = Palette.FLOW
-	dodge_rune.tooltip_text = "DODGE (secondary) — small/normal bars, any rating; leaks more the bigger the bar. Cheap WIND, fast recovery."
+	dodge_rune.tooltip_text = "DODGE (secondary) — 1 / SPACE / LEFT CLICK. Small/normal bars, any rating; leaks more the bigger the bar. Cheap WIND, fast recovery."
 	dodge_rune.pressed.connect(func(): hud._ctrl.human({"type": "dodge"}))
 	row.add_child(dodge_rune)
 	# PARRY (main, F) — the commit + the hit-back
 	parry_rune = AbilityRune.new()
 	parry_rune.label = "Parry"
-	parry_rune.key_label = "F"
+	parry_rune.key_num = 2
 	parry_rune.icon_id = "guard"
 	parry_rune.accent = Palette.STEEL
-	parry_rune.tooltip_text = "PARRY (main) — answers ANY size incl. tall; a PERFECT parry HITS BACK (counter + banks ◆). Costs WIND, slow recovery."
+	parry_rune.tooltip_text = "PARRY (main) — 2 / RIGHT CLICK. Answers ANY size incl. tall; a PERFECT parry HITS BACK (counter + banks ◆). Costs WIND, slow recovery."
 	parry_rune.pressed.connect(func(): hud._ctrl.human({"type": "defense"}))
 	row.add_child(parry_rune)
 	var sep := Control.new()
@@ -44,7 +44,7 @@ func build() -> void:
 	# ⚡ DUMP (1) — spend the ◆ bank
 	dump_rune = AbilityRune.new()
 	dump_rune.label = "Dump"
-	dump_rune.key_num = 1
+	dump_rune.key_num = 3
 	dump_rune.icon_id = "avalanche"
 	dump_rune.accent = Palette.GOLD_BRIGHT
 	dump_rune.tooltip_text = "⚡ DUMP — spend the ◆ bank for a burst of pure damage."
@@ -53,13 +53,13 @@ func build() -> void:
 	# ⏱ EN GARDE (the signature CD, S6) — the challenge: invite + wall + double flow
 	engarde_rune = AbilityRune.new()
 	engarde_rune.label = "En Garde"
-	engarde_rune.key_num = 2
+	engarde_rune.key_num = 4
 	engarde_rune.icon_id = "shockwave"
 	engarde_rune.accent = Palette.CRIMSON
 	engarde_rune.tooltip_text = "⏱ EN GARDE (~1-min CD) — plant your feet and CALL IT OUT: +25% melee tempo, leaks HALVED, clean answers pay DOUBLE flow, a perfect MAIN banks ◆◆. Two slips break it early. An amplifier — pays nothing if you don't answer."
 	engarde_rune.pressed.connect(func(): hud._ctrl.human({"type": "ability", "id": "engarde"}))
 	row.add_child(engarde_rune)
-	hud._hint_line("SPACE — DODGE    ·    F — PARRY (perfect = counter + ◆)    ·    1 — ⚡ DUMP    ·    2 — ⏱ EN GARDE")
+	hud._hint_line("1 / SPACE / LMB — DODGE    ·    2 / RMB — PARRY (perfect = counter + ◆)    ·    3 — ⚡ DUMP    ·    4 — ⏱ EN GARDE")
 
 func render(_s: CombatState, p: Seat, obs: Dictionary) -> void:
 	hp_orb.set_values(p.hp, p.hp_max)
@@ -82,11 +82,25 @@ func render(_s: CombatState, p: Seat, obs: Dictionary) -> void:
 
 func key_pressed(code: int) -> void:
 	match code:
-		KEY_SPACE:
+		KEY_1, KEY_SPACE:
 			hud._ctrl.human({"type": "dodge"})     # DODGE (secondary)
-		KEY_F:
-			hud._ctrl.human({"type": "defense"})   # PARRY (main)
-		KEY_1:
+		KEY_2, KEY_F:
+			hud._ctrl.human({"type": "defense"})   # PARRY (main; F = legacy alias)
+		KEY_3:
 			hud._ctrl.human({"type": "ability", "id": "dump"})
-		KEY_2:
+		KEY_4:
 			hud._ctrl.human({"type": "ability", "id": "engarde"})
+
+## Mouse grammar (Bill, 2026-07-11): LEFT CLICK = DODGE · RIGHT CLICK = PARRY.
+## Clicks that land on real buttons (pause / the runes / dev) keep their click —
+## the hovered-control check stops the double-fire.
+func mouse(event: InputEventMouseButton) -> void:
+	if not event.pressed or event.button_index > MOUSE_BUTTON_RIGHT:
+		return
+	var hov: Control = hud.get_viewport().gui_get_hovered_control()
+	if hov is BaseButton:
+		return
+	if event.button_index == MOUSE_BUTTON_LEFT:
+		hud._ctrl.human({"type": "dodge"})
+	else:
+		hud._ctrl.human({"type": "defense"})
