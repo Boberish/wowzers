@@ -1921,6 +1921,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `peel-simplify` (worktree `../wow-peel-simplify`) — **LOST-AGGRO = UNDODGEABLE —
+  MERGED `cdd008f`.** Bill: "if you get hit by a lost aggro attack you can't dodge it, and simplify
+  it." A peeled rhythm bar was ALREADY undodgeable (only the tank's Duelist funnel answers the
+  stream; DPS `modify_incoming` ignores it) — but the UI faked a dodge three ways: a dim "PEELED"
+  comet on the tank's channel, a full dodge-DIAL prompt for the strayed DPS, and a banner that said
+  "DODGE!". Now the stream carries ONLY the tank's own bars (`observe`: armed == the bar targets me);
+  a peel just PAUSES the tank's stream till aggro drifts back, the raider eats the hit, and the
+  banner reads "IT'S HUNTING YOU — CAN'T DODGE, RIDE IT OUT." DELETED: the peeled dial block, the
+  "THE RHYTHM — PEELED"/mine-vs-not-mine judge branch, and the dead `rhythm_stray_windup` grace (a
+  peel now lands at normal cadence — losing aggro costs you SOONER). Net −17 lines. This also erases
+  the peel-nudge residual from `d7d8a2c`: lane probe 0 jumps / 0 flips / 0 nudges (riftmaw+mythos).
+  GATES: gemini BYTE-IDENTICAL `4635155925447111502` (non-rhythm untouched) · riftmaw determinism
+  PASS, re-baseline `2317005574163013085`→`7992045833249951212`, expert WR ~75% held · forge_sim ALL
+  PASS · raid smoke ALL OK. STAMP → ONE BAR v1.6 · PEEL = NO DODGE. *(this session)*
+
 - ☑ 2026-07-11 · `rhythm-fix` (worktree `../wow-rhythm-fix`) — **TANK-STREAM COMET GLITCH FIXED —
   MERGED `d7d8a2c`.** Bill: icons appear then vanish and pop in "in the middle on a line with a
   circle flashing around it," on ALL tank fights — a real bug, NOT clutter (he corrected an earlier
