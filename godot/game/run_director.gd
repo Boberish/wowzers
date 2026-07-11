@@ -50,6 +50,10 @@ var drop_rng: DetRng = null        ## the drop stream — NEVER the combat rng
 
 # ---- Draft 2.0 + COMMANDER: the human's boon run, and the AI raiders you command
 var run_seed: int = -1             ## the descent's ONE minted seed (REFIT P4): drops/floors/fights/drafts derive closed-form — a run replays from this integer
+var pulls: Dictionary = {}         ## TANK-V2 freshness (TANK-PLAN §0): "floor:node" -> pull count.
+                                   ## Folded into the fight seed so a re-entered node never replays
+                                   ## the identical bar pattern; the same (seed, pull) still replays
+                                   ## byte-identical. Supersedes "same node re-entered = same fight".
 var run: RunState = null           ## the human's boon run (null = no descent live)
 var fight_log: Array = []          ## METER L3 — per-fight meter snapshots (MeterPanel.snapshot) for the meter's run-history segments; auto-reset per descent via fight_log_seed
 var fight_log_seed: int = -2       ## the run_seed the `fight_log` was gathered under (-2 sentinel); a change clears the log = new descent

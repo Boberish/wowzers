@@ -1,7 +1,9 @@
-## screenshot_duelist_raid.gd — visual probe for THE DUELIST (dodge tank) on the game HUD:
-## the DuelistBand (HP + FLOW/AGGRO orb + WIND bubble + ◆ pips + DODGE/PARRY/DUMP/EN GARDE runes)
-## + the DuelistGauge, driven by DuelistPolicy so shots catch parries/counters/flow mid-fight.
-## Needs a display (WSLg — NOT --headless):
+## screenshot_duelist_raid.gd — visual probe for THE DUELIST (tank-v2) on the game HUD:
+## THE CHANNEL (AnswerChannel — comets/shapes/words/purple feints/LATE flashes/bullseye gate)
+## + the DuelistBand (FLOW/AGGRO orb · WIND bubble · ◆ pips · runes) + the VERDICT SLAM,
+## driven by DuelistPolicy so shots catch answers/counters/peels mid-fight. Bill's visual
+## verdict wants: the full shape alphabet on screen · a flurry mode-swap · a purple feint ·
+## an AGGRO LOST moment · a LATE pop. Needs a display (WSLg — NOT --headless):
 ##   godot --path godot --rendering-driver opengl3 --script res://sim/screenshot_duelist_raid.gd -- --out=/absolute/dir
 extends SceneTree
 

@@ -468,30 +468,42 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 		if imp > horizon or imp + to_ticks(s.config.stream_answer_clear, hz) > barrier:
 			return
 		var period := maxi(2, int(round(float(to_ticks(float(melee.get("every", 1.5)), hz)) / maxf(0.25, tempo))))
-		# --- slot type (grammar first, then the odds ladder — ONE float draw) ---
-		var kind := "auto"
+		# --- slot type: the odds ladder picks a CANDIDATE (one float draw, cumulative
+		#     ranges), then the grammar guards it — a blocked candidate DEGRADES TO AUTO
+		#     (never slides into the next kind's range; that would warp every odds knob) ---
 		var roll := s.rng.next_float()
 		var fl_odds := float(melee.get("flurry_odds", 0.0))
 		var fe_odds := float(melee.get("feint_odds", 0.0))
 		var ea_odds := float(melee.get("eat_odds", 0.0))
 		var cr_odds := float(melee.get("crush_odds", 0.0))
 		var he_odds := float(melee.get("heavy_odds", 0.0))
-		var fresh := s.boss.stream_after_cast and s.boss.stream.is_empty()
-		var flurry_n := maxi(2, int(melee.get("flurry_n", 4)))
-		var flurry_gap := to_ticks(float(melee.get("flurry_gap", 0.35)) / maxf(0.25, tempo), hz)
-		var flurry_fits := imp + flurry_gap * (flurry_n - 1) + to_ticks(s.config.stream_answer_clear, hz) <= mini(horizon, barrier)
-		if fresh:
-			kind = "auto"                               # the bar after a global stays plain
-		elif roll < fl_odds and s.tick >= s.boss.stream_flurry_cd_until and flurry_fits:
+		var kind := "auto"
+		if roll < fl_odds:
 			kind = "flurry"
-		elif roll < fl_odds + fe_odds and s.boss.stream_seq > 0:
-			kind = "feint"                              # never the fight's opener
-		elif roll < fl_odds + fe_odds + ea_odds and s.tick - s.boss.stream_last_eat_tick > period * 2:
+		elif roll < fl_odds + fe_odds:
+			kind = "feint"
+		elif roll < fl_odds + fe_odds + ea_odds:
 			kind = "eat"
-		elif roll < fl_odds + fe_odds + ea_odds + cr_odds and String(s.boss.stream_last_kind) != "buster":
-			kind = "buster"                             # texture-rolled crush (authored ones ride stream_inject)
+		elif roll < fl_odds + fe_odds + ea_odds + cr_odds:
+			kind = "buster"
 		elif roll < fl_odds + fe_odds + ea_odds + cr_odds + he_odds:
 			kind = "heavy"
+		var flurry_n := maxi(2, int(melee.get("flurry_n", 4)))
+		var flurry_gap := to_ticks(float(melee.get("flurry_gap", 0.35)) / maxf(0.25, tempo), hz)
+		# grammar guards (each failure degrades to the plain auto):
+		if s.boss.stream_after_cast and s.boss.stream.is_empty():
+			kind = "auto"                               # the bar after a global stays plain
+		elif kind == "flurry" and (s.tick < s.boss.stream_flurry_cd_until \
+				or imp + flurry_gap * (flurry_n - 1) + to_ticks(s.config.stream_answer_clear, hz) > barrier):
+			# the burst may run past the HORIZON (bars just enter the mouth later — the
+			# horizon is a visibility guarantee, not a cap) but never past the BARRIER
+			kind = "auto"
+		elif kind == "feint" and s.boss.stream_seq == 0:
+			kind = "auto"                               # never the fight's opener
+		elif kind == "eat" and s.tick - s.boss.stream_last_eat_tick <= period * 2:
+			kind = "auto"
+		elif kind == "buster" and String(s.boss.stream_last_kind) == "buster":
+			kind = "auto"
 		if kind == "flurry":
 			s.boss.stream_flurry_cd_until = s.tick + to_ticks(s.config.stream_flurry_cd, hz)
 			var group := s.boss.stream_seq

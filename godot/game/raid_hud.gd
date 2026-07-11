@@ -1164,11 +1164,15 @@ func _launch_map_fight(fi: int) -> void:
 	_screen = "combat"
 	_clear()
 	var enc: EncounterRes = _d.fights[clampi(fi, 0, _d.fights.size() - 1)]
-	# fight seed: closed-form off (descent seed, floor, fight, NODE) — the node id is
+	# fight seed: closed-form off (descent seed, floor, fight, NODE, PULL) — the node id is
 	# folded so two same-index nodes never replay the identical fight (the
-	# RunState.fight_seed() idiom); same node re-entered = same fight, by design.
+	# RunState.fight_seed() idiom). TANK-V2 FRESHNESS (TANK-PLAN §0): the PULL counter folds
+	# in too — every attempt rolls a new bar pattern; the same (seed, pull) replays exactly.
+	var pull_key := "%d:%d" % [_d.floor_i, _d.node]
+	var pull := int(_d.pulls.get(pull_key, 0))
+	_d.pulls[pull_key] = pull + 1
 	var run_seed := int((_d.run_seed * 1000003 + (_d.floor_i + 1) * 7919 \
-		+ (fi + 1) * 104729 + (_d.node + 2) * 6763) & 0x7FFFFFFF)
+		+ (fi + 1) * 104729 + (_d.node + 2) * 6763 + pull * 31337) & 0x7FFFFFFF)
 	# COMMANDER: the whole assembled party rides the spec — AI aspects/classes AND
 	# every seat's drafted boons (RaidNet.build folds each into its seat's kit).
 	# PACK QUOTAS: a rolled chain opens with fillers; the node's enc stays the KILL that

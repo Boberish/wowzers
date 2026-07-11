@@ -95,6 +95,7 @@ func _run(s: CombatState, dcfg: DuelistConfig) -> Dictionary:
 	var wind_floor := dcfg.wind_max
 	var dumps := 0
 	var deaths := 0
+	var peels := 0
 	while not s.over and s.tick < cap:
 		for seat in s.seats:
 			if seat.policy != null and seat.alive():
@@ -110,17 +111,20 @@ func _run(s: CombatState, dcfg: DuelistConfig) -> Dictionary:
 			var t := String(ev.get("t", ""))
 			if t == "duel_dump":
 				dumps += 1
+			elif t == "aggro_pulled":
+				# counted off the EVENT — _bump_diag skips statblock seats, so summing
+				# victim diags under-counts peels to statblock DPS (tank-v2 fix)
+				peels += 1
 			elif t == "hurt" and int(ev.get("amt", 0)) > 0 and ev.get("seat") != null \
 					and not (ev["seat"] as Seat).alive():
 				deaths += 1
 		s.events.clear()
 	var ttk := s.tick * s.dt
 	var won := s.over and s.boss.hp <= 0.0
-	var peels := 0
-	for seat in s.seats:
-		peels += int(seat.diag.get("aggro_pulled", 0))
 	var d: Dictionary = tank.diag
-	var graded := int(d.get("perfect", 0)) + int(d.get("good", 0)) + int(d.get("graze", 0)) + int(d.get("miss", 0))
+	# the v3 ladder: LAND (binary parry) + BULLSEYE sit above perfect; sharp = the elite share
+	var graded := int(d.get("land", 0)) + int(d.get("bullseye", 0)) + int(d.get("perfect", 0)) \
+		+ int(d.get("good", 0)) + int(d.get("graze", 0)) + int(d.get("miss", 0))
 	return {
 		"won": won,
 		"ttk_sec": ttk,
@@ -128,7 +132,7 @@ func _run(s: CombatState, dcfg: DuelistConfig) -> Dictionary:
 		"peels": peels,
 		"wind_floor": wind_floor,
 		"dumps_per_min": 60.0 * float(dumps) / maxf(1.0, ttk),
-		"sharp_pct": float(int(d.get("perfect", 0))) / maxf(1.0, float(graded)),
+		"sharp_pct": float(int(d.get("land", 0)) + int(d.get("bullseye", 0))) / maxf(1.0, float(graded)),
 		"fumbles": int(d.get("fumble", 0)),
 		"deaths": deaths,
 		"checksum": s.checksum,

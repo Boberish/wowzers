@@ -30,15 +30,17 @@ func _process(_d: float) -> bool:
 		return false
 	step += 1
 	if step == 1:
-		hud._seat_key = "tank"
-		hud._aspect = "duelist"
+		# TANK-V2 (TANK-PLAN §0): the Duelist runs DECKLESS (empty catalog by design) —
+		# the boon-wiring probe rides the BLADE now; it tests the draft plumbing, not the tank.
+		hud._seat_key = "blade"
+		hud._aspect = "tempo"
 		hud._start_map_run()
-		if hud._d.map == null:   # the DUELIST is a reworked class: a creed-pick interposes at descent start
-			hud._d.run.creed = "veteran"
-			hud._d.run.rig = {"when": "tall_land", "then": "strike"}
+		if hud._d.map == null:   # a reworked class: the creed-pick interposes at descent start
+			hud._d.run.creed = "flourish"
+			hud._d.run.rig = {"when": "coup", "then": "overcharge"}
 			hud._build_floor()
 		# TEST A — wiring: a run exists, a boon can be drafted, and it injects into the kit
-		var run_ok := hud._d.run != null and String(hud._d.run.char_class) == "duelist"
+		var run_ok := hud._d.run != null and String(hud._d.run.char_class) == "twinfang"
 		var picks: Array = Draft.roll_offers(hud._d.run)
 		var pre := (hud._d.run.boons as Dictionary).size()
 		if not picks.is_empty():
@@ -47,7 +49,7 @@ func _process(_d: float) -> bool:
 		hud._enter_node(hud._d.map.entry_id)                 # launch the entry fight
 		if String(hud._screen) == "ledger":               # GEAR-2: the oath offer interposes
 			_press("FIGHT UNSWORN")
-		var kit = hud._ctrl.state.seats[0].kit
+		var kit = hud._ctrl.state.seats[hud.SEAT_IDX[hud._seat_key]].kit
 		var injected: bool = kit != null and (kit.boons as Dictionary).size() > 0 \
 			and (kit.boons as Dictionary).size() == (hud._d.run.boons as Dictionary).size()
 		print("[A wiring] run=%s (class=%s) offers=%d boon_taken=%s kit_injected=%s (%d boons)" % [
