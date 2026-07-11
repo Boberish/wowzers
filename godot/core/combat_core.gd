@@ -240,9 +240,17 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			lane["size"] = s.boss.rhythm_size
 		else:
 			# projected impact of the NEXT swing (timer counts only in gaps; the lane
-			# shows it frozen while paused — honest, and it never vanishes)
-			lane["next_eta"] = float(maxi(0, s.boss.melee_timer) + to_ticks(
-				float(lane_melee.get("rhythm", 0.6)), s.config.fixed_hz)) * s.dt
+			# shows it frozen while paused — honest, and it never vanishes). Uses the
+			# PRE-ROLLED size + its windup so the projected comet is the true shape at the
+			# true lead — it glides continuously into the armed bar (mine); a later aggro
+			# peel is the only thing that can still nudge it. Mirrors the arm math exactly.
+			var nsz: int = s.boss.rhythm_next_size
+			var wproj := float(lane_melee.get("rhythm", 0.6))
+			if nsz == AbilityRes.Size.HEAVY:
+				wproj *= 1.35
+			lane["size"] = nsz if nsz != AbilityRes.Size.NONE else AbilityRes.Size.LIGHT
+			lane["next_eta"] = float(maxi(0, s.boss.melee_timer) \
+				+ maxi(1, to_ticks(wproj, s.config.fixed_hz))) * s.dt
 		base["rhythm_lane"] = lane
 	if s.boss.add_i >= 0:
 		var ad: AddRes = s.encounter.adds[s.boss.add_i]
@@ -398,9 +406,20 @@ static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
 		if jig > 0.0:
 			period = int(round(float(period) * (1.0 + (s.rng.next_float() - 0.5) * 2.0 * jig)))
 		s.boss.melee_timer += maxi(1, period - s.boss.rhythm_windup_ticks)
+		# PRE-ROLL the NEXT bar's SIZE right here, the instant this one resolves — so even a
+		# collapsed 1-tick gap (which follows a HEAVY bar) still shows the true shape for a
+		# frame before arming. The gap-phase roll below only covers the fight's FIRST bar.
+		s.boss.rhythm_next_size = _roll_rhythm_size(s, melee)
 		return
 	if s.telegraph != null:                             # gap-fill: never arm under a real swing
 		return
+	# PRE-ROLL (Bill 2026-07-11 stream-glitch fix): the NEXT bar's SIZE is decided at the
+	# START of its approach, not at arm. The projected comet then shows its TRUE shape and
+	# lead from the mouth — no diamond→HEAVY morph and no position JUMP the instant it arms
+	# (the old code guessed LIGHT + base-windup, then corrected on arm = the "icon pops in
+	# the middle / flashes" glitch). This branch seeds the FIRST bar (nothing resolved yet).
+	if s.boss.rhythm_next_size == AbilityRes.Size.NONE:
+		s.boss.rhythm_next_size = _roll_rhythm_size(s, melee)
 	s.boss.melee_timer -= 1
 	if s.boss.melee_timer > 0:
 		return
@@ -409,23 +428,29 @@ static func _tick_rhythm(s: CombatState, melee: Dictionary) -> void:
 		victim = _tank_target(s)
 	if victim == null:
 		return
+	# commit the pre-rolled bar: base windup, TALL if it was pre-rolled HEAVY, then the
+	# strayed-victim reaction grace (view assumes mine, so a peel is the only remaining nudge)
+	var sz := s.boss.rhythm_next_size
 	var windup := float(melee.get("rhythm", 0.6))
+	if sz == AbilityRes.Size.HEAVY:
+		windup *= 1.35
 	if victim != _tank_seat(s):
 		windup *= s.config.rhythm_stray_windup
-	# "heavy_odds": some bars come in TALL — a HEAVY parry bar with a broader tell
-	# and a heavier payload (§3 stream texture: Vorathek tall/honest → Mythos all shapes)
-	var sz := AbilityRes.Size.LIGHT
-	var ho := float(melee.get("heavy_odds", 0.0))
-	if ho > 0.0 and s.rng.next_float() < ho:
-		sz = AbilityRes.Size.HEAVY
-		windup *= 1.35
 	s.boss.rhythm_size = sz
+	s.boss.rhythm_next_size = AbilityRes.Size.NONE
 	s.boss.rhythm_victim_i = s.seats.find(victim)
 	s.boss.rhythm_windup_ticks = maxi(1, to_ticks(windup, hz))
 	s.boss.rhythm_impact_tick = s.tick + s.boss.rhythm_windup_ticks
 	s.boss.rhythm_dmg = s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0)))
 	if sz == AbilityRes.Size.HEAVY:
 		s.boss.rhythm_dmg = roundf(s.boss.rhythm_dmg * 1.45)
+
+## "heavy_odds": some bars come in TALL — a HEAVY parry bar with a broader tell and heavier
+## payload (§3 stream texture). One rng draw; owned here so the pre-roll (approach start) and
+## the fallback seed use the identical draw, and the size is known before the comet appears.
+static func _roll_rhythm_size(s: CombatState, melee: Dictionary) -> int:
+	var ho := float(melee.get("heavy_odds", 0.0))
+	return AbilityRes.Size.HEAVY if (ho > 0.0 and s.rng.next_float() < ho) else AbilityRes.Size.LIGHT
 
 ## Begin a telegraph for `ab` — shared by the scheduler and chain links. Its
 ## rand_target beats roll their victims NOW so the wind-up shows who is marked.
@@ -1357,6 +1382,7 @@ static func _pack_advance(s: CombatState) -> void:
 	b.rhythm_windup_ticks = 0
 	b.rhythm_dmg = 0.0
 	b.rhythm_size = 1
+	b.rhythm_next_size = 0                  # NONE: the new member re-rolls its first bar's shape
 	_stagger_abilities(b, enc, s.config, s.rng)
 	if not enc.melee.is_empty():
 		# §3½: a rhythm member opens its stream right after the walk-in grace

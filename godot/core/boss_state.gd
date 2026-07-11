@@ -71,6 +71,9 @@ var rhythm_impact_tick: int = 0
 var rhythm_windup_ticks: int = 0
 var rhythm_dmg: float = 0.0
 var rhythm_size: int = 1               ## AbilityRes.Size of the armed swing (heavy_odds roll)
+var rhythm_next_size: int = 0          ## NONE=unplanned; pre-rolled at the NEXT bar's approach start
+                                       ## so the projected comet shows its TRUE shape/lead — no arm-time
+                                       ## morph or position JUMP (Bill 2026-07-11 stream-glitch fix)
 
 ## Add-phase state (raid): while add_i >= 0 an AddRes unit holds the field — all
 ## boss damage routes to add_hp, the main body's ability timers freeze, and the
