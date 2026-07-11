@@ -866,7 +866,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   regression hunt + symptom repro → root-cause synthesis → 3-architect design + judge synthesis →
   sequential build slices on the branch (quick gates only, per Bill's verify law) → verify-all
   final gate + class restore proof. *(this session)*
-
+  **⚠ HAND-OFF NOTE from the tank-v2 session (2026-07-11, after this claim): PASS 2 landed on
+  main at `8d77cbe` AFTER the claim above — audit THAT code, not `68b780a`.** Pass 2 maps onto
+  the symptom list directly: *notes not showing / flickering in-out* = the peel-filter (obs hid
+  bars whose victim ≠ tank; near the lock floor the victim FLAPPED per-bar → flicker) — GONE,
+  every bar ships now (peeled = translucent + hunt-tick; answering them = the aggro comeback,
+  Bill's rule) · *sync weird / imprecise* = press-grading was early-side-only + judged at impact
+  → replaced with THE TWINFANG PRESS MODEL (instant symmetric claim, ±ms readout, 0.15s resolve
+  slack, tick interpolation) · *other classes broken* = REAL v2 regression, fixed (the shared
+  judge starved mid-cast by a `not is_cast` guard; it must feed on EVERY telegraph — pre-tank
+  contract) · easy-aggro first cut in (slip .05/decay .02/floor .15/start .75). Remaining
+  suspects pass 2 does NOT cover: *"elements pop up all over"* beyond LATE bars + peel-flicker —
+  unreproduced here; check `AnswerChannel._seen`/flash bookkeeping + the barrier's thin-stream
+  gaps on Seals. Gates green: stream_probe · duelist_sim det · ui_smoke_raid. If Bill's playtest
+  of `8d77cbe` still fails, v3 proceeds — from the union, with the builds-1/2 autopsy including
+  pass 2's root-cause map (this entry + the pass-2 log block below). The tank-v2 session STOPS
+  touching this surface as of this note (the claim is yours).
 - ☑ 2026-07-11 · `../wow-tank-v2` → **MERGED `5af4927` (ff)** · **THE TANK-V2 REWRITE — BUILT.**
   All slices landed: S1 engine+kit bang (`30008b6` — THE STREAM committed-timeline replaces
   rhythm_*; kit rewritten deckless on the v3 matrix, tick-native, BULLSEYE ladder; BARRAGE
