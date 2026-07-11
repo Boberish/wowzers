@@ -325,6 +325,14 @@ Burst stays the single brace. Other bodies + the Seals inherit the rhythm as the
 stream texture" row (VORATHEK slow·tall·honest → MYTHOS dense) — via SealTune, per-Seal
 slices.
 
+**Presentation (v3 — THE ONE BAR, Bill 2026-07-11, merged `60c866b`):** the tank answers
+EVERYTHING on the one **Judgment Channel**, re-seated bottom-center: the rhythm stream rides it
+between real telegraphs (armed comet · projected-next glides into arming · PEELED dim · duel_answer
+verdicts + gems · eaten = crimson miss), and globals simply take the channel back — smalls read
+DODGE, bigs PARRY, feints the hollow DON'T-PRESS veil, strings their beat comets. (v1 dial-borrowing
+strobed ~30% uptime; v2's separate RhythmLane duplicated the judge — both superseded.) A strayed
+victim keeps the sudden dial warning. The big dial = the boss spectacle only.
+
 **Guards:** encounters without a rhythm flag keep the exact old melee path — **byte-identical**
 (ab-gate). Sims re-baseline for the swarm only. Slices: S1 engine channel · S2 swarm content ·
 S3 per-seat dial visibility · S4 duelist_sim/raid_sim + feel pass. Worktree `wow-rhythm`

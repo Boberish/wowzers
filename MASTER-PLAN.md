@@ -1921,6 +1921,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   comp flips, NO-KICKER interim until pillar #3). ⚠ collides with live `cask-policy` +
   `tempo-pilot` worktrees — merging main often. *(this session)*
 
+- ☑ 2026-07-11 · `one-bar` (worktree `../wow-onebar`) — **THE ONE BAR — MERGED `60c866b`.** Bill:
+  lane works, but tank had TWO dodge bars — reuse the global one. RhythmLane DELETED; StrikeJudge
+  gains the `rhythm` kind (feed_rhythm) — the stream and the globals take turns on the ONE Judgment
+  Channel (re-seated bottom-center for the Duelist): smalls DODGE · bigs PARRY · feints hollow
+  DON'T-PRESS · strings beat-comets; armed/projected comets glide seamlessly; duel_answer verdicts
+  now stamp (also fixes Duelist classic swings never grading on the judge); eaten bars synth a MISS.
+  + fixed the latent judge-starvation bug (feed never ran on gap frames). BUILD STAMP → 'ONE BAR v1'.
+  Gates: all checksums unchanged · both smokes · WSLg armed/projection/string+verdict shots.
+  BOSS-PLAN §3½ presentation para updated (v3). *(this session)*
+
 - ☑ 2026-07-11 · `rhythm-lane` (worktree `../wow-lane`) — **THE RHYTHM LANE v1 — MERGED `ae0c0f0`.**
   Bill: "still no auto attacks, only globals, glitchy — audit the whole implementation." The e2e
   audit (real descent path, human seat) proved the ENGINE fires but the v1 PRESENTATION was the
