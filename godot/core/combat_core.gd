@@ -1314,9 +1314,16 @@ static func _pack_advance(s: CombatState) -> void:
 	b.add_hp_max = 0.0
 	b.adds_spawned = {}
 	b.entered_tick = s.tick                 # walk-in grace + per-member enrage key off this
+	b.rhythm_victim_i = -1                  # §3½: the dead member's armed swing dies with it
+	b.rhythm_impact_tick = 0
+	b.rhythm_windup_ticks = 0
+	b.rhythm_dmg = 0.0
 	_stagger_abilities(b, enc, s.config, s.rng)
 	if not enc.melee.is_empty():
-		b.melee_timer = to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
+		# §3½: a rhythm member opens its stream right after the walk-in grace
+		b.melee_timer = to_ticks(s.config.rhythm_open_delay, s.config.fixed_hz) \
+			if enc.melee.has("rhythm") \
+			else to_ticks(float(enc.melee.get("every", 1.5)), s.config.fixed_hz)
 	_emit(s, {"t": "pack_next", "i": s.pack_i, "n": s.pack.size(), "name": enc.name})
 
 static func _primary_target(s: CombatState) -> Seat:

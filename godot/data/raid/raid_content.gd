@@ -342,7 +342,11 @@ static func _skirmish(src: AddRes, display: String, hp: int, intro: String,
 	e.name = display
 	e.hp = hp
 	e.intro = intro
-	e.melee = src.melee
+	# §3½: the skirmish COPY gets THE RHYTHM (0.6 wind-up); the Seal's own add dict is
+	# untouched (each make_*() builds fresh instances, and we duplicate besides).
+	e.melee = (src.melee as Dictionary).duplicate()
+	if not e.melee.is_empty():
+		e.melee["rhythm"] = 0.6
 	e.enrage_at = enrage
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	e.phases = [p0]
