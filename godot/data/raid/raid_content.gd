@@ -337,7 +337,18 @@ static func make_gemini() -> EncounterRes:
 	]
 	e.adds = [
 		_add_wave(0.5, &"bard", "BARD.EXE (deprecated)", 2100,
-			{"every": 0.9, "min": 18.0, "max": 26.0}, [
+			# ⚠ RHYTHM IS MANDATORY on add melee (Bill 2026-07-12: the rhythm-less Bard fell
+			# back to the LEGACY auto timer — unanswerable hits, empty channel, "just hits me
+			# until I die"). THE SONGBOOK: a deprecated bard fights in 3/4 — waltzing farewells.
+			{"every": 0.9, "min": 18.0, "max": 26.0, "rhythm": 0.5, "jig": 0.25,
+				"phrases": [
+					{"name": "waltz", "weight": 1.2, "rest": 1.4,
+						"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
+					{"name": "false_note", "weight": 0.9, "rest": 1.5,
+						"steps": [{"kind": "auto"}, {"gap": 0.6, "kind": "feint"}]},
+					{"name": "crescendo_chord", "weight": 0.8, "rest": 1.7,
+						"steps": [{"kind": "auto"}, {"gap": 0.7, "kind": "heavy"}]},
+				]}, [
 				_barrage(&"bard_sonnet", "Farewell Sonnet", 140.0, 2.6, 18.0, 1.5, [   # cd 12→18: the add's beat load
 					{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 					{"at": 1.8, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
@@ -408,7 +419,16 @@ static func make_mythos() -> EncounterRes:
 	]
 	e.adds = [
 		_add_wave(0.65, &"sonnet", "SONNET SUBAGENT", 2100,
-			{"every": 0.85, "min": 17.0, "max": 25.0}, [
+			# rhythm mandatory (the Bard lesson). THE SONGBOOK: a Sonnet — fast, cheap, everywhere.
+			{"every": 0.85, "min": 17.0, "max": 25.0, "rhythm": 0.5, "jig": 0.30,
+				"phrases": [
+					{"name": "quick_pair", "weight": 1.2, "rest": 1.2,
+						"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
+					{"name": "triplet_rush", "weight": 0.9, "rest": 1.5,
+						"steps": [{"kind": "auto"}, {"gap": 0.45, "kind": "auto"}, {"gap": 0.45, "kind": "auto"}]},
+					{"name": "tool_call", "weight": 0.7, "rest": 1.4,
+						"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "heavy"}]},
+				]}, [
 				_barrage(&"sonnet_tools", "Parallel Tool Calls", 114.0, 2.4, 17.0, 1.5, [   # cd 11→17: the add's beat load
 					{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 					{"at": 1.7, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
@@ -417,7 +437,17 @@ static func make_mythos() -> EncounterRes:
 				_swing(&"sonnet_scope", "Scope Creep", AbilityRes.Size.HEAVY, 68.0, 1.6, 8.0, 1.5, false),
 			]),
 		_add_wave(0.32, &"opus", "OPUS SUBAGENT", 2600,
-			{"every": 1.0, "min": 21.0, "max": 30.0}, [
+			# rhythm mandatory (the Bard lesson). THE SONGBOOK: an Opus — deliberate, heavy,
+			# worth the tokens.
+			{"every": 1.0, "min": 21.0, "max": 30.0, "rhythm": 0.55, "jig": 0.25,
+				"phrases": [
+					{"name": "considered_swing", "weight": 1.0, "rest": 1.6,
+						"steps": [{"kind": "auto"}, {"gap": 0.7, "kind": "auto"}]},
+					{"name": "deep_review", "weight": 0.9, "rest": 1.8,
+						"steps": [{"kind": "auto"}, {"gap": 0.85, "kind": "auto"}, {"gap": 0.6, "kind": "heavy"}]},
+					{"name": "hotfix_hammer", "weight": 0.7, "rest": 2.0,
+						"steps": [{"kind": "heavy"}, {"gap": 1.0, "kind": "heavy"}]},
+				]}, [
 				_chant(&"opus_hotfix", "Hotfix Deployment", 450.0, 2.2, 8.0, 1.5),
 				_swing(&"opus_review", "Code Review (brutal)", AbilityRes.Size.HEAVY, 80.0, 1.7, 9.0, 1.5, false),
 			]),

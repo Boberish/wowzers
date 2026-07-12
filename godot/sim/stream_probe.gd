@@ -16,6 +16,9 @@
 ##  6. THE GUARD (2026-07-12): no committed bar's impact lies inside a live authored quiet
 ##     window (the melee makes way around the boss's answerable telegraph impacts); the
 ##     guard's quiet + its rear-up shatter are AUTHORED — never scored as a publish halt.
+##  7. ADD-RHYTHM LAW (2026-07-12, the Bard lesson): every add with a melee dict carries
+##     "rhythm" — a rhythm-less add falls back to the LEGACY unanswerable auto timer
+##     (empty channel, no answers, "just hits me until I die"). Static content check.
 ##  4. OBS INVARIANTS: EVERY committed bar ships to the tank — a peeled bar (victim != tank)
 ##     ships MARKED `peeled` + victim (§0 pass 2 restored, Bill 2026-07-12; the old
 ##     never-ships/stream-pauses model is dead) · a LATE bar never ships before its pop-in
@@ -33,6 +36,7 @@ func _initialize() -> void:
 	_probe_seal(ticks)
 	print("continuity (v3, Slice 2 — HARD: publish never halts / no mid-rhythm blank / born at the mouth):")
 	_probe_seals_continuity(mini(ticks, 1200))       # all 4 Seals + immutability/no-reuse/continuity HARD
+	_probe_add_rhythm_law()
 	_probe_freshness()
 	_probe_claim_tiebreak()
 	_probe_process_order()
@@ -286,6 +290,20 @@ func _probe_seals_continuity(ticks: int) -> void:
 ## Walk one state, HARD-asserting immutability + no-reused-id + the three CONTINUITY laws
 ## (tank-v3 S2); print the metrics. The barrier is gone, so continuity is a GATE now.
 ##
+## Law 7 (Bill 2026-07-12, the Bard lesson): EVERY add carrying a melee dict must carry
+## "rhythm" — without it the add's attacks ride the legacy auto timer: unanswerable hits,
+## an empty channel, and a dead tank. Static content law over all four Seals' add waves.
+func _probe_add_rhythm_law() -> void:
+	for enc_v in [RaidContent.make_riftmaw(), RaidContent.make_mistral(),
+			RaidContent.make_gemini(), RaidContent.make_mythos()]:
+		var enc: EncounterRes = enc_v
+		for ad_v in enc.adds:
+			var ad: AddRes = ad_v
+			var m: Dictionary = ad.melee
+			if not m.is_empty() and not m.has("rhythm"):
+				_fail("%s/%s: add melee has NO rhythm key — legacy unanswerable timer" % [enc.id, ad.id])
+	print("  add-rhythm law: every Seal add's melee carries rhythm — holds")
+
 ## The committed stream (s.boss.stream) — NOT the peel-filtered obs — is the source for
 ## continuity: a peeled bar legitimately blanks the tank's obs (aggro loss) but publishing
 ## must NOT stop. So `obs-blank` stays a printed metric; committed-blank is the hard gate.
