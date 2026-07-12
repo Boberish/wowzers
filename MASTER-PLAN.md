@@ -876,12 +876,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-12 · `main` · §GRAPHICS — **CLAIM: C3 TEXTURE-VISIBILITY HOTFIX.** The first real
-  Stack textures import and load with correct pixels, but SceneKit's full-screen palette Control
-  uses additive blending with near-white RGB and saturates the composed stage to white. Change
-  only that overlay to ordinary alpha tinting, then repeat the single 1920×1080 Stack shot. No
-  gameplay/actor/HUD changes; keep the P3 layer delivery separate and default-off. *(Codex
-  graphics-v2 session)*
+- ☑ 2026-07-12 · `main` (`516e1b0` hotfix · `ebd7242` delivery) · §GRAPHICS — **C3
+  TEXTURE-VISIBILITY HOTFIX — FIXED; root cause was NOT the tint blend.** (Claim opened by
+  the Codex graphics-v2 session; taken over + diagnosed by Claude.) **Root cause:** on the
+  WSLg d3d12-GL driver, a texture whose FIRST `load()` happens inside a canvas draw callback
+  uploads as a PERMANENT flat-white RID. `SceneKit.layer_tex()` loaded lazily inside every
+  painter ⇒ both delivered Stack layers drew flat white while every vector sibling rendered.
+  **Proof:** `sim/artv2_tex_probe.gd` four-path bisect (kept as the regression harness) —
+  the SAME `.ctex` renders ART when first-loaded up front, WHITE when first-loaded in-draw;
+  in-context bisect on the live tour confirmed (ImageTexture rendered, ctex white). **Fix
+  (smallest):** `_tex` cache resolved once in `_ready`, painters do zero I/O; delivery
+  semantics unchanged. Codex's tint ADD→normal-alpha KEPT (exonerated as cause, right
+  semantic over real art). `artv2_probe` [6] made delivery-agnostic (was hardcoded
+  'pending⇒null', went stale at first delivery) — ALL OK (70). SCENES.md §3½ records the
+  no-texture-I/O-in-painters law. **Verify (minimal per Bill):** import 0 errors · probe ·
+  one 1920×1080 stack_atrium tour — THE ATRIUM RENDERS (glass roof / copper pipes / racks /
+  planters) under the untouched HUD. Legacy default-off preserved (flags absent ⇒ SceneKit
+  never constructed). Delivery commit separate: `distant.png` + both `.import` sidecars +
+  art-source chroma/alpha/prepared variants. *(Claude session)*
 
 - ☑ 2026-07-12 · `artv2-c3` → **MERGED to `main` (ff `1abfcd4`)** · §GRAPHICS — **GRAPHICS
   PACKET C3 COMPLETE — ASSET IMPORT + SCENE TOUR** (GRAPHICS-PLAN §5·C3; Bill's spec).
