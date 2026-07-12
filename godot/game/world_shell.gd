@@ -15,7 +15,8 @@ const RaidHud := preload("res://game/raid_hud.gd")
 var hud: RaidHud = null   ## the combat HUD instance surface — TYPED so the moved
                           ## builders' `:=` inference sees real member types
 var _ui: Control           ## the shell's own screen surface (drawn OVER the instance)
-var _screen: String = "home"   ## home/class/aspect/raidpick/party/atlas/bastion/zone/zonestop · "instance" = the HUD drives
+var _screen: String = "home"   ## home/class/aspect/raidpick/party/atlas/bastion/zone/zonestop/bosstest · "instance" = the HUD drives
+var _dev_seat: String = "tank"   ## DEV · BOSS TEST: which seat the jump-in takes (debug-only tooling)
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -125,7 +126,7 @@ func _show_home() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 14)
-	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -260, -230, 260, 250)
+	UiKit.place(box, 0.5, 0.5, 0.5, 0.5, -260, -270, 260, 290)
 	_ui.add_child(box)
 	var t := UiKit.title_in(box, "THE RIFT", 76, Palette.GOLD)
 	t.add_theme_font_override("font", UiKit.title(900))
@@ -137,6 +138,8 @@ func _show_home() -> void:
 	box.add_child(_menu_button("🌐    PLAY ONLINE", Palette.FLOW, hud._show_online))
 	if hud.WORLD_PREVIEW:   # W1: the world door (PLAY → ATLAS becomes the front door at W3)
 		box.add_child(_menu_button("⟐    THE WORLD — preview", Palette.VERDANCE, _start_world_pick))
+	if OS.is_debug_build():   # DEV · BOSS TEST — jump straight into any Seal (never in a release build)
+		box.add_child(_menu_button("🐞    DEV · BOSS TEST", Palette.REACT, _show_boss_test))
 	box.add_child(_menu_button("QUIT", Palette.TEXT_DIM, func(): get_tree().quit()))
 
 func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
@@ -147,6 +150,64 @@ func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
 	b.add_theme_color_override("font_color", accent)
 	b.pressed.connect(cb)
 	return b
+
+## DEV · BOSS TEST (debug builds only, gated at the home button) — pick a seat, then a
+## Seal, and jump STRAIGHT into that single-boss fight, skipping the class/aspect/raid/
+## party ceremony. Pure dev tooling: it drives the same hud._launch() the raid autostart
+## uses (--autostart=raid:seat:aspect:boss), so the AI party is filled and the fight
+## starts exactly as a normal Seal pull. The seat tokens feed _launch's debug aliases.
+func _show_boss_test() -> void:
+	_screen = "bosstest"
+	hud._d.map = null
+	hud._map_pending = false
+	_clear()
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 70, 420, 150)
+	_ui.add_child(head)
+	var hl := UiKit.title_in(head, "DEV · BOSS TEST", 30, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	UiKit.title_in(head, "pick a seat, then a Seal — jump straight into the fight (debug only)", 14, Palette.TEXT_DIM)
+	# seat toggle — the token feeds hud._launch's debug aliases (tank/blade/alchemist/well/bloom)
+	var seats := [
+		["tank", "DUELIST"], ["blade", "TWINFANG"], ["alchemist", "ALCHEMIST"],
+		["well", "WELL"], ["bloom", "BLOOM"],
+	]
+	var seatrow := HBoxContainer.new()
+	seatrow.alignment = BoxContainer.ALIGNMENT_CENTER
+	seatrow.add_theme_constant_override("separation", 8)
+	UiKit.place(seatrow, 0.5, 0, 0.5, 0, -440, 165, 440, 205)
+	_ui.add_child(seatrow)
+	for s in seats:
+		var sid := String(s[0])
+		var sb := Button.new()
+		sb.text = String(s[1])
+		sb.custom_minimum_size = Vector2(155, 38)
+		sb.add_theme_font_size_override("font_size", 15)
+		sb.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if sid == _dev_seat else Palette.TEXT_DIM)
+		sb.pressed.connect(_dev_pick_seat.bind(sid))
+		seatrow.add_child(sb)
+	# the Seals, canonical from RaidContent (auto-tracks any boss added to run_encounters)
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 10)
+	UiKit.place(col, 0.5, 0.5, 0.5, 0.5, -280, -60, 280, 200)
+	_ui.add_child(col)
+	for e in RaidContent.run_encounters():
+		var bid := String(e.id)
+		col.add_child(_menu_button(String(e.name), Palette.CRIMSON, hud._launch.bind(_dev_seat, "", bid)))
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -80, -78, 80, -44)
+	back.pressed.connect(_show_home)
+	_ui.add_child(back)
+
+## DEV · BOSS TEST: switch the jump-in seat, then re-render to move the highlight.
+func _dev_pick_seat(sid: String) -> void:
+	_dev_seat = sid
+	_show_boss_test()
 
 ## PLAY → pick your CLASS (the four raid seats; you play one, AI fills the rest).
 func _show_class_select() -> void:
