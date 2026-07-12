@@ -871,6 +871,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · `devgen` · §BOSSES/dev tooling — **DEV · GENERATED SETUPS on the BOSS TEST
+  screen** (Bill): pick class/spec (+ sub-spec anchor, e.g. the Well's ⭐Vigil module) + a Seal,
+  and the game GENERATES an average depth-scaled build — creed/rig/modules/transform/keystone/
+  boons scaled to how deep that Seal sits (boss 2 = fewer boons than boss 4) — by replaying the
+  REAL draft economy (Draft.roll_offers/take + the milestone flow) with a seeded average-player
+  picker. Shown seed + quick build description + reroll; same seed = same build. Debug-only,
+  extends the `28a0775` boss-test screen; expected touch: `world_shell.gd` + a new generator
+  file + `raid_hud.gd` launch plumbing. *(Claude session)*
+
 - ☑ 2026-07-12 · main (docs only) · §GRAPHICS — **GRAPHICS PACKET C0 COMPLETE — the read-only
   recon; `GRAPHICS-PLAN.md §10 IMPLEMENTATION MAP` populated.** Seam map with exact anchors:
   ACTOR = `Actor2D.make()` (both call sites in `raid_stage_2d.gd`; `art/actors/` folder doesn't
