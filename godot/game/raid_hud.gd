@@ -3218,7 +3218,10 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 	_dial.feed_strikes(tg, dur, bool(obs.get("dodge_ready", true)), s.config.strike_good, s.config.strike_perfect)
 	_dial.def_ready = bool(obs.get("defense_ready", true))
 	_dial.dodge_ready = bool(obs.get("dodge_ready", true))
-	if _judge != null and not is_cast:
+	# fed on EVERY live telegraph, CASTS INCLUDED (spec §7 item 5 / NG6 — feed-or-deactivate
+	# is unconditional): the judge carries the kick/cast windows for caster/healer/blade;
+	# a `not is_cast` guard starved it mid-cast and froze the shared comet (pass-2 regression).
+	if _judge != null:
 		_judge.feed(s, obs, _seat_judge_window(obs))
 
 ## The seat's classic answer window fed to the shared StrikeJudge (caster=clean zone /

@@ -125,7 +125,10 @@ static func make_riftmaw() -> EncounterRes:
 		# DODGE-CHECK (GENTLE on the teacher): a missed beat stings (~20 on a dps) and
 		# makes the healer spend, but won't cascade a fresh player into a wipe. This is
 		# the knob that gets CRANKED in the later Seals — Vorathek just teaches the motion.
-		_barrage(&"volley", "Void Volley", 60.0, 2.4, 13.0, 2.0, [
+		# cd 13→22 (tank-v3 2026-07-12): §7 item 2 un-collapsed the barrage but its cadence
+		# overshot COMBAT PILLAR #2's 3–8 beats/fight (the teacher was firing ~15/fight — the
+		# stream-busy tank couldn't weave them all and dropped). Slower cadence lands it in band.
+		_barrage(&"volley", "Void Volley", 60.0, 2.4, 22.0, 2.0, [
 			{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 			{"at": 1.7, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
 			{"at": 2.4, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
@@ -274,13 +277,13 @@ static func make_gemini() -> EncounterRes:
 	]
 	e.abilities = [
 		_swing(&"gem_hammer", "Benchmark Hammer", AbilityRes.Size.CRUSH, 160.0, 2.4, 13.0, 2.0, true),
-		_tank_string(&"gem_check", "Double-Check", 175.0, 2.5, 16.0, 2.0, [
+		_tank_string(&"gem_check", "Double-Check", 175.0, 2.5, 22.0, 2.0, [   # cd 16→22: 3-8 beats/fight band
 			{"at": 1.0, "frac": 0.35, "size": AbilityRes.Size.HEAVY},
 			{"at": 1.7, "frac": 0.0, "size": AbilityRes.Size.HEAVY, "feint": true},   # the hallucinated answer
 			{"at": 2.5, "frac": 0.72, "size": AbilityRes.Size.CRUSH, "guard": StrikeRes.Guard.BLOCKABLE},
 		]),
 		ov,
-		_rand_barrage(&"gem_abtest", "A/B Test", 280.0, 3.2, 17.0, 2.0, [
+		_rand_barrage(&"gem_abtest", "A/B Test", 280.0, 3.2, 24.0, 2.0, [   # cd 17→24: 3-8 beats/fight band
 			{"at": 1.1, "frac": 0.25, "size": AbilityRes.Size.LIGHT},
 			{"at": 1.8, "frac": 0.25, "size": AbilityRes.Size.HEAVY},
 			{"at": 2.5, "frac": 0.25, "size": AbilityRes.Size.LIGHT},
@@ -290,7 +293,7 @@ static func make_gemini() -> EncounterRes:
 	e.adds = [
 		_add_wave(0.5, &"bard", "BARD.EXE (deprecated)", 2100,
 			{"every": 0.9, "min": 18.0, "max": 26.0}, [
-				_barrage(&"bard_sonnet", "Farewell Sonnet", 140.0, 2.6, 12.0, 1.5, [
+				_barrage(&"bard_sonnet", "Farewell Sonnet", 140.0, 2.6, 18.0, 1.5, [   # cd 12→18: the add's beat load
 					{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 					{"at": 1.8, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
 					{"at": 2.6, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
@@ -324,12 +327,15 @@ static func make_mythos() -> EncounterRes:
 		_swing(&"myth_align", "Alignment Hammer", AbilityRes.Size.CRUSH, 175.0, 2.4, 14.0, 2.0, true),
 		_swing(&"myth_probe", "Red-Team Probe", AbilityRes.Size.HEAVY, 84.0, 1.6, 8.0, 2.0, false),
 		cot,
-		_rand_barrage(&"myth_fanout", "Agentic Fan-Out", 240.0, 3.3, 18.0, 2.0, [
+		# cd 18→26 + 5 beats→4 (tank-v3 2026-07-12): the finale's fan-out was the densest in the
+		# raid (5 beats × frequent) — over COMBAT PILLAR #2's 3–8/fight band even before the add's
+		# barrage stacks on. Drop the 5th beat and slow the cadence into band; frac stays 0.2/beat
+		# so each beat's damage is unchanged (total drops one beat's worth — intended relief).
+		_rand_barrage(&"myth_fanout", "Agentic Fan-Out", 240.0, 3.3, 26.0, 2.0, [
 			{"at": 0.9, "frac": 0.2, "size": AbilityRes.Size.LIGHT},
 			{"at": 1.5, "frac": 0.2, "size": AbilityRes.Size.HEAVY},
 			{"at": 2.1, "frac": 0.2, "size": AbilityRes.Size.LIGHT},
 			{"at": 2.7, "frac": 0.2, "size": AbilityRes.Size.HEAVY},
-			{"at": 3.3, "frac": 0.2, "size": AbilityRes.Size.HEAVY},
 		]),
 		_doom(&"myth_ultra", "ULTRATHINK", 280.0, 10.0, 42.0, 4.0, [
 			{"at": 8.2, "frac": 0.35, "size": AbilityRes.Size.HEAVY},
@@ -341,7 +347,7 @@ static func make_mythos() -> EncounterRes:
 	e.adds = [
 		_add_wave(0.65, &"sonnet", "SONNET SUBAGENT", 2100,
 			{"every": 0.85, "min": 17.0, "max": 25.0}, [
-				_barrage(&"sonnet_tools", "Parallel Tool Calls", 114.0, 2.4, 11.0, 1.5, [
+				_barrage(&"sonnet_tools", "Parallel Tool Calls", 114.0, 2.4, 17.0, 1.5, [   # cd 11→17: the add's beat load
 					{"at": 1.0, "frac": 0.34, "size": AbilityRes.Size.LIGHT},
 					{"at": 1.7, "frac": 0.33, "size": AbilityRes.Size.HEAVY},
 					{"at": 2.4, "frac": 0.33, "size": AbilityRes.Size.HEAVY},

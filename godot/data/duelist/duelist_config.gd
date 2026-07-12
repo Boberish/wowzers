@@ -71,7 +71,7 @@ extends Resource
 
 # --- FLOW start: the pull opens ON the tank (aggro ≥ the lock floor); slip and it drifts.
 #     The shared flow economy knobs (gain/slip/decay/spike/lock-floor) live on TuningConfig. ---
-@export var flow_start: float = 0.55
+@export var flow_start: float = 0.75         ## EASY AGGRO (DEC-8 / pass 2): open with a real cushion
 
 # --- EN GARDE (the ~1-min signature CD): the invite — melee tempo +25% (engine-side via the
 #     stream tempo), leaks/slivers HALVED, clean answers pay DOUBLE flow, two slips break it. ---

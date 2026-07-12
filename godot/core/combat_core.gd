@@ -529,7 +529,12 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 ## Append ONE committed bar. Damage + disguise + victim are all final here (LAW 1).
 static func _stream_push(s: CombatState, melee: Dictionary, kind: String, impact: int,
 		dmg_frac: float, late: bool, flurry_group: int, flurry_i: int, flurry_n: int) -> void:
-	var dmg := s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0))) * dmg_frac
+	# stream_dmg_mult (tank-v3 continuity re-baseline): the barrier retirement made the stream
+	# publish continuously, so the tank now eats the bars the old halt used to drop — this scalar
+	# holds its stream DPS near the pre-continuity budget. Applied before the kind multipliers so
+	# heavy/buster keep their RELATIVE weight; the rng draw is unchanged (byte-order preserved).
+	var dmg := s.rng.next_range(float(melee.get("min", 10.0)), float(melee.get("max", 15.0))) \
+		* dmg_frac * s.config.stream_dmg_mult
 	match kind:
 		"heavy": dmg = roundf(dmg * 1.45)
 		"buster": dmg = roundf(dmg * 2.0)
