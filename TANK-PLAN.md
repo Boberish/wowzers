@@ -45,6 +45,31 @@ not "verb" — jargon dropped per the deck-creator pass.)
 
 ## §0 · THE CHANNEL CONTRACT v3 (Bill, 2026-07-11) — THE TANK-V2 REWRITE · design of record
 
+**⚠ AMENDED 2026-07-12 (Bill's v3 playtest — THE ONE-BAR VERDICTS, built on the branch
+S7–S8b):** five rulings that supersede the matching lines below:
+1. **ONE BAR, literally** — the boss dial (the circle) + the shared judge are GONE for the
+   tank; GLOBALS (dodge) + targeted BUSTERS (parry) + my telegraph beats ride THE CHANNEL as
+   comets (verbatim off the live telegraph, synthetic negative ids); ALL casting (heal/
+   empower/kickable/brace) rides the BossCastBar under the boss HP — the one cast surface,
+   every seat. LAW 2's "boss spells stay off the channel" survives only for CASTS.
+2. **THE MISS AFTERLIFE** — `stream_resolve_slack` 0.15→0.04 (~1 tick of tick-alignment
+   fairness): a comet never sits pressable at the line. Unpressed past the line = MISSED —
+   it flips crimson + ✗ and KEEPS FLOWING to the bar's end ("I missed it, it kept going").
+   The gate draws late-side bands only as wide as the true grace — everything visible is
+   pressable. The press ghost rises VERTICALLY (horizontal drift crowded the next tone).
+3. **THE PEEL, re-restored to pass 2** — the tank sees + answers EVERY bar regardless of
+   aggro (the v3 rebuild had regressed to the stream-pause model): peeled bars ship marked
+   (crimson hunt-chevron + "→ VICTIM"), clean answers pay flow/counters (the comeback),
+   damage lands on the hunted raider.
+4. **THE SONGBOOK** — flat per-bar odds are retired on authored fights: melee dicts carry
+   `phrases` (motif library: {weight, rest, steps:[{gap,kind,late}]}), one seeded weighted
+   draw per motif — learnable like a song, fresh every pull. Per-Seal songbooks authored
+   (Riftmaw drumbeat / Mistral syncopation / Gemini echo-pairs / Mythos full-language);
+   packs + spike stay on the legacy odds path.
+5. **AAA bar** — the channel matches the Twinfang/healer instrument standard (chrome, glow
+   comets, Cinzel words, spawn pops, gate heartbeat, banded target); "not up to the
+   standards of the others" is a bug class, not a style note.
+
 **Why this section exists:** tank-w1 (`62cc09e` + the ONE BAR v1→v1.5 patch chain) broke the
 game. Bill's call: **full rewrite from the base — kit + engine stream + UI — no patching, no
 tech debt.** Root causes: the presentation was never specified; the tank UI forked the shared
