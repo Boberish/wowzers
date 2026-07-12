@@ -857,6 +857,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · `tank-v3` → **MERGED to `main` (ff `006c37d`)** — **THE WHOLE TANK-V3 LINE
+  IS ON MAIN.** Bill: "merge this to main so we don't get too far off." The branch (S1–S5
+  foundation + S6/S6b/S6c PRESS-restore + AAA + S7/S7b/S7c ONE-BAR + miss afterlife + peel +
+  S8/S8b/S8c SONGBOOK + living-motion + feint fix) merged over the healer work with ONE
+  conflict (the coordination log — unioned) and a clean `raid_hud.gd` auto-merge (tank's
+  `_render_dial` vs the healer ticket flow live in different functions). **Integration gates
+  on the merged tree:** stream_probe ALL OK · duelist_sim det PASS (checksums byte-identical
+  to pre-merge S8c) · well_sim det PASS · keystone_probe ALL PASS · ui_smoke_map ALL PASS ·
+  ui_smoke_raid = ONLY the known pause+codex warden-placeholder fail (dies with §A½). Windows
+  install `C:\Games\v3Tank` already carries this code (== main now). Protocol **v18** rides.
+  Owed (unchanged): per-Seal `stream_breathe`/buster/LATE authoring · Duelist deck re-land ·
+  Bulwark/warden deletion (§A½, clears the smoke). *(this session)*
 - ☑ 2026-07-12 · `heal-fixes` → **MERGED to `main`** (`2f2190e` fixes 1-3 · `1e66130`
   keystones) — **HEALER PLAYTEST PASS (Bill, 3 reports on the Well):** ① **THE FLUME** no
   longer drains Current to 0 (read as a random punish + mismatched its own text) — you keep
@@ -874,7 +886,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   well_sim det PASS · draft_sim ALL PASS (synergy+pity hold) · keystone_probe ALL PASS ·
   ui_smoke_map + ui_smoke_raid + net_map_smoke ALL OK. *(this session)*
 
-- ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE ONE-BAR VERDICTS — BUILT
+- ☑ 2026-07-12 · `tank-v3` (now MERGED to main `006c37d`) — **THE ONE-BAR VERDICTS — BUILT
   (S7 `9cb0180` · S7b `4a24897` · S7c `9815871` · S8 `f91e002` · S8b `63ff7c7` + TANK-PLAN
   §0 amendment `573ad88`→).** Bill's second playtest round, five rulings, all landed:
   **① ONE BAR** — dial (the circle) + shared judge HIDDEN for the tank; GLOBALS/targeted
@@ -893,7 +905,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   raid_sim 10-seed clean (rations PASS) · tour 5/5 (phrase-aware injection). **Windows
   install C:\Games\v3Tank updated (project+cache), boot + autostart checks clean — ready for
   Bill's playtest.** *(this session)*
-- ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE PRESS RESTORE + AAA CHANNEL
+- ☑ 2026-07-12 · `tank-v3` (now MERGED to main `006c37d`) — **THE PRESS RESTORE + AAA CHANNEL
   PASS — BUILT (`730a695`+`8194aa7`+`c93462c`+`573ad88`).**
   Root cause of Bill's "old slug" report FOUND: the v3 kit rewrite had regressed §THE PRESS
   to judged-at-impact (pass-2's instant symmetric claim + `stream_resolve_slack` + tick
