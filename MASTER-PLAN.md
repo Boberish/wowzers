@@ -871,6 +871,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · main · **ONE CLAIM — the overlap fix (Bill's playtest round 3).** Globals
+  "don't register" traced in two layers: ① telegraph events were judged at IMPACT (open-window)
+  while stream bars judge at the PRESS — an interim view-preview (`ffab265`) fixed the feel for
+  the no-overlap case; ② Bill confirmed the press-STEALING overlap ("for sure") → FULL
+  UNIFICATION: telegraph events (GLOBAL beats / my beats / strikeless BUSTERS) now compete in
+  `_claim` under the same DEC-14 window/tie-break — nearest comet wins, judged at press on the
+  one ladder, payoffs at press, stored mit applied at impact (`tg_claims`); the open-window
+  model + its age knobs + the preview hack are RETIRED/deleted (−215 lines). TANK-PLAN §0
+  amendment ruling 6. Proof: spike checksum BYTE-IDENTICAL (no overlaps = old behavior exactly) ·
+  dense expert 35%→80% win, 13→5 deaths (the stolen presses back) · raid_sim clean, rations
+  PASS · tour 5/5. Also this round: feints anchor their own READ dissolve (never the red ✗,
+  `3763588`) + gate-neighborhood verdict anchors. Windows install updated + boot-clean.
+  Remaining fairness lever: per-Seal quiet windows (S6, owed). *(this session)*
 - ☑ 2026-07-12 · `devgen` → **MERGED to `main` (ff `97854ee`)** — **DEV · GENERATED SETUPS
   on the BOSS TEST screen** (Bill: "simulate different runs … give me an average build, not a
   perfect build, with a seed so I can retry one"). The SETUP toggle on the debug boss-test

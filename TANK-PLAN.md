@@ -69,6 +69,17 @@ S7–S8b):** five rulings that supersede the matching lines below:
 5. **AAA bar** — the channel matches the Twinfang/healer instrument standard (chrome, glow
    comets, Cinzel words, spawn pops, gate heartbeat, banded target); "not up to the
    standards of the others" is a bug class, not a style note.
+6. **ONE CLAIM (playtest round 3, same day)** — Bill: globals "don't register" + "we have
+   the overlap problem for sure." The telegraph events (GLOBAL aoe beats · my beats ·
+   strikeless BUSTERS) now COMPETE in the press claim with the stream bars — same DEC-14
+   window/tie-break, nearest impact wins (the comet the eye is on), judged AT the press on
+   the one ladder (parry ±parry_land · DEC-15 legality), payoffs at press, stored mit
+   applied at impact (`seat.vars.tg_claims`). **The open-window model is RETIRED** (its
+   age knobs marked RETIRED in DuelistConfig); "telegraph busters/globals keep the
+   open-window model" in §THE PRESS below is DEAD. Proof: spike's sim checksum is
+   byte-identical (no overlaps ⇒ old behavior exactly), dense expert 35%→80% win (the
+   stolen presses back). Unanswerable pairs (< dodge_recover apart) remain the per-Seal
+   quiet-window authoring's job (S6, owed).
 
 **Why this section exists:** tank-w1 (`62cc09e` + the ONE BAR v1→v1.5 patch chain) broke the
 game. Bill's call: **full rewrite from the base — kit + engine stream + UI — no patching, no
