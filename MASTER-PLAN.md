@@ -876,8 +876,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-12 · worktree `../wow-artv2-c3` (branch `artv2-c3`) · §GRAPHICS — **CLAIM:
-  GRAPHICS PACKET C3 — ASSET IMPORT + SCENE TOUR** (GRAPHICS-PLAN §5·C3; Bill's spec).
+- ☑ 2026-07-12 · `artv2-c3` → **MERGED to `main` (ff `1abfcd4`)** · §GRAPHICS — **GRAPHICS
+  PACKET C3 COMPLETE — ASSET IMPORT + SCENE TOUR** (GRAPHICS-PLAN §5·C3; Bill's spec).
+  **Shipped:** `game/art_v2/SCENES.md` = the six-layer environment asset schema of record
+  (folder/filename convention `res://game/art_v2/scenes/<id>/<layer>.png` — 5 texture
+  layers, atmosphere = params only · per-layer placement/tiling contract · source sizes ·
+  texture-import defaults: Lossless WebP + mipmaps ON + no VRAM compression per the
+  WebGL2 law, per-file .import only, `project.godot` untouched) · `scene_kit.gd` layers
+  now CONSUME Codex textures via the dir convention (`layer_tex`, missing file ⇒ null ⇒
+  colored debug drawing + 'AWAITING CODEX · <profile>/<layer>.png' watermark — safe
+  fallback, never a hole/crash, no delivery-order constraints) · NEW SUNPRINT CEL
+  profiles **`stack_atrium`** (warm glass atrium) + **`stack_cold_aisle`** (cool server
+  aisle), dir-bound, debug palettes until Codex I1 lands · ultrawide = scale-by-height +
+  horizontal tiling (sides grow, never stretch). No art generated/repainted; no gameplay/
+  actor/HUD changes; legacy default. `artv2_probe` §[6] (+25 checks). **Verify (minimal
+  per Bill):** import 0 errors · probe ALL OK (70) · 1920×1080 tour per profile — SceneKit
+  host confirmed, FEET-LINE RECORD byte-identical across both profiles, shots eyeballed
+  (warm-bright vs cool-bright, HUD/actors untouched, labels legible). **RECORDED DEBT
+  (rides the C2 debt line):** full 1920/1280/2560 × profile matrix + old-mode A/B +
+  smoke/ab-gate — close before Art V2 ever becomes release default. Next: Codex I1
+  delivers layers into the bound folders (zero code per delivery), then P3's Bill gate.
+  ORIGINAL CLAIM:
   Target profiles: **`stack_atrium`** + **`stack_cold_aisle`** (SUNPRINT CEL direction —
   bright/playful debug palettes until Codex I1 delivers). Deliverables: documented six-layer
   environment asset schema + texture-import defaults (`game/art_v2/SCENES.md`) · profile→

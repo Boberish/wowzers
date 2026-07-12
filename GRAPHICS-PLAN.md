@@ -11,7 +11,7 @@
 
 **Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
-texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C2 SceneKit merged as
+texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C3 schema/bindings merged `1abfcd4`; C2 SceneKit merged as
 `da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
 verification debt, not a blocker to P3.
 Generated boards remain visual references, not runtime assets or a locked pixel layout.
@@ -224,7 +224,7 @@ and smokes clean.
 could continue. Run the recorded profile/resolution tour, UI smoke, and low-seed A/B gate before
 Art V2 can become a release default; failures return to C2 without invalidating the asset work.
 
-### P3 · ENVIRONMENT CONTRAST PAIR — 🟡 CODEX I1 ACTIVE · CLAUDE C3 NEXT
+### P3 · ENVIRONMENT CONTRAST PAIR — 🟡 CODEX I1 ACTIVE · C3 🔨 `1abfcd4` (schema + stack bindings live, awaiting layers)
 
 Codex generates approved layered interior/exterior assets. Claude builds/imports the two profiles
 and the screenshot tour. Bill approves the same fight in both before we expand scenes.
@@ -293,7 +293,7 @@ profile absence returns legacy · atmosphere view-only.
 
 **Gates:** screenshot tour at 1920×1080, 1280×720, 2560×1080; old-mode A/B; UI smoke.
 
-### C3 · ASSET IMPORT + SCENE TOUR
+### C3 · ASSET IMPORT + SCENE TOUR — 🔨 BUILT+MERGED `1abfcd4` (2026-07-12; schema = `godot/game/art_v2/SCENES.md`; profiles `stack_atrium`/`stack_cold_aisle` bound, placeholders labeled until I1 delivers)
 
 **Goal:** documented folder/schema for layered backgrounds, texture import defaults, and a tour
 that renders both approved profiles in repeatable combat moments.
