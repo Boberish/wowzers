@@ -746,13 +746,23 @@ tuning land per slice with fresh bands, coordinated with the Duelist's final num
 
 ## GRAPHICS / PRESENTATION
 
-**Now:** Gilded Reliquary 2D UI done; 3D stage = Bulwark slice (PoseRig procedural rigs, dais, VFX, reticle dial).
+**⚠ 2026-07-12 DIRECTION RESET — `GRAPHICS-PLAN.md` now owns the final visual system.** The
+current Gilded Reliquary/code-art stage is the **functional, verified fallback**, not the final
+authored-art claim. `ART-PLAN.md` v1 is superseded (its unbuilt Twinfang rigid-skin/flipbook slices
+do not proceed); `tempo-art` Slice 1 `e4589a6` is salvage-only pending a current-main hunk audit.
+V2 = AI-owned production · modular Scene Profiles (interior + outdoor contrast proof) · native
+painted/deformable character rigs + replacement contact drawings · authored dashboard UI ·
+Claude-heavy engineering packets. **At Bill's V1 style-board gate; no code/art approved yet.**
+
+**Now:** Gilded Reliquary 2D UI + PoseRig stage are playable and stay default throughout V2 work.
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
 **Next up:**
 - ~~Wire the other 4 HUDs to CombatStage3D~~ — DEAD 2026-07-10 (loop audit): the solo HUDs + `stage3d/` were deleted in REFIT P1; stage work now targets the 2D raid stage rigs (per-body Forge rigs owed).
 - **Robot re-rig**: per-boss silhouettes as ROBOTS/COMPUTERS (theme!) — replaces the `variant()` stopgap and is easier than organic sculpts. CAPTCHA-9 = a turnstile with an eye; GEMINI = two identical chassis; OPUS = a server-cathedral.
 - Blender/GLTF pipeline later (art replaces rig subclasses; `act()`/`windup()` contracts stay).
-- **TWINFANG ART PASS v1 — CLAIMED 2026-07-10 (branch `tempo-art`), the first real character-art
+- **⚠ TWINFANG ART PASS v1 — SUPERSEDED 2026-07-12 by `GRAPHICS-PLAN.md`.** The following is
+  retained as history; do not execute Slices 2–3 or merge `tempo-art` wholesale. Slice 1 may be
+  transplanted hunk-by-hunk after Claude Packet C0. **Original claim (branch `tempo-art`):** the first real character-art
   slice.** Foundation review done with Bill (Spine vs native vs code — StS2 is literally Godot 4 +
   Spine, so the ceiling is same-engine): **verdict = painted layers on the EXISTING `PoseRig2D`
   code-driven skeleton** (agents can author/tune it; Godot's Bone2D-modification layer is
@@ -768,6 +778,10 @@ tuning land per slice with fresh bands, coordinated with the Duelist's final num
   4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
   trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
   `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
+- **GRAPHICS V2 — CLAIMED (docs reset in progress):** order is P0 docs → P1 Codex three-way style
+  board/V1 Bill verdict → Claude foundation packets C0–C2 → interior/exterior scene contrast pair →
+  Duelist anchor+hybrid rig → connected Duelist dashboard → signature VFX → side-by-side playtest.
+  Old renderer/HUD remains selectable and default until every replacement slice passes.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -856,6 +870,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-12 · main (docs only) · §GRAPHICS — **GRAPHICS DIRECTION V2 DOC RESET COMPLETE —
+  the AI-owned, modular-art reset (Bill); V1 STYLE BOARD is next.** Superseded the
+  new-but-now-obsolete `ART-PLAN.md` v1
+  before executing its painted-cutout slices; preserve its completed `tempo-art` Slice 1 as a
+  reusable juice candidate and keep `godot/ART-PIPELINE.md` / `Actor2D` as the live fallback
+  contract. New `GRAPHICS-PLAN.md` owns the full visual system: AI-generated + agent-prepared
+  character art, native deformable hybrid rigs and selective frame swaps, authored dashboard UI,
+  and **modular scene kits** that prove the same combat in a dark interior AND an outdoor/daylight
+  scene. Work is approval-gated one slice at a time; existing stage/HUD remains playable and the
+  default until each replacement is visually approved + verified. Implementation will use a fresh
+  `art-v2` worktree, merge `main` frequently while Claude playtests there, and expose bounded
+  non-image Claude handoff packets with files/contracts/gates. This claim is DOCS ONLY:
+  ART-PLAN deprecation banner · GRAPHICS-PLAN new · MASTER §GRAPHICS + BUILD-LEDGER §G sync;
+  no code or art assets touched. `GRAPHICS-PLAN.md` carries the one-gate-at-a-time order,
+  C0–C8 Claude engineering packets, I0–I5 Codex image/visual packets, fallback laws, collision
+  map, and mandatory interior+outdoor proof. **NEXT:** Codex I0 generates three V1 direction
+  boards; Claude may run read-only Packet C0 in parallel. *(Codex graphics-v2 session)*
 
 - ☑ 2026-07-12 · `tankline` → **MERGED to `main` (ff `b5aaa20`)** — **tank gate: drop the
   approach-side blue mullion** (Bill: "remove the 1st blue vertical line that shows where you
@@ -1490,8 +1522,9 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   rows) · CLAUDE.md index. ⚠ build slices will touch `raid_content.gd` — `wow-descent-map` owns it
   live (fight ladder bang); build starts only after that merge. *(boss-rework session)*
 
-- ☐ 2026-07-10 · worktree `../wow-tempo-art` (branch `tempo-art`, docs on main) · §GRAPHICS —
-  **CLAIM: TWINFANG ART PASS v1.** Foundation review locked with Bill: painted layers on the
+- ☑ 2026-07-10 · worktree `../wow-tempo-art` (branch `tempo-art`, docs on main) · §GRAPHICS —
+  **SUPERSEDED 2026-07-12 by `GRAPHICS-PLAN.md`; branch frozen as salvage-only. ORIGINAL CLAIM:
+  TWINFANG ART PASS v1.** Foundation review locked with Bill: painted layers on the
   existing `PoseRig2D` skeleton (native, $0, agent-authorable; **Spine Pro = per-actor upgrade
   door** behind `Actor2D` — StS2 is literally Godot 4 + Spine, so the ceiling is same-engine);
   AtO-cel AI art generated now (THEME re-skin risk accepted). Slices: ① juice pass (screen_post

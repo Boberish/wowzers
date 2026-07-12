@@ -19,6 +19,8 @@ The checkout is `/home/bill/projects/Wowzers` in WSL Ubuntu. The directory name 
    - `BUILD-LEDGER.md` — forward-looking unbuilt work, dependencies, and collision hotspots.
    - `CARD-CATALOG.md` — canonical card slate and lifecycle/status.
    - `DECK-LAYOUT.md` — canonical deck anatomy and run grant order.
+   - `GRAPHICS-PLAN.md` — visual-system owner: AI art, modular scenes, dashboard, actors, VFX,
+     approval gates, and Claude/Codex packet boundaries. `ART-PLAN.md` v1 is superseded.
    - The named subsystem/class plan — the actual design of record.
    - `CLAUDE.md` — stable architecture, verification rules, run book, and hard-won gotchas.
 4. Check the Coordination Log for an active owner. Do not touch a claimed surface or another

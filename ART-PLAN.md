@@ -1,5 +1,13 @@
 # ART-PLAN — the character-art pass (Project Rift)
 
+> **⚠ SUPERSEDED 2026-07-12 by `GRAPHICS-PLAN.md`.** Do not execute this plan's unbuilt
+> Slice 2/3 pipeline as written. Its assumptions are retired: Twinfang-first only · locked AtO-cel
+> style · Bill generates/cuts art · rigid painted limbs as the target · no environment/UI system.
+> `tempo-art` Slice 1 (`e4589a6`) remains a **candidate salvage source** pending a current-main
+> hunk audit; it is not approved for wholesale merge. This file stays as decision history.
+> `godot/ART-PIPELINE.md` and `Actor2D` remain the current live fallback contract until V2 actors
+> prove individually.
+
 > **What this is.** The design-of-record for putting real, "nice and pro" character art +
 > ability juice into the game, **starting with Twinfang·Tempo**. Born 2026-07-10 when Bill asked
 > to begin the art for one class and to first sanity-check the *foundation* ("did we pick the best
