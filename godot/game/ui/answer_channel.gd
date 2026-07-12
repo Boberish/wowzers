@@ -41,7 +41,9 @@ const BURST_LIFE := 0.55                    # the press burst (frozen line + exp
 const TICK_DT := 1.0 / 30.0                 # one engine tick (sub-tick comet interpolation)
 
 # --- fed by the band every frame (view data straight off observe()) ---
-var bars: Array = []                       ## committed stream bars: {id,kind,purple,eta,late,answered,flurry_i,flurry_n}
+var bars: Array = []                       ## committed stream bars: {id,kind,purple,eta,late,peeled,victim,answered,flurry_i,flurry_n}
+var tbars: Array = []                      ## ONE BAR (2026-07-12): telegraph comets — GLOBALS (dodge) +
+                                           ## targeted BUSTERS (parry) + my beats, synthetic negative ids
 var tick_frac: float = 0.0                 ## the controller's accumulator fraction (0..1) — comets
                                            ## interpolate BETWEEN 30 Hz ticks (§0 pass 2; no stair-step)
 var tempo: float = 1.0                     ## whole-flow multiplier (TANK-V3: baked into impact_tick at publish, kept as a no-op input field)
@@ -156,6 +158,24 @@ func resolve(id: int, family: String, txt: String, ms_txt: String) -> void:
 	_rail.append(family)
 	if _rail.size() > 8:
 		_rail.pop_front()
+
+## ONE BAR: anchor a TELEGRAPH verdict (the event carries no bar id) on the nearest tracked
+## telegraph comet (synthetic negative ids only — never steals a stream comet's moment).
+## Falls back to a gate stamp when nothing is tracked.
+func resolve_tg(family: String, txt: String) -> void:
+	var best := 1
+	var best_x := -1.0e9
+	for k in _last_x:
+		if int(k) >= 0:
+			continue
+		var rx := float(_last_x[k]["x"])
+		if rx > best_x:
+			best_x = rx
+			best = int(k)
+	if best < 0:
+		resolve(best, family, txt, "")
+	else:
+		stamp(txt, family)
 
 ## The tracked comet nearest the gate (largest x that hasn't passed it) — the fallback anchor
 ## when the band's id is stale (frame skew) so a claim still lands on a real comet, not the gate.
@@ -335,6 +355,23 @@ func _draw() -> void:
 			if bool(b.get("late", false)):
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
 		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered)
+	# --- ONE BAR: telegraph comets (GLOBALS / targeted BUSTERS / my beats) on the same
+	#     track — committed times off the live telegraph, same gate, same press ---
+	for tb_v in tbars:
+		var tb: Dictionary = tb_v
+		var teta := float(tb.get("eta", 0.0))
+		var tx2 := minf(_bar_x(teta), gx)
+		if tx2 < 10.0 or tx2 > w - 10.0:
+			continue
+		var tid := int(tb.get("id", -1))
+		var tkind := String(tb.get("kind", "global"))
+		var tpurple := bool(tb.get("purple", false))
+		present[tid] = true
+		_last_x[tid] = {"x": tx2, "kind": tkind, "purple": tpurple, "absent": 0}
+		if not _seen.has(tid):
+			_seen[tid] = true
+			_flashes.append({"x": tx2, "t": 0.0})     # big moves announce themselves
+		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)))
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()
 	var stale: Array = []
@@ -384,7 +421,7 @@ func _draw() -> void:
 	# --- the quiet glass: no committed melee this instant. The channel no longer goes blank
 	#     on aggro loss (peeled comets still ride it translucent), and boss GLOBALS/CASTS live
 	#     on the judge — so an empty channel just means the melee runway is momentarily clear. ---
-	if bars.is_empty() and _shards.is_empty():
+	if bars.is_empty() and tbars.is_empty() and _shards.is_empty():
 		UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(w * 0.5 - 60, cy + 4),
 			"— HOLD —", HORIZONTAL_ALIGNMENT_CENTER, 120, UiKit.SIZE["LABEL"], Palette.TEXT_DIM)
 
@@ -403,7 +440,7 @@ func _shape_pts(kind: String, x: float, cy: float, r: float) -> PackedVector2Arr
 				var a := TAU * float(i) / 6.0 - PI / 2.0
 				hp.append(Vector2(x + cos(a) * r * 0.8, cy + sin(a) * r))
 			return hp
-		"buster":
+		"buster", "global":
 			var op := PackedVector2Array()
 			for i in 8:
 				var a := TAU * float(i) / 8.0
@@ -546,6 +583,16 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 				PURPLE.lightened(0.3) if purple else Palette.CRIMSON)
 			_bullseye_dot(x, cy, 18.0)
 			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.CRIMSON)
+		"global":
+			# the boss's big room-wide move — boss colors, every seat dodges it
+			_glow(x, cy, 19.0, PURPLE if purple else Palette.CRIMSON)
+			_octagon(x, cy, 19.0, PURPLE if purple else Palette.CRIMSON,
+				PURPLE.lightened(0.3) if purple else Palette.GOLD_BRIGHT)
+			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.GOLD_BRIGHT)
+		"beat":
+			# a telegraph strike aimed at ME (boss-tinted diamond) — the classic dodge read
+			_diamond(x, cy, 12.0, PURPLE if purple else Palette.CRIMSON.lightened(0.15))
+			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.CRIMSON.lightened(0.3))
 		"eat":
 			var col := Palette.TEXT_DIM
 			_diamond(x, cy, 13.0, col)
@@ -586,6 +633,8 @@ func _comet_col(kind: String) -> Color:
 	match kind:
 		"heavy": return Palette.HEAVY
 		"buster": return Palette.CRUSH
+		"global": return Palette.CRIMSON
+		"beat": return Palette.CRIMSON.lightened(0.15)
 		"flurry": return Palette.FLOW
 		"eat": return Palette.TEXT_DIM
 		_: return Palette.LIGHT

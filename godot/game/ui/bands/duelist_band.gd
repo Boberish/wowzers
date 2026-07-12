@@ -85,6 +85,35 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var stream: Dictionary = obs.get("stream", {})
 	channel.bars = stream.get("bars", [])
 	channel.tick_frac = clampf(hud._ctrl._accum / s.dt, 0.0, 1.0)   # smooth 60 fps comets
+	# ONE BAR (Bill 2026-07-12): GLOBALS + targeted BUSTERS ride the channel as comets too —
+	# a live telegraph is COMMITTED (fixed end tick, beats at fixed offsets; timers freeze,
+	# they never jump), so this is verbatim view data, zero prediction. Casts (heal/empower/
+	# kickable/brace) stay on the BossCastBar under the boss HP. Synthetic NEGATIVE ids keep
+	# them apart from stream bars (and clear of the -1 sentinel).
+	var tbars: Array = []
+	var tg: Dictionary = obs.get("telegraph", {})
+	if not tg.is_empty():
+		var tgid := int(tg.get("tick", 0))
+		var is_cast: bool = bool(tg.get("heal", false)) or bool(tg.get("empower", false)) \
+			or bool(tg.get("interruptible", false))
+		if not is_cast:
+			var beats: Array = tg.get("strikes", [])
+			if beats.is_empty():
+				if bool(tg.get("targets_me", false)) and bool(tg.get("defensible", false)):
+					tbars.append({"id": -(1000 + tgid * 8), "kind": "buster",
+						"eta": float(tg.get("remaining", 0.0)),
+						"purple": bool(tg.get("feint", false)), "answered": false})
+			else:
+				for i in beats.size():
+					var bt: Dictionary = beats[i]
+					if bool(bt.get("resolved", false)) or not bool(bt.get("mine", false)):
+						continue
+					tbars.append({"id": -(1000 + tgid * 8 + 1 + i),
+						"kind": ("global" if bool(bt.get("aoe", false)) else "beat"),
+						"eta": float(bt.get("remaining", 0.0)),
+						"purple": bool(bt.get("feint", false)),
+						"answered": bool(bt.get("answered", false))})
+	channel.tbars = tbars
 	channel.tempo = float(stream.get("tempo", 1.0)) * (1.25 if bool(obs.get("engarde_live", false)) else 1.0)
 	channel.flurry = bool(obs.get("flurry", false))
 	channel.aggro_lost = not bool(obs.get("aggro_me", true))
@@ -187,29 +216,29 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			if has_id:
 				channel.resolve(id, "bullseye", txt, ms)
 			else:
-				channel.stamp(txt, "bullseye")
+				channel.resolve_tg("bullseye", txt)   # telegraph answer → its own comet
 			slam.slam(txt, "perfect")
 			hud._shake_amt = maxf(hud._shake_amt, 2.0)
 		StrikeRes.Grade.PERFECT:
 			if has_id:
 				channel.resolve(id, "perfect", "PERFECT", ms)
 			else:
-				channel.stamp("PERFECT", "perfect")
+				channel.resolve_tg("perfect", "PERFECT")
 		StrikeRes.Grade.GOOD:
 			if has_id:
 				channel.resolve(id, "good", "GOOD", ms)
 			else:
-				channel.stamp("GOOD", "good")
+				channel.resolve_tg("good", "GOOD")
 		StrikeRes.Grade.GRAZE:
 			if has_id:
 				channel.resolve(id, "graze", "GRAZE", ms)
 			else:
-				channel.stamp("GRAZE", "graze")
+				channel.resolve_tg("graze", "GRAZE")
 		StrikeRes.Grade.BAITED:
 			if has_id:
 				channel.resolve(id, "baited", "BAITED!", ms)
 			else:
-				channel.stamp("BAITED!", "baited")
+				channel.resolve_tg("baited", "BAITED!")
 			slam.slam("BAITED", "baited")
 		StrikeRes.Grade.READ:
 			channel.resolve(id, "read", "READ", "")     # held it — no press to time
@@ -224,7 +253,7 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			if has_id:
 				channel.resolve(id, "hit", mtxt, ms)
 			else:
-				channel.stamp(mtxt, "hit")
+				channel.resolve_tg("hit", mtxt)
 			hud._shake_amt = maxf(hud._shake_amt, 7.0)
 
 ## THE STREAM TUNER (dev-only): live-tune the ACTIVE body's texture profile mid-fight.

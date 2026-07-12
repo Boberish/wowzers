@@ -3120,6 +3120,16 @@ func _active_add(s: CombatState) -> AddRes:
 	return null
 
 func _render_dial(s: CombatState, obs: Dictionary) -> void:
+	# ONE BAR (Bill 2026-07-12): the tank's channel is the ONE answer surface — the boss
+	# dial (pure spectacle for this seat since v3) and the shared judge DISAPPEAR for the
+	# tank; GLOBALS + targeted BUSTERS ride the channel as comets (the duelist band builds
+	# them from obs.telegraph), and ALL casting rides the BossCastBar under the boss HP
+	# (every seat, unchanged). Other classes keep the dial + judge untouched.
+	var tank_channel := String(_seat_cls_now()) == "duelist"
+	if _dial != null:
+		_dial.visible = not tank_channel
+	if _judge != null:
+		_judge.visible = not tank_channel
 	var live_add := _active_add(s)
 	if live_add != null:
 		_dial.boss_name = live_add.name
@@ -3128,24 +3138,18 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 		_dial.boss_name = s.encounter.name
 		_dial.boss_hp_frac = s.boss.hp / maxf(s.boss.hp_max, 1.0)
 	_dial.enraged = s.encounter.enrage_at > 0.0 and float(s.tick) * s.dt >= s.encounter.enrage_at
-	# TANK-V2 (TANK-PLAN §0): the Duelist's footwork lives on THE CHANNEL (its band's own
-	# AnswerChannel — fed straight from observe(), never through the shared judge/dial).
-	# The big dial stays boss spectacle for the tank; the cast bar serves every seat.
-	var tank_channel := String(_seat_cls_now()) == "duelist"
 	var tg: Dictionary = obs.get("telegraph", {})
 	if tg.is_empty():
 		if _castbar != null:
 			_castbar.active = false
-		# LOST-AGGRO = UNDODGEABLE (cdd008f, kept): a strayed stream bar is an unavoidable
-		# hit on whoever pulled it — no dodge prompt anywhere (there's nothing to press);
-		# the aggro banner is the whole tell.
 		_dial.tg_active = false
 		_dial.tg_strikes = []
 		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
 		_dial.def_ready = bool(obs.get("defense_ready", true))
 		# R5 FIX (feed-or-deactivate is UNCONDITIONAL, NG6): a gap frame must still feed the
 		# judge so its deactivation branch runs — otherwise it redraws a frozen ghost comet.
-		if _judge != null:
+		# (Hidden for the tank ⇒ nothing draws ⇒ nothing to deactivate.)
+		if _judge != null and not tank_channel:
 			_judge.feed(s, obs, _seat_judge_window(obs))
 		return
 	var dur := float(s.telegraph.dur_ticks) * s.dt
@@ -3177,16 +3181,11 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 				_castbar.kind = "brace"
 				_castbar.window = 0.0
 	if tank_channel:
-		# TANK-V3: the channel draws only the committed melee stream. Raid-wide GLOBALS + CASTS
-		# now render on the SHARED JUDGE for the tank too (the octagon projection is deleted),
-		# answered by the fall-through press. The big dial stays boss spectacle — tg_active
-		# stays false so the dial never arms a tank press.
+		# ONE BAR (Bill 2026-07-12): GLOBALS + targeted BUSTERS ride THE CHANNEL as comets
+		# (the duelist band builds them from obs.telegraph each frame); casts are already on
+		# the BossCastBar above. The dial + judge are hidden for this seat — nothing to feed.
 		_dial.tg_active = false
 		_dial.tg_strikes = []
-		_dial.def_ready = bool(obs.get("defense_ready", true))
-		_dial.dodge_ready = bool(obs.get("dodge_ready", true))
-		if _judge != null:
-			_judge.feed(s, obs, _seat_judge_window(obs))
 		return
 	_dial.tg_active = true
 	_dial.tg_name = s.telegraph.ability.name
