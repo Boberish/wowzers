@@ -904,18 +904,30 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   direct kick probe ✅ (Evis+dump kick myth_cot→myth_cot2, non-carrier Alchemist can't) ·
   `alchemist_sim`/`well_sim` byte-identical (`ab-gate.sh`) · `ui_smoke_raid`. *(Claude session)*
 
-- ☐ 2026-07-12 · worktree `../wow-artv2-c1` (branch `artv2-c1`) · §GRAPHICS — **CLAIM:
-  GRAPHICS PACKET C1 — ART-V2 SELECTOR + FAIL-SAFE** (GRAPHICS-PLAN §5·C1, shape per the C0
-  map §10.2). Three INDEPENDENT view-only toggles, all default OFF: static `ArtV2` holder
-  (`game/art_v2/art_v2.gd`, no autoload) — `actors: bool` · `scene: String` (profile id) ·
-  `dash: bool` — parsed from `--artv2=actors,scene:<id>,dash` at the top of the WorldShell
-  boot (before the HUD instances — its `_ready` builds the backdrop). Guarded consumption,
-  one seam each: `Actor2D.make()` head (v2 asset missing ⇒ fall through to user-art/puppet) ·
-  `raid_hud._ready:276` backdrop construction (unknown/empty profile ⇒ legacy `StageBackdrop`) ·
-  `_build_combat` dashboard block (no C6 host registered ⇒ current widgets+band untouched).
-  No CombatState/spec/protocol/checksum contact; release default = old graphics. NOT C2 —
-  no SceneKit host, no placeholder profiles. Gates: import · `ui_smoke_raid` ·
-  `ab-gate.sh raid_sim` byte-identical · WSLg old-mode tour sheets. *(Claude session)*
+- ☑ 2026-07-12 · `artv2-c1` → **MERGED to `main` (ff `3da278f`, slice `47197bd`)** ·
+  §GRAPHICS — **GRAPHICS PACKET C1 COMPLETE — ART-V2 SELECTOR + FAIL-SAFE** (GRAPHICS-PLAN
+  §5·C1, built exactly to the C0 map §10.2 shape). Three INDEPENDENT view-only toggles, all
+  default OFF: static `ArtV2` holder (`game/art_v2/art_v2.gd`, no autoload) — `actors: bool` ·
+  `scene: String` (profile id) · `dash: bool` — parsed from `--artv2=actors,scene:<id>,dash`
+  at the top of `WorldShell._ready` (NOT drive_autostart: the parse must precede the HUD
+  instance, whose `_ready` builds the backdrop). Guarded consumption, one seam each, THE
+  FAIL-SAFE LAW at all three: `Actor2D.make()` head (V2 asset missing ⇒ null ⇒ fall through
+  to user-art/puppets) · `raid_hud._ready` backdrop (`ArtV2.make_scene()`: "" / unknown
+  profile ⇒ legacy `StageBackdrop`; `_stage` member loosened to `Control` for the C2 host,
+  3 use sites) · `_build_combat` (v2dash guard around bar/castbar/dial/judge + band;
+  `make_dash` returns null until C6 registers a host — even `--artv2=dash` builds the
+  current dashboard; C6 owns null-guarding the render feed). No CombatState/spec/protocol/
+  checksum contact. NEW `sim/artv2_probe.gd` (22 checks ALL OK — defaults OFF · grammar ·
+  OFF-purity per factory id incl. the duelist→RiftmawRig2D fallthrough locked AS-IS for C4 ·
+  flags-ON-no-assets ⇒ legacy) wired into verify-all PROBES. **Gates:** import clean ·
+  `ui_smoke_raid` failure signature identical to main (only the known pause+codex fail) ·
+  `ab-gate.sh raid_sim --seeds=20` **BYTE-IDENTICAL PASS** (low seeds per Bill's 07-12
+  quicker-sims steer) · WSLg `raid_stage_tour` + `screenshot_duelist_raid` old-mode sheets
+  eyeballed (legacy backdrop/puppets/dashboard, no drift) · live boot
+  `--artv2=actors,scene:v2_interior_test,dash` = selector prints, profile warns + falls
+  back, no script errors. Merged main pre-verify (docs-only delta — SUNPRINT CEL verdict;
+  no code drift). verify-all deliberately not forced: globally PAUSED (Bill's pre-release
+  switch) + docs-only merge kept every gate valid. Next packet: **C2**. *(Claude session)*
 
 - ☑ 2026-07-12 · main · **ONE CLAIM — the overlap fix (Bill's playtest round 3).** Globals
   "don't register" traced in two layers: ① telegraph events were judged at IMPACT (open-window)

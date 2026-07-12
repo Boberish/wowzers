@@ -11,7 +11,7 @@
 
 **Status:** 🟡 **V1 STYLE LOCKED / P2 FOUNDATION ACTIVE.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
-texture rather than generic dark-fantasy micro-detail. C0 is complete; C1 is active; C2 is next.
+texture rather than generic dark-fantasy micro-detail. C0 + C1 are complete (selector merged `3da278f`); C2 is next.
 Generated boards remain visual references, not runtime assets or a locked pixel layout.
 
 ---
@@ -212,7 +212,7 @@ animation-friendly parts; make the default world bright, fun, and detailed throu
 design rather than AI-looking microtexture. The UI is reaction-first per §2.3. No more slideshow
 proof is required; proceed to the replaceability foundation.
 
-### P2 · FOUNDATION RECON + FLAG — 🟡 C0 DONE · C1 ACTIVE · C2 NEXT
+### P2 · FOUNDATION RECON + FLAG — 🟡 C0 DONE · C1 🔨 `3da278f` · C2 NEXT
 
 Read-only architecture map, default-off selector/fallback, and a Scene Profile host with placeholder
 layers. This proves replaceability without final art. Merge only if old default is byte-identical
@@ -268,7 +268,7 @@ diff against current main.
 candidate selector shape, collision list, and slice-specific verification. **No code.** Explicitly
 classify every `e4589a6` hunk as salvage / stale / collision / reject.
 
-### C1 · ART-V2 SELECTOR + FAIL-SAFE
+### C1 · ART-V2 SELECTOR + FAIL-SAFE — 🔨 BUILT+MERGED `3da278f` (2026-07-12)
 
 **Goal:** independent view-only toggles for actor, scene, dashboard; all default OFF.
 
