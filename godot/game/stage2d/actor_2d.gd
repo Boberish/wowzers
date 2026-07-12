@@ -56,6 +56,12 @@ func win() -> void: pass
 ## puppet is used. `id`: bulwark|twinfang|voidcaller|mender|riftmaw — the voidcaller/
 ## mender rigs stay as the caster/healer seat PLACEHOLDER puppets (per-class art owed)
 static func make(id: String, aspect := "") -> Actor2D:
+	# ART V2 (GRAPHICS-PLAN C1, flag-gated, default OFF): a V2 actor may answer
+	# first; missing asset ⇒ null ⇒ fall through — user art + puppets unchanged.
+	if ArtV2.actors:
+		var v2 := ArtV2.make_actor(id, aspect)
+		if v2 != null:
+			return v2
 	var art := "res://game/art/actors/%s.tscn" % id
 	if ResourceLoader.exists(art):
 		return SpriteActor2D.new(art)

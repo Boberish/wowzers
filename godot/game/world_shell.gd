@@ -29,6 +29,10 @@ const DEV_SEAT_CLS := {"tank": "duelist", "blade": "twinfang", "alchemist": "alc
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# ART V2 selector (GRAPHICS-PLAN C1): parse `--artv2=` BEFORE the HUD instances
+	# below — its _ready builds the backdrop through the scene seam. View-only,
+	# defaults OFF; probes/smokes that load raid_main directly stay on defaults.
+	ArtV2.boot(OS.get_cmdline_user_args())
 	hud = (load("res://game/raid_main.tscn") as PackedScene).instantiate() as RaidHud
 	add_child(hud)                      # child _ready runs here (blank until we route)
 	hud._shell = self                   # the delegators (home/select/zone) route UP

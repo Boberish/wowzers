@@ -232,7 +232,7 @@ var _party_ctx := ""               ## "" = raid flow (DESCEND) · "bastion" = th
 # GEAR-2 (Sworn Oaths / Realm-1 SLAs): one oath per fight, sworn at the boss node.
 var _oath_lbl: Label = null
 
-var _stage: StageBackdrop
+var _stage: Control   ## the ONE environment node — legacy StageBackdrop, or an ART-V2 scene profile (C1 selector; C2 owns the host)
 var _stage2d: RaidStage2D = null
 var _ui: Control
 var _fx: Control
@@ -273,7 +273,9 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	seed(Time.get_ticks_usec())
 	set_theme(UiKit.build_theme())
-	_stage = StageBackdrop.new()
+	# ART V2 scene selector (GRAPHICS-PLAN C1): profile "" (the default) or unknown
+	# ⇒ exactly the old `StageBackdrop.new()` — the legacy scene is the fail-safe.
+	_stage = ArtV2.make_scene()
 	add_child(_stage)
 	_ui = Control.new()
 	_ui.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2634,30 +2636,39 @@ func _build_combat(s: CombatState) -> void:
 	_shake_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(_shake_root)
 
-	_bar = BossBar.new()
-	UiKit.place(_bar, 0.5, 0, 0.5, 0, -340, 52, 340, 104)
-	_shake_root.add_child(_bar)
-	# THE BOSS CAST BAR (Bill 2026-07-11 — the declutter): everything the boss CASTS
-	# (self-heal · empower · kickable verse · unavoidable nova) reads HERE, under its
-	# HP — the Judgment Channel below is footwork ONLY. Hidden while nothing casts.
-	_castbar = BossCastBar.new()
-	UiKit.place(_castbar, 0.5, 0, 0.5, 0, -270, 112, 270, 158)
-	_shake_root.add_child(_castbar)
+	# ART V2 dashboard selector (GRAPHICS-PLAN C1) — independent of actors/scene.
+	# A C6 host would replace the fixed widgets + class band below; none is
+	# registered yet (make_dash ⇒ null always), so even with --artv2=dash the
+	# current dashboard builds — the missing-host fail-safe. Default OFF ⇒ this
+	# whole screen is byte-identical to before the seam existed.
+	var v2dash: Control = ArtV2.make_dash(self) if ArtV2.dash else null
+	if v2dash != null:
+		_shake_root.add_child(v2dash)
+	else:
+		_bar = BossBar.new()
+		UiKit.place(_bar, 0.5, 0, 0.5, 0, -340, 52, 340, 104)
+		_shake_root.add_child(_bar)
+		# THE BOSS CAST BAR (Bill 2026-07-11 — the declutter): everything the boss CASTS
+		# (self-heal · empower · kickable verse · unavoidable nova) reads HERE, under its
+		# HP — the Judgment Channel below is footwork ONLY. Hidden while nothing casts.
+		_castbar = BossCastBar.new()
+		UiKit.place(_castbar, 0.5, 0, 0.5, 0, -270, 112, 270, 158)
+		_shake_root.add_child(_castbar)
 
-	_dial = BossCastDial.new()
-	_dial.verb = _verb()
-	# reticle mode, ringed around the Riftmaw puppet (x-anchor = the boss slot)
-	_dial.show_sigil = false
-	UiKit.place(_dial, 0.72, 0, 0.72, 0, -210, 128, 210, 640)
-	_shake_root.add_child(_dial)
+		_dial = BossCastDial.new()
+		_dial.verb = _verb()
+		# reticle mode, ringed around the Riftmaw puppet (x-anchor = the boss slot)
+		_dial.show_sigil = false
+		UiKit.place(_dial, 0.72, 0, 0.72, 0, -210, 128, 210, 640)
+		_shake_root.add_child(_dial)
 
-	# the Judgment Channel under the reticle — seat-aware: parry gate for the
-	# tank, dodge gate for the blade, clean-kick band for the caster, barrage
-	# timing for the healer; off-target swings fly dim with their victim's name
-	_judge = StrikeJudge.new()
-	_judge.verb = _verb()
-	UiKit.place(_judge, 0.72, 0, 0.72, 0, -260, 648, 260, 752)
-	_shake_root.add_child(_judge)
+		# the Judgment Channel under the reticle — seat-aware: parry gate for the
+		# tank, dodge gate for the blade, clean-kick band for the caster, barrage
+		# timing for the healer; off-target swings fly dim with their victim's name
+		_judge = StrikeJudge.new()
+		_judge.verb = _verb()
+		UiKit.place(_judge, 0.72, 0, 0.72, 0, -260, 648, 260, 752)
+		_shake_root.add_child(_judge)
 
 	# every fight opens with a ceremony: the boss's name-card burns in and off
 	BossIntro.play(_ui, s.encounter.name)
@@ -2718,8 +2729,9 @@ func _build_combat(s: CombatState) -> void:
 	UiKit.place(_aggro_warn, 0.5, 0, 0.5, 0, -360, 106, 360, 130)
 	_shake_root.add_child(_aggro_warn)
 
-	_band = ClassBand.for_hud(self)   # the class's instrument cluster (REFIT P4)
-	_band.build()
+	if v2dash == null:   # ART V2 (C1): a C6 dashboard host replaces the band too
+		_band = ClassBand.for_hud(self)   # the class's instrument cluster (REFIT P4)
+		_band.build()
 
 	# BUILD STAMP (Bill 2026-07-11): which build am I actually running? Settles every
 	# "did the sync take?" question at a glance. Bump on each playtest sync.
