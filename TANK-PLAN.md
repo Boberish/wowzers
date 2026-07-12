@@ -136,6 +136,13 @@ cue + gold pip + the victim's "IT'S HUNTING YOU" banner all stand. (The pass-1
 "peel rides the victim's own dodge bar + grace-delay" stays dead too.)
 
 ### THE PRESS (⚠ amended pass 2) — THE TWINFANG MODEL, verbatim
+**✅ RESTORED IN V3 (S6, 2026-07-12):** the v3 rebuild had silently regressed this to
+judged-at-impact (the union merge carried only guard+easy-aggro) — the source of Bill's
+"old slug" report. S6 re-ports the pass-2 semantics into the v3 kit (`stream_answers` +
+`stream_resolve_slack`, claim filtered to victim==me per the v3 peel), S6b adds the view
+half (tick interpolation · the frozen-pixel press burst: fading line + expanding circle ·
+ease-in killed · every press echoes), S6c the AAA channel pass (symmetric banded gate ·
+glow/shadow comets · Cinzel words · gilded chrome · rune kick).
 Bill: *"the twinfang is super good, do that."* A press **CLAIMS the nearest unanswered bar
 within ±`answer_claim` (0.30s) and is judged INSTANTLY, SYMMETRIC around gate-touch**:
 `|press − impact| / claim` on the blade's own fractions (`grade_bull_frac .18 ·
