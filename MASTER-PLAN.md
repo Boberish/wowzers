@@ -857,6 +857,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · `tankline` → **MERGED to `main` (ff `b5aaa20`)** — **tank gate: drop the
+  approach-side blue mullion** (Bill: "remove the 1st blue vertical line that shows where you
+  can start clicking, it should be implied"). `answer_channel.gd` drew TWO steel-blue gate
+  mullions — one at the graze OPEN (`gx - win_graze`, where scoring starts) + one at the CLOSE
+  (the true late/stop edge). Kept only the CLOSE line (the hard stop is worth marking); the
+  approach edge is now unmarked — the start is implied by the grading bands lighting up. Pure
+  `_draw` view change (no state/engine). Verified: parse+import clean · WSLg before/after gate
+  crop confirms the left blue line + gem gone, gold plumb + right stop-line intact. Deployed to
+  `C:\Games\v3Tank` for playtest. No planned-scope/card change → no ledger/catalog touch. *(this session)*
 - ☑ 2026-07-12 · `devboss` → **MERGED to `main` (ff `28a0775`)** — **DEV · BOSS TEST home-menu
   button** (Bill: "make a dev tester button main menu to select any of the raid bosses to test
   them quickly"). Debug-only button on the WorldShell home screen (`OS.is_debug_build()` gate,
