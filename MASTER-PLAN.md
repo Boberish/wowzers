@@ -755,7 +755,8 @@ painted/deformable character rigs + replacement contact drawings · authored das
 Claude-heavy engineering packets. **Bill V1 approved 2026-07-12: SUNPRINT CEL** — bright,
 playful, authored screen-print/cel detail, with darker dungeons as contrast rather than the default.
 The game is UI-first: a dominant timing channel, same-frame press feedback, large grades, compact
-secondary abilities, and fast cancelable actor payoff. C0 is complete; C1 is active; C2 is next.
+secondary abilities, and fast cancelable actor payoff. C0 + C1 are complete (selector merged
+`3da278f`); C2 (Scene Profile contract + placeholder profiles) is next.
 
 **Now:** Gilded Reliquary 2D UI + PoseRig stage are playable and stay default throughout V2 work.
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
@@ -885,20 +886,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 - ☐ 2026-07-12 · worktree `../wow-interrupt` (branch `interrupt-pillar3`) · §COMBAT PILLARS —
   **CLAIM: INTERRUPT-BY-ABILITY (Pillar #3 turns ON).** Bill: *"no one can interrupt — let's make
-  our Eviscerate, and a combo tank attack interrupt."* The boss side is already plumbed
-  (`AbilityRes.kick_window` E8 · `Response.INTERRUPTIBLE` casts · the `kick_open_missed` diag counts
-  every uncontested verse) and the WHOLE UI/feedback layer is built and waiting (`boss_cast_bar`
-  window band + "CLEAN KICK!/KICK!/OVERLOAD!" pops). Missing = the class-side press that honors the
-  window. Three guarded pieces (byte-identical when no ability carries the flag ⇒ every existing sim
-  unchanged): (1) `combat_core._try_interrupt()` fired right after a kick-tagged ability commits in
-  `perform` — in-window (remaining ≤ 0.62s, matches the UI band) = CLEAN KICK (effect denied · chain
-  skips one verse · `on_boss_heal_denied` broadcast), early = WHIFF (damage lands, no kick), miss =
-  the verse resolves; (2) `ClassKit.ability_interrupts(id)` — **Twinfang→`eviscerate` · Duelist→`dump`**
-  (the two combo-finisher carriers Bill named), both add `carries_kick` to obs; (3) flip
-  `raid_hud.gd:3298 kickable_seat` to read the seat's `carries_kick` (kills "nobody carries a kick
-  yet"). Alchemist dump = the 3rd kicker, follow-up. Gates: import · `twinfang_sim`/`alchemist_sim`/
-  `well_sim` byte-identical (`ab-gate.sh`) · `raid_sim` runs (tank/twinfang change is the feature) ·
-  `ui_smoke_raid`. *(Claude session)*
+  our Eviscerate, and a combo tank attack interrupt."* The interrupt RESOLVER already exists
+  (`CombatCore.stagger_boss` — used by the legacy `_kick` button + scripted Shockwave/Vindicate) and
+  the WHOLE UI/feedback layer is built and waiting (`boss_cast_bar` "interrupt/uncontested" cue +
+  "CLEAN KICK!/DENIED!" pops); the only blocker was `raid_hud.gd:3298 kickable_seat=false` + no press
+  that honors it. **SIMPLE by Bill's steer (2026-07-12): press your ability ANY time during the cast
+  to stop it — no tight window, no early-press whiff, no interrupt tax. DPS already juggle dodge +
+  interrupt.** Three guarded pieces (byte-identical when no ability carries the flag ⇒ every
+  non-carrier sim unchanged): (1) `ClassKit.ability_interrupts(id)` — **Twinfang→`eviscerate` ·
+  Duelist→`dump`** (the two combo finishers Bill named), both add `carries_kick` to obs;
+  (2) `combat_core._try_interrupt()` fired right after a kick-tagged ability commits in `perform` — a
+  live INTERRUPTIBLE cast (single-resolve, not a dodge-string) routes to `stagger_boss(s, seat)` (new
+  optional crediting seat → richer "interrupt" event + `kick_landed`; null arg = legacy "staggered",
+  byte-identical); chains skip one verse, unchained casts clear. (3) flip that one `kickable_seat`
+  line to read `carries_kick`. Alchemist dump = the 3rd kicker, follow-up; the AI isn't a *deliberate*
+  kicker yet (raid_sim coincidental kicks ≈ 0 — AI kicker policy is the next slice). Gates: import ✅ ·
+  direct kick probe ✅ (Evis+dump kick myth_cot→myth_cot2, non-carrier Alchemist can't) ·
+  `alchemist_sim`/`well_sim` byte-identical (`ab-gate.sh`) · `ui_smoke_raid`. *(Claude session)*
 
 - ☐ 2026-07-12 · worktree `../wow-artv2-c1` (branch `artv2-c1`) · §GRAPHICS — **CLAIM:
   GRAPHICS PACKET C1 — ART-V2 SELECTOR + FAIL-SAFE** (GRAPHICS-PLAN §5·C1, shape per the C0
