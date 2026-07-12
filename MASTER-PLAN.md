@@ -876,6 +876,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · worktree `../wow-artv2-c3` (branch `artv2-c3`) · §GRAPHICS — **CLAIM:
+  GRAPHICS PACKET C3 — ASSET IMPORT + SCENE TOUR** (GRAPHICS-PLAN §5·C3; Bill's spec).
+  Target profiles: **`stack_atrium`** + **`stack_cold_aisle`** (SUNPRINT CEL direction —
+  bright/playful debug palettes until Codex I1 delivers). Deliverables: documented six-layer
+  environment asset schema + texture-import defaults (`game/art_v2/SCENES.md`) · profile→
+  asset-dir bindings (conventional `res://game/art_v2/scenes/<id>/<layer>.png`) · SceneKit
+  layers CONSUME textures when present, clearly-labeled AWAITING-CODEX placeholders when
+  missing (safe fallback, never a hole/crash) · repeatable ultrawide side behavior (scale-
+  by-height + horizontal tiling, never stretch) · repeatable tour (`artv2_scene_tour`).
+  Tooling consumes Codex assets — NO art generation/repainting, NO gameplay/actor/HUD
+  changes; legacy stays default. Verification INTENTIONALLY MINIMAL (Bill): parse/import ·
+  `artv2_probe` · one 1920×1080 shot per profile; **full resolution/A-B matrix = recorded
+  debt** (rides the C2 check-back debt). *(Claude session)*
+
 - ☑ 2026-07-12 · main · **ADD PHASES SING + a boot-breaker caught (`63080a1` + `949d4e7`).**
   ① Bill: Gemini's add phase "says HOLD and just hits me until I die, no notes" (+ "same with
   mythos adds") — ALL THREE raid adds (BARD.EXE · SONNET · OPUS subagents) shipped melee dicts
