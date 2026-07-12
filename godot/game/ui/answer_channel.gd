@@ -312,11 +312,13 @@ func _draw() -> void:
 			win_perfect * pps + minf(win_perfect, late_grace) * pps, bh), bloom)
 		UiKit.glow(self, Vector2(gx, cy), 46.0 + 30.0 * bf, Color(bull_col.r, bull_col.g, bull_col.b, 0.35 * bf))
 	_gate_band(gx, cy, bh, win_bullseye * pps, bull_col, bull_a)
-	# gem-set mullions at the band's OPEN (approach) + CLOSE (the true late edge)
-	for mx in [gx - win_graze * pps, gx + minf(win_graze, late_grace) * pps]:
-		draw_line(Vector2(mx, ty + 2), Vector2(mx, ty + bh - 2), Palette.BG0, 3.0, true)
-		draw_line(Vector2(mx + 1.0, ty + 2), Vector2(mx + 1.0, ty + bh - 2), Palette.STEEL, 1.2, true)
-		draw_circle(Vector2(mx, ty - 3.0), 2.2, Palette.STEEL.lightened(0.2))
+	# gem-set mullion at the band's CLOSE (the true late edge — the hard stop line). The
+	# OPEN/approach edge is deliberately UNMARKED (Bill 2026-07-12): where you can start
+	# clicking is implied by the grading bands lighting up, not a printed blue line.
+	var cmx := gx + minf(win_graze, late_grace) * pps
+	draw_line(Vector2(cmx, ty + 2), Vector2(cmx, ty + bh - 2), Palette.BG0, 3.0, true)
+	draw_line(Vector2(cmx + 1.0, ty + 2), Vector2(cmx + 1.0, ty + bh - 2), Palette.STEEL, 1.2, true)
+	draw_circle(Vector2(cmx, ty - 3.0), 2.2, Palette.STEEL.lightened(0.2))
 	# the PARRY land window — steel notches above + below the track (late side = the grace)
 	var pw := parry_window * pps
 	var pwr := pw + minf(parry_window, late_grace) * pps
