@@ -1045,6 +1045,12 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 		"rupture":     return _rupture(s, seat)
 	return false
 
+## INTERRUPT-BY-ABILITY (pillar #3): the combo finisher Eviscerate carries the kick — land it
+## during a boss's interruptible cast and it stops (CombatCore._try_interrupt). Bill's steer:
+## no separate button, no tight window; the finisher is the interrupt.
+func ability_interrupts(id: StringName) -> bool:
+	return String(id) == "eviscerate"
+
 ## GRADED WINDOW (§2c): given `since` and the live green [lo,hi], return the grade. The
 ## dead centre is a Bullseye, the core is Perfect, the flanks are Good, outside is a Miss.
 func _strike_grade(since: int, lo: int, hi: int) -> int:
@@ -1738,6 +1744,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	var out := {
 		"tick": s.tick,
 		"aspect": aspect,
+		"carries_kick": true,   # INTERRUPT-BY-ABILITY (pillar #3): Eviscerate kicks — the cast bar reads "interrupt", not "uncontested"
 		"energy": seat.resource,
 		"energy_max": cfg.energy_max,
 		"cp": int(seat.vars.get("cp", 0)),
