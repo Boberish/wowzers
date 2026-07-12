@@ -116,6 +116,14 @@ var spec: Dictionary = {}
 
 var _distant_l: Control
 var _atmos: CPUParticles2D
+## C3 HOTFIX (2026-07-12): layer textures are resolved ONCE here, at _ready —
+## NEVER load()ed inside a draw callback. On the WSLg d3d12-GL driver a texture
+## whose FIRST load happens during a canvas draw pass uploads as a permanent
+## flat-white RID (proven by artv2_tex_probe: same .ctex, in-draw first-load =
+## white, up-front first-load = art). Resolving up front is also just correct —
+## painters should read, not do I/O. Delivery semantics unchanged: files are
+## picked up at host construction (profile boot), same as before.
+var _tex: Dictionary = {}   # layer name -> Texture2D (missing layer = absent)
 var _t := 0.0
 # fixed offset tables so shapes are stable frame-to-frame (no unseeded randomness)
 # typed: an untyped const Array indexes to Variant and breaks every `:=` inference
@@ -130,6 +138,10 @@ func _init(p: String) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _ready() -> void:
+	for l in LAYER_FILES:   # the hotfix: texture I/O up front, outside any draw
+		var t := SceneKit.layer_tex(spec, l)
+		if t != null:
+			_tex[l] = t
 	# six layers, back to front — each a full-rect draw surface fed by its spec
 	_layer(_paint_backdrop)
 	_distant_l = _layer(_paint_distant)
@@ -138,10 +150,9 @@ func _ready() -> void:
 	_layer(_paint_dressing)
 	_atmos = _make_atmosphere()
 	add_child(_atmos)
-	var tint := _layer(_paint_tint)   # the palette half of layer 6
-	var add := CanvasItemMaterial.new()
-	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
-	tint.material = add
+	# Palette is a subtle alpha tint, not a light emitter. Additive blending with
+	# near-white profile colors saturates real textures to white.
+	_layer(_paint_tint)
 	# the watermark: debug/placeholder scenes say so on every screenshot
 	var tag := Label.new()
 	tag.text = "SCENEKIT · %s · %s" % [profile_id,
@@ -204,7 +215,7 @@ func _paint_backdrop(ci: Control) -> void:
 	var h := ci.size.y
 	if w <= 0.0 or h <= 0.0:
 		return
-	var tex := SceneKit.layer_tex(spec, "backdrop")
+	var tex: Texture2D = _tex.get("backdrop")
 	if tex != null:
 		_tile(ci, tex, 0.0, h)   # scale-by-height, tile any leftover width
 		return
@@ -222,7 +233,7 @@ func _paint_distant(ci: Control) -> void:
 	var h := ci.size.y
 	if w <= 0.0 or h <= 0.0:
 		return
-	var tex := SceneKit.layer_tex(spec, "distant")
+	var tex: Texture2D = _tex.get("distant")
 	if tex != null:
 		# a transparent sky-band strip, drifting slowly (repeatable, wraps clean)
 		_tile(ci, tex, h * 0.06, h * 0.26, _t * 8.0)
@@ -255,7 +266,7 @@ func _paint_midground(ci: Control) -> void:
 	if w <= 0.0 or h <= 0.0:
 		return
 	var floor_y := h * FLOOR_Y
-	var tex := SceneKit.layer_tex(spec, "midground")
+	var tex: Texture2D = _tex.get("midground")
 	if tex != null:
 		# transparent framing tile, feet on the floor line, tiled across width
 		var strip_h := h * 0.46
@@ -290,7 +301,7 @@ func _paint_floor(ci: Control) -> void:
 		return
 	var d: Dictionary = spec.get("floor", {})
 	var floor_y := h * FLOOR_Y
-	var tex := SceneKit.layer_tex(spec, "floor")
+	var tex: Texture2D = _tex.get("floor")
 	if tex != null:
 		_tile(ci, tex, floor_y, h - floor_y)
 	else:
@@ -311,7 +322,7 @@ func _paint_dressing(ci: Control) -> void:
 	if w <= 0.0 or h <= 0.0:
 		return
 	var floor_y := h * FLOOR_Y
-	var tex := SceneKit.layer_tex(spec, "dressing")
+	var tex: Texture2D = _tex.get("dressing")
 	if tex != null:
 		# flank props: drawn once per side, right side mirrored — never tiled
 		# across the combat lane (props frame the fight, they don't cross it)

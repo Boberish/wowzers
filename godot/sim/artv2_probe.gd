@@ -81,8 +81,12 @@ func _initialize() -> void:
 		for layer in ["backdrop", "distant", "midground", "floor", "dressing", "atmosphere"]:
 			_chk(fails, "%s has %s layer" % [pid, layer], prof.has(layer))
 		for layer in SceneKit.LAYER_FILES:
-			_chk(fails, "%s %s tex pending => null" % [pid, layer],
-				SceneKit.layer_tex(prof, String(layer)) == null)
+			# delivery-agnostic: the resolver must agree with the filesystem —
+			# delivered => a real Texture2D, pending => null (the labeled fallback)
+			var want := ResourceLoader.exists("%s/%s.png" % [String(prof["dir"]), layer], "Texture2D")
+			var got := SceneKit.layer_tex(prof, String(layer))
+			_chk(fails, "%s %s resolver matches delivery(%s)" % [pid, layer, want],
+				(got != null) == want)
 		var host := SceneKit.make(String(pid))
 		_chk(fails, "%s => SceneKit host" % pid, host is SceneKit)
 		host.free()

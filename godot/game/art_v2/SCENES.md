@@ -66,6 +66,18 @@ Target the 1080p design height; the engine scales from there:
   sheets/generations stay out of `res://` (a marked source-art folder outside the
   project if Bill wants history).
 
+## 3½. Renderer law — no texture I/O in painters (2026-07-12 hotfix)
+
+SceneKit resolves every layer texture ONCE, at host construction (`_ready`) —
+never `load()` inside a draw callback. On the WSLg d3d12-GL driver a texture
+whose FIRST load happens during a canvas draw pass uploads as a permanently
+flat-white RID (the C3 texture-visibility bug: art loaded+drawn in-painter =
+white screen; identical `.ctex` loaded up front = correct). Delivery semantics
+are unchanged — files are picked up when the profile host boots.
+`sim/artv2_tex_probe.gd` is the four-path regression harness (ctex up-front ·
+ctex in-draw · ImageTexture · TextureRect); if scenes ever go white again on a
+new driver, run it first.
+
 ## 4. The repeatable tour (visual acceptance)
 
 ```
