@@ -110,6 +110,9 @@ scored, best/closest resolves the payout.
 - **Open feel-verdict:** bite magnitudes (how punishing before it's un-fun).
 
 ### 🟡 ENDLESS — a door on the Depth ladder (coordinate, do NOT fork)
+> **➜ DESIGNED 2026-07-11: `ENDLESS-PLAN.md` (THE BLIND DESCENT — fog-of-war maze crawler,
+> Bill's pitch) now owns the mode's structure**; this section stays the origin note. The
+> don't-fork rule held: Depth math untouched, the plan owns only the door + the floor shape.
 - The infinite-scaling engine already exists + is locked: the **Depth** ladder (numeric spine +
   affix tiers that tighten windows / add beats, never stat-inflation; run-scoped power + a
   how-deep standing = already Law-#1-safe). "Balatro, go till you die" is a new **door/framing**,

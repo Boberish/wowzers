@@ -126,12 +126,27 @@ duration (tempo multiplier, never per-note), beats fast and close. Inside: **dod
 parry disabled · wind NOT used** — pure execution, don't miss one; all-or-nothing stands,
 clean weave = free RIPOSTE; tempo eases back after. No LATE bars inside a flurry.
 
-### THE PEEL (aggro loss) — loud, unanswerable, legible
-Lost-aggro attacks are UNDODGEABLE (merged `cdd008f`, kept): the stream carries ONLY bars
-the tank can answer, so on a peel the tank's stream simply **PAUSES** (the tank's tell) +
-an **AGGRO LOST** cue everyone sees + the aggro-box pip snaps gold to the victim + the
-victim's "IT'S HUNTING YOU — CAN'T DODGE, RIDE IT OUT" banner. **Supersedes §1c/§1d "peel
-rides the victim's own dodge bar + grace-delay" — that rule is DEAD.** No ghost bars.
+### THE PEEL (aggro loss) — loud, and THE COMEBACK (⚠ amended pass 2, Bill's playtest)
+**Pass 2 (2026-07-11): the tank SEES AND ANSWERS EVERY BAR, always.** A peeled bar draws
+translucent + hunt-ticked on the channel; its damage lands on the VICTIM (undodgeable for
+them — `cdd008f`'s rule survives on the damage side), but the tank's clean answer still
+pays flow/counters — **answering peeled bars IS how you claw aggro back.** The AGGRO LOST
+cue + gold pip + the victim's "IT'S HUNTING YOU" banner all stand. (The pass-1
+"stream pauses on a peel" tell is DEAD — it read as missing notes. §1c/§1d's
+"peel rides the victim's own dodge bar + grace-delay" stays dead too.)
+
+### THE PRESS (⚠ amended pass 2) — THE TWINFANG MODEL, verbatim
+Bill: *"the twinfang is super good, do that."* A press **CLAIMS the nearest unanswered bar
+within ±`answer_claim` (0.30s) and is judged INSTANTLY, SYMMETRIC around gate-touch**:
+`|press − impact| / claim` on the blade's own fractions (`grade_bull_frac .18 ·
+grade_perfect_frac .55 · grade_good_frac .80`, graze to the edge; PARRY binary at
+±`parry_land` 0.07). Verdict + payoffs fire AT the press with the blade's **±ms readout**;
+bars resolve `stream_resolve_slack` (0.15s) after gate-touch so a hair-late press still
+connects; the channel interpolates comets between 30 Hz ticks. The pass-1 model
+(press-opens-a-window, judged later at impact, early-side only) is DEAD — it graded
+hair-late presses as silent misses and read as input lag. Telegraph busters/globals keep
+the open-window model (big slow reads). EASY AGGRO first cut rides this pass (slip .05 ·
+decay .02 · floor .15 · start .75 — Bill: "easy aggro for now, tune later").
 
 ### BINDS + OFF-CHANNEL SURFACES
 Binds (kept from `1a03d33`): **1/SPACE/LMB = DODGE · 2/RMB = PARRY · 3 = ⚡DUMP · 4 = ⏱EN

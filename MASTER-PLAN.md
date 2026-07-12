@@ -858,7 +858,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
 - ☑ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3) — BUILT,
-  all 5 slices on the branch, ready for merge.** Design of record = TANK-PLAN §0 THE CHANNEL CONTRACT
+  all 5 slices + red-gate repair + union merge on the branch; final bar running.** Design of record = TANK-PLAN §0 THE CHANNEL CONTRACT
   v3 (FINAL BUILD SPEC): Design C two surfaces (channel = committed melee · judge/cast bar = raid
   globals+casts), full A/B unification REJECTED (DEC-1). Slices: **S1 `717b2a2`** law-suite probe +
   byte-free UI fixes (octagon projection + `_tempo_vis` deleted → constant pps; judge feed-or-
@@ -872,11 +872,63 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the forced-multi-step process-order probe (req 33 — real controller catch-up drain → single coherent
   comet slide, no jump); `server/preflight.sh` OK; net_smoke/net_map_smoke checksum-identical over
   loopback (v18); WSLg render confirmed (tank + Alchemist — no octagon, no frozen ghost, casts on the
-  cast bar); `verify-all` SEEDS=300 GREEN with all four classes' sims in one merge; BUILD_STAMP →
-  TANK-V3 (v18). ⚠ §7 items 1-3 are a DELIBERATE non-byte-identical re-baseline (the retirement WAS
+  cast bar); BUILD_STAMP → TANK-V3 (v18). **`cc4011f` red-gate repair (verify round 1):** the
+  `not is_cast` judge-feed guard REMOVED (the spec-named shared-widget regression — starved the
+  judge mid-cast for blade/caster/healer) · DEC-8/pass-2 easy-aggro carried exactly ·
+  `stream_dmg_mult` 0.85 (compensates the continuity fix's added stream exposure) · barrage-cd
+  re-tune into PILLAR #2's 3–8 band. **UNION MERGE of main `9b15833`** (pass-2 `8d77cbe` +
+  endless docs): branch wins the retired systems (barrier/octagon stay dead), pass-2 semantics
+  verified carried by the gate round. **⏳ `verify-all` SEEDS=300 (the merge-back bar) launched
+  2026-07-12 post-union** — known excluded fails: map_advance_probe (descent thread, broken on
+  main too) · ui_smoke_raid pause+codex (PRE-EXISTING: the frozen Bulwark placeholder wipes in
+  the input-less smoke; dies with the warden deletion, LEDGER §A½). Residual: expert-tier
+  tank_death on Riftmaw/Gemini/Mythos (the AI tank policy answers stream-first and misses the
+  CRUSH under the now-continuous stream) = S6 `stream_breathe` authoring + tuning, playtest-owned.
+  ⚠ §7 items 1-3 are a DELIBERATE non-byte-identical re-baseline (the retirement WAS
   the regression) — re-pin checksums, don't chase the diff. **Bill's per-Seal playtest = the feel gate**
   (per-Seal texture/busters/LATE authoring = S6; deck re-land = later). *(this session)*
 
+- ☑ 2026-07-11 · main (docs only) · **`ENDLESS-PLAN.md` NEW** / TEETH §ENDLESS / LEDGER §E —
+  **ENDLESS MODE DESIGNED: THE BLIND DESCENT (Bill's fog-of-war pitch).** Bill: dungeon-crawler
+  fog of war — see only adjacent rooms, find "the end", dead ends, turn around and go back.
+  Design v1: the third door (raid=campaign · dungeon=push lap · **endless=which-way-and-how-
+  greedy**) — small maze floors (~10–16 rooms, corridor→warren as Depth texture) under fog ·
+  **honest info economy** (silhouette tells · VANTAGE rooms · CHARTS as loot · SCOUT ⏻ spend;
+  Bill CUT the lying-signposts idea) · **free backtracking through cleared rooms** (Bill-liked;
+  anti-tedium law: wrong turns cost decisions, never time) · **dead-ends-always-pay law** ·
+  **the HUNTER as a per-floor printed term** (Bill: "some levels, not all-or-nothing") —
+  QUIET/HUNTED read on the stair before you descend, exploration-fed clock, kill-it-to-quiet-
+  the-floor · stairs/plunge exits, guardian every 3rd floor, runs start at rung 0, standing =
+  deepest floor cleared (own page) · **⚠ NOT AI-themed (Bill)** — skin candidates WANDERING
+  ESTATE / FIRST DIG / UNDERVAULT at §V-8. TEETH's don't-fork-Depth rule honored (rides
+  `spec.depth`, zero new math). 🟡 at Bill's 8-verdict board §V; slices S0–S4 after DESCENT §I's
+  map bang. No code touched. *(endless design session)*
+- ☑ 2026-07-11 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3, Bill) —
+  the original claim, kept for the record (the BUILT entry above supersedes).**
+  Bill's tank-v2 playtest: upcoming notes NOT showing · whole notes flicker in/out · elements pop
+  up all over (not just late) · sync weird · "fully buggy, not one thing" · other classes suspected
+  broken by the merge. Scope check: AAA bar, tens of thousands of players — logically perfect and
+  robust, no patch-on-patch. Opus agent workflow: behavior-contract recovery (the INTENT, not the
+  v2 tech plan — learn what it got wrong) + current-code audit + builds-1/2 autopsy + class-
+  regression hunt + symptom repro → root-cause synthesis → 3-architect design + judge synthesis →
+  sequential build slices on the branch (quick gates only, per Bill's verify law) → verify-all
+  final gate + class restore proof. *(this session)*
+  **⚠ HAND-OFF NOTE from the tank-v2 session (2026-07-11, after this claim): PASS 2 landed on
+  main at `8d77cbe` AFTER the claim above — audit THAT code, not `68b780a`.** Pass 2 maps onto
+  the symptom list directly: *notes not showing / flickering in-out* = the peel-filter (obs hid
+  bars whose victim ≠ tank; near the lock floor the victim FLAPPED per-bar → flicker) — GONE,
+  every bar ships now (peeled = translucent + hunt-tick; answering them = the aggro comeback,
+  Bill's rule) · *sync weird / imprecise* = press-grading was early-side-only + judged at impact
+  → replaced with THE TWINFANG PRESS MODEL (instant symmetric claim, ±ms readout, 0.15s resolve
+  slack, tick interpolation) · *other classes broken* = REAL v2 regression, fixed (the shared
+  judge starved mid-cast by a `not is_cast` guard; it must feed on EVERY telegraph — pre-tank
+  contract) · easy-aggro first cut in (slip .05/decay .02/floor .15/start .75). Remaining
+  suspects pass 2 does NOT cover: *"elements pop up all over"* beyond LATE bars + peel-flicker —
+  unreproduced here; check `AnswerChannel._seen`/flash bookkeeping + the barrier's thin-stream
+  gaps on Seals. Gates green: stream_probe · duelist_sim det · ui_smoke_raid. If Bill's playtest
+  of `8d77cbe` still fails, v3 proceeds — from the union, with the builds-1/2 autopsy including
+  pass 2's root-cause map (this entry + the pass-2 log block below). The tank-v2 session STOPS
+  touching this surface as of this note (the claim is yours).
 - ☑ 2026-07-11 · `../wow-tank-v2` → **MERGED `5af4927` (ff)** · **THE TANK-V2 REWRITE — BUILT.**
   All slices landed: S1 engine+kit bang (`30008b6` — THE STREAM committed-timeline replaces
   rhythm_*; kit rewritten deckless on the v3 matrix, tick-native, BULLSEYE ladder; BARRAGE
@@ -894,6 +946,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   timers keep the earliest-fire close) — an S6/SealTune knob, the barrier is law. ⚠ WSLg
   screenshot pass owed (`screenshot_duelist_raid` re-scoped to the channel checklist).
   *(the tank-v2 rewrite — S1–S4 + swap)*
+  **↳ PASS 2 (2026-07-11, Bill's live playtest) — MERGED `8d77cbe`.** Four reports, four
+  fixes: **① "laggy/imprecise presses" → THE TWINFANG PRESS MODEL** (Bill: *"the twinfang
+  is super good, do that"*): a press CLAIMS the nearest bar and is judged INSTANTLY,
+  SYMMETRIC around gate-touch (|off|/claim on the blade's own fractions, ±ms readout on
+  every stamp); bars resolve `stream_resolve_slack` (0.15s) after touch so hair-late
+  presses connect; comets interpolate between 30 Hz ticks. The old press-opens-a-window,
+  judged-at-impact, early-side-only model = the perceived lag. **② "not seeing all the
+  notes" → THE PEEL REWORKED (Bill's rule):** the tank sees + answers EVERY bar; a peeled
+  bar (translucent, hunt-ticked) damages its victim undodgeable, but the tank's clean
+  answers still pay flow/counters — **answering peeled bars IS the aggro comeback**
+  (supersedes the cdd008f stream-pause). **③ "aggro gone in 3 hits" → EASY AGGRO first
+  cut:** slip .14→.05 · decay .05→.02 · lock floor .30→.15 · start .55→.75 (sloppy sim
+  tank now HOLDS the boss; tune later). **④ "the blade froze — the bug is global" → a real
+  tank-v2 regression:** the shared judge must be fed on EVERY live telegraph INCLUDING
+  CASTS (its kick/cast windows live there — the pre-tank contract); the pass-1 `not
+  is_cast` guard starved it mid-cast. Gates: stream_probe ALL OK (peeled-flag invariant) ·
+  duelist_sim det PASS · ui_smoke_raid ALL OK. *(pass 2 — the playtest fixes)*
   **↳ the original claim (kept for the record):**
   (Bill: tank-w1 broke the game — *"plan the rewrite of the tank and the global dodge UI FROM
   THE BASE, no patching… i dont want tech debt"*). Requirements confirmed question-by-question →

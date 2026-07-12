@@ -55,11 +55,18 @@ func act(obs: Dictionary) -> Dictionary:
 	# expert stays in the bullseye/perfect core while good drifts to good/graze and sloppy
 	# sprays across the ladder — the visible gradient, without a tier that only ever grazes.
 
-	# 0) THE STREAM — my own committed bars, nearest first (the obs ships them ordered).
+	# 0) THE STREAM — the committed bars, nearest first (peeled ones too: answering them
+	#    is the aggro comeback — pass 2). Skip what's already answered and the eats.
 	var stream: Dictionary = obs.get("stream", {})
 	var bars: Array = stream.get("bars", [])
-	if not bars.is_empty() and answering == "":
-		var b: Dictionary = bars[0]
+	var b: Dictionary = {}
+	for cand_v in bars:
+		var cand: Dictionary = cand_v
+		if bool(cand.get("answered", false)) or String(cand.get("kind", "")) == "eat":
+			continue
+		b = cand
+		break
+	if not b.is_empty() and answering == "":
 		var eta := float(b.get("eta", 99.0))
 		var bk := String(b.get("kind", "auto"))
 		var react := _react_for(int(b.get("id", -1)), bk == "heavy" or bk == "buster")
