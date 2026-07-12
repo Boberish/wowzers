@@ -756,7 +756,8 @@ Claude-heavy engineering packets. **Bill V1 approved 2026-07-12: SUNPRINT CEL** 
 playful, authored screen-print/cel detail, with darker dungeons as contrast rather than the default.
 The game is UI-first: a dominant timing channel, same-frame press feedback, large grades, compact
 secondary abilities, and fast cancelable actor payoff. C0 + C1 are complete (selector merged
-`3da278f`); C2 (Scene Profile contract + placeholder profiles) is next.
+`3da278f`); C2 SceneKit merged `da314e9` under Bill's assume-pass instruction. P3 environment
+contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-default debt.
 
 **Now:** Gilded Reliquary 2D UI + PoseRig stage are playable and stay default throughout V2 work.
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
@@ -782,7 +783,7 @@ secondary abilities, and fast cancelable actor payoff. C0 + C1 are complete (sel
   4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
   trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
   `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
-- **GRAPHICS V2 — P2 FOUNDATION ACTIVE:** order is P0 docs → P1 **SUNPRINT CEL + reaction-first
+- **GRAPHICS V2 — P3 ENVIRONMENT PAIR ACTIVE:** order is P0 docs → P1 **SUNPRINT CEL + reaction-first
   verdict approved** → Claude foundation packets C0–C2 → interior/exterior scene contrast pair →
   Duelist anchor+hybrid rig → connected Duelist dashboard → signature VFX → side-by-side playtest.
   Old renderer/HUD remains selectable and default until every replacement slice passes.
@@ -875,6 +876,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · preview art / no runtime code · §GRAPHICS — **CLAIM: P3 CODEX I1 — THE
+  ENVIRONMENT CONTRAST PAIR + C3 ASSET CONTRACT.** Use the approved SUNPRINT CEL direction and
+  the Mistral data-center concept as the bright anchor: **THE STACK**, an airy retro-future server
+  atrium. Pair it with a darker machine-space scene that remains colorful/readable and clearly
+  belongs to the same world—not another generic fantasy dungeon. Define separable six-layer
+  deliverables for SceneKit; generated previews remain outside runtime until Bill approves. After
+  approval, Claude receives C3 only (asset folders/import defaults/repeatable scene tour). No
+  overlap with the live `raid_content.gd` playtest edit. *(Codex graphics-v2 session)*
+
 - ☑ 2026-07-12 · main · **THE GUARD — authored space around globals (`d03dbfa`; Bill: "it's
   every time a problem").** Quiet windows [impact−0.65, impact+0.45] (TuningConfig knobs,
   per-Seal melee overrides) around every answerable telegraph impact: committed bars inside
@@ -887,9 +897,9 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   warden fail HEALED (it was dying to unanswerable stream pressure).** Closes the owed
   "per-Seal quiet windows" item as a general system. Windows install updated + boot-clean.
   TANK-PLAN §0 ruling 7. *(this session)*
-- ☐ 2026-07-12 · worktree `../wow-artv2-c2` (branch `artv2-c2`) · §GRAPHICS — **GRAPHICS
-  PACKET C2 — SCENE PROFILE CONTRACT + PLACEHOLDER PROFILES: ⚠ BUILT ON BRANCH (`d296c7d`),
-  GATES DEFERRED — CHECK-BACK OWED** (Bill 2026-07-12: "assume it passes, at worst we come
+- ☑ 2026-07-12 · worktree `../wow-artv2-c2` (branch `artv2-c2`) → **MERGED `da314e9`** ·
+  §GRAPHICS — **GRAPHICS PACKET C2 — SCENE PROFILE CONTRACT + PLACEHOLDER PROFILES: ASSUMED
+  PASS; FINAL MATRIX DEFERRED** (Bill 2026-07-12: "assume it passes, at worst we come
   back and fix it — update the plan and move on"). Built per GRAPHICS-PLAN §5·C2 / the §2.2
   six-layer law: data-driven `SceneKit` host (`game/art_v2/scene_kit.gd`) — profiles as pure
   data (backdrop · distant life · midground · combat floor · encounter dressing ·
@@ -902,8 +912,9 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   profile×resolution sheets + the FEET-LINE RECORD — positions printed per shot, must match
   across profiles). **CHECK-BACK before merge:** probe result (run was in flight when the
   assume-pass call came) · tour matrix 1920/1280/2560 × legacy/interior/exterior + feet-line
-  diff · `ui_smoke_raid` parity · `ab-gate raid_sim` low-seed. NOT merged to `main` yet —
-  parse must prove first (a broken `class_name` cascades into concurrent sessions).
+  diff · `ui_smoke_raid` parity · `ab-gate raid_sim` low-seed. Bill explicitly overrode the wait;
+  current `main` was merged into the clean C2 branch and the result fast-forwarded to main without
+  touching the unrelated live `raid_content.gd` edit. Debt remains before release-default enable.
   *(Claude session)*
 
 - ☑ 2026-07-12 · `main` (docs only) · §GRAPHICS — **V1 VISUAL VERDICT +

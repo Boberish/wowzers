@@ -9,9 +9,11 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **V1 STYLE LOCKED / P2 FOUNDATION ACTIVE.** Bill approved **SUNPRINT CEL** on
+**Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
-texture rather than generic dark-fantasy micro-detail. C0 + C1 are complete (selector merged `3da278f`); C2 is next.
+texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C2 SceneKit merged as
+`da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
+verification debt, not a blocker to P3.
 Generated boards remain visual references, not runtime assets or a locked pixel layout.
 
 ---
@@ -212,13 +214,17 @@ animation-friendly parts; make the default world bright, fun, and detailed throu
 design rather than AI-looking microtexture. The UI is reaction-first per §2.3. No more slideshow
 proof is required; proceed to the replaceability foundation.
 
-### P2 · FOUNDATION RECON + FLAG — 🟡 C0 DONE · C1 🔨 `3da278f` · C2 NEXT
+### P2 · FOUNDATION RECON + FLAG — ✅ C0/C1 DONE · C2 MERGED `da314e9` (ASSUMED PASS)
 
 Read-only architecture map, default-off selector/fallback, and a Scene Profile host with placeholder
 layers. This proves replaceability without final art. Merge only if old default is byte-identical
 and smokes clean.
 
-### P3 · ENVIRONMENT CONTRAST PAIR — Codex I1 + Claude C3
+**Verification debt:** Bill explicitly waived C2's long final matrix on 2026-07-12 so production
+could continue. Run the recorded profile/resolution tour, UI smoke, and low-seed A/B gate before
+Art V2 can become a release default; failures return to C2 without invalidating the asset work.
+
+### P3 · ENVIRONMENT CONTRAST PAIR — 🟡 CODEX I1 ACTIVE · CLAUDE C3 NEXT
 
 Codex generates approved layered interior/exterior assets. Claude builds/imports the two profiles
 and the screenshot tour. Bill approves the same fight in both before we expand scenes.
