@@ -45,6 +45,32 @@ func _initialize() -> void:
 	ArtV2.actors = false
 	ArtV2.dash = false
 
+	# [5] SceneKit (C2): the six-layer host + profile table — absence returns legacy
+	var sk_legacy := SceneKit.make("")
+	_chk(fails, "SceneKit '' => StageBackdrop combat", sk_legacy is StageBackdrop and (sk_legacy as StageBackdrop).combat)
+	sk_legacy.free()
+	var sk_menu := SceneKit.make("legacy", false)
+	_chk(fails, "SceneKit 'legacy' keeps menu variant", sk_menu is StageBackdrop and not (sk_menu as StageBackdrop).combat)
+	sk_menu.free()
+	var sk_bogus := SceneKit.make("bogus_profile")
+	_chk(fails, "SceneKit unknown => legacy", sk_bogus is StageBackdrop)
+	sk_bogus.free()
+	for pid in ["v2_interior_test", "v2_exterior_test"]:
+		var host := SceneKit.make(String(pid))
+		_chk(fails, "SceneKit %s => host" % pid, host is SceneKit and (host as SceneKit).profile_id == String(pid))
+		host.free()
+		var prof: Dictionary = SceneKit.PROFILES[pid]
+		for layer in ["backdrop", "distant", "midground", "floor", "dressing", "atmosphere"]:
+			_chk(fails, "%s has %s layer" % [pid, layer], prof.has(layer))
+	ArtV2.scene = "v2_exterior_test"
+	var routed := ArtV2.make_scene()
+	_chk(fails, "ArtV2.make_scene routes to SceneKit", routed is SceneKit)
+	routed.free()
+	ArtV2.scene = ""
+	var routed2 := ArtV2.make_scene()
+	_chk(fails, "ArtV2.make_scene default => legacy", routed2 is StageBackdrop)
+	routed2.free()
+
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
 	print("ARTV2 PROBE: %s (%d checks)" % ["ALL OK" if fails.is_empty() else "FAIL", _n])

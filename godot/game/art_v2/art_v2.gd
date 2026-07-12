@@ -19,7 +19,6 @@ static var dash := false     ## ON: a V2 dashboard host may replace the widgets
 
 ## The non-canonical V2 namespace (§3): runtime assets live here until approved.
 const ACTOR_DIR := "res://game/art_v2/actors"
-const SCENE_DIR := "res://game/art_v2/scenes"
 
 ## Parse the boot arg: --artv2=actors,scene:<id>,dash  (any subset, any order).
 ## Unknown tokens warn and are IGNORED — a typo can't take the old graphics away.
@@ -52,21 +51,12 @@ static func make_actor(id: String, _aspect := "") -> Actor2D:
 		return SpriteActor2D.new(p)
 	return null   # missing V2 asset — the current puppet, never a null actor
 
-## SCENE seam — consumed at raid_hud._ready (the ONE environment node). Profile
-## "" or unknown ⇒ the legacy StageBackdrop, byte-for-byte the old construction.
-## Packet C2 replaces the naive lookup with the SceneKit six-layer host; this
-## selector + fall-back contract is the slot it lands in.
+## SCENE seam — consumed at raid_hud._ready (the ONE environment node). C2:
+## routes through the SceneKit six-layer host (game/art_v2/scene_kit.gd), which
+## owns the profile table AND the fail-safe — "" / "legacy" / unknown ⇒ the
+## legacy StageBackdrop, byte-for-byte the old construction.
 static func make_scene() -> Control:
-	if scene != "":
-		var p := "%s/%s.tscn" % [SCENE_DIR, scene]
-		if ResourceLoader.exists(p):
-			var node := (load(p) as PackedScene).instantiate()
-			if node is Control:
-				return node
-			if node != null:
-				node.free()   # wrong root type — reject, fall back
-		push_warning("ArtV2: scene profile '%s' missing/invalid — legacy backdrop" % scene)
-	return StageBackdrop.new()
+	return SceneKit.make(scene)
 
 ## DASHBOARD seam — consumed in raid_hud._build_combat. C1 ships the selector +
 ## fall-back ONLY: no V2 dashboard host exists until Packet C6 registers one
