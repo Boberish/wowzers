@@ -875,6 +875,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · main · **THE GUARD — authored space around globals (`d03dbfa`; Bill: "it's
+  every time a problem").** Quiet windows [impact−0.65, impact+0.45] (TuningConfig knobs,
+  per-Seal melee overrides) around every answerable telegraph impact: committed bars inside
+  SHATTER at cast start (the rear-up — a rule; selective, `stream_guard_shatter` names ids),
+  both publishers slide beats past live windows (flurries degrade rather than cross),
+  publishing never reads s.telegraph (windows = authored BossState data — continuity law
+  intact). Probe law 6 + sanctioned-vanish + guard-quiet-not-a-halt. **Dense expert 100%
+  win/2 deaths (35% this morning) — the whole press-feel arc closed: PRESS restore → ONE
+  BAR → ONE CLAIM → THE GUARD. And ui_smoke_raid is ALL OK — the long-known pause+codex
+  warden fail HEALED (it was dying to unanswerable stream pressure).** Closes the owed
+  "per-Seal quiet windows" item as a general system. Windows install updated + boot-clean.
+  TANK-PLAN §0 ruling 7. *(this session)*
 - ☐ 2026-07-12 · worktree `../wow-artv2-c2` (branch `artv2-c2`) · §GRAPHICS — **CLAIM:
   GRAPHICS PACKET C2 — SCENE PROFILE CONTRACT + PLACEHOLDER PROFILES** (GRAPHICS-PLAN §5·C2,
   the §2.2 six-layer law). Data-driven `SceneKit` host (`game/art_v2/scene_kit.gd`):

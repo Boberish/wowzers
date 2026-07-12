@@ -80,6 +80,17 @@ S7–S8b):** five rulings that supersede the matching lines below:
    byte-identical (no overlaps ⇒ old behavior exactly), dense expert 35%→80% win (the
    stolen presses back). Unanswerable pairs (< dodge_recover apart) remain the per-Seal
    quiet-window authoring's job (S6, owed).
+7. **THE GUARD (same round)** — Bill: "author the space around globals, it's every time a
+   problem." When the boss commits to an answerable cast (aoe beats · tank-aimed beats ·
+   strikeless busters), authored quiet windows [impact − `stream_guard_before` 0.65,
+   impact + `stream_guard_after` 0.45] open: committed bars inside SHATTER (the rear-up —
+   a rule, like body-death; the runway beyond survives) and both publishers slide future
+   beats past (flurries never cross — they degrade to autos). Per-Seal override via melee
+   `guard_before`/`guard_after`. Probe law 6 enforces it; guard quiet is never a publish
+   halt. Result: dense expert 80%→100% (the unanswerable pairs were the deaths) and the
+   long-known ui_smoke pause+codex warden fail HEALED (it was dying to unanswerable
+   pressure). This closes the owed "per-Seal stream_breathe quiet windows" item as a
+   GENERAL system — `stream_breathe` remains for extra scripted gaps.
 
 **Why this section exists:** tank-w1 (`62cc09e` + the ONE BAR v1→v1.5 patch chain) broke the
 game. Bill's call: **full rewrite from the base — kit + engine stream + UI — no patching, no
