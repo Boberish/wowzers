@@ -71,6 +71,24 @@ func _initialize() -> void:
 	_chk(fails, "ArtV2.make_scene default => legacy", routed2 is StageBackdrop)
 	routed2.free()
 
+	# [6] C3 asset bindings: the stack profiles are dir-bound, six layers each;
+	# no Codex layer is delivered yet, so layer_tex = null everywhere and the
+	# labeled-placeholder path IS the live path (missing-layer fail-safe).
+	for pid in ["stack_atrium", "stack_cold_aisle"]:
+		var prof: Dictionary = SceneKit.PROFILES.get(pid, {})
+		_chk(fails, "%s registered" % pid, not prof.is_empty())
+		_chk(fails, "%s dir-bound" % pid, String(prof.get("dir", "")).begins_with("res://game/art_v2/scenes/"))
+		for layer in ["backdrop", "distant", "midground", "floor", "dressing", "atmosphere"]:
+			_chk(fails, "%s has %s layer" % [pid, layer], prof.has(layer))
+		for layer in SceneKit.LAYER_FILES:
+			_chk(fails, "%s %s tex pending => null" % [pid, layer],
+				SceneKit.layer_tex(prof, String(layer)) == null)
+		var host := SceneKit.make(String(pid))
+		_chk(fails, "%s => SceneKit host" % pid, host is SceneKit)
+		host.free()
+	_chk(fails, "undirred profile never resolves tex",
+		SceneKit.layer_tex(SceneKit.PROFILES["v2_interior_test"], "backdrop") == null)
+
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
 	print("ARTV2 PROBE: %s (%d checks)" % ["ALL OK" if fails.is_empty() else "FAIL", _n])
