@@ -125,6 +125,58 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 	# no stream bar in claim range — leave the answer open for the telegraph path
 	seat.vars["ans_kind"] = kind
 	seat.vars["ans_tick"] = s.tick
+	_preview_tg(s, seat, kind)                            # instant feedback for a GLOBAL/beat/BUSTER
+
+## Instant feedback for a TELEGRAPH answer (GLOBAL / beat / BUSTER). These stay on the
+## open-window model (judged at impact) so the mitigation is unchanged — but the tank no longer
+## waits for the hit to LAND to see the verdict (the "globals don't register" complaint). We
+## PREDICT the grade from `remaining`, which equals the `age` modify_incoming computes at impact
+## (both = impact − press), so the pop can never lie; then emit a VIEW-ONLY preview the band
+## resolves ON the comet. Nothing here mutates state (boss HP + tick unchanged ⇒ byte-identical).
+func _preview_tg(s: CombatState, seat: Seat, kind: String) -> void:
+	var tg := s.telegraph
+	if tg == null:
+		return
+	var win := _tt(s, cfg.answer_active)
+	var strikes: Array = tg.ability.strikes
+	var best_i := -2                                      # -2 none · -1 buster · >=0 strike index
+	var best_rem := 1 << 30
+	if strikes.is_empty():
+		# a BUSTER: DEFENSIBLE swing aimed at me, no beats
+		if tg.ability.response == AbilityRes.Response.DEFENSIBLE and tg.target == seat \
+				and not tg.ability.feint:
+			var rem := (tg.start_tick + tg.dur_ticks) - s.tick
+			if rem >= 0 and rem <= win:
+				best_i = -1
+				best_rem = rem
+	else:
+		for i in range(tg.next_strike, strikes.size()):
+			var st: StrikeRes = strikes[i]
+			if st.feint:
+				continue                                  # telegraph fakes don't punish the tank — no preview
+			if not (st.aoe or CombatCore._beat_victim(tg, i) == seat):
+				continue
+			var imp := tg.start_tick + CombatCore.to_ticks(st.at, s.config.fixed_hz)
+			var rem := imp - s.tick
+			if rem >= 0 and rem <= win and rem < best_rem:
+				best_rem = rem
+				best_i = i
+	if best_i == -2:
+		return
+	# ANY telegraph strike is a GLOBAL at impact (modify_incoming: is_global = strikes non-empty);
+	# only a strikeless buster is the personal parry/dodge target.
+	var is_global := best_i >= 0
+	var size := int((strikes[best_i] as StrikeRes).size) if best_i >= 0 else int(tg.ability.size)
+	var id := -(1000 + tg.start_tick * 8) if best_i < 0 else -(1000 + tg.start_tick * 8 + 1 + best_i)
+	var grade := StrikeRes.Grade.MISS
+	if kind == "parry":
+		grade = StrikeRes.Grade.MISS if is_global \
+			else (StrikeRes.Grade.BULLSEYE if best_rem <= _tt(s, cfg.parry_window) * 2 else StrikeRes.Grade.MISS)
+	else:
+		var g := _dodge_grade(s, best_rem)
+		grade = g if (is_global or g == StrikeRes.Grade.BULLSEYE) else StrikeRes.Grade.MISS
+	CombatCore._emit(s, {"t": "duel_tg_preview", "player": seat.is_player, "seat": seat,
+		"kind": ("dodge" if is_global else kind), "grade": grade, "size": size, "id": id})
 
 ## THE PRESS (§0 pass 2): find the nearest unanswered, claimable bar within ±answer_claim of
 ## NOW (late side bounded by the resolve slack) and judge the press against it INSTANTLY.

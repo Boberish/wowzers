@@ -191,6 +191,8 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		"duel_answer":
 			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)),
 				ev.has("id"), int(ev.get("id", -1)), ev.has("off_ms"), int(ev.get("off_ms", 0)))
+		"duel_tg_preview":
+			_tg_preview(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("id", -1)))
 		"duel_dodge":
 			channel.press_tick("dodge")            # the frame-you-press echo (§0 pass 2)
 			dodge_rune.kick()                      # the bind rail animates too (key/mouse bypass _gui_input)
@@ -300,8 +302,29 @@ func _tg_claim(family: String, txt: String) -> void:
 	if best_id < 0:
 		_tg_answered[best_id] = true
 		channel.resolve(best_id, family, txt, "")
-	else:
-		channel.stamp(txt, family)   # no telegraph comet tracked — a bare gate stamp
+	# else: nothing tracked (usually because the press-time preview already popped this comet) —
+	# stay silent so a previewed global/beat/buster never double-pops at impact.
+
+## The INSTANT telegraph preview (Bill 2026-07-12): globals/beats/busters were judged at impact,
+## so a dodge felt unregistered. Pop the predicted grade ON the comet the frame you press; the
+## mitigation still lands at impact and the center-screen SLAM still fires there for the big
+## grades — this is just the comet-level "registered" beat. Mark it answered so the miss-
+## afterlife can't also red it, and so the impact verdict (via _tg_claim) stays silent.
+func _tg_preview(kind: String, grade: int, id: int) -> void:
+	if id >= 0:
+		return
+	_tg_answered[id] = true
+	match grade:
+		StrikeRes.Grade.BULLSEYE:
+			channel.resolve(id, "bullseye", ("PARRY!" if kind == "parry" else "BULLSEYE!"), "")
+		StrikeRes.Grade.PERFECT:
+			channel.resolve(id, "perfect", "PERFECT", "")
+		StrikeRes.Grade.GOOD:
+			channel.resolve(id, "good", "GOOD", "")
+		StrikeRes.Grade.GRAZE:
+			channel.resolve(id, "graze", "GRAZE", "")
+		_:
+			channel.resolve(id, "hit", ("MISSED" if kind == "parry" else "MISS"), "")
 
 ## THE STREAM TUNER (dev-only): live-tune the ACTIVE body's texture profile mid-fight.
 func _toggle_tuner() -> void:
