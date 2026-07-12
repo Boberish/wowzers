@@ -9,9 +9,10 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **PLANNING / AT VISUAL DIRECTION GATE V1.** Architecture and execution order are
-captured. No final style, generated asset, or Art-V2 code is approved yet. The dashboard mock-up
-from the Codex session is a useful composition reference, **not a locked skin or layout**.
+**Status:** 🟡 **V1 STYLE LOCKED / P2 FOUNDATION ACTIVE.** Bill approved **SUNPRINT CEL** on
+2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
+texture rather than generic dark-fantasy micro-detail. C0 is complete; C1 is active; C2 is next.
+Generated boards remain visual references, not runtime assets or a locked pixel layout.
 
 ---
 
@@ -36,8 +37,12 @@ feedback, not hours in Spine or an image editor.
 aligned them; rigid painted limbs on the existing Twinfang code rig were the target; UI and
 environments were outside the plan.
 
-**V2 assumption:** the style is deliberately **OPEN** until Bill sees comparison boards. Codex
-generates and prepares the art. Claude builds the reusable native pipeline. The target is a
+**V2 decision:** the boards resolved the open style gate to **SUNPRINT CEL**. The default world is
+light, colorful, happy, and adventurous; authored darker dungeons are contrast scenes, not the
+whole game's exposure. Confident irregular ink contours, deliberate color blocks, limited
+screen-print grain, and consistent shape language replace glossy gradients, random filigree, and
+generic AI-fantasy microtexture. Codex generates and prepares the art. Claude builds the reusable
+native pipeline. The target remains a
 **C/D hybrid**: painted layered characters + selective deformation + replacement drawings at
 extreme/contact poses + authored flipbook VFX, inside modular scene kits and a painted dashboard.
 
@@ -107,18 +112,36 @@ art; sides grow through repeatable/extendable layers.
 The same Duelist, boss, timing channel, and dashboard must belong in both. Passing only the dark
 scene is a failure: it would reproduce the "one dungeon forever" trap Bill flagged.
 
-### 2.3 HUD/UI — painted components over live controls
+### 2.3 HUD/UI — reaction-first painted components over live controls
 
-The generated Duelist dashboard mock-up establishes a promising hierarchy, not final taste. Its
-durable insight is **one connected class instrument**:
+Bill's V1 verdict clarified that this is a **split-second UI game represented by animated
+characters**, not a character-control game with a decorative HUD. The timing/answer channel is the
+primary attention target. Actors, environments, and VFX celebrate and explain the input without
+competing with the next read.
 
-- Flow/Aggro is the primary spine and prints the 30% lock threshold.
+The durable layout insight remains **one connected class instrument**:
+
+- The answer channel is the largest persistent combat instrument, broad and prominent in the
+  lower-middle, and owns timing truth.
+- Flow/Aggro is the class spine beneath it and prints the 30% lock threshold.
 - Five combo sockets live inside that spine.
 - Wind is a secondary reservoir inside the same object.
-- Four abilities dock to the instrument.
-- The answer channel remains immediately above and owns timing truth.
+- Four abilities dock compactly to the instrument and remain visually secondary to the next
+  timing target.
 - Player/party survivability and current target form a left island.
 - Boss HP/cast/effects form an enemy island away from the timing instrument.
+
+**Reaction-first contract:**
+
+- A valid press responds in the same rendered frame: button depression/pulse, exact press mark,
+  and local channel reaction do not wait for later attack impact.
+- PERFECT/BULLSEYE/other grades are large, high-contrast, and anchored at the answer focus; a
+  brief residual history remains while the next target is already readable.
+- Feedback has three ordered layers: **press acknowledgment → timing verdict → world/actor payoff**.
+  Layer 3 may be beautiful, but layers 1–2 carry the game.
+- Shake, smears, flashes, and large typography never move or hide timing truth.
+- Final pixel sizes are chosen in a live rapid-sequence prototype, not copied literally from a
+  generated screenshot.
 
 Implementation uses modular authored components: 9-slice frames/caps · fill masks · sockets ·
 icons · glints · typography · effect rings. No text, numbers, fills, cooldowns, or state are baked
@@ -140,6 +163,11 @@ Motion has four layers, ordered by return:
 
 The `tempo-art` Slice 1 (`e4589a6`) may already solve useful pieces of layer 2. Claude must audit
 and transplant only the reusable, current-main-safe parts; do not merge the old branch wholesale.
+
+**High-flow law:** gameplay never queues behind presentation. Contact accents initially target
+roughly 50–100 ms; recovery may run roughly 100–180 ms but is always interruptible. New committed
+actions replace/scrub stale recovery immediately, especially for Twinfang at high Flow. The answer
+channel and next target remain coherent even when character poses cannot visually finish.
 
 ---
 
@@ -167,7 +195,7 @@ and transplant only the reusable, current-main-safe parts; do not merge the old 
 
 New plan · old-plan deprecation · MASTER/LEDGER sync · Claude packets. No code or art. Stop at V1.
 
-### P1 · V1 STYLE BOARD — Codex image generation
+### P1 · V1 STYLE BOARD — ✅ BILL VERDICT 2026-07-12
 
 Generate **three coherent direction boards**, each showing the same small set: Duelist · one boss
 silhouette · interior crop · outdoor crop · dashboard material fragment · one ability icon.
@@ -179,9 +207,12 @@ Candidate families (prompts refined before generation; names are descriptive, no
 - **C · ETCHED RELIQUARY:** illustrated ink/engraving character edges with painted fills and
   Gilded-Age ornament.
 
-**Bill V1:** choose one, combine named parts, or reject all. Nothing else advances first.
+**Bill V1 verdict:** **A refined to SUNPRINT CEL.** Keep Graphic Cel's crisp silhouettes and
+animation-friendly parts; make the default world bright, fun, and detailed through intentional
+design rather than AI-looking microtexture. The UI is reaction-first per §2.3. No more slideshow
+proof is required; proceed to the replaceability foundation.
 
-### P2 · FOUNDATION RECON + FLAG — Claude packets C0/C1/C2
+### P2 · FOUNDATION RECON + FLAG — 🟡 C0 DONE · C1 ACTIVE · C2 NEXT
 
 Read-only architecture map, default-off selector/fallback, and a Scene Profile host with placeholder
 layers. This proves replaceability without final art. Merge only if old default is byte-identical
