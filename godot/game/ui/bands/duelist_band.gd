@@ -68,7 +68,7 @@ func build() -> void:
 	engarde_rune.tooltip_text = "⏱ EN GARDE (~1-min CD) — CALL IT OUT: the stream quickens +25%, leaks HALVED, clean answers pay DOUBLE flow. Two slips break it. An amplifier — pays nothing if you don't answer."
 	engarde_rune.pressed.connect(func(): hud._ctrl.human({"type": "ability", "id": "engarde"}))
 	row.add_child(engarde_rune)
-	hud._hint_line("1 / SPACE / LMB — DODGE    ·    2 / RMB — PARRY (land = counter + ◆)    ·    3 — ⚡ DUMP    ·    4 — ⏱ EN GARDE")
+	hud._hint_line("1 / SPACE / LMB — DODGE    ·    2 / RMB — PARRY (land = counter + ◆)    ·    3 — ⚡ DUMP    ·    4 — ⏱ EN GARDE    ·    PURPLE = A FAKE, DON'T PRESS    ·    SKULL = BRACE")
 
 func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	hp_orb.set_values(p.hp, p.hp_max)
@@ -244,7 +244,8 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 				channel.resolve_tg("baited", "BAITED!")
 			slam.slam("BAITED", "baited")
 		StrikeRes.Grade.READ:
-			channel.resolve(id, "read", "READ", "")     # held it — no press to time
+			# the event carries the fake's own id now — the purple dissolve lands ON it
+			channel.resolve(id, "read", "READ", "held the fake")
 		_:
 			var mtxt := "MISS"
 			if kind == "parry":

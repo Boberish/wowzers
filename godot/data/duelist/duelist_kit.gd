@@ -408,7 +408,8 @@ func on_stream_bar(s: CombatState, seat: Seat, bar: Dictionary) -> void:
 			_add_flow(s, seat, s.config.flow_gain_graze)
 			CombatCore._bump_diag(s, seat, "read")
 			CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-				"kind": "hold", "grade": StrikeRes.Grade.READ, "size": AbilityRes.Size.LIGHT})
+				"kind": "hold", "grade": StrikeRes.Grade.READ, "size": AbilityRes.Size.LIGHT,
+				"id": int(bar.get("id", -1))})   # the view anchors the READ on the fake itself
 		"eat":
 			CombatCore._bump_diag(s, seat, "eaten")
 			CombatCore._emit(s, {"t": "duel_eat", "player": seat.is_player, "seat": seat})

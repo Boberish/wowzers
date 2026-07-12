@@ -129,8 +129,13 @@ func missed(id: int) -> void:
 	var rec = _last_x.get(id)                 # untyped: .get() into := is a parse error
 	if rec == null:
 		return
-	_missed.append({"x0": float(rec["x"]), "kind": String(rec["kind"]),
-		"purple": bool(rec["purple"]), "t": 0.0})
+	if bool(rec["purple"]):
+		# belt-and-braces: a fake NEVER wears the red ✗ — it dissolves purple
+		_deaths.append({"x": float(rec["x"]), "kind": String(rec["kind"]), "purple": true,
+			"col": PURPLE, "shape": "puff", "t": 0.0, "seed": float(absi(id) % 211)})
+	else:
+		_missed.append({"x0": float(rec["x"]), "kind": String(rec["kind"]),
+			"purple": false, "t": 0.0})
 	_last_x.erase(id)
 
 ## A secondary callout landed (COUNTER / RIPOSTE / EN GARDE …): a light floating tag over the
@@ -186,11 +191,12 @@ func resolve(id: int, family: String, txt: String, ms_txt: String) -> void:
 func resolve_tg(family: String, txt: String) -> void:
 	var best := 1
 	var best_x := -1.0e9
-	for k in _last_x:
+	var floor_x := _gate_x() - 70.0           # answers happen AT the gate — never steal a
+	for k in _last_x:                          # mid-track comet (the red-✗-on-a-feint bug)
 		if int(k) >= 0:
 			continue
 		var rx := float(_last_x[k]["x"])
-		if rx > best_x:
+		if rx > best_x and rx >= floor_x:
 			best_x = rx
 			best = int(k)
 	if best < 0:
@@ -204,9 +210,10 @@ func _nearest_key() -> int:
 	var best := -9999
 	var best_x := -1.0e9
 	var gx := _gate_x() + 6.0
-	for k in _last_x:
+	var floor_x := _gate_x() - 70.0           # verdicts belong to the gate neighborhood —
+	for k in _last_x:                          # never anchor on a comet still mid-track
 		var rx := float(_last_x[k]["x"])
-		if rx <= gx and rx > best_x:
+		if rx <= gx and rx >= floor_x and rx > best_x:
 			best_x = rx
 			best = int(k)
 	return best
@@ -386,7 +393,7 @@ func _draw() -> void:
 		var purple := bool(b.get("purple", false))
 		var answered := bool(b.get("answered", false))
 		present[id] = true
-		_last_x[id] = {"x": x, "kind": kind, "purple": purple, "absent": 0}   # claim anchor, verbatim
+		_last_x[id] = {"x": x, "kind": kind, "purple": purple, "answered": answered, "absent": 0}   # claim anchor, verbatim
 		if not _seen.has(id):
 			_seen[id] = 0.0
 			if bool(b.get("late", false)):
@@ -411,7 +418,8 @@ func _draw() -> void:
 		var tkind := String(tb.get("kind", "global"))
 		var tpurple := bool(tb.get("purple", false))
 		present[tid] = true
-		_last_x[tid] = {"x": tx2, "kind": tkind, "purple": tpurple, "absent": 0}
+		_last_x[tid] = {"x": tx2, "kind": tkind, "purple": tpurple,
+			"answered": bool(tb.get("answered", false)), "absent": 0}
 		if not _seen.has(tid):
 			_seen[tid] = 0.0
 			_flashes.append({"x": tx2, "t": 0.0})     # big moves announce themselves
@@ -432,9 +440,17 @@ func _draw() -> void:
 			if int(_last_x[k]["absent"]) > 3:
 				stale.append(k)
 	for k in stale:
-		if int(k) < 0 and float(_last_x[k]["x"]) >= gx - 10.0:
-			_missed.append({"x0": float(_last_x[k]["x"]), "kind": String(_last_x[k]["kind"]),
-				"purple": bool(_last_x[k]["purple"]), "t": 0.0})
+		var was_purple: bool = bool(_last_x[k]["purple"])
+		var was_answered: bool = bool(_last_x[k].get("answered", false))
+		if int(k) < 0 and float(_last_x[k]["x"]) >= gx - 10.0 and not was_answered:
+			if was_purple:
+				# a held FAKE dissolves purple — success feedback, never the red ✗
+				_deaths.append({"x": float(_last_x[k]["x"]), "kind": String(_last_x[k]["kind"]),
+					"purple": true, "col": PURPLE, "shape": "puff", "t": 0.0,
+					"seed": float(absi(int(k)) % 211)})
+			else:
+				_missed.append({"x0": float(_last_x[k]["x"]), "kind": String(_last_x[k]["kind"]),
+					"purple": false, "t": 0.0})
 		_last_x.erase(k)
 	# --- THE MISS AFTERLIFE: red ✗ husks keep flowing past the line to the bar's end ---
 	for m_v in _missed:
