@@ -542,7 +542,7 @@ land now. Shared + Brim below; Draw rows arrive with D6.)*
 | **Whitewater** | `whitewater` | POWER | H/S/O | 🔨 `ed358aa` | Rapids | Clean/still heals +4%/Current stack. |
 | **Shoot the Gap** | `shootGap` | GREED | H/S/O | 🔨 `ed358aa` | Rapids | At MAX Current, Still-Point tags ×1.3. |
 | **Eddyline** | `eddyline` | STRAT | H/S/O | 🔨 `ed358aa` | Rapids | One undercook/10s downgrades the Current instead of breaking it (still weak, still costs). |
-| **THE FLUME** (keystone) | `flume` | RULE | elite | 🔨 `ed358aa` | Rapids | MAX Current held 12s → ~6s all releases auto-clean, then Current 0. |
+| **THE FLUME** (keystone) | `flume` | RULE | elite | 🔨 `ed358aa` · `2f2190e` | Rapids | MAX Current held 12s → ~6s all releases auto-clean. **NO drain (Bill 2026-07-12 `2f2190e`):** the empty-to-0 read as a random punish (and mis-matched its own text) — Current is kept, the river re-arms and runs white again while held at max. |
 | **Current Reading** | `currentReading` | STRAT | H/S/O | 🔨 `ed358aa` | Eddy | A tag in the band's first-third → +1 extra Current (the bridge). |
 | **Deep Eddy** | `deepEddy` | GREED | H/S/O | 🔨 `ed358aa` | Eddy | Drift range ×2; Still-Point tags ×1.5. |
 | **THE GLASS RIVER** (keystone) | `glassRiver` | RULE | elite | 🔨 `ed358aa` | Eddy | Three Still tags in a row → ~5s frozen drift + all-Still grading. |

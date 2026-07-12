@@ -857,6 +857,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · `heal-fixes` → **MERGED to `main`** (`2f2190e` fixes 1-3 · `1e66130`
+  keystones) — **HEALER PLAYTEST PASS (Bill, 3 reports on the Well):** ① **THE FLUME** no
+  longer drains Current to 0 (read as a random punish + mismatched its own text) — you keep
+  max Current, the river re-arms and runs white again while held (well_kit/boons/config;
+  CARD-CATALOG §Flume updated). ② **WELL DODGE READOUT** — the Well band built NO dodge
+  indicator; gave it the same SPACE/DODGE rune the other unified kits carry, and fixed
+  `render_guard` to normalize by the real unified cd (was the stale 2.4s def_cd — mis-read
+  for Twinfang/Alchemist too). ③ **TICKET TURN-IN** — a turn-in was invisible for a healthy
+  party (repair/mana no-op + a delayed one-shot toast); added a TICKET CLOSED / SPRINT RETRO
+  stop panel at the node, and the TURN-IN map badge now only shows while you HOLD the ticket.
+  ④ **KEYSTONES ELITE-GATED + capped 1/run** (Bill's call — he got The Flume on fight 1):
+  keystones filtered out of the normal draft, granted only at ELITE nodes (1-of-2, per-seat
+  chain), the reserved slot wired at last — **BUILD-LEDGER "keystone acquisition" row flipped
+  🔨** (online offer still ⏳, protocol-gated like curses). Verify (paused bar → targeted):
+  well_sim det PASS · draft_sim ALL PASS (synergy+pity hold) · keystone_probe ALL PASS ·
+  ui_smoke_map + ui_smoke_raid + net_map_smoke ALL OK. *(this session)*
+
 - ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE ONE-BAR VERDICTS — BUILT
   (S7 `9cb0180` · S7b `4a24897` · S7c `9815871` · S8 `f91e002` · S8b `63ff7c7` + TANK-PLAN
   §0 amendment `573ad88`→).** Bill's second playtest round, five rulings, all landed:
