@@ -871,6 +871,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · `main` (docs only) · §GRAPHICS — **CLAIM: V1 VISUAL VERDICT +
+  REACTION-FIRST CONTRACT.** Bill selected the bright **SUNPRINT CEL** family and approved the
+  UI-first hierarchy: the timing/answer channel dominates; abilities are secondary; press and
+  grade feedback are immediate and unmistakable; actor motion is fast, cancelable punctuation
+  that never delays combat truth. Update `GRAPHICS-PLAN.md`, MASTER §GRAPHICS, and BUILD-LEDGER
+  only. No generated preview becomes a runtime asset in this slice; no overlap with Claude's
+  active default-off C1 selector branch. *(Codex graphics-v2 session)*
+
 - ☐ 2026-07-12 · worktree `../wow-interrupt` (branch `interrupt-pillar3`) · §COMBAT PILLARS —
   **CLAIM: INTERRUPT-BY-ABILITY (Pillar #3 turns ON).** Bill: *"no one can interrupt — let's make
   our Eviscerate, and a combo tank attack interrupt."* The boss side is already plumbed
