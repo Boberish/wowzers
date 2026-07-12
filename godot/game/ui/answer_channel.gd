@@ -83,6 +83,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_spin += delta * 2.2
+	for k in _seen:
+		_seen[k] = float(_seen[k]) + delta            # comet age — drives the spawn-in pop
 	for f in _flashes:
 		f["t"] += delta
 	_flashes = _flashes.filter(func(f): return f["t"] < 0.5)
@@ -313,11 +315,25 @@ func _draw() -> void:
 	var pwr := pw + minf(parry_window, late_grace) * pps
 	draw_rect(Rect2(gx - pw, ty - 5.0, pwr, 3.0), Palette.STEEL)
 	draw_rect(Rect2(gx - pw, ty + bh + 2.0, pwr, 3.0), Palette.STEEL)
+	# THE HEARTBEAT: the gate leans in as the next comet closes — anticipation you can feel
+	var next_eta := 9.9
+	for b_v2 in bars:
+		var b2: Dictionary = b_v2
+		if not bool(b2.get("answered", false)):
+			next_eta = minf(next_eta, float(b2.get("eta", 9.9)))
+	for tb_v2 in tbars:
+		var tb2: Dictionary = tb_v2
+		if not bool(tb2.get("answered", false)):
+			next_eta = minf(next_eta, float(tb2.get("eta", 9.9)))
+	var beat := clampf(1.0 - next_eta / 0.5, 0.0, 1.0)
+	if beat > 0.0:
+		UiKit.glow(self, Vector2(gx, cy), 30.0 + 14.0 * beat,
+			Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.10 + 0.20 * beat))
 	# the gate line — the gilded AIM PLUMB (RhythmBar's idiom: dark seat + gold stroke +
 	# white hairline + a gem at heart). Pulses the grade color on any verdict.
 	var gate_line := Palette.GOLD_BRIGHT
 	gate_line.a = 0.85
-	var gate_wid := 1.6
+	var gate_wid := 1.6 + 0.8 * beat
 	if _gate_pulse > 0.0:
 		var gf := _gate_pulse / GATE_LIFE
 		gate_line = gate_line.lerp(_gate_col, gf)
@@ -335,8 +351,8 @@ func _draw() -> void:
 		UiKit.glow(self, Vector2(gx, cy), 34.0, Color(pcol.r, pcol.g, pcol.b, 0.30 * pf))
 	draw_line(Vector2(gx, ty - 6), Vector2(gx, ty + bh + 6), Palette.BG0, 3.4, true)
 	draw_line(Vector2(gx, ty - 6), Vector2(gx, ty + bh + 6), gate_line, gate_wid, true)
-	draw_line(Vector2(gx, ty - 4), Vector2(gx, ty + bh + 4), Color(1, 1, 1, 0.45), 0.7, true)
-	draw_circle(Vector2(gx, cy), 3.2, Palette.GOLD_BRIGHT)
+	draw_line(Vector2(gx, ty - 4), Vector2(gx, ty + bh + 4), Color(1, 1, 1, 0.45 + 0.3 * beat), 0.7, true)
+	draw_circle(Vector2(gx, cy), 3.2 + 1.6 * beat, Palette.GOLD_BRIGHT)
 	draw_circle(Vector2(gx - 0.9, cy - 1.0), 1.0, Color(1, 1, 1, 0.75))
 	# the DRY press (fumble): a crimson cross-tick at the gate — registered, but no wind
 	if _dud_t > 0.0:
@@ -372,11 +388,17 @@ func _draw() -> void:
 		present[id] = true
 		_last_x[id] = {"x": x, "kind": kind, "purple": purple, "absent": 0}   # claim anchor, verbatim
 		if not _seen.has(id):
-			_seen[id] = true
+			_seen[id] = 0.0
 			if bool(b.get("late", false)):
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
+		var age := float(_seen.get(id, 1.0))
+		var sc := (1.0 + 0.45 * maxf(0.0, 1.0 - age / 0.22)) \
+			* (1.0 + 0.10 * clampf(1.0 - eta / 0.55, 0.0, 1.0))
+		if age < 0.2 and not bool(b.get("late", false)):
+			var bc := Color(1, 1, 1, 0.5 * (1.0 - age / 0.2))
+			draw_arc(Vector2(x, cy), 10.0 + age * 90.0, 0, TAU, 20, bc, 1.6, true)
 		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered,
-			bool(b.get("peeled", false)), String(b.get("victim", "")))
+			bool(b.get("peeled", false)), String(b.get("victim", "")), sc)
 	# --- ONE BAR: telegraph comets (GLOBALS / targeted BUSTERS / my beats) on the same
 	#     track — committed times off the live telegraph, same gate, same press ---
 	for tb_v in tbars:
@@ -391,9 +413,12 @@ func _draw() -> void:
 		present[tid] = true
 		_last_x[tid] = {"x": tx2, "kind": tkind, "purple": tpurple, "absent": 0}
 		if not _seen.has(tid):
-			_seen[tid] = true
+			_seen[tid] = 0.0
 			_flashes.append({"x": tx2, "t": 0.0})     # big moves announce themselves
-		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)))
+		var tage := float(_seen.get(tid, 1.0))
+		var tsc := (1.0 + 0.45 * maxf(0.0, 1.0 - tage / 0.22)) \
+			* (1.0 + 0.10 * clampf(1.0 - teta / 0.55, 0.0, 1.0))
+		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc)
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()/missed(). A TELEGRAPH comet
 	# (negative id) that expires unconsumed at the gate = an unanswered big move — it gets
@@ -611,7 +636,7 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 ## A PEELED comet (§0 pass 2: the boss hunts someone else) draws with a crimson hunt-chevron +
 ## its victim's name — the tank still answers it (the comeback); the damage is the victim's.
 func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
-		answered: bool = false, peeled: bool = false, victim: String = "") -> void:
+		answered: bool = false, peeled: bool = false, victim: String = "", sc: float = 1.0) -> void:
 	if answered:
 		var hc := (PURPLE if purple else _comet_col(kind))
 		hc.a = 0.3
@@ -635,46 +660,46 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		_trail(x, cy, kind, purple)
 	match kind:
 		"heavy":
-			_glow(x, cy, 15.0, PURPLE if purple else Palette.HEAVY)
-			_hexagon(x, cy, 15.0, PURPLE if purple else Palette.HEAVY)
-			_bullseye_dot(x, cy, 15.0)
+			_glow(x, cy, 15.0 * sc, PURPLE if purple else Palette.HEAVY)
+			_hexagon(x, cy, 15.0 * sc, PURPLE if purple else Palette.HEAVY)
+			_bullseye_dot(x, cy, 15.0 * sc)
 			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.HEAVY)
 		"buster":
-			_glow(x, cy, 18.0, PURPLE if purple else Palette.CRUSH)
-			_octagon(x, cy, 18.0, PURPLE if purple else Palette.CRUSH,
+			_glow(x, cy, 18.0 * sc, PURPLE if purple else Palette.CRUSH)
+			_octagon(x, cy, 18.0 * sc, PURPLE if purple else Palette.CRUSH,
 				PURPLE.lightened(0.3) if purple else Palette.CRIMSON)
-			_bullseye_dot(x, cy, 18.0)
+			_bullseye_dot(x, cy, 18.0 * sc)
 			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.CRIMSON)
 		"global":
 			# the boss's big room-wide move — boss colors, every seat dodges it
-			_glow(x, cy, 19.0, PURPLE if purple else Palette.CRIMSON)
-			_octagon(x, cy, 19.0, PURPLE if purple else Palette.CRIMSON,
+			_glow(x, cy, 19.0 * sc, PURPLE if purple else Palette.CRIMSON)
+			_octagon(x, cy, 19.0 * sc, PURPLE if purple else Palette.CRIMSON,
 				PURPLE.lightened(0.3) if purple else Palette.GOLD_BRIGHT)
 			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.GOLD_BRIGHT)
 		"beat":
 			# a telegraph strike aimed at ME (boss-tinted diamond) — the classic dodge read
-			_diamond(x, cy, 12.0, PURPLE if purple else Palette.CRIMSON.lightened(0.15))
+			_diamond(x, cy, 12.0 * sc, PURPLE if purple else Palette.CRIMSON.lightened(0.15))
 			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.CRIMSON.lightened(0.3))
 		"eat":
 			var col := Palette.TEXT_DIM
-			_diamond(x, cy, 13.0, col)
+			_diamond(x, cy, 13.0 * sc, col)
 			draw_line(Vector2(x - 5, cy - 5), Vector2(x + 5, cy + 5), Palette.BG0, 2.0)
 			draw_line(Vector2(x + 5, cy - 5), Vector2(x - 5, cy + 5), Palette.BG0, 2.0)
 			_word(font, x, cy, "EAT", col)
 		"flurry":
 			var col2 := PURPLE if purple else Palette.FLOW
-			draw_circle(Vector2(x, cy), 6.5, col2)
-			draw_arc(Vector2(x, cy), 9.0, 0, TAU, 14, col2.darkened(0.3), 1.5)
+			draw_circle(Vector2(x, cy), 6.5 * sc, col2)
+			draw_arc(Vector2(x, cy), 9.0 * sc, 0, TAU, 14, col2.darkened(0.3), 1.5)
 			if flurry_i == 0:
 				_word(font, x, cy, "WEAVE", col2)
 		_:
-			_diamond(x, cy, 11.0, PURPLE if purple else Palette.LIGHT)
+			_diamond(x, cy, 11.0 * sc, PURPLE if purple else Palette.LIGHT)
 			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.LIGHT)
 	# a feint's disguise breathes a faint purple ring — the only tell
 	if purple:
 		var pr := PURPLE
 		pr.a = 0.18 + 0.14 * sin(_spin * 3.0)
-		draw_arc(Vector2(x, cy), 18.0, 0, TAU, 18, pr, 1.4, true)
+		draw_arc(Vector2(x, cy), 18.0 * sc, 0, TAU, 18, pr, 1.4, true)
 
 ## Motion trail: layered afterimages BEHIND the comet (toward the mouth it came from — comets
 ## travel left→right into the gate) + a soft glow streak. Pure function of position — no

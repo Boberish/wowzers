@@ -131,14 +131,30 @@ func _process(_d: float) -> bool:
 				return false
 			var st = ctrl.state
 			# PROBE-ONLY: enrich the LIVE encounter's melee texture so the tank's stream shows the
-			# whole vocabulary (the raid Seals emit only autos+heavies — feints/flurries/eats/lates
-			# live in the practice bosses the raid factory can't launch). Runtime tweak, no file
-			# touched; it just lets these shots prove the feint/late claim language on the real HUD.
+			# whole vocabulary. Runtime tweak, no file touched; it just lets these shots prove the
+			# feint/late claim language on the real HUD. THE SONGBOOK (2026-07-12): Seals publish
+			# authored phrases now — swap in a full-vocabulary tour songbook (the odds keys only
+			# feed the legacy path and are ignored while `phrases` is present).
 			if not enriched and st.encounter != null and st.encounter.melee is Dictionary:
 				st.encounter.melee["feint_odds"] = 0.24
 				st.encounter.melee["flurry_odds"] = 0.08
 				st.encounter.melee["eat_odds"] = 0.05
 				st.encounter.melee["late_odds"] = 0.12
+				if st.encounter.melee.has("phrases"):
+					st.encounter.melee["phrases"] = [
+						{"name": "one_two", "weight": 1.0, "rest": 1.3,
+							"steps": [{"kind": "auto"}, {"gap": 0.6, "kind": "auto"}]},
+						{"name": "the_lie", "weight": 1.2, "rest": 1.3,
+							"steps": [{"kind": "auto"}, {"gap": 0.6, "kind": "feint"}]},
+						{"name": "tall", "weight": 0.7, "rest": 1.5,
+							"steps": [{"kind": "auto"}, {"gap": 0.7, "kind": "heavy"}]},
+						{"name": "the_weave", "weight": 0.4, "rest": 1.6,
+							"steps": [{"kind": "flurry"}]},
+						{"name": "late_jab", "weight": 0.5, "rest": 1.3,
+							"steps": [{"kind": "auto"}, {"gap": 0.75, "kind": "auto", "late": true}]},
+						{"name": "brace", "weight": 0.35, "rest": 1.5,
+							"steps": [{"kind": "auto"}, {"gap": 0.85, "kind": "eat"}]},
+					]
 				enriched = true
 			if st.over:
 				phase = 4
