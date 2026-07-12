@@ -23,3 +23,12 @@ godot/game/art_v2/scenes/<profile>/
 
 Atmosphere remains profile parameters. Generated intermediates and rejected variants stay here,
 outside `res://`; only approved processed layers enter the runtime folders.
+
+## Delivery progress
+
+- `stack_atrium/backdrop-v1.png` — approved prototype backdrop, 1672×941 RGB. Copied to
+  `godot/game/art_v2/scenes/stack_atrium/backdrop.png` for the first live composition pass.
+  Its regular atrium-bay rhythm is intentional for horizontal repetition; the distant,
+  midground, and dressing layers must break center-mirrored symmetry with offset clusters.
+- This v1 is below the preferred 2048×1024+ source target. Do not spend an upscale/regeneration
+  pass until its scale, seam, and readability have been inspected in SceneKit.

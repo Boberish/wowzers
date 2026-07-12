@@ -931,7 +931,10 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   belongs to the same world—not another generic fantasy dungeon. Define separable six-layer
   deliverables for SceneKit; generated previews remain outside runtime until Bill approves. After
   approval, Claude receives C3 only (asset folders/import defaults/repeatable scene tour). No
-  overlap with the live `raid_content.gd` playtest edit. *(Codex graphics-v2 session)*
+  overlap with live gameplay work. **Progress:** C3 merged `1abfcd4`; source anchors archived
+  `3a855ef`; Bill approved the regular atrium base as the quiet repeating backdrop and Stack
+  layer 1/5 now lives at `scenes/stack_atrium/backdrop.png`. Remaining transparent layers own
+  asymmetry; v1 scale/seam inspection precedes any upscale credit. *(Codex graphics-v2 session)*
 
 - ☑ 2026-07-12 · main · **THE GUARD — authored space around globals (`d03dbfa`; Bill: "it's
   every time a problem").** Quiet windows [impact−0.65, impact+0.45] (TuningConfig knobs,
