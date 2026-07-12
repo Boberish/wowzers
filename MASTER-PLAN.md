@@ -871,6 +871,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · main (docs only) · §GRAPHICS — **CLAIM: GRAPHICS PACKET C0 — read-only
+  recon.** Audit the actor/scene/dashboard seams (`Actor2D`/`SpriteActor2D`/`PoseRig2D` ·
+  `RaidStage2D` construction+resize · `StageBackdrop` · `raid_hud` combat construction/render ·
+  screenshot tours) + classify every `tempo-art` `e4589a6` hunk (salvage/stale/collision/reject);
+  deliverable = populate `GRAPHICS-PLAN.md §10 IMPLEMENTATION MAP`. NO code changes. *(Claude
+  session, this claim)*
+
 - ☑ 2026-07-12 · main (docs only) · §GRAPHICS — **GRAPHICS DIRECTION V2 DOC RESET COMPLETE —
   the AI-owned, modular-art reset (Bill); V1 STYLE BOARD is next.** Superseded the
   new-but-now-obsolete `ART-PLAN.md` v1
