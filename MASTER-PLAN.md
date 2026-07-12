@@ -871,6 +871,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · worktree `../wow-interrupt` (branch `interrupt-pillar3`) · §COMBAT PILLARS —
+  **CLAIM: INTERRUPT-BY-ABILITY (Pillar #3 turns ON).** Bill: *"no one can interrupt — let's make
+  our Eviscerate, and a combo tank attack interrupt."* The boss side is already plumbed
+  (`AbilityRes.kick_window` E8 · `Response.INTERRUPTIBLE` casts · the `kick_open_missed` diag counts
+  every uncontested verse) and the WHOLE UI/feedback layer is built and waiting (`boss_cast_bar`
+  window band + "CLEAN KICK!/KICK!/OVERLOAD!" pops). Missing = the class-side press that honors the
+  window. Three guarded pieces (byte-identical when no ability carries the flag ⇒ every existing sim
+  unchanged): (1) `combat_core._try_interrupt()` fired right after a kick-tagged ability commits in
+  `perform` — in-window (remaining ≤ 0.62s, matches the UI band) = CLEAN KICK (effect denied · chain
+  skips one verse · `on_boss_heal_denied` broadcast), early = WHIFF (damage lands, no kick), miss =
+  the verse resolves; (2) `ClassKit.ability_interrupts(id)` — **Twinfang→`eviscerate` · Duelist→`dump`**
+  (the two combo-finisher carriers Bill named), both add `carries_kick` to obs; (3) flip
+  `raid_hud.gd:3298 kickable_seat` to read the seat's `carries_kick` (kills "nobody carries a kick
+  yet"). Alchemist dump = the 3rd kicker, follow-up. Gates: import · `twinfang_sim`/`alchemist_sim`/
+  `well_sim` byte-identical (`ab-gate.sh`) · `raid_sim` runs (tank/twinfang change is the feature) ·
+  `ui_smoke_raid`. *(Claude session)*
+
 - ☐ 2026-07-12 · worktree `../wow-artv2-c1` (branch `artv2-c1`) · §GRAPHICS — **CLAIM:
   GRAPHICS PACKET C1 — ART-V2 SELECTOR + FAIL-SAFE** (GRAPHICS-PLAN §5·C1, shape per the C0
   map §10.2). Three INDEPENDENT view-only toggles, all default OFF: static `ArtV2` holder
