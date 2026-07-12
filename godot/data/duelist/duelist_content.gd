@@ -42,7 +42,22 @@ static func make_dense() -> EncounterRes:
 	e.intro = "Dense footwork: the full stream. Parry what's aimed at you, don't touch the purple."
 	e.melee = {"every": 1.0, "min": 20.0, "max": 28.0, "rhythm": 0.55, "jig": 0.30,
 		"heavy_odds": 0.15, "feint_odds": 0.15, "flurry_odds": 0.06, "eat_odds": 0.05,
-		"late_odds": 0.08}
+		"late_odds": 0.08,   # legacy fallback (unused while `phrases` is present; SPIKE keeps the odds path live)
+		# THE SONGBOOK (2026-07-12): the training golem drills the full vocabulary in phrases
+		"phrases": [
+			{"name": "one_two", "weight": 1.0, "rest": 1.7,
+				"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "auto"}]},
+			{"name": "windup_tall", "weight": 0.9, "rest": 1.9,
+				"steps": [{"kind": "auto"}, {"gap": 0.8, "kind": "auto"}, {"gap": 0.55, "kind": "heavy"}]},
+			{"name": "the_lie", "weight": 0.8, "rest": 1.7,
+				"steps": [{"kind": "auto"}, {"gap": 0.6, "kind": "feint"}]},
+			{"name": "the_weave", "weight": 0.5, "rest": 2.0,
+				"steps": [{"kind": "flurry"}]},
+			{"name": "brace_bell", "weight": 0.45, "rest": 1.9,
+				"steps": [{"kind": "auto"}, {"gap": 0.85, "kind": "eat"}]},
+			{"name": "late_jab", "weight": 0.5, "rest": 1.7,
+				"steps": [{"kind": "auto"}, {"gap": 0.75, "kind": "auto", "late": true}]},
+		]}
 	e.enrage_at = 150.0
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.5; p1.mult = 1.15; p1.speed = 1.1

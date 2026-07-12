@@ -480,8 +480,16 @@ static func _stream_size(kind: String) -> int:
 ## s.telegraph or an ability timer (barrier RETIRED, tank-v3 S2 / TANK-PLAN §2): the melee
 ## keeps flowing through every global (CLAUDE.md scheduler law: "melee keeps ticking"), so
 ## there is no seam to hitch at. Per-Seal thinning around a scripted big-dodge/kick window
-## is authored via `stream_breathe`, not a reactive halt. All rng draws happen here, in a
-## fixed order per bar: slot-type roll → (disguise) → damage → jig → late → victim.
+## is authored via `stream_breathe`, not a reactive halt.
+##
+## THE SONGBOOK (Bill 2026-07-12, "we need dynamic and interesting rhythms"): a melee dict
+## carrying `phrases` publishes AUTHORED MOTIFS instead of flat per-bar odds — each phrase =
+## {name, weight, rest, steps:[{gap,kind,late,dmg_frac}]} where `gap` is seconds after the
+## previous step's impact (the first step rides the scheduled beat) and `rest` is the breath
+## after the phrase. One seeded weighted draw picks each motif: the boss plays a SONG —
+## learnable phrases, freshly arranged every pull (same seed = the same song, LAW 1 intact).
+## Grammar guards still apply per step (degrade to auto); LATE is authored per step, capped
+## by the DEC-11 budget. Profiles WITHOUT `phrases` keep the legacy odds ladder unchanged.
 static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 	var hz := s.config.fixed_hz
 	var horizon := s.tick + to_ticks(s.config.stream_horizon, hz)
@@ -492,6 +500,9 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 	var tk := _tank_seat(s)
 	if tk != null and s.tick < int(tk.vars.get("engarde_until", 0)):
 		tempo *= 1.25
+	if melee.has("phrases"):
+		_publish_phrases(s, melee, horizon, tempo, hz)
+		return
 	while true:
 		var imp := s.boss.stream_next_impact
 		if imp > horizon:
@@ -556,6 +567,78 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 			var jig := float(melee.get("jig", 0.0))
 			if jig > 0.0:
 				s.boss.stream_next_impact += int(round(float(period) * (s.rng.next_float() - 0.5) * 2.0 * jig))
+
+## THE SONGBOOK publisher: pop authored motif steps — each bar lands on the scheduled beat,
+## the next beat = this impact + the NEXT step's gap (or the phrase's rest at the end),
+## tempo-compressed together (SPEED LAW: spacing varies, px/s never does). Grammar guards
+## degrade a blocked step to the plain auto (identical laws to the odds path); flurry steps
+## run the standard burst machinery; LATE is authored per step under the DEC-11 budget.
+## rng order: ONE weighted draw per motif · damage (+ feint disguise) per bar in
+## _stream_push · jig on the phrase REST only — the motif's internal rhythm stays crisp.
+static func _publish_phrases(s: CombatState, melee: Dictionary, horizon: int, tempo: float, hz: int) -> void:
+	var every := float(melee.get("every", 1.5))
+	while true:
+		var imp := s.boss.stream_next_impact
+		if imp > horizon:
+			return
+		var period := maxi(2, int(round(float(to_ticks(every, hz)) / maxf(0.25, tempo))))
+		if s.boss.stream_phrase_q.is_empty():
+			# pick the next motif — ONE seeded weighted draw (the arrangement of the song)
+			var phrases: Array = melee["phrases"]
+			var total := 0.0
+			for p_v in phrases:
+				total += float((p_v as Dictionary).get("weight", 1.0))
+			var pick := s.rng.next_float() * maxf(0.001, total)
+			var chosen: Dictionary = phrases[phrases.size() - 1]
+			for p_v in phrases:
+				var p: Dictionary = p_v
+				pick -= float(p.get("weight", 1.0))
+				if pick <= 0.0:
+					chosen = p
+					break
+			var steps: Array = (chosen.get("steps", []) as Array).duplicate(true)
+			if steps.is_empty():
+				return                                  # an empty motif would spin forever
+			(steps[steps.size() - 1] as Dictionary)["rest"] = float(chosen.get("rest", every))
+			s.boss.stream_phrase_q = steps
+		var step: Dictionary = s.boss.stream_phrase_q.pop_front()
+		var kind := String(step.get("kind", "auto"))
+		var flurry_n := maxi(2, int(melee.get("flurry_n", 4)))
+		var flurry_gap := to_ticks(float(melee.get("flurry_gap", 0.35)) / maxf(0.25, tempo), hz)
+		# grammar guards (a blocked step DEGRADES to the plain auto — the laws hold):
+		if s.boss.stream_after_cast and s.boss.stream.is_empty():
+			kind = "auto"                               # the bar after a global stays plain
+		elif kind == "flurry" and s.tick < s.boss.stream_flurry_cd_until:
+			kind = "auto"
+		elif kind == "feint" and s.boss.stream_seq == 0:
+			kind = "auto"                               # never the fight's opener
+		elif kind == "eat" and s.tick - s.boss.stream_last_eat_tick <= period * 2:
+			kind = "auto"
+		elif kind == "buster" and String(s.boss.stream_last_kind) == "buster":
+			kind = "auto"
+		var base := imp
+		if kind == "flurry":
+			s.boss.stream_flurry_cd_until = s.tick + to_ticks(s.config.stream_flurry_cd, hz)
+			var group := s.boss.stream_seq
+			for i in range(flurry_n):
+				_stream_push(s, melee, "flurry", imp + flurry_gap * i, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
+			base = imp + flurry_gap * (flurry_n - 1)
+		else:
+			var late := bool(step.get("late", false)) \
+				and s.boss.stream_late_count < int(melee.get("late_cap", s.config.stream_late_cap))
+			if late:
+				s.boss.stream_late_count += 1
+			_stream_push(s, melee, kind, imp, float(step.get("dmg_frac", 1.0)), late, -1, 0, 0)
+		# advance: the next step's gap, or the phrase's rest (only the REST breathes with jig)
+		if s.boss.stream_phrase_q.is_empty():
+			var rest := to_ticks(float(step.get("rest", every)) / maxf(0.25, tempo), hz)
+			var jig := float(melee.get("jig", 0.0))
+			if String(melee.get("jig_mode", "")) != "none" and jig > 0.0:
+				rest += int(round(float(rest) * (s.rng.next_float() - 0.5) * 2.0 * jig))
+			s.boss.stream_next_impact = base + maxi(2, rest)
+		else:
+			var gap := to_ticks(float((s.boss.stream_phrase_q[0] as Dictionary).get("gap", every)) / maxf(0.25, tempo), hz)
+			s.boss.stream_next_impact = base + maxi(2, gap)
 
 ## Append ONE committed bar. Damage + disguise + victim are all final here (LAW 1).
 static func _stream_push(s: CombatState, melee: Dictionary, kind: String, impact: int,
@@ -630,6 +713,7 @@ static func _stream_shatter(s: CombatState) -> void:
 		return
 	s.boss.stream.clear()
 	s.boss.stream_answers.clear()                        # claims die with their bars
+	s.boss.stream_phrase_q.clear()                       # the dead body's song dies with it
 	if OS.is_debug_build():                              # shattered bars never resolve — drop their ledger
 		s.boss.stream_snap.clear()
 	s.boss.stream_next_impact = -1

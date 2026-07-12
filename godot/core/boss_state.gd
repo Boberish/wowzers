@@ -81,6 +81,9 @@ var stream_late_count: int = 0         ## per-fight LATE tally (DEC-11 rate cap;
 var stream_tempo: float = 1.0          ## whole-flow speed multiplier (SPEED LAW: view pacing +
                                        ## publish cadence together; per-bar variance is forbidden)
 var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.)
+var stream_phrase_q: Array = []        ## THE SONGBOOK (2026-07-12): the active motif's remaining
+                                       ## steps ({gap,kind,late,dmg_frac}, last carries "rest");
+                                       ## empty = pick the next motif (one seeded weighted draw)
 var stream_resolving: Dictionary = {}  ## the bar mid-resolve — the kit funnel reads flurry
                                        ## group/index here (cleared the same tick; never checksummed)
 var stream_answers: Dictionary = {}    ## bar id -> {kind:String, grade:int} — press-time claims

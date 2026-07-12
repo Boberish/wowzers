@@ -105,7 +105,22 @@ static func make_riftmaw() -> EncounterRes:
 	# Seals (Gemini/Mythos) are where the melee + dodge punishment ramps hard.
 	# §3½ THE TANK STREAM (Bill 2026-07-11): Vorathek's stream goes VISIBLE — slow,
 	# tall, honest (§3 texture row): broad wind-ups, a third of the bars come in TALL.
-	e.melee = {"every": 1.25, "min": 34.0, "max": 44.0, "rhythm": 0.85, "jig": 0.25, "heavy_odds": 0.35}
+	e.melee = {"every": 1.25, "min": 34.0, "max": 44.0, "rhythm": 0.85, "jig": 0.25,
+		"heavy_odds": 0.35,   # legacy fallback (unused while `phrases` is present)
+		# THE SONGBOOK (2026-07-12): slow, tall, honest — the teaching Seal is a drumbeat
+		# you can learn: pairs, a wind-up that ACCELERATES into the tall, twin talons.
+		"phrases": [
+			{"name": "one_two", "weight": 1.2, "rest": 1.6,
+				"steps": [{"kind": "auto"}, {"gap": 0.6, "kind": "auto"}]},
+			{"name": "maw_windup", "weight": 1.0, "rest": 1.8,
+				"steps": [{"kind": "auto"}, {"gap": 0.95, "kind": "auto"}, {"gap": 0.65, "kind": "heavy"}]},
+			{"name": "twin_talons", "weight": 0.7, "rest": 2.0,
+				"steps": [{"kind": "heavy"}, {"gap": 1.15, "kind": "heavy"}]},
+			{"name": "lone_swing", "weight": 0.8, "rest": 1.4,
+				"steps": [{"kind": "auto"}]},
+			{"name": "rake", "weight": 0.7, "rest": 1.9,
+				"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "auto"}, {"gap": 0.55, "kind": "auto"}]},
+		]}
 	e.enrage_at = 225.0                           # BASELEN: enrage tracks the ×2.5 pool
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
@@ -235,7 +250,22 @@ static func make_mistral() -> EncounterRes:
 	# build flow, and the boss peeled onto the dps (the 27%-win / high-peel regression). Add a
 	# rhythm profile so the channel is populated on every Seal (one tank code path). Efficient
 	# and quick (fast `every`), a touch fewer talls than the teaching Seal — Mistral's texture.
-	e.melee = {"every": 1.1, "min": 34.0, "max": 44.0, "rhythm": 0.75, "jig": 0.28, "heavy_odds": 0.30}   # was 26-36; a pushover at 100/100/100 needed a floor of pressure
+	e.melee = {"every": 1.1, "min": 34.0, "max": 44.0, "rhythm": 0.75, "jig": 0.28,
+		"heavy_odds": 0.30,   # legacy fallback (unused while `phrases` is present); was 26-36 — a pushover at 100/100/100 needed a floor of pressure
+		# THE SONGBOOK (2026-07-12): efficient + syncopated — long-short stutters, quick
+		# talls, the occasional polite lie. Mistral answers before you finish asking.
+		"phrases": [
+			{"name": "offbeat", "weight": 1.1, "rest": 1.4,
+				"steps": [{"kind": "auto"}, {"gap": 0.85, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
+			{"name": "polite_lie", "weight": 0.9, "rest": 1.5,
+				"steps": [{"kind": "auto"}, {"gap": 0.65, "kind": "feint"}]},
+			{"name": "efficient_tall", "weight": 0.9, "rest": 1.6,
+				"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "heavy"}]},
+			{"name": "recital", "weight": 0.7, "rest": 1.8,
+				"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
+			{"name": "footnote", "weight": 0.5, "rest": 1.5,
+				"steps": [{"kind": "auto"}, {"gap": 0.9, "kind": "auto", "late": true}]},
+		]}
 	e.enrage_at = 237.5                           # FREE TIER EXCEEDED (BASELEN ×2.5)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.55; p1.mult = 1.12; p1.speed = 1.08
@@ -264,7 +294,22 @@ static func make_gemini() -> EncounterRes:
 	# the 0%-win-at-expert Seal (dps_wipe=40, ~49 peels: a blank channel = no flow = the boss
 	# never locked on the tank). Add a rhythm profile between the teaching Seal and Mythos:
 	# mid cadence, mid talls, wider jig than Mistral — the twin-minds texture.
-	e.melee = {"every": 1.1, "min": 27.0, "max": 37.0, "rhythm": 0.6, "jig": 0.35, "heavy_odds": 0.25}
+	e.melee = {"every": 1.1, "min": 27.0, "max": 37.0, "rhythm": 0.6, "jig": 0.35,
+		"heavy_odds": 0.25,   # legacy fallback (unused while `phrases` is present)
+		# THE SONGBOOK (2026-07-12): the twin minds — EVERYTHING comes in pairs and echoes;
+		# even the lies arrive twice, even the LATEs agree with each other.
+		"phrases": [
+			{"name": "twin_taps", "weight": 1.2, "rest": 1.5,
+				"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
+			{"name": "twin_talls", "weight": 0.8, "rest": 1.9,
+				"steps": [{"kind": "heavy"}, {"gap": 0.95, "kind": "heavy"}]},
+			{"name": "echo_lie", "weight": 0.8, "rest": 1.6,
+				"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "auto"}, {"gap": 1.0, "kind": "feint"}, {"gap": 0.55, "kind": "feint"}]},
+			{"name": "stutter_echo", "weight": 0.9, "rest": 1.6,
+				"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.95, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
+			{"name": "second_opinion", "weight": 0.5, "rest": 1.7,
+				"steps": [{"kind": "auto", "late": true}, {"gap": 0.65, "kind": "auto", "late": true}]},
+		]}
 	e.enrage_at = 270.0                           # BASELEN ×2.5
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
 	var p1 := PhaseRes.new(); p1.at = 0.6; p1.mult = 1.15; p1.speed = 1.1
@@ -311,7 +356,24 @@ static func make_mythos() -> EncounterRes:
 	e.intro = "The final Seal. Kick its Chain-of-Thought before the Conclusion scales, scatter from the Agentic Fan-Out, and when it delegates, the subagents are YOUR problem — the OPUS one will hotfix its master's HP. Survive ULTRATHINK. It is very sorry about ULTRATHINK."
 	# §3½ THE TANK STREAM (Bill 2026-07-11): Mythos runs the DENSE end of the §3
 	# texture — quick bars, the widest jitter, talls mixed in (all shapes).
-	e.melee = {"every": 1.0, "min": 26.0, "max": 36.0, "rhythm": 0.5, "jig": 0.40, "heavy_odds": 0.20}
+	e.melee = {"every": 1.0, "min": 26.0, "max": 36.0, "rhythm": 0.5, "jig": 0.40,
+		"heavy_odds": 0.20,   # legacy fallback (unused while `phrases` is present)
+		# THE SONGBOOK (2026-07-12): the finale speaks the WHOLE language — long sentences,
+		# crescendos into talls, pivots through lies, the weave, the brace bell, cold reads.
+		"phrases": [
+			{"name": "crescendo", "weight": 1.0, "rest": 1.8,
+				"steps": [{"kind": "auto"}, {"gap": 0.9, "kind": "auto"}, {"gap": 0.65, "kind": "auto"}, {"gap": 0.5, "kind": "heavy"}]},
+			{"name": "the_pivot", "weight": 0.9, "rest": 1.5,
+				"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "feint"}, {"gap": 0.55, "kind": "auto"}]},
+			{"name": "hammer_verse", "weight": 0.7, "rest": 2.0,
+				"steps": [{"kind": "heavy"}, {"gap": 0.8, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.8, "kind": "heavy"}]},
+			{"name": "the_weave", "weight": 0.5, "rest": 2.0,
+				"steps": [{"kind": "flurry"}]},
+			{"name": "cold_read", "weight": 0.6, "rest": 1.6,
+				"steps": [{"kind": "feint"}, {"gap": 0.7, "kind": "auto", "late": true}]},
+			{"name": "brace_bell", "weight": 0.4, "rest": 1.9,
+				"steps": [{"kind": "auto"}, {"gap": 0.95, "kind": "eat"}]},
+		]}
 	e.enrage_at = 355.0                           # USAGE LIMIT REACHED (BASELEN ×2.5)
 	# Phases: Helpful -> Harmless -> Honest (it drops all pretense)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
