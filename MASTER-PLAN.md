@@ -887,20 +887,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   warden fail HEALED (it was dying to unanswerable stream pressure).** Closes the owed
   "per-Seal quiet windows" item as a general system. Windows install updated + boot-clean.
   TANK-PLAN §0 ruling 7. *(this session)*
-- ☐ 2026-07-12 · worktree `../wow-artv2-c2` (branch `artv2-c2`) · §GRAPHICS — **CLAIM:
-  GRAPHICS PACKET C2 — SCENE PROFILE CONTRACT + PLACEHOLDER PROFILES** (GRAPHICS-PLAN §5·C2,
-  the §2.2 six-layer law). Data-driven `SceneKit` host (`game/art_v2/scene_kit.gd`):
-  profiles as pure data (backdrop · distant life · midground · combat floor · encounter
-  dressing · atmosphere+palette), `legacy`/""/unknown ⇒ the existing `StageBackdrop`
-  UNCHANGED (profile absence returns legacy), `v2_interior_test` + `v2_exterior_test` =
-  temporary colored/debug layers ONLY (no art). `ArtV2.make_scene()` re-routes through
-  `SceneKit.make` (C1's naive .tscn lookup replaced per the C0 map). Constraints: aspect-
-  expand safe (repeatable side growth at 2560×1080) · actor feet/scale untouched (zero
-  `stage2d/*` edits) · no UI parenting changes (same `_stage` slot) · atmosphere view-only.
-  Gates: `artv2_probe` extended · new `artv2_scene_tour` at 1920×1080 / 1280×720 /
-  2560×1080 × 3 profiles · feet-line eyeball vs legacy · `ui_smoke_raid` parity ·
-  `ab-gate raid_sim` low-seed byte-identical (flag absent). NOT C3+: no asset import
-  schema, no Codex assets, no actor/dashboard work. *(Claude session)*
+- ☐ 2026-07-12 · worktree `../wow-artv2-c2` (branch `artv2-c2`) · §GRAPHICS — **GRAPHICS
+  PACKET C2 — SCENE PROFILE CONTRACT + PLACEHOLDER PROFILES: ⚠ BUILT ON BRANCH (`d296c7d`),
+  GATES DEFERRED — CHECK-BACK OWED** (Bill 2026-07-12: "assume it passes, at worst we come
+  back and fix it — update the plan and move on"). Built per GRAPHICS-PLAN §5·C2 / the §2.2
+  six-layer law: data-driven `SceneKit` host (`game/art_v2/scene_kit.gd`) — profiles as pure
+  data (backdrop · distant life · midground · combat floor · encounter dressing ·
+  atmosphere+palette), `legacy`/""/unknown ⇒ the existing `StageBackdrop` UNCHANGED,
+  `v2_interior_test` + `v2_exterior_test` = temporary colored/debug layers ONLY
+  (watermarked). `ArtV2.make_scene()` re-routes through `SceneKit.make` (C1's naive .tscn
+  lookup replaced per the C0 map; SCENE_DIR retired). Floor line at legacy h·0.80; zero
+  `stage2d/*` edits; midground repeats from live size (2560×1080 grows sides); same
+  `_stage` slot. `artv2_probe` +13 checks; NEW `sim/artv2_scene_tour.gd` (per
+  profile×resolution sheets + the FEET-LINE RECORD — positions printed per shot, must match
+  across profiles). **CHECK-BACK before merge:** probe result (run was in flight when the
+  assume-pass call came) · tour matrix 1920/1280/2560 × legacy/interior/exterior + feet-line
+  diff · `ui_smoke_raid` parity · `ab-gate raid_sim` low-seed. NOT merged to `main` yet —
+  parse must prove first (a broken `class_name` cascades into concurrent sessions).
+  *(Claude session)*
 
 - ☑ 2026-07-12 · `main` (docs only) · §GRAPHICS — **V1 VISUAL VERDICT +
   REACTION-FIRST CONTRACT.** Bill selected the bright **SUNPRINT CEL** family and approved the
