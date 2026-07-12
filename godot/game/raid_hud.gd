@@ -683,6 +683,32 @@ func _on_desync() -> void:
 
 # ============================================================ START / BUILD
 func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void:
+	_resolve_seat(seat_id, aspect)
+	if _map_pending:                  # TOPOLOGY: the aspect ceremony pulls onto the map
+		_map_pending = false
+		_start_map_run()
+		return
+	if jump_to != "":
+		_enc_id = jump_to
+	_screen = "combat"
+	_clear()
+	# offline uses the SAME shared fight factory the netcode locksteps on
+	# (COMMANDER: the assembled party's aspects/classes ride single-Seal pulls too)
+	var run_seed := _mint_run_seed()   # recorded — a Seal pull replays like any run
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
+	var s := RaidNet.build(spec, _seat_key)
+	_apply_fightlen(s)
+	_loadout = _make_loadout()
+	_build_combat(s)
+	_shake_amt = 0.0
+	_online = false
+	_ctrl = _local_ctrl
+	_ctrl.begin(s, SEAT_IDX[_seat_key])
+
+## Resolve a seat token + aspect id onto the HUD's seat state (_seat_key/_aspect and the
+## healer/caster class toggles) — the head of _launch, split out so the DEV generated-setup
+## launcher shares the exact alias rules (byte-identical extraction, no behavior change).
+func _resolve_seat(seat_id: String, aspect: String) -> void:
 	# debug alias: a "bloom"/"bloomweaver" seat token = the healer seat as a Bloomweaver
 	if seat_id == "bloom" or seat_id == "bloomweaver":
 		seat_id = "healer"
@@ -709,20 +735,27 @@ func _launch(seat_id: String, aspect: String = "", jump_to: String = "") -> void
 	for a in pool:
 		if String(a["id"]) == aspect:
 			_aspect = aspect
-	if _map_pending:                  # TOPOLOGY: the aspect ceremony pulls onto the map
-		_map_pending = false
-		_start_map_run()
-		return
-	if jump_to != "":
-		_enc_id = jump_to
+
+## DEV · GENERATED SETUPS (world_shell boss test): a single-Seal pull CARRYING a generated
+## average run — boons ride the spec exactly like a map pull's (yours + the AI raiders'),
+## creed/modules/rig/transform fold via _inject_boons, bought curios arm via _arm_gear.
+## Debug tooling only: nothing live calls this; the plain _launch stays byte-identical.
+func _launch_dev_gen(seat_id: String, aspect: String, enc_id: String, gen: Dictionary) -> void:
+	_resolve_seat(seat_id, aspect)
+	_enc_id = enc_id
+	_d.run = gen["run"] as RunState
+	_d.taken_boons = (gen["taken"] as Array).duplicate()
+	_d.ai_runs = gen["ai"]
+	_d.gear = (gen["gear"] as Array).duplicate()
+	_d.gear_charges = {}
 	_screen = "combat"
 	_clear()
-	# offline uses the SAME shared fight factory the netcode locksteps on
-	# (COMMANDER: the assembled party's aspects/classes ride single-Seal pulls too)
-	var run_seed := _mint_run_seed()   # recorded — a Seal pull replays like any run
-	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id)
+	var run_seed := _mint_run_seed()
+	var spec := RaidNet.make_spec(run_seed, _party_seat_cfg(), _enc_id, {}, _seat_boons_now())
 	var s := RaidNet.build(spec, _seat_key)
 	_apply_fightlen(s)
+	_arm_gear(s.seats[SEAT_IDX[_seat_key]])       # the setup's bought curios ride in
+	_inject_boons(s.seats[SEAT_IDX[_seat_key]])   # creed/modules/rig/transform + boons
 	_loadout = _make_loadout()
 	_build_combat(s)
 	_shake_amt = 0.0

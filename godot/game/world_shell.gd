@@ -15,8 +15,17 @@ const RaidHud := preload("res://game/raid_hud.gd")
 var hud: RaidHud = null   ## the combat HUD instance surface — TYPED so the moved
                           ## builders' `:=` inference sees real member types
 var _ui: Control           ## the shell's own screen surface (drawn OVER the instance)
-var _screen: String = "home"   ## home/class/aspect/raidpick/party/atlas/bastion/zone/zonestop/bosstest · "instance" = the HUD drives
+var _screen: String = "home"   ## home/class/aspect/raidpick/party/atlas/bastion/zone/zonestop/bosstest/bosstest_gen · "instance" = the HUD drives
 var _dev_seat: String = "tank"   ## DEV · BOSS TEST: which seat the jump-in takes (debug-only tooling)
+var _dev_aspect: String = ""     ## DEV · BOSS TEST: the seat's spec ("" = the class default)
+var _dev_gen: bool = false       ## DEV · GENERATED SETUPS: false = bare kit, true = average build
+var _dev_anchor: String = ""     ## the module id a generated build anchors on ("" = any)
+var _dev_seed: int = 0           ## the setup seed (0 = mint a fresh one at the preview)
+var _dev_seed_edit: LineEdit = null   ## the preview's seed-replay box
+
+## DEV · BOSS TEST seat token → the class whose spec/deck the generated setup samples.
+const DEV_SEAT_CLS := {"tank": "duelist", "blade": "twinfang", "alchemist": "alchemist",
+	"well": "well", "bloom": "bloomweaver"}
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -151,11 +160,14 @@ func _menu_button(text: String, accent: Color, cb: Callable) -> Button:
 	b.pressed.connect(cb)
 	return b
 
-## DEV · BOSS TEST (debug builds only, gated at the home button) — pick a seat, then a
-## Seal, and jump STRAIGHT into that single-boss fight, skipping the class/aspect/raid/
-## party ceremony. Pure dev tooling: it drives the same hud._launch() the raid autostart
-## uses (--autostart=raid:seat:aspect:boss), so the AI party is filled and the fight
-## starts exactly as a normal Seal pull. The seat tokens feed _launch's debug aliases.
+## DEV · BOSS TEST (debug builds only, gated at the home button) — pick a seat + spec,
+## then a Seal, and jump STRAIGHT into that single-boss fight, skipping the class/aspect/
+## raid/party ceremony. Pure dev tooling: it drives the same hud._launch() the raid
+## autostart uses (--autostart=raid:seat:aspect:boss), so the AI party is filled and the
+## fight starts exactly as a normal Seal pull. The seat tokens feed _launch's debug aliases.
+## DEV · GENERATED SETUPS (Bill 2026-07-12): the SETUP toggle swaps the bare-kit jump for
+## an AVERAGE depth-scaled build (DevSetups) — pick an optional module FOCUS, press a Seal,
+## and a seeded preview (build + quick description + reroll/replay) fronts the fight.
 func _show_boss_test() -> void:
 	_screen = "bosstest"
 	hud._d.map = null
@@ -163,11 +175,11 @@ func _show_boss_test() -> void:
 	_clear()
 	var head := VBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
-	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 70, 420, 150)
+	UiKit.place(head, 0.5, 0, 0.5, 0, -420, 52, 420, 126)
 	_ui.add_child(head)
 	var hl := UiKit.title_in(head, "DEV · BOSS TEST", 30, Palette.GOLD)
 	hl.add_theme_font_override("font", UiKit.display(750, 3))
-	UiKit.title_in(head, "pick a seat, then a Seal — jump straight into the fight (debug only)", 14, Palette.TEXT_DIM)
+	UiKit.title_in(head, "pick a seat + spec, then a Seal — jump straight into the fight (debug only)", 14, Palette.TEXT_DIM)
 	# seat toggle — the token feeds hud._launch's debug aliases (tank/blade/alchemist/well/bloom)
 	var seats := [
 		["tank", "DUELIST"], ["blade", "TWINFANG"], ["alchemist", "ALCHEMIST"],
@@ -176,7 +188,7 @@ func _show_boss_test() -> void:
 	var seatrow := HBoxContainer.new()
 	seatrow.alignment = BoxContainer.ALIGNMENT_CENTER
 	seatrow.add_theme_constant_override("separation", 8)
-	UiKit.place(seatrow, 0.5, 0, 0.5, 0, -440, 165, 440, 205)
+	UiKit.place(seatrow, 0.5, 0, 0.5, 0, -440, 138, 440, 178)
 	_ui.add_child(seatrow)
 	for s in seats:
 		var sid := String(s[0])
@@ -187,26 +199,196 @@ func _show_boss_test() -> void:
 		sb.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if sid == _dev_seat else Palette.TEXT_DIM)
 		sb.pressed.connect(_dev_pick_seat.bind(sid))
 		seatrow.add_child(sb)
+	# spec toggle — the class's aspects (hidden when there's only one)
+	var cls := String(DEV_SEAT_CLS[_dev_seat])
+	var aspects: Array = (ClassRegistry.table()[cls] as Dictionary)["aspects"]
+	if _dev_aspect == "" or not aspects.has(_dev_aspect):
+		_dev_aspect = String(aspects[0])
+	if aspects.size() > 1:
+		var arow := HBoxContainer.new()
+		arow.alignment = BoxContainer.ALIGNMENT_CENTER
+		arow.add_theme_constant_override("separation", 8)
+		UiKit.place(arow, 0.5, 0, 0.5, 0, -440, 184, 440, 218)
+		_ui.add_child(arow)
+		for a in aspects:
+			var aid := String(a)
+			var ab := Button.new()
+			ab.text = aid.to_upper()
+			ab.custom_minimum_size = Vector2(130, 32)
+			ab.add_theme_font_size_override("font_size", 13)
+			ab.add_theme_color_override("font_color", Palette.GOLD_BRIGHT if aid == _dev_aspect else Palette.TEXT_DIM)
+			ab.pressed.connect(_dev_pick_aspect.bind(aid))
+			arow.add_child(ab)
+	# THE SETUP row — bare kit vs a GENERATED average build, plus the module FOCUS anchor
+	var srow := HBoxContainer.new()
+	srow.alignment = BoxContainer.ALIGNMENT_CENTER
+	srow.add_theme_constant_override("separation", 10)
+	UiKit.place(srow, 0.5, 0, 0.5, 0, -440, 224, 440, 260)
+	_ui.add_child(srow)
+	var gb := Button.new()
+	gb.text = "SETUP: AVG BUILD @ SEAL" if _dev_gen else "SETUP: BARE KIT"
+	gb.custom_minimum_size = Vector2(250, 34)
+	gb.add_theme_font_size_override("font_size", 14)
+	gb.add_theme_color_override("font_color", Palette.VERDANCE if _dev_gen else Palette.TEXT_DIM)
+	gb.pressed.connect(_dev_toggle_gen)
+	srow.add_child(gb)
+	var fw := DevSetups.fw_of(cls)
+	if _dev_gen and fw != "":
+		var focus := "ANY" if _dev_anchor == "" \
+			else String(DevSetups.module_data(fw, _dev_anchor).get("name", _dev_anchor)).to_upper()
+		var fb := Button.new()
+		fb.text = "FOCUS: %s" % focus
+		fb.custom_minimum_size = Vector2(250, 34)
+		fb.add_theme_font_size_override("font_size", 14)
+		fb.add_theme_color_override("font_color", Palette.FLOW if _dev_anchor != "" else Palette.TEXT_DIM)
+		fb.pressed.connect(_dev_cycle_anchor)
+		srow.add_child(fb)
 	# the Seals, canonical from RaidContent (auto-tracks any boss added to run_encounters)
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 10)
-	UiKit.place(col, 0.5, 0.5, 0.5, 0.5, -280, -60, 280, 200)
+	UiKit.place(col, 0.5, 0.5, 0.5, 0.5, -280, -30, 280, 230)
 	_ui.add_child(col)
 	for e in RaidContent.run_encounters():
 		var bid := String(e.id)
-		col.add_child(_menu_button(String(e.name), Palette.CRIMSON, hud._launch.bind(_dev_seat, "", bid)))
+		var bname := String(e.name)
+		var cb: Callable = _show_gen_preview.bind(bid, bname) if _dev_gen \
+			else hud._launch.bind(_dev_seat, _dev_aspect, bid)
+		col.add_child(_menu_button(bname, Palette.CRIMSON, cb))
 	var back := Button.new()
 	back.text = "◂ back"
 	back.flat = true
 	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
-	UiKit.place(back, 0.5, 1, 0.5, 1, -80, -78, 80, -44)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -80, -60, 80, -26)
 	back.pressed.connect(_show_home)
 	_ui.add_child(back)
 
 ## DEV · BOSS TEST: switch the jump-in seat, then re-render to move the highlight.
 func _dev_pick_seat(sid: String) -> void:
 	_dev_seat = sid
+	_dev_aspect = ""
+	_dev_anchor = ""
+	_show_boss_test()
+
+func _dev_pick_aspect(aid: String) -> void:
+	_dev_aspect = aid
+	_dev_anchor = ""       # the anchor pool is per-spec (⭐Vigil is Draw-only)
+	_show_boss_test()
+
+func _dev_toggle_gen() -> void:
+	_dev_gen = not _dev_gen
+	_show_boss_test()
+
+## Cycle the module FOCUS: ANY → each of the spec's offerable modules → ANY …
+func _dev_cycle_anchor() -> void:
+	var fw := DevSetups.fw_of(String(DEV_SEAT_CLS[_dev_seat]))
+	if fw == "":
+		return
+	var opts: Array = [""]
+	opts.append_array(DevSetups.module_offer_ids(fw, "", _dev_aspect))
+	var i := opts.find(_dev_anchor)
+	_dev_anchor = String(opts[(i + 1) % opts.size()])
+	_show_boss_test()
+
+## DEV · GENERATED SETUPS preview — the average build DevSetups rolled for this Seal +
+## seed, with its quick description. FIGHT launches it; REROLL mints a fresh seed; the
+## seed box replays any seed you noted (same seed = the identical setup, retryable).
+func _show_gen_preview(bid: String, bname: String) -> void:
+	_screen = "bosstest_gen"
+	_clear()
+	if _dev_seed == 0:
+		_dev_seed = Profile.current().next_run_seed()
+	# resolve the seat context the way _launch will, so the party comp matches
+	hud._resolve_seat(_dev_seat, _dev_aspect)
+	hud._ensure_party()
+	var party := {}
+	for key in hud._d.party:
+		party[key] = {"cls": String(hud._d.party[key]["cls"]),
+			"aspect": String(hud._d.party[key]["aspect"])}
+	var cls := String(DEV_SEAT_CLS[_dev_seat])
+	var gen := DevSetups.generate(cls, hud._aspect, _dev_anchor,
+		DevSetups.boss_floor(bid), _dev_seed, party)
+	var head := VBoxContainer.new()
+	head.alignment = BoxContainer.ALIGNMENT_CENTER
+	UiKit.place(head, 0.5, 0, 0.5, 0, -460, 40, 460, 128)
+	_ui.add_child(head)
+	var hl := UiKit.title_in(head, "GENERATED SETUP — %s" % bname, 26, Palette.GOLD)
+	hl.add_theme_font_override("font", UiKit.display(750, 3))
+	UiKit.title_in(head, "%s · %s   ·   SEED %d" % [cls.to_upper(), hud._aspect.to_upper(), _dev_seed],
+		14, Palette.TEXT_DIM)
+	var sc := ScrollContainer.new()
+	UiKit.place(sc, 0.5, 0, 0.5, 0, -430, 140, 430, 448)
+	_ui.add_child(sc)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 7)
+	sc.add_child(box)
+	UiKit.title_in(box, String(gen["title"]), 21, Palette.GOLD_BRIGHT)
+	var bl := Label.new()
+	bl.text = String(gen["blurb"])
+	bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bl.custom_minimum_size = Vector2(840, 0)
+	bl.add_theme_font_size_override("font_size", 14)
+	bl.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	box.add_child(bl)
+	for ln in (gen["lines"] as Array):
+		var l := Label.new()
+		l.text = String(ln)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size = Vector2(840, 0)
+		l.add_theme_font_size_override("font_size", 13)
+		box.add_child(l)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	UiKit.place(row, 0.5, 1, 0.5, 1, -430, -152, 430, -98)
+	_ui.add_child(row)
+	var fight := _menu_button("⚔    FIGHT", Palette.GOLD_BRIGHT,
+		hud._launch_dev_gen.bind(_dev_seat, _dev_aspect, bid, gen))
+	fight.custom_minimum_size = Vector2(240, 52)
+	row.add_child(fight)
+	var rr := _menu_button("🎲    REROLL", Palette.REACT, _dev_reroll.bind(bid, bname))
+	rr.custom_minimum_size = Vector2(200, 52)
+	row.add_child(rr)
+	var srow := HBoxContainer.new()
+	srow.alignment = BoxContainer.ALIGNMENT_CENTER
+	srow.add_theme_constant_override("separation", 8)
+	UiKit.place(srow, 0.5, 1, 0.5, 1, -430, -90, 430, -54)
+	_ui.add_child(srow)
+	var se := LineEdit.new()
+	se.text = str(_dev_seed)
+	se.custom_minimum_size = Vector2(180, 32)
+	se.add_theme_font_size_override("font_size", 14)
+	srow.add_child(se)
+	_dev_seed_edit = se
+	var use := Button.new()
+	use.text = "↻ USE SEED"
+	use.add_theme_font_size_override("font_size", 14)
+	use.add_theme_color_override("font_color", Palette.FLOW)
+	use.pressed.connect(_dev_use_seed.bind(bid, bname))
+	srow.add_child(use)
+	var back := Button.new()
+	back.text = "◂ back"
+	back.flat = true
+	back.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	UiKit.place(back, 0.5, 1, 0.5, 1, -80, -44, 80, -12)
+	back.pressed.connect(_dev_back_from_preview)
+	_ui.add_child(back)
+
+func _dev_reroll(bid: String, bname: String) -> void:
+	_dev_seed = 0                      # mint a fresh seed at the re-render
+	_show_gen_preview(bid, bname)
+
+func _dev_use_seed(bid: String, bname: String) -> void:
+	if _dev_seed_edit == null:
+		return
+	var v := _dev_seed_edit.text.strip_edges().to_int()
+	if v > 0:
+		_dev_seed = v
+		_show_gen_preview(bid, bname)
+
+func _dev_back_from_preview() -> void:
+	_dev_seed = 0
 	_show_boss_test()
 
 ## PLAY → pick your CLASS (the four raid seats; you play one, AI fills the rest).
