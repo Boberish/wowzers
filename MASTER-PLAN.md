@@ -871,6 +871,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · worktree `../wow-artv2-c1` (branch `artv2-c1`) · §GRAPHICS — **CLAIM:
+  GRAPHICS PACKET C1 — ART-V2 SELECTOR + FAIL-SAFE** (GRAPHICS-PLAN §5·C1, shape per the C0
+  map §10.2). Three INDEPENDENT view-only toggles, all default OFF: static `ArtV2` holder
+  (`game/art_v2/art_v2.gd`, no autoload) — `actors: bool` · `scene: String` (profile id) ·
+  `dash: bool` — parsed from `--artv2=actors,scene:<id>,dash` at the top of the WorldShell
+  boot (before the HUD instances — its `_ready` builds the backdrop). Guarded consumption,
+  one seam each: `Actor2D.make()` head (v2 asset missing ⇒ fall through to user-art/puppet) ·
+  `raid_hud._ready:276` backdrop construction (unknown/empty profile ⇒ legacy `StageBackdrop`) ·
+  `_build_combat` dashboard block (no C6 host registered ⇒ current widgets+band untouched).
+  No CombatState/spec/protocol/checksum contact; release default = old graphics. NOT C2 —
+  no SceneKit host, no placeholder profiles. Gates: import · `ui_smoke_raid` ·
+  `ab-gate.sh raid_sim` byte-identical · WSLg old-mode tour sheets. *(Claude session)*
+
 - ☑ 2026-07-12 · main · **ONE CLAIM — the overlap fix (Bill's playtest round 3).** Globals
   "don't register" traced in two layers: ① telegraph events were judged at IMPACT (open-window)
   while stream bars judge at the PRESS — an interim view-preview (`ffab265`) fixed the feel for
