@@ -147,6 +147,11 @@ static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 				if seat.kit.on_action(s, seat, StringName(action.get("id", "")), action.get("target")):
 					_emit(s, {"t": "ability_fired", "player": seat.is_player, "seat": seat,
 						"id": String(action.get("id", ""))})
+					# INTERRUPT-BY-ABILITY (COMBAT PILLAR #3): a kick-carrying ability just
+					# committed — try to stagger a live interruptible cast. Guarded: for every
+					# kit today ability_interrupts is false, so this is a no-op → byte-identical.
+					if seat.kit.ability_interrupts(StringName(action.get("id", ""))):
+						_try_interrupt(s, seat)
 		_:
 			pass
 
@@ -804,6 +809,24 @@ static func _advance_chain(s: CombatState) -> bool:
 	s.telegraph.chain_i = next_i + 1
 	return true
 
+## INTERRUPT-BY-ABILITY (COMBAT PILLAR #3). A kick-carrying ability (a class's dump / combo
+## finisher) just committed. SIMPLE by design (Bill 2026-07-12): press your ability ANY time
+## during a live INTERRUPTIBLE cast and it stops — no tight window, no early-press whiff. DPS
+## already juggle dodge + interrupt; a one-click kick keeps their focus on damage.
+##   · no telegraph, a multi-strike STRING (answered with dodge, not a kick), or a non-
+##     INTERRUPTIBLE cast → no-op (the finisher was just its own damage).
+##   · a live INTERRUPTIBLE cast → CLEAN KICK: the effect is DENIED and the verse skipped — a
+##     chain advances one link (the litany lives, it just loses this verse); an unchained cast
+##     ends and recasts later on the timer armed at cast start. The telegraph never reaches
+##     _resolve_telegraph, so the `kick_open_missed` counter is correctly NOT bumped. Pure.
+static func _try_interrupt(s: CombatState, seat: Seat) -> void:
+	var tg := s.telegraph
+	if tg == null or not tg.ability.strikes.is_empty():
+		return                                # no cast, or a STRING (answered with dodge, not a kick)
+	if tg.ability.response != AbilityRes.Response.INTERRUPTIBLE:
+		return                                # only interruptible verses can be kicked
+	stagger_boss(s, seat)                     # CLEAN KICK — the canonical resolver, seat-credited
+
 static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 	var ab := s.telegraph.ability
 	# STATS PAGE v2 — a kickable cast that reached resolution was NOT staggered: count the
@@ -911,14 +934,23 @@ static func _resolve_telegraph(s: CombatState, ph: PhaseRes) -> void:
 	if not _advance_chain(s):          # a resolved chain verse flows into the next
 		s.telegraph = null
 
-## Cancel the current telegraph (Shockwave / Avalanche / Vindicate-interrupt).
-## Kicking a CHAIN verse skips that verse only — the litany continues.
-static func stagger_boss(s: CombatState) -> void:
+## Cancel the current telegraph (Shockwave / Avalanche / Vindicate-interrupt, or a class
+## dump/finisher's INTERRUPT-BY-ABILITY kick). Kicking a CHAIN verse skips that verse only —
+## the litany continues. `by_seat` (INTERRUPT-BY-ABILITY, pillar #3): when a player/AI landed
+## the kick with a kick-carrying ability, credit it and pop the richer "CLEAN KICK!/DENIED!"
+## feedback; null (the scripted/legacy path) keeps the plain "STAGGERED!" emit byte-identical.
+static func stagger_boss(s: CombatState, by_seat: Seat = null) -> void:
 	if s.telegraph != null:
 		# View juice: denying a heal cast is the payoff moment; flag it so the HUD
 		# can pop "DENIED!" vs a plain "STAGGERED!".
 		var was_heal := s.telegraph.ability.effect == AbilityRes.Effect.HEAL_BOSS
-		_emit(s, {"t": "staggered", "was_heal": was_heal})
+		if by_seat != null:
+			by_seat.diag["kick_landed"] = int(by_seat.diag.get("kick_landed", 0)) + 1
+			s.diag["kick_landed"] = int(s.diag.get("kick_landed", 0)) + 1
+			_emit(s, {"t": "interrupt", "player": by_seat.is_player, "seat": by_seat,
+				"clean": true, "was_heal": was_heal, "id": s.telegraph.ability.id})
+		else:
+			_emit(s, {"t": "staggered", "was_heal": was_heal})
 		if was_heal:
 			# GEAR-1: broadcast the denial to every living kitted seat (no-op base
 			# hook — gearless runs execute nothing and stay byte-identical).
