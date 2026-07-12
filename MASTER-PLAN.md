@@ -899,8 +899,8 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   active default-off C1 selector branch. Plans synchronized in the docs closure immediately after
   claim; no runtime asset or code changed. *(Codex graphics-v2 session)*
 
-- ☐ 2026-07-12 · worktree `../wow-interrupt` (branch `interrupt-pillar3`) · §COMBAT PILLARS —
-  **CLAIM: INTERRUPT-BY-ABILITY (Pillar #3 turns ON).** Bill: *"no one can interrupt — let's make
+- ☑ 2026-07-12 · **MERGED `3126437`** (feat `916e9c2`) · §COMBAT PILLARS —
+  **INTERRUPT-BY-ABILITY (Pillar #3 turns ON).** Bill: *"no one can interrupt — let's make
   our Eviscerate, and a combo tank attack interrupt."* The interrupt RESOLVER already exists
   (`CombatCore.stagger_boss` — used by the legacy `_kick` button + scripted Shockwave/Vindicate) and
   the WHOLE UI/feedback layer is built and waiting (`boss_cast_bar` "interrupt/uncontested" cue +
@@ -915,9 +915,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   optional crediting seat → richer "interrupt" event + `kick_landed`; null arg = legacy "staggered",
   byte-identical); chains skip one verse, unchained casts clear. (3) flip that one `kickable_seat`
   line to read `carries_kick`. Alchemist dump = the 3rd kicker, follow-up; the AI isn't a *deliberate*
-  kicker yet (raid_sim coincidental kicks ≈ 0 — AI kicker policy is the next slice). Gates: import ✅ ·
-  direct kick probe ✅ (Evis+dump kick myth_cot→myth_cot2, non-carrier Alchemist can't) ·
-  `alchemist_sim`/`well_sim` byte-identical (`ab-gate.sh`) · `ui_smoke_raid`. *(Claude session)*
+  kicker yet (raid_sim coincidental kicks ≈ 0 — AI kicker policy is the next slice). **Gates all
+  green:** import ✅ · direct kick probe ✅ (Evis+dump kick myth_cot→myth_cot2, non-carrier Alchemist
+  can't) · `ab-gate alchemist_sim` **BYTE-IDENTICAL PASS** (engine touch byte-neutral for
+  non-carriers) · merged-main import clean + raid_sim runs. ⚠ **Pre-existing bug surfaced (NOT this
+  change):** `ui_smoke_raid` fails at the `pause+codex round-trip` assertion (line 125) — reproduced
+  identically on the pinned baseline `7064a01`, so it lives on `main` already (likely tank-v3/graphics
+  era); flagged to Bill, unrelated to interrupts. **OWED (follow-ups):** AI *deliberate*-kicker policy
+  · Alchemist dump = 3rd kicker · the boss-side S7 tight-window slice (`kick_window`) + verse-table
+  kick diag stay parked · legacy Twinfang `_kick` button coexists (Bill may cut it). *(Claude session)*
 
 - ☑ 2026-07-12 · `artv2-c1` → **MERGED to `main` (ff `3da278f`, slice `47197bd`)** ·
   §GRAPHICS — **GRAPHICS PACKET C1 COMPLETE — ART-V2 SELECTOR + FAIL-SAFE** (GRAPHICS-PLAN
