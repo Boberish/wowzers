@@ -86,6 +86,11 @@ NOT built, triggers per rung, 2026-07-10) ·
 bug + `ClassKit` label/accent hooks) · L2 new modes from existing data (⚡AMPLIFY/DISCIPLINE/
 sparklines) · L3 segments+run-history · L4 window chrome · L5 teaching layer; the live twin of
 STATS PAGE v2, nearly all view-only/diag-family; 🟡 at Bill's verdict, 2026-07-10) ·
+`ART-PLAN.md` (**THE CHARACTER-ART PASS — design of record**: foundation verdict [native
+`PoseRig2D` skeleton now, **Spine Pro = per-actor upgrade door** behind `Actor2D`; StS2 = Godot 4
++ Spine] · AtO-cel AI art · 3 slices ①juice-pass ✅ ②painted-cutout-skin ③flipbook-FX · the
+AI-generation brief · reusable per class; Twinfang pilot on `tempo-art`; companion to the
+`godot/ART-PIPELINE.md` animation-name contract, 2026-07-10) ·
 `archive/` (**frozen docs — 2026-07-10 cleanup**: `HISTORY.md` the milestone build-up M0→R2.5 ·
 `RAID-PLAN.md` netcode-era origin · `PORT-PLAN.md` / `rift-godot-port-brief.md` the port origins ·
 `UNLOCK-BRIEF.md` retired; see `archive/README.md` — never claim work from there) + `poc/`.
