@@ -32,3 +32,8 @@ outside `res://`; only approved processed layers enter the runtime folders.
   midground, and dressing layers must break center-mirrored symmetry with offset clusters.
 - This v1 is below the preferred 2048×1024+ source target. Do not spend an upscale/regeneration
   pass until its scale, seam, and readability have been inspected in SceneKit.
+- `stack_atrium/distant-*-v1.png` — chroma source, alpha extraction, and 2048×256 prepared runtime
+  strip; delivered as layer 2/5 in `ebd7242`.
+- `stack_atrium/midground-*-v1.png` — asymmetric chroma source, alpha extraction, and 2048×512
+  prepared strip. The live 1080p tour keeps the timing lane readable; final density tuning waits
+  until floor and dressing complete the scene.

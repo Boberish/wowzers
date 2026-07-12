@@ -9,7 +9,7 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE — STACK 1/5 LAYERS.** Bill approved **SUNPRINT CEL** on
+**Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE — STACK 3/5 LAYERS.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
 texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C3 schema/bindings merged `1abfcd4`; C2 SceneKit merged as
 `da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
@@ -233,6 +233,10 @@ and the screenshot tour. Bill approves the same fight in both before we expand s
 regular bright-atrium base as a quiet tileable backdrop; `stack_atrium/backdrop.png` is layer 1/5.
 Its v1 resolution is prototype-grade, and later transparent layers deliberately provide the
 asymmetry and encounter-specific composition.
+
+Backdrop + distant shipped in `ebd7242` after the C3 visibility hotfix `516e1b0`. The asymmetric
+midground is layer 3/5: transparent 2048×512 with the actor/timing lanes open. Floor and dressing
+remain before the first complete Stack composition verdict.
 
 ### P4 · DUELIST ANCHOR + RIG — Codex I2 + Claude C4/C5
 

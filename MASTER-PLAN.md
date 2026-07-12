@@ -951,9 +951,9 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   deliverables for SceneKit; generated previews remain outside runtime until Bill approves. After
   approval, Claude receives C3 only (asset folders/import defaults/repeatable scene tour). No
   overlap with live gameplay work. **Progress:** C3 merged `1abfcd4`; source anchors archived
-  `3a855ef`; Bill approved the regular atrium base as the quiet repeating backdrop and Stack
-  layer 1/5 now lives at `scenes/stack_atrium/backdrop.png`. Remaining transparent layers own
-  asymmetry; v1 scale/seam inspection precedes any upscale credit. *(Codex graphics-v2 session)*
+  `3a855ef`; backdrop+distant render after hotfix `516e1b0` / delivery `ebd7242`; the asymmetric
+  2048×512 midground is now Stack layer 3/5 and keeps the live timing lane open at 1080p. Floor +
+  dressing remain before density/upscale decisions. *(Codex graphics-v2 session)*
 
 - ☑ 2026-07-12 · main · **THE GUARD — authored space around globals (`d03dbfa`; Bill: "it's
   every time a problem").** Quiet windows [impact−0.65, impact+0.45] (TuningConfig knobs,
