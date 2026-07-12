@@ -888,6 +888,8 @@ func _show_map() -> void:
 	ms.subtitle = String(RaidContent.FLOORS[_d.floor_i]["title"])
 	ms.ring = int(RaidContent.FLOORS[_d.floor_i]["ring"])
 	ms.open_tickets = _open_ticket_lines()
+	ms.held_tickets = _d.tickets.keys()   # the ids we're carrying — gates the honest TURN-IN badge
+	ms.have_held_info = true              # offline knows exactly what's held (online keeps the legacy badge)
 	ms.toast = _d.toast
 	_d.toast = ""                 # one-shot — clears once shown
 	ms.gear_line = _gear_line()
@@ -945,17 +947,50 @@ func _enter_node(id: int) -> void:
 	# visited/shard/TICKET/key — the ONE rulebook (CampaignCore.ticket_at replaced the
 	# HUD's _ticket_at twin); purse Tokens route through _gain_tokens (Hashgrinder ×2).
 	var cp := _d.cp_view()
+	var closed_before := int(cp["closed"])
 	var out := CampaignCore.enter_node(cp, n, _d.gear.has("ticket_stub"))
 	_d.cp_sync(cp)
 	if int(out["tokens"]) != 0:
 		_gain_tokens(int(out["tokens"]))
-	if bool(out["key_grabbed"]):
-		_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
-			[{"label": "TAKE IT", "fx": {"key": true,
-				"result": "Authorization acquired. The raid agrees to never speak of where it was taped."}}],
-			Palette.GOLD_BRIGHT, _resolve_node.bind(n))
-		return
-	_resolve_node(n)
+	# the key-grab ceremony + the node itself, deferred behind any ticket confirmation
+	var proceed := func():
+		if bool(out["key_grabbed"]):
+			_map_stop(String(n["name"]), MapContent.KEY_PICKUP,
+				[{"label": "TAKE IT", "fx": {"key": true,
+					"result": "Authorization acquired. The raid agrees to never speak of where it was taped."}}],
+				Palette.GOLD_BRIGHT, _resolve_node.bind(n))
+		else:
+			_resolve_node(n)
+	# TICKET CLOSED confirmation (Bill 2026-07-12): a turn-in used to be invisible — its
+	# repair/mana reward is a no-op for a healthy party, so all you saw was a quiet ⏣ tick
+	# and a one-shot toast AFTER the node's own fight. A stop panel makes the payoff explicit
+	# at the node itself, the moment you turn the ticket in.
+	if int(_d.closed) > closed_before:
+		_show_ticket_closed(n, int(out["tokens"]), proceed)
+	else:
+		proceed.call()
+
+## The turn-in payoff panel (Bill 2026-07-12): shown the instant a ticket closes, before
+## the node resolves. The reward is ALREADY applied (CampaignCore.ticket_at) — this is a
+## confirmation, so its one choice carries an empty fx. Names the actual goods (⏣ / repair /
+## refuel) and celebrates the SPRINT RETRO when the last ticket on the floor drops.
+func _show_ticket_closed(n: Dictionary, granted: int, done: Callable) -> void:
+	var td := MapContent.ticket(String(n.get("ticket_close", "")))
+	var reward: Dictionary = td.get("reward", {})
+	var lines: Array = []
+	if granted > 0:
+		lines.append("+%d ⏣" % granted)
+	if bool(reward.get("repair", false)):
+		lines.append("a corrupted sector repaired")
+	if reward.has("mana"):
+		lines.append("the healer's reserves refueled")
+	var body := String(td.get("close", "The ticket is closed."))
+	body += "\n\nREWARD:  " + ("   ·   ".join(lines) if not lines.is_empty() else "logged for the retro")
+	var title := "✅  TICKET CLOSED"
+	if int(_d.closed) >= int(_d.ticket_total) and int(_d.ticket_total) > 0:
+		title = "★  SPRINT RETRO"
+		body += "\n\nEvery ticket on this floor is closed — the on-call daemon buys the raid dinner. Corrupted sectors repaired, reserves topped."
+	_map_stop(title, body, [{"label": "CLAIMED", "fx": {}}], Palette.GOLD_BRIGHT, done)
 
 ## THE DESCENT REBUILD: nodes resolve through RunMap.effective_kind — a WILD reveals
 ## its rolled payload; unbuilt interiors (market/jailbreak/minigame) fall back to the

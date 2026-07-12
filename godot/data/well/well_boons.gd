@@ -47,7 +47,7 @@ const BRIM := [
 		"desc": "Each Mend that pours in a row shaves 1 charge off the next (min 1) — reward the metronome; a miss resets it."},
 	{"id": "blindfold", "type": "relic", "rarity": "sonnet", "tags": ["brim", "glint"], "ctype": "GREED", "title": "The Blindfold",
 		"desc": "The landing preview goes DARK — but every pour's Glint burns +40% harder. Heal by feel, get paid for the nerve."},
-	{"id": "highTide", "type": "relic", "rarity": "opus", "tags": ["brim", "glint"], "ctype": "RULE", "title": "High Tide",
+	{"id": "highTide", "type": "relic", "rarity": "opus", "tags": ["brim", "glint", "keystone"], "ctype": "RULE", "title": "High Tide",
 		"desc": "KEYSTONE: while EVERY ally is at or above the pour band, your next POUR Glints the WHOLE party at once. A full tide lifts every blade — build to keep the team topped."},
 ]
 
@@ -73,8 +73,8 @@ const DRAW := [
 		"desc": "SIGNATURE: at MAX Current, every clean draw heals +30%. The Current pays in power, not just speed — the reward for riding high."},
 	{"id": "theMillrace", "type": "relic", "rarity": "sonnet", "theme": "rapids", "tags": ["draw", "current", "well"], "ctype": "POWER", "title": "The Millrace",
 		"desc": "While the Current runs FULL, every third cast is FREE (0 charges). The rush's one economy valve — ride high or run dry. (Demoted from keystone: honest economy, not a spectacle.)"},
-	{"id": "flume", "type": "relic", "rarity": "opus", "theme": "rapids", "tags": ["draw", "current"], "ctype": "RULE", "title": "The Flume",
-		"desc": "KEYSTONE: hold MAX Current for 12s and the river runs white — for 6s every release auto-grades CLEAN and the whole party rides the flow. Then the Current empties to 0. Earned, never toggled."},
+	{"id": "flume", "type": "relic", "rarity": "opus", "theme": "rapids", "tags": ["draw", "current", "keystone"], "ctype": "RULE", "title": "The Flume",
+		"desc": "KEYSTONE: hold MAX Current for 12s and the river runs white — for 6s every release auto-grades CLEAN and the whole party rides the flow. Your Current is NOT spent — keep it maxed and the river runs white again. Earned by holding high, never toggled."},
 	# --- VIGIL (held heals — pairs with The Patient Hand / ⭐The Vigil module) ---
 	{"id": "secondHand", "type": "upgrade", "rarity": "haiku", "theme": "vigil", "tags": ["draw", "hold"], "ctype": "STRAT", "title": "Second Hand",
 		"desc": "Flash stays castable while a held heal is cocked in your hand — the stance, not a lockout. Cover a second dip without dropping the one you're holding."},
@@ -82,7 +82,7 @@ const DRAW := [
 		"desc": "A held heal releases +8% stronger per half-second you hold it (up to +60%) — ride the sway to the brink, but a gutter still wastes the charge and the cast."},
 	{"id": "lastDrops", "type": "relic", "rarity": "sonnet", "theme": "vigil", "tags": ["draw", "execute", "well"], "ctype": "GREED", "title": "Last Drops",
 		"desc": "While the Well is nearly dry (≤2 charges), casts run 20% faster and heal +15% — squeeze the dregs."},
-	{"id": "loosedAtLast", "type": "relic", "rarity": "opus", "theme": "vigil", "tags": ["draw", "hold", "shield"], "ctype": "RULE", "title": "Loosed at Last",
+	{"id": "loosedAtLast", "type": "relic", "rarity": "opus", "theme": "vigil", "tags": ["draw", "hold", "shield", "keystone"], "ctype": "RULE", "title": "Loosed at Last",
 		"desc": "KEYSTONE: release a HELD heal within 0.2s of the ally being hit and it lands as a PERFECT INTERCEPT — full heal, and half of it clings on as a 2s absorb. The archer's photo-finish."},
 	# --- EDDY (drift reads — pairs with The Eddy creed) ---
 	{"id": "currentReading", "type": "upgrade", "rarity": "haiku", "theme": "eddy", "tags": ["draw", "current", "band"], "ctype": "STRAT", "title": "Current Reading",
@@ -91,7 +91,7 @@ const DRAW := [
 		"desc": "The band's drift range DOUBLES — but land a Still Point in the wandering water and it heals ×1.5. Wilder reads, bigger payoff."},
 	{"id": "deepStill", "type": "relic", "rarity": "sonnet", "theme": "eddy", "tags": ["draw", "glint"], "ctype": "EASE", "title": "Deep Still",
 		"desc": "The Still Point sliver runs 60% wider — the Glint-tier release is easier to tag while you ride the Current."},
-	{"id": "glassRiver", "type": "relic", "rarity": "opus", "theme": "eddy", "tags": ["draw", "band", "glint"], "ctype": "RULE", "title": "The Glass River",
+	{"id": "glassRiver", "type": "relic", "rarity": "opus", "theme": "eddy", "tags": ["draw", "band", "glint", "keystone"], "ctype": "RULE", "title": "The Glass River",
 		"desc": "KEYSTONE: land three moving Still Points in a row and the water FREEZES — for 5s the bands stop drifting and every release grades as a Still Point. Read the river until it holds still."},
 ]
 
