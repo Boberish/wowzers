@@ -239,6 +239,7 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 				"eta": float(int(b["impact_tick"]) - s.tick) * s.dt,
 				"lead": float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt,
 				"late": bool(b["late"]),
+				"answered": s.boss.stream_answers.has(int(b["id"])),
 				"flurry_i": int(b["flurry_i"]), "flurry_n": int(b["flurry_n"]),
 			})
 		base["stream"] = {
@@ -387,9 +388,11 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 ##    horizon and NEVER reads s.telegraph or an ability timer — the melee keeps flowing
 ##    through every global (no seam, no drain, no post-cast dead beat). Scripted quiet
 ##    windows around a big-dodge/kick are authored via `stream_breathe`, not a halt.
-##  · RESOLVE: at impact_tick, through the same _damage path old melee used (the victim
-##    kit's modify_incoming grades whatever press is active — source-agnostic since M0).
-##    Feints deal nothing (judged BAITED/READ via the kit hook); unavoidables skip grading.
+##  · RESOLVE (§0 THE PRESS, pass 2 restored): presses are judged AT THE PRESS — the kit
+##    stores the claim in stream_answers; a damage bar holds stream_resolve_slack past
+##    gate-touch, then applies the stored outcome through the same _damage path old melee
+##    used (source-agnostic since M0). Feints deal nothing (claimed = BAITED at the press;
+##    unclaimed = READ via the kit hook); unavoidables skip grading.
 ##  · A PEELED bar (victim != tank) is an UNDODGEABLE hit and never ships in the tank's
 ##    obs — the stream visibly PAUSES on aggro loss (cdd008f, kept).
 ##  · Texture profile keys (all optional): every · jig · min/max · heavy_odds · crush_odds ·
@@ -399,10 +402,17 @@ static func _tick_stream(s: CombatState, melee: Dictionary) -> void:
 	_stream_resolve_due(s)
 	_stream_publish(s, melee)
 
+## Resolve due bars. THE PRESS (§0 pass 2, restored tank-v3): presses were already judged
+## AT THE PRESS (stream_answers) — resolution just applies the stored outcome. Damage bars
+## hold for stream_resolve_slack past gate-touch so a hair-late press still claims them
+## (symmetric grading); feints/eats resolve at impact (nothing to mitigate).
 static func _stream_resolve_due(s: CombatState) -> void:
+	var slack := to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
 	while not s.boss.stream.is_empty():
 		var bar: Dictionary = s.boss.stream[0]
-		if s.tick < int(bar["impact_tick"]):
+		var kind := String(bar["kind"])
+		var hold := 0 if (kind == "feint" or kind == "eat") else slack
+		if s.tick < int(bar["impact_tick"]) + hold:
 			return
 		s.boss.stream.remove_at(0)
 		if OS.is_debug_build():                          # R12: a bar NEVER changes publish->resolve
@@ -413,6 +423,8 @@ static func _stream_resolve_due(s: CombatState) -> void:
 						and int(bar["victim_i"]) == int(_snap[2]) and String(bar["kind"]) == String(_snap[3]),
 					"stream bar %d MUTATED between publish and resolve" % _bid)
 				s.boss.stream_snap.erase(_bid)
+		var ans: Dictionary = s.boss.stream_answers.get(int(bar["id"]), {})
+		s.boss.stream_answers.erase(int(bar["id"]))
 		var vi := int(bar["victim_i"])
 		if vi < 0 or vi >= s.seats.size():
 			continue
@@ -420,19 +432,22 @@ static func _stream_resolve_due(s: CombatState) -> void:
 		if not victim.alive():
 			continue                                    # a bar aimed at the fallen fizzles
 		s.boss.stream_after_cast = false
-		var kind := String(bar["kind"])
 		if kind == "feint":
-			if victim.kit != null:
-				victim.kit.on_stream_bar(s, victim, bar)  # BAITED vs READ is the kit's judgment
+			# a claimed feint was punished (BAITED) at the press; unclaimed = the READ
+			if ans.is_empty() and victim.kit != null:
+				victim.kit.on_stream_bar(s, victim, bar)
 			continue                                    # a fake deals nothing
 		if kind == "eat":
 			if victim.kit != null:
 				victim.kit.on_stream_bar(s, victim, bar)
 			_damage(s, victim, float(bar["dmg"]), &"eat", AbilityRes.Size.NONE)
 		else:
-			# auto/heavy/buster/flurry — the kit funnel grades the active press. The bar
-			# being resolved is exposed for the funnel (flurry groups, buster reads).
-			s.boss.stream_resolving = bar
+			# auto/heavy/buster/flurry — the funnel applies the press-time answer. The bar
+			# being resolved is exposed for the funnel (stored grade, flurry groups).
+			var rb := bar.duplicate()
+			rb["ans_kind"] = String(ans.get("kind", ""))
+			rb["ans_grade"] = int(ans.get("grade", -1))
+			s.boss.stream_resolving = rb
 			var src := &"flurry" if kind == "flurry" else &"rhythm"
 			_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
 			s.boss.stream_resolving = {}
@@ -598,6 +613,7 @@ static func _stream_shatter(s: CombatState) -> void:
 	if s.boss.stream.is_empty():
 		return
 	s.boss.stream.clear()
+	s.boss.stream_answers.clear()                        # claims die with their bars
 	if OS.is_debug_build():                              # shattered bars never resolve — drop their ledger
 		s.boss.stream_snap.clear()
 	s.boss.stream_next_impact = -1

@@ -50,6 +50,9 @@ extends Resource
                                                ## least this much remaining travel (obs lead = max(lead, this))
 @export var stream_late_cap: int = 8           ## DEC-11 per-fight LATE budget (a SealTune knob; a melee
                                                ## dict may override with "late_cap"); beyond it, bars ship on-time
+@export var stream_resolve_slack: float = 0.15 ## THE PRESS (§0 pass 2, restored in v3): damage bars resolve
+                                               ## this long AFTER gate-touch so a hair-late press still claims
+                                               ## them (symmetric grading); feints/eats keep resolving at impact
 ## CONTINUITY RE-BASELINE (tank-v3 S2 fallout, 2026-07-12): retiring the barrier made the
 ## melee stream publish CONTINUOUSLY — the old model DROPPED every bar that fell inside a
 ## telegraph/cast (barrier<0 → no publish, stream_next_impact frozen), so the tank now faces

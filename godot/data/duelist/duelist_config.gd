@@ -21,16 +21,22 @@ extends Resource
 @export var parry_cost: float = 3.5        ## a PARRY press — land OR miss (the commit)
 
 # --- ANSWER WINDOWS (tick-native — the 30 Hz wall: never author tighter than ~2 ticks).
-#     A press opens an "answer" that grades the NEXT incoming bar by press age at impact.
-#     PARRY is BINARY: within parry_window = the land, else the miss (no tiers — the ~3-tick
-#     window IS the bullseye-tight commitment). DODGE is GRADED: bullseye ⊂ perfect ⊂ good,
-#     graze out to answer_active. ---
-@export var answer_active: float = 0.50    ## the answer stays open this long after the press
+#     STREAM bars: THE PRESS (§0 pass 2) — a press CLAIMS the nearest bar within ±answer_claim
+#     and is judged INSTANTLY, symmetric around gate-touch: |press−impact|/answer_claim on the
+#     grade_*_frac ladder (PARRY binary at ±parry_land). TELEGRAPH busters/globals keep the
+#     open-window model: the press stays open answer_active and grades by press age at impact
+#     (parry_window / dodge_* below). ---
+@export var answer_active: float = 0.50    ## telegraph path: the answer stays open this long after the press
 @export var answer_claim: float = 0.30     ## DEC-14 claim range: a press answers a bar within
                                            ## ±this of now; among several, the tie-break picks nearest
                                            ## |impact−now| → earliest impact → lowest id (deterministic)
-@export var parry_window: float = 0.10     ## land window (~3 ticks) — binary, the commit
-@export var dodge_bullseye: float = 0.07   ## the dead-center read (~2 ticks) — answers heavy/buster
+@export var parry_land: float = 0.07       ## stream-claim PARRY: lands within ±this of gate-touch
+                                           ## (~2 ticks symmetric — tick-native, never float-ms)
+@export var grade_bull_frac: float = 0.18  ## stream-claim DODGE ladder: |press−impact|/answer_claim
+@export var grade_perfect_frac: float = 0.55
+@export var grade_good_frac: float = 0.80  ## …beyond = GRAZE, out to the claim edge
+@export var parry_window: float = 0.10     ## telegraph land window (~3 ticks) — binary, the commit
+@export var dodge_bullseye: float = 0.07   ## telegraph dead-center read (~2 ticks) — answers heavy/buster
 @export var dodge_perfect: float = 0.14
 @export var dodge_good: float = 0.30
 

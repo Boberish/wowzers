@@ -83,6 +83,9 @@ var stream_tempo: float = 1.0          ## whole-flow speed multiplier (SPEED LAW
 var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.)
 var stream_resolving: Dictionary = {}  ## the bar mid-resolve — the kit funnel reads flurry
                                        ## group/index here (cleared the same tick; never checksummed)
+var stream_answers: Dictionary = {}    ## bar id -> {kind:String, grade:int} — press-time claims
+                                       ## (THE PRESS §0 pass 2: judged AT the press, symmetric around
+                                       ## gate-touch; resolve just applies the stored outcome)
 var stream_snap: Dictionary = {}       ## DEBUG-ONLY immutability ledger (id -> [impact,dmg,victim,kind]),
                                        ## written only under OS.is_debug_build(); the resolve asserts
                                        ## a bar never changed publish->resolve (R12). Never checksummed,
