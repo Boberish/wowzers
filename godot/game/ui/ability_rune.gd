@@ -32,6 +32,11 @@ var _pulse: float = 0.0
 var _hover: float = 0.0           # eased 0..1 hover emphasis
 var _hovered: bool = false
 var _press_k: float = 0.0         # press-down kick, decays
+
+## External press echo: key/mouse verbs bypass _gui_input (they call the controller
+## directly), so the band kicks the rune here — the button animates however you pressed.
+func kick() -> void:
+	_press_k = 1.0
 var _gleam: float = 0.0           # become-ready glint sweep, decays
 var _was_on: bool = true
 var _glow: GlowCore

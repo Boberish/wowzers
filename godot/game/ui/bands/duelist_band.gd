@@ -142,8 +142,15 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 				ev.has("id"), int(ev.get("id", -1)), ev.has("off_ms"), int(ev.get("off_ms", 0)))
 		"duel_dodge":
 			channel.press_tick("dodge")            # the frame-you-press echo (§0 pass 2)
+			dodge_rune.kick()                      # the bind rail animates too (key/mouse bypass _gui_input)
 		"duel_parry":
 			channel.press_tick("parry")
+			parry_rune.kick()
+		"duel_dump":
+			dump_rune.kick()
+		"duel_engarde":
+			engarde_rune.kick()
+			channel.stamp("EN GARDE!", "bullseye")
 		"duel_counter":
 			channel.stamp("COUNTER +◆", "bullseye")
 		"duel_riposte":
@@ -160,8 +167,6 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 			channel.stamp("WINDED", "hit")
 		"duel_eat":
 			channel.stamp("BRACE", "graze")
-		"duel_engarde":
-			channel.stamp("EN GARDE!", "bullseye")
 		"duel_engarde_break":
 			channel.stamp("BROKEN", "hit")
 		"stream_shatter":

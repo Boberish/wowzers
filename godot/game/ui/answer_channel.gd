@@ -13,18 +13,23 @@
 ## px/s is CONSTANT — whole-flow tempo is baked into each bar's impact_tick at publish, so
 ## a faster tempo shows as comets with closer etas, never a render-side rescale — TANK-V3).
 ##
-## THE CLAIM MOMENT (tank-v3 juice pass, Bill 2026-07-12): a claimed comet no longer just
-## blinks out under a fixed tag. The band routes the graded engine verdict to `resolve()`,
-## which fires a SHAPE-AWARE death at the comet's own last on-screen spot (`_last_x`, tracked
-## verbatim in _draw): a PARRY shape SHATTERS, a DODGE shape GHOSTS left past the gate, a MISS
-## bursts a crimson X + edge-flash, a feint puffs purple. A position-anchored VERDICT punches
-## in (grade color + ±ms readout) and floats up, and the GATE pulses the grade color (BULLSEYE
-## blooms the gold center band). All one-shots — they never touch what the committed comets draw.
+## THE CLAIM MOMENT (§0 pass 2 + the AAA pass, 2026-07-12): a press is judged AT the press —
+## the engine's duel_answer arrives the same tick you clicked, carrying the claimed bar's id +
+## signed off_ms. `resolve()` anchors everything at that comet's frozen last-drawn pixel
+## (`_last_x`): THE PRESS BURST (Twinfang's ghost — a fading vertical line + an expanding
+## circle above, BULLSEYE adds the mint ring), a SHAPE-AWARE death (PARRY SHATTERS, DODGE
+## GHOSTS, MISS bursts a crimson X, feint puffs purple), and a position-anchored VERDICT that
+## punches at FULL SIZE frame 1 (no ease-in — ease-out only) with the ±ms readout. The GATE
+## pulses the grade color (BULLSEYE blooms). Comets interpolate between 30 Hz ticks
+## (tick_frac); every press echoes the frame it lands (press_tick / dud). All one-shots —
+## they never touch what the committed comets draw.
 ##
-## THE GATE is the game-wide grading target (GRADING COHERENCE LAW): steel GRAZE band →
-## gold GOOD → mint PERFECT → bright-gold BULLSEYE center, identical in reading to the
-## Twinfang rhythm bar; the thin steel notch is the PARRY land window (binary). A tiny mint
-## dot above a heavy/buster marks "bullseye-dodge legal". Pure view — never touches state.
+## THE GATE is the game-wide grading target (GRADING COHERENCE LAW), SYMMETRIC around the
+## gate line like the grading is (§0 pass 2): steel GRAZE → gold GOOD → mint PERFECT →
+## bright-gold BULLSEYE centre band, gem-set mullions at the graze edges and the gilded
+## aim-plumb on the gate line — identical in reading to the Twinfang rhythm bar; the steel
+## notches are the PARRY land window (binary). A tiny mint dot above a heavy/buster marks
+## "bullseye-dodge legal". Pure view — never touches state.
 class_name AnswerChannel
 extends Control
 
@@ -202,63 +207,96 @@ func _draw() -> void:
 	var w := size.x
 	var h := size.y
 	var cy := h * 0.46
-	# --- the glass channel + the mode skin ---
+	# --- the gilded glass channel + the mode skin (AAA pass: grad glass, bevel, filigree) ---
 	var bg0 := Palette.FILL_TOP
 	var bg1 := Palette.FILL_BOT
 	if flurry:
 		bg0 = bg0.lerp(Palette.CRIMSON_DEEP, 0.45)
 		bg1 = bg1.lerp(Palette.CRIMSON_DEEP, 0.3)
-	draw_rect(Rect2(0, 0, w, h), bg1)
-	draw_rect(Rect2(0, 0, w, h * 0.5), bg0)
+	UiKit.grad_rect(self, Rect2(0, 0, w, h), bg0, bg1)
+	draw_rect(Rect2(0, h - 3.0, w, 3.0), Color(0, 0, 0, 0.35))       # seated base shadow
+	draw_rect(Rect2(0, 0, w, 2.0), Color(1, 1, 1, 0.05))             # glass sheen lip
 	var edge := Palette.EDGE
 	if flurry:
 		var pulse := 0.5 + 0.5 * sin(_spin * 4.0)
 		edge = Palette.CRIMSON.lerp(Palette.GOLD_BRIGHT, pulse)
-		draw_string(get_theme_default_font(), Vector2(w * 0.5 - 92, 14),
-			"FLURRY — DON'T MISS ONE", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, edge)
-	draw_rect(Rect2(0, 0, w, h), edge, false, 2.0)
+		UiKit.engraved_plaque(self, Vector2(w * 0.5, 10.0), "FLURRY — DON'T MISS ONE", true)
+		# a travelling shimmer sells the quickened flow
+		var sx2 := fmod(_spin * 90.0, w - 20.0) + 10.0
+		var shim := Palette.CRIMSON.lightened(0.4)
+		shim.a = 0.20
+		draw_rect(Rect2(sx2, 4.0, 9.0, h - 8.0), shim)
+	draw_rect(Rect2(0, 0, w, h), Color(0, 0, 0, 0.5), false, 3.0)    # dark outer seat
+	draw_rect(Rect2(1, 1, w - 2, h - 2), edge if flurry else Palette.GOLD_DIM.darkened(0.2), false, 1.5)
+	UiKit.filigree_corner(self, Vector2(0, 0), Vector2(1, 1))
+	UiKit.filigree_corner(self, Vector2(w, 0), Vector2(-1, 1))
+	UiKit.filigree_corner(self, Vector2(0, h), Vector2(1, -1))
+	UiKit.filigree_corner(self, Vector2(w, h), Vector2(-1, -1))
 	# a leak bleeds crimson at the channel border (complements the slam's full-screen vignette)
 	if _edge_flash > 0.0:
 		var ec := Palette.CRIMSON
 		ec.a = 0.75 * _edge_flash
 		draw_rect(Rect2(1, 1, w - 2, h - 2), ec, false, 3.0)
 	draw_line(Vector2(8, cy), Vector2(w - 8, cy), Palette.EDGE, 1.0)
-	# --- THE GATE: the game-wide bullseye target (bands = the dodge ladder, drawn as
-	#     approach-time; the steel notch = the binary parry land window) ---
+	# --- THE GATE: the game-wide bullseye target, SYMMETRIC around the gate line (the
+	#     grading is — §0 pass 2). Same read as the Twinfang rhythm bar's centre model:
+	#     graze flanks → gold GOOD → mint PERFECT core → bright-gold BULLSEYE centre,
+	#     gem-set mullions at the graze edges, the gilded aim-plumb on the line itself.
+	#     The steel notches above/below = the binary PARRY land window. ---
 	var gx := _gate_x()
 	var pps := _pps()
 	var bh := h - 26.0
-	_gate_band(gx, cy, bh, win_graze * pps, Palette.STEEL.darkened(0.55))
-	_gate_band(gx, cy, bh, win_good * pps, Palette.GOLD.darkened(0.25))
-	_gate_band(gx, cy, bh, win_perfect * pps, Palette.PERFECT.darkened(0.1))
-	# BULLSEYE center band — blooms bright on a landed bullseye
+	var ty := cy - bh * 0.5
+	_gate_band(gx, cy, bh, win_graze * pps, Palette.STEEL.darkened(0.55), 0.14)
+	_gate_band(gx, cy, bh, win_good * pps, Palette.GOLD.darkened(0.25), 0.16)
+	var core := Palette.PERFECT.lightened(0.1)
+	_gate_band(gx, cy, bh, win_perfect * pps, core, 0.20)
+	# BULLSEYE centre band — blooms bright on a landed bullseye
 	var bull_col := Palette.GOLD_BRIGHT
+	var bull_a := 0.45
 	if _gate_bloom > 0.0:
 		var bf := _gate_bloom / (GATE_LIFE * 1.4)
 		bull_col = bull_col.lightened(0.4 * bf)
+		bull_a = 0.55 + 0.35 * bf
 		var bloom := Palette.GOLD_BRIGHT
-		bloom.a = 0.5 * bf
-		draw_rect(Rect2(gx - win_perfect * pps, cy - bh * 0.5, win_perfect * pps, bh), bloom)
-	_gate_band(gx, cy, bh, win_bullseye * pps, bull_col)
-	draw_rect(Rect2(gx - parry_window * pps, cy - bh * 0.5 - 4, 2.0, 8.0), Palette.STEEL)
-	# the gate line — pulses the grade color on any verdict
-	var gate_line := Palette.TEXT
-	var gate_wid := 2.0
+		bloom.a = 0.4 * bf
+		draw_rect(Rect2(gx - win_perfect * pps, ty, win_perfect * pps * 2.0, bh), bloom)
+		UiKit.glow(self, Vector2(gx, cy), 46.0 + 30.0 * bf, Color(bull_col.r, bull_col.g, bull_col.b, 0.35 * bf))
+	_gate_band(gx, cy, bh, win_bullseye * pps, bull_col, bull_a)
+	# gem-set mullions at the graze edges (the band's OPEN/CLOSE, RhythmBar's idiom)
+	for mx in [gx - win_graze * pps, gx + win_graze * pps]:
+		draw_line(Vector2(mx, ty + 2), Vector2(mx, ty + bh - 2), Palette.BG0, 3.0, true)
+		draw_line(Vector2(mx + 1.0, ty + 2), Vector2(mx + 1.0, ty + bh - 2), Palette.STEEL, 1.2, true)
+		draw_circle(Vector2(mx, ty - 3.0), 2.2, Palette.STEEL.lightened(0.2))
+	# the PARRY land window — steel notches above + below the track, symmetric
+	var pw := parry_window * pps
+	draw_rect(Rect2(gx - pw, ty - 5.0, pw * 2.0, 3.0), Palette.STEEL)
+	draw_rect(Rect2(gx - pw, ty + bh + 2.0, pw * 2.0, 3.0), Palette.STEEL)
+	# the gate line — the gilded AIM PLUMB (RhythmBar's idiom: dark seat + gold stroke +
+	# white hairline + a gem at heart). Pulses the grade color on any verdict.
+	var gate_line := Palette.GOLD_BRIGHT
+	gate_line.a = 0.85
+	var gate_wid := 1.6
 	if _gate_pulse > 0.0:
 		var gf := _gate_pulse / GATE_LIFE
-		gate_line = Palette.TEXT.lerp(_gate_col, gf)
-		gate_wid = 2.0 + 2.0 * gf
+		gate_line = gate_line.lerp(_gate_col, gf)
+		gate_wid = 1.6 + 2.0 * gf
 		var glow := _gate_col
 		glow.a = 0.28 * gf
-		draw_rect(Rect2(gx - 6.0, cy - bh * 0.5 - 6, 12.0, bh + 12.0), glow)
+		draw_rect(Rect2(gx - 6.0, ty - 6, 12.0, bh + 12.0), glow)
 	# THE PRESS ECHO — the gate KICKS white the frame you press (before any verdict lands):
 	# instant proof the input registered, tinted by the button.
 	if _press_flash > 0.0:
 		var pf := _press_flash / 0.15
 		var pcol := (Palette.STEEL if _press_kind == "parry" else Palette.FLOW).lerp(Color.WHITE, 0.6)
 		gate_line = gate_line.lerp(pcol, pf)
-		gate_wid = maxf(gate_wid, 2.0 + 2.5 * pf)
-	draw_line(Vector2(gx, cy - bh * 0.5 - 6), Vector2(gx, cy + bh * 0.5 + 6), gate_line, gate_wid)
+		gate_wid = maxf(gate_wid, 1.6 + 3.0 * pf)
+		UiKit.glow(self, Vector2(gx, cy), 34.0, Color(pcol.r, pcol.g, pcol.b, 0.30 * pf))
+	draw_line(Vector2(gx, ty - 6), Vector2(gx, ty + bh + 6), Palette.BG0, 3.4, true)
+	draw_line(Vector2(gx, ty - 6), Vector2(gx, ty + bh + 6), gate_line, gate_wid, true)
+	draw_line(Vector2(gx, ty - 4), Vector2(gx, ty + bh + 4), Color(1, 1, 1, 0.45), 0.7, true)
+	draw_circle(Vector2(gx, cy), 3.2, Palette.GOLD_BRIGHT)
+	draw_circle(Vector2(gx - 0.9, cy - 1.0), 1.0, Color(1, 1, 1, 0.75))
 	# the DRY press (fumble): a crimson cross-tick at the gate — registered, but no wind
 	if _dud_t > 0.0:
 		var df := _dud_t / 0.3
@@ -312,12 +350,18 @@ func _draw() -> void:
 	# TANK-V3: the octagon projection is GONE. Raid-wide GLOBALS + targeted BUSTERS render on
 	# the SHARED JUDGE (boss surface), answered by the fall-through press — the channel draws
 	# ONLY the committed melee stream (one widget, one source of truth, NG1).
-	# --- LATE flashes ---
+	# --- LATE flashes: a golden SHOCKWAVE where the reaction test pops in ---
 	for f_v in _flashes:
 		var f: Dictionary = f_v
 		var t := float(f["t"])
-		var col := Color(1, 1, 1, (1.0 - t * 2.0) * 0.9)
-		draw_arc(Vector2(float(f["x"]), cy), 14.0 + t * 34.0, 0, TAU, 20, col, 2.5)
+		var fa := clampf(1.0 - t * 2.0, 0.0, 1.0)
+		var fx := float(f["x"])
+		UiKit.glow(self, Vector2(fx, cy), 30.0 * (1.0 - t), Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g, Palette.GOLD_BRIGHT.b, 0.4 * fa))
+		var col := Palette.GOLD_BRIGHT
+		col.a = 0.9 * fa
+		draw_arc(Vector2(fx, cy), 14.0 + t * 34.0, 0, TAU, 24, col, 2.5, true)
+		var col2 := Color(1, 1, 1, 0.7 * fa)
+		draw_arc(Vector2(fx, cy), 8.0 + t * 46.0, 0, TAU, 24, col2, 1.4, true)
 	# --- claim deaths (shatter / ghost / burst / puff) at the comet's own last spot ---
 	for d_v in _deaths:
 		_draw_death(d_v, cy)
@@ -328,8 +372,8 @@ func _draw() -> void:
 		var t := float(st["t"])
 		var col: Color = st["col"]
 		col.a = 1.0 - t / 0.9
-		draw_string(font, Vector2(gx - 236, cy - 30 - t * 22.0), String(st["txt"]),
-			HORIZONTAL_ALIGNMENT_CENTER, 150, 12, col)
+		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(gx - 236, cy - 30 - t * 22.0),
+			String(st["txt"]), HORIZONTAL_ALIGNMENT_CENTER, 150, UiKit.SIZE["LABEL"], col)
 	# --- position-anchored graded verdicts (the readability core) ---
 	for v_v in _verdicts:
 		_draw_verdict(v_v, cy, font)
@@ -341,12 +385,13 @@ func _draw() -> void:
 	#     on aggro loss (peeled comets still ride it translucent), and boss GLOBALS/CASTS live
 	#     on the judge — so an empty channel just means the melee runway is momentarily clear. ---
 	if bars.is_empty() and _shards.is_empty():
-		draw_string(font, Vector2(w * 0.5 - 32, cy + 4), "— HOLD —",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Palette.TEXT_DIM)
+		UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(w * 0.5 - 60, cy + 4),
+			"— HOLD —", HORIZONTAL_ALIGNMENT_CENTER, 120, UiKit.SIZE["LABEL"], Palette.TEXT_DIM)
 
-func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color) -> void:
-	col.a = 0.5
-	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx, bh), col)
+## One symmetric grading band centred on the gate line (the grading is symmetric — §0 pass 2).
+func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color, a: float = 0.5) -> void:
+	col.a = a
+	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx * 2.0, bh), col)
 
 ## The shape polygon for a kind (shared by comet / ghost / shatter so a death looks like the
 ## comet that died). Returns points around (x, cy).
@@ -463,15 +508,16 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 			var c := Vector2(x, y - 5.0)
 			draw_line(c + Vector2(cos(a), sin(a)) * (12.0 + 10.0 * rf),
 				c + Vector2(cos(a), sin(a)) * (20.0 + 18.0 * rf), rc, 1.8, true)
-	var fs := int(round(15.0 * punch))
+	var fs := int(round(float(UiKit.SIZE["SUBHEAD"]) * punch))
+	var vf := UiKit.display(700, 1)
 	var sh := Color(0, 0, 0, 0.7 * fade)
-	draw_string(font, Vector2(x - 70.0, y + 1.5), String(v["txt"]), HORIZONTAL_ALIGNMENT_CENTER, 140, fs, sh)
-	draw_string(font, Vector2(x - 70.0, y), String(v["txt"]), HORIZONTAL_ALIGNMENT_CENTER, 140, fs, col)
+	draw_string(vf, Vector2(x - 70.0, y + 1.5), String(v["txt"]), HORIZONTAL_ALIGNMENT_CENTER, 140, fs, sh)
+	draw_string(vf, Vector2(x - 70.0, y), String(v["txt"]), HORIZONTAL_ALIGNMENT_CENTER, 140, fs, col)
 	var ms := String(v["ms"])
 	if ms != "":
 		var mc := Palette.TEXT_DIM
 		mc.a = fade * 0.95
-		draw_string(font, Vector2(x - 50.0, y + 13.0), ms, HORIZONTAL_ALIGNMENT_CENTER, 100, 10, mc)
+		draw_string(font, Vector2(x - 50.0, y + 13.0), ms, HORIZONTAL_ALIGNMENT_CENTER, 100, UiKit.SIZE["MICRO"], mc)
 
 ## One committed comet. Shape = the kind's costume; purple tints a FEINT's disguise. A subtle
 ## motion trail (pure function of x — comets slide in from the right) sells the constant speed.
@@ -521,17 +567,19 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		pr.a = 0.18 + 0.14 * sin(_spin * 3.0)
 		draw_arc(Vector2(x, cy), 18.0, 0, TAU, 18, pr, 1.4, true)
 
-## Motion trail: 2 faint afterimages to the right (where the comet came from). Pure function of
-## position — no stored history. Kept low-alpha so the track stays legible.
+## Motion trail: layered afterimages to the right (where the comet came from) + a soft glow
+## streak at the head. Pure function of position — no stored history. Alphas ramped so the
+## motion reads at a glance while the track stays legible.
 func _trail(x: float, cy: float, kind: String, purple: bool) -> void:
 	var base := PURPLE if purple else _comet_col(kind)
-	for k in range(1, 3):
-		var tx := x + float(k) * 9.0
+	UiKit.glow(self, Vector2(x + 8.0, cy), 16.0, Color(base.r, base.g, base.b, 0.10))
+	for k in range(1, 4):
+		var tx := x + float(k) * 8.0
 		if tx > _gate_x() + 4.0:
 			continue
 		var c := base
-		c.a = 0.10 - 0.035 * float(k - 1)
-		var pts := _shape_pts(kind, tx, cy, (11.0 if kind != "buster" else 16.0) - float(k) * 1.5)
+		c.a = 0.16 - 0.05 * float(k - 1)
+		var pts := _shape_pts(kind, tx, cy, (11.0 if kind != "buster" else 16.0) - float(k) * 1.8)
 		draw_colored_polygon(pts, c)
 
 func _comet_col(kind: String) -> Color:
@@ -543,32 +591,51 @@ func _comet_col(kind: String) -> Color:
 		_: return Palette.LIGHT
 
 ## A soft glow halo behind the big shapes (heavy / buster) — reads their weight at a glance.
+## AAA pass: a real radial bloom (UiKit.glow), breathing.
 func _glow(x: float, cy: float, r: float, col: Color) -> void:
-	var c := col
-	c.a = 0.12 + 0.05 * sin(_spin * 2.0)
-	draw_circle(Vector2(x, cy), r + 6.0, c)
+	UiKit.glow(self, Vector2(x, cy), r * 2.1,
+		Color(col.r, col.g, col.b, 0.30 + 0.08 * sin(_spin * 2.0)))
 
 ## The mint center-dot: "a BULLSEYE dodge answers this" (heavy/buster only).
 func _bullseye_dot(x: float, cy: float, r: float) -> void:
 	draw_circle(Vector2(x, cy - r - 5.0), 2.5, Palette.PERFECT)
 
-func _word(font: Font, x: float, cy: float, txt: String, col: Color) -> void:
-	col.a = 0.95
-	draw_string(font, Vector2(x - 30, cy + 30), txt, HORIZONTAL_ALIGNMENT_CENTER, 60, 11, col)
+## The answer word under a comet — Cinzel smallcaps, shadowed (AAA pass: no more tiny
+## default-font glyphs; the word is the read, it must land at a glance).
+func _word(_font: Font, x: float, cy: float, txt: String, col: Color) -> void:
+	col.a = 0.98
+	UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(x - 40, cy + 31), txt,
+		HORIZONTAL_ALIGNMENT_CENTER, 80, UiKit.SIZE["LABEL"], col)
+
+## Shape drop shadow — every comet sits ON the glass, not IN it (one virtual light).
+func _shape_shadow(pts: PackedVector2Array) -> void:
+	var sp := PackedVector2Array()
+	for p in pts:
+		sp.append(p + Vector2(1.5, 2.5))
+	draw_colored_polygon(sp, Color(0, 0, 0, 0.45))
+
+## A tiny specular tick on the lit (top-left) rim — the shapes read as set gems.
+func _specular(x: float, cy: float, r: float) -> void:
+	draw_circle(Vector2(x - r * 0.32, cy - r * 0.42), maxf(1.2, r * 0.14), Color(1, 1, 1, 0.55))
 
 func _diamond(x: float, cy: float, r: float, col: Color) -> void:
 	var pts := PackedVector2Array([Vector2(x, cy - r), Vector2(x + r * 0.72, cy),
 		Vector2(x, cy + r), Vector2(x - r * 0.72, cy)])
+	_shape_shadow(pts)
+	UiKit.glow(self, Vector2(x, cy), r * 1.7, Color(col.r, col.g, col.b, 0.22))
 	draw_colored_polygon(pts, col)
-	draw_polyline(pts + PackedVector2Array([pts[0]]), col.lightened(0.35), 1.5)
+	draw_polyline(pts + PackedVector2Array([pts[0]]), col.lightened(0.4), 1.8, true)
+	_specular(x, cy, r)
 
 func _hexagon(x: float, cy: float, r: float, col: Color) -> void:
 	var pts := PackedVector2Array()
 	for i in 6:
 		var a := TAU * float(i) / 6.0 - PI / 2.0
 		pts.append(Vector2(x + cos(a) * r * 0.8, cy + sin(a) * r))
+	_shape_shadow(pts)
 	draw_colored_polygon(pts, col)
-	draw_polyline(pts + PackedVector2Array([pts[0]]), col.lightened(0.35), 1.5)
+	draw_polyline(pts + PackedVector2Array([pts[0]]), col.lightened(0.4), 1.8, true)
+	_specular(x, cy, r)
 
 ## The spiked spinning octagon — the biggest-baddest shape (BUSTER in tank colors /
 ## GLOBAL in boss colors; the word carries the answer).
@@ -577,10 +644,12 @@ func _octagon(x: float, cy: float, r: float, col: Color, spike_col: Color) -> vo
 	for i in 8:
 		var a := TAU * float(i) / 8.0 + _spin
 		pts.append(Vector2(x + cos(a) * r * 0.85, cy + sin(a) * r * 0.85))
+	_shape_shadow(pts)
 	draw_colored_polygon(pts, col)
 	for i in 8:
 		var a2 := TAU * (float(i) + 0.5) / 8.0 + _spin
 		var p0 := Vector2(x + cos(a2) * r * 0.85, cy + sin(a2) * r * 0.85)
 		var p1 := Vector2(x + cos(a2) * (r * 0.85 + 6.0), cy + sin(a2) * (r * 0.85 + 6.0))
-		draw_line(p0, p1, spike_col, 2.0)
-	draw_polyline(pts + PackedVector2Array([pts[0]]), spike_col, 1.5)
+		draw_line(p0, p1, spike_col, 2.0, true)
+	draw_polyline(pts + PackedVector2Array([pts[0]]), spike_col, 1.8, true)
+	_specular(x, cy, r * 0.9)
