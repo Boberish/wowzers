@@ -114,6 +114,7 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 						"purple": bool(bt.get("feint", false)),
 						"answered": bool(bt.get("answered", false))})
 	channel.tbars = tbars
+	channel.late_grace = s.config.stream_resolve_slack   # the gate draws ONLY the true late window
 	channel.tempo = float(stream.get("tempo", 1.0)) * (1.25 if bool(obs.get("engarde_live", false)) else 1.0)
 	channel.flurry = bool(obs.get("flurry", false))
 	channel.aggro_lost = not bool(obs.get("aggro_me", true))
@@ -194,6 +195,8 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		"duel_fumble":
 			channel.dud()                          # the dry-press echo at the gate
 			channel.stamp("WINDED", "hit")
+		"duel_bar_missed":
+			channel.missed(int(ev.get("id", -1)))  # red ✗, keeps flowing past the line
 		"duel_eat":
 			channel.stamp("BRACE", "graze")
 		"duel_engarde_break":

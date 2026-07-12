@@ -56,8 +56,13 @@ var win_good: float = 0.30
 var win_graze: float = 0.50
 var parry_window: float = 0.10
 
+var late_grace: float = 0.04               ## the true post-line press window (sec) — the right-side
+                                           ## bands draw ONLY this wide (everything visible is pressable)
 var _seen: Dictionary = {}                 ## bar id -> true (late-flash bookkeeping)
 var _last_x: Dictionary = {}               ## bar id -> {x, kind, purple, absent} (the claim anchor)
+var _missed: Array = []                    ## THE MISS AFTERLIFE (Bill 2026-07-12): [{x0,kind,purple,t}] —
+                                           ## an unpressed comet crosses the line, turns red + ✗ and keeps
+                                           ## flowing to the end of the bar ("I missed it, it kept going")
 var _flashes: Array = []                   ## [{x, t}] LATE pop-in rings
 var _stamps: Array = []                    ## [{txt, col, t}] secondary callouts (COUNTER / RIPOSTE …) floating over the gate
 var _deaths: Array = []                    ## [{x, kind, purple, col, shape, t, seed}] claim death one-shots
@@ -90,6 +95,9 @@ func _process(delta: float) -> void:
 	for d in _deaths:
 		d["t"] += delta
 	_deaths = _deaths.filter(func(d): return d["t"] < DEATH_LIFE)
+	for m in _missed:
+		m["t"] += delta
+	_missed = _missed.filter(func(m): return m["t"] < 0.9)
 	for v in _verdicts:
 		v["t"] += delta
 	_verdicts = _verdicts.filter(func(v): return v["t"] < VERDICT_LIFE)
@@ -111,6 +119,17 @@ func press_tick(kind: String) -> void:
 ## body couldn't answer.
 func dud() -> void:
 	_dud_t = 0.3
+
+## THE MISS AFTERLIFE: an unpressed comet crossed the line — flip it red + ✗ and let it keep
+## flowing to the end of the bar. Seeded from the comet's own last-drawn spot (consumed so
+## the death/verdict machinery can't double-anchor there).
+func missed(id: int) -> void:
+	var rec = _last_x.get(id)                 # untyped: .get() into := is a parse error
+	if rec == null:
+		return
+	_missed.append({"x0": float(rec["x"]), "kind": String(rec["kind"]),
+		"purple": bool(rec["purple"]), "t": 0.0})
+	_last_x.erase(id)
 
 ## A secondary callout landed (COUNTER / RIPOSTE / EN GARDE …): a light floating tag over the
 ## gate + a rail gem. The graded per-comet answers go through `resolve()` instead (below).
@@ -280,18 +299,20 @@ func _draw() -> void:
 		bull_a = 0.55 + 0.35 * bf
 		var bloom := Palette.GOLD_BRIGHT
 		bloom.a = 0.4 * bf
-		draw_rect(Rect2(gx - win_perfect * pps, ty, win_perfect * pps * 2.0, bh), bloom)
+		draw_rect(Rect2(gx - win_perfect * pps, ty,
+			win_perfect * pps + minf(win_perfect, late_grace) * pps, bh), bloom)
 		UiKit.glow(self, Vector2(gx, cy), 46.0 + 30.0 * bf, Color(bull_col.r, bull_col.g, bull_col.b, 0.35 * bf))
 	_gate_band(gx, cy, bh, win_bullseye * pps, bull_col, bull_a)
-	# gem-set mullions at the graze edges (the band's OPEN/CLOSE, RhythmBar's idiom)
-	for mx in [gx - win_graze * pps, gx + win_graze * pps]:
+	# gem-set mullions at the band's OPEN (approach) + CLOSE (the true late edge)
+	for mx in [gx - win_graze * pps, gx + minf(win_graze, late_grace) * pps]:
 		draw_line(Vector2(mx, ty + 2), Vector2(mx, ty + bh - 2), Palette.BG0, 3.0, true)
 		draw_line(Vector2(mx + 1.0, ty + 2), Vector2(mx + 1.0, ty + bh - 2), Palette.STEEL, 1.2, true)
 		draw_circle(Vector2(mx, ty - 3.0), 2.2, Palette.STEEL.lightened(0.2))
-	# the PARRY land window — steel notches above + below the track, symmetric
+	# the PARRY land window — steel notches above + below the track (late side = the grace)
 	var pw := parry_window * pps
-	draw_rect(Rect2(gx - pw, ty - 5.0, pw * 2.0, 3.0), Palette.STEEL)
-	draw_rect(Rect2(gx - pw, ty + bh + 2.0, pw * 2.0, 3.0), Palette.STEEL)
+	var pwr := pw + minf(parry_window, late_grace) * pps
+	draw_rect(Rect2(gx - pw, ty - 5.0, pwr, 3.0), Palette.STEEL)
+	draw_rect(Rect2(gx - pw, ty + bh + 2.0, pwr, 3.0), Palette.STEEL)
 	# the gate line — the gilded AIM PLUMB (RhythmBar's idiom: dark seat + gold stroke +
 	# white hairline + a gem at heart). Pulses the grade color on any verdict.
 	var gate_line := Palette.GOLD_BRIGHT
@@ -354,7 +375,8 @@ func _draw() -> void:
 			_seen[id] = true
 			if bool(b.get("late", false)):
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
-		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered)
+		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered,
+			bool(b.get("peeled", false)), String(b.get("victim", "")))
 	# --- ONE BAR: telegraph comets (GLOBALS / targeted BUSTERS / my beats) on the same
 	#     track — committed times off the live telegraph, same gate, same press ---
 	for tb_v in tbars:
@@ -373,7 +395,9 @@ func _draw() -> void:
 			_flashes.append({"x": tx2, "t": 0.0})     # big moves announce themselves
 		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)))
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
-	# a short grace); consumed anchors are erased in resolve()
+	# a short grace); consumed anchors are erased in resolve()/missed(). A TELEGRAPH comet
+	# (negative id) that expires unconsumed at the gate = an unanswered big move — it gets
+	# the same red miss-afterlife (stream bars get theirs via the duel_bar_missed event).
 	var stale: Array = []
 	for k in _last_x:
 		if present.has(k):
@@ -383,7 +407,26 @@ func _draw() -> void:
 			if int(_last_x[k]["absent"]) > 3:
 				stale.append(k)
 	for k in stale:
+		if int(k) < 0 and float(_last_x[k]["x"]) >= gx - 10.0:
+			_missed.append({"x0": float(_last_x[k]["x"]), "kind": String(_last_x[k]["kind"]),
+				"purple": bool(_last_x[k]["purple"]), "t": 0.0})
 		_last_x.erase(k)
+	# --- THE MISS AFTERLIFE: red ✗ husks keep flowing past the line to the bar's end ---
+	for m_v in _missed:
+		var m: Dictionary = m_v
+		var mt := float(m["t"])
+		var mx := float(m["x0"]) + mt * _pps()
+		if mx > w - 10.0:
+			continue
+		var ma := clampf(1.0 - mt / 0.9, 0.0, 1.0)
+		var mc := Palette.CRIMSON
+		mc.a = 0.85 * ma
+		var mr := 16.0 if String(m["kind"]) == "buster" or String(m["kind"]) == "global" else 12.0
+		var mpts := _shape_pts(String(m["kind"]), mx, cy, mr)
+		draw_polyline(mpts + PackedVector2Array([mpts[0]]), mc, 2.0, true)
+		var xg := mr * 0.55
+		draw_line(Vector2(mx - xg, cy - xg), Vector2(mx + xg, cy + xg), mc, 2.4, true)
+		draw_line(Vector2(mx + xg, cy - xg), Vector2(mx - xg, cy + xg), mc, 2.4, true)
 	# TANK-V3: the octagon projection is GONE. Raid-wide GLOBALS + targeted BUSTERS render on
 	# the SHARED JUDGE (boss surface), answered by the fall-through press — the channel draws
 	# ONLY the committed melee stream (one widget, one source of truth, NG1).
@@ -425,10 +468,13 @@ func _draw() -> void:
 		UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(w * 0.5 - 60, cy + 4),
 			"— HOLD —", HORIZONTAL_ALIGNMENT_CENTER, 120, UiKit.SIZE["LABEL"], Palette.TEXT_DIM)
 
-## One symmetric grading band centred on the gate line (the grading is symmetric — §0 pass 2).
+## One grading band at the gate — full width on the approach side, but the far side draws
+## ONLY as wide as the true post-line press window (late_grace): everything visible is
+## pressable, nothing more (Bill 2026-07-12 — no dead target past the stop line).
 func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color, a: float = 0.5) -> void:
 	col.a = a
-	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx * 2.0, bh), col)
+	var right := minf(wpx, late_grace * _pps())
+	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx + right, bh), col)
 
 ## The shape polygon for a kind (shared by comet / ghost / shatter so a death looks like the
 ## comet that died). Returns points around (x, cy).
@@ -475,13 +521,15 @@ func _draw_death(d: Dictionary, cy: float) -> void:
 			if e < 0.3:
 				draw_circle(Vector2(x, cy), 5.0, Color(1, 1, 1, (1.0 - e / 0.3) * 0.7))
 		"ghost":
-			var sx := x - 30.0 * ease            # slips left, past the gate
+			# VERTICAL slip (Bill 2026-07-12): the fading outline rises off the track —
+			# horizontal drift crowded the next incoming tone.
+			var sy := cy - 26.0 * ease
 			var a := (1.0 - e) * 0.85
 			for k in 3:
-				var gxk := sx + float(k) * 8.0
+				var gyk := sy - float(k) * 7.0
 				var c := col
 				c.a = a * (0.55 - 0.16 * float(k))
-				var pts := _shape_pts(String(d["kind"]), gxk, cy, 12.0 + 2.0 * e)
+				var pts := _shape_pts(String(d["kind"]), x, gyk, 12.0 + 2.0 * e)
 				draw_polyline(pts + PackedVector2Array([pts[0]]), c, 1.6, true)
 		"burst":
 			var g := 7.0 + 15.0 * ease
@@ -557,11 +605,13 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 		draw_string(font, Vector2(x - 50.0, y + 13.0), ms, HORIZONTAL_ALIGNMENT_CENTER, 100, UiKit.SIZE["MICRO"], mc)
 
 ## One committed comet. Shape = the kind's costume; purple tints a FEINT's disguise. A subtle
-## motion trail (pure function of x — comets slide in from the right) sells the constant speed.
+## motion trail (pure function of x — comets slide in from the left) sells the constant speed.
 ## An ANSWERED comet (claimed at the press, still resolving through the slack) draws as a dim
 ## hollow husk — the death anim + verdict carry the punch; the husk just stays honest.
+## A PEELED comet (§0 pass 2: the boss hunts someone else) draws with a crimson hunt-chevron +
+## its victim's name — the tank still answers it (the comeback); the damage is the victim's.
 func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
-		answered: bool = false) -> void:
+		answered: bool = false, peeled: bool = false, victim: String = "") -> void:
 	if answered:
 		var hc := (PURPLE if purple else _comet_col(kind))
 		hc.a = 0.3
@@ -569,6 +619,18 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		var hpts := _shape_pts(kind, x, cy, hr)
 		draw_polyline(hpts + PackedVector2Array([hpts[0]]), hc, 1.6, true)
 		return
+	if peeled:
+		# the hunt-tick: a crimson chevron over the comet + the hunted raider's name
+		var pk := Palette.CRIMSON
+		pk.a = 0.85 + 0.15 * sin(_spin * 3.0)
+		var py := cy - 24.0
+		draw_line(Vector2(x - 5, py - 4), Vector2(x, py + 2), pk, 2.2, true)
+		draw_line(Vector2(x + 5, py - 4), Vector2(x, py + 2), pk, 2.2, true)
+		if victim != "":
+			var vc := Palette.CRIMSON.lightened(0.3)
+			vc.a = 0.9
+			UiKit.text_shadowed(self, UiKit.body(500), Vector2(x - 50, py - 8), "→ " + victim,
+				HORIZONTAL_ALIGNMENT_CENTER, 100, UiKit.SIZE["MICRO"], vc)
 	if kind != "eat":
 		_trail(x, cy, kind, purple)
 	match kind:
@@ -614,15 +676,15 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		pr.a = 0.18 + 0.14 * sin(_spin * 3.0)
 		draw_arc(Vector2(x, cy), 18.0, 0, TAU, 18, pr, 1.4, true)
 
-## Motion trail: layered afterimages to the right (where the comet came from) + a soft glow
-## streak at the head. Pure function of position — no stored history. Alphas ramped so the
-## motion reads at a glance while the track stays legible.
+## Motion trail: layered afterimages BEHIND the comet (toward the mouth it came from — comets
+## travel left→right into the gate) + a soft glow streak. Pure function of position — no
+## stored history. Alphas ramped so the motion reads at a glance while the track stays legible.
 func _trail(x: float, cy: float, kind: String, purple: bool) -> void:
 	var base := PURPLE if purple else _comet_col(kind)
-	UiKit.glow(self, Vector2(x + 8.0, cy), 16.0, Color(base.r, base.g, base.b, 0.10))
+	UiKit.glow(self, Vector2(x - 8.0, cy), 16.0, Color(base.r, base.g, base.b, 0.10))
 	for k in range(1, 4):
-		var tx := x + float(k) * 8.0
-		if tx > _gate_x() + 4.0:
+		var tx := x - float(k) * 8.0
+		if tx < 12.0:
 			continue
 		var c := base
 		c.a = 0.16 - 0.05 * float(k - 1)
