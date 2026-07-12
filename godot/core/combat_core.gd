@@ -212,14 +212,16 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 	}
 	if s.threat_enabled:
 		base["aggro_me"] = _threat_target(s) == seat   # raid: am I the boss's victim?
-	# THE STREAM (TANK-PLAN §0 — tank-v2): the committed timeline, shipped verbatim and
-	# visible ONLY to the tank, filtered to bars the tank can answer (victim == me). A
-	# PEELED bar never ships — the stream visibly PAUSES on aggro loss (cdd008f kept; the
-	# aggro banner carries the victim's warning). LATE bars ship only inside their pop-in
-	# lead (the reaction test). FEINTS ship their DISGUISE + the purple flag — exactly the
-	# tell a human sees, so policies read the same information the player does; the true
-	# kind stays engine-side. View data only; the melee dict gates the key (rhythm-less
-	# fights ship an obs without it, byte-free).
+	# THE STREAM (TANK-PLAN §0 — tank-v2 · ⚠ THE PEEL restored to pass 2, Bill 2026-07-12):
+	# the committed timeline, shipped verbatim to the tank — EVERY bar, aggro or not. A
+	# PEELED bar (victim != tank) ships MARKED with its victim: the tank sees it, answers
+	# it (flow/aggro comeback — the claim ignores victims), and the DAMAGE lands on the
+	# victim at resolve. The stream never pauses or hides on aggro loss (the old
+	# cdd008f stream-pause is DEAD — it read as missing notes). LATE bars ship only inside
+	# their pop-in lead (the reaction test). FEINTS ship their DISGUISE + the purple flag —
+	# exactly the tell a human sees, so policies read the same information the player does;
+	# the true kind stays engine-side. View data only; the melee dict gates the key
+	# (rhythm-less fights ship an obs without it, byte-free).
 	var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 		else (s.encounter.adds[s.boss.add_i] as AddRes).melee
 	if lane_melee.has("rhythm") and seat == _tank_seat(s):
 		var my_i := s.seats.find(seat)
@@ -228,10 +230,10 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 		var bars: Array = []
 		for b_v in s.boss.stream:
 			var b: Dictionary = b_v
-			if int(b["victim_i"]) != my_i:
-				continue
 			if bool(b["late"]) and int(b["impact_tick"]) - s.tick > late_lead:
 				continue
+			var vi_b := int(b["victim_i"])
+			var peeled := vi_b != my_i
 			bars.append({
 				"id": int(b["id"]),
 				"kind": (String(b["disguise"]) if String(b["kind"]) == "feint" else String(b["kind"])),
@@ -239,6 +241,8 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 				"eta": float(int(b["impact_tick"]) - s.tick) * s.dt,
 				"lead": float(int(b["impact_tick"]) - int(b["publish_tick"])) * s.dt,
 				"late": bool(b["late"]),
+				"peeled": peeled,
+				"victim": (s.seats[vi_b].unit_name if peeled and vi_b >= 0 and vi_b < s.seats.size() else ""),
 				"answered": s.boss.stream_answers.has(int(b["id"])),
 				"flurry_i": int(b["flurry_i"]), "flurry_n": int(b["flurry_n"]),
 			})
@@ -393,8 +397,10 @@ static func _boss_think(s: CombatState, ph: PhaseRes) -> void:
 ##    gate-touch, then applies the stored outcome through the same _damage path old melee
 ##    used (source-agnostic since M0). Feints deal nothing (claimed = BAITED at the press;
 ##    unclaimed = READ via the kit hook); unavoidables skip grading.
-##  · A PEELED bar (victim != tank) is an UNDODGEABLE hit and never ships in the tank's
-##    obs — the stream visibly PAUSES on aggro loss (cdd008f, kept).
+##  · THE PEEL (⚠ restored to pass 2, Bill 2026-07-12): a PEELED bar (victim != tank)
+##    SHIPS in the tank's obs marked with its victim — the tank sees and answers EVERY
+##    bar; clean answers still pay flow/counters (the aggro comeback) while the damage
+##    lands on the victim, undodgeable for them. The stream never pauses on aggro loss.
 ##  · Texture profile keys (all optional): every · jig · min/max · heavy_odds · crush_odds ·
 ##    feint_odds · eat_odds · flurry_odds · flurry_n · flurry_gap · flurry_frac · late_odds ·
 ##    rhythm (= the LATE bar's pop-in lead, sec — also the stream opt-in key).
@@ -432,14 +438,16 @@ static func _stream_resolve_due(s: CombatState) -> void:
 		if not victim.alive():
 			continue                                    # a bar aimed at the fallen fizzles
 		s.boss.stream_after_cast = false
+		var tk := _tank_seat(s)
+		var answerer: Seat = tk if tk != null else victim   # the tank answers EVERY bar (§0 pass 2)
 		if kind == "feint":
 			# a claimed feint was punished (BAITED) at the press; unclaimed = the READ
-			if ans.is_empty() and victim.kit != null:
-				victim.kit.on_stream_bar(s, victim, bar)
+			if ans.is_empty() and answerer.kit != null and answerer.alive():
+				answerer.kit.on_stream_bar(s, answerer, bar)
 			continue                                    # a fake deals nothing
 		if kind == "eat":
-			if victim.kit != null:
-				victim.kit.on_stream_bar(s, victim, bar)
+			if answerer.kit != null and answerer.alive():
+				answerer.kit.on_stream_bar(s, answerer, bar)
 			_damage(s, victim, float(bar["dmg"]), &"eat", AbilityRes.Size.NONE)
 		else:
 			# auto/heavy/buster/flurry — the funnel applies the press-time answer. The bar
@@ -449,7 +457,15 @@ static func _stream_resolve_due(s: CombatState) -> void:
 			rb["ans_grade"] = int(ans.get("grade", -1))
 			s.boss.stream_resolving = rb
 			var src := &"flurry" if kind == "flurry" else &"rhythm"
-			_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
+			if victim == tk or tk == null:
+				_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
+			else:
+				# PEELED (§0 pass 2, restored): the tank's kit settles the weave/miss
+				# bookkeeping (its press-time payoffs already fired — the comeback), the
+				# victim eats the bar whole (their own kit isn't the duelist funnel).
+				if tk.kit != null and tk.alive():
+					tk.kit.on_stream_bar(s, tk, rb)
+				_damage(s, victim, float(bar["dmg"]), src, _stream_size(kind))
 			s.boss.stream_resolving = {}
 		if s.threat_enabled:                            # aggro / stray-shot accounting
 			_note_melee_victim(s, victim)

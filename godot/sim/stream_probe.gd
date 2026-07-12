@@ -13,8 +13,10 @@
 ##  5. CONTINUITY (tank-v3 S2, HARD): publishing NEVER halts while a telegraph is live · the
 ##     committed stream never blanks past the warm-up floor · every non-LATE, non-opener bar
 ##     is born with runway >= horizon - one period. Regression test for the #1 live hitch.
-##  4. OBS INVARIANTS: the tank's obs never ships a peeled bar (victim != tank) · a LATE
-##     bar never ships before its pop-in lead · a feint ships its DISGUISE, never the truth.
+##  4. OBS INVARIANTS: EVERY committed bar ships to the tank — a peeled bar (victim != tank)
+##     ships MARKED `peeled` + victim (§0 pass 2 restored, Bill 2026-07-12; the old
+##     never-ships/stream-pauses model is dead) · a LATE bar never ships before its pop-in
+##     lead · a feint ships its DISGUISE, never the truth.
 ##
 ## Usage: godot --headless --script sim/stream_probe.gd [-- --ticks=3600]
 extends SceneTree
@@ -175,8 +177,10 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 			var oid := int(ob["id"])
 			if ledger.has(oid):
 				var truth: Dictionary = ledger[oid]
-				if int(truth["victim"]) != 0:
-					_fail("%s: obs shipped a PEELED bar %d" % [label, oid])
+				# §0 pass 2 (restored): every bar ships; peeled ⇔ victim != tank, marked
+				if bool(ob.get("peeled", false)) != (int(truth["victim"]) != 0):
+					_fail("%s: bar %d peeled flag wrong (victim=%d, flag=%s)"
+						% [label, oid, int(truth["victim"]), str(ob.get("peeled"))])
 				if String(truth["kind"]) == "feint" and String(ob["kind"]) == "feint":
 					_fail("%s: obs shipped a feint's TRUE kind (bar %d)" % [label, oid])
 				var floored_lead := maxf(s.config.stream_late_lead, s.config.stream_late_min_travel)

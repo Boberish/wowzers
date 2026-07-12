@@ -129,10 +129,10 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 ## THE PRESS (§0 pass 2): find the nearest unanswered, claimable bar within ±answer_claim of
 ## NOW (late side bounded by the resolve slack) and judge the press against it INSTANTLY.
 ## Returns true if a bar (real or fake) consumed the press. Winner ordering = DEC-14 verbatim
-## (nearest |impact−now| → earliest impact → lowest id — the rule _press_claims enforces);
-## only bars aimed at THIS seat can claim (v3 peel model: an unseen bar never eats a press).
+## (nearest |impact−now| → earliest impact → lowest id — the rule _press_claims enforces).
+## PEELED bars claim too (§0 pass 2, restored): the tank answers EVERY bar — clean answers
+## on a hunted raider's bar are exactly the aggro comeback (the damage stays the victim's).
 func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
-	var my_i := s.seats.find(seat)
 	var claim := _tt(s, cfg.answer_claim)
 	var late := CombatCore.to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
 	var best: Dictionary = {}
@@ -141,8 +141,6 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 	var best_id := 1 << 30
 	for b_v in s.boss.stream:
 		var b: Dictionary = b_v
-		if int(b["victim_i"]) != my_i:
-			continue
 		var bk := String(b["kind"])
 		if bk == "eat":
 			continue                                      # unavoidable — never eats a press
@@ -256,20 +254,20 @@ func _unanswered(s: CombatState, seat: Seat, dmg: float, size: int) -> float:
 		CombatCore._bump_diag(s, seat, "miss")
 	return _engarde_wall(s, seat, dmg)
 
-## DEC-14 claim tie-break. Among every bar aimed at this seat within ±answer_claim of now, the
-## press answers the nearest |impact−now|, then the earliest impact, then the lowest id. Returns
-## whether `bar` (the one being resolved/judged, already popped from the stream) is that winner:
-## a strictly-better claim target still pending in the stream means `bar` is NOT it. EAT bars are
-## excluded (they take no press). Deterministic, rng-free; `bar` self-comparison never rejects.
-func _press_claims(s: CombatState, seat: Seat, bar: Dictionary) -> bool:
-	var my_i := s.seats.find(seat)
+## DEC-14 claim tie-break. Among every unanswered bar within ±answer_claim of now (peeled ones
+## included — §0 pass 2), the press answers the nearest |impact−now|, then the earliest impact,
+## then the lowest id. Returns whether `bar` (the one being resolved/judged, already popped from
+## the stream) is that winner: a strictly-better claim target still pending in the stream means
+## `bar` is NOT it. EAT bars are excluded (they take no press). Deterministic, rng-free;
+## `bar` self-comparison never rejects.
+func _press_claims(s: CombatState, _seat: Seat, bar: Dictionary) -> bool:
 	var claim := _tt(s, cfg.answer_claim)
 	var w_dist := absi(int(bar["impact_tick"]) - s.tick)
 	var w_imp := int(bar["impact_tick"])
 	var w_id := int(bar["id"])
 	for b_v in s.boss.stream:
 		var b: Dictionary = b_v
-		if int(b["victim_i"]) != my_i or String(b["kind"]) == "eat":
+		if String(b["kind"]) == "eat":
 			continue
 		if s.boss.stream_answers.has(int(b["id"])):
 			continue                                      # already claimed — can't compete (§0 pass 2)
@@ -361,6 +359,10 @@ func _stream_settle(s: CombatState, seat: Seat, source: StringName, size: int) -
 		if size >= AbilityRes.Size.HEAVY:                 # letting a big one through costs aggro
 			_slip(s, seat)
 			CombatCore._bump_diag(s, seat, "miss")
+		# the view's MISS AFTERLIFE signal (Bill 2026-07-12): an unclaimed bar crossed the
+		# line — it turns red and keeps flowing. Local event, never networked/checksummed.
+		CombatCore._emit(s, {"t": "duel_bar_missed", "player": seat.is_player, "seat": seat,
+			"id": int(bar.get("id", -1)), "size": size})
 		return 0.0
 	if grade == StrikeRes.Grade.MISS:
 		return clampf(cfg.mit_parry_miss if akind == "parry" else 0.0, 0.0, cfg.mit_cap)
@@ -395,10 +397,11 @@ func _flurry_settle(s: CombatState, seat: Seat, bar: Dictionary) -> float:
 		CombatCore._emit(s, {"t": "duel_riposte", "player": seat.is_player, "seat": seat})
 	return _dodge_mit(grade)
 
-## Unclaimed-FEINT + EAT bookkeeping (the engine routes non-damage bars here). BAITED now
-## fires at the press (_claim) — a feint reaching this hook was HELD through = the READ.
-## EAT here is the authored tank-specific channel comet (DEC-10) — a distinct event from the
-## raid-wide BRACE that rides the cast bar for every seat; the two never share a path.
+## Non-funnel stream bookkeeping (the engine routes here): an UNCLAIMED feint = the READ
+## (BAITED fires at the press now) · an EAT = the brace · a PEELED damage bar (§0 pass 2,
+## restored) = settle the tank's weave/miss state — the victim eats the damage; the tank's
+## press-time payoffs already fired (the comeback). EAT here is the authored tank-specific
+## channel comet (DEC-10) — distinct from the raid-wide BRACE on the cast bar.
 func on_stream_bar(s: CombatState, seat: Seat, bar: Dictionary) -> void:
 	match String(bar.get("kind", "")):
 		"feint":
@@ -409,6 +412,20 @@ func on_stream_bar(s: CombatState, seat: Seat, bar: Dictionary) -> void:
 		"eat":
 			CombatCore._bump_diag(s, seat, "eaten")
 			CombatCore._emit(s, {"t": "duel_eat", "player": seat.is_player, "seat": seat})
+		"flurry":
+			var prev := s.boss.stream_resolving
+			s.boss.stream_resolving = bar
+			_flurry_settle(s, seat, bar)                  # group state only; damage is the victim's
+			s.boss.stream_resolving = prev
+		_:
+			# peeled auto/heavy/buster: an unanswered big one still costs aggro discipline
+			if String(bar.get("ans_kind", "")) == "":
+				if CombatCore._stream_size(String(bar.get("kind", ""))) >= AbilityRes.Size.HEAVY:
+					_slip(s, seat)
+					CombatCore._bump_diag(s, seat, "miss")
+				CombatCore._emit(s, {"t": "duel_bar_missed", "player": seat.is_player,
+					"seat": seat, "id": int(bar.get("id", -1)),
+					"size": CombatCore._stream_size(String(bar.get("kind", "")))})
 
 ## EN GARDE's wall: while the challenge holds, leaks + slivers are HALVED. Base = no-op.
 func _engarde_wall(s: CombatState, seat: Seat, leaked: float) -> float:
