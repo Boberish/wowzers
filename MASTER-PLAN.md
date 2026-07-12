@@ -876,6 +876,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · main · **ADD PHASES SING + a boot-breaker caught (`63080a1` + `949d4e7`).**
+  ① Bill: Gemini's add phase "says HOLD and just hits me until I die, no notes" (+ "same with
+  mythos adds") — ALL THREE raid adds (BARD.EXE · SONNET · OPUS subagents) shipped melee dicts
+  WITHOUT the "rhythm" key → the legacy unanswerable auto timer, empty channel, dead tank.
+  Each add now carries an identity songbook (the Bard waltzes in 3/4 with a false note · the
+  Sonnet rushes cheap pairs/triplets · the Opus lands deliberate talls). Proven by a forced
+  add-phase probe (bard 5/5 · sonnet 4/4 · opus 4/4 bars committed/in tank obs) + **stream_probe
+  LAW 7 (the Bard lesson): add melee without "rhythm" = FAIL — the class can't ship again.**
+  ② ⚠ FOR THE ARTV2 SESSION's owed check-back: the `da314e9` assume-pass merge was RED — 
+  scene_kit's untyped `const _DRIFT/_BOB` broke `:=` inference (the CLAUDE.md parse-cascade
+  gotcha), world_shell failed to compile, and **main did not BOOT** (caught only by the
+  Windows-install boot check; sims never load world_shell). Fixed with pure type annotations
+  (`Array[float]`, `949d4e7`) — ARTV2 PROBE ALL OK (41 checks) · RAID UI SMOKE ALL OK · boot 0
+  errors. Assume-pass merges on BOOT-PATH files need at least the one-frame boot check.
+  Windows install updated + gemini tank autostart clean. *(this session)*
 - ☐ 2026-07-12 · preview art / no runtime code · §GRAPHICS — **CLAIM: P3 CODEX I1 — THE
   ENVIRONMENT CONTRAST PAIR + C3 ASSET CONTRACT.** Use the approved SUNPRINT CEL direction and
   the Mistral data-center concept as the bright anchor: **THE STACK**, an airy retro-future server
