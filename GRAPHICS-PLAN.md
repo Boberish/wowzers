@@ -298,7 +298,7 @@ profile absence returns legacy · atmosphere view-only.
 
 **Gates:** screenshot tour at 1920×1080, 1280×720, 2560×1080; old-mode A/B; UI smoke.
 
-### C3 · ASSET IMPORT + SCENE TOUR — 🔨 BUILT+MERGED `1abfcd4` (2026-07-12; schema = `godot/game/art_v2/SCENES.md`; profiles `stack_atrium`/`stack_cold_aisle` bound, placeholders labeled until I1 delivers)
+### C3 · ASSET IMPORT + SCENE TOUR — 🔨 BUILT+MERGED `1abfcd4` + hotfix `516e1b0` (2026-07-12; schema = `godot/game/art_v2/SCENES.md`; `stack_atrium` backdrop+distant delivered `ebd7242` and RENDERING; §3½ renderer law: textures resolve at host _ready, never in painters — WSLg first-load-in-draw = white RID)
 
 **Goal:** documented folder/schema for layered backgrounds, texture import defaults, and a tour
 that renders both approved profiles in repeatable combat moments.
