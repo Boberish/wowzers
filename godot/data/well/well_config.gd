@@ -96,7 +96,7 @@ extends Resource
 @export var shootgap_still_mult: float = 1.30  ## Shoot the Gap: Still-Point tags ×this while at MAX Current
 @export var eddyline_cd: float = 10.0          ## Eddyline: min seconds between Current-downgrade saves
 @export var flume_hold_sec: float = 12.0       ## The Flume (keystone): hold MAX Current this long to trip it
-@export var flume_run_sec: float = 6.0         ## The Flume: seconds every release auto-grades CLEAN, then Current 0
+@export var flume_run_sec: float = 6.0         ## The Flume: seconds every release auto-grades CLEAN (Current is NOT spent — re-arms while held at max)
 # VIGIL (held heals)
 @export var ridetremble_per: float = 0.08      ## Ride the Tremble: a held heal +this per half-second held
 @export var ridetremble_cap: float = 0.60      ## Ride the Tremble: the held bonus caps here

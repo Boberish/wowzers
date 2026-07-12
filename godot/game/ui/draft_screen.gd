@@ -18,15 +18,18 @@ var _mid: VBoxContainer
 var _tokens_lbl: Label
 var _row: HBoxContainer
 var _reroll: Button            ## REGENERATE — spends a banked charge to redraw the row
+var _allow_econ := true        ## false = a KEYSTONE offer: no REGENERATE (would reroll into the
+                               ## normal pool) and no UPSELL (keystones are already top-tier)
 
 func _init(run, offers: Array, headline: String, flavor: String, extra_lines: Array = [],
-		extra_color: Color = Palette.STEEL) -> void:
+		extra_color: Color = Palette.STEEL, allow_econ: bool = true) -> void:
 	_run = run
 	_offers = offers
 	_headline = headline
 	_flavor = flavor
 	_extra = extra_lines
 	_extra_col = extra_color
+	_allow_econ = allow_econ
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -54,21 +57,23 @@ func _ready() -> void:
 	_mid.add_theme_constant_override("separation", 16)
 	center.add_child(_mid)
 
-	_tokens_lbl = _label(_mid, "", 15, Palette.GOLD)
-	_tokens_lbl.add_theme_font_override("font", UiKit.display(650, 2))
+	if _allow_econ:
+		_tokens_lbl = _label(_mid, "", 15, Palette.GOLD)
+		_tokens_lbl.add_theme_font_override("font", UiKit.display(650, 2))
 
 	_row = HBoxContainer.new()
 	_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_row.add_theme_constant_override("separation", 24)
 	_mid.add_child(_row)
 
-	_reroll = Button.new()
-	_reroll.custom_minimum_size = Vector2(240, 40)
-	_reroll.add_theme_font_size_override("font_size", 15)
-	_reroll.pressed.connect(_on_reroll)
-	var rc := CenterContainer.new()
-	rc.add_child(_reroll)
-	_mid.add_child(rc)
+	if _allow_econ:
+		_reroll = Button.new()
+		_reroll.custom_minimum_size = Vector2(240, 40)
+		_reroll.add_theme_font_size_override("font_size", 15)
+		_reroll.pressed.connect(_on_reroll)
+		var rc := CenterContainer.new()
+		rc.add_child(_reroll)
+		_mid.add_child(rc)
 
 	_rebuild()
 
@@ -89,29 +94,31 @@ func _rebuild() -> void:
 			Draft.rarity(b), i == 0 and Draft.matches(b, _run), String(b.get("slot", "")))
 		card.taken.connect(_on_taken.bind(i))
 		col.add_child(card)
-		var up := Button.new()
-		up.text = "UPSELL · %d ⏣" % Draft.UPSELL_COST
-		up.custom_minimum_size = Vector2(150, 34)
-		up.add_theme_font_size_override("font_size", 13)
-		if Draft.can_upsell(_run, _offers, i):
-			up.pressed.connect(_on_upsell.bind(i))
-		else:
-			up.disabled = true
-			up.modulate = Color(1, 1, 1, 0.35)
-		col.add_child(up)
+		if _allow_econ:                       # keystone offers have no upsell (already top-tier)
+			var up := Button.new()
+			up.text = "UPSELL · %d ⏣" % Draft.UPSELL_COST
+			up.custom_minimum_size = Vector2(150, 34)
+			up.add_theme_font_size_override("font_size", 13)
+			if Draft.can_upsell(_run, _offers, i):
+				up.pressed.connect(_on_upsell.bind(i))
+			else:
+				up.disabled = true
+				up.modulate = Color(1, 1, 1, 0.35)
+			col.add_child(up)
 		_row.add_child(col)
 		# the deal-in: each card arrives a beat after the last (rerolls re-deal too)
 		col.modulate.a = 0.0
 		var tw := col.create_tween()
 		tw.tween_interval(0.10 + 0.09 * float(i))
 		tw.tween_property(col, "modulate:a", 1.0, 0.22)
-	var t: int = _run.tokens
-	var rg: int = _run.regenerate
-	_tokens_lbl.text = "TOKENS · %d   —   REGENERATE · %d   —   spend them responsibly" % [t, rg]
-	_tokens_lbl.add_theme_color_override("font_color", Palette.GOLD if t > 0 else Palette.TEXT_DIM)
-	# rerolls-out (§11 #3): the row is redrawn by a banked REGENERATE charge, not Tokens
-	_reroll.text = "REGENERATE THE OFFER  (%d left)" % rg
-	_reroll.disabled = rg <= 0
+	if _allow_econ:
+		var t: int = _run.tokens
+		var rg: int = _run.regenerate
+		_tokens_lbl.text = "TOKENS · %d   —   REGENERATE · %d   —   spend them responsibly" % [t, rg]
+		_tokens_lbl.add_theme_color_override("font_color", Palette.GOLD if t > 0 else Palette.TEXT_DIM)
+		# rerolls-out (§11 #3): the row is redrawn by a banked REGENERATE charge, not Tokens
+		_reroll.text = "REGENERATE THE OFFER  (%d left)" % rg
+		_reroll.disabled = rg <= 0
 
 func _on_taken(i: int) -> void:
 	boon_taken.emit(_offers[i])

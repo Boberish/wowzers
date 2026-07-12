@@ -101,7 +101,17 @@ func build_guard(row: HBoxContainer, label: String, icon: String, accent: Color,
 	guard.pressed.connect(func(): hud._ctrl.human({"type": "defense"}))
 	row.add_child(guard)
 
-func render_guard(s: CombatState, p: Seat, obs: Dictionary, def_cd_default: float) -> void:
-	var dcd := maxf(1.0, float(CombatCore.to_ticks(float(obs.get("def_cd", def_cd_default)), s.config.fixed_hz)))
-	guard.usable = bool(obs.get("defense_ready", false))
-	guard.cd_frac = clampf(float(p.defense_ready_tick - s.tick) / dcd, 0.0, 1.0)
+## Fill the DODGE rune's cooldown veil. THE ONE DODGE (unified): normalize by the REAL
+## recovery/whiff cd from config — NOT the stale static def_cd (the pre-unified 2.4s, which
+## under-filled the veil, so the veil misreported the live cooldown). The whiff lockout is
+## the longer of the two; using it as the divisor keeps the veil honest — a wasted press
+## reads as a fuller veil than a clean 0.8s recovery, and both drain to empty exactly when
+## the dodge is ready. `dodge_ready_tick` is the unified truth (defense_ready_tick rides it).
+## The `_def_cd_default` arg is kept for call-site compatibility, now unused.
+func render_guard(s: CombatState, p: Seat, obs: Dictionary, _def_cd_default: float = 0.0) -> void:
+	if guard == null:
+		return
+	var cd_sec := maxf(s.config.dodge_whiff_cd, s.config.dodge_recovery)
+	var dcd := maxf(1.0, float(CombatCore.to_ticks(cd_sec, s.config.fixed_hz)))
+	guard.usable = bool(obs.get("dodge_ready", obs.get("defense_ready", false)))
+	guard.cd_frac = clampf(float(p.dodge_ready_tick - s.tick) / dcd, 0.0, 1.0)

@@ -147,7 +147,10 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 		seat.vars["millrace_n"] = 0
 
 	# THE FLUME (keystone): hold MAX Current for flume_hold_sec and the river runs white
-	# (flume_run_sec of auto-clean releases), then the Current empties. Earned, never toggled.
+	# (flume_run_sec of auto-clean releases). The Current is NO LONGER spent (Bill 2026-07-12
+	# — the empty-to-0 read as a random punish, not a payoff): you KEEP your max Current, so
+	# it re-arms flume_hold_sec later — hold the river high and it runs white again. Earned by
+	# maintenance, never toggled, never drained.
 	if aspect == "draw" and _b("flume"):
 		if int(seat.vars.get("current", 0)) >= cfg.current_max:
 			var since := int(seat.vars.get("current_full_since", -1))
@@ -155,8 +158,7 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 				seat.vars["current_full_since"] = s.tick
 			elif s.tick - since >= _tt(s, cfg.flume_hold_sec):
 				seat.vars["flume_until"] = s.tick + _tt(s, cfg.flume_run_sec)
-				seat.vars["current"] = 0
-				seat.vars["current_full_since"] = -1
+				seat.vars["current_full_since"] = s.tick    # re-arm the hold from here (no drain)
 				CombatCore._emit(s, {"t": "well_flume", "seat": seat, "player": seat.is_player})
 		else:
 			seat.vars["current_full_since"] = -1

@@ -39,6 +39,12 @@ func build() -> void:
 	var row: HBoxContainer = hud._rune_row(-380.0, 380.0)
 	runes = []
 	rune_ids = []
+	# THE ONE DODGE readout: the Well shows the SAME SPACE/DODGE rune the other unified
+	# kits carry (Bill 2026-07-12 — the healer had no dodge-cooldown indicator at all).
+	# Its veil burns down over the real recovery/whiff cd and it flashes the moment dodge
+	# is ready — SPACE still fires the dodge; this is the missing readout, not a new button.
+	build_guard(row, "DODGE", "dodge", Palette.WATER,
+		"SPACE — dodge the barrage aimed at YOU. Short recovery on a clean dodge, longer lockout on a whiff.")
 	for id in hud._loadout:
 		var sp: Dictionary = hud._wcfg.book.get(id, {})
 		var rune := AbilityRune.new()
@@ -61,6 +67,7 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var g := well_gauge
 	if g == null:
 		return
+	render_guard(s, p, obs)          # THE ONE DODGE — burn the SPACE rune's cooldown veil
 	g.seat_ref = p
 	g.aspect = hud._aspect
 	g.charges = int(obs.get("charges", 0))

@@ -18,6 +18,8 @@ var hp_frac: float = 1.0
 var subtitle: String = ""            ## optional ring/floor label (MAP-3c); "" = hide
 var ring: int = -1                   ## MAP-2: current ring (drives realm title/sub); -1 = solo
 var open_tickets: Array = []         ## MAP-2: titles of quests still open (header list)
+var held_tickets: Array = []         ## MAP-2: ids of quests currently HELD — gates the TURN-IN badge
+var have_held_info: bool = false     ## offline sets this true; online leaves it (keeps the legacy always-on badge)
 var toast: String = ""               ## MAP-2: one-shot ticket pickup/close banner
 var gear_line: String = ""           ## GEAR-1: equipped curios + ⏣ (raid map; "" = hidden)
 var entropy: int = 0                  ## ⚡ LUCK, the within-run pool (Inference Check); 0 hides
@@ -284,7 +286,11 @@ func _draw() -> void:
 		# ticket badges (MAP-2): where to pick up a quest / where to turn it in
 		if String(n.get("ticket_open", "")) != "" and not visited:
 			draw_string(fnt, p + Vector2(-45, -r - 26), "TICKET", HORIZONTAL_ALIGNMENT_CENTER, 90, 12, Palette.FLOW)
-		if String(n.get("ticket_close", "")) != "" and not visited:
+		# TURN-IN only shows when you're actually HOLDING the matching ticket (Bill 2026-07-12:
+		# the badge used to appear even if you never picked the ticket up, so walking onto it
+		# did nothing). Online (have_held_info false) keeps the legacy always-on badge.
+		var tclose := String(n.get("ticket_close", ""))
+		if tclose != "" and not visited and (not have_held_info or tclose in held_tickets):
 			draw_string(fnt, p + Vector2(-45, -r - 26), "TURN-IN", HORIZONTAL_ALIGNMENT_CENTER, 90, 12, Palette.FLOW)
 		# name + the attention-price PIPS (▮ normal · ▮▮ elite · ▮▮▮ Seal, §5). The pips
 		# are always on (the price you pay in rhythm); the full reward CONTRACT prints on

@@ -857,6 +857,65 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · `heal-fixes` → **MERGED to `main`** (`2f2190e` fixes 1-3 · `1e66130`
+  keystones) — **HEALER PLAYTEST PASS (Bill, 3 reports on the Well):** ① **THE FLUME** no
+  longer drains Current to 0 (read as a random punish + mismatched its own text) — you keep
+  max Current, the river re-arms and runs white again while held (well_kit/boons/config;
+  CARD-CATALOG §Flume updated). ② **WELL DODGE READOUT** — the Well band built NO dodge
+  indicator; gave it the same SPACE/DODGE rune the other unified kits carry, and fixed
+  `render_guard` to normalize by the real unified cd (was the stale 2.4s def_cd — mis-read
+  for Twinfang/Alchemist too). ③ **TICKET TURN-IN** — a turn-in was invisible for a healthy
+  party (repair/mana no-op + a delayed one-shot toast); added a TICKET CLOSED / SPRINT RETRO
+  stop panel at the node, and the TURN-IN map badge now only shows while you HOLD the ticket.
+  ④ **KEYSTONES ELITE-GATED + capped 1/run** (Bill's call — he got The Flume on fight 1):
+  keystones filtered out of the normal draft, granted only at ELITE nodes (1-of-2, per-seat
+  chain), the reserved slot wired at last — **BUILD-LEDGER "keystone acquisition" row flipped
+  🔨** (online offer still ⏳, protocol-gated like curses). Verify (paused bar → targeted):
+  well_sim det PASS · draft_sim ALL PASS (synergy+pity hold) · keystone_probe ALL PASS ·
+  ui_smoke_map + ui_smoke_raid + net_map_smoke ALL OK. *(this session)*
+
+- ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE ONE-BAR VERDICTS — BUILT
+  (S7 `9cb0180` · S7b `4a24897` · S7c `9815871` · S8 `f91e002` · S8b `63ff7c7` + TANK-PLAN
+  §0 amendment `573ad88`→).** Bill's second playtest round, five rulings, all landed:
+  **① ONE BAR** — dial (the circle) + shared judge HIDDEN for the tank; GLOBALS/targeted
+  BUSTERS/my beats ride the channel as telegraph comets (synthetic negative ids, verbatim
+  off the live telegraph); ALL casting on the BossCastBar under boss HP; telegraph verdicts
+  anchor via `resolve_tg` (never mis-anchor a stream comet). **② THE MISS AFTERLIFE** —
+  resolve slack 0.15→0.04 (~1 tick): nothing sits pressable at the line; unpressed = crimson
+  ✗ husk that KEEPS FLOWING to the bar's end (`duel_bar_missed` event); gate draws only the
+  true late-grace; press ghost rises VERTICALLY. **③ THE PEEL re-restored to pass 2** — every
+  bar ships marked (hunt-chevron + victim name), tank answers all (comeback), damage to the
+  hunted raider; probe invariant flipped. **④ THE SONGBOOK** — `_publish_phrases`: authored
+  motif libraries per boss (weight/rest/steps{gap,kind,late}), one seeded draw per motif,
+  grammar laws intact, legacy odds path preserved (spike+packs); songbooks authored for all
+  4 Seals + the dense golem. **⑤ living-motion** — spawn pops, approach scaling, gate
+  heartbeat. Gates: stream_probe ALL OK ×3 · duelist_sim det PASS (dense re-tuned to band) ·
+  raid_sim 10-seed clean (rations PASS) · tour 5/5 (phrase-aware injection). **Windows
+  install C:\Games\v3Tank updated (project+cache), boot + autostart checks clean — ready for
+  Bill's playtest.** *(this session)*
+- ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE PRESS RESTORE + AAA CHANNEL
+  PASS — BUILT (`730a695`+`8194aa7`+`c93462c`+`573ad88`).**
+  Root cause of Bill's "old slug" report FOUND: the v3 kit rewrite had regressed §THE PRESS
+  to judged-at-impact (pass-2's instant symmetric claim + `stream_resolve_slack` + tick
+  interpolation never carried — `cc4011f` took only guard+easy-aggro), so a press's verdict
+  waited for the comet to reach the gate = perceived lag equals your earliness; raw press
+  events rendered by NOTHING; comets stair-stepped at 30 Hz. **S6** ports pass-2 judging into
+  the v3 kit (boss.stream_answers + resolve slack 0.15s; claim filtered victim==me per the v3
+  peel; DEC-14/-15 kept; `duel_answer` gains signed `off_ms`+`id`; obs bars gain `answered` —
+  activates the policy's existing skip; v18 note extended, no bump) · **S6b** the Twinfang
+  echo (tick_frac interpolation · claim moment anchored at the comet's frozen last-drawn
+  pixel: fading line + expanding circle + BULLSEYE ring, ±ms readout · verdict ease-in KILLED
+  · every press echoes: press_tick gate-kick / dud crimson tick; the band's _front_id/_pending
+  reconstruction hack DELETED — telegraph answers no longer mis-anchor on random comets) ·
+  **S6c** the AAA pass (channel joins the UiKit glass family: gilded chrome/filigree ·
+  SYMMETRIC banded gate = the RhythmBar target + aim plumb + gem mullions · shadow/glow/
+  specular comets · Cinzel words · LATE shockwave · FLURRY plaque · AbilityRune.kick() so
+  key/mouse presses animate the rail · gauge glass+gems). Gates per slice: duelist_sim det
+  PASS (metrics move = the contract restored; good/sloppy fixture deaths match main's
+  reference shape) · stream_probe ALL OK ×3 · ui_smoke_raid pre-existing pause+codex assert
+  ONLY (A/B'd vs untouched c8d46cb) · screenshot tour 5/5 ×2. verify-all PAUSED globally
+  (~/.rift-verify-paused, "building not gating") — respected, not forced. **NEXT: Bill's
+  playtest = the feel gate** (`--autostart=raid:tank`). *(this session)*
 - ☑ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`) — **THE TANK-V3 REBUILD (attempt 3) — BUILT,
   all 5 slices + red-gate repair + union merge on the branch; final bar running.** Design of record = TANK-PLAN §0 THE CHANNEL CONTRACT
   v3 (FINAL BUILD SPEC): Design C two surfaces (channel = committed melee · judge/cast bar = raid
