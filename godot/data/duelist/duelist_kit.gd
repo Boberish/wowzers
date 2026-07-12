@@ -483,6 +483,12 @@ func on_action(s: CombatState, seat: Seat, id: StringName, _target: Seat = null)
 			return _engarde(s, seat)
 	return false
 
+## INTERRUPT-BY-ABILITY (pillar #3): the combo dump carries the tank's kick — spend the combo
+## during a boss's interruptible cast and it stops (CombatCore._try_interrupt). The dump always
+## deals its combo damage; kicking a live verse is the bonus for timing it into a cast.
+func ability_interrupts(id: StringName) -> bool:
+	return String(id) == "dump"
+
 func _dump(s: CombatState, seat: Seat) -> bool:
 	if s.tick < seat.gcd_until_tick:
 		return false
@@ -511,6 +517,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 	return {
 		"tick": s.tick,
 		"aspect": aspect,
+		"carries_kick": true,   # INTERRUPT-BY-ABILITY (pillar #3): the combo dump kicks — the cast bar reads "interrupt", not "uncontested"
 		"flow": _flow(seat),
 		"flow_lock": s.config.flow_lock_floor,
 		"wind": _wind(seat),

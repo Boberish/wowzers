@@ -88,6 +88,16 @@ func on_stream_bar(_s: CombatState, _seat: Seat, _bar: Dictionary) -> void:
 func on_action(_s: CombatState, _seat: Seat, _id: StringName, _target: Seat = null) -> bool:
 	return false
 
+## INTERRUPT-BY-ABILITY (COMBAT PILLAR #3): does pressing `id` carry a kick — the "interrupt
+## tax" riding a class's dump / combo finisher? The moment such an ability COMMITS, CombatCore
+## stops any live INTERRUPTIBLE cast (simple: press it during the cast, see _try_interrupt).
+## Default false = this seat kicks nothing, so the interrupt path is never entered → byte-
+## identical. Twinfang tags its Eviscerate, the Duelist tank its combo dump; a kit that carries
+## a kick should also add `"carries_kick": true` to its observe() so the cast bar stops reading
+## "uncontested".
+func ability_interrupts(_id: StringName) -> bool:
+	return false
+
 ## Heal multiplier the CASTER applies to a heal, based on the TARGET (Brinkwarden:
 ## bigger the lower the target). Default 1.0.
 func heal_mult(_target: Seat) -> float:

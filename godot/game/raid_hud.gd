@@ -3307,7 +3307,10 @@ func _render_dial(s: CombatState, obs: Dictionary) -> void:
 			elif bool(tg.get("interruptible", false)):
 				_castbar.kind = "kick"
 				_castbar.window = float(obs.get("clean_zone", 0.62))
-				_castbar.kickable_seat = false   # pillar #3: nobody carries a kick yet
+				# INTERRUPT-BY-ABILITY (pillar #3): seats whose dump/finisher carries the kick
+				# (Twinfang Eviscerate · Duelist dump) read as the kicker. Press any time during
+				# the cast to stop it — the window band is just escalating urgency, not a gate.
+				_castbar.kickable_seat = bool(obs.get("carries_kick", false))
 				_castbar.in_zone = _castbar.remaining <= _castbar.window
 			else:
 				_castbar.kind = "brace"
