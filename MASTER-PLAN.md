@@ -857,18 +857,29 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ⏳ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`) — **THE PRESS RESTORE + AAA CHANNEL
-  PASS (Bill, rides the tank-v3 claim).** Root cause of Bill's "old slug" report: the v3 kit
-  rewrite regressed §THE PRESS to judged-at-impact (pass-2's instant symmetric claim +
-  `stream_resolve_slack` + tick interpolation never carried — `cc4011f` took only
-  guard+easy-aggro). Slices: **A** port pass-2 judging semantics from main (`8d77cbe`) into
-  the v3 kit (keep DEC-14/DEC-15/peel/barrier-retired; `duel_answer` gains `off_ms`+`id`;
-  obs bars gain `answered`; v18 note extended, no bump) · **B** the Twinfang echo on the
-  channel (tick_frac interpolation, event-anchored claim moment at the frozen `_last_x`
-  pixel, fading line + expanding circle, ease-in killed, every press echoes) · **C** AAA
-  dressing C1–C6 (UiKit chrome/glow comets/display fonts/banded RhythmBar gate/FLURRY
-  chrome/rune kick + strike_judge coherence). Plan file: `okay-im-trying-to-glistening-canyon`.
-  *(this session)*
+- ☑ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`, ON THE BRANCH — not merged) — **THE
+  PRESS RESTORE + AAA CHANNEL PASS — BUILT** (`730a695`+`8194aa7`+`c93462c`+`573ad88`).
+  Root cause of Bill's "old slug" report FOUND: the v3 kit rewrite had regressed §THE PRESS
+  to judged-at-impact (pass-2's instant symmetric claim + `stream_resolve_slack` + tick
+  interpolation never carried — `cc4011f` took only guard+easy-aggro), so a press's verdict
+  waited for the comet to reach the gate = perceived lag equals your earliness; raw press
+  events rendered by NOTHING; comets stair-stepped at 30 Hz. **S6** ports pass-2 judging into
+  the v3 kit (boss.stream_answers + resolve slack 0.15s; claim filtered victim==me per the v3
+  peel; DEC-14/-15 kept; `duel_answer` gains signed `off_ms`+`id`; obs bars gain `answered` —
+  activates the policy's existing skip; v18 note extended, no bump) · **S6b** the Twinfang
+  echo (tick_frac interpolation · claim moment anchored at the comet's frozen last-drawn
+  pixel: fading line + expanding circle + BULLSEYE ring, ±ms readout · verdict ease-in KILLED
+  · every press echoes: press_tick gate-kick / dud crimson tick; the band's _front_id/_pending
+  reconstruction hack DELETED — telegraph answers no longer mis-anchor on random comets) ·
+  **S6c** the AAA pass (channel joins the UiKit glass family: gilded chrome/filigree ·
+  SYMMETRIC banded gate = the RhythmBar target + aim plumb + gem mullions · shadow/glow/
+  specular comets · Cinzel words · LATE shockwave · FLURRY plaque · AbilityRune.kick() so
+  key/mouse presses animate the rail · gauge glass+gems). Gates per slice: duelist_sim det
+  PASS (metrics move = the contract restored; good/sloppy fixture deaths match main's
+  reference shape) · stream_probe ALL OK ×3 · ui_smoke_raid pre-existing pause+codex assert
+  ONLY (A/B'd vs untouched c8d46cb) · screenshot tour 5/5 ×2. verify-all PAUSED globally
+  (~/.rift-verify-paused, "building not gating") — respected, not forced. **NEXT: Bill's
+  playtest = the feel gate** (`--autostart=raid:tank`). *(this session)*
 - ☑ 2026-07-11 · main (docs only) · **`ENDLESS-PLAN.md` NEW** / TEETH §ENDLESS / LEDGER §E —
   **ENDLESS MODE DESIGNED: THE BLIND DESCENT (Bill's fog-of-war pitch).** Bill: dungeon-crawler
   fog of war — see only adjacent rooms, find "the end", dead ends, turn around and go back.
