@@ -15,14 +15,12 @@ var dodge_rune: AbilityRune
 var dump_rune: AbilityRune
 var engarde_rune: AbilityRune
 
-# ONE-BAR telegraph tracking (2026-07-12 feint/red-beat fix): a telegraph comet's own
-# `answered` flag reads s.telegraph.answers, which the TANK never writes (bespoke dodge skips
-# _answer_strike) — so every dodged global/beat/buster was falsely painted MISSED. The band
-# owns the truth instead: when the tank's telegraph answer fires (a duel_answer with no bar
-# id), we mark the nearest telegraph comet answered here + resolve THAT comet by id. Only a
-# genuinely unanswered comet reaches the gate with answered=false → the honest red miss.
+# ONE-CLAIM telegraph tracking (2026-07-12): a telegraph comet's own `answered` flag reads
+# s.telegraph.answers, which the TANK never writes (its claims live in seat.vars.tg_claims) —
+# so the band records answers itself off the duel_answer events (they carry the comet's own
+# negative id since ONE CLAIM). Answered comets dim; only a genuinely unanswered one reaches
+# the gate unclaimed → the honest red miss.
 var _tg_answered: Dictionary = {}     ## telegraph comet id -> true (answered this appearance)
-var _last_tbars: Array = []           ## the telegraph comets fed this frame (for the nearest-lookup)
 
 func build() -> void:
 	hp_orb = hud._orb(Palette.BLOOD, "HEALTH", false)
@@ -133,7 +131,6 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	for aid in _tg_answered.keys():
 		if not live_ids.has(aid):
 			_tg_answered.erase(aid)
-	_last_tbars = tbars
 	channel.tbars = tbars
 	channel.late_grace = s.config.stream_resolve_slack   # the gate draws ONLY the true late window
 	channel.tempo = float(stream.get("tempo", 1.0)) * (1.25 if bool(obs.get("engarde_live", false)) else 1.0)
@@ -189,10 +186,13 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		return
 	match String(ev.get("t", "")):
 		"duel_answer":
+			# ONE CLAIM: a telegraph comet's answer arrives with its own negative id — record
+			# it band-side (the engine's tg.answers stays tank-blind) so the render dims it
+			# and the miss-afterlife can never red an answered comet.
+			if int(ev.get("id", 1)) < 0:
+				_tg_answered[int(ev.get("id", -1))] = true
 			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)),
 				ev.has("id"), int(ev.get("id", -1)), ev.has("off_ms"), int(ev.get("off_ms", 0)))
-		"duel_tg_preview":
-			_tg_preview(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("id", -1)))
 		"duel_dodge":
 			channel.press_tick("dodge")            # the frame-you-press echo (§0 pass 2)
 			dodge_rune.kick()                      # the bind rail animates too (key/mouse bypass _gui_input)
@@ -242,29 +242,29 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			if has_id:
 				channel.resolve(id, "bullseye", txt, ms)
 			else:
-				_tg_claim("bullseye", txt)   # telegraph answer → its own comet
+				channel.stamp(txt, "bullseye")   # defensive only — every tank answer carries an id now   # telegraph answer → its own comet
 			slam.slam(txt, "perfect")
 			hud._shake_amt = maxf(hud._shake_amt, 2.0)
 		StrikeRes.Grade.PERFECT:
 			if has_id:
 				channel.resolve(id, "perfect", "PERFECT", ms)
 			else:
-				_tg_claim("perfect", "PERFECT")
+				channel.stamp("PERFECT", "perfect")   # defensive only — every tank answer carries an id now
 		StrikeRes.Grade.GOOD:
 			if has_id:
 				channel.resolve(id, "good", "GOOD", ms)
 			else:
-				_tg_claim("good", "GOOD")
+				channel.stamp("GOOD", "good")   # defensive only — every tank answer carries an id now
 		StrikeRes.Grade.GRAZE:
 			if has_id:
 				channel.resolve(id, "graze", "GRAZE", ms)
 			else:
-				_tg_claim("graze", "GRAZE")
+				channel.stamp("GRAZE", "graze")   # defensive only — every tank answer carries an id now
 		StrikeRes.Grade.BAITED:
 			if has_id:
 				channel.resolve(id, "baited", "BAITED!", ms)
 			else:
-				_tg_claim("baited", "BAITED!")
+				channel.stamp("BAITED!", "baited")   # defensive only — every tank answer carries an id now
 			slam.slam("BAITED", "baited")
 		StrikeRes.Grade.READ:
 			# the event carries the fake's own id now — the purple dissolve lands ON it
@@ -280,51 +280,8 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			if has_id:
 				channel.resolve(id, "hit", mtxt, ms)
 			else:
-				_tg_claim("hit", mtxt)
+				channel.stamp(mtxt, "hit")   # defensive only — every tank answer carries an id now
 			hud._shake_amt = maxf(hud._shake_amt, 7.0)
-
-## Resolve a TELEGRAPH answer (globals/busters/beats — the engine event carries no bar id) on
-## the nearest telegraph comet by its OWN id, and mark it answered so the miss-afterlife prune
-## can never also paint it red. A clean dodge/parry now kills the comet with its proper verdict
-## + burst; only a comet the tank NEVER answers reaches the gate unclaimed → the honest red miss.
-func _tg_claim(family: String, txt: String) -> void:
-	var best_id := 1
-	var best_eta := 1.0e9
-	for tb_v in _last_tbars:
-		var tb: Dictionary = tb_v
-		var tid := int(tb["id"])
-		if _tg_answered.has(tid):
-			continue
-		var e := float(tb.get("eta", 1.0e9))
-		if e < best_eta:
-			best_eta = e
-			best_id = tid
-	if best_id < 0:
-		_tg_answered[best_id] = true
-		channel.resolve(best_id, family, txt, "")
-	# else: nothing tracked (usually because the press-time preview already popped this comet) —
-	# stay silent so a previewed global/beat/buster never double-pops at impact.
-
-## The INSTANT telegraph preview (Bill 2026-07-12): globals/beats/busters were judged at impact,
-## so a dodge felt unregistered. Pop the predicted grade ON the comet the frame you press; the
-## mitigation still lands at impact and the center-screen SLAM still fires there for the big
-## grades — this is just the comet-level "registered" beat. Mark it answered so the miss-
-## afterlife can't also red it, and so the impact verdict (via _tg_claim) stays silent.
-func _tg_preview(kind: String, grade: int, id: int) -> void:
-	if id >= 0:
-		return
-	_tg_answered[id] = true
-	match grade:
-		StrikeRes.Grade.BULLSEYE:
-			channel.resolve(id, "bullseye", ("PARRY!" if kind == "parry" else "BULLSEYE!"), "")
-		StrikeRes.Grade.PERFECT:
-			channel.resolve(id, "perfect", "PERFECT", "")
-		StrikeRes.Grade.GOOD:
-			channel.resolve(id, "good", "GOOD", "")
-		StrikeRes.Grade.GRAZE:
-			channel.resolve(id, "graze", "GRAZE", "")
-		_:
-			channel.resolve(id, "hit", ("MISSED" if kind == "parry" else "MISS"), "")
 
 ## THE STREAM TUNER (dev-only): live-tune the ACTIVE body's texture profile mid-fight.
 func _toggle_tuner() -> void:

@@ -26,7 +26,7 @@ extends Resource
 #     grade_*_frac ladder (PARRY binary at ±parry_land). TELEGRAPH busters/globals keep the
 #     open-window model: the press stays open answer_active and grades by press age at impact
 #     (parry_window / dodge_* below). ---
-@export var answer_active: float = 0.50    ## telegraph path: the answer stays open this long after the press
+@export var answer_active: float = 0.50    ## RETIRED (ONE CLAIM 2026-07-12): the open window is dead — kept for old saves/sweeps
 @export var answer_claim: float = 0.30     ## DEC-14 claim range: a press answers a bar within
                                            ## ±this of now; among several, the tie-break picks nearest
                                            ## |impact−now| → earliest impact → lowest id (deterministic)
@@ -35,8 +35,8 @@ extends Resource
 @export var grade_bull_frac: float = 0.18  ## stream-claim DODGE ladder: |press−impact|/answer_claim
 @export var grade_perfect_frac: float = 0.55
 @export var grade_good_frac: float = 0.80  ## …beyond = GRAZE, out to the claim edge
-@export var parry_window: float = 0.10     ## telegraph land window (~3 ticks) — binary, the commit
-@export var dodge_bullseye: float = 0.07   ## telegraph dead-center read (~2 ticks) — answers heavy/buster
+@export var parry_window: float = 0.10     ## RETIRED (ONE CLAIM 2026-07-12): telegraph parries use ±parry_land now
+@export var dodge_bullseye: float = 0.07   ## RETIRED (ONE CLAIM 2026-07-12): telegraph dodges grade on the claim fracs
 @export var dodge_perfect: float = 0.14
 @export var dodge_good: float = 0.30
 

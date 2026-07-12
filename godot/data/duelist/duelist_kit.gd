@@ -73,15 +73,15 @@ func _bank(seat: Seat, n: int) -> void:
 func _engarde_live(s: CombatState, seat: Seat) -> bool:
 	return s.tick < int(seat.vars.get("engarde_until", 0))
 
-# --- per-tick upkeep: wind recharge, flow decay, answer expiry ------------------
+# --- per-tick upkeep: wind recharge, flow decay, stale-claim expiry --------------
 func upkeep(s: CombatState, seat: Seat) -> void:
 	if not seat.vars.has("flow"):
 		seat.vars["flow"] = cfg.flow_start                # first tick: the pull opens on the tank
 	seat.vars["wind"] = minf(cfg.wind_max, _wind(seat) + cfg.wind_regen * s.dt)
 	seat.vars["flow"] = maxf(0.0, _flow(seat) - s.config.flow_decay * s.dt)
-	if String(seat.vars.get("ans_kind", "")) != "" \
-			and s.tick - int(seat.vars.get("ans_tick", -100000)) > _tt(s, cfg.answer_active):
-		seat.vars["ans_kind"] = ""                        # an unanswered press lapses (wind was the price)
+	if s.telegraph == null and seat.vars.has("tg_claims") \
+			and not (seat.vars["tg_claims"] as Dictionary).is_empty():
+		seat.vars["tg_claims"] = {}                       # the swing is gone — stale claims die with it
 
 # --- input: the two answer buttons (binds: 1/SPACE/LMB = DODGE · 2/RMB = PARRY) --
 func on_defense_press(s: CombatState, seat: Seat) -> void:
@@ -120,70 +120,17 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 	CombatCore._emit(s, {"t": ("duel_parry" if kind == "parry" else "duel_dodge"),
 		"player": seat.is_player, "seat": seat})
 	if _claim(s, seat, kind):
-		seat.vars["ans_kind"] = ""                        # the press was consumed by its bar
-		return
-	# no stream bar in claim range — leave the answer open for the telegraph path
-	seat.vars["ans_kind"] = kind
-	seat.vars["ans_tick"] = s.tick
-	_preview_tg(s, seat, kind)                            # instant feedback for a GLOBAL/beat/BUSTER
+		return                                            # the press was consumed by its comet
+	# nothing in claim range — a whiff (the wind was the price, same as any dry press)
 
-## Instant feedback for a TELEGRAPH answer (GLOBAL / beat / BUSTER). These stay on the
-## open-window model (judged at impact) so the mitigation is unchanged — but the tank no longer
-## waits for the hit to LAND to see the verdict (the "globals don't register" complaint). We
-## PREDICT the grade from `remaining`, which equals the `age` modify_incoming computes at impact
-## (both = impact − press), so the pop can never lie; then emit a VIEW-ONLY preview the band
-## resolves ON the comet. Nothing here mutates state (boss HP + tick unchanged ⇒ byte-identical).
-func _preview_tg(s: CombatState, seat: Seat, kind: String) -> void:
-	var tg := s.telegraph
-	if tg == null:
-		return
-	var win := _tt(s, cfg.answer_active)
-	var strikes: Array = tg.ability.strikes
-	var best_i := -2                                      # -2 none · -1 buster · >=0 strike index
-	var best_rem := 1 << 30
-	if strikes.is_empty():
-		# a BUSTER: DEFENSIBLE swing aimed at me, no beats
-		if tg.ability.response == AbilityRes.Response.DEFENSIBLE and tg.target == seat \
-				and not tg.ability.feint:
-			var rem := (tg.start_tick + tg.dur_ticks) - s.tick
-			if rem >= 0 and rem <= win:
-				best_i = -1
-				best_rem = rem
-	else:
-		for i in range(tg.next_strike, strikes.size()):
-			var st: StrikeRes = strikes[i]
-			if st.feint:
-				continue                                  # telegraph fakes don't punish the tank — no preview
-			if not (st.aoe or CombatCore._beat_victim(tg, i) == seat):
-				continue
-			var imp := tg.start_tick + CombatCore.to_ticks(st.at, s.config.fixed_hz)
-			var rem := imp - s.tick
-			if rem >= 0 and rem <= win and rem < best_rem:
-				best_rem = rem
-				best_i = i
-	if best_i == -2:
-		return
-	# ANY telegraph strike is a GLOBAL at impact (modify_incoming: is_global = strikes non-empty);
-	# only a strikeless buster is the personal parry/dodge target.
-	var is_global := best_i >= 0
-	var size := int((strikes[best_i] as StrikeRes).size) if best_i >= 0 else int(tg.ability.size)
-	var id := -(1000 + tg.start_tick * 8) if best_i < 0 else -(1000 + tg.start_tick * 8 + 1 + best_i)
-	var grade := StrikeRes.Grade.MISS
-	if kind == "parry":
-		grade = StrikeRes.Grade.MISS if is_global \
-			else (StrikeRes.Grade.BULLSEYE if best_rem <= _tt(s, cfg.parry_window) * 2 else StrikeRes.Grade.MISS)
-	else:
-		var g := _dodge_grade(s, best_rem)
-		grade = g if (is_global or g == StrikeRes.Grade.BULLSEYE) else StrikeRes.Grade.MISS
-	CombatCore._emit(s, {"t": "duel_tg_preview", "player": seat.is_player, "seat": seat,
-		"kind": ("dodge" if is_global else kind), "grade": grade, "size": size, "id": id})
-
-## THE PRESS (§0 pass 2): find the nearest unanswered, claimable bar within ±answer_claim of
-## NOW (late side bounded by the resolve slack) and judge the press against it INSTANTLY.
-## Returns true if a bar (real or fake) consumed the press. Winner ordering = DEC-14 verbatim
-## (nearest |impact−now| → earliest impact → lowest id — the rule _press_claims enforces).
-## PEELED bars claim too (§0 pass 2, restored): the tank answers EVERY bar — clean answers
-## on a hunted raider's bar are exactly the aggro comeback (the damage stays the victim's).
+## THE PRESS (§0 pass 2 + ONE CLAIM, Bill 2026-07-12): find the nearest unanswered, claimable
+## COMET within ±answer_claim of NOW (late side bounded by the resolve slack) and judge the
+## press against it INSTANTLY — stream bars AND the live telegraph's events (GLOBALS / beats /
+## BUSTERS) compete in the SAME decision, so the press always goes to the comet the eye is on
+## (kills the press-stealing overlap bug: a melee note no longer eats the dodge you aimed at a
+## global). Winner ordering = DEC-14 verbatim (nearest |impact−now| → earliest impact → lowest
+## id — telegraph ids are negative, so an exact tie goes to the bigger read). PEELED bars claim
+## too (§0 pass 2): the tank answers EVERY bar — the damage stays the victim's.
 func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 	var claim := _tt(s, cfg.answer_claim)
 	var late := CombatCore.to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
@@ -212,6 +159,49 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 			best_imp = imp
 			best_id = id
 			best = b
+	# --- the telegraph candidates (same window, same tie-break; ids mirror the view's) ---
+	var best_tg: Dictionary = {}
+	var tg := s.telegraph
+	if tg != null and not tg.ability.feint:
+		var tgc: Dictionary = seat.vars.get("tg_claims", {})
+		var strikes: Array = tg.ability.strikes
+		if strikes.is_empty():
+			# a BUSTER: DEFENSIBLE swing aimed at me, no beats — lands at the wind-up's end
+			if tg.ability.response == AbilityRes.Response.DEFENSIBLE and tg.target == seat:
+				var tid := -(1000 + tg.start_tick * 8)
+				var timp := tg.start_tick + tg.dur_ticks
+				var tdelta := s.tick - timp
+				if not tgc.has(tid) and not (tdelta > late or -tdelta > claim):
+					var td := absi(tdelta)
+					if td < best_d or (td == best_d and timp < best_imp) \
+							or (td == best_d and timp == best_imp and tid < best_id):
+						best_d = td
+						best_imp = timp
+						best_id = tid
+						best_tg = {"id": tid, "imp": timp, "aoe": false, "size": int(tg.ability.size)}
+		else:
+			for i in range(tg.next_strike, strikes.size()):
+				var st: StrikeRes = strikes[i]
+				if st.feint or st.guard == StrikeRes.Guard.UNANSWERABLE:
+					continue                              # fakes bait nothing here; dooms take no press
+				if not (st.aoe or CombatCore._beat_victim(tg, i) == seat):
+					continue                              # someone else's bolt — their dodge, not mine
+				var tid2 := -(1000 + tg.start_tick * 8 + 1 + i)
+				if tgc.has(tid2):
+					continue
+				var timp2 := tg.start_tick + CombatCore.to_ticks(st.at, s.config.fixed_hz)
+				var tdelta2 := s.tick - timp2
+				if tdelta2 > late or -tdelta2 > claim:
+					continue
+				var td2 := absi(tdelta2)
+				if td2 < best_d or (td2 == best_d and timp2 < best_imp) \
+						or (td2 == best_d and timp2 == best_imp and tid2 < best_id):
+					best_d = td2
+					best_imp = timp2
+					best_id = tid2
+					best_tg = {"id": tid2, "imp": timp2, "aoe": st.aoe, "size": int(st.size)}
+	if not best_tg.is_empty():
+		return _claim_tg(s, seat, kind, best_tg, s.tick - int(best_tg["imp"]))
 	if best.is_empty():
 		return false
 	var off_ms := (s.tick - best_imp) * 33                # signed: − = early, + = late
@@ -257,9 +247,65 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 		"off_ms": off_ms, "id": best_id})
 	return true
 
-# --- the mitigation funnel. STREAM bars were judged AT THE PRESS (stream_answers, §0
-#     pass 2) — settle just applies the stored grade. Telegraph busters/globals keep the
-#     open-window model below. ---
+## ONE CLAIM: a telegraph event (GLOBAL / beat / BUSTER) won the press. Judged NOW on the one
+## game-wide ladder — symmetric |press − impact| / answer_claim, exactly like a stream bar
+## (same comet shape ⇒ same timing, the grading-coherence law). Payoffs fire at the press;
+## the mitigation is STORED on the seat and applied when the strike lands (modify_incoming).
+## Legality (DEC-15): GLOBAL (aoe) = dodge only, any grade, no size leak · personal beat =
+## dodge (HEAVY+ needs the bullseye) or parry · BUSTER = parry (±parry_land) or bullseye dodge.
+func _claim_tg(s: CombatState, seat: Seat, kind: String, cand: Dictionary, off_ticks: int) -> bool:
+	var aoe := bool(cand["aoe"])
+	var size := int(cand["size"])
+	var d := absi(off_ticks)
+	var claim := _tt(s, cfg.answer_claim)
+	var grade := StrikeRes.Grade.MISS
+	if kind == "parry":
+		# you don't parry a room-wide blast (DEC-15); on a personal hit it's the binary land
+		if not aoe:
+			grade = StrikeRes.Grade.BULLSEYE if d <= _tt(s, cfg.parry_land) else StrikeRes.Grade.MISS
+	else:
+		var p := float(d) / maxf(1.0, float(claim))       # 0 at the gate line … 1 at the edge
+		if p <= cfg.grade_bull_frac:
+			grade = StrikeRes.Grade.BULLSEYE
+		elif p <= cfg.grade_perfect_frac:
+			grade = StrikeRes.Grade.PERFECT
+		elif p <= cfg.grade_good_frac:
+			grade = StrikeRes.Grade.GOOD
+		else:
+			grade = StrikeRes.Grade.GRAZE
+		if not aoe and size >= AbilityRes.Size.HEAVY and grade != StrikeRes.Grade.BULLSEYE:
+			grade = StrikeRes.Grade.MISS                  # DEC-15: a big personal hit = bullseye-dodge only
+	# the payoffs land NOW (instant feedback is the whole point); the mit waits for the hit
+	var mit := 0.0
+	if grade == StrikeRes.Grade.MISS:
+		if kind == "parry" and not aoe:
+			mit = clampf(cfg.mit_parry_miss, 0.0, cfg.mit_cap)   # the pressed-but-out token cut
+		_slip(s, seat)
+		CombatCore._bump_diag(s, seat, "miss")
+	else:
+		if kind == "parry":
+			mit = minf(cfg.mit_parry_land, 0.99)          # DEC-6: the one above-cap payout
+			_counter(s, seat, size)
+			CombatCore._bump_diag(s, seat, "land")
+		else:
+			mit = _dodge_mit(grade)
+			if not aoe and size > AbilityRes.Size.LIGHT:
+				mit -= cfg.dodge_leak_per_size * float(size - AbilityRes.Size.LIGHT)
+			mit = clampf(mit, 0.0, cfg.mit_cap)           # globals: full ladder, NO size leak
+			CombatCore._bump_diag(s, seat, StrikeRes.grade_name(grade))
+		_add_flow(s, seat, _flow_gain(s, grade))
+	var tgc: Dictionary = seat.vars.get("tg_claims", {})
+	tgc[int(cand["id"])] = {"mit": mit}
+	seat.vars["tg_claims"] = tgc
+	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+		"kind": kind, "grade": grade, "size": size,
+		"off_ms": off_ticks * 33, "id": int(cand["id"])})
+	return true
+
+# --- the mitigation funnel. EVERY comet was judged AT THE PRESS (ONE CLAIM, 2026-07-12):
+#     stream bars via stream_answers, telegraph events via tg_claims — resolution just
+#     applies the stored result. The old open-window (ans_kind/answer_active) is RETIRED:
+#     a press either claims a comet or whiffs; nothing is graded at impact anymore. ---
 func modify_incoming(s: CombatState, seat: Seat, dmg: float, source: StringName, size: int) -> float:
 	if source == &"enrage" or source == &"debuff":
 		return dmg
@@ -267,37 +313,18 @@ func modify_incoming(s: CombatState, seat: Seat, dmg: float, source: StringName,
 		return dmg                                        # EAT takes no press (legality) — whole, never consumes one
 	if source == &"rhythm" or source == &"flurry":
 		return _engarde_wall(s, seat, dmg * (1.0 - _stream_settle(s, seat, source, size)))
-	var kind := String(seat.vars.get("ans_kind", ""))
-	if kind == "":
-		return _unanswered(s, seat, dmg, size)
-	var age := s.tick - int(seat.vars.get("ans_tick", -100000))
-	if age < 0 or age > _tt(s, cfg.answer_active):
-		seat.vars["ans_kind"] = ""
-		return _engarde_wall(s, seat, dmg)
-	seat.vars["ans_kind"] = ""                            # one press answers one bar
-	# WHAT is this bar? (the v3 matrix) — only telegraph damage reaches here now: aimed at ME
-	# with no beats = a BUSTER on the cast channel (parry rules, like a heavy); an aoe beat
-	# = a GLOBAL (dodge-only for every seat, never parried, no size leak).
-	var is_global := not (s.telegraph != null \
-		and s.telegraph.ability.strikes.is_empty() and s.telegraph.target == seat)
-	# DEC-15 LEGALITY MATRIX — one explicit gate before grading; an illegal press leaks whole.
-	var grade := _dodge_grade(s, age) if kind == "dodge" else StrikeRes.Grade.BULLSEYE
-	if not _answer_legal(kind, size, is_global, grade):
-		_slip(s, seat)
-		CombatCore._bump_diag(s, seat, "miss")
-		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-			"kind": kind, "grade": StrikeRes.Grade.MISS, "size": size})
-		return _engarde_wall(s, seat, dmg)
-	# legal → grade + mitigate:
-	if is_global:                                         # room-wide dodge: graded, NO size leak
-		_add_flow(s, seat, _flow_gain(s, grade))
-		CombatCore._bump_diag(s, seat, StrikeRes.grade_name(grade))
-		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-			"kind": "dodge", "grade": grade, "size": size})
-		return _engarde_wall(s, seat, dmg * (1.0 - clampf(_dodge_mit(grade), 0.0, cfg.mit_cap)))
-	if kind == "parry":
-		return _engarde_wall(s, seat, dmg * (1.0 - _parry_result(s, seat, age, size)))
-	return _engarde_wall(s, seat, dmg * (1.0 - _dodge_result(s, seat, age, size)))
+	# TELEGRAPH damage (a GLOBAL beat / my beat / a strikeless BUSTER) — derive the resolving
+	# event's claim key (same synthetic id scheme as _claim + the view) and apply the stored mit.
+	var tgc: Dictionary = seat.vars.get("tg_claims", {})
+	if s.telegraph != null and not tgc.is_empty():
+		var key := -(1000 + s.telegraph.start_tick * 8)   # the strikeless buster's key…
+		if not s.telegraph.ability.strikes.is_empty():
+			key = -(1000 + s.telegraph.start_tick * 8 + 1 + s.telegraph.next_strike)   # …or the resolving beat's
+		if tgc.has(key):
+			var mit := float((tgc[key] as Dictionary).get("mit", 0.0))
+			tgc.erase(key)
+			return _engarde_wall(s, seat, dmg * (1.0 - mit))
+	return _unanswered(s, seat, dmg, size)
 
 ## The unanswered path: no valid press covered this bar — letting a big one through costs aggro.
 func _unanswered(s: CombatState, seat: Seat, dmg: float, size: int) -> float:
@@ -333,57 +360,10 @@ func _press_claims(s: CombatState, _seat: Seat, bar: Dictionary) -> bool:
 			return false                                  # a better claim target is still pending
 	return true
 
-## DEC-15 legality: reject an illegal press before grading. GLOBAL = dodge only (parry never);
-## AUTO = parry or dodge any grade; HEAVY/BUSTER = parry, or dodge at BULLSEYE only. (EAT never
-## reaches here — source==eat returns above; FEINT is judged in on_stream_bar.)
-func _answer_legal(kind: String, size: int, is_global: bool, grade: int) -> bool:
-	if is_global:
-		return kind == "dodge"
-	if kind == "parry":
-		return true
-	if size >= AbilityRes.Size.HEAVY:
-		return grade == StrikeRes.Grade.BULLSEYE
-	return true
-
-## PARRY — binary: the land or the miss. A land on ANY size aimed at you; the top payout.
-func _parry_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
-	if age <= _tt(s, cfg.parry_window):
-		_add_flow(s, seat, s.config.flow_gain_perfect)
-		CombatCore._bump_diag(s, seat, "land")
-		CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-			"kind": "parry", "grade": StrikeRes.Grade.BULLSEYE, "size": size})
-		_counter(s, seat, size)
-		# DEC-6: a LANDED PARRY is the one explicit ABOVE-cap payout — mit_cap is the DODGE/partial
-		# ceiling, not the parry's. It still leaks a sliver (mit_parry_land < 1.0; never full-negate).
-		return minf(cfg.mit_parry_land, 0.99)
-	_slip(s, seat)
-	CombatCore._bump_diag(s, seat, "miss")
-	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-		"kind": "parry", "grade": StrikeRes.Grade.MISS, "size": size})
-	return clampf(cfg.mit_parry_miss, 0.0, cfg.mit_cap)
-
-## DODGE — graded on the one ladder. AUTO: any grade. HEAVY/BUSTER: reaches here only at
-## BULLSEYE (the legality matrix already rejected any lesser dodge on a big bar). The power
-## leak still applies, so parry stays the preferred answer on the big ones.
-func _dodge_result(s: CombatState, seat: Seat, age: int, size: int) -> float:
-	var grade := _dodge_grade(s, age)
-	var mit := _dodge_mit(grade)
-	if size > AbilityRes.Size.LIGHT:
-		mit -= cfg.dodge_leak_per_size * float(size - AbilityRes.Size.LIGHT)
-	_add_flow(s, seat, _flow_gain(s, grade))
-	CombatCore._bump_diag(s, seat, StrikeRes.grade_name(grade))
-	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
-		"kind": "dodge", "grade": grade, "size": size})
-	return clampf(mit, 0.0, cfg.mit_cap)
-
-func _dodge_grade(s: CombatState, age: int) -> int:
-	if age <= _tt(s, cfg.dodge_bullseye):
-		return StrikeRes.Grade.BULLSEYE
-	if age <= _tt(s, cfg.dodge_perfect):
-		return StrikeRes.Grade.PERFECT
-	if age <= _tt(s, cfg.dodge_good):
-		return StrikeRes.Grade.GOOD
-	return StrikeRes.Grade.GRAZE
+# _answer_legal / _parry_result / _dodge_result / _dodge_grade — DELETED with the open
+# window (ONE CLAIM, 2026-07-12): legality + grading live inline in _claim/_claim_tg now,
+# on the one press-time ladder. The age-based knobs (answer_active · parry_window ·
+# dodge_bullseye/perfect/good) are retired with them; the claim fracs are the law.
 
 func _dodge_mit(grade: int) -> float:
 	match grade:
