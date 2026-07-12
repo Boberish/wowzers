@@ -72,8 +72,10 @@ var _distant_l: Control
 var _atmos: CPUParticles2D
 var _t := 0.0
 # fixed offset tables so shapes are stable frame-to-frame (no unseeded randomness)
-const _DRIFT := [0.05, 0.38, 0.62, 0.20, 0.81, 0.50, 0.12, 0.70]
-const _BOB := [0.0, 0.6, -0.4, 0.8, -0.7, 0.3, -0.5, 0.15]
+# typed: an untyped const Array indexes to Variant and breaks every `:=` inference
+# downstream (the CLAUDE.md parse-cascade gotcha — this file killed boot on 2026-07-12)
+const _DRIFT: Array[float] = [0.05, 0.38, 0.62, 0.20, 0.81, 0.50, 0.12, 0.70]
+const _BOB: Array[float] = [0.0, 0.6, -0.4, 0.8, -0.7, 0.3, -0.5, 0.15]
 
 func _init(p: String) -> void:
 	profile_id = p
