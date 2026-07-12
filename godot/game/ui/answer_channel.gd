@@ -32,9 +32,13 @@ const PURPLE := Color("b072c9")            # the feint tell (Palette.RELIC)
 const DEATH_LIFE := 0.45                    # comet death-anim life (sec)
 const VERDICT_LIFE := 0.85                  # position-anchored verdict pop life (sec)
 const GATE_LIFE := 0.28                     # gate-reaction pulse life (sec)
+const BURST_LIFE := 0.55                    # the press burst (frozen line + expanding ring) — Twinfang's hold
+const TICK_DT := 1.0 / 30.0                 # one engine tick (sub-tick comet interpolation)
 
 # --- fed by the band every frame (view data straight off observe()) ---
-var bars: Array = []                       ## committed stream bars: {id,kind,purple,eta,late,flurry_i,flurry_n}
+var bars: Array = []                       ## committed stream bars: {id,kind,purple,eta,late,answered,flurry_i,flurry_n}
+var tick_frac: float = 0.0                 ## the controller's accumulator fraction (0..1) — comets
+                                           ## interpolate BETWEEN 30 Hz ticks (§0 pass 2; no stair-step)
 var tempo: float = 1.0                     ## whole-flow multiplier (TANK-V3: baked into impact_tick at publish, kept as a no-op input field)
 var flurry: bool = false                   ## FLURRY MODE (border + label + bg tint)
 var aggro_lost: bool = false               ## stream paused because the boss hunts another
@@ -58,6 +62,9 @@ var _gate_pulse: float = 0.0               ## gate-reaction timer (any verdict)
 var _gate_col: Color = Palette.GOLD        ## gate-reaction color
 var _gate_bloom: float = 0.0               ## BULLSEYE center-band bloom timer
 var _edge_flash: float = 0.0               ## crimson border flash timer (a leak)
+var _press_flash: float = 0.0              ## press-accepted echo: the gate line kicks the frame you press
+var _press_kind: String = "dodge"          ## which button (tints the kick)
+var _dud_t: float = 0.0                    ## dry-press (fumble) echo: a brief crimson tick at the gate
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -82,7 +89,21 @@ func _process(delta: float) -> void:
 	_gate_pulse = maxf(0.0, _gate_pulse - delta)
 	_gate_bloom = maxf(0.0, _gate_bloom - delta)
 	_edge_flash = maxf(0.0, _edge_flash - delta)
+	_press_flash = maxf(0.0, _press_flash - delta)
+	_dud_t = maxf(0.0, _dud_t - delta)
 	queue_redraw()
+
+## THE PRESS ECHO (§0 pass 2): the frame you press, the gate kicks — always, even before any
+## verdict. A claimed press's full moment (resolve) lands right on top of this; an unclaimed
+## one still proves the input registered. Cheap, never wrong: pure acknowledgment.
+func press_tick(kind: String) -> void:
+	_press_flash = 0.15
+	_press_kind = kind
+
+## The dry press (WINDED / mid-recovery): a brief crimson tick — the input registered, the
+## body couldn't answer.
+func dud() -> void:
+	_dud_t = 0.3
 
 ## A secondary callout landed (COUNTER / RIPOSTE / EN GARDE …): a light floating tag over the
 ## gate + a rail gem. The graded per-comet answers go through `resolve()` instead (below).
@@ -173,7 +194,9 @@ func _pps() -> float:
 	return (_gate_x() - 26.0) / maxf(0.5, horizon)
 
 func _bar_x(eta: float) -> float:
-	return _gate_x() - eta * _pps()
+	# eta is tick-quantized (30 Hz); tick_frac carries the render frame's position INSIDE the
+	# current tick, so comets slide smoothly at 60+ fps instead of stair-stepping (§0 pass 2).
+	return _gate_x() - (eta - tick_frac * TICK_DT) * _pps()
 
 func _draw() -> void:
 	var w := size.x
@@ -228,7 +251,22 @@ func _draw() -> void:
 		var glow := _gate_col
 		glow.a = 0.28 * gf
 		draw_rect(Rect2(gx - 6.0, cy - bh * 0.5 - 6, 12.0, bh + 12.0), glow)
+	# THE PRESS ECHO — the gate KICKS white the frame you press (before any verdict lands):
+	# instant proof the input registered, tinted by the button.
+	if _press_flash > 0.0:
+		var pf := _press_flash / 0.15
+		var pcol := (Palette.STEEL if _press_kind == "parry" else Palette.FLOW).lerp(Color.WHITE, 0.6)
+		gate_line = gate_line.lerp(pcol, pf)
+		gate_wid = maxf(gate_wid, 2.0 + 2.5 * pf)
 	draw_line(Vector2(gx, cy - bh * 0.5 - 6), Vector2(gx, cy + bh * 0.5 + 6), gate_line, gate_wid)
+	# the DRY press (fumble): a crimson cross-tick at the gate — registered, but no wind
+	if _dud_t > 0.0:
+		var df := _dud_t / 0.3
+		var dc := Palette.CRIMSON
+		dc.a = 0.9 * df
+		var dg := 5.0 + 4.0 * (1.0 - df)
+		draw_line(Vector2(gx - dg, cy - dg), Vector2(gx + dg, cy + dg), dc, 2.5, true)
+		draw_line(Vector2(gx + dg, cy - dg), Vector2(gx - dg, cy + dg), dc, 2.5, true)
 	# --- SHATTER shards (dead publisher's bars breaking) ---
 	for sh_v in _shards:
 		var sh: Dictionary = sh_v
@@ -245,19 +283,20 @@ func _draw() -> void:
 	for b_v in bars:
 		var b: Dictionary = b_v
 		var eta := float(b.get("eta", 0.0))
-		var x := _bar_x(eta)
+		var x := minf(_bar_x(eta), gx)                 # a resolving bar HOLDS the gate (the slack)
 		if x < 10.0 or x > w - 10.0:
 			continue
 		var id := int(b.get("id", -1))
 		var kind := String(b.get("kind", "auto"))
 		var purple := bool(b.get("purple", false))
+		var answered := bool(b.get("answered", false))
 		present[id] = true
 		_last_x[id] = {"x": x, "kind": kind, "purple": purple, "absent": 0}   # claim anchor, verbatim
 		if not _seen.has(id):
 			_seen[id] = true
 			if bool(b.get("late", false)):
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
-		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font)
+		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered)
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()
 	var stale: Array = []
@@ -385,20 +424,38 @@ func _draw_death(d: Dictionary, cy: float) -> void:
 				pc2.a = (1.0 - e) * 0.7
 				draw_circle(Vector2(x + cos(ang) * rr, cy + sin(ang) * rr), 2.0 * (1.0 - e * 0.5), pc2)
 
-## The position-anchored graded verdict: scale-punch in, float up + fade, grade color, with the
-## ±ms sub-line. BULLSEYE gets short golden rays. Drawn centered on the comet's spot.
+## The position-anchored graded verdict + THE PRESS BURST (rhythm_bar.gd's ghost, ported —
+## the fading vertical line + the expanding circle that freeze WHERE you pressed). NO ease-in:
+## the verdict punches at full size FRAME 1 and only decays (§0 pass 2 — the 0.12s scale-in
+## read as lag); rays fire immediately. Float up + fade, grade color, ±ms sub-line.
 func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 	var t := float(v["t"])
-	var appear := clampf(t / 0.12, 0.0, 1.0)             # first 0.12s: punch in 1.6 -> 1.0
-	var punch := 1.6 - 0.6 * appear
-	var rise := maxf(0.0, t - 0.12)
-	var y := cy - 26.0 - rise * 34.0
+	var punch := 1.0 + 0.35 * exp(-t * 14.0)             # full-size on frame 1, settles fast
+	var y := cy - 26.0 - t * 30.0
 	var fade := clampf((VERDICT_LIFE - t) / 0.3, 0.0, 1.0)
 	var x := float(v["x"])
 	var col: Color = v["col"]
 	col.a = fade
-	if bool(v["rays"]) and appear >= 1.0:
-		var rf := clampf((t - 0.12) / 0.3, 0.0, 1.0)
+	# --- THE PRESS BURST (Twinfang verbatim): its own ~0.55s per-frame decay ---
+	var bf := clampf(1.0 - t / BURST_LIFE, 0.0, 1.0)
+	if bf > 0.0:
+		var bh := size.y - 26.0
+		var lc: Color = v["col"]
+		lc.a = 0.85 * bf
+		# the frozen vertical line at the press pixel
+		draw_line(Vector2(x, cy - bh * 0.5 - 2.0), Vector2(x, cy + bh * 0.5 + 2.0), lc, 3.0, true)
+		# the expanding circle ABOVE the track (r 6 -> 28 as it fades)
+		var br := 6.0 + 22.0 * (1.0 - bf)
+		var rc0: Color = v["col"]
+		rc0.a = 0.7 * bf
+		draw_arc(Vector2(x, cy - bh * 0.5 - 10.0), br, 0.0, TAU, 24, rc0, 2.0, true)
+		if bool(v["rays"]):
+			# BULLSEYE: the second (mint) ring inside the burst
+			var mc2 := Palette.PERFECT
+			mc2.a = 0.8 * bf
+			draw_arc(Vector2(x, cy - bh * 0.5 - 10.0), 14.0, 0.0, TAU, 20, mc2, 1.6, true)
+	if bool(v["rays"]):
+		var rf := clampf(t / 0.3, 0.0, 1.0)
 		for k in 8:
 			var a := TAU * float(k) / 8.0 + t * 1.2
 			var rc := Palette.GOLD_BRIGHT
@@ -418,7 +475,17 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 
 ## One committed comet. Shape = the kind's costume; purple tints a FEINT's disguise. A subtle
 ## motion trail (pure function of x — comets slide in from the right) sells the constant speed.
-func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font) -> void:
+## An ANSWERED comet (claimed at the press, still resolving through the slack) draws as a dim
+## hollow husk — the death anim + verdict carry the punch; the husk just stays honest.
+func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
+		answered: bool = false) -> void:
+	if answered:
+		var hc := (PURPLE if purple else _comet_col(kind))
+		hc.a = 0.3
+		var hr := 18.0 if kind == "buster" else (15.0 if kind == "heavy" else 11.0)
+		var hpts := _shape_pts(kind, x, cy, hr)
+		draw_polyline(hpts + PackedVector2Array([hpts[0]]), hc, 1.6, true)
+		return
 	if kind != "eat":
 		_trail(x, cy, kind, purple)
 	match kind:

@@ -10,12 +10,6 @@ var channel: AnswerChannel
 var gauge: DuelistGauge
 var slam: VerdictSlam
 var tuner: StreamTuner
-
-# --- claim-moment routing (view-only): the on-deck comet id + the press earliness in ms ---
-var _front_id: int = -1                  ## nearest committed bar THIS frame
-var _front_id_prev: int = -1             ## nearest LAST frame — the bar a same-frame verdict claimed
-var _pending_ms: int = -1                ## the last press's earliness (ms), captured off obs
-var _prev_ans_tick: int = -100000        ## detects a fresh press (seat.vars.ans_tick flips)
 var parry_rune: AbilityRune
 var dodge_rune: AbilityRune
 var dump_rune: AbilityRune
@@ -85,32 +79,12 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	gauge.combo_max = int(obs.get("combo_max", 5))
 	gauge.fumbling = bool(obs.get("fumbling", false))
 	gauge.queue_redraw()
-	# THE CHANNEL: hand it the committed view data verbatim (LAW 1 — no view math here)
+	# THE CHANNEL: hand it the committed view data verbatim (LAW 1 — no view math here).
+	# The claim moment needs NO reconstruction anymore: the engine's duel_answer carries the
+	# claimed bar's id + the signed off_ms (§0 pass 2) — on_event routes them straight in.
 	var stream: Dictionary = obs.get("stream", {})
-	var bars: Array = stream.get("bars", [])
-	channel.bars = bars
-	# CLAIM ROUTING (view-only): track the on-deck (nearest) comet + how early the press was, so
-	# a graded verdict can anchor at that comet's spot with a ±ms readout. The engine's duel_answer
-	# carries no id/timing, so we read the nearest bar's eta and the seat's ans_tick — never
-	# predicting, never mutating: pure presentation off observe() + seat.vars.
-	var fid := -1
-	var feta := 9.0e9
-	for b_v in bars:
-		var bb: Dictionary = b_v
-		var e2 := float(bb.get("eta", 9.0e9))
-		if e2 < feta:
-			feta = e2
-			fid = int(bb.get("id", -1))
-	_front_id_prev = _front_id
-	_front_id = fid
-	var at := int(p.vars.get("ans_tick", -100000))
-	if at != _prev_ans_tick and at > -50000:
-		_prev_ans_tick = at
-		if feta < 2.0:
-			var age := maxi(0, s.tick - at)
-			_pending_ms = int(round(maxf(0.0, feta - float(age) * s.dt) * 1000.0))
-		else:
-			_pending_ms = -1
+	channel.bars = stream.get("bars", [])
+	channel.tick_frac = clampf(hud._ctrl._accum / s.dt, 0.0, 1.0)   # smooth 60 fps comets
 	channel.tempo = float(stream.get("tempo", 1.0)) * (1.25 if bool(obs.get("engarde_live", false)) else 1.0)
 	channel.flurry = bool(obs.get("flurry", false))
 	channel.aggro_lost = not bool(obs.get("aggro_me", true))
@@ -164,7 +138,12 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		return
 	match String(ev.get("t", "")):
 		"duel_answer":
-			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)))
+			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)),
+				ev.has("id"), int(ev.get("id", -1)), ev.has("off_ms"), int(ev.get("off_ms", 0)))
+		"duel_dodge":
+			channel.press_tick("dodge")            # the frame-you-press echo (§0 pass 2)
+		"duel_parry":
+			channel.press_tick("parry")
 		"duel_counter":
 			channel.stamp("COUNTER +◆", "bullseye")
 		"duel_riposte":
@@ -177,6 +156,7 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		"duel_parry_sealed":
 			channel.stamp("PARRY SEALED — WEAVE!", "baited")
 		"duel_fumble":
+			channel.dud()                          # the dry-press echo at the gate
 			channel.stamp("WINDED", "hit")
 		"duel_eat":
 			channel.stamp("BRACE", "graze")
@@ -187,47 +167,60 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		"stream_shatter":
 			channel.shatter()
 
-## One graded answer → the CLAIM MOMENT on the channel (positional death + verdict + ±ms, at
-## the claimed comet's own spot) plus the slam (the moments that deserve the whole room). The
-## claimed comet id is last frame's on-deck bar (this frame's obs already dropped it), and the
-## ms is the earliness captured in render(); the channel falls back gracefully if either is stale.
-func _verdict(kind: String, grade: int, size: int) -> void:
-	var id := _front_id_prev
+## One graded answer → the CLAIM MOMENT on the channel (positional death + press burst +
+## verdict + ±ms, at the claimed comet's own frozen pixel) plus the slam (the moments that
+## deserve the whole room). STREAM claims carry the bar's id + signed off_ms on the event
+## (§0 pass 2 — judged AT the press, so this fires the same tick you clicked). TELEGRAPH
+## answers (globals/busters on the judge) carry neither — they get the slam + a gate stamp,
+## never a mis-anchored comet death.
+func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
+		has_ms: bool, off_ms: int) -> void:
+	var ms := ("%+d ms" % off_ms) if has_ms else ""
 	match grade:
 		StrikeRes.Grade.BULLSEYE:
-			if kind == "parry":
-				channel.resolve(id, "bullseye", "PARRY!", _ms_txt())
-				slam.slam("PARRY!", "perfect")
+			var txt := "PARRY!" if kind == "parry" else "BULLSEYE!"
+			if has_id:
+				channel.resolve(id, "bullseye", txt, ms)
 			else:
-				channel.resolve(id, "bullseye", "BULLSEYE!", _ms_txt())
-				slam.slam("BULLSEYE!", "perfect")
+				channel.stamp(txt, "bullseye")
+			slam.slam(txt, "perfect")
 			hud._shake_amt = maxf(hud._shake_amt, 2.0)
 		StrikeRes.Grade.PERFECT:
-			channel.resolve(id, "perfect", "PERFECT", _ms_txt())
+			if has_id:
+				channel.resolve(id, "perfect", "PERFECT", ms)
+			else:
+				channel.stamp("PERFECT", "perfect")
 		StrikeRes.Grade.GOOD:
-			channel.resolve(id, "good", "GOOD", _ms_txt())
+			if has_id:
+				channel.resolve(id, "good", "GOOD", ms)
+			else:
+				channel.stamp("GOOD", "good")
 		StrikeRes.Grade.GRAZE:
-			channel.resolve(id, "graze", "GRAZE", _ms_txt())
+			if has_id:
+				channel.resolve(id, "graze", "GRAZE", ms)
+			else:
+				channel.stamp("GRAZE", "graze")
 		StrikeRes.Grade.BAITED:
-			channel.resolve(id, "baited", "BAITED!", _ms_txt())
+			if has_id:
+				channel.resolve(id, "baited", "BAITED!", ms)
+			else:
+				channel.stamp("BAITED!", "baited")
 			slam.slam("BAITED", "baited")
 		StrikeRes.Grade.READ:
 			channel.resolve(id, "read", "READ", "")     # held it — no press to time
 		_:
+			var mtxt := "MISS"
 			if kind == "parry":
-				channel.resolve(id, "hit", "MISSED", "")
+				mtxt = "MISSED"
 				slam.slam("MISSED PARRY", "hit")
 			elif size >= AbilityRes.Size.HEAVY:
-				channel.resolve(id, "hit", "WRONG — PARRY IT", "")
+				mtxt = "WRONG — PARRY IT"
 				slam.slam("PARRY IT", "hit")
+			if has_id:
+				channel.resolve(id, "hit", mtxt, ms)
 			else:
-				channel.resolve(id, "hit", "MISS", "")
+				channel.stamp(mtxt, "hit")
 			hud._shake_amt = maxf(hud._shake_amt, 7.0)
-	_pending_ms = -1
-
-## The pass-2 earliness readout for the just-claimed press ("" when unavailable — never faked).
-func _ms_txt() -> String:
-	return "" if _pending_ms < 0 else "%d ms early" % _pending_ms
 
 ## THE STREAM TUNER (dev-only): live-tune the ACTIVE body's texture profile mid-fight.
 func _toggle_tuner() -> void:
