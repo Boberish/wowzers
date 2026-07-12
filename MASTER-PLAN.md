@@ -876,6 +876,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · `main` · §GRAPHICS — **CLAIM: C3 TEXTURE-VISIBILITY HOTFIX.** The first real
+  Stack textures import and load with correct pixels, but SceneKit's full-screen palette Control
+  uses additive blending with near-white RGB and saturates the composed stage to white. Change
+  only that overlay to ordinary alpha tinting, then repeat the single 1920×1080 Stack shot. No
+  gameplay/actor/HUD changes; keep the P3 layer delivery separate and default-off. *(Codex
+  graphics-v2 session)*
+
 - ☑ 2026-07-12 · `artv2-c3` → **MERGED to `main` (ff `1abfcd4`)** · §GRAPHICS — **GRAPHICS
   PACKET C3 COMPLETE — ASSET IMPORT + SCENE TOUR** (GRAPHICS-PLAN §5·C3; Bill's spec).
   **Shipped:** `game/art_v2/SCENES.md` = the six-layer environment asset schema of record
