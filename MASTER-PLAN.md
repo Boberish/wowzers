@@ -857,8 +857,27 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☑ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`, ON THE BRANCH — not merged) — **THE
-  PRESS RESTORE + AAA CHANNEL PASS — BUILT** (`730a695`+`8194aa7`+`c93462c`+`573ad88`).
+- ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE ONE-BAR VERDICTS — BUILT
+  (S7 `9cb0180` · S7b `4a24897` · S7c `9815871` · S8 `f91e002` · S8b `63ff7c7` + TANK-PLAN
+  §0 amendment `573ad88`→).** Bill's second playtest round, five rulings, all landed:
+  **① ONE BAR** — dial (the circle) + shared judge HIDDEN for the tank; GLOBALS/targeted
+  BUSTERS/my beats ride the channel as telegraph comets (synthetic negative ids, verbatim
+  off the live telegraph); ALL casting on the BossCastBar under boss HP; telegraph verdicts
+  anchor via `resolve_tg` (never mis-anchor a stream comet). **② THE MISS AFTERLIFE** —
+  resolve slack 0.15→0.04 (~1 tick): nothing sits pressable at the line; unpressed = crimson
+  ✗ husk that KEEPS FLOWING to the bar's end (`duel_bar_missed` event); gate draws only the
+  true late-grace; press ghost rises VERTICALLY. **③ THE PEEL re-restored to pass 2** — every
+  bar ships marked (hunt-chevron + victim name), tank answers all (comeback), damage to the
+  hunted raider; probe invariant flipped. **④ THE SONGBOOK** — `_publish_phrases`: authored
+  motif libraries per boss (weight/rest/steps{gap,kind,late}), one seeded draw per motif,
+  grammar laws intact, legacy odds path preserved (spike+packs); songbooks authored for all
+  4 Seals + the dense golem. **⑤ living-motion** — spawn pops, approach scaling, gate
+  heartbeat. Gates: stream_probe ALL OK ×3 · duelist_sim det PASS (dense re-tuned to band) ·
+  raid_sim 10-seed clean (rations PASS) · tour 5/5 (phrase-aware injection). **Windows
+  install C:\Games\v3Tank updated (project+cache), boot + autostart checks clean — ready for
+  Bill's playtest.** *(this session)*
+- ☑ 2026-07-12 · `tank-v3` (on the branch, not merged) — **THE PRESS RESTORE + AAA CHANNEL
+  PASS — BUILT (`730a695`+`8194aa7`+`c93462c`+`573ad88`).**
   Root cause of Bill's "old slug" report FOUND: the v3 kit rewrite had regressed §THE PRESS
   to judged-at-impact (pass-2's instant symmetric claim + `stream_resolve_slack` + tick
   interpolation never carried — `cc4011f` took only guard+easy-aggro), so a press's verdict
