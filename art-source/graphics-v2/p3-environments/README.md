@@ -37,3 +37,6 @@ outside `res://`; only approved processed layers enter the runtime folders.
 - `stack_atrium/midground-*-v1.png` — asymmetric chroma source, alpha extraction, and 2048×512
   prepared strip. The live 1080p tour keeps the timing lane readable; final density tuning waits
   until floor and dressing complete the scene.
+- `stack_atrium/floor-*-v1.png` — opaque source and 2048×256 prepared access-panel strip.
+- `stack_atrium/dressing-*-v1.png` — chroma source, alpha extraction, and 512×512 prepared coolant
+  service-column flank prop. Stack Atrium is now 5/5 layers and rendering in the 1080p tour.

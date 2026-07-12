@@ -9,7 +9,7 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE — STACK 3/5 LAYERS.** Bill approved **SUNPRINT CEL** on
+**Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE — STACK 5/5 COMPLETE · COLD AISLE NEXT.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
 texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C3 schema/bindings merged `1abfcd4`; C2 SceneKit merged as
 `da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
@@ -237,6 +237,10 @@ asymmetry and encounter-specific composition.
 Backdrop + distant shipped in `ebd7242` after the C3 visibility hotfix `516e1b0`. The asymmetric
 midground is layer 3/5: transparent 2048×512 with the actor/timing lanes open. Floor and dressing
 remain before the first complete Stack composition verdict.
+
+**Stack Atrium 5/5 complete:** the opaque 2048×256 access-panel floor calms the lower band; the
+512×512 coolant-column dressing frames both flanks. One live 1080p tour renders all five layers,
+keeps feet fixed, and leaves the timing channel unobstructed. P3 now builds the Cold Aisle sibling.
 
 ### P4 · DUELIST ANCHOR + RIG — Codex I2 + Claude C4/C5
 
