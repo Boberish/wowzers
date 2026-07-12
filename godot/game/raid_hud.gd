@@ -2045,6 +2045,58 @@ func _show_boon_draft(done: Callable) -> void:
 		chain = func(): _show_seat_draft(k, next)
 	_show_seat_draft(_seat_key, chain)
 
+## THE KEYSTONE OFFER (Bill 2026-07-12): elite-only, one per run per seat. Runs BEFORE the
+## normal reforge at an ELITE node — offer the human, then each commanded AI raider (SEAT_KEYS
+## order), skipping any seat already holding a keystone or whose class grants none. Built
+## back-to-front so it runs you → the AI seats, then hands off to `done` (the reforge).
+func _show_keystone_draft(done: Callable) -> void:
+	if _d.run == null:
+		done.call()
+		return
+	var chain := done
+	var order: Array = []
+	for key in RaidNet.SEAT_KEYS:
+		if _d.ai_runs.has(key):
+			order.append(key)
+	order.reverse()
+	for key in order:
+		var k := String(key)
+		var next := chain
+		chain = func(): _show_keystone_seat(k, next)
+	_show_keystone_seat(_seat_key, chain)
+
+## One KEYSTONE offer for one seat (a 1-of-2 spectacle pick, no economy). Skips straight to
+## `done` when the seat is capped or its class grants no keystones — so a run only ever sees
+## this at its first elite while a keystone is still open.
+func _show_keystone_seat(key: String, done: Callable) -> void:
+	var mine: bool = key == _seat_key
+	var run: RunState = _d.run if mine else (_d.ai_runs.get(key) as RunState)
+	if run == null:
+		done.call()
+		return
+	var picks := Draft.roll_keystone_offer(run)
+	if picks.is_empty():
+		done.call()
+		return
+	_screen = "draft"
+	_clear()
+	var disp := "THE BLOOMWEAVER" if (key == "healer" and run.char_class == "bloomweaver") \
+		else String(SEAT_NAMES.get(key, "RAIDER"))
+	var headline := "KEYSTONE — the elite yields a run-defining relic" if mine \
+		else "KEYSTONE — %s · AI ALLY" % disp
+	var flavor := "Take ONE. A keystone reshapes the whole build — one per run." if mine \
+		else "Pick the raider's keystone — one per run."
+	var ds := DraftScreen.new(run, picks, headline, flavor, [], Palette.VOID, false)
+	ds.boon_taken.connect(func(boon: Dictionary):
+		Draft.take(run, boon)
+		if mine:
+			_d.taken_boons.append(boon)
+			_toast_add("★  KEYSTONE — %s installed" % String(boon.get("title", "?")))
+		else:
+			_toast_add("★  %s takes the keystone %s" % [disp, String(boon.get("title", "?"))])
+		done.call())
+	_ui.add_child(ds)
+
 ## One REFORGE screen for one seat — yours or a commanded AI raider's (COMMANDER).
 ## PER-SEAT WALLETS (V#11): each seat spends its OWN `run.tokens` — the AI raider drafts
 ## against the ⏣ it earned itself (the old shared-bank mirror is gone).
@@ -3726,8 +3778,8 @@ func _on_end(won: bool) -> void:
 			CampaignCore.skirmish_scavenge(scp)
 			_d.cp_sync(scp)
 		# ELITE bounty (DESCENT §5): fat ⏣ on top of the curio-roll drop event below.
-		# (The keystone 1-of-2 slot is reserved here — lands with the per-class deck
-		# slices; no class ships a granter-ready keystone pool yet.)
+		# The keystone 1-of-2 is now GRANTED here (Bill 2026-07-12): keystones are elite-only,
+		# capped one per run — offered per-seat in the drop chain below (_show_keystone_draft).
 		if ek == RunMap.KIND_ELITE:
 			var bounty := int(ELITE_TOKENS.get(int(RaidContent.FLOORS[_d.floor_i]["ring"]), 4))
 			_gain_tokens(bounty)
@@ -3744,8 +3796,13 @@ func _on_end(won: bool) -> void:
 		# ARMORY: a Seal kill OR an elite is a drop EVENT here — skirmish repeats pay salvage
 		var drop_event: bool = ek == RunMap.KIND_SEAL or ek == RunMap.KIND_ELITE
 		var enc_id := String(_ctrl.state.encounter.id)
-		_show_fight_recap(func(): _after_drop(enc_id,
-			func(): _show_boon_draft(after), drop_event))
+		# the reforge (1-of-3). At an ELITE, a 1-of-2 KEYSTONE offer runs FIRST (elite-only,
+		# capped one per run per seat — Bill 2026-07-12), then the normal reforge.
+		var reforge_then: Callable = func(): _show_boon_draft(after)
+		if ek == RunMap.KIND_ELITE:
+			var normal_reforge := reforge_then
+			reforge_then = func(): _show_keystone_draft(normal_reforge)
+		_show_fight_recap(func(): _after_drop(enc_id, reforge_then, drop_event))
 		return
 	_show_end(won)
 

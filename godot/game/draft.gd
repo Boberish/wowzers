@@ -13,6 +13,7 @@ const WEIGHTS := {"haiku": 0.70, "sonnet": 0.25, "opus": 0.05}
 const OPUS_PITY_STEP := 0.05      ## +5pp effective opus weight per opus-less draft
 const OPUS_PITY_HARD := 5         ## the draft after this many opus-less ones forces an opus offer
 const UPSELL_COST := 2
+const KEYSTONE_OFFER_N := 2       ## elite keystone table size (a 1-of-2 spectacle pick)
 ## REROLL_COST + LOCK_COST retired (§11 #3, rerolls-out): the reroll spends a banked
 ## REGENERATE charge (run.regenerate), not a Token; LOCK is gone entirely.
 ## The class-signature skill counter each kit bumps into diag (see Draft.mint).
@@ -51,9 +52,18 @@ static func _ok(b: Dictionary, run) -> bool:
 		return false
 	return not run.boons.has(b["id"])
 
+## Is this boon a KEYSTONE (the run-defining spectacle relic)? Keystones are ELITE-ONLY,
+## capped 1 per run (Bill 2026-07-12) — they are FILTERED OUT of the normal post-fight
+## draft (offerable) and only surface via roll_keystone_offer at an elite node. Marked by
+## the `keystone` tag across every class (Twinfang's already carried it; the Well's got it
+## in the same pass). Twinfang's FERMATA keystones were already a separate elite-only array.
+static func is_keystone(b: Dictionary) -> bool:
+	return "keystone" in b.get("tags", [])
+
 ## Aspect pool first, then shared — deduped by id (deterministic const-array order).
 ## A class with no boon catalog yet (the Alchemist base build) offers nothing —
 ## every caller already handles an empty roll (the draft is skipped).
+## KEYSTONES ARE EXCLUDED HERE (elite-gated, 2026-07-12) — the normal draft never offers them.
 static func offerable(run) -> Array:
 	var cat = catalog(run)
 	if cat == null:
@@ -71,9 +81,68 @@ static func offerable(run) -> Array:
 		if seen.has(b["id"]):
 			continue
 		seen[b["id"]] = true
+		if is_keystone(b):
+			continue                     # keystones are elite-only (roll_keystone_offer)
 		if _ok(b, run):
 			out.append(b)
 	return out
+
+# ---------------------------------------------------------------- keystones (elite-only)
+## Every keystone this class+aspect can grant (spec pool + shared + Twinfang's separate
+## FERMATA keystone array). Used for the elite offer and the 1-per-run cap check.
+static func _all_keystones(run) -> Array:
+	var cat = catalog(run)
+	if cat == null:
+		return []
+	var pool: Array = cat.spec_pool(run.aspect) + cat.SHARED
+	# Twinfang's FERMATA keystones live in their own elite-only array (never in spec_pool).
+	if String(run.char_class) == "twinfang" and String(run.aspect) == "fermata":
+		pool += TwinfangBoons.FERMATA_KEYSTONES
+	var out: Array = []
+	var seen := {}
+	for b in pool:
+		if seen.has(b["id"]):
+			continue
+		seen[b["id"]] = true
+		if is_keystone(b):
+			out.append(b)
+	return out
+
+## Does this run already hold a keystone? (The 1-per-run cap — per seat, since each seat
+## carries its own RunState.)
+static func has_keystone(run) -> bool:
+	for b in _all_keystones(run):
+		if run.boons.has(b["id"]):
+			return true
+	return false
+
+## The keystones offerable at an elite right now: none if the run is already capped, else
+## every keystone it doesn't own yet. (roll_keystone_offer narrows this to a 1-of-N table.)
+static func keystone_offerable(run) -> Array:
+	if has_keystone(run):
+		return []
+	var out: Array = []
+	for b in _all_keystones(run):
+		if _ok(b, run):
+			out.append(b)
+	return out
+
+## The elite keystone table: up to KEYSTONE_OFFER_N distinct keystones, picked deterministically
+## off run.draft_rng (a Fisher-Yates prefix). [] when the run is capped or the class has none.
+## Consumes run.draft_rng ONLY at elite nodes, so the normal draft stream (draft_sim) is
+## untouched — a run still replays exactly from (run_seed, picks, tokens, elite offers seen).
+static func roll_keystone_offer(run) -> Array:
+	var cand := keystone_offerable(run)
+	if cand.is_empty():
+		return []
+	var pool := cand.duplicate()
+	var n := mini(KEYSTONE_OFFER_N, pool.size())
+	for i in n:
+		var j: int = i + int(run.draft_rng.next_u32() % (pool.size() - i))
+		var tmp = pool[i]
+		pool[i] = pool[j]
+		pool[j] = tmp
+	return pool.slice(0, n)
 
 # ---------------------------------------------------------------- synergy
 ## The build's tag set: bar ability ids + owned boon ids + the aspect + the aspect's
