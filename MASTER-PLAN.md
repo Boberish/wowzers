@@ -878,10 +878,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `stream_dmg_mult` 0.85 (compensates the continuity fix's added stream exposure) · barrage-cd
   re-tune into PILLAR #2's 3–8 band. **UNION MERGE of main `9b15833`** (pass-2 `8d77cbe` +
   endless docs): branch wins the retired systems (barrier/octagon stay dead), pass-2 semantics
-  verified carried by the gate round. **⏳ `verify-all` SEEDS=300 (the merge-back bar) launched
-  2026-07-12 post-union** — known excluded fails: map_advance_probe (descent thread, broken on
-  main too) · ui_smoke_raid pause+codex (PRE-EXISTING: the frozen Bulwark placeholder wipes in
-  the input-less smoke; dies with the warden deletion, LEDGER §A½). Residual: expert-tier
+  verified carried by the gate round. **✅ `verify-all` SEEDS=300 (the merge-back bar) RAN
+  2026-07-12 post-union: 39 ok / 2 FAIL, both understood + owned elsewhere** — map_advance_probe
+  (pre-existing, broken on main too, descent thread owns it) · ui_smoke_raid pause+codex (the
+  smoke's tank walk still drives the frozen Bulwark/warden placeholder, whose dead kit ends the
+  fight early under the now-continuous stream — it passed on main only because the barrier used
+  to DROP bars during telegraphs; the placeholder and its smoke line die with the §A½ warden
+  deletion — do NOT weaken the smoke to pass it). Residual: expert-tier
   tank_death on Riftmaw/Gemini/Mythos (the AI tank policy answers stream-first and misses the
   CRUSH under the now-continuous stream) = S6 `stream_breathe` authoring + tuning, playtest-owned.
   ⚠ §7 items 1-3 are a DELIBERATE non-byte-identical re-baseline (the retirement WAS
