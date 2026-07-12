@@ -857,6 +857,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ⏳ 2026-07-12 · `tank-v3` (worktree `../wow-tank-v3`) — **THE PRESS RESTORE + AAA CHANNEL
+  PASS (Bill, rides the tank-v3 claim).** Root cause of Bill's "old slug" report: the v3 kit
+  rewrite regressed §THE PRESS to judged-at-impact (pass-2's instant symmetric claim +
+  `stream_resolve_slack` + tick interpolation never carried — `cc4011f` took only
+  guard+easy-aggro). Slices: **A** port pass-2 judging semantics from main (`8d77cbe`) into
+  the v3 kit (keep DEC-14/DEC-15/peel/barrier-retired; `duel_answer` gains `off_ms`+`id`;
+  obs bars gain `answered`; v18 note extended, no bump) · **B** the Twinfang echo on the
+  channel (tick_frac interpolation, event-anchored claim moment at the frozen `_last_x`
+  pixel, fading line + expanding circle, ease-in killed, every press echoes) · **C** AAA
+  dressing C1–C6 (UiKit chrome/glow comets/display fonts/banded RhythmBar gate/FLURRY
+  chrome/rune kick + strike_judge coherence). Plan file: `okay-im-trying-to-glistening-canyon`.
+  *(this session)*
 - ☑ 2026-07-11 · main (docs only) · **`ENDLESS-PLAN.md` NEW** / TEETH §ENDLESS / LEDGER §E —
   **ENDLESS MODE DESIGNED: THE BLIND DESCENT (Bill's fog-of-war pitch).** Bill: dungeon-crawler
   fog of war — see only adjacent rooms, find "the end", dead ends, turn around and go back.
