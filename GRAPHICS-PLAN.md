@@ -360,6 +360,148 @@ Everything else waits. This is deliberately the first small, reversible decision
 
 ---
 
-## 10. IMPLEMENTATION MAP
+## 10. IMPLEMENTATION MAP — Packet C0 recon (2026-07-12)
 
-**Pending Claude Packet C0.** This section will receive the exact current-code seam map before C1.
+> Read-only audit against `main` @ `e0ebe88` (post tank-v3 merge — the AnswerChannel/one-bar
+> era). Line numbers drift; the function names are the durable anchors. **Correction to §8's
+> assumption:** tank-v3 is already MERGED to `main` — the collision picture below reflects that.
+
+### 10.1 The seams — where each independent selector cuts
+
+**ACTOR seam — `game/stage2d/actor_2d.gd` (70 lines, the whole contract):**
+- `Actor2D.make(id, aspect)` `actor_2d.gd:58-70` is THE single actor factory; both call sites
+  live in `raid_stage_2d.gd` (`:52` boss, `:75` seats). User art already wins via
+  `res://game/art/actors/<id>.tscn` → `SpriteActor2D` (`:59-61`) — **that folder does not exist
+  yet**; every seat is a placeholder puppet today.
+- ⚠ **LIVE WART (post-PURGE fallthrough):** the factory matches only `twinfang | voidcaller |
+  mender`; `RaidStage2D.setup` (`raid_stage_2d.gd:71-72`) now passes `duelist / alchemist /
+  well` — all three fall through `_` to **`RiftmawRig2D` (the BOSS puppet)**. Tank, caster and
+  healer render as mini-Riftmaws on main today, and `aspect` is dropped for them. The
+  `voidcaller`/`mender` rigs are unreachable dead code; the factory's doc comment (`:56-57`)
+  is stale. C4's adapter registration should fix the mapping in the same breath.
+- Verb contract (`act/windup/swing/reacts/state-looks`, `:14-51`) is complete and boss-scrub
+  proven: `SpriteActor2D.windup` (`sprite_actor_2d.gd:61-69`) already pauses + seeks
+  `windup_<kind>` to `amt × length` per frame — the exact scrub law C4 needs, working today.
+- `PoseRig2D` (`pose_rig_2d.gd`): joints/limbs (`:14-71,118-149`), named poses + seq + windup
+  overlay solve (`:234-275`), `flash_part`/`part_glow` (`:217-231`). Cosmetic RNG only
+  (`jolt :198`). This is the pose solver Art V2 may reuse behind the C4 adapter.
+
+**SCENE seam — one construction point, one always-on node:**
+- `raid_hud.gd:276` (`_ready`): `_stage = StageBackdrop.new()` — the ONE environment node,
+  first child, alive behind every screen. `WorldShell` (`world_shell.gd:23`) instances
+  `raid_main` as its child and adds NO backdrop of its own, so shell screens (home/atlas/
+  bastion) draw over this same node. **C2's host replaces exactly this one line.**
+- `StageBackdrop` (`ui/stage_backdrop.gd`, 227 lines): `_init(is_combat)` menu/combat variants
+  (`:19-26`), layers = `UiKit.stage_background` fill + `_arch` colonnade `_draw` (`:109-166`) +
+  `_glow` rift/god-rays/ground-pool (`:179-227`) + `UiKit.gold_motes` + embers particles
+  (`:59-82`). Fixed-jag const (`:17`) keeps it deterministic frame-to-frame. It is already a
+  poor-man's Scene Profile (backdrop/midground/floor/atmosphere in one file) — C2 decomposes
+  this grammar into the six-layer contract; `legacy` profile = this node unchanged.
+- Combat floor contract (what profiles must NOT move): `RaidStage2D.SLOTS` feet fractions +
+  per-slot scale/dim (`raid_stage_2d.gd:15-20`), `BOSS_AT` (`:21`), contact shadows in
+  `_draw` (`:98-107`), `_layout` on `resized` (`:80,83-96`). Stretch = `canvas_items` +
+  `expand` (project.godot) — wider aspects GROW design width, so fraction-anchored actors
+  spread apart on 2560×1080; profile side-layers must be repeatable/extendable (law §2.2).
+
+**DASHBOARD seam — `raid_hud._build_combat` + the band registry:**
+- `raid_hud.gd:2583` `_build_combat(s)`: builds, in order — `_stage2d` (`:2587`) →
+  `_shake_root` (`:2599`) → fixed widgets `_bar`/`_castbar`/`_dial`/`_judge`
+  (`:2604-2627`) → `BossIntro` (`:2630`) → `_meter` (`:2636`) → raid frames col
+  (`:2649-2678`) → `_aggro_warn` (`:2680`) → **`_band = ClassBand.for_hud(self)` + build
+  (`:2688-2689`)** → build stamp → `_fx` overlay (`:2700-2703`) → pause button.
+- Per-class instruments live in `game/ui/bands/*.gd` (`ClassBand.for_hud` picks by
+  `_seat_cls_now()`). The tank's connected instrument already half-exists:
+  `duelist_band.gd:build()` raises `AnswerChannel` (`:37-39`, bottom-center
+  `place(-370,-412,370,-288)` under `_shake_root`), `DuelistGauge`, `VerdictSlam`, 4
+  `AbilityRune`s. **The answer channel is timing truth (law §2.3) — C6 docks art AROUND it,
+  never re-parents or smooths it.**
+- Render feed: `_process` (`:3158`, guarded `_screen != "combat"`) → `_render_dial`
+  (`:3209`, one-bar: dial+judge hidden for the duelist seat `:3215-3219`), `_render_frames`,
+  `_band.render` (`:3192-3193`) → `_stage2d.sync(s)` + event drain to `_stage2d.on_event` +
+  `_handle_event` (`:3195-3201`). `_handle_event` (`:3477`) is the juice trigger map.
+- Teardown: `_clear` (`:298-311`) frees `_ui` children and nulls `_band`/`_stage2d` — any V2
+  host member must be nulled there too (see H5 note below).
+
+**View-config precedent (for the C1 selector):**
+- User-arg parsing: `--fightlen=` in `raid_hud._ready` (`:289-293`); all autostart idioms
+  live in `WorldShell.drive_autostart` (`world_shell.gd:70` region) — the boot owner, where an
+  `--artv2=` arg belongs. Persistence precedent: `UI_CFG := "user://rift_ui.cfg"` +
+  `ConfigFile` (`raid_hud.gd:2953,2979-3006`, the raid-col drag position).
+
+### 10.2 Candidate selector shape (C1 input, not a decision)
+
+One tiny static holder, no autoload: `game/art_v2/art_v2.gd` (`class_name ArtV2`) with three
+independent `static var`s — `actors: bool` · `scene: String` (profile id, `""` = legacy) ·
+`dash: bool` — set once by `WorldShell.drive_autostart` from `--artv2=actors,scene:<id>,dash`
+(+ optional `user://rift_art.cfg` later). Consumption, one guarded line per seam:
+1. `Actor2D.make()` head: `if ArtV2.actors: <v2 adapter try_make, null ⇒ fall through>` —
+   sits ABOVE the user-art check without changing it; OFF ⇒ byte-identical path.
+2. `raid_hud._ready:276`: `_stage = SceneKit.make(ArtV2.scene)` where unknown/empty profile
+   returns `StageBackdrop.new()` (legacy).
+3. `_build_combat`: `if ArtV2.dash and <host has this class>:` build the V2 dashboard host
+   instead of the fixed-widget block + band; else current code untouched.
+All three are view-construction reads only — no CombatState/spec/protocol/checksum contact;
+flags default off ⇒ smokes/sims byte-identical. (GDScript gotcha: `static var`, never `const`.)
+
+### 10.3 Collision list (live, 2026-07-12)
+
+| Surface | Who else is on it | Rule for art-v2 |
+|---|---|---|
+| `raid_hud.gd` | THE hotspot (LEDGER §0): tank-v3 playtest surface is LIVE on main (Bill mid-playtest, fix `ef7a44e` same day); SEAL-rework build (BOSS-BRIEF) queued against it; METER L4/L5 🟡 | Merge `main` into `art-v2` before EVERY slice; keep `_build_combat` edits additive + guarded; never edit `_render_dial`/answer-channel truth |
+| `ui/bands/duelist_band.gd` + `ui/answer_channel.gd` | tank-v3's active feel surface, tuned daily | C6 is deliberately LAST (P5); dock around, never re-parent; the channel's `place` box is the positioning contract |
+| `stage2d/*` | QUIET — only the purge id-swap since the `tempo-art` branch point; no open claims | Lowest-risk seam; C4/C5 land here. Fix the `make()` fallthrough wart here |
+| `ui/stage_backdrop.gd` | Untouched since branch point; no claims | C2 replaces its construction site only; file itself stays as the `legacy` profile |
+| `godot/project.godot` | ⚠ an UNCOMMITTED editor rewrite (comment-strip + key reorder) is sitting in the working tree RIGHT NOW — §8's warning is live, not theoretical | Never stage it with an art slice |
+| Open ☐ claims (MASTER log) | slate-machine ×2, refit-p3, undermill, tank-design ×2 — docs-only or non-stage surfaces | No stage2d/backdrop overlap; re-check the log at each C-packet claim |
+
+### 10.4 Slice-specific verification
+
+- **Honest A/B caveat:** the view layer seeds cosmetic RNG from wall-clock
+  (`raid_hud.gd:274 seed(Time.get_ticks_usec())`; `randf` in stage FX / smears / jolts), so
+  pixel-diffing busy combat frames is unreliable. Old-mode A/B = idle/menu frames pixel-safe +
+  busy frames eyeballed on tour sheets + `ab-gate.sh raid_sim` byte-identical + smokes green.
+- **C1:** headless import · `ui_smoke_raid` · `scripts/ab-gate.sh raid_sim` (flags absent ⇒
+  byte-identical) · WSLg `raid_stage_tour` + `screenshot_duelist_raid` old-mode sheets.
+- **C2:** `raid_stage_tour --resolution` at 1920×1080 / 1280×720 / 2560×1080 (tour boots
+  `raid_main` directly and drives `hud._launch` at frame 1 — `sim/raid_stage_tour.gd:14-33`,
+  the probe-boot gotcha already encoded); feet-line check = SLOTS fractions unchanged in shots.
+- **C4/C5:** pose/contact tour (extend `raid_stage_tour` shot list) · live `--autostart=raid`
+  tank playtest · fallback proof = boot with the v2 asset folder renamed away → current puppet.
+- **C6:** `ui_smoke_raid` · resolution matrix · both scene profiles · tank playtest.
+- **C7:** tour + `ab-gate raid_sim`; budget check = `ScreenPostFx` hidden at rest (idle pays
+  zero — its own contract), one-shot FX all `queue_free` ≤ ~1.2 s.
+- **Budget baseline (C0 measurement):** today's stage is 100% vector `_draw` + CPUParticles
+  (bursts of 12–24) + zero textures; the only shader is the dormant `screen_post.gdshader`.
+  Texture/draw budgets have no baseline to inherit — C3 sets them when the first real assets
+  land (per §7).
+- **Everything:** `verify-all.sh` at slice END only (Bill's verify-minimal rule, 2026-07-11).
+
+### 10.5 `tempo-art` Slice 1 (`e4589a6`) — hunk-by-hunk classification
+
+The branch is ONE commit ahead of `0ad2ac8`; since then main's touched files drifted only in
+`raid_hud.gd` (massively — tank-v2/v3, castbar split, event-map growth; all anchors survive
+under new line numbers) and `raid_stage_2d.gd` (purge id-swap + `BulwarkRig2D` guard removal
+only). `pose_rig_2d.gd`: zero drift. `screen_post.gdshader` exists on main, dormant, uniforms
+exactly matching. **Verdict: 13/13 hunks SALVAGE (no stale, no reject) — but transplant as a
+fresh C7 cherry-pick with re-anchors + the noted fixes, never a branch merge.**
+
+| # | File · hunk | Verdict | Anchor on main today + notes |
+|---|---|---|---|
+| H1 | `ui/screen_post_fx.gd` (+`.uid`) — new 95-line `ScreenPostFx` | **SALVAGE** | File absent on main; shader uniforms match 1:1; self-hides at rest (idle pays zero — §7 law). C7 re-checks `hint_screen_texture` cost on WebGL2 |
+| H2 | `pose_rig_2d.gd` — `flash_all()` | **SALVAGE** | Insert after `set_highlight` (`:215`); zero drift |
+| H3 | `raid_hud.gd` — `var _post` member | **SALVAGE** | After `var _fx: Control` (`:238`) |
+| H4 | `raid_hud.gd` — `_build_combat` creates `_post` topmost | **SALVAGE** | After `_fx` add (`:2703`), before `_add_pause_button()` (`:2704`) |
+| H5 | `raid_hud.gd` — `_process` vignette feed | **SALVAGE + fix** | After `obs :=` (`:3167`). ⚠ Branch never nulls `_post` in `_clear` (`:305` region) — dangles on a freed node after teardown; dormant today only because `_handle_event` runs solely from combat `_process`. Add `_post = null` to `_clear` in the transplant |
+| H6 | `raid_hud.gd` — `hurt` crimson flash + aberr (`amt ≥ 30`) | **SALVAGE** | Inside `mine` block of `"hurt"` (`:3509-3515`) |
+| H7 | `raid_hud.gd` — `staggered` green deny-wash | **SALVAGE (re-anchor)** | Branch anchored a single big-text; main split `was_heal` → CHANT DENIED (`:3541-3547`). Insert after `_add_shake(5.0)` (`:3547`) |
+| H8 | `raid_hud.gd` — `strike` bullseye/perfect mint washes | **SALVAGE** | Graded-verdict match intact (`:3602-3608`) |
+| H9 | `raid_hud.gd` — new `finisher` branch (cp≥4 gold wash) | **SALVAGE + fix** | Event IS live: `twinfang_kit.gd:1464` (eviscerate) `/:1566` (envenom) emit `{"t":"finisher","cp"}`. ⚠ Event carries no `player` flag and the hunk never gates on `mine` — an AI blade's evis also washes the whole screen. C7 decides: add a player gate or accept party-wide |
+| H10 | `raid_hud.gd` — `coup` wash + delayed (0.26 s) shock/aberr | **SALVAGE** | `:3622-3624`; shock center `(0.72,0.55)` = `BOSS_AT` fraction, still correct |
+| H11 | `raid_hud.gd` — `opening` PUNISH flash | **SALVAGE** | `:3651-3653` |
+| H12 | `raid_stage_2d.gd` — `_freeze` member + `_layout` `set_meta("home")` | **SALVAGE** | `:28` region / `:93`; layout re-stamps home on resize (correct) |
+| H13 | `raid_stage_2d.gd` — `_fire` swing-juice (lunge/smear/coup ghosts) + `hitstop()/_lunge()/_smear()` + `_process` freeze + impact `flash_all`/hitstop/`ghostat` + `_ghost(col)` | **SALVAGE** | Anchors `:287-295` / `:298` / `:307-330` / `:386` all intact. Verified vs tank-v3: the tank's committed STREAM rides `AnswerChannel` (HUD widget, NOT under `_world`) — hit-stop can't touch timing truth; plain strikes exempt by design (idle bounce = beat reference); `kick` hitstop is a dead path until pillar #3 lands (harmless). Note: `_fxl` particles freeze WITH `_world` during the 0.06-0.09 s stop (tweens keep flying — they bind to the stage node); imperceptible, keep |
+
+**Transplant route:** all of it is C7 scope (plus H2's `flash_all` which C5 may want earlier).
+Cherry-pick from `e4589a6` hunk-wise onto a fresh current-main branch, apply the H5/H9 fixes,
+then the standard C7 gates. After transplant, freeze `tempo-art` for deletion (its only commit
+is then fully absorbed).

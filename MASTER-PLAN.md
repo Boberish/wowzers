@@ -871,12 +871,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-12 · main (docs only) · §GRAPHICS — **CLAIM: GRAPHICS PACKET C0 — read-only
-  recon.** Audit the actor/scene/dashboard seams (`Actor2D`/`SpriteActor2D`/`PoseRig2D` ·
-  `RaidStage2D` construction+resize · `StageBackdrop` · `raid_hud` combat construction/render ·
-  screenshot tours) + classify every `tempo-art` `e4589a6` hunk (salvage/stale/collision/reject);
-  deliverable = populate `GRAPHICS-PLAN.md §10 IMPLEMENTATION MAP`. NO code changes. *(Claude
-  session, this claim)*
+- ☑ 2026-07-12 · main (docs only) · §GRAPHICS — **GRAPHICS PACKET C0 COMPLETE — the read-only
+  recon; `GRAPHICS-PLAN.md §10 IMPLEMENTATION MAP` populated.** Seam map with exact anchors:
+  ACTOR = `Actor2D.make()` (both call sites in `raid_stage_2d.gd`; `art/actors/` folder doesn't
+  exist yet) · SCENE = the ONE `StageBackdrop` node at `raid_hud._ready:276` (WorldShell adds no
+  backdrop of its own) · DASHBOARD = `_build_combat:2583` + `ClassBand.for_hud:2688` (tank's
+  AnswerChannel = timing truth, dock-around-only). Candidate C1 selector shape = static `ArtV2`
+  holder + `--artv2=` parsed in `WorldShell.drive_autostart` (§10.2). **`e4589a6` hunk audit:
+  13/13 SALVAGE** (0 stale/reject — `raid_stage_2d`/`pose_rig_2d` barely drifted; all `raid_hud`
+  anchors survive under tank-v3) with 2 transplant fixes owed: `_post` never nulled in `_clear`
+  (H5) + the `finisher` wash isn't player-gated (H9); route = C7 cherry-pick, never a branch
+  merge. **Findings for Bill:** ① tank-v3 is MERGED to main (§8's collision note was stale —
+  corrected in §10); ② ⚠ LIVE WART — post-PURGE, `Actor2D.make` has no `duelist/alchemist/well`
+  cases, so tank + caster + healer puppets all fall through to `RiftmawRig2D` (the BOSS rig) and
+  drop their aspect; the voidcaller/mender rigs are unreachable dead code (C4 fixes the mapping);
+  ③ an uncommitted editor rewrite of `project.godot` sits in the working tree right now — §8's
+  never-stage warning is live, left untouched. NO code changed. *(Claude session)*
 
 - ☑ 2026-07-12 · main (docs only) · §GRAPHICS — **GRAPHICS DIRECTION V2 DOC RESET COMPLETE —
   the AI-owned, modular-art reset (Bill); V1 STYLE BOARD is next.** Superseded the
