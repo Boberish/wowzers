@@ -50,13 +50,16 @@ var _combo_n := 0
 var _next_feint := false      ## the next answerable thing is a feint — DON'T PRESS
 
 # ---- verdict / juice state ----
-var _stamps: Array = []       ## {x_frac, col, t, rays}
+var _stamps: Array = []       ## {x_frac, col, t, rays, ms, death}
+var _deaths: Array = []       ## {x_frac, col, shape, t, seed} — the claim death one-shots
 var _verdict := ""
 var _verdict_col := Color.WHITE
 var _verdict_t := 0.0
 var _history: Array = []      ## {col, hollow, big}
 var _hist_pop := 0.0          ## newest-gem pop-in scale timer
 var _gate_hit := 0.0          ## impact flash at the gate (miss/landed)
+var _gate_pulse := 0.0        ## grade-colored gate pulse (a graded answer)
+var _gate_pcol := Palette.GOLD
 var _pulse := 0.0
 var _alpha := 0.0
 var _linger := 0.0            ## keeps the instrument lit briefly after a swing ends
@@ -77,10 +80,14 @@ func _process(delta: float) -> void:
 	_verdict_t = maxf(0.0, _verdict_t - delta)
 	_hist_pop = maxf(0.0, _hist_pop - delta * 4.0)
 	_gate_hit = maxf(0.0, _gate_hit - delta * 3.0)
+	_gate_pulse = maxf(0.0, _gate_pulse - delta * 4.0)
 	_linger = maxf(0.0, _linger - delta)
 	for st in _stamps:
 		st["t"] = float(st["t"]) - delta
 	_stamps = _stamps.filter(func(st): return float(st["t"]) > 0.0)
+	for d in _deaths:
+		d["t"] = float(d["t"]) + delta
+	_deaths = _deaths.filter(func(d): return float(d["t"]) < 0.45)
 	var want := 1.0 if (_active or _verdict_t > 0.0 or not _stamps.is_empty() or _linger > 0.0) else 0.16
 	_alpha = lerpf(_alpha, want, minf(1.0, delta * 9.0))
 	modulate.a = _alpha
@@ -197,6 +204,9 @@ func _close_classic_if_unexplained() -> void:
 func _judge_miss() -> void:
 	_push_history(Palette.CRIMSON, false, false)
 	_gate_hit = 1.0
+	# a leak bursts a crimson X at the gate (a swing that got through)
+	_deaths.append({"x_frac": clampf(minf(_rem, _view_secs()) / maxf(_view_secs(), 0.001), 0.0, 1.0),
+		"col": Palette.CRIMSON, "shape": "burst", "t": 0.0, "seed": float(_deaths.size())})
 	_set_verdict("HIT", Palette.CRIMSON)
 
 # ============================================================ EVENTS
@@ -212,7 +222,7 @@ func on_event(ev: Dictionary) -> void:
 				return
 			_classic_closed = true
 			if bool(ev.get("feint", false)):
-				_stamp(_rem, Palette.CRIMSON, false)
+				_stamp(_rem, Palette.RELIC, false, "puff")
 				_push_history(Palette.RELIC, true, false)
 				_set_verdict("BAITED!", Palette.CRIMSON)
 			else:
@@ -222,19 +232,19 @@ func on_event(ev: Dictionary) -> void:
 			var rem := float(_last_rem.get(idx, 0.0))
 			match int(ev.get("grade", 0)):
 				StrikeRes.Grade.PERFECT:
-					_stamp(rem, Palette.GOLD_BRIGHT, true)
+					_stamp(rem, Palette.GOLD_BRIGHT, true, "shatter")
 					_push_history(Palette.GOLD_BRIGHT, false, true)
 					_set_verdict("PERFECT", Palette.GOLD_BRIGHT)
 				StrikeRes.Grade.GOOD:
-					_stamp(rem, Palette.GOLD, false)
+					_stamp(rem, Palette.GOLD, false, "ghost")
 					_push_history(Palette.GOLD, false, false)
 					_set_verdict("GOOD", Palette.GOLD)
 				StrikeRes.Grade.GRAZE:
-					_stamp(rem, Palette.STEEL, false)
+					_stamp(rem, Palette.STEEL, false, "ghost")
 					_push_history(Palette.STEEL, false, false)
 					_set_verdict("GRAZE — half", Palette.STEEL)
 				StrikeRes.Grade.BAITED:
-					_stamp(rem, Palette.CRIMSON, false)
+					_stamp(rem, Palette.RELIC, false, "puff")
 					_push_history(Palette.RELIC, true, false)
 					_set_verdict("BAITED!", Palette.CRIMSON)
 				StrikeRes.Grade.READ:
@@ -243,7 +253,7 @@ func on_event(ev: Dictionary) -> void:
 				StrikeRes.Grade.MISS:
 					_judge_miss()
 		"dodge_whiff":
-			_stamp(minf(_rem, _view_secs()), Palette.CRIMSON.darkened(0.1), false)
+			_stamp(minf(_rem, _view_secs()), Palette.CRIMSON.darkened(0.1), false, "burst")
 			_push_history(Palette.CRIMSON.darkened(0.2), true, false)
 			_set_verdict("TOO EARLY — locked", Palette.CRIMSON.darkened(0.1))
 		"read":
@@ -256,7 +266,7 @@ func on_event(ev: Dictionary) -> void:
 			var clean := bool(ev.get("clean", false))
 			var col := Palette.WIN if bool(ev.get("was_heal", false)) else \
 				(Palette.GOLD_BRIGHT if clean else Palette.KICK)
-			_stamp(_rem, col, clean)
+			_stamp(_rem, col, clean, "shatter" if clean else "ghost")
 			_push_history(col, false, clean)
 			if bool(ev.get("was_heal", false)):
 				_set_verdict("DENIED!", col)
@@ -277,21 +287,30 @@ func _ev_is_me(ev: Dictionary) -> bool:
 ## FULL either way (engine truth) — the grade is pride, and it trains the gate.
 func _judge_classic_press() -> void:
 	if _rem <= _perfect_w:
-		_stamp(_rem, Palette.GOLD_BRIGHT, true)
+		_stamp(_rem, Palette.GOLD_BRIGHT, true, "shatter")
 		_push_history(Palette.GOLD_BRIGHT, false, true)
 		_set_verdict("PERFECT %s" % verb, Palette.GOLD_BRIGHT)
 	elif _rem <= _good_w:
-		_stamp(_rem, Palette.GOLD, false)
+		_stamp(_rem, Palette.GOLD, false, "ghost")
 		_push_history(Palette.GOLD, false, false)
 		_set_verdict("%s!" % verb, Palette.GOLD)
 	else:
-		_stamp(_rem, Palette.STEEL, false)
+		_stamp(_rem, Palette.STEEL, false, "ghost")
 		_push_history(Palette.STEEL, false, false)
 		_set_verdict("%s — early" % verb, Palette.STEEL)
 
-func _stamp(rem: float, col: Color, rays: bool) -> void:
-	_stamps.append({"x_frac": clampf(rem / maxf(_view_secs(), 0.001), 0.0, 1.0),
-		"col": col, "t": STAMP_HOLD, "rays": rays})
+## A press verdict freezes at the comet's spot. `death` = the shape-aware claim animation
+## ("shatter" clean answer · "ghost" a graded slip · "burst" a leak · "puff" a feint); it also
+## drives the gate pulse + the ±ms readout (from `rem` — how far out the press landed).
+func _stamp(rem: float, col: Color, rays: bool, death: String = "ghost") -> void:
+	var xf := clampf(rem / maxf(_view_secs(), 0.001), 0.0, 1.0)
+	_stamps.append({"x_frac": xf, "col": col, "t": STAMP_HOLD, "rays": rays,
+		"ms": int(round(maxf(0.0, rem) * 1000.0)), "death": death})
+	if death != "":
+		_deaths.append({"x_frac": xf, "col": col, "shape": death, "t": 0.0,
+			"seed": float(_deaths.size() * 37 % 211)})
+	_gate_pulse = 1.0
+	_gate_pcol = col
 	_linger = maxf(_linger, 1.1)
 
 func _set_verdict(v: String, col: Color) -> void:
@@ -401,7 +420,12 @@ func _draw() -> void:
 			and _kind != "brace" and not _next_feint:
 		_draw_lockout(tx, tw, ty, th)
 
-	# ---- verdict stamps: ghost needle + burst at the pressed spot ----
+	# ---- claim deaths: shape-aware one-shots at the pressed spot ----
+	for d_v in _deaths:
+		_draw_judge_death(d_v, tx, gx, ty, th)
+
+	# ---- verdict stamps: ghost needle + burst + a scale-punched grade word + ±ms readout ----
+	var vfont := UiKit.display(750, 1)
 	for stp in _stamps:
 		var f := float(stp["t"]) / STAMP_HOLD
 		var px := gx - float(stp["x_frac"]) * (gx - tx - 10.0)
@@ -419,6 +443,25 @@ func _draw() -> void:
 				rc.a = 0.85 * f
 				draw_line(Vector2(px, ty + th * 0.5) + d * (ring + 2.0),
 					Vector2(px, ty + th * 0.5) + d * (ring + 10.0 + 6.0 * (1.0 - f)), rc, 1.8, true)
+		# scale-punch grade word + ±ms, anchored above the spot (the readability core)
+		var elapsed := STAMP_HOLD - float(stp["t"])
+		var appear := clampf(elapsed / 0.12, 0.0, 1.0)
+		var punch := 1.6 - 0.6 * appear
+		var rise := maxf(0.0, elapsed - 0.12)
+		var wy := ty - 6.0 - rise * 26.0
+		var wc: Color = stp["col"]
+		wc.a = 0.55 + 0.45 * f
+		var fs := int(round(13.0 * punch))
+		draw_string(vfont, Vector2(px - 60.0 + 1.0, wy + 1.0), _word_for(stp["col"]),
+			HORIZONTAL_ALIGNMENT_CENTER, 120, fs, Color(0, 0, 0, 0.6 * f))
+		draw_string(vfont, Vector2(px - 60.0, wy), _word_for(stp["col"]),
+			HORIZONTAL_ALIGNMENT_CENTER, 120, fs, wc)
+		var dsh := String(stp.get("death", "ghost"))
+		if dsh == "ghost" or dsh == "shatter":
+			var mc := Palette.TEXT_DIM
+			mc.a = 0.85 * f
+			draw_string(ThemeDB.fallback_font, Vector2(px - 44.0, wy + 13.0),
+				"%d ms" % int(stp.get("ms", 0)), HORIZONTAL_ALIGNMENT_CENTER, 88, 10, mc)
 
 	# ---- frame: bevel + filigree ----
 	draw_line(Vector2(tx, ty), Vector2(tx + tw, ty), Palette.GOLD_BRIGHT, 1.5, true)
@@ -514,7 +557,12 @@ func _draw_gate(gx: float, ty: float, th: float) -> void:
 	var hl := Palette.GOLD_BRIGHT if live else Palette.GOLD
 	if _gate_hit > 0.0:
 		hl = hl.lerp(Palette.CRIMSON, _gate_hit)
-	draw_line(Vector2(gx, ty - 5.0), Vector2(gx, ty + th + 5.0), hl, 2.0, true)
+	elif _gate_pulse > 0.0:
+		hl = hl.lerp(_gate_pcol, _gate_pulse)
+		var gg := _gate_pcol
+		gg.a = 0.24 * _gate_pulse
+		draw_rect(Rect2(gx - 6.0, ty - 5.0, 12.0, th + 10.0), gg)
+	draw_line(Vector2(gx, ty - 5.0), Vector2(gx, ty + th + 5.0), hl, 2.0 + 1.5 * _gate_pulse, true)
 	draw_line(Vector2(gx + 1.2, ty - 5.0), Vector2(gx + 1.2, ty + th + 5.0), Color(1, 1, 1, 0.35), 1.0, true)
 	if live:
 		var halo := Palette.GOLD_BRIGHT
@@ -672,6 +720,64 @@ func _draw_history(right_x: float, y: float) -> void:
 func _diamond_pts(at: Vector2, r: float) -> PackedVector2Array:
 	return PackedVector2Array([at + Vector2(0, -r), at + Vector2(r * 0.78, 0),
 		at + Vector2(0, r), at + Vector2(-r * 0.78, 0)])
+
+## A short grade word for the position-anchored pop (the full phrase rides the verdict line).
+func _word_for(col: Color) -> String:
+	if col == Palette.GOLD_BRIGHT: return "PERFECT"
+	if col == Palette.GOLD: return "GOOD"
+	if col == Palette.STEEL: return "GRAZE"
+	if col == Palette.RELIC: return "READ"
+	if col == Palette.WIN: return "DENIED"
+	if col == Palette.KICK: return "KICK"
+	return "HIT"
+
+## The shape-aware claim death on the judge (comets are gem diamonds): shatter shards / a ghost
+## diamond slipping past the gate / a crimson X leak / a purple feint puff. One-shot, pure view.
+func _draw_judge_death(d: Dictionary, tx: float, gx: float, ty: float, th: float) -> void:
+	var t := float(d["t"])
+	var e := clampf(t / 0.45, 0.0, 1.0)
+	var ease := 1.0 - (1.0 - e) * (1.0 - e)
+	var px := gx - float(d["x_frac"]) * (gx - tx - 10.0)
+	var cy := ty + th * 0.5
+	var col: Color = d["col"]
+	var seed := float(d["seed"])
+	match String(d["shape"]):
+		"shatter":
+			for i in 7:
+				var ang := TAU * float(i) / 7.0 + sin(seed + float(i)) * 0.25
+				var reach := (12.0 + 24.0 * ease) * (0.7 + 0.5 * absf(sin(seed * 1.7 + float(i))))
+				var c := col
+				c.a = (1.0 - e) * 0.95
+				draw_line(Vector2(px + cos(ang) * (4.0 + 7.0 * ease), cy + sin(ang) * (4.0 + 7.0 * ease)),
+					Vector2(px + cos(ang) * reach, cy + sin(ang) * reach), c, 2.2 * (1.0 - e * 0.6), true)
+			var rc := col.lightened(0.4)
+			rc.a = (1.0 - e) * 0.8
+			draw_arc(Vector2(px, cy), 7.0 + 34.0 * ease, 0, TAU, 26, rc, 2.2 * (1.0 - e), true)
+		"ghost":
+			var sx := px - 26.0 * ease
+			var a := (1.0 - e) * 0.8
+			for k in 3:
+				var c := col
+				c.a = a * (0.55 - 0.15 * float(k))
+				var pts := _diamond_pts(Vector2(sx + float(k) * 7.0, cy), 8.0 + 2.0 * e)
+				for j in 4:
+					draw_line(pts[j], pts[(j + 1) % 4], c, 1.6, true)
+		"burst":
+			var g := 6.0 + 14.0 * ease
+			var c := Palette.CRIMSON
+			c.a = (1.0 - e) * 0.95
+			draw_line(Vector2(px - g, cy - g), Vector2(px + g, cy + g), c, 3.0 * (1.0 - e * 0.5), true)
+			draw_line(Vector2(px + g, cy - g), Vector2(px - g, cy + g), c, 3.0 * (1.0 - e * 0.5), true)
+		"puff":
+			var pc := Palette.RELIC
+			pc.a = (1.0 - e) * 0.8
+			draw_arc(Vector2(px, cy), 5.0 + 22.0 * ease, 0, TAU, 20, pc, 2.0 * (1.0 - e), true)
+			for i in 5:
+				var ang := TAU * float(i) / 5.0 + seed
+				var rr := 7.0 + 18.0 * ease
+				var pc2 := Palette.RELIC.lightened(0.2)
+				pc2.a = (1.0 - e) * 0.7
+				draw_circle(Vector2(px + cos(ang) * rr, cy + sin(ang) * rr), 1.8 * (1.0 - e * 0.5), pc2)
 
 ## a small cut gem (gold bezel, specular) — the gate's crown
 func _gem(at: Vector2, r: float, body: Color, live: bool) -> void:
