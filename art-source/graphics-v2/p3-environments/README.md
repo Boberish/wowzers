@@ -40,3 +40,11 @@ outside `res://`; only approved processed layers enter the runtime folders.
 - `stack_atrium/floor-*-v1.png` — opaque source and 2048×256 prepared access-panel strip.
 - `stack_atrium/dressing-*-v1.png` — chroma source, alpha extraction, and 512×512 prepared coolant
   service-column flank prop. Stack Atrium is now 5/5 layers and rendering in the 1080p tour.
+- `stack_cold_aisle/backdrop-v1.png` — opaque night-maintenance server/fan background.
+- `stack_cold_aisle/distant-*-v1.png` — chroma, alpha, and 2048×256 drifting fan/catwalk strip.
+- `stack_cold_aisle/midground-*-v1.png` — chroma, alpha, and 2048×512 asymmetric cooling strip.
+- `stack_cold_aisle/floor-*-v1.png` — opaque source and 2048×256 cool access-panel floor.
+- `stack_cold_aisle/dressing-*-v1.png` — chroma, alpha, and 512×512 dehumidifier/tool flank prop.
+
+P3 prototype delivery is complete: 10/10 runtime textures. One 1920×1080 tour per profile renders
+the full pair with identical actor feet. The larger resolution/legacy matrix remains deferred debt.

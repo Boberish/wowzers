@@ -9,7 +9,7 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P3 ENVIRONMENT CONTRAST PAIR ACTIVE — STACK 5/5 COMPLETE · COLD AISLE NEXT.** Bill approved **SUNPRINT CEL** on
+**Status:** 🟡 **P3 CONTRAST PAIR COMPLETE · P4 PAINTED ACTOR ADAPTER NEXT.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
 texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C3 schema/bindings merged `1abfcd4`; C2 SceneKit merged as
 `da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
@@ -224,7 +224,7 @@ and smokes clean.
 could continue. Run the recorded profile/resolution tour, UI smoke, and low-seed A/B gate before
 Art V2 can become a release default; failures return to C2 without invalidating the asset work.
 
-### P3 · ENVIRONMENT CONTRAST PAIR — 🟡 CODEX I1 ACTIVE · C3 🔨 `1abfcd4` (schema + stack bindings live, awaiting layers)
+### P3 · ENVIRONMENT CONTRAST PAIR — ✅ 10/10 LAYERS + LIVE 1080P CONTRAST PROOF
 
 Codex generates approved layered interior/exterior assets. Claude builds/imports the two profiles
 and the screenshot tour. Bill approves the same fight in both before we expand scenes.
@@ -242,7 +242,13 @@ remain before the first complete Stack composition verdict.
 512×512 coolant-column dressing frames both flanks. One live 1080p tour renders all five layers,
 keeps feet fixed, and leaves the timing channel unobstructed. P3 now builds the Cold Aisle sibling.
 
-### P4 · DUELIST ANCHOR + RIG — Codex I2 + Claude C4/C5
+**Cold Aisle 5/5 complete:** night-maintenance backdrop, drifting fan/catwalk strip, asymmetric
+cooling midground, cool access-panel floor, and dehumidifier flank dressing. The paired live
+1920×1080 tours render all 10 textures; feet records are identical across profiles; timing/HUD
+remain untouched. The full resolution/legacy A-B matrix remains recorded debt before release
+default, per Bill's explicit move-on instruction.
+
+### P4 · DUELIST ANCHOR + RIG — 🟡 CLAUDE C4 FOUNDATION NEXT · CODEX I2 ANCHOR FOLLOWS
 
 Approve the canonical character → derive/extract runtime layers → native rig → core animations →
 deforming garment → contact replacement. Old actor remains default until the complete tour passes.

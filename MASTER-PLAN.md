@@ -943,7 +943,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   (`Array[float]`, `949d4e7`) — ARTV2 PROBE ALL OK (41 checks) · RAID UI SMOKE ALL OK · boot 0
   errors. Assume-pass merges on BOOT-PATH files need at least the one-frame boot check.
   Windows install updated + gemini tank autostart clean. *(this session)*
-- ☐ 2026-07-12 · preview art / no runtime code · §GRAPHICS — **CLAIM: P3 CODEX I1 — THE
+- ☑ 2026-07-12 · preview/source/runtime art · §GRAPHICS — **P3 CODEX I1 COMPLETE — THE
   ENVIRONMENT CONTRAST PAIR + C3 ASSET CONTRACT.** Use the approved SUNPRINT CEL direction and
   the Mistral data-center concept as the bright anchor: **THE STACK**, an airy retro-future server
   atrium. Pair it with a darker machine-space scene that remains colorful/readable and clearly
@@ -951,10 +951,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   deliverables for SceneKit; generated previews remain outside runtime until Bill approves. After
   approval, Claude receives C3 only (asset folders/import defaults/repeatable scene tour). No
   overlap with live gameplay work. **Progress:** C3 merged `1abfcd4`; source anchors archived
-  `3a855ef`; backdrop+distant render after hotfix `516e1b0` / delivery `ebd7242`; Stack Atrium is
-  now 5/5 with the asymmetric midground, calm access-panel floor, and coolant-column flank
-  dressing. The live 1080p tour renders all layers with fixed feet and an unobstructed timing
-  channel. Cold Aisle 0/5 is next. *(Codex graphics-v2 session)*
+  `3a855ef`; visibility hotfix `516e1b0`; Stack Atrium **5/5** and Cold Aisle **5/5** runtime
+  textures delivered. Paired 1920×1080 tours render all layers with identical feet records and
+  the untouched timing/HUD contract. Full resolution/legacy A-B matrix remains debt by Bill's
+  move-on instruction. P4 next: Claude C4 class-agnostic painted actor adapter, then Codex I2
+  Duelist anchor/layers and Claude C5 rig. *(Codex graphics-v2 session)*
 
 - ☑ 2026-07-12 · main · **THE GUARD — authored space around globals (`d03dbfa`; Bill: "it's
   every time a problem").** Quiet windows [impact−0.65, impact+0.45] (TuningConfig knobs,
