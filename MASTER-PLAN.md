@@ -875,6 +875,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-12 · worktree `../wow-artv2-c2` (branch `artv2-c2`) · §GRAPHICS — **CLAIM:
+  GRAPHICS PACKET C2 — SCENE PROFILE CONTRACT + PLACEHOLDER PROFILES** (GRAPHICS-PLAN §5·C2,
+  the §2.2 six-layer law). Data-driven `SceneKit` host (`game/art_v2/scene_kit.gd`):
+  profiles as pure data (backdrop · distant life · midground · combat floor · encounter
+  dressing · atmosphere+palette), `legacy`/""/unknown ⇒ the existing `StageBackdrop`
+  UNCHANGED (profile absence returns legacy), `v2_interior_test` + `v2_exterior_test` =
+  temporary colored/debug layers ONLY (no art). `ArtV2.make_scene()` re-routes through
+  `SceneKit.make` (C1's naive .tscn lookup replaced per the C0 map). Constraints: aspect-
+  expand safe (repeatable side growth at 2560×1080) · actor feet/scale untouched (zero
+  `stage2d/*` edits) · no UI parenting changes (same `_stage` slot) · atmosphere view-only.
+  Gates: `artv2_probe` extended · new `artv2_scene_tour` at 1920×1080 / 1280×720 /
+  2560×1080 × 3 profiles · feet-line eyeball vs legacy · `ui_smoke_raid` parity ·
+  `ab-gate raid_sim` low-seed byte-identical (flag absent). NOT C3+: no asset import
+  schema, no Codex assets, no actor/dashboard work. *(Claude session)*
+
 - ☑ 2026-07-12 · `main` (docs only) · §GRAPHICS — **V1 VISUAL VERDICT +
   REACTION-FIRST CONTRACT.** Bill selected the bright **SUNPRINT CEL** family and approved the
   UI-first hierarchy: the timing/answer channel dominates; abilities are secondary; press and
