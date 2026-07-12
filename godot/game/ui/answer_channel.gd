@@ -185,25 +185,6 @@ func resolve(id: int, family: String, txt: String, ms_txt: String) -> void:
 	if _rail.size() > 8:
 		_rail.pop_front()
 
-## ONE BAR: anchor a TELEGRAPH verdict (the event carries no bar id) on the nearest tracked
-## telegraph comet (synthetic negative ids only — never steals a stream comet's moment).
-## Falls back to a gate stamp when nothing is tracked.
-func resolve_tg(family: String, txt: String) -> void:
-	var best := 1
-	var best_x := -1.0e9
-	var floor_x := _gate_x() - 70.0           # answers happen AT the gate — never steal a
-	for k in _last_x:                          # mid-track comet (the red-✗-on-a-feint bug)
-		if int(k) >= 0:
-			continue
-		var rx := float(_last_x[k]["x"])
-		if rx > best_x and rx >= floor_x:
-			best_x = rx
-			best = int(k)
-	if best < 0:
-		resolve(best, family, txt, "")
-	else:
-		stamp(txt, family)
-
 ## The tracked comet nearest the gate (largest x that hasn't passed it) — the fallback anchor
 ## when the band's id is stale (frame skew) so a claim still lands on a real comet, not the gate.
 func _nearest_key() -> int:

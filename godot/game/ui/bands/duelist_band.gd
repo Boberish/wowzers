@@ -15,6 +15,15 @@ var dodge_rune: AbilityRune
 var dump_rune: AbilityRune
 var engarde_rune: AbilityRune
 
+# ONE-BAR telegraph tracking (2026-07-12 feint/red-beat fix): a telegraph comet's own
+# `answered` flag reads s.telegraph.answers, which the TANK never writes (bespoke dodge skips
+# _answer_strike) — so every dodged global/beat/buster was falsely painted MISSED. The band
+# owns the truth instead: when the tank's telegraph answer fires (a duel_answer with no bar
+# id), we mark the nearest telegraph comet answered here + resolve THAT comet by id. Only a
+# genuinely unanswered comet reaches the gate with answered=false → the honest red miss.
+var _tg_answered: Dictionary = {}     ## telegraph comet id -> true (answered this appearance)
+var _last_tbars: Array = []           ## the telegraph comets fed this frame (for the nearest-lookup)
+
 func build() -> void:
 	hp_orb = hud._orb(Palette.BLOOD, "HEALTH", false)
 	res_orb = hud._orb(Palette.STEEL, "FLOW / AGGRO", true)   # the aggro driver, shown as %
@@ -113,6 +122,18 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 						"eta": float(bt.get("remaining", 0.0)),
 						"purple": bool(bt.get("feint", false)),
 						"answered": bool(bt.get("answered", false))})
+	# the band OWNS `answered` for telegraph comets (the engine flag is tank-blind): a comet
+	# the tank has answered stays answered; drop tracking for comets no longer on screen.
+	var live_ids := {}
+	for tb_v in tbars:
+		var tb: Dictionary = tb_v
+		if _tg_answered.has(int(tb["id"])):
+			tb["answered"] = true
+		live_ids[int(tb["id"])] = true
+	for aid in _tg_answered.keys():
+		if not live_ids.has(aid):
+			_tg_answered.erase(aid)
+	_last_tbars = tbars
 	channel.tbars = tbars
 	channel.late_grace = s.config.stream_resolve_slack   # the gate draws ONLY the true late window
 	channel.tempo = float(stream.get("tempo", 1.0)) * (1.25 if bool(obs.get("engarde_live", false)) else 1.0)
@@ -219,29 +240,29 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			if has_id:
 				channel.resolve(id, "bullseye", txt, ms)
 			else:
-				channel.resolve_tg("bullseye", txt)   # telegraph answer → its own comet
+				_tg_claim("bullseye", txt)   # telegraph answer → its own comet
 			slam.slam(txt, "perfect")
 			hud._shake_amt = maxf(hud._shake_amt, 2.0)
 		StrikeRes.Grade.PERFECT:
 			if has_id:
 				channel.resolve(id, "perfect", "PERFECT", ms)
 			else:
-				channel.resolve_tg("perfect", "PERFECT")
+				_tg_claim("perfect", "PERFECT")
 		StrikeRes.Grade.GOOD:
 			if has_id:
 				channel.resolve(id, "good", "GOOD", ms)
 			else:
-				channel.resolve_tg("good", "GOOD")
+				_tg_claim("good", "GOOD")
 		StrikeRes.Grade.GRAZE:
 			if has_id:
 				channel.resolve(id, "graze", "GRAZE", ms)
 			else:
-				channel.resolve_tg("graze", "GRAZE")
+				_tg_claim("graze", "GRAZE")
 		StrikeRes.Grade.BAITED:
 			if has_id:
 				channel.resolve(id, "baited", "BAITED!", ms)
 			else:
-				channel.resolve_tg("baited", "BAITED!")
+				_tg_claim("baited", "BAITED!")
 			slam.slam("BAITED", "baited")
 		StrikeRes.Grade.READ:
 			# the event carries the fake's own id now — the purple dissolve lands ON it
@@ -257,8 +278,30 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			if has_id:
 				channel.resolve(id, "hit", mtxt, ms)
 			else:
-				channel.resolve_tg("hit", mtxt)
+				_tg_claim("hit", mtxt)
 			hud._shake_amt = maxf(hud._shake_amt, 7.0)
+
+## Resolve a TELEGRAPH answer (globals/busters/beats — the engine event carries no bar id) on
+## the nearest telegraph comet by its OWN id, and mark it answered so the miss-afterlife prune
+## can never also paint it red. A clean dodge/parry now kills the comet with its proper verdict
+## + burst; only a comet the tank NEVER answers reaches the gate unclaimed → the honest red miss.
+func _tg_claim(family: String, txt: String) -> void:
+	var best_id := 1
+	var best_eta := 1.0e9
+	for tb_v in _last_tbars:
+		var tb: Dictionary = tb_v
+		var tid := int(tb["id"])
+		if _tg_answered.has(tid):
+			continue
+		var e := float(tb.get("eta", 1.0e9))
+		if e < best_eta:
+			best_eta = e
+			best_id = tid
+	if best_id < 0:
+		_tg_answered[best_id] = true
+		channel.resolve(best_id, family, txt, "")
+	else:
+		channel.stamp(txt, family)   # no telegraph comet tracked — a bare gate stamp
 
 ## THE STREAM TUNER (dev-only): live-tune the ACTIVE body's texture profile mid-fight.
 func _toggle_tuner() -> void:
