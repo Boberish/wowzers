@@ -857,6 +857,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-12 · `devboss` → **MERGED to `main` (ff `28a0775`)** — **DEV · BOSS TEST home-menu
+  button** (Bill: "make a dev tester button main menu to select any of the raid bosses to test
+  them quickly"). Debug-only button on the WorldShell home screen (`OS.is_debug_build()` gate,
+  same idiom as the in-combat DEV ▶ WIN button) → a boss-test screen: pick a seat
+  (Duelist/Twinfang/Alchemist/Well/Bloom) then a Seal (Vorathek/Mistral/Gemini/Mythos) and jump
+  STRAIGHT into that single-boss fight, skipping class/aspect/raid/party ceremony. Drives the
+  same `hud._launch(seat, "", boss_id)` the raid autostart uses, so the AI party fills and the
+  fight starts as a normal Seal pull; Seal list pulled canonically from
+  `RaidContent.run_encounters()` (new bosses auto-appear). Release builds never see the button;
+  `world_shell.gd` only. Verified: import clean · shell_probe ALL OK · throwaway devboss_probe
+  drove open→seat-toggle→press-each-Seal→lands-in-combat-on-right-enc ALL OK (probe then removed).
+  No planned-scope/card change → no ledger/catalog touch. *(this session)*
+
 - ☑ 2026-07-12 · `tank-v3` → **MERGED to `main` (ff `006c37d`)** — **THE WHOLE TANK-V3 LINE
   IS ON MAIN.** Bill: "merge this to main so we don't get too far off." The branch (S1–S5
   foundation + S6/S6b/S6c PRESS-restore + AAA + S7/S7b/S7c ONE-BAR + miss afterlife + peel +
