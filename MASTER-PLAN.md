@@ -871,14 +871,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-12 · `devgen` · §BOSSES/dev tooling — **DEV · GENERATED SETUPS on the BOSS TEST
-  screen** (Bill): pick class/spec (+ sub-spec anchor, e.g. the Well's ⭐Vigil module) + a Seal,
-  and the game GENERATES an average depth-scaled build — creed/rig/modules/transform/keystone/
-  boons scaled to how deep that Seal sits (boss 2 = fewer boons than boss 4) — by replaying the
-  REAL draft economy (Draft.roll_offers/take + the milestone flow) with a seeded average-player
-  picker. Shown seed + quick build description + reroll; same seed = same build. Debug-only,
-  extends the `28a0775` boss-test screen; expected touch: `world_shell.gd` + a new generator
-  file + `raid_hud.gd` launch plumbing. *(Claude session)*
+- ☑ 2026-07-12 · `devgen` → **MERGED to `main` (ff `97854ee`)** — **DEV · GENERATED SETUPS
+  on the BOSS TEST screen** (Bill: "simulate different runs … give me an average build, not a
+  perfect build, with a seed so I can retry one"). The SETUP toggle on the debug boss-test
+  screen swaps the bare-kit jump for an AVERAGE build scaled to the chosen Seal's depth: new
+  `game/dev_setups.gd` replays the descent's REAL economy in fast-forward — walks each floor's
+  actual RunMap on a seeded route, one LIVE `Draft.roll_offers` 1-of-3 per fight won picked by
+  a weighted average-player policy (rarity + synergy nudge, never optimal), milestones where
+  the run lands them (creed@start · rig@draft-1 · module@Floor-1 · transform+rewire@Floor-2
+  Twinfang · keystone@first elite · a curio at an affordable market); AI seats = Commander
+  parity (boons+keystones, decorrelated seeds). Boss-test also gained a SPEC row (brim/draw
+  etc.) and a module FOCUS anchor (e.g. ⭐Vigil — creed-compat filtered); the preview screen
+  prints the build + a quick description + SEED with FIGHT / REROLL / USE-SEED (same seed =
+  identical setup). `raid_hud.gd`: `_launch` head extracted to `_resolve_seat` (byte-identical)
+  + `_launch_dev_gen` (boons ride the spec, `_inject_boons`/`_arm_gear` fold the rest). NEW
+  probes: `dev_setup_probe` (determinism · depth-scaling · anchor · all-class · launch, ALL
+  OK) + `screenshot_devgen` (both screens eyeballed). shell_probe ALL OK · ui_smoke_map ALL
+  PASS · ui_smoke_raid = only the known pause+codex fail (identical on main). Dev tooling
+  built same-day → no ledger/catalog touch. *(Claude session)*
 
 - ☑ 2026-07-12 · main (docs only) · §GRAPHICS — **GRAPHICS PACKET C0 COMPLETE — the read-only
   recon; `GRAPHICS-PLAN.md §10 IMPLEMENTATION MAP` populated.** Seam map with exact anchors:
