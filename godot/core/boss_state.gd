@@ -84,6 +84,10 @@ var stream_last_kind: String = ""      ## grammar memory (no double buster, etc.
 var stream_phrase_q: Array = []        ## THE SONGBOOK (2026-07-12): the active motif's remaining
                                        ## steps ({gap,kind,late,dmg_frac}, last carries "rest");
                                        ## empty = pick the next motif (one seeded weighted draw)
+var stream_guards: Array = []          ## THE GUARD (2026-07-12): authored quiet windows
+                                       ## [[from_tick, to_tick], …] around the live telegraph's
+                                       ## answerable impacts — committed bars inside them SHATTER
+                                       ## at cast start, the publisher skips them; expire by tick
 var stream_resolving: Dictionary = {}  ## the bar mid-resolve — the kit funnel reads flurry
                                        ## group/index here (cleared the same tick; never checksummed)
 var stream_answers: Dictionary = {}    ## bar id -> {kind:String, grade:int} — press-time claims

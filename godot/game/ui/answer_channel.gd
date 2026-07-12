@@ -199,6 +199,15 @@ func _nearest_key() -> int:
 			best = int(k)
 	return best
 
+## THE GUARD: the boss rears up for its big move — the marked bars break off the track
+## (selective shatter; the rest of the runway flows on). Shards at each comet's own pixel.
+func shatter_ids(ids: Array) -> void:
+	for id_v in ids:
+		var rec = _last_x.get(int(id_v))          # untyped: .get() into := is a parse error
+		if rec != null:
+			_shards.append({"x": float(rec["x"]), "kind": String(rec["kind"]), "t": 0.0})
+			_last_x.erase(int(id_v))
+
 ## The publisher's body died — its committed bars SHATTER (visible: killing the attacker
 ## cancels its swings). The band calls this off the stream_shatter event.
 func shatter() -> void:

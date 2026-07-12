@@ -54,6 +54,15 @@ extends Resource
                                                ## ~1 tick of tick-alignment fairness ONLY (Bill 2026-07-12: a
                                                ## comet never sits pressable at the line; past the line = MISSED,
                                                ## it turns red and keeps flowing). Feints/eats resolve at impact.
+@export var stream_guard_before: float = 0.65  ## THE GUARD (Bill 2026-07-12, "author the space around
+                                               ## globals — it's every time a problem"): when the boss commits
+                                               ## to a big move its own melee MAKES WAY — no answerable bar
+                                               ## lands within this many seconds BEFORE an answerable
+                                               ## telegraph impact…
+@export var stream_guard_after: float = 0.45   ## …or this many AFTER it (dodge recovery + re-aim). Committed
+                                               ## bars inside a window SHATTER at cast start (a rule, like the
+                                               ## body-death shatter). SealTune: melee dicts may override with
+                                               ## "guard_before"/"guard_after".
 ## CONTINUITY RE-BASELINE (tank-v3 S2 fallout, 2026-07-12): retiring the barrier made the
 ## melee stream publish CONTINUOUSLY — the old model DROPPED every bar that fell inside a
 ## telegraph/cast (barrier<0 → no publish, stream_next_impact frozen), so the tank now faces

@@ -181,8 +181,13 @@ func mouse(event: InputEventMouseButton) -> void:
 ## Engine events → the feedback layer (channel stamps + rail; the SLAM for the big ones).
 func on_event(ev: Dictionary, mine: bool) -> void:
 	if not mine:
-		if String(ev.get("t", "")) == "stream_shatter" and channel != null:
-			channel.shatter()
+		if channel != null:
+			match String(ev.get("t", "")):
+				"stream_shatter":
+					channel.shatter()
+				"stream_guard_shatter":
+					# THE GUARD: the boss rears up — the marked comets break off the track
+					channel.shatter_ids(ev.get("ids", []))
 		return
 	match String(ev.get("t", "")):
 		"duel_answer":

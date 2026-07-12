@@ -13,6 +13,9 @@
 ##  5. CONTINUITY (tank-v3 S2, HARD): publishing NEVER halts while a telegraph is live · the
 ##     committed stream never blanks past the warm-up floor · every non-LATE, non-opener bar
 ##     is born with runway >= horizon - one period. Regression test for the #1 live hitch.
+##  6. THE GUARD (2026-07-12): no committed bar's impact lies inside a live authored quiet
+##     window (the melee makes way around the boss's answerable telegraph impacts); the
+##     guard's quiet + its rear-up shatter are AUTHORED — never scored as a publish halt.
 ##  4. OBS INVARIANTS: EVERY committed bar ships to the tank — a peeled bar (victim != tank)
 ##     ships MARKED `peeled` + victim (§0 pass 2 restored, Bill 2026-07-12; the old
 ##     never-ships/stream-pauses model is dead) · a LATE bar never ships before its pop-in
@@ -93,18 +96,29 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 			CombatCore.perform(s, tank, a)
 		CombatCore.update(s)
 		# --- CONTINUITY (HARD): the committed stream never halts (training bosses are single-
-		#     body/rhythm-only — no add lane to gate; a shatter opens a refill window) ---
+		#     body/rhythm-only — no add lane to gate; a shatter opens a refill window; THE
+		#     GUARD's authored quiet windows are never a halt) ---
 		for ev in s.events:
-			if String(ev.get("t", "")) == "stream_shatter":
-				restart_until = s.tick + restart_ticks
+			var evt := String(ev.get("t", ""))
+			if evt == "stream_shatter" or evt == "stream_guard_shatter":
+				restart_until = maxi(restart_until, s.tick + restart_ticks)
 		if not s.boss.stream.is_empty():
 			warm = true
 			cs_blank = 0
-		elif warm and s.tick >= restart_until:
+		elif warm and s.tick >= restart_until and s.boss.stream_guards.is_empty():
 			cs_blank += 1
 			max_cs_blank = maxi(max_cs_blank, cs_blank)
 			if s.telegraph != null:
 				max_tg_blank = maxi(max_tg_blank, cs_blank)
+		# --- THE GUARD (2026-07-12): no committed bar's impact inside a live quiet window ---
+		for w_v in s.boss.stream_guards:
+			var w: Array = w_v
+			for gb_v in s.boss.stream:
+				var gb: Dictionary = gb_v
+				var gimp := int(gb["impact_tick"])
+				if gimp >= int(w[0]) and gimp <= int(w[1]):
+					_fail("%s: bar %d impacts INSIDE a guard window [%d..%d]"
+						% [label, int(gb["id"]), int(w[0]), int(w[1])])
 		# --- LAW 1: immutability of every visible bar ---
 		var present := {}
 		for b_v in s.boss.stream:
@@ -155,17 +169,24 @@ func _probe_fight(label: String, enc: EncounterRes, seed_v: int, ticks: int) -> 
 				# grammar: a bar may never land inside a live telegraph's window
 			elif str(ledger[id]) != str(snap):
 				_fail("%s: bar %d MUTATED after publish (%s -> %s)" % [label, id, ledger[id], snap])
-		# bars that vanished must have resolved (impact reached) or shattered
+		# bars that vanished must have resolved (impact reached) or shattered — a body death's
+		# full shatter, or THE GUARD's rear-up (its event names the exact sanctioned ids)
+		var guard_dead := {}
+		for ev in s.events:
+			var evt2 := String(ev.get("t", ""))
+			if evt2 == "stream_shatter":
+				shatter_armed = true
+			elif evt2 == "stream_guard_shatter":
+				for gid in ev.get("ids", []):
+					guard_dead[int(gid)] = true
 		for id in ledger:
 			if not present.has(id) and not resolved.has(id):
 				resolved[id] = true
-				if int((ledger[id] as Dictionary)["impact"]) > s.tick and not shatter_armed:
+				if int((ledger[id] as Dictionary)["impact"]) > s.tick and not shatter_armed \
+						and not guard_dead.has(int(id)):
 					_fail("%s: bar %d vanished EARLY (impact %d > tick %d, no shatter)"
 						% [label, id, int((ledger[id] as Dictionary)["impact"]), s.tick])
 		shatter_armed = false
-		for ev in s.events:
-			if String(ev.get("t", "")) == "stream_shatter":
-				shatter_armed = true
 		# CONTINUITY (tank-v3 S2): the barrier is RETIRED — the melee keeps flowing THROUGH a
 		# telegraph (CLAUDE.md scheduler law), so bars legitimately impact inside a global's
 		# window. The old "no bar impacts inside a telegraph" assertion is deleted; §continuity
@@ -304,13 +325,14 @@ func _continuity(label: String, s: CombatState, tank: Seat, ticks: int) -> void:
 		if not a.is_empty():
 			CombatCore.perform(s, tank, a)
 		CombatCore.update(s)
-		# a shatter (add spawn/death, body swap) legitimately empties the stream — open a
-		# refill window so the following opener gap isn't scored as a publish halt.
+		# a shatter (add spawn/death, body swap, THE GUARD's rear-up) legitimately empties the
+		# stream — open a refill window so the following gap isn't scored as a publish halt.
 		for ev in s.events:
-			if String(ev.get("t", "")) == "stream_shatter":
-				restart_until = s.tick + restart_ticks
+			var evt := String(ev.get("t", ""))
+			if evt == "stream_shatter" or evt == "stream_guard_shatter":
+				restart_until = maxi(restart_until, s.tick + restart_ticks)
 		# CONTINUITY (HARD) — only while THIS lane carries rhythm (else the stream is empty
-		# by design and _tick_stream never runs).
+		# by design and _tick_stream never runs). THE GUARD's authored quiet is never a halt.
 		var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 \
 			else (s.encounter.adds[s.boss.add_i] as AddRes).melee
 		if lane_melee.has("rhythm"):
@@ -318,11 +340,20 @@ func _continuity(label: String, s: CombatState, tank: Seat, ticks: int) -> void:
 			if not s.boss.stream.is_empty():
 				warm = true
 				cs_blank = 0
-			elif warm and s.tick >= restart_until:     # a halt, not a sanctioned refill gap
+			elif warm and s.tick >= restart_until and s.boss.stream_guards.is_empty():
 				cs_blank += 1
 				max_cs_blank = maxi(max_cs_blank, cs_blank)
 				if s.telegraph != null:
 					max_tg_blank = maxi(max_tg_blank, cs_blank)
+		# THE GUARD (2026-07-12): no committed bar's impact inside a live quiet window
+		for w_v in s.boss.stream_guards:
+			var w: Array = w_v
+			for gb_v in s.boss.stream:
+				var gb: Dictionary = gb_v
+				var gimp := int(gb["impact_tick"])
+				if gimp >= int(w[0]) and gimp <= int(w[1]):
+					_fail("%s: bar %d impacts INSIDE a guard window [%d..%d]"
+						% [label, int(gb["id"]), int(w[0]), int(w[1])])
 		var present := {}
 		for b_v in s.boss.stream:
 			var b: Dictionary = b_v

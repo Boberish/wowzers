@@ -510,6 +510,11 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 		return
 	while true:
 		var imp := s.boss.stream_next_impact
+		# THE GUARD: a bar never lands inside an authored quiet window — the beat slides past
+		var gimp := _guard_adjust(s, imp)
+		if gimp != imp:
+			s.boss.stream_next_impact = gimp
+			continue
 		if imp > horizon:
 			return
 		var period := maxi(2, int(round(float(to_ticks(float(melee.get("every", 1.5)), hz)) / maxf(0.25, tempo))))
@@ -542,6 +547,8 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 			# the burst may run past the HORIZON — bars just enter the mouth later; the
 			# horizon is a visibility guarantee, not a cap
 			kind = "auto"
+		elif kind == "flurry" and _guard_adjust(s, imp, flurry_gap * (flurry_n - 1)) != imp:
+			kind = "auto"                               # THE GUARD: a burst never crosses a quiet window
 		elif kind == "feint" and s.boss.stream_seq == 0:
 			kind = "auto"                               # never the fight's opener
 		elif kind == "eat" and s.tick - s.boss.stream_last_eat_tick <= period * 2:
@@ -584,6 +591,11 @@ static func _publish_phrases(s: CombatState, melee: Dictionary, horizon: int, te
 	var every := float(melee.get("every", 1.5))
 	while true:
 		var imp := s.boss.stream_next_impact
+		# THE GUARD: a beat never lands inside an authored quiet window — the phrase slides past
+		var gimp := _guard_adjust(s, imp)
+		if gimp != imp:
+			s.boss.stream_next_impact = gimp
+			continue
 		if imp > horizon:
 			return
 		var period := maxi(2, int(round(float(to_ticks(every, hz)) / maxf(0.25, tempo))))
@@ -615,6 +627,8 @@ static func _publish_phrases(s: CombatState, melee: Dictionary, horizon: int, te
 			kind = "auto"                               # the bar after a global stays plain
 		elif kind == "flurry" and s.tick < s.boss.stream_flurry_cd_until:
 			kind = "auto"
+		elif kind == "flurry" and _guard_adjust(s, imp, flurry_gap * (flurry_n - 1)) != imp:
+			kind = "auto"                               # THE GUARD: a burst never crosses a quiet window
 		elif kind == "feint" and s.boss.stream_seq == 0:
 			kind = "auto"                               # never the fight's opener
 		elif kind == "eat" and s.tick - s.boss.stream_last_eat_tick <= period * 2:
@@ -719,6 +733,7 @@ static func _stream_shatter(s: CombatState) -> void:
 	s.boss.stream.clear()
 	s.boss.stream_answers.clear()                        # claims die with their bars
 	s.boss.stream_phrase_q.clear()                       # the dead body's song dies with it
+	s.boss.stream_guards.clear()                         # …and its quiet windows with it
 	if OS.is_debug_build():                              # shattered bars never resolve — drop their ledger
 		s.boss.stream_snap.clear()
 	s.boss.stream_next_impact = -1
@@ -756,6 +771,88 @@ static func _start_telegraph(s: CombatState, ab: AbilityRes) -> void:
 	tg.pips_left = ab.pips              # E9: charge-counter pips (0 = none → no-op)
 	s.boss.deny_dmg = 0.0              # E6: fresh deny-race accumulator per cast (0 for non-deny)
 	s.telegraph = tg
+	_stream_guard_cast(s, tg)          # THE GUARD: the melee makes way around the big move
+
+## THE GUARD (Bill 2026-07-12 — "author the space around globals, it's every time a problem"):
+## when the boss commits to a big move, its own melee MAKES WAY. For every answerable event of
+## the new telegraph (aoe beats · beats aimed at the tank · the strikeless DEFENSIBLE buster's
+## end) an authored quiet window [impact − guard_before, impact + guard_after] opens:
+## committed bars whose impact falls inside SHATTER now (the boss rears up, its swings hold —
+## a RULE like the body-death shatter, never a mutation) and the publisher skips the window
+## for future bars (below). Windows live on BossState as authored data — publishing itself
+## still never reads s.telegraph (the continuity law's letter and spirit both hold: the melee
+## flows right up to the window's edge and resumes right after; no drain, no halt).
+static func _stream_guard_cast(s: CombatState, tg: Telegraph) -> void:
+	var lane_melee: Dictionary = s.encounter.melee if s.boss.add_i < 0 \
+		else (s.encounter.adds[s.boss.add_i] as AddRes).melee
+	if not lane_melee.has("rhythm"):
+		return                              # no committed stream on this fight — nothing to part
+	var hz := s.config.fixed_hz
+	var gb := to_ticks(float(lane_melee.get("guard_before", s.config.stream_guard_before)), hz)
+	var ga := to_ticks(float(lane_melee.get("guard_after", s.config.stream_guard_after)), hz)
+	if gb + ga <= 0:
+		return
+	var tank := _tank_seat(s)
+	var wins: Array = []
+	if tg.ability.strikes.is_empty():
+		if tg.ability.response == AbilityRes.Response.DEFENSIBLE and tg.target == tank \
+				and not tg.ability.feint:
+			var bimp := tg.start_tick + tg.dur_ticks
+			wins.append([bimp - gb, bimp + ga])
+	else:
+		for i in tg.ability.strikes.size():
+			var st: StrikeRes = tg.ability.strikes[i]
+			if st.feint or st.guard == StrikeRes.Guard.UNANSWERABLE:
+				continue                    # fakes + dooms take no press — no space needed
+			if not (st.aoe or _beat_victim(tg, i) == tank):
+				continue                    # another raider's bolt — the tank's lane flows on
+			var simp := tg.start_tick + to_ticks(st.at, hz)
+			wins.append([simp - gb, simp + ga])
+	if wins.is_empty():
+		return
+	for w in wins:
+		s.boss.stream_guards.append(w)
+	# committed bars inside a window SHATTER — selectively (the runway beyond survives)
+	var dead: Array = []
+	var kept: Array = []
+	for b_v in s.boss.stream:
+		var b: Dictionary = b_v
+		var bimp2 := int(b["impact_tick"])
+		var inside := false
+		for w_v in wins:
+			var w2: Array = w_v
+			if bimp2 >= int(w2[0]) and bimp2 <= int(w2[1]):
+				inside = true
+				break
+		if inside:
+			dead.append(int(b["id"]))
+			s.boss.stream_answers.erase(int(b["id"]))
+			if OS.is_debug_build():
+				s.boss.stream_snap.erase(int(b["id"]))   # shattered bars never resolve — drop the ledger row
+		else:
+			kept.append(b)
+	if not dead.is_empty():
+		s.boss.stream = kept
+		_emit(s, {"t": "stream_guard_shatter", "ids": dead})
+
+## Push a scheduled impact (or a span, for flurry bursts) out of any live guard window;
+## prunes expired windows as it goes. Pure authored-data read — deterministic.
+static func _guard_adjust(s: CombatState, imp: int, span: int = 0) -> int:
+	var i := 0
+	while i < s.boss.stream_guards.size():
+		if int((s.boss.stream_guards[i] as Array)[1]) < s.tick:
+			s.boss.stream_guards.remove_at(i)   # expired — the window closed behind us
+			continue
+		i += 1
+	var moved := true
+	while moved:
+		moved = false
+		for w_v in s.boss.stream_guards:
+			var w: Array = w_v
+			if imp + span >= int(w[0]) and imp <= int(w[1]):
+				imp = int(w[1]) + 1
+				moved = true
+	return imp
 
 ## Add waves (raid). Main form: crossing a wave's HP threshold spawns its add — the
 ## boss withdraws (timers frozen, HP untouchable) while the add fights with its own
