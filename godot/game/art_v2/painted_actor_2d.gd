@@ -92,6 +92,7 @@ func _build(dir: String, meta: Dictionary) -> bool:
 		var at: Array = p.get("at", [0, 0])
 		node.position = Vector2(float(at[0]), float(at[1]))
 		node.rotation = deg_to_rad(float(p.get("rot", 0.0)))
+		node.scale = Vector2.ONE * float(p.get("scale", 1.0))   # C5.1: per-part registration scale
 		var parent_node: Node2D = _parts.get(String(p.get("parent", "")), _rig)
 		parent_node.add_child(node)
 		var pname := String(p.get("name", "part%d" % built))
@@ -117,7 +118,9 @@ func _build(dir: String, meta: Dictionary) -> bool:
 			_frames[String(k)] = load(fp) as Texture2D
 	_swap = Sprite2D.new()
 	_swap.centered = false
-	_swap.scale = Vector2.ONE * _scale_base
+	# C5.1: frames_scale matches the replacement drawings' apparent size to the
+	# layered rig (both are authored figures; parity is a registration number)
+	_swap.scale = Vector2.ONE * _scale_base * float(meta.get("frames_scale", 1.0))
 	_swap.visible = false
 	add_child(_swap)
 	_gaze = Polygon2D.new()
@@ -251,11 +254,11 @@ func windup(kind: String, amt: float) -> void:
 		_swap.rotation = -0.10 * _scrub
 		_swap.position = Vector2(-6.0 * _scrub, 5.0 * _scrub)
 		return
-	if _pose_lerp("windup", _scrub):        # C5 authored coil (arm raises, head tracks)
-		_rig.position = Vector2(-7.0 * _scrub, 6.0 * _scrub)
+	if _pose_lerp("windup", _scrub):        # C5 authored coil (torso chain — legs planted)
+		_rig.position = Vector2(-8.0 * _scrub, 0.0)   # step-back slides ALONG the baseline
 		return
-	_rig.rotation = -0.30 * _scrub          # coil back…
-	_rig.position = Vector2(-7.0 * _scrub, 6.0 * _scrub)   # …and crouch
+	_rig.rotation = -0.30 * _scrub          # generic coil (no authored pose)
+	_rig.position = Vector2(-8.0 * _scrub, 0.0)
 
 func clear_windup() -> void:
 	_scrub = 0.0

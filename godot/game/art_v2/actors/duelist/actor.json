@@ -14,8 +14,8 @@
 				0.12
 			],
 			"at": [
-				12,
-				-232
+				8,
+				-240
 			],
 			"sway": 7
 		},
@@ -40,7 +40,7 @@
 			],
 			"at": [
 				2,
-				-118
+				-112
 			]
 		},
 		{
@@ -52,21 +52,21 @@
 			],
 			"parent": "torso",
 			"at": [
-				8,
-				-120
+				7,
+				-116
 			]
 		},
 		{
 			"name": "arm",
 			"tex": "parts/arm.png",
 			"anchor": [
-				0.05,
+				0.12,
 				0.5
 			],
 			"parent": "torso",
 			"at": [
-				16,
-				-110
+				56,
+				-107
 			],
 			"rot": 18
 		},
@@ -79,7 +79,7 @@
 			],
 			"parent": "arm",
 			"at": [
-				97,
+				90,
 				2
 			],
 			"rot": -8
@@ -91,20 +91,21 @@
 	},
 	"poses": {
 		"windup": {
-			"root": -10,
-			"arm": -95,
-			"head": 6
+			"torso": -12,
+			"arm": -88,
+			"head": 13
 		},
 		"swing": {
-			"root": 6,
+			"torso": 6,
 			"arm": -14
 		},
 		"parry": {
-			"root": -4,
+			"torso": -4,
 			"arm": -55
 		},
 		"lunge": {
-			"root": 6
+			"torso": 6
 		}
-	}
+	},
+	"frames_scale": 1.0
 }
