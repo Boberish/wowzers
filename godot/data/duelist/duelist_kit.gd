@@ -7,13 +7,15 @@
 ## judged INSTANTLY, symmetric around gate-touch (verdict + payoffs fire AT the press — the
 ## Twinfang model, Bill: "the twinfang is super good, do that"); resolve applies the stored
 ## grade. Telegraph busters/globals keep the open-window model (big slow reads):
-##   PARRY (main)      — BINARY: land within ±parry_land of gate-touch = mit .95 + COUNTER
-##                       hit-back + ◆ + flow spike; pressed-but-out = the miss (.18 token mit,
-##                       wind gone). 3.5 wind. Answers AUTO / HEAVY / BUSTER — never a GLOBAL.
+##   PARRY (main)      — GRADED GOOD or BULLSEYE (SHAPE LAW 2026-07-13): land inside the perfect
+##                       zone (parry_grade_frac) = GOOD, dead-centre (grade_bull_frac) = BULLSEYE,
+##                       looser = the miss (.18 token mit, wind gone). Either land = mit .95 +
+##                       COUNTER + ◆ + flow spike. 3.5 wind. Answers ◇ AUTO/light-beat + ⯃
+##                       HEAVY/BUSTER aimed at YOU — never a ⬡ GLOBAL/FLURRY.
 ##   DODGE (secondary) — GRADED on the one game-wide ladder GRAZE<GOOD<PERFECT<BULLSEYE
 ##                       (|press−impact|/answer_claim on the grade_*_frac ladder). 1 wind.
-##                       Answers AUTO at any grade; HEAVY/BUSTER at BULLSEYE only
-##                       (the power leak still applies). Never hits back.
+##                       Answers ◇ AUTO/light-beat + ⬡ GLOBAL at any grade; ⯃ HEAVY/BUSTER are
+##                       PARRY-ONLY (dodge illegal — the bullseye-dodge escape is GONE). No hit-back.
 ##   FEINT             — a disguised bar (purple is the only tell): press = BAITED at the
 ##                       press (flow slip + lockout), hold = READ (via on_stream_bar).
 ##   FLURRY MODE       — dodge-only, parry SEALED, wind FREE: miss one beat and the group is
@@ -123,6 +125,17 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 		return                                            # the press was consumed by its comet
 	# nothing in claim range — a whiff (the wind was the price, same as any dry press)
 
+## PARRY grades to GOOD or BULLSEYE only (SHAPE LAW 2026-07-13): inside grade_bull_frac of the
+## claim window = BULLSEYE, inside parry_grade_frac (the perfect boundary) = a solid GOOD, looser
+## = a MISS (wind gone). Ties parry to the one dodge ladder — retune the fracs and it tracks.
+func _parry_grade(d: int, claim: int) -> int:
+	var p := float(d) / maxf(1.0, float(claim))
+	if p <= cfg.grade_bull_frac:
+		return StrikeRes.Grade.BULLSEYE
+	if p <= cfg.parry_grade_frac:
+		return StrikeRes.Grade.GOOD
+	return StrikeRes.Grade.MISS
+
 ## THE PRESS (§0 pass 2 + ONE CLAIM, Bill 2026-07-12): find the nearest unanswered, claimable
 ## COMET within ±answer_claim of NOW (late side bounded by the resolve slack) and judge the
 ## press against it INSTANTLY — stream bars AND the live telegraph's events (GLOBALS / beats /
@@ -219,7 +232,7 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 	var size := CombatCore._stream_size(bk)
 	var grade := StrikeRes.Grade.MISS
 	if kind == "parry":
-		grade = StrikeRes.Grade.BULLSEYE if best_d <= _tt(s, cfg.parry_land) else StrikeRes.Grade.MISS
+		grade = _parry_grade(best_d, claim)               # SHAPE LAW: GOOD or BULLSEYE, else miss
 	else:
 		var p := float(best_d) / maxf(1.0, float(claim))  # 0 at the gate line … 1 at the edge
 		if p <= cfg.grade_bull_frac:
@@ -230,8 +243,8 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 			grade = StrikeRes.Grade.GOOD
 		else:
 			grade = StrikeRes.Grade.GRAZE
-		if size >= AbilityRes.Size.HEAVY and grade != StrikeRes.Grade.BULLSEYE:
-			grade = StrikeRes.Grade.MISS                  # DEC-15: heavy/buster = bullseye-dodge only
+		if size >= AbilityRes.Size.HEAVY:
+			grade = StrikeRes.Grade.MISS                  # SHAPE LAW: ⯃ octagon = PARRY ONLY (dodge illegal)
 	s.boss.stream_answers[best_id] = {"kind": kind, "grade": grade}
 	# the payoffs land NOW — instant feedback is the whole point
 	if grade == StrikeRes.Grade.MISS:
@@ -251,8 +264,9 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 ## game-wide ladder — symmetric |press − impact| / answer_claim, exactly like a stream bar
 ## (same comet shape ⇒ same timing, the grading-coherence law). Payoffs fire at the press;
 ## the mitigation is STORED on the seat and applied when the strike lands (modify_incoming).
-## Legality (DEC-15): GLOBAL (aoe) = dodge only, any grade, no size leak · personal beat =
-## dodge (HEAVY+ needs the bullseye) or parry · BUSTER = parry (±parry_land) or bullseye dodge.
+## Legality (SHAPE LAW 2026-07-13): ⬡ GLOBAL (aoe) = dodge only, any grade, no size leak ·
+## ◇ light personal beat = dodge (graded) or parry (good/bullseye) · ⯃ HEAVY beat / BUSTER =
+## PARRY ONLY (dodge illegal — no bullseye-dodge escape).
 func _claim_tg(s: CombatState, seat: Seat, kind: String, cand: Dictionary, off_ticks: int) -> bool:
 	var aoe := bool(cand["aoe"])
 	var size := int(cand["size"])
@@ -260,9 +274,9 @@ func _claim_tg(s: CombatState, seat: Seat, kind: String, cand: Dictionary, off_t
 	var claim := _tt(s, cfg.answer_claim)
 	var grade := StrikeRes.Grade.MISS
 	if kind == "parry":
-		# you don't parry a room-wide blast (DEC-15); on a personal hit it's the binary land
+		# a room-wide blast is a ⬡ hexagon (dodge-only); a personal hit grades GOOD or BULLSEYE
 		if not aoe:
-			grade = StrikeRes.Grade.BULLSEYE if d <= _tt(s, cfg.parry_land) else StrikeRes.Grade.MISS
+			grade = _parry_grade(d, claim)
 	else:
 		var p := float(d) / maxf(1.0, float(claim))       # 0 at the gate line … 1 at the edge
 		if p <= cfg.grade_bull_frac:
@@ -273,8 +287,8 @@ func _claim_tg(s: CombatState, seat: Seat, kind: String, cand: Dictionary, off_t
 			grade = StrikeRes.Grade.GOOD
 		else:
 			grade = StrikeRes.Grade.GRAZE
-		if not aoe and size >= AbilityRes.Size.HEAVY and grade != StrikeRes.Grade.BULLSEYE:
-			grade = StrikeRes.Grade.MISS                  # DEC-15: a big personal hit = bullseye-dodge only
+		if not aoe and size >= AbilityRes.Size.HEAVY:
+			grade = StrikeRes.Grade.MISS                  # SHAPE LAW: ⯃ octagon = PARRY ONLY (dodge illegal)
 	# the payoffs land NOW (instant feedback is the whole point); the mit waits for the hit
 	var mit := 0.0
 	if grade == StrikeRes.Grade.MISS:

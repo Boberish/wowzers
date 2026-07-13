@@ -5,10 +5,12 @@
 ## live telegraph the band feeds it (the Duelist is its first client; other classes migrate
 ## later and inherit it unchanged).
 ##
-## THE VOCABULARY (v3): AUTO diamond (word DODGE) · HEAVY hexagon (PARRY) · BUSTER spiked
-## octagon, tank colors (PARRY) · GLOBAL spiked octagon, boss colors (DODGE — every seat) ·
-## FEINT = a disguise wearing a real shape + word, PURPLE is the only tell · FLURRY beat
-## cluster (WEAVE — the channel mode-swaps) · EAT skull (brace). LATE bars pop in mid-track
+## THE VOCABULARY (SHAPE LAW 2026-07-13 — shape=answer · color=status · size=damage):
+## ◇ diamond = DODGE or PARRY (auto / light personal beat) · ⬡ hexagon = DODGE-only (global /
+## flurry) · ⯃ spiked octagon = PARRY-only (heavy / buster / HEAVY personal beat) · ☠ skull =
+## BRACE (eat). COLOR is STATUS, never the answer: PURPLE = feint (a lie in a real shape + the
+## breathing ring) · RED = peeled (the boss hunts another seat — still yours) · BLUE = flurry.
+## SIZE scales the shape (light pokes small, big commits large). LATE bars pop in mid-track
 ## with a flash (THE SPEED LAW: difficulty is WHEN a bar appears, never how fast it moves;
 ## px/s is CONSTANT — whole-flow tempo is baked into each bar's impact_tick at publish, so
 ## a faster tempo shows as comets with closer etas, never a render-side rescale — TANK-V3).
@@ -28,12 +30,12 @@
 ## gate line like the grading is (§0 pass 2): steel GRAZE → gold GOOD → mint PERFECT →
 ## bright-gold BULLSEYE centre band, gem-set mullions at the graze edges and the gilded
 ## aim-plumb on the gate line — identical in reading to the Twinfang rhythm bar; the steel
-## notches are the PARRY land window (binary). A tiny mint dot above a heavy/buster marks
-## "bullseye-dodge legal". Pure view — never touches state.
+## notches are the PARRY land window (now the GOOD/BULLSEYE zone, not a binary). Pure view.
 class_name AnswerChannel
 extends Control
 
 const PURPLE := Color("b072c9")            # the feint tell (Palette.RELIC)
+const FLURRY_COL := Color("5bc8ff")        # BLUE = flurry / WEAVE mode (status color, SHAPE LAW)
 const DEATH_LIFE := 0.45                    # comet death-anim life (sec)
 const VERDICT_LIFE := 0.85                  # position-anchored verdict pop life (sec)
 const GATE_LIFE := 0.28                     # gate-reaction pulse life (sec)
@@ -397,7 +399,7 @@ func _draw() -> void:
 			var bc := Color(1, 1, 1, 0.5 * (1.0 - age / 0.2))
 			draw_arc(Vector2(x, cy), 10.0 + age * 90.0, 0, TAU, 20, bc, 1.6, true)
 		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered,
-			bool(b.get("peeled", false)), String(b.get("victim", "")), sc)
+			bool(b.get("peeled", false)), String(b.get("victim", "")), sc, int(b.get("size", -1)))
 	# --- ONE BAR: telegraph comets (GLOBALS / targeted BUSTERS / my beats) on the same
 	#     track — committed times off the live telegraph, same gate, same press ---
 	for tb_v in tbars:
@@ -418,7 +420,7 @@ func _draw() -> void:
 		var tage := float(_seen.get(tid, 1.0))
 		var tsc := (1.0 + 0.45 * maxf(0.0, 1.0 - tage / 0.22)) \
 			* (1.0 + 0.10 * clampf(1.0 - teta / 0.55, 0.0, 1.0))
-		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc)
+		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc, int(tb.get("size", -1)))
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()/missed(). A TELEGRAPH comet
 	# (negative id) that expires unconsumed at the gate = an unanswered big move — it gets
@@ -513,18 +515,18 @@ func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color, a: floa
 ## comet that died). Returns points around (x, cy).
 func _shape_pts(kind: String, x: float, cy: float, r: float) -> PackedVector2Array:
 	match kind:
-		"heavy":
-			var hp := PackedVector2Array()
-			for i in 6:
-				var a := TAU * float(i) / 6.0 - PI / 2.0
-				hp.append(Vector2(x + cos(a) * r * 0.8, cy + sin(a) * r))
-			return hp
-		"buster", "global":
+		"heavy", "buster":
 			var op := PackedVector2Array()
 			for i in 8:
 				var a := TAU * float(i) / 8.0
 				op.append(Vector2(x + cos(a) * r * 0.85, cy + sin(a) * r * 0.85))
 			return op
+		"global":
+			var hp := PackedVector2Array()
+			for i in 6:
+				var a := TAU * float(i) / 6.0 - PI / 2.0
+				hp.append(Vector2(x + cos(a) * r * 0.8, cy + sin(a) * r))
+			return hp
 		_:
 			return PackedVector2Array([Vector2(x, cy - r), Vector2(x + r * 0.72, cy),
 				Vector2(x, cy + r), Vector2(x - r * 0.72, cy)])
@@ -644,7 +646,8 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 ## A PEELED comet (§0 pass 2: the boss hunts someone else) draws with a crimson hunt-chevron +
 ## its victim's name — the tank still answers it (the comeback); the damage is the victim's.
 func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
-		answered: bool = false, peeled: bool = false, victim: String = "", sc: float = 1.0) -> void:
+		answered: bool = false, peeled: bool = false, victim: String = "", sc: float = 1.0,
+		size: int = -1) -> void:
 	if answered:
 		var hc := (PURPLE if purple else _comet_col(kind))
 		hc.a = 0.3
@@ -666,43 +669,40 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 				HORIZONTAL_ALIGNMENT_CENTER, 100, UiKit.SIZE["MICRO"], vc)
 	if kind != "eat":
 		_trail(x, cy, kind, purple)
+	# SHAPE = the button · COLOR = status (_stat_col) · SIZE = damage (the radius).
+	var r := _size_r(kind, size) * sc
 	match kind:
-		"heavy":
-			_glow(x, cy, 15.0 * sc, PURPLE if purple else Palette.HEAVY)
-			_hexagon(x, cy, 15.0 * sc, PURPLE if purple else Palette.HEAVY)
-			_bullseye_dot(x, cy, 15.0 * sc)
-			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.HEAVY)
-		"buster":
-			_glow(x, cy, 18.0 * sc, PURPLE if purple else Palette.CRUSH)
-			_octagon(x, cy, 18.0 * sc, PURPLE if purple else Palette.CRUSH,
-				PURPLE.lightened(0.3) if purple else Palette.CRIMSON)
-			_bullseye_dot(x, cy, 18.0 * sc)
-			_word(font, x, cy, "PARRY", PURPLE if purple else Palette.CRIMSON)
+		"heavy", "buster":
+			# ⯃ PARRY-ONLY spiked octagon — bronze/amber, sized by damage
+			var oc := _stat_col(Palette.HEAVY, purple, peeled)
+			_glow(x, cy, r + 3.0, oc)
+			_octagon(x, cy, r, oc, oc.lightened(0.4))
+			_word(font, x, cy, "PARRY", oc)
 		"global":
-			# the boss's big room-wide move — boss colors, every seat dodges it
-			_glow(x, cy, 19.0 * sc, PURPLE if purple else Palette.CRIMSON)
-			_octagon(x, cy, 19.0 * sc, PURPLE if purple else Palette.CRIMSON,
-				PURPLE.lightened(0.3) if purple else Palette.GOLD_BRIGHT)
-			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.GOLD_BRIGHT)
-		"beat":
-			# a telegraph strike aimed at ME (boss-tinted diamond) — the classic dodge read
-			_diamond(x, cy, 12.0 * sc, PURPLE if purple else Palette.CRIMSON.lightened(0.15))
-			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.CRIMSON.lightened(0.3))
+			# ⬡ DODGE-ONLY hexagon — the boss's room-wide move, cool steel; every seat dodges
+			var gc := _stat_col(Palette.STEEL.lightened(0.2), purple, peeled)
+			_glow(x, cy, r + 2.0, gc)
+			_hexagon(x, cy, r, gc)
+			_word(font, x, cy, "DODGE", gc)
+		"flurry":
+			# ⬡ DODGE-ONLY weave cluster — BLUE (status), a rapid WEAVE string
+			var fc := PURPLE if purple else FLURRY_COL
+			draw_circle(Vector2(x, cy), 6.5 * sc, fc)
+			draw_arc(Vector2(x, cy), 9.0 * sc, 0, TAU, 14, fc.darkened(0.3), 1.5)
+			if flurry_i == 0:
+				_word(font, x, cy, "WEAVE", fc)
 		"eat":
+			# ☠ BRACE — a muted crossed marker; no press
 			var col := Palette.TEXT_DIM
 			_diamond(x, cy, 13.0 * sc, col)
 			draw_line(Vector2(x - 5, cy - 5), Vector2(x + 5, cy + 5), Palette.BG0, 2.0)
 			draw_line(Vector2(x + 5, cy - 5), Vector2(x - 5, cy + 5), Palette.BG0, 2.0)
 			_word(font, x, cy, "EAT", col)
-		"flurry":
-			var col2 := PURPLE if purple else Palette.FLOW
-			draw_circle(Vector2(x, cy), 6.5 * sc, col2)
-			draw_arc(Vector2(x, cy), 9.0 * sc, 0, TAU, 14, col2.darkened(0.3), 1.5)
-			if flurry_i == 0:
-				_word(font, x, cy, "WEAVE", col2)
 		_:
-			_diamond(x, cy, 11.0 * sc, PURPLE if purple else Palette.LIGHT)
-			_word(font, x, cy, "DODGE", PURPLE if purple else Palette.LIGHT)
+			# ◇ DODGE-or-PARRY diamond (auto / light personal beat) — warm gold, THE base read
+			var dc := _stat_col(Palette.GOLD_BRIGHT, purple, peeled)
+			_diamond(x, cy, r, dc)
+			_word(font, x, cy, "DODGE", dc)
 	# a feint's disguise breathes a faint purple ring — the only tell
 	if purple:
 		var pr := PURPLE
@@ -724,25 +724,45 @@ func _trail(x: float, cy: float, kind: String, purple: bool) -> void:
 		var pts := _shape_pts(kind, tx, cy, (11.0 if kind != "buster" else 16.0) - float(k) * 1.8)
 		draw_colored_polygon(pts, c)
 
+## COLOR = STATUS (SHAPE LAW): a feint wears purple, a peeled comet wears red; else the shape
+## keeps its quiet base tint — the shape already told the player the answer.
+func _stat_col(base: Color, purple: bool, peeled: bool) -> Color:
+	if purple:
+		return PURPLE
+	if peeled:
+		return Palette.CRIMSON
+	return base
+
+## SIZE = damage: light pokes draw small, the big commits draw large. `size` is the strike's
+## AbilityRes.Size (or -1 to derive from the kind for committed bars that carry no size field).
+func _size_r(kind: String, size: int) -> float:
+	var sz := size if size >= 0 else _kind_size(kind)
+	match sz:
+		AbilityRes.Size.CRUSH: return 18.0
+		AbilityRes.Size.HEAVY: return 15.0
+		_: return 11.0
+
+func _kind_size(kind: String) -> int:
+	match kind:
+		"buster": return AbilityRes.Size.CRUSH
+		"heavy", "global": return AbilityRes.Size.HEAVY
+		_: return AbilityRes.Size.LIGHT
+
+## The shape's quiet BASE tint (trails + husks) — matches _comet's shape colors. Status
+## (purple/peel/blue) is applied at draw time in _stat_col, not here.
 func _comet_col(kind: String) -> Color:
 	match kind:
-		"heavy": return Palette.HEAVY
-		"buster": return Palette.CRUSH
-		"global": return Palette.CRIMSON
-		"beat": return Palette.CRIMSON.lightened(0.15)
-		"flurry": return Palette.FLOW
+		"heavy", "buster": return Palette.HEAVY
+		"global": return Palette.STEEL.lightened(0.2)
+		"flurry": return FLURRY_COL
 		"eat": return Palette.TEXT_DIM
-		_: return Palette.LIGHT
+		_: return Palette.GOLD_BRIGHT   # auto / beat — the base diamond
 
 ## A soft glow halo behind the big shapes (heavy / buster) — reads their weight at a glance.
 ## AAA pass: a real radial bloom (UiKit.glow), breathing.
 func _glow(x: float, cy: float, r: float, col: Color) -> void:
 	UiKit.glow(self, Vector2(x, cy), r * 2.1,
 		Color(col.r, col.g, col.b, 0.30 + 0.08 * sin(_spin * 2.0)))
-
-## The mint center-dot: "a BULLSEYE dodge answers this" (heavy/buster only).
-func _bullseye_dot(x: float, cy: float, r: float) -> void:
-	draw_circle(Vector2(x, cy - r - 5.0), 2.5, Palette.PERFECT)
 
 ## The answer word under a comet — Cinzel smallcaps, shadowed (AAA pass: no more tiny
 ## default-font glyphs; the word is the read, it must land at a glance).

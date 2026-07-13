@@ -52,7 +52,7 @@ func build() -> void:
 	dodge_rune.key_num = 1
 	dodge_rune.icon_id = "dodge"
 	dodge_rune.accent = Palette.FLOW
-	dodge_rune.tooltip_text = "DODGE — 1 / SPACE / LEFT CLICK. Graded GRAZE<GOOD<PERFECT<BULLSEYE. Answers autos at any grade, globals at any grade; a BULLSEYE answers even a heavy. Cheap WIND. Never hits back."
+	dodge_rune.tooltip_text = "DODGE — 1 / SPACE / LEFT CLICK. Graded GRAZE<GOOD<PERFECT<BULLSEYE. Answers ◇ diamonds (autos / light beats) and ⬡ hexagons (globals / flurry) at any grade — NOT ⯃ octagons (heavy / buster: parry those). Cheap WIND. Never hits back."
 	dodge_rune.pressed.connect(func(): hud._ctrl.human({"type": "dodge"}))
 	row.add_child(dodge_rune)
 	parry_rune = AbilityRune.new()
@@ -60,7 +60,7 @@ func build() -> void:
 	parry_rune.key_num = 2
 	parry_rune.icon_id = "guard"
 	parry_rune.accent = Palette.STEEL
-	parry_rune.tooltip_text = "PARRY — 2 / RIGHT CLICK. Binary: land it (tight window) = best mit + COUNTER + ◆ + flow spike; miss = wind gone. Answers anything aimed at YOU — never a global."
+	parry_rune.tooltip_text = "PARRY — 2 / RIGHT CLICK. Lands GOOD or BULLSEYE (dead-centre = bullseye) = best mit + COUNTER + ◆ + flow spike; loose = wind gone. Answers ◇ diamonds and ⯃ octagons aimed at YOU — never a ⬡ global / flurry."
 	parry_rune.pressed.connect(func(): hud._ctrl.human({"type": "defense"}))
 	row.add_child(parry_rune)
 	var sep := Control.new()
@@ -82,7 +82,7 @@ func build() -> void:
 	engarde_rune.tooltip_text = "⏱ EN GARDE (~1-min CD) — CALL IT OUT: the stream quickens +25%, leaks HALVED, clean answers pay DOUBLE flow. Two slips break it. An amplifier — pays nothing if you don't answer."
 	engarde_rune.pressed.connect(func(): hud._ctrl.human({"type": "ability", "id": "engarde"}))
 	row.add_child(engarde_rune)
-	hud._hint_line("1 / SPACE / LMB — DODGE    ·    2 / RMB — PARRY (land = counter + ◆)    ·    3 — ⚡ DUMP    ·    4 — ⏱ EN GARDE    ·    PURPLE = A FAKE, DON'T PRESS    ·    SKULL = BRACE")
+	hud._hint_line("◇ DODGE-or-PARRY   ·   ⬡ DODGE-only   ·   ⯃ PARRY-only   ·   ☠ BRACE       —       1 / SPACE / LMB DODGE   ·   2 / RMB PARRY (land = counter + ◆)   ·   3 ⚡ DUMP   ·   4 ⏱ EN GARDE       —       PURPLE = A FAKE, DON'T PRESS   ·   RED = PEELED (still yours)")
 
 func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	hp_orb.set_values(p.hp, p.hp_max)
@@ -115,6 +115,7 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 			if beats.is_empty():
 				if bool(tg.get("targets_me", false)) and bool(tg.get("defensible", false)):
 					tbars.append({"id": -(1000 + tgid * 8), "kind": "buster",
+						"size": int(tg.get("size", AbilityRes.Size.CRUSH)),
 						"eta": float(tg.get("remaining", 0.0)),
 						"purple": bool(tg.get("feint", false)), "answered": false})
 			else:
@@ -122,8 +123,14 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 					var bt: Dictionary = beats[i]
 					if bool(bt.get("resolved", false)) or not bool(bt.get("mine", false)):
 						continue
+					# SHAPE LAW: aoe → ⬡ hexagon (global, dodge-only) · non-aoe LIGHT → ◇ diamond
+					# (beat, dodge-or-parry) · non-aoe HEAVY+ → ⯃ octagon (parry-only, the fix for
+					# the once-invisible heavy beat).
+					var bsz := int(bt.get("size", AbilityRes.Size.LIGHT))
+					var bkind := "global" if bool(bt.get("aoe", false)) \
+						else ("heavy" if bsz >= AbilityRes.Size.HEAVY else "beat")
 					tbars.append({"id": -(1000 + tgid * 8 + 1 + i),
-						"kind": ("global" if bool(bt.get("aoe", false)) else "beat"),
+						"kind": bkind, "size": bsz,
 						"eta": float(bt.get("remaining", 0.0)),
 						"purple": bool(bt.get("feint", false)),
 						"answered": bool(bt.get("answered", false))})

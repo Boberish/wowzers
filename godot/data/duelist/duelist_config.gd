@@ -4,10 +4,12 @@
 ##
 ## THE FEEL: dense/twitch. LOW HP that swings fast (a build for a quick healer). WIND = a small
 ## pool with fast recharge — the anti-spam leash, NOT a flat cooldown. The v3 choice economy:
-## PARRY = the damage/aggro engine (binary land/miss, counter + ◆ + flow spike, best mit, big
-## wind cost) · DODGE = the economy play (cheap, graded GRAZE<GOOD<PERFECT<BULLSEYE, no counter;
-## a BULLSEYE dodge answers anything aimed at you). Every mitigation leaks a sliver (partial-mit
-## law, cap .90 — the healer is never bored) and NO self-heal, ever.
+## PARRY = the damage/aggro engine (graded GOOD or BULLSEYE — lands inside the perfect zone,
+## dead-centre = bullseye; counter + ◆ + flow spike, best mit, big wind cost) · DODGE = the
+## economy play (cheap, graded GRAZE<GOOD<PERFECT<BULLSEYE, no counter). THE SHAPE LAW
+## (2026-07-13): the comet's shape IS its button — ◇ diamond = dodge OR parry · ⬡ hexagon =
+## dodge-only (globals/flurry) · ⯃ octagon = parry-only (heavy/buster; NO bullseye-dodge escape)
+## · ☠ = brace. Every mitigation leaks a sliver (cap .90 — the healer is never bored), NO self-heal.
 class_name DuelistConfig
 extends Resource
 
@@ -30,8 +32,11 @@ extends Resource
 @export var answer_claim: float = 0.30     ## DEC-14 claim range: a press answers a bar within
                                            ## ±this of now; among several, the tie-break picks nearest
                                            ## |impact−now| → earliest impact → lowest id (deterministic)
-@export var parry_land: float = 0.07       ## stream-claim PARRY: lands within ±this of gate-touch
-                                           ## (~2 ticks symmetric — tick-native, never float-ms)
+@export var parry_land: float = 0.07       ## RETIRED (SHAPE LAW 2026-07-13): parry now grades on the
+                                           ## one ladder (parry_grade_frac), not a ±window
+@export var parry_grade_frac: float = 0.55 ## PARRY lands inside this fraction of answer_claim (= the
+                                           ## PERFECT boundary) → GOOD; inside grade_bull_frac → BULLSEYE;
+                                           ## looser = a miss. Ties parry to the dodge ladder (coherence).
 @export var grade_bull_frac: float = 0.18  ## stream-claim DODGE ladder: |press−impact|/answer_claim
 @export var grade_perfect_frac: float = 0.55
 @export var grade_good_frac: float = 0.80  ## …beyond = GRAZE, out to the claim edge
@@ -43,10 +48,10 @@ extends Resource
 # --- MITIGATION (fraction REMOVED). THE SINGLE MIT AUTHORITY (DEC-6): DODGE tops out at
 #     BULLSEYE = .85, strictly UNDER the partial-mit cap .90 (a sliver always leaks — the healer
 #     is never bored); a LANDED PARRY = .95 is the one explicit ABOVE-cap payout, the reward for
-#     the binary commit. The v3 legality matrix (enforced in the kit's claim funnel before grading):
-#     AUTO = parry or dodge any grade · HEAVY/BUSTER = parry, or dodge at BULLSEYE only
-#     (and the power leak still applies — parry stays preferred on the big ones) ·
-#     GLOBALS = dodge-only if one reaches this funnel (parry rejected); EAT takes no press. ---
+#     the commit. THE SHAPE-LAW legality matrix (2026-07-13; enforced in the claim funnel):
+#     ◇ AUTO / light beat = parry OR dodge any grade · ⯃ HEAVY/BUSTER = PARRY ONLY (dodge is
+#     illegal — the bullseye-dodge escape is GONE) · ⬡ GLOBAL (aoe) = dodge-only, parry rejected ·
+#     ⬡ FLURRY = dodge-only · ☠ EAT takes no press. ---
 @export var mit_parry_land: float = 0.95
 @export var mit_parry_miss: float = 0.18   ## a pressed-but-out-of-window parry keeps a token cut
 @export var mit_dodge_bullseye: float = 0.85
