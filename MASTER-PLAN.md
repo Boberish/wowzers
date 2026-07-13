@@ -924,13 +924,25 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   **Bill verdict on revision 2: “okay thats good, lets move on.”** I3-A is now the approved visual
   family/anatomy reference. It remains a flattened concept board, not a shipping atlas.
 
-- ☐ 2026-07-13 · Codex image packet `I3-B` · §GRAPHICS — **CLAIM: PRODUCTION ALPHA SOURCES;
+- ☑ 2026-07-13 · Codex image packet `I3-B` · §GRAPHICS — **DELIVERED `801d713`: PRODUCTION ALPHA SOURCES;
   BILL EXPLICITLY AUTHORIZED NEW IMAGE GENERATION.** Derive isolated transparent, 9-slice-
   capable shells/caps, party rows, socket/button pieces, utility tab, and normal/feint/BRACE icons
   from the approved I3-A family. Do not bake text, numbers, fill truth, timing gates, cooldowns, or
   lock markers. The flattened dark-backed board is not suitable for direct shipping extraction.
   After the sources are approved, hand all trim/slice/import/binding/fallback/test work to Claude
-  as C6B; no further Codex image generation is implied without another Bill approval.
+  as C6B; no further Codex image generation is implied without another Bill approval. **DONE:**
+  four untouched chroma sheets + four visually checked RGBA alpha sheets + production README at
+  `art-source/graphics-v2/p5-dashboard/`. Contents: wide shells, repeatable party/control pieces,
+  all seven exact answer/feint/BRACE icons, and a corrected utility tab with an empty code-data
+  window. Dedicated utility source supersedes the baked sample on the wide sheet. C6B is unblocked.
+
+- ⏳ 2026-07-13 · Claude packet `C6B` · §GRAPHICS — **READY FOR CLAUDE CLAIM: PAINTED DASHBOARD
+  SKIN + DUELIST BINDING.** Start from current `main`, claim before code, and consume only the
+  approved `art-source/graphics-v2/p5-dashboard/alpha/` sheets under their README contract. Own
+  deterministic trim/crop preparation, 9-slice/style-box setup, runtime import, C6A binding,
+  default-off/missing-asset fallback, resolution/scene tour, smoke, and docs closure. No gameplay,
+  timing smoothing, new image generation, redesign, or giant baked HUD. Stop and ask Bill if an
+  approved source cannot satisfy a required state.
 
 - ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
   §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·

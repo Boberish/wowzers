@@ -374,7 +374,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → ✅ I3-A BOARD APPROVED → **I3-B PRODUCTION ASSETS ACTIVE** → C6B skin/binding
+### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → ✅ I3-A BOARD APPROVED → ✅ I3-B SOURCES `801d713` → **CLAUDE C6B READY**
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -529,12 +529,15 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   barred-disc BRACE token; expand party rows for HP/resource/cast/debuff information. Bill's
   verdict on revision 2: **“okay thats good, lets move on.”** This flattened board approves the
   family and hierarchy; it is not an extraction-ready runtime atlas.
-- **I3-B:** 🟡 **AUTHORIZED BY BILL 2026-07-13; CODEX ACTIVE.** Derive the approved I3-A
+- **I3-B:** ✅ **DELIVERED `801d713` after Bill's 2026-07-13 authorization.** Derived the approved I3-A
   family into isolated transparent production sources: 9-slice-capable frame/bar shells, party
   row shell, five-socket combo strip or repeatable socket, repeatable ability slot, utility tab,
   and the normal/feint/BRACE icon set. Preserve code-owned holes/masks and avoid baking labels,
   values, fills, timing gates, cooldowns, or lock markers. Claude must not scrape the flattened
-  dark-backed board into shipping textures; after I3-B exists, C6B owns trim/slice/import/binding.
+  dark-backed board into shipping textures; C6B owns trim/slice/import/binding. Delivered under
+  `art-source/graphics-v2/p5-dashboard/`: four untouched chroma sheets + four visually checked RGBA
+  alpha sheets + the production contract/contents README. The dedicated empty-window utility tab
+  supersedes the wide sheet's baked sample. C6B may now claim from current `main`.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.
