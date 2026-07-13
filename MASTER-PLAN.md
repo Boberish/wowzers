@@ -783,9 +783,10 @@ contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-
   4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
   trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
   `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
-- **GRAPHICS V2 — P3 ENVIRONMENT PAIR ACTIVE:** order is P0 docs → P1 **SUNPRINT CEL + reaction-first
-  verdict approved** → Claude foundation packets C0–C2 → interior/exterior scene contrast pair →
-  Duelist anchor+hybrid rig → connected Duelist dashboard → signature VFX → side-by-side playtest.
+- **GRAPHICS V2 — P5 DASHBOARD ACTIVE:** P0/P1 SUNPRINT CEL + C0–C3 foundation/environment pair
+  are done; P4 Duelist anchor+hybrid rig is done through C5.1 `5bb532c`. The dashboard order is now
+  **C6A art-free reaction-first graybox + theater-safe layout → Bill live speed/rectangle verdict →
+  Codex I3 component generation → Claude C6B skin/binding** → signature VFX → side-by-side playtest.
   Old renderer/HUD remains selectable and default until every replacement slice passes.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
@@ -875,6 +876,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-13 · `main` (docs only) · §GRAPHICS — **P5 SCREEN ANATOMY LOCKED; C6 SPLIT SO
+  LAYOUT PROVES BEFORE ART.** Bill identified the real problem after C5.1: this is a UI game whose
+  characters are a cool representation, but the legacy full-screen-stage layout puts the answer
+  channel across the Duelist. Art V2 now uses one responsive contract: top status islands · upper
+  UI-free combat theater · dominant broad answer instrument · connected lower class dashboard ·
+  collapsible hint gutter. **Persistent UI may never enter the theater.** `RaidStage2D.SLOTS`
+  keeps its local spacing/feet grammar while dash mode places the stage and SceneKit floor inside
+  the same upper safe rectangle; default-off legacy is unchanged. P5 order is **Claude C6A
+  graybox/no images → Bill speed/layout gate → Codex I3 generation → Claude C6B painted binding**.
+  C6A must keep healer click-cast frames viable, meter reachable but collapsed, and prove 720p /
+  1080p / ultrawide in both scene profiles. `hudlow` is only the retired C5.1 inspection stopgap.
+  Any later image need remains a hard stop: ask Bill before Codex generates or edits it. *(Codex)*
 
 - ☑ 2026-07-13 · `artv2-c5-align` → **MERGED to `main` (ff `5bb532c`)** · §GRAPHICS —
   **C5.1 COMPLETE — DUELIST VISUAL REGISTRATION + LIVE ANIMATION + GRADING (Bill: "solid,

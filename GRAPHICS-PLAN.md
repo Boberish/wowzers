@@ -9,11 +9,12 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P4 SOURCE ART COMPLETE · CLAUDE C5 RUNTIME RIG NEXT.** Bill approved **SUNPRINT CEL** on
+**Status:** 🟡 **P5 ACTIVE · C6A REACTION-FIRST GRAYBOX NEXT.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
-texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C3 schema/bindings merged `1abfcd4`; C2 SceneKit merged as
-`da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
-verification debt, not a blocker to P3.
+texture rather than generic dark-fantasy micro-detail. P4 is complete through C5.1 `5bb532c`:
+the real Duelist is registered, animating, and graded in live play. P5 is deliberately split into
+an art-free layout proof (C6A) before Codex generates the I3 component family, then a skinned
+binding pass (C6B). C2's deferred tour/smoke/A-B matrix remains release-default debt.
 Generated boards remain visual references, not runtime assets or a locked pixel layout.
 
 ---
@@ -132,6 +133,35 @@ The durable layout insight remains **one connected class instrument**:
   timing target.
 - Player/party survivability and current target form a left island.
 - Boss HP/cast/effects form an enemy island away from the timing instrument.
+
+**The permanent screen anatomy (Bill, 2026-07-13): theater above, instruments below.** The
+legacy HUD grew around a full-screen stage, so its answer channel currently crosses the Duelist's
+body. Art V2 reverses that priority. At the 1920×1080 reference size the responsive targets are:
+
+| Zone | Reference band | Owns |
+|---|---:|---|
+| Status rail | `y 0–150` | compact party island left · boss HP/cast center · collapsed utility/meter right |
+| Combat theater | `y 150–560` | scenery + actors + transient world payoff only |
+| Answer instrument | `y 560–750` | the broad timing channel · exact press mark · local grade/history |
+| Class dashboard | `y 750–1040` | HP · Flow/Aggro + 30% threshold · five combo sockets · Wind · four compact abilities |
+| Hint gutter | `y 1040–1080` | optional binds/help only; may collapse first at 720p |
+
+These are ratios/minimums expressed by one layout contract, not five unrelated hard-coded pixel
+placements. At 720p the hint gutter and ornamental spacing collapse before the answer instrument;
+at ultrawide the theater gains side canvas while the central instrument stops at a readable max
+width.
+
+**NO-OVERLAP LAW:** persistent combat UI never occupies the combat-theater rectangle. Only
+transient world-space damage/heal numbers, contact FX, warnings attached to an actor, and ceremony
+may enter it—and they never cover the next timing target. The actor stage and SceneKit floor share
+the same theater-safe rectangle. `RaidStage2D.SLOTS` keeps its proven *local* feet/spacing grammar,
+but Art V2 dash mode may place that local stage inside the upper theater; the legacy/default-off
+full-screen floor remains byte-identical. The answer-channel contract protects its live widget,
+input/event semantics, tick truth, and same-frame feedback—not the obsolete literal
+`place(-370,-412,370,-288)` rectangle.
+
+The game remains fully playable from the instruments alone. Characters and environments are a
+high-quality performance of combat truth, never a prerequisite for reading or answering it.
 
 **Reaction-first contract:**
 
@@ -263,10 +293,11 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — Codex I3 + Claude C6
+### P5 · DUELIST DASHBOARD — C6A graybox → Bill speed gate → Codex I3 → C6B skin/binding
 
-Generate a modular component sheet from the approved UI direction, implement the connected class
-instrument over existing live data, then test at 1080p/720p/ultrawide and in both scene profiles.
+First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
+at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
+family and skin the accepted layout. Test at 1080p/720p/ultrawide and in both scene profiles.
 
 ### P6 · SIGNATURE VFX — Codex I4 + Claude C7
 
@@ -350,13 +381,37 @@ ask Bill before handing an explicit image request back to Codex.
 **Gates:** automated pose/contact tour · live `raid:tank` playtest build · missing-assets fallback ·
 determinism/raid integration check.
 
-### C6 · DASHBOARD HOST + DUELIST BINDING
+### C6A · REACTION-FIRST GRAYBOX HOST + THEATER CONTRACT — NEXT
 
-**Goal:** implement the modular painted dashboard using existing Flow/Wind/combo/ability/HP/party/
-boss/cast/effect truth. Preserve the answer-channel positioning contract.
+**Goal:** behind `--artv2=...,dash`, prove §2.3's permanent screen anatomy using plain code-drawn
+surfaces and the existing live controls/data: compact party/boss/utility top rail; a UI-free upper
+combat theater; a broad dominant AnswerChannel; connected HP/Flow-Aggro/combo/Wind dashboard; and
+four compact abilities. This is a layout/interaction proof, not final UI art.
 
-**Constraints:** art is replaceable texture/mask data · labels remain real fonts · no giant baked
-HUD image · old band selectable · responsive safe areas · no gameplay smoothing of timing truth.
+**Required contract:** one responsive layout source owns all rectangles; `RaidStage2D` and
+SceneKit share its theater/floor line in dash mode; persistent UI is clipped/placed outside that
+rect; the existing AnswerChannel instance and its event/tick truth are reused at the new size;
+`hudlow` is unnecessary while the dash host is active; default-off and missing-host paths build
+the complete legacy HUD unchanged. A dev layout overlay labels the safe rectangles for tours.
+
+**Constraints:** no image generation or substitution · no gameplay/CombatState/spec/protocol work
+· no timing smoothing · preserve healer click-cast frame behavior even if the Duelist proof uses
+compact frames · meter defaults collapsed but remains reachable · real fonts and live values ·
+1280×720, 1920×1080, and 2560×1080 must keep the AnswerChannel and theater non-overlapping.
+
+**Gate:** import/parse · `artv2_probe`/`ui_smoke_raid` · both scene profiles × resolution matrix ·
+busy Duelist stream + boss cast + low HP/aggro screenshots · live tank speed test. Stop for Bill's
+rectangle verdict before I3 image generation.
+
+### C6B · PAINTED DASHBOARD SKIN + DUELIST BINDING — AFTER I3
+
+**Goal:** consume Codex's Bill-approved I3 component family as replaceable 9-slice frames/caps,
+masks/fills, sockets, buttons, and effect frames over the C6A host. Bind every existing
+Flow/Wind/combo/ability/HP/party/boss/cast/effect truth without changing the accepted anatomy.
+
+**Constraints:** labels remain real fonts · no giant baked HUD image · old band selectable · no
+gameplay smoothing of timing truth · any missing/unusable visual source is an image-generation
+stop: ask Bill before Codex generates or edits it.
 
 ### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE
 
@@ -379,7 +434,8 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
 - **I1:** approved interior/exterior contrast pair, delivered as separable scene layers.
 - **I2:** 🔨 `11bcd4a` + `567adea` — approved Duelist anchor + separated chroma/alpha part sources +
   windup/contact replacements; lower-level runtime preparation delegated to C5 by Bill.
-- **I3:** dashboard component family: frame/caps/masks/fills/sockets/buttons/effect frames/icons.
+- **I3:** after Bill approves C6A's live rectangles, dashboard component family:
+  frame/caps/masks/fills/sockets/buttons/effect frames/icons.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.
@@ -521,7 +577,7 @@ flags default off ⇒ smokes/sims byte-identical. (GDScript gotcha: `static var`
 | Surface | Who else is on it | Rule for art-v2 |
 |---|---|---|
 | `raid_hud.gd` | THE hotspot (LEDGER §0): tank-v3 playtest surface is LIVE on main (Bill mid-playtest, fix `ef7a44e` same day); SEAL-rework build (BOSS-BRIEF) queued against it; METER L4/L5 🟡 | Merge `main` into `art-v2` before EVERY slice; keep `_build_combat` edits additive + guarded; never edit `_render_dial`/answer-channel truth |
-| `ui/bands/duelist_band.gd` + `ui/answer_channel.gd` | tank-v3's active feel surface, tuned daily | C6 is deliberately LAST (P5); dock around, never re-parent; the channel's `place` box is the positioning contract |
+| `ui/bands/duelist_band.gd` + `ui/answer_channel.gd` | tank-v3's active feel surface, tuned daily | C6A reuses the live channel and may resize/reposition it through the one layout contract; never fork/rebuild its tick/event/input truth. The old literal `place` box remains legacy-only |
 | `stage2d/*` | QUIET — only the purge id-swap since the `tempo-art` branch point; no open claims | Lowest-risk seam; C4/C5 land here. Fix the `make()` fallthrough wart here |
 | `ui/stage_backdrop.gd` | Untouched since branch point; no claims | C2 replaces its construction site only; file itself stays as the `legacy` profile |
 | `godot/project.godot` | ⚠ an UNCOMMITTED editor rewrite (comment-strip + key reorder) is sitting in the working tree RIGHT NOW — §8's warning is live, not theoretical | Never stage it with an art slice |
@@ -540,7 +596,9 @@ flags default off ⇒ smokes/sims byte-identical. (GDScript gotcha: `static var`
   the probe-boot gotcha already encoded); feet-line check = SLOTS fractions unchanged in shots.
 - **C4/C5:** pose/contact tour (extend `raid_stage_tour` shot list) · live `--autostart=raid`
   tank playtest · fallback proof = boot with the v2 asset folder renamed away → current puppet.
-- **C6:** `ui_smoke_raid` · resolution matrix · both scene profiles · tank playtest.
+- **C6A:** `artv2_probe` + `ui_smoke_raid` · labeled safe-rect overlay · resolution matrix · both
+  scene profiles · busy stream/cast/low-HP shots · tank speed playtest; Bill layout verdict before I3.
+- **C6B:** repeat C6A matrix with approved component assets + missing-assets fallback.
 - **C7:** tour + `ab-gate raid_sim`; budget check = `ScreenPostFx` hidden at rest (idle pays
   zero — its own contract), one-shot FX all `queue_free` ≤ ~1.2 s.
 - **Budget baseline (C0 measurement):** today's stage is 100% vector `_draw` + CPUParticles
