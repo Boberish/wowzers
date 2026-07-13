@@ -225,9 +225,10 @@ PERFECT (mint) < BULLSEYE (bright-gold). **PARRY grades to only GOOD or BULLSEYE
 the perfect zone = a solid GOOD, dead-centre = BULLSEYE, looser = a miss (wind gone). DODGE uses
 the full ladder. Same names + colors in every class.
 
-**E · DASHBOARD INSTRUMENTS (`y 750–1040`):** HP orb · Flow/Aggro orb (% + the 30% lock line) ·
-Wind bubble (fast-recharge leash) · five ◆ combo sockets (banked by a LANDED PARRY, spent by
-⚡ DUMP) · four ability runes (1 Dodge · 2 Parry · 3 ⚡Dump · 4 ⏱En Garde) that KICK on press.
+**E · DASHBOARD INSTRUMENTS (`y 750–1040`):** horizontal HP bar · horizontal Flow/Aggro bar
+(% + the 30% lock line) · compact secondary Wind reservoir · five modest ◆ combo sockets
+(banked by a LANDED PARRY, spent by ⚡ DUMP) · four ability runes (1 Dodge · 2 Parry · 3 ⚡Dump ·
+4 ⏱En Garde) that KICK on press. Resource bars outrank the combo sockets in visual mass.
 
 **F · STABLE vs IN-FLIGHT:** A–E (vocabulary · events · obs · grading) are **LOCKED** — safe to
 draw against. Still TUNING (numbers only, no shape/field change): guard windows, per-Seal
@@ -509,7 +510,10 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   rectangles and smaller ability band: modular component family for frame/caps/masks/fills/
   sockets/repeatable 4–6-button slots/effect frames. Timing nail, gate, labels, numbers, fills,
   and answer-shape geometry remain code-owned; the first image is a visual-material direction
-  board, not a baked runtime HUD or final atlas.
+  board, not a baked runtime HUD or final atlas. **I3-A revision:** replace the oversized HP /
+  Flow-Aggro bubbles with horizontal bars; keep Wind compact/secondary; shrink the five combo
+  sockets ~20–25%; the top-right fragment is the collapsed utility/damage-meter tab and uses a
+  restrained mini-graph/expand cue, not meaningless red dots.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.

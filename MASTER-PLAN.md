@@ -886,7 +886,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   baked full HUD and not a runtime atlas. Exact timing nail/gate, answer shapes, labels, numbers,
   fills, and cooldown truth stay code-owned. Answer-shape amendment from Bill: **PURPLE ALONE is
   the complete feint tell; remove the breathing-ring requirement.** No code/runtime import/C6B
-  until Bill approves the visual family. *(Codex)*
+  until Bill approves the visual family. **Iteration after v1:** material language accepted
+  ("looks nice"); replace the two visually dominant resource bubbles with horizontal HP and
+  Flow/Aggro bars, keep Wind compact/secondary, shrink five combo sockets ~20–25%, and clarify
+  the top-right fragment as the collapsed utility/damage-meter tab with a mini-graph/expand cue
+  instead of three meaningless red dots. Preserve every other component/style invariant. *(Codex)*
 
 - ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
   §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·
