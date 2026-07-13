@@ -877,6 +877,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-13 · `grade-fix` → **MERGED to `main` (`bf887cd`)** · §CLASSES/Duelist + shared UI —
+  **PARRY·PERFECT + THE GRADE RENAME. DONE.** Bill playtested the shape-law build: "cannot parry
+  on perfect, only bullseye." Root cause = the gate DREW the parry window as `parry_land` (0.07s,
+  old binary) while the parry actually lands to the perfect zone (0.165s) — **the gate lied.** Fix:
+  observe feeds `answer_claim * parry_grade_frac` (the real window); the perfect-zone parry now
+  grades **PERFECT** (was GOOD) so a parry lands on "the perfect area OR bullseye," never looser.
+  **GRADE RENAME (Bill): GRAZE < GOOD < GREAT < PERFECT** — DISPLAY ONLY (new `StrikeRes.grade_label`;
+  the internal `grade_name` keys / diag / boon triggers / oaths / draft are UNCHANGED — renaming
+  them would break the economy + determinism). Duelist channel + Twinfang rhythm-bar + raid_hud
+  strike popup renamed; 3-tier systems keep "PERFECT" as their top (each class's best reads PERFECT).
+  A landed parry shows **PARRY!** BUILD_STAMP bumped so the install is identifiable. Verify: import
+  clean · duelist det PASS (checksum inert — AI presses centre) · alchemist byte-identical · WSLg
+  shot = landed PARRY! + wider gate window. **Deployed to `C:\Games\v3Tank`.** ⚠ OWED (flagged):
+  Twinfang **boon description text** still says "Bullseye" (a content pass, not the verdict layer).
+
 - ☐ 2026-07-13 · Codex image packet `I3-A` · §GRAPHICS — **CLAIM: FIRST DUELIST DASHBOARD
   COMPONENT BOARD (Bill explicitly authorized image generation).** C6A's reaction-first layout
   and smaller ability band are approved. Generate one SUNPRINT CEL visual-material direction
