@@ -9,7 +9,7 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P3 CONTRAST PAIR COMPLETE · P4 PAINTED ACTOR ADAPTER NEXT.** Bill approved **SUNPRINT CEL** on
+**Status:** 🟡 **P4 SOURCE ART COMPLETE · CLAUDE C5 RUNTIME RIG NEXT.** Bill approved **SUNPRINT CEL** on
 2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
 texture rather than generic dark-fantasy micro-detail. C0/C1 are complete; C3 schema/bindings merged `1abfcd4`; C2 SceneKit merged as
 `da314e9` under Bill's explicit assume-pass instruction. Its deferred tour/smoke/A-B matrix remains
@@ -248,10 +248,20 @@ cooling midground, cool access-panel floor, and dehumidifier flank dressing. The
 remain untouched. The full resolution/legacy A-B matrix remains recorded debt before release
 default, per Bill's explicit move-on instruction.
 
-### P4 · DUELIST ANCHOR + RIG — 🟡 C4 ADAPTER 🔨 `05d9952` (debug-slab proof) · CODEX I2 ANCHOR NEXT · C5 RIG AFTER BILL'S GATE
+### P4 · DUELIST ANCHOR + RIG — 🟡 C4 ADAPTER 🔨 `05d9952` · I2 SOURCE ART 🔨 `11bcd4a` + `567adea` · CLAUDE C5 NEXT
 
 Approve the canonical character → derive/extract runtime layers → native rig → core animations →
 deforming garment → contact replacement. Old actor remains default until the complete tour passes.
+
+**I2 image gate passed 2026-07-13:** Bill approved the revised light dodge-tank identity after
+rejecting the armored first pass. Codex delivered the anchor, six separately generated part
+sources, and two replacement poses as both chroma and alpha files under
+`art-source/graphics-v2/p4-duelist/` (`11bcd4a`, `567adea`). At Bill's explicit delegation, C5 now
+owns the non-image production tail: trim/normalize, runtime copy/import, anchor mapping, real pose
+vocabulary, and verification. The debug slabs remain in `res://` until that work passes. **C5 may
+not generate, redesign, or silently substitute any image.** If the delivered sources cannot meet
+the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
+another image.
 
 ### P5 · DUELIST DASHBOARD — Codex I3 + Claude C6
 
@@ -331,6 +341,10 @@ windup scrub · no engine state · no Spine dependency.
 
 **Goal:** map Codex's approved Duelist layer set onto C4 and implement the P4 vocabulary.
 
+**Image-generation stop:** tooling/crop/scale/anchor/import work is authorized; new generation,
+redesign, or art substitution is not. If a source or required pose is missing/unusable, stop and
+ask Bill before handing an explicit image request back to Codex.
+
 **Gates:** automated pose/contact tour · live `raid:tank` playtest build · missing-assets fallback ·
 determinism/raid integration check.
 
@@ -361,7 +375,8 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
 
 - **I0:** V1 three-direction board.
 - **I1:** approved interior/exterior contrast pair, delivered as separable scene layers.
-- **I2:** Duelist anchor sheet + separated/derived runtime layers + replacement contact drawing.
+- **I2:** 🔨 `11bcd4a` + `567adea` — approved Duelist anchor + separated chroma/alpha part sources +
+  windup/contact replacements; lower-level runtime preparation delegated to C5 by Bill.
 - **I3:** dashboard component family: frame/caps/masks/fills/sockets/buttons/effect frames/icons.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual

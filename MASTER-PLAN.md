@@ -876,14 +876,23 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-13 · `artv2-i2` · §GRAPHICS — **CODEX I2 — DUELIST CANONICAL ART.** Generate one
-  SUNPRINT CEL Duelist anchor against the approved Stack visual language; stop at Bill's visual
-  gate before deriving the approved figure into C4's transparent `parts/` and replacement
-  `frames/` contract. Source/chroma/prepared assets stay under `art-source/graphics-v2/p4-duelist/`;
-  only approved processed runtime PNGs may replace the debug slabs under `res://game/art_v2/`.
-  No adapter/code, dashboard, VFX, gameplay, or legacy-default changes. After approval: deliver
-  anchor + runtime layers + heavy contact replacement, run import/probe/one actor tour, merge,
-  and hand C5 rig/pose vocabulary back to Claude. *(Codex graphics-v2 session)*
+- ☑ 2026-07-13 · `artv2-i2` → **MERGED to `main` (`11bcd4a` + `567adea`)** · §GRAPHICS —
+  **CODEX I2 IMAGE DELIVERY COMPLETE — DUELIST DODGE-TANK ANCHOR + SEPARATED SOURCES.** Bill
+  rejected the first armored-swordsman read and approved the second revision: a light, side-on
+  evasion tank with fitted teal coat, one forearm deflection bracer, short two-tail red scarf, and
+  one-handed dueling sword. Delivered outside `res://` under
+  `art-source/graphics-v2/p4-duelist/`: approved anchor + six separately generated rig parts
+  (`cloak/legs/torso/head/arm/blade`) + `windup_heavy`/`swing_heavy` whole-figure replacements,
+  each as retained flat-magenta chroma source and validated alpha PNG. The torso was regenerated
+  once to remove duplicate scarf tails. Installed helper extraction reported transparent corners
+  and plausible subject coverage for all eight. Per Bill's delegation, **all non-image tail work
+  now belongs to Claude C5**: crop/normalize to the 300px actor contract, place pivots/anchors,
+  replace debug runtime slabs, import, implement the real pose vocabulary, tour/playtest, and
+  merge/docs closure. No runtime, adapter, gameplay, HUD, or legacy-default file changed in I2;
+  C4 debug art remains live behind the default-off flag until C5. **NEW IMAGE STOP:** Claude may
+  crop/scale/anchor/wire the delivered files but may not regenerate, redesign, or substitute art;
+  if another image or pose is needed, stop and ask Bill before returning it to Codex.
+  *(Codex graphics-v2 session)*
 
 - ☑ 2026-07-13 · `artv2-c4` → **MERGED to `main` (ff `05d9952`)** · §GRAPHICS — **GRAPHICS
   PACKET C4 COMPLETE — PAINTED ACTOR ADAPTER** (GRAPHICS-PLAN §5·C4; Bill's spec). Verified
