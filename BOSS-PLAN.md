@@ -581,3 +581,19 @@ no-HP-bar · Title-Defense remixes → Trial Ladder · partner-boss tier → Dep
 build · JAILBREAK aggro-curse variants (post-E5). Cut: taunt button (everywhere, forever) ·
 second simultaneous telegraph source (law) · any +HP-sponge lever (`--fightlen` bridging
 included).
+
+## 10 · OPEN IDEAS — TODO (pre-verdict, not built, not yet ledgered)
+Loose boss-mechanic ideas dropped here to hold; each still owes a verdict before it becomes
+planned work.
+
+- **MISS-TAX = a lingering debuff for a blown answer (Bill, 2026-07-13).** Today a missed dodge
+  costs only the hit's damage — the whiff has no *lasting* teeth. Idea: a failed answer also
+  slaps a **short, stacking debuff** on that seat so sloppy play compounds and clean play pays
+  past the raw mitigation. Flavors to pick from: **−outgoing damage** · **slower charging**
+  (longer cooldowns / slower resource-gauge fill / slower cast) · −healing-received. Dials
+  (all SealTune-loose): *which* failures trigger it (dodge-only vs. dodge+parry+kick), stack
+  cap, decay rate, per-Seal on/off (fits the density ramp — off at Vorathek, on up-ladder).
+  ⚠ **Death-spiral watch:** a struggling raid getting *weaker* can snowball to a wipe — cap +
+  fast decay so it stings one mistake without becoming a doom loop; ties into the §1½ kick
+  miss-consequence and the **S15 grade-payoff law** (every answer tier pays distinctly). Verdict
+  owed: is this a general seat rule or a per-Seal signature mechanic?
