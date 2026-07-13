@@ -1,0 +1,28 @@
+{
+  "source_size": [1672, 941],
+  "four_by_two": {
+    "x_edges": [0, 418, 836, 1254, 1672],
+    "y_edges": [0, 470, 941],
+    "order": "row_major"
+  },
+  "three_by_two": {
+    "x_edges": [0, 557, 1114, 1672],
+    "y_edges": [0, 470, 941],
+    "order": "row_major"
+  },
+  "four_by_one": {
+    "x_edges": [0, 418, 836, 1254, 1672],
+    "y_edges": [0, 941],
+    "order": "row_major"
+  },
+  "sheets": {
+    "parry-alpha-v1.png": {"layout": "four_by_two", "frames": 8, "anchor_rule": "contact"},
+    "dodge-alpha-v1.png": {"layout": "four_by_two", "frames": 8, "anchor_rule": "release"},
+    "dump-alpha-v1.png": {"layout": "four_by_two", "frames": 8, "anchor_rule": "release"},
+    "engarde-activate-alpha-v1.png": {"layout": "four_by_two", "frames": 8, "anchor_rule": "body_and_floor"},
+    "engarde-hold-alpha-v1.png": {"layout": "four_by_one", "frames": 4, "anchor_rule": "body_and_floor"},
+    "impact-light-alpha-v1.png": {"layout": "three_by_two", "frames": 6, "anchor_rule": "contact"},
+    "impact-heavy-alpha-v1.png": {"layout": "four_by_two", "frames": 8, "anchor_rule": "contact"},
+    "impact-crush-alpha-v1.png": {"layout": "four_by_two", "frames": 8, "anchor_rule": "ground_contact"}
+  }
+}
