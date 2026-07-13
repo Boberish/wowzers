@@ -4,8 +4,8 @@
 ##
 ## THE FEEL: dense/twitch. LOW HP that swings fast (a build for a quick healer). WIND = a small
 ## pool with fast recharge — the anti-spam leash, NOT a flat cooldown. The v3 choice economy:
-## PARRY = the damage/aggro engine (graded GOOD or BULLSEYE — lands inside the perfect zone,
-## dead-centre = bullseye; counter + ◆ + flow spike, best mit, big wind cost) · DODGE = the
+## PARRY = the damage/aggro engine (lands on the top two tiers — the perfect zone = PERFECT,
+## dead-centre = BULLSEYE; counter + ◆ + flow spike, best mit, big wind cost) · DODGE = the
 ## economy play (cheap, graded GRAZE<GOOD<PERFECT<BULLSEYE, no counter). THE SHAPE LAW
 ## (2026-07-13): the comet's shape IS its button — ◇ diamond = dodge OR parry · ⬡ hexagon =
 ## dodge-only (globals/flurry) · ⯃ octagon = parry-only (heavy/buster; NO bullseye-dodge escape)
@@ -35,8 +35,8 @@ extends Resource
 @export var parry_land: float = 0.07       ## RETIRED (SHAPE LAW 2026-07-13): parry now grades on the
                                            ## one ladder (parry_grade_frac), not a ±window
 @export var parry_grade_frac: float = 0.55 ## PARRY lands inside this fraction of answer_claim (= the
-                                           ## PERFECT boundary) → GOOD; inside grade_bull_frac → BULLSEYE;
-                                           ## looser = a miss. Ties parry to the dodge ladder (coherence).
+                                           ## PERFECT boundary) → PERFECT; inside grade_bull_frac → BULLSEYE;
+                                           ## looser = a miss. The gate DRAWS this as the parry window.
 @export var grade_bull_frac: float = 0.18  ## stream-claim DODGE ladder: |press−impact|/answer_claim
 @export var grade_perfect_frac: float = 0.55
 @export var grade_good_frac: float = 0.80  ## …beyond = GRAZE, out to the claim edge

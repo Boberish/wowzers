@@ -416,17 +416,17 @@ func _verdict_text() -> String:
 	# FERMATA (EDGE): the ramp verdicts read by DEPTH, and the SNAP is the cliff.
 	if ramp:
 		match verdict:
-			"bullseye": return "BULLSEYE — the lip!"
-			"perfect": return "PERFECT"
+			"bullseye": return "PERFECT — the lip!"
+			"perfect": return "GREAT"
 			"good": return "GOOD — safe & shallow"
 			"snap": return "SNAPPED — too deep"
 			_: return "MISS"
 	if _bull:
-		return "BULLSEYE!"
+		return "PERFECT!"
 	match verdict:
 		"perfect":
 			# high-granularity feedback: how many ms off the ideal beat you were
-			return "PERFECT!  %+.0f ms" % (_press_off_ticks * (1000.0 / 30.0))
+			return "GREAT!  %+.0f ms" % (_press_off_ticks * (1000.0 / 30.0))
 		"early": return "EARLY — NO FLOW"
 		_: return "LATE — NO FLOW"
 

@@ -3654,10 +3654,10 @@ func _handle_event(ev: Dictionary) -> void:
 			if mine:
 				match String(ev.get("result", "")):
 					"bullseye":
-						_big_text("BULLSEYE!", Palette.GOLD_BRIGHT, 38)
+						_big_text("PERFECT!", Palette.GOLD_BRIGHT, 38)
 						_add_shake(5.0)
 					"perfect":
-						_big_text("PERFECT!", Palette.PERFECT, 34)
+						_big_text("GREAT!", Palette.PERFECT, 34)
 					"good":
 						_big_text("good", Palette.TEXT_DIM, 22, 0.42)
 		"snap":

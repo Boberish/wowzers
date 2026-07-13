@@ -52,7 +52,7 @@ func build() -> void:
 	dodge_rune.key_num = 1
 	dodge_rune.icon_id = "dodge"
 	dodge_rune.accent = Palette.FLOW
-	dodge_rune.tooltip_text = "DODGE — 1 / SPACE / LEFT CLICK. Graded GRAZE<GOOD<PERFECT<BULLSEYE. Answers ◇ diamonds (autos / light beats) and ⬡ hexagons (globals / flurry) at any grade — NOT ⯃ octagons (heavy / buster: parry those). Cheap WIND. Never hits back."
+	dodge_rune.tooltip_text = "DODGE — 1 / SPACE / LEFT CLICK. Graded GRAZE<GOOD<GREAT<PERFECT. Answers ◇ diamonds (autos / light beats) and ⬡ hexagons (globals / flurry) at any grade — NOT ⯃ octagons (heavy / buster: parry those). Cheap WIND. Never hits back."
 	dodge_rune.pressed.connect(func(): hud._ctrl.human({"type": "dodge"}))
 	row.add_child(dodge_rune)
 	parry_rune = AbilityRune.new()
@@ -60,7 +60,7 @@ func build() -> void:
 	parry_rune.key_num = 2
 	parry_rune.icon_id = "guard"
 	parry_rune.accent = Palette.STEEL
-	parry_rune.tooltip_text = "PARRY — 2 / RIGHT CLICK. Lands GOOD or BULLSEYE (dead-centre = bullseye) = best mit + COUNTER + ◆ + flow spike; loose = wind gone. Answers ◇ diamonds and ⯃ octagons aimed at YOU — never a ⬡ global / flurry."
+	parry_rune.tooltip_text = "PARRY — 2 / RIGHT CLICK. Lands on the perfect area — GREAT, or PERFECT dead-centre = best mit + COUNTER + ◆ + flow spike; loose = wind gone. Answers ◇ diamonds and ⯃ octagons aimed at YOU — never a ⬡ global / flurry."
 	parry_rune.pressed.connect(func(): hud._ctrl.human({"type": "defense"}))
 	row.add_child(parry_rune)
 	var sep := Control.new()
@@ -257,7 +257,8 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 	var ms := ("%+d ms" % off_ms) if has_ms else ""
 	match grade:
 		StrikeRes.Grade.BULLSEYE:
-			var txt := "PARRY!" if kind == "parry" else "BULLSEYE!"
+			# grade-label rename: the dead-centre read shows PERFECT (a landed parry shows PARRY!)
+			var txt := "PARRY!" if kind == "parry" else "PERFECT!"
 			if has_id:
 				channel.resolve(id, "bullseye", txt, ms)
 			else:
@@ -265,10 +266,12 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			slam.slam(txt, "perfect")
 			hud._shake_amt = maxf(hud._shake_amt, 2.0)
 		StrikeRes.Grade.PERFECT:
+			# the old "perfect" tier now reads GREAT; a landed parry (perfect zone) shows PARRY!
+			var txt := "PARRY!" if kind == "parry" else "GREAT"
 			if has_id:
-				channel.resolve(id, "perfect", "PERFECT", ms)
+				channel.resolve(id, "perfect", txt, ms)
 			else:
-				channel.stamp("PERFECT", "perfect")   # defensive only — every tank answer carries an id now
+				channel.stamp(txt, "perfect")   # defensive only — every tank answer carries an id now
 		StrikeRes.Grade.GOOD:
 			if has_id:
 				channel.resolve(id, "good", "GOOD", ms)

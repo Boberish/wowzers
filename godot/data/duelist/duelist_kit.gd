@@ -7,8 +7,8 @@
 ## judged INSTANTLY, symmetric around gate-touch (verdict + payoffs fire AT the press — the
 ## Twinfang model, Bill: "the twinfang is super good, do that"); resolve applies the stored
 ## grade. Telegraph busters/globals keep the open-window model (big slow reads):
-##   PARRY (main)      — GRADED GOOD or BULLSEYE (SHAPE LAW 2026-07-13): land inside the perfect
-##                       zone (parry_grade_frac) = GOOD, dead-centre (grade_bull_frac) = BULLSEYE,
+##   PARRY (main)      — lands on the top TWO tiers (Bill 2026-07-13): the perfect zone
+##                       (parry_grade_frac) = PERFECT, dead-centre (grade_bull_frac) = BULLSEYE,
 ##                       looser = the miss (.18 token mit, wind gone). Either land = mit .95 +
 ##                       COUNTER + ◆ + flow spike. 3.5 wind. Answers ◇ AUTO/light-beat + ⯃
 ##                       HEAVY/BUSTER aimed at YOU — never a ⬡ GLOBAL/FLURRY.
@@ -125,15 +125,16 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 		return                                            # the press was consumed by its comet
 	# nothing in claim range — a whiff (the wind was the price, same as any dry press)
 
-## PARRY grades to GOOD or BULLSEYE only (SHAPE LAW 2026-07-13): inside grade_bull_frac of the
-## claim window = BULLSEYE, inside parry_grade_frac (the perfect boundary) = a solid GOOD, looser
-## = a MISS (wind gone). Ties parry to the one dodge ladder — retune the fracs and it tracks.
+## PARRY lands on the top TWO timing tiers (Bill 2026-07-13): dead-centre (grade_bull_frac) =
+## BULLSEYE, anywhere in the perfect zone out to parry_grade_frac = PERFECT, looser = a MISS
+## (wind gone). So a parry lands on "the perfect area OR bullseye", never the loose GOOD/GRAZE.
+## Displays as PERFECT / GREAT (the 2026-07-13 grade-label rename) — see StrikeRes.grade_label.
 func _parry_grade(d: int, claim: int) -> int:
 	var p := float(d) / maxf(1.0, float(claim))
 	if p <= cfg.grade_bull_frac:
 		return StrikeRes.Grade.BULLSEYE
 	if p <= cfg.parry_grade_frac:
-		return StrikeRes.Grade.GOOD
+		return StrikeRes.Grade.PERFECT
 	return StrikeRes.Grade.MISS
 
 ## THE PRESS (§0 pass 2 + ONE CLAIM, Bill 2026-07-12): find the nearest unanswered, claimable
@@ -553,7 +554,9 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"win_perfect": cfg.answer_claim * cfg.grade_perfect_frac,
 		"win_good": cfg.answer_claim * cfg.grade_good_frac,
 		"win_graze": cfg.answer_claim,
-		"parry_window": cfg.parry_land,
+		# the PARRY land window the gate DRAWS = the real one (perfect zone), not the old
+		# ±parry_land bullseye-sized notch — so the player sees they can parry through perfect.
+		"parry_window": cfg.answer_claim * cfg.parry_grade_frac,
 	}
 
 func recap_spec(_s: CombatState, seat: Seat) -> Array:
