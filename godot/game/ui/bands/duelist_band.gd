@@ -33,7 +33,14 @@ func build() -> void:
 	# carries the raid-wide GLOBALS + CASTS (the octagon projection is deleted); the judge's
 	# gap-frame ghost is fixed at the source (raid_hud _seat_judge_window feed-or-deactivate).
 	channel = AnswerChannel.new()
-	UiKit.place(channel, 0.5, 1, 0.5, 1, -370, -412, 370, -288)
+	# DEV hudlow (Bill's art-test, C5.1): duck the channel toward the bottom and
+	# fade it so the painted actor reads through it — a stopgap until C6 gives the
+	# dashboard a real home. Normal HUD is untouched when the flag is off.
+	if ArtV2.hud_low:
+		UiKit.place(channel, 0.5, 1, 0.5, 1, -340, -300, 340, -196)
+		channel.modulate.a = 0.5
+	else:
+		UiKit.place(channel, 0.5, 1, 0.5, 1, -370, -412, 370, -288)
 	hud._shake_root.add_child(channel)
 	# THE VERDICT SLAM — center-screen verdicts (carried from the juice pass; place THEN add)
 	slam = VerdictSlam.new()

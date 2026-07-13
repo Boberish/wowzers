@@ -16,6 +16,7 @@ extends RefCounted
 static var actors := false   ## ON: V2 actor art may answer Actor2D.make()
 static var scene := ""       ## scene profile id — "" = legacy StageBackdrop
 static var dash := false     ## ON: a V2 dashboard host may replace the widgets
+static var hud_low := false  ## DEV/test: duck + fade the answer channel so the actor reads (temp until C6 dashboard)
 
 ## The non-canonical V2 namespace (§3): runtime assets live here until approved.
 const ACTOR_DIR := "res://game/art_v2/actors"
@@ -32,6 +33,8 @@ static func boot(args: PackedStringArray) -> void:
 				actors = true
 			elif t == "dash":
 				dash = true
+			elif t == "hudlow":
+				hud_low = true
 			elif t.begins_with("scene:"):
 				scene = t.substr("scene:".length()).strip_edges()
 			elif t != "":
