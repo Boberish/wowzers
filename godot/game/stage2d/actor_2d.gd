@@ -50,6 +50,22 @@ func variant(_id: String) -> void: pass       ## reskin per encounter/boss id
 func die() -> void: pass
 func win() -> void: pass
 
+## The graded answer (stream/claim classes — the tank first). Default routes to
+## the classic reacts so placeholder puppets keep today's look; painted actors
+## override with one unique animation per grade (C5.1, Bill's grading-clarity ask).
+func graded_react(kind: String, grade: int) -> void:
+	if kind == "parry":
+		if grade == StrikeRes.Grade.MISS:
+			stumble_react()
+		else:
+			evade_react()
+	elif grade == StrikeRes.Grade.MISS or grade == StrikeRes.Grade.BAITED:
+		stumble_react()
+	elif grade == StrikeRes.Grade.GRAZE:
+		graze_react()
+	else:
+		hop_react(grade >= StrikeRes.Grade.PERFECT)
+
 # ============================================================ factory
 ## Build the actor for a role. USER ART WINS: if res://game/art/actors/<id>.tscn
 ## exists it is wrapped in a SpriteActor2D; otherwise the built-in placeholder

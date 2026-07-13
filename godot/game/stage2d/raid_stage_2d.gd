@@ -230,13 +230,20 @@ func on_event(ev: Dictionary) -> void:
 		# TANK-V3 vocabulary → actor verbs (the pre-rework stage only knew
 		# negate/strike_graded; the Duelist's stream/claim model emits these).
 		# Additive: other classes keep firing negate/strike_graded above.
-		"duel_dodge":
+		# THE GRADED ANSWER (C5.1): duel_answer carries kind+grade — one unique
+		# animation per grade (Actor2D.graded_react; painted actors go further).
+		# The raw press echoes (duel_dodge/duel_parry) no longer animate — the
+		# graded answer lands the same tick and owns the motion.
+		"duel_answer":
 			if a != null:
-				a.hop_react(true)
-				_ghost(a.position)
-		"duel_parry":
-			if a != null:
-				a.evade_react()
+				var g := int(ev.get("grade", 0))
+				a.graded_react(String(ev.get("kind", "dodge")), g)
+				if g == StrikeRes.Grade.BULLSEYE:
+					_ghost(a.position)
+					_star(a.position + Vector2(10, -320), Color("ffd76a"))
+					_punch = maxf(_punch, 0.5)
+				elif g == StrikeRes.Grade.PERFECT or g == StrikeRes.Grade.GOOD:
+					_ghost(a.position)
 		"duel_fumble", "duel_weave_blown":
 			if a != null:
 				a.stumble_react()
