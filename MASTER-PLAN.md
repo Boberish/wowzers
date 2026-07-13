@@ -966,6 +966,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   timing smoothing, new image generation, redesign, or giant baked HUD. Stop and ask Bill if an
   approved source cannot satisfy a required state.
 
+- ⏳ 2026-07-13 · Claude packet `C6B.1` · §GRAPHICS — **READY FOR CLAUDE CLAIM: SCALE + BAR
+  PIXEL-REGISTRATION POLISH.** Bill's live C6B verdict: **“the basics are solid”**; preserve the
+  approved architecture/material/hierarchy and correct only component scaling plus the few bar/fill
+  pixel lineups visible in play. Inspect `art-Test` and the existing state/resolution tours; tune
+  responsive sizes, insets, style-box margins, and safe pixel snapping. Crop metadata may change
+  only for a proven clipped approved edge. No new images/redesign, gameplay/state/protocol/timing
+  change, or fallback regression. Repeat 720p/1080p/ultrawide × both scenes and the C6B state strip,
+  redeploy, then stop for Bill's final P5 verdict before I4/C7.
+
 - ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
   §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·
   size=damage · parry graded good/bullseye. DONE.** Verify: import parse-clean · duelist_sim

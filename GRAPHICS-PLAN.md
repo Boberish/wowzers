@@ -9,13 +9,14 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P5 SKIN BUILT — C6B 🔨 MERGED `28e9b15` (2026-07-13) · ⚠ AT BILL'S LIVE PAINTED-
-DASHBOARD VERDICT.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
+**Status:** 🟡 **P5 SKIN BUILT — C6B 🔨 MERGED `28e9b15` (2026-07-13) · BILL CONDITIONAL PASS ·
+C6B.1 SCALE/REGISTRATION POLISH READY.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
 `5bb532c`; C6A graybox `2b407c4` passed Bill's rectangle/speed gate; I3-A/B delivered the
 approved component family (`801d713`); **C6B bound it**: deterministic crops → `res://game/
 art_v2/dash/`, painted answer frame/comet icons/Wind+sockets/HP+Flow bars/slots/party rows/
 boss+cast shells/utility tab over the SAME truth widgets, default-off behind `--artv2=…,dash`,
-missing-asset ⇒ C6A graybox. `art-Test` boots it. Bill's verdict gates P6 (I4 VFX / C7).
+missing-asset ⇒ C6A graybox. `art-Test` boots it. Bill's live verdict: **“the basics are solid”**;
+some component scaling and bar-edge pixel registration still need a narrow C6B.1 pass before P6.
 C2's deferred tour/smoke/A-B matrix remains release-default debt. Generated boards remain
 visual references, not runtime assets or a locked pixel layout.
 
@@ -376,7 +377,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ gate → I3-A ✅ → I3-B `801d713` ✅ → **C6B 🔨 `28e9b15` · ⚠ BILL'S LIVE PAINTED VERDICT GATES P6**
+### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ → I3-A/B ✅ → C6B `28e9b15` ✅ BASIC SYSTEM → **C6B.1 SCALE/PIXEL POLISH READY · P6 WAITS**
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -514,6 +515,26 @@ Flow/Wind/combo/ability/HP/party/boss/cast/effect truth without changing the acc
 **Constraints:** labels remain real fonts · no giant baked HUD image · old band selectable · no
 gameplay smoothing of timing truth · any missing/unusable visual source is an image-generation
 stop: ask Bill before Codex generates or edits it.
+
+### C6B.1 · PAINTED DASHBOARD SCALE + BAR REGISTRATION POLISH — READY FOR CLAUDE
+
+**Bill's live verdict (2026-07-13):** “the basics are solid”; preserve the C6B architecture,
+material family, hierarchy, controls, and live bindings. This is not a layout redesign or image
+request. Inspect the live `art-Test` build and existing resolution tour, then tune component scale
+and the few bar/fill pixel registrations so painted inner openings, live fill rects, labels, and
+code-drawn markers share intentional insets at 1080p, 720p, and ultrawide.
+
+**Scope:** responsive constants/insets/minimum sizes · texture/style-box margins · crop metadata
+only if an existing approved alpha edge is actually clipped · pixel snapping where it improves
+crispness without causing fractional motion jitter. Re-check central Wind prominence, smaller
+five-socket combo bank, side HP/Aggro balance, party-row density, boss/cast fit, ability scale, and
+utility-tab hit target. Fix seams, one-pixel leaks, clipped caps, overlarge shells, and fill-to-frame
+misregistration; do not change the accepted screen anatomy.
+
+**Hard boundary:** no new image generation/redesign · no gameplay/state/protocol/checksum/timing
+changes · no new smoothing · no baked values · default-off/missing-asset fallback remains complete.
+Gate with the C6B state strip plus 1280×720, 1920×1080, and 2560×1080 tours in both scene profiles,
+then stop for Bill's final P5 polish verdict before I4/C7.
 
 ### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE
 
