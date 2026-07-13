@@ -182,9 +182,9 @@ status · SIZE = damage.** A player reads the shape to know which key, glances a
 | **◇ diamond** | **DODGE** (graded) *or* **PARRY** (the greed line) | `auto` (ambient rhythm) · `beat` (a personal boss strike aimed at you, LIGHT) |
 | **⬡ hexagon** | **DODGE only** — parry is illegal | `global` (room-wide aoe, every seat) · `flurry` beats (a rapid WEAVE cluster) |
 | **⯃ spiked octagon** | **PARRY only** — dodge is illegal | `heavy` · `buster` · a HEAVY/CRUSH personal `beat` |
-| **☠ skull / ✗** | **BRACE** — do not press | `eat` (unavoidable) |
+| **⊘ barred disc / sealed impact** | **BRACE** — no action is legal; take the hit | `eat` (unavoidable) |
 
-- **The printed WORD under the comet is the answer** (`DODGE` / `PARRY` / `WEAVE` / `EAT`). On a
+- **The printed WORD under the comet is the answer** (`DODGE` / `PARRY` / `WEAVE` / `BRACE`). On a
   diamond the word is **DODGE** (the safe default); *parry-the-diamond* is the greed play taught
   by the rune tooltip, not a second word.
 - **Bullseye-dodge on a heavy/buster is GONE.** An octagon is a pure parry check — you cannot
@@ -196,7 +196,8 @@ status · SIZE = damage.** A player reads the shape to know which key, glances a
 "→ VICTIM"; the tank still answers it, damage stays the victim's) · **BLUE = flurry** (WEAVE
 mode) · **PURPLE = feint** (a lie wearing a real shape + word; **purple alone is the complete
 tell—no breathing ring or second animation**; press it and you're BAITED). Red no longer means
-"boss attack"; it means peeled.
+"boss attack"; it means peeled. A feint may wear **any pressable shape**—diamond, hexagon, or
+spiked octagon—but never the barred-disc BRACE token.
 
 **A·· SIZE = damage.** The shape scales with the strike's `size` (`LIGHT < HEAVY < CRUSH`): small
 pokes draw small, the big commits draw large with a heavier glow. Size is read-only flavor +
@@ -220,15 +221,23 @@ unpressed damage comet crossed the line → red ✗ husk that flows to the bar's
 `duel_eat` = brace · `duel_engarde`/`duel_engarde_break` · `duel_dump {amt}` · `stream_shatter`
 = body-death shatter · `stream_guard_shatter {ids}` = THE GUARD rear-up.
 
-**D · THE GRADING LADDER (game-wide, identical to Twinfang):** GRAZE (steel) < GOOD (gold) <
-PERFECT (mint) < BULLSEYE (bright-gold). **PARRY grades to only GOOD or BULLSEYE** — land inside
-the perfect zone = a solid GOOD, dead-centre = BULLSEYE, looser = a miss (wind gone). DODGE uses
-the full ladder. Same names + colors in every class.
+**D · THE DISPLAY GRADING LADDER (game-wide, identical to Twinfang):** GRAZE (steel) < GOOD
+(gold) < GREAT (mint) < PERFECT (bright-gold). **PARRY lands only on GREAT or PERFECT** — land
+inside the perfect zone = GREAT, dead-centre = PERFECT, looser = a miss (wind gone). DODGE uses
+the full ladder. Same visible names + colors in every class; the engine's internal grade keys
+remain unchanged.
 
-**E · DASHBOARD INSTRUMENTS (`y 750–1040`):** horizontal HP bar · horizontal Flow/Aggro bar
-(% + the 30% lock line) · compact secondary Wind reservoir · five modest ◆ combo sockets
-(banked by a LANDED PARRY, spent by ⚡ DUMP) · four ability runes (1 Dodge · 2 Parry · 3 ⚡Dump ·
-4 ⏱En Garde) that KICK on press. Resource bars outrank the combo sockets in visual mass.
+**E · DASHBOARD INSTRUMENTS (`y 750–1040`):** horizontal HP safety bar on the left · horizontal
+Flow/Aggro safety bar on the right (% + the code-drawn 30% lock line) · **Wind as the primary
+central bar above** five modest ◆ combo sockets (banked by a LANDED PARRY, spent by ⚡ DUMP) ·
+four ability runes (1 Dodge · 2 Parry · 3 ⚡Dump · 4 ⏱En Garde) that KICK on press. Wind is the
+active pacing read; HP/Aggro stay available peripherally; combo sockets carry no decorative
+status bubbles of their own.
+
+**Party island detail:** each of the four compact seat rows reserves a primary HP bar, a smaller
+class-resource bar, a thin optional cast/progress bar, and a short row of debuff/status sockets.
+The healer's legacy click-target behavior remains functional truth; the painting only supplies
+replaceable shells and spacing.
 
 **F · STABLE vs IN-FLIGHT:** A–E (vocabulary · events · obs · grading) are **LOCKED** — safe to
 draw against. Still TUNING (numbers only, no shape/field change): guard windows, per-Seal
@@ -513,7 +522,11 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   board, not a baked runtime HUD or final atlas. **I3-A revision:** replace the oversized HP /
   Flow-Aggro bubbles with horizontal bars; keep Wind compact/secondary; shrink the five combo
   sockets ~20–25%; the top-right fragment is the collapsed utility/damage-meter tab and uses a
-  restrained mini-graph/expand cue, not meaningless red dots.
+  restrained mini-graph/expand cue, not meaningless red dots. **Revision 2:** Wind becomes the
+  central primary bar above the smaller combo bank; HP and Flow/Aggro stay as side bars; remove
+  the accidental baked diamond/lock marker from Aggro; combo sockets lose their tiny top bubbles;
+  show clean purple feint versions of diamond+hexagon+octagon only; replace skull with the muted
+  barred-disc BRACE token; expand party rows for HP/resource/cast/debuff information.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.

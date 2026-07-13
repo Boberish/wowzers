@@ -877,6 +877,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-13 · `main` (docs) · §GRAPHICS/I3 + ANSWER-SHAPE visual amendment —
+  **WIND TAKES THE CENTER; BRACE RETIRES THE SKULL.** Bill's second component-board revision:
+  Wind is the primary central bar above five smaller clean combo sockets; HP stays on the left
+  and Flow/Aggro on the right as peripheral safety rails. Remove the accidental baked diamond
+  from the Aggro shell and the decorative bubbles above combo sockets. Purple feints need clean
+  diamond, hexagon, and spiked-octagon variants, never a BRACE variant. Replace skull/X art with
+  a muted barred-disc `⊘` meaning **BRACE — no action is legal; take the hit.** Expand each party
+  row to reserve HP, class resource, cast/progress, and debuff/status space. This is a visual
+  contract only: current runtime skull/X remains functional and owes the thin C6B/UI follow-up.
+
 - ☑ 2026-07-13 · `grade-fix` → **MERGED to `main` (`bf887cd`)** · §CLASSES/Duelist + shared UI —
   **PARRY·PERFECT + THE GRADE RENAME. DONE.** Bill playtested the shape-law build: "cannot parry
   on perfect, only bullseye." Root cause = the gate DREW the parry window as `parry_land` (0.07s,
@@ -906,6 +916,11 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   Flow/Aggro bars, keep Wind compact/secondary, shrink five combo sockets ~20–25%, and clarify
   the top-right fragment as the collapsed utility/damage-meter tab with a mini-graph/expand cue
   instead of three meaningless red dots. Preserve every other component/style invariant. *(Codex)*
+  **Iteration 2:** make Wind the central primary bar above the smaller combo bank; keep HP left
+  and Flow/Aggro right; remove the baked Aggro diamond and combo-top bubbles; include purple
+  feint versions of all three pressable shapes (diamond/hexagon/octagon) but none for BRACE;
+  replace the skull with a muted barred-disc BRACE/no-action seal; flesh out four party rows with
+  HP/resource/cast/debuff reservations. Preserve the accepted material family and code-owned truth.
 
 - ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
   §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·
