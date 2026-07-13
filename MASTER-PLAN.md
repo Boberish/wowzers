@@ -876,8 +876,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-13 · worktree `../wow-artv2-c4` (branch `artv2-c4`, from `b744571`) · §GRAPHICS —
-  **CLAIM: GRAPHICS PACKET C4 — PAINTED ACTOR ADAPTER** (GRAPHICS-PLAN §5·C4; Bill's spec).
+- ☑ 2026-07-13 · `artv2-c4` → **MERGED to `main` (ff `05d9952`)** · §GRAPHICS — **GRAPHICS
+  PACKET C4 COMPLETE — PAINTED ACTOR ADAPTER** (GRAPHICS-PLAN §5·C4; Bill's spec). Verified
+  minimal: import 0 errors · `artv2_probe` ALL OK (77 — [7] adapter contract + delivery-
+  agnostic factory map + flag-OFF-always-legacy) · one 1920×1080 `--actors` tour shot =
+  debug slab duelist at the tank slot with twinfang/alchemist/well/boss STAYING PUPPETS
+  in-frame (the live fallback photographed) · feet record byte-identical. Deferred debt
+  (ledger row): pose/contact matrix + live tank playtest. Next: Codex I2 Duelist anchor →
+  Bill's P4 gate → C5 rig. ORIGINAL CLAIM:
   Class-agnostic native layered-actor adapter (`game/art_v2/painted_actor_2d.gd`,
   `PaintedActor2D extends Actor2D`) behind `ArtV2.make_actor` (C1 seam, default OFF):
   consumes a documented folder/metadata contract (`game/art_v2/actors/<id>/actor.json` +

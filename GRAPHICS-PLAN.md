@@ -248,7 +248,7 @@ cooling midground, cool access-panel floor, and dehumidifier flank dressing. The
 remain untouched. The full resolution/legacy A-B matrix remains recorded debt before release
 default, per Bill's explicit move-on instruction.
 
-### P4 · DUELIST ANCHOR + RIG — 🟡 CLAUDE C4 FOUNDATION NEXT · CODEX I2 ANCHOR FOLLOWS
+### P4 · DUELIST ANCHOR + RIG — 🟡 C4 ADAPTER 🔨 `05d9952` (debug-slab proof) · CODEX I2 ANCHOR NEXT · C5 RIG AFTER BILL'S GATE
 
 Approve the canonical character → derive/extract runtime layers → native rig → core animations →
 deforming garment → contact replacement. Old actor remains default until the complete tour passes.
@@ -319,7 +319,7 @@ that renders both approved profiles in repeatable combat moments.
 
 **Constraint:** tooling consumes Codex assets; it does not invent style or repaint them.
 
-### C4 · PAINTED ACTOR ADAPTER
+### C4 · PAINTED ACTOR ADAPTER — 🔨 BUILT+MERGED `05d9952` (2026-07-13; contract = `godot/game/art_v2/ACTORS.md`; rigid/deform/replacement modes proven on debug slabs at the duelist id; legacy factory untouched; pose/contact matrix + live playtest = deferred debt)
 
 **Goal:** native reusable actor implementation consuming approved layer/anchor metadata while
 satisfying `Actor2D` verbs and failing back to the current actor.
