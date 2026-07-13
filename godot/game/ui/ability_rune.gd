@@ -41,6 +41,12 @@ var _gleam: float = 0.0           # become-ready glint sweep, decays
 var _was_on: bool = true
 var _glow: GlowCore
 var _tex: Texture2D
+# ART V2 / C6B (set ONLY by the dash host BEFORE add_child; default off ⇒ legacy
+# byte-identical): the I3-B painted slot replaces the code chamfer/bevel body.
+# Glyph, cooldown veil, gleam, keybind tab, charge pips, want-line, name and every
+# press/hover/ready reaction stay code-drawn. The slot repeats 4–6 across untouched
+# (the HBox lays out by min size — modularity is the row's, not the texture's).
+var v2_skin: DashSkin = null
 
 const CHAMFER := 9.0
 
@@ -83,9 +89,20 @@ func _process(delta: float) -> void:
 		_glow.set_base((0.9 if on else 0.0) + 0.4 * _hover)
 	queue_redraw()
 
-## The socket face: a chamfered square (octagon), centred, 62px.
+## The socket face: a chamfered square (octagon), centred, 62px. In C6B slot mode
+## the face is the painted slot's interior opening (glyph/cooldown geometry follows).
 func _face() -> Rect2:
+	if v2_skin != null:
+		return DashSkin.uniform_opening(_v2_slot_rect(), DashSkin.OPEN_SLOT)
 	return Rect2(size.x * 0.5 - 31.0, 1.0, 62.0, 62.0)
+
+## The painted slot's dest rect: fitted to the classic 76px socket width, top-anchored
+## so the engraved name keeps its line under the socket.
+func _v2_slot_rect() -> Rect2:
+	var tex: Texture2D = v2_skin.t["slot_ability"]
+	var sw := 76.0
+	var sh := sw * float(tex.get_height()) / float(tex.get_width())
+	return Rect2(size.x * 0.5 - sw * 0.5, 0.0, sw, sh)
 
 func _oct(fr: Rect2, inset: float = 0.0) -> PackedVector2Array:
 	var k := CHAMFER - inset * 0.4
@@ -105,23 +122,33 @@ func _draw() -> void:
 	# the whole socket lifts a breath on hover and dips on press
 	draw_set_transform(Vector2(0.0, 1.6 * _press_k - 1.0 * _hover), 0.0, Vector2.ONE)
 
-	# ---- seat shadow + glass face ----
-	var seat := _oct(fr.grow(2.0))
-	draw_colored_polygon(seat, Color(0, 0, 0, 0.55))
+	# ---- seat shadow + glass face (C6B: the painted slot IS the body) ----
 	var face := _oct(fr)
-	draw_colored_polygon(face, Palette.FILL_BOT if on else Palette.BG1.darkened(0.18))
-	# top gloss (light falls from UiKit.LIGHT_DIR — upper half catches it)
-	var gx0 := fr.position.x + 2.0
-	var gx1 := fr.end.x - 2.0
-	var gy0 := fr.position.y + 2.0
-	var gmid := fr.position.y + fr.size.y * 0.42
-	var gloss := PackedVector2Array([
-		Vector2(gx0 + CHAMFER, gy0), Vector2(gx1 - CHAMFER, gy0),
-		Vector2(gx1, gy0 + CHAMFER), Vector2(gx1, gmid), Vector2(gx0, gmid),
-		Vector2(gx0, gy0 + CHAMFER)])
-	var gc := Palette.FILL_TOP.lightened(0.06)
-	gc.a = 0.55 if on else 0.30
-	draw_colored_polygon(gloss, gc)
+	if v2_skin != null:
+		var srect := _v2_slot_rect()
+		var stex: Texture2D = v2_skin.t["slot_ability"]
+		draw_texture_rect(stex, Rect2(srect.position + Vector2(1.5, 2.5), srect.size),
+			false, Color(0, 0, 0, 0.5))
+		# glass face UNDER the painting — the frame's rounded bevel masks its edges
+		draw_rect(fr.grow(3.0), Palette.FILL_BOT if on else Palette.BG1.darkened(0.18))
+		draw_texture_rect(stex, srect, false,
+			Color.WHITE if on else Color(0.62, 0.62, 0.68, 1.0))
+	else:
+		var seat := _oct(fr.grow(2.0))
+		draw_colored_polygon(seat, Color(0, 0, 0, 0.55))
+		draw_colored_polygon(face, Palette.FILL_BOT if on else Palette.BG1.darkened(0.18))
+		# top gloss (light falls from UiKit.LIGHT_DIR — upper half catches it)
+		var gx0 := fr.position.x + 2.0
+		var gx1 := fr.end.x - 2.0
+		var gy0 := fr.position.y + 2.0
+		var gmid := fr.position.y + fr.size.y * 0.42
+		var gloss := PackedVector2Array([
+			Vector2(gx0 + CHAMFER, gy0), Vector2(gx1 - CHAMFER, gy0),
+			Vector2(gx1, gy0 + CHAMFER), Vector2(gx1, gmid), Vector2(gx0, gmid),
+			Vector2(gx0, gy0 + CHAMFER)])
+		var gc := Palette.FILL_TOP.lightened(0.06)
+		gc.a = 0.55 if on else 0.30
+		draw_colored_polygon(gloss, gc)
 
 	# ---- the glyph (big — the face belongs to it) ----
 	if _tex != null:
@@ -169,18 +196,20 @@ func _draw() -> void:
 		bcol.a = 0.34 * ga
 		draw_colored_polygon(band, bcol)
 
-	# ---- two-tone gilded bevel (light top-left / shadow bottom-right) ----
-	var bright := accent.lerp(Palette.GOLD_BRIGHT, 0.5) if _hover > 0.3 else Palette.GOLD_BRIGHT
-	var lit_a := (0.9 if on else 0.45) + 0.1 * _hover
-	for i in 8:
-		var p1 := face[i]
-		var p2 := face[(i + 1) % 8]
-		var n := (p1 + p2) * 0.5 - c
-		var lit := n.x + n.y < 0.0                       # faces the top-left light
-		var ec := (bright if lit else Palette.GOLD_DIM)
-		ec.a = lit_a if lit else 0.85
-		draw_line(p1, p2, Color(0, 0, 0, 0.8), 3.2, true)
-		draw_line(p1, p2, ec, 1.5, true)
+	# ---- two-tone gilded bevel (light top-left / shadow bottom-right); the painted
+	#      slot carries its own bevel in C6B ----
+	if v2_skin == null:
+		var bright := accent.lerp(Palette.GOLD_BRIGHT, 0.5) if _hover > 0.3 else Palette.GOLD_BRIGHT
+		var lit_a := (0.9 if on else 0.45) + 0.1 * _hover
+		for i in 8:
+			var p1 := face[i]
+			var p2 := face[(i + 1) % 8]
+			var n := (p1 + p2) * 0.5 - c
+			var lit := n.x + n.y < 0.0                   # faces the top-left light
+			var ec := (bright if lit else Palette.GOLD_DIM)
+			ec.a = lit_a if lit else 0.85
+			draw_line(p1, p2, Color(0, 0, 0, 0.8), 3.2, true)
+			draw_line(p1, p2, ec, 1.5, true)
 
 	# ---- hover ignite: the socket rim catches fire, faint halo past it ----
 	if _hover > 0.01:

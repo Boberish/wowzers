@@ -23,6 +23,11 @@ var in_zone: bool = false      ## a kick would land now
 var kickable_seat: bool = false ## this seat can actually kick (else "uncontested")
 
 var _glyph: Texture2D
+# ART V2 / C6B (set ONLY by the dash host; default off ⇒ legacy byte-identical):
+# the I3-B resource shell replaces the flat glass plate. It rides this control's
+# own modulate, so the painted shell fades in/out WITH the cast — no dead chrome
+# between casts. Fill, kick window, names, countdown, cue: all still code-drawn.
+var v2_skin: DashSkin = null
 var _pulse := 0.0
 var _alpha := 0.0
 var _flash := 0.0              ## resolve burst decay
@@ -75,16 +80,29 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var acc := _accent()
 
-	# glass plate + gilded frame
-	var plate := StyleBoxFlat.new()
-	plate.bg_color = Color(0.030, 0.026, 0.052, 0.66)
-	plate.set_corner_radius_all(8)
-	plate.border_color = Color(acc.r, acc.g, acc.b, 0.55)
-	plate.set_border_width_all(1)
-	draw_style_box(plate, Rect2(0, 0, w, h))
+	# glass plate + gilded frame (C6B: the painted resource shell, fading with us)
+	var cx := 40.0
+	var cw := w - cx - 12.0
+	var cy := 6.0
+	var ch := h - 26.0
+	if v2_skin != null:
+		var srect := Rect2(0.0, 0.0, w, ch + 12.0)
+		v2_skin.hshell(self, "shell_resource", srect, DashSkin.CAPS_RESOURCE)
+		var op := v2_skin.sliced_opening("shell_resource", srect, DashSkin.CAPS_RESOURCE, DashSkin.OPEN_RESOURCE)
+		cx = op.position.x + 26.0            # the medallion keeps the channel's west end
+		cw = op.end.x - cx
+		cy = op.position.y
+		ch = op.size.y
+	else:
+		var plate := StyleBoxFlat.new()
+		plate.bg_color = Color(0.030, 0.026, 0.052, 0.66)
+		plate.set_corner_radius_all(8)
+		plate.border_color = Color(acc.r, acc.g, acc.b, 0.55)
+		plate.set_border_width_all(1)
+		draw_style_box(plate, Rect2(0, 0, w, h))
 
 	# boss glyph medallion (left)
-	var med := Vector2(20.0, h * 0.5)
+	var med := Vector2(20.0, (cy + ch * 0.5) if v2_skin != null else h * 0.5)
 	draw_circle(med, 13.0, Color(0, 0, 0, 0.5))
 	if _glyph != null:
 		var gr := 11.0
@@ -93,10 +111,6 @@ func _draw() -> void:
 	UiKit.gilded_ring(self, med, 13.0, 1.5, 20)
 
 	# the fill channel
-	var cx := 40.0
-	var cw := w - cx - 12.0
-	var cy := 6.0
-	var ch := h - 26.0
 	draw_rect(Rect2(cx, cy, cw, ch), Color(0.024, 0.020, 0.043))
 	# fill left->right (the cast progressing toward resolution)
 	var fc := acc

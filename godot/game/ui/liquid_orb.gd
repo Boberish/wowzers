@@ -11,6 +11,14 @@ var value: float = 100.0
 var max_value: float = 100.0
 var fill: Color = Color("9a2b28")
 var caption: String = "HP"
+# --- ART V2 / C6B (set ONLY by the dash host; default off ⇒ legacy orb byte-identical):
+# the same live feed presented as a painted HORIZONTAL safety bar (§2.3.1 E — HP left,
+# Flow/Aggro right). Fills, numerals, captions, warnings stay code-drawn; the I3-B
+# resource shell supplies only the housing.
+var v2_bar: DashSkin = null
+var v2_pct: bool = false          ## print the numeral as a percentage (the Flow/Aggro bar)
+var v2_lock: float = -1.0         ## 0..1 threshold marker (the Duelist's 30% Flow lock);
+                                  ## < 0 = none. Always code-drawn — never baked (README law).
 
 var _phase: float = 0.0
 var _disp: float = 1.0            # eased displayed fraction (the liquid moves like liquid)
@@ -63,6 +71,13 @@ func _process(delta: float) -> void:
 	else:
 		_chip = maxf(_disp, _chip - delta * 0.45)
 	var throb := UiKit.crit_throb(frac, _phase) if caption == "HEALTH" else 0.0
+	if v2_bar != null:                # C6B bar mode: the orb shader/halo stay dark
+		if _liq != null and _liq.visible:
+			_liq.visible = false
+		if _glow != null and _glow.visible:
+			_glow.visible = false
+		queue_redraw()
+		return
 	if _glow != null:
 		_glow.set_base(0.18 + 0.55 * frac + 0.25 * _flash)
 	if _mat != null:
@@ -72,7 +87,52 @@ func _process(delta: float) -> void:
 		_mat.set_shader_parameter("throb", throb)
 	queue_redraw()
 
+## C6B: the painted horizontal safety bar — shell = I3-B resource frame (end caps at
+## uniform scale), well/fill/chip/numeral/caption all code-drawn from the SAME eased
+## feed the orb uses. The host draws the 30% Flow lock on top (code-owned by law).
+func _draw_v2_bar() -> void:
+	var rect := Rect2(Vector2.ZERO, size)
+	v2_bar.hshell(self, "shell_resource", rect, DashSkin.CAPS_RESOURCE)
+	var well := v2_bar.sliced_opening("shell_resource", rect, DashSkin.CAPS_RESOURCE, DashSkin.OPEN_RESOURCE)
+	draw_rect(well, Palette.BG0)
+	draw_rect(Rect2(well.position, Vector2(well.size.x, well.size.y * 0.45)), Color(0, 0, 0, 0.35))
+	var frac := clampf(_disp, 0.0, 1.0)
+	var throb := UiKit.crit_throb(_frac(), _phase) if caption == "HEALTH" else 0.0
+	# pale chip ghost trails the fill down after damage (the orb's read, flattened)
+	if _chip > frac + 0.003:
+		draw_rect(Rect2(well.position.x + well.size.x * frac, well.position.y + 1.0,
+			well.size.x * (_chip - frac), well.size.y - 2.0), Color(0.95, 0.85, 0.8, 0.30))
+	var fw := well.size.x * frac
+	if fw > 1.0:
+		var fc := fill.lerp(Palette.CRIMSON, 0.5 * throb)
+		if _flash > 0.0:
+			fc = fc.lightened(0.30 * _flash)
+		UiKit.grad_rect(self, Rect2(well.position, Vector2(fw, well.size.y)),
+			fc.lightened(0.22), fc.darkened(0.22))
+		draw_rect(Rect2(well.position + Vector2(0, 1.0), Vector2(fw, well.size.y * 0.34)),
+			Color(1, 1, 1, 0.10))
+		if frac < 0.995:
+			draw_rect(Rect2(well.position.x + fw - 1.5, well.position.y, 1.5, well.size.y),
+				fc.lightened(0.5))
+	if v2_lock >= 0.0:                # the lock line rides ABOVE the fill, code-owned
+		var lx := well.position.x + well.size.x * v2_lock
+		var lc := Color(1.0, 0.62, 0.30, 0.9)
+		draw_line(Vector2(lx, well.position.y - 3.0), Vector2(lx, well.end.y + 3.0), lc, 2.0, true)
+		UiKit.text_shadowed(self, UiKit.display(700), Vector2(lx - 20.0, well.end.y + 12.0),
+			"%d%% LOCK" % int(round(v2_lock * 100.0)), HORIZONTAL_ALIGNMENT_LEFT, 70.0,
+			UiKit.SIZE["MICRO"], lc)
+	var numc := Palette.GOLD_BRIGHT.lerp(Palette.CRIMSON.lightened(0.25), throb)
+	var vtxt := (str(int(round(value))) + "%") if v2_pct else str(int(round(value)))
+	UiKit.text_shadowed(self, UiKit.display(700), Vector2(well.position.x, well.get_center().y + 5.0),
+		vtxt, HORIZONTAL_ALIGNMENT_RIGHT, well.size.x - 8.0, UiKit.SIZE["LABEL"], numc)
+	UiKit.text_shadowed(self, UiKit.display(600, 2), Vector2(well.position.x + 8.0, well.get_center().y + 4.5),
+		caption.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, well.size.x - 60.0,
+		UiKit.SIZE["MICRO"], Palette.GOLD_DIM.lightened(0.25))
+
 func _draw() -> void:
+	if v2_bar != null:
+		_draw_v2_bar()
+		return
 	var c := size * 0.5
 	var r := minf(size.x, size.y) * 0.5 - 3.0
 	var frac := _frac()

@@ -138,6 +138,52 @@ func _initialize() -> void:
 	_chk(fails, "make_dash: null hud => null (fallback)", ArtV2.make_dash(null) == null)
 	ArtV2.dash = false
 
+	# [9] C6B: the painted dashboard skin — asset registry · icon law · slice math ·
+	# default-off widget flags (the fail-safe surface)
+	var sk := DashSkin.make()
+	_chk(fails, "C6B: DashSkin.make() finds all %d pieces" % DashSkin.PIECES.size(), sk != null)
+	if sk != null:
+		_chk(fails, "C6B: registry complete", sk.t.size() == DashSkin.PIECES.size())
+		# THE ICON LAW: shape = the answer; purple only for the three pressables
+		_chk(fails, "C6B icon: default/beat -> diamond", sk.icon("auto", false) == sk.t["icon_diamond"])
+		_chk(fails, "C6B icon: global -> hexagon", sk.icon("global", false) == sk.t["icon_hexagon"])
+		_chk(fails, "C6B icon: flurry -> hexagon", sk.icon("flurry", false) == sk.t["icon_hexagon"])
+		_chk(fails, "C6B icon: heavy -> octagon", sk.icon("heavy", false) == sk.t["icon_octagon"])
+		_chk(fails, "C6B icon: buster -> octagon", sk.icon("buster", false) == sk.t["icon_octagon"])
+		_chk(fails, "C6B icon: eat -> BRACE disc", sk.icon("eat", false) == sk.t["icon_brace"])
+		_chk(fails, "C6B icon: purple beat -> feint diamond", sk.icon("beat", true) == sk.t["icon_feint_diamond"])
+		_chk(fails, "C6B icon: purple global -> feint hexagon", sk.icon("global", true) == sk.t["icon_feint_hexagon"])
+		_chk(fails, "C6B icon: purple buster -> feint octagon", sk.icon("buster", true) == sk.t["icon_feint_octagon"])
+		_chk(fails, "C6B icon LAW: a BRACE can NEVER be purple", sk.icon("eat", true) == sk.t["icon_brace"])
+		# slice math: endpoints exact, openings stay inside the shell
+		var rr := Rect2(100, 50, 500, 30)
+		_chk(fails, "C6B slice_x endpoints",
+			absf(DashSkin.slice_x(rr, DashSkin.CAPS_RESOURCE, 0.0, 800.0, 71.0) - rr.position.x) < 0.01
+			and absf(DashSkin.slice_x(rr, DashSkin.CAPS_RESOURCE, 1.0, 800.0, 71.0) - rr.end.x) < 0.01)
+		var op := sk.sliced_opening("shell_resource", rr, DashSkin.CAPS_RESOURCE, DashSkin.OPEN_RESOURCE)
+		_chk(fails, "C6B opening inside its shell", rr.encloses(op) and op.size.x > 0.0 and op.size.y > 0.0)
+		var prow := sk.sliced_opening("party_row", Rect2(0, 0, 320, 30), DashSkin.CAPS_ROW, DashSkin.ROW_HP)
+		_chk(fails, "C6B party HP opening sane", prow.size.x > 150.0 and prow.size.y > 4.0)
+	# default-off fail-safe: every C6B widget flag ships dark until the host sets it
+	var ac := AnswerChannel.new()
+	_chk(fails, "C6B default-off: channel unskinned", ac.v2_skin == null and not ac.v2_naked)
+	ac.free()
+	var lo := LiquidOrb.new()
+	_chk(fails, "C6B default-off: orb stays an orb", lo.v2_bar == null and lo.v2_lock < 0.0)
+	lo.free()
+	var bb := BossBar.new()
+	_chk(fails, "C6B default-off: boss plate keeps chrome", not bb.v2_naked)
+	bb.free()
+	var bcb := BossCastBar.new()
+	_chk(fails, "C6B default-off: castbar keeps its plate", bcb.v2_skin == null)
+	bcb.free()
+	var ar := AbilityRune.new()
+	_chk(fails, "C6B default-off: rune keeps its chamfer", ar.v2_skin == null)
+	ar.free()
+	var dg := DuelistGauge.new()
+	_chk(fails, "C6B default-off: gauge unskinned", dg.v2_skin == null)
+	dg.free()
+
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
 	print("ARTV2 PROBE: %s (%d checks)" % ["ALL OK" if fails.is_empty() else "FAIL", _n])

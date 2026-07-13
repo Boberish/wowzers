@@ -25,6 +25,11 @@ static func phase_index(s: CombatState) -> int:
 	return n
 
 const BARH := 26.0
+# ART V2 / C6B (set ONLY by the dash host; default off ⇒ legacy byte-identical):
+# the painted boss shell owns the housing — skip the plate's own flourish arms,
+# bevel frame and jeweled end-caps. Name, fill, chip ghost, phase gems/notches,
+# SUNDER, HP numerals, phase flash and the enrage clock stay code-drawn.
+var v2_naked := false
 var _bar: ColorRect
 var _chip: float = 1.0
 var _chip_hold: float = 0.0
@@ -90,7 +95,7 @@ func _draw() -> void:
 	var ry := 14.0
 	var gap := tw * 0.5 + 20.0
 	var arm := minf(size.x * 0.5 - gap - 16.0, 90.0)
-	if arm > 20.0:
+	if arm > 20.0 and not v2_naked:
 		for s: float in [-1.0, 1.0]:
 			var x0 := cx + s * gap
 			var x1 := cx + s * (gap + arm)
@@ -131,15 +136,15 @@ func _draw() -> void:
 			draw_line(Vector2(x, top + 2.0), Vector2(x, top + BARH - 2.0), Palette.BG0, 3.0)
 			draw_line(Vector2(x + 1.0, top + 2.0), Vector2(x + 1.0, top + BARH - 2.0), Palette.GOLD_DIM, 1.0)
 
-	# --- 2-tone gilded bevel frame around the bar (one virtual light) ---
-	draw_line(Vector2(0, top), Vector2(size.x, top), Palette.GOLD_BRIGHT, 1.6, true)
-	draw_line(Vector2(0, top), Vector2(0, top + BARH), Palette.GOLD, 1.6, true)
-	draw_line(Vector2(0, top + BARH), Vector2(size.x, top + BARH), Palette.GOLD_DIM, 1.6, true)
-	draw_line(Vector2(size.x, top), Vector2(size.x, top + BARH), Palette.GOLD_DIM, 1.6, true)
-
-	# --- jeweled end-caps ---
-	_gem(Vector2(0, top + BARH * 0.5), 8.0, Palette.CRIMSON_DEEP.lightened(0.1))
-	_gem(Vector2(size.x, top + BARH * 0.5), 8.0, Palette.CRIMSON_DEEP.lightened(0.1))
+	# --- 2-tone gilded bevel frame + jeweled end-caps (the painted shell's recessed
+	#     window replaces both in C6B) ---
+	if not v2_naked:
+		draw_line(Vector2(0, top), Vector2(size.x, top), Palette.GOLD_BRIGHT, 1.6, true)
+		draw_line(Vector2(0, top), Vector2(0, top + BARH), Palette.GOLD, 1.6, true)
+		draw_line(Vector2(0, top + BARH), Vector2(size.x, top + BARH), Palette.GOLD_DIM, 1.6, true)
+		draw_line(Vector2(size.x, top), Vector2(size.x, top + BARH), Palette.GOLD_DIM, 1.6, true)
+		_gem(Vector2(0, top + BARH * 0.5), 8.0, Palette.CRIMSON_DEEP.lightened(0.1))
+		_gem(Vector2(size.x, top + BARH * 0.5), 8.0, Palette.CRIMSON_DEEP.lightened(0.1))
 
 	# --- HP readout centred on the bar, in display numerals ---
 	UiKit.text_shadowed(self, UiKit.display(600), Vector2(0, top + 18.0),

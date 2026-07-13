@@ -60,6 +60,12 @@ var parry_window: float = 0.10
 
 var late_grace: float = 0.04               ## the true post-line press window (sec) — the right-side
                                            ## bands draw ONLY this wide (everything visible is pressable)
+# --- ART V2 / C6B (set ONLY by the dash host; both default off ⇒ legacy byte-identical) ---
+var v2_skin: DashSkin = null               ## painted comet icons (◇⬡⯃⊘ + purple feints), resolved at
+                                           ## construction by DashSkin (§3½ — never load in a draw).
+                                           ## PURPLE ALONE is the feint tell in V2 — no breathing ring.
+var v2_naked: bool = false                 ## the painted answer frame owns the housing — skip the
+                                           ## channel's own seat/border/filigree, keep the glass + gate
 var _seen: Dictionary = {}                 ## bar id -> true (late-flash bookkeeping)
 var _last_x: Dictionary = {}               ## bar id -> {x, kind, purple, absent} (the claim anchor)
 var _missed: Array = []                    ## THE MISS AFTERLIFE (Bill 2026-07-12): [{x0,kind,purple,t}] —
@@ -254,8 +260,9 @@ func _draw() -> void:
 		bg0 = bg0.lerp(Palette.CRIMSON_DEEP, 0.45)
 		bg1 = bg1.lerp(Palette.CRIMSON_DEEP, 0.3)
 	UiKit.grad_rect(self, Rect2(0, 0, w, h), bg0, bg1)
-	draw_rect(Rect2(0, h - 3.0, w, 3.0), Color(0, 0, 0, 0.35))       # seated base shadow
-	draw_rect(Rect2(0, 0, w, 2.0), Color(1, 1, 1, 0.05))             # glass sheen lip
+	if not v2_naked:
+		draw_rect(Rect2(0, h - 3.0, w, 3.0), Color(0, 0, 0, 0.35))   # seated base shadow
+		draw_rect(Rect2(0, 0, w, 2.0), Color(1, 1, 1, 0.05))         # glass sheen lip
 	var edge := Palette.EDGE
 	if flurry:
 		var pulse := 0.5 + 0.5 * sin(_spin * 4.0)
@@ -266,12 +273,15 @@ func _draw() -> void:
 		var shim := Palette.CRIMSON.lightened(0.4)
 		shim.a = 0.20
 		draw_rect(Rect2(sx2, 4.0, 9.0, h - 8.0), shim)
-	draw_rect(Rect2(0, 0, w, h), Color(0, 0, 0, 0.5), false, 3.0)    # dark outer seat
-	draw_rect(Rect2(1, 1, w - 2, h - 2), edge if flurry else Palette.GOLD_DIM.darkened(0.2), false, 1.5)
-	UiKit.filigree_corner(self, Vector2(0, 0), Vector2(1, 1))
-	UiKit.filigree_corner(self, Vector2(w, 0), Vector2(-1, 1))
-	UiKit.filigree_corner(self, Vector2(0, h), Vector2(1, -1))
-	UiKit.filigree_corner(self, Vector2(w, h), Vector2(-1, -1))
+	if not v2_naked:                       # C6B: the painted frame IS the housing
+		draw_rect(Rect2(0, 0, w, h), Color(0, 0, 0, 0.5), false, 3.0)    # dark outer seat
+		draw_rect(Rect2(1, 1, w - 2, h - 2), edge if flurry else Palette.GOLD_DIM.darkened(0.2), false, 1.5)
+		UiKit.filigree_corner(self, Vector2(0, 0), Vector2(1, 1))
+		UiKit.filigree_corner(self, Vector2(w, 0), Vector2(-1, 1))
+		UiKit.filigree_corner(self, Vector2(0, h), Vector2(1, -1))
+		UiKit.filigree_corner(self, Vector2(w, h), Vector2(-1, -1))
+	elif flurry:                           # the mode edge still reads on the naked glass
+		draw_rect(Rect2(1, 1, w - 2, h - 2), edge, false, 1.5)
 	# a leak bleeds crimson at the channel border (complements the slam's full-screen vignette)
 	if _edge_flash > 0.0:
 		var ec := Palette.CRIMSON
@@ -671,6 +681,31 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		_trail(x, cy, kind, purple)
 	# SHAPE = the button · COLOR = status (_stat_col) · SIZE = damage (the radius).
 	var r := _size_r(kind, size) * sc
+	# --- C6B: the painted icon set (◇⬡⯃ + purple feints + the ⊘ BRACE disc that
+	# retires the skull/X). SAME live geometry — x/cy/r come from the committed
+	# feed exactly as the polygons did; the texture only changes the costume.
+	# Status law holds: a feint rides its own PAINTED purple variant (purple wins,
+	# and PURPLE ALONE is the tell — the breathing ring is deliberately gone in
+	# V2); peeled modulates crimson; flurry modulates blue; BRACE is never purple.
+	if v2_skin != null:
+		var itex := v2_skin.icon(kind, purple)
+		if itex != null:
+			var mod := Color.WHITE
+			if not purple:
+				if peeled:
+					mod = Palette.CRIMSON.lightened(0.25)
+				elif kind == "flurry":
+					mod = FLURRY_COL.lightened(0.30)
+			if kind == "heavy" or kind == "buster":
+				_glow(x, cy, r + 3.0, PURPLE if purple else _comet_col(kind))
+			var ih := r * 2.6
+			var iw := ih * float(itex.get_width()) / float(itex.get_height())
+			draw_texture_rect(itex, Rect2(x - iw * 0.5 + 1.5, cy - ih * 0.5 + 2.5, iw, ih),
+				false, Color(0, 0, 0, 0.45))            # seated shadow (one virtual light)
+			draw_texture_rect(itex, Rect2(x - iw * 0.5, cy - ih * 0.5, iw, ih), false, mod)
+			if kind != "flurry" or flurry_i == 0:
+				_word(font, x, cy, _v2_word(kind), _stat_col(_comet_col(kind), purple, peeled))
+			return
 	match kind:
 		"heavy", "buster":
 			# ⯃ PARRY-ONLY spiked octagon — bronze/amber, sized by damage
@@ -709,12 +744,35 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		pr.a = 0.18 + 0.14 * sin(_spin * 3.0)
 		draw_arc(Vector2(x, cy), 18.0 * sc, 0, TAU, 18, pr, 1.4, true)
 
+## The printed answer under a V2 comet — same word law as the polygons, plus the
+## §2.3.1 A-table BRACE read for the eat token (the skull/X presentation retires
+## with the painted ⊘; legacy keeps EAT untouched).
+func _v2_word(kind: String) -> String:
+	match kind:
+		"heavy", "buster": return "PARRY"
+		"global": return "DODGE"
+		"flurry": return "WEAVE"
+		"eat": return "BRACE"
+		_: return "DODGE"
+
 ## Motion trail: layered afterimages BEHIND the comet (toward the mouth it came from — comets
 ## travel left→right into the gate) + a soft glow streak. Pure function of position — no
 ## stored history. Alphas ramped so the motion reads at a glance while the track stays legible.
 func _trail(x: float, cy: float, kind: String, purple: bool) -> void:
 	var base := PURPLE if purple else _comet_col(kind)
 	UiKit.glow(self, Vector2(x - 8.0, cy), 16.0, Color(base.r, base.g, base.b, 0.10))
+	if v2_skin != null:                    # C6B: the afterimages wear the painted icon too
+		var itex := v2_skin.icon(kind, purple)
+		if itex != null:
+			for k in range(1, 4):
+				var tx := x - float(k) * 8.0
+				if tx < 12.0:
+					continue
+				var ih := ((26.0 if kind != "buster" else 38.0) - float(k) * 4.0)
+				var iw := ih * float(itex.get_width()) / float(itex.get_height())
+				draw_texture_rect(itex, Rect2(tx - iw * 0.5, cy - ih * 0.5, iw, ih),
+					false, Color(1, 1, 1, 0.16 - 0.05 * float(k - 1)))
+			return
 	for k in range(1, 4):
 		var tx := x - float(k) * 8.0
 		if tx < 12.0:
