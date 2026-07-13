@@ -22,6 +22,8 @@ func _initialize() -> void:
 			out_dir = a.substr("--out=".length())
 		elif a.begins_with("--profile="):
 			profile = a.substr("--profile=".length())
+		elif a == "--actors":
+			ArtV2.actors = true   # C4: painted adapters answer Actor2D.make
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	# the seam under test: set the selector BEFORE the HUD instances — its
 	# _ready builds the backdrop through ArtV2.make_scene() -> SceneKit.make()

@@ -1,0 +1,19 @@
+{
+	"version": 1,
+	"id": "duelist",
+	"scale": 1.0,
+	"height": 300,
+	"glow_part": "blade",
+	"parts": [
+		{"name": "cloak", "tex": "parts/cloak.png", "mode": "deform", "anchor": [0.5, 0.0], "at": [-10, -282], "sway": 8},
+		{"name": "legs", "tex": "parts/legs.png", "anchor": [0.5, 1.0], "at": [0, 0]},
+		{"name": "torso", "tex": "parts/torso.png", "anchor": [0.5, 1.0], "at": [0, -116]},
+		{"name": "head", "tex": "parts/head.png", "anchor": [0.5, 1.0], "parent": "torso", "at": [4, -108]},
+		{"name": "arm", "tex": "parts/arm.png", "anchor": [0.5, 0.08], "parent": "torso", "at": [16, -96], "rot": -38},
+		{"name": "blade", "tex": "parts/blade.png", "anchor": [0.5, 0.94], "parent": "arm", "at": [0, 82], "rot": -55}
+	],
+	"frames": {
+		"windup_heavy": "frames/windup_heavy.png",
+		"swing_heavy": "frames/swing_heavy.png"
+	}
+}

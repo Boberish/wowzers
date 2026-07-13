@@ -43,9 +43,14 @@ static func boot(args: PackedStringArray) -> void:
 ## when the flag is ON and its scene exists under art_v2/actors/; it rides the
 ## same SpriteActor2D wrapper as user art, so the full Actor2D contract holds.
 ## null ⇒ the factory falls through to the user-art check + placeholder puppets.
-static func make_actor(id: String, _aspect := "") -> Actor2D:
+static func make_actor(id: String, aspect := "") -> Actor2D:
 	if not actors:
 		return null
+	# C4: the painted layered adapter answers first (actors/<id>/actor.json —
+	# the ACTORS.md contract); a plain .tscn drop-in (C1's user-art path) second.
+	var painted := PaintedActor2D.try_make(id, aspect)
+	if painted != null:
+		return painted
 	var p := "%s/%s.tscn" % [ACTOR_DIR, id]
 	if ResourceLoader.exists(p):
 		return SpriteActor2D.new(p)

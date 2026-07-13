@@ -31,8 +31,9 @@ func _initialize() -> void:
 	ArtV2.actors = true
 	ArtV2.scene = "no_such_profile"
 	ArtV2.dash = true
-	_chk(fails, "actor adapter: missing asset ⇒ null (fall through)", ArtV2.make_actor("duelist") == null)
-	_legacy_chk(fails, "ON+missing")   # the factory still hands out the puppets
+	var ma := ArtV2.make_actor("zzz_no_such_class")
+	_chk(fails, "actor adapter: missing asset ⇒ null (fall through)", ma == null)
+	_legacy_chk(fails, "ON")   # undelivered ids stay puppets; delivered ids go painted
 	var st := ArtV2.make_scene()
 	_chk(fails, "scene: unknown profile ⇒ legacy StageBackdrop", st is StageBackdrop)
 	_chk(fails, "scene: legacy keeps the combat variant", st is StageBackdrop and (st as StageBackdrop).combat)
@@ -93,6 +94,23 @@ func _initialize() -> void:
 	_chk(fails, "undirred profile never resolves tex",
 		SceneKit.layer_tex(SceneKit.PROFILES["v2_interior_test"], "backdrop") == null)
 
+	# [7] C4 painted-actor adapter: metadata contract + fallback proof
+	var dj := FileAccess.file_exists("res://game/art_v2/actors/duelist/actor.json")
+	var pa := PaintedActor2D.try_make("duelist")
+	_chk(fails, "try_make duelist matches delivery(%s)" % dj, (pa != null) == dj)
+	if pa != null:
+		_chk(fails, "adapter built parts", not pa._parts.is_empty())
+		_chk(fails, "adapter has a deform part", not pa._deforms.is_empty())
+		_chk(fails, "adapter resolved replacement frames", pa._frames.has("windup_heavy"))
+		pa.free()
+	_chk(fails, "try_make absent id => null (legacy fallback)", PaintedActor2D.try_make("zzz_no_such_class") == null)
+	var pa2 := PaintedActor2D.try_make("duelist", "warden")   # unknown aspect variant falls back to the base folder
+	_chk(fails, "aspect variant falls back to base", (pa2 != null) == dj)
+	if pa2 != null:
+		pa2.free()
+	ArtV2.actors = false
+	_chk(fails, "flag OFF: make_actor null even when delivered", ArtV2.make_actor("duelist") == null)
+
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
 	print("ARTV2 PROBE: %s (%d checks)" % ["ALL OK" if fails.is_empty() else "FAIL", _n])
@@ -104,9 +122,15 @@ func _legacy_chk(fails: Array, tag: String) -> void:
 	var want := {"twinfang": "TwinfangRig2D", "voidcaller": "VoidcallerRig2D",
 		"mender": "MenderRig2D", "duelist": "RiftmawRig2D", "riftmaw": "RiftmawRig2D"}
 	for id in want:
+		# C4, delivery-agnostic: with the actors flag ON and a painted folder
+		# delivered, the id maps to the adapter; otherwise the legacy class.
+		# Flags OFF ("OFF" tag) must ALWAYS be pure legacy — the release default.
+		var expect := String(want[id])
+		if ArtV2.actors and FileAccess.file_exists("res://game/art_v2/actors/%s/actor.json" % id):
+			expect = "PaintedActor2D"
 		var a := Actor2D.make(String(id), "")
-		var ok := a != null and a.get_script() != null and String(a.get_script().get_global_name()) == String(want[id])
-		_chk(fails, "%s factory %s -> %s" % [tag, id, want[id]], ok)
+		var ok := a != null and a.get_script() != null and String(a.get_script().get_global_name()) == expect
+		_chk(fails, "%s factory %s -> %s" % [tag, id, expect], ok)
 		if a != null:
 			a.free()
 
