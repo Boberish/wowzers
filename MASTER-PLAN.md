@@ -876,6 +876,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · worktree `../wow-artv2-c5` (branch `artv2-c5`, from `5a5d064`) · §GRAPHICS —
+  **CLAIM: GRAPHICS PACKET C5 — DUELIST RIG + CORE ANIMATIONS** (GRAPHICS-PLAN §5·C5; Bill's
+  spec; approved sources = `art-source/graphics-v2/p4-duelist/` README + alpha/, Bill's P4
+  anchor gate 2026-07-13). Non-image production ONLY (crop/scale/alpha placement authorized;
+  NO generation/redesign/repaint — any unusable source ⇒ stop and ask Bill): crop+normalize
+  the 6 parts + 2 contact frames against the 300px actor contract (prep script
+  `sim/artv2_part_prep.gd`, crop-to-used-rect + per-part target size) · replace C4's debug
+  slabs under `actors/duelist/` · re-map actor.json (scale/pivots/anchors/parenting/paint
+  order for the real proportions) · wire the deforming SCARF + a DATA-DRIVEN pose/verb
+  vocabulary (json `poses` block: guard/windup/swing/parry deltas on named parts — adapter
+  stays class-agnostic) · integrate `windup_heavy` (scrubbed) + `swing_heavy` (release
+  flash). Selector default-off, legacy fallback, gameplay isolation all preserved. Verify
+  (minimal): import/parse · `artv2_probe` · missing-assets fallback · NEW pose/contact tour
+  (`sim/artv2_pose_tour.gd` contact sheet). Long matrices/playtests = background debt.
+  *(Claude session)*
+
 - ☑ 2026-07-13 · `artv2-i2` → **MERGED to `main` (`11bcd4a` + `567adea`)** · §GRAPHICS —
   **CODEX I2 IMAGE DELIVERY COMPLETE — DUELIST DODGE-TANK ANCHOR + SEPARATED SOURCES.** Bill
   rejected the first armored-swordsman read and approved the second revision: a light, side-on
