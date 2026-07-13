@@ -248,7 +248,7 @@ cooling midground, cool access-panel floor, and dehumidifier flank dressing. The
 remain untouched. The full resolution/legacy A-B matrix remains recorded debt before release
 default, per Bill's explicit move-on instruction.
 
-### P4 · DUELIST ANCHOR + RIG — 🟡 C4 ADAPTER 🔨 `05d9952` · I2 SOURCE ART 🔨 `11bcd4a` + `567adea` · CLAUDE C5 NEXT
+### P4 · DUELIST ANCHOR + RIG — 🟢 CHAIN COMPLETE: C4 adapter `05d9952` · I2 source art `11bcd4a`+`567adea` · **C5 rig 🔨 `f91f1b0`** — real Duelist assembled + posed behind the flag; Bill's eye + playtest = the P7-side gate
 
 Approve the canonical character → derive/extract runtime layers → native rig → core animations →
 deforming garment → contact replacement. Old actor remains default until the complete tour passes.
@@ -337,7 +337,7 @@ satisfying `Actor2D` verbs and failing back to the current actor.
 **Constraints:** class-agnostic adapter · rigid/deform/frame-swap parts · render-rate motion ·
 windup scrub · no engine state · no Spine dependency.
 
-### C5 · DUELIST RIG + CORE ANIMATIONS
+### C5 · DUELIST RIG + CORE ANIMATIONS — 🔨 BUILT+MERGED `f91f1b0` (2026-07-13; `sim/artv2_part_prep.gd` crops/normalizes approved alpha — never repaints; actor.json v2 real rig + data-driven `poses` vocabulary; pose sheet `sim/artv2_pose_tour.gd`; live playtest + full matrix = debt)
 
 **Goal:** map Codex's approved Duelist layer set onto C4 and implement the P4 vocabulary.
 

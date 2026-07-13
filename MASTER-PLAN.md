@@ -876,8 +876,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-13 · worktree `../wow-artv2-c5` (branch `artv2-c5`, from `5a5d064`) · §GRAPHICS —
-  **CLAIM: GRAPHICS PACKET C5 — DUELIST RIG + CORE ANIMATIONS** (GRAPHICS-PLAN §5·C5; Bill's
+- ☑ 2026-07-13 · `artv2-c5` → **MERGED to `main` (ff `f91f1b0`)** · §GRAPHICS — **GRAPHICS
+  PACKET C5 COMPLETE — THE REAL DUELIST IS ASSEMBLED AND POSED.** Verified minimal: import 0
+  errors · `artv2_probe` ALL OK (77) · pose/contact sheet (8 verbs: idle · scrubbed windups ·
+  windup_heavy frame scrub · swing_heavy flash · parry flick · hit · die — eyeballed) ·
+  fallback true · in-stage atrium tour (real Duelist at the tank slot, teammates/boss stay
+  puppets, feet byte-identical). Image stop never tripped — all 8 approved sources usable,
+  crop/scale only. Debt: live tank playtest + full matrix (ledger row). ORIGINAL CLAIM:
+  **GRAPHICS PACKET C5 — DUELIST RIG + CORE ANIMATIONS** (GRAPHICS-PLAN §5·C5; Bill's
   spec; approved sources = `art-source/graphics-v2/p4-duelist/` README + alpha/, Bill's P4
   anchor gate 2026-07-13). Non-image production ONLY (crop/scale/alpha placement authorized;
   NO generation/redesign/repaint — any unusable source ⇒ stop and ask Bill): crop+normalize
