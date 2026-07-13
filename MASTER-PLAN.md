@@ -876,6 +876,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · worktree `../wow-artv2-c5-align` (branch `artv2-c5-align`, from `b3bc4c2`) ·
+  §GRAPHICS — **CLAIM: C5.1 — DUELIST VISUAL REGISTRATION FIX (P4 reopened: Bill REJECTED the
+  C5 visual assembly; functional merge `f91f1b0` stands).** Deliverables: dev-only ALIGNMENT
+  LAB (`sim/artv2_align_lab.gd` — large zoom · part bounding boxes + pivot markers · approved
+  anchor as optional ghost · idle/windup .5+1.0/parry/hit/death poses · live-editable
+  at/anchor/rot/per-part scale · save-back into actor.json + R reload) + the registration
+  pass itself: arm shoulder seats ON the torso's circular socket and rotates about the
+  anatomical shoulder gap-free · grip centered in the fist through every pose · head/collar
+  overlap · torso/hip overlap without duplicated skirt edge · scarf loop behind the neck,
+  tails behind the body · feet on the baseline · death visible in the pose tour · layered vs
+  replacement-frame scale parity (new per-part `scale` + root `frames_scale` json fields).
+  IMAGE STOP: no regeneration/repaint/substitution — an unhideable seam ⇒ stop, name the PNG
+  + missing pixels + marked screenshot for Bill. Verify: close-up pose sheet + one live Stack
+  shot. ⚠ CLOSURE GATED ON BILL: no P5, and MASTER/GRAPHICS/LEDGER flip ONLY after his visual
+  approval — work stays on the branch until then. *(Claude session)*
+
 - ☑ 2026-07-13 · `artv2-c5` → **MERGED to `main` (ff `f91f1b0`)** · §GRAPHICS — **GRAPHICS
   PACKET C5 COMPLETE — THE REAL DUELIST IS ASSEMBLED AND POSED.** Verified minimal: import 0
   errors · `artv2_probe` ALL OK (77) · pose/contact sheet (8 verbs: idle · scrubbed windups ·
