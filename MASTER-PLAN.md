@@ -877,6 +877,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · worktree `../wow-artv2-c6a` (branch `artv2-c6a`, from `4dbac71`) · §GRAPHICS —
+  **CLAIM: GRAPHICS PACKET C6A — REACTION-FIRST GRAYBOX HOST + THEATER CONTRACT** (GRAPHICS-
+  PLAN §2.3/P5/C6A; Bill's spec; ART-FREE — graybox only, any image need ⇒ stop and ask).
+  Behind `ArtV2.dash` (default OFF), Duelist-only: NEW `game/art_v2/dash_host_c6a.gd` =
+  ONE responsive layout contract (status 0-150 · theater 150-560 · answer 560-750 · dash
+  750-1040 · hint 1040-1080 @1080p; 720p collapses hint/ornament never the answer; ultrawide
+  grows theater, caps central instruments) + THE CORE LAW: persistent UI never inside the
+  combat-theater rect. Host REUSES live truth — creates the real BossBar/BossCastBar (top-
+  center island; dial+judge parked hidden per the one-bar law) + the real DuelistBand via
+  ClassBand.for_hud (channel/gauge/orbs/runes RE-PLACED through the contract — never a second
+  timing implementation); party frames → compact top-left island; meter → collapsed top-right;
+  RaidStage2D keeps SLOTS as LOCAL grammar placed into the theater (new view-only `dash_scale`);
+  SceneKit floor reflows to the same line (`dash_floor_px`, reset in `_clear`); labeled dev
+  rect overlay (`dashdebug` token). raid_hud edits additive+dash-guarded only (hint-label
+  handle, SceneKit floor reset). hudlow stays legacy-only. Gates: import · `artv2_probe`
+  (+layout-contract checks) · `ui_smoke_raid` · both Stack profiles × 1280/1920/2560 shots ·
+  busy-stream/cast/low-HP/overlay states · live tank run · default-off legacy proof · deploy
+  `C:\Games\art-Test`. NOT: I3 images, C6B skin, Meter L4/L5, VFX. Stop at Bill's rectangle/
+  speed verdict. *(Claude session)*
+
 - ☑ 2026-07-13 · `main` (docs only) · §GRAPHICS — **P5 SCREEN ANATOMY LOCKED; C6 SPLIT SO
   LAYOUT PROVES BEFORE ART.** Bill identified the real problem after C5.1: this is a UI game whose
   characters are a cool representation, but the legacy full-screen-stage layout puts the answer
