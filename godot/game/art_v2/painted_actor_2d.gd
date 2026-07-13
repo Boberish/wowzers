@@ -286,11 +286,14 @@ func curse_release() -> void:
 	_flash(Color(0.75, 0.45, 0.95))
 
 # --- reacts ---
+## THE PARRY — HOLD the deflection so it reads (Bill: too fast to see). The pose
+## is cosmetic; the mechanical parry still resolves instantly — only the look
+## lingers (~0.44s: snap up, hold the blade, ease home).
 func evade_react() -> void:
-	_pose_flash("parry", 0.06, 0.22)       # the deflection flick (blade up, weight back)
+	_pose_flash("parry", 0.24, 0.20)
 	var tw := create_tween()
-	tw.tween_property(_rig, "position:x", -22.0, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(_rig, "position:x", 0.0, 0.16)
+	tw.tween_property(_rig, "position:x", -24.0, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_rig, "position:x", 0.0, 0.24)
 
 ## THE DODGE: a readable back-slip away from the boss (he faces right) + a small
 ## lift, then a snap home. Bigger than the old vertical-only hop so it reads at
