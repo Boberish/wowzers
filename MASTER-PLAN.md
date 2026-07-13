@@ -936,8 +936,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   all seven exact answer/feint/BRACE icons, and a corrected utility tab with an empty code-data
   window. Dedicated utility source supersedes the baked sample on the wide sheet. C6B is unblocked.
 
-- ⏳ 2026-07-13 · Claude packet `C6B` · §GRAPHICS — **READY FOR CLAUDE CLAIM: PAINTED DASHBOARD
-  SKIN + DUELIST BINDING.** Start from current `main`, claim before code, and consume only the
+- 🔨 2026-07-13 · Claude packet `C6B` · §GRAPHICS — **CLAIMED (Claude, worktree `../wow-c6b`,
+  branch `c6b`): PAINTED DASHBOARD SKIN + DUELIST BINDING.** Consuming the approved
+  `p5-dashboard/alpha/` sheets per their README: deterministic crop/trim → runtime pieces under
+  `res://game/art_v2/dash/` · 9-slice shells (caps/rings/medallion never stretch) · skin layer
+  over the C6A host (Wind central bar + 5 sockets below · HP left / Flow-Aggro right horizontal
+  bars · code-drawn 30% lock · modular 4–6 ability slots · 4 party rows w/ portrait/HP/resource/
+  cast/3 sockets · boss + utility shells, dedicated utility-tab source) · answer icons bound at
+  live AnswerChannel geometry (never a purple BRACE) · default-off + missing-asset ⇒ graybox/
+  legacy fallback. View-only; no gameplay/timing/protocol contact.
+  ORIGINAL SPEC (kept): Start from current `main`, claim before code, and consume only the
   approved `art-source/graphics-v2/p5-dashboard/alpha/` sheets under their README contract. Own
   deterministic trim/crop preparation, 9-slice/style-box setup, runtime import, C6A binding,
   default-off/missing-asset fallback, resolution/scene tour, smoke, and docs closure. No gameplay,
