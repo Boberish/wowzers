@@ -1,111 +1,113 @@
 {
-	"version": 2,
-	"id": "duelist",
-	"scale": 1.0,
-	"height": 300,
+	"frames": {
+		"swing_heavy": "frames/swing_heavy.png",
+		"windup_heavy": "frames/windup_heavy.png"
+	},
+	"frames_scale": 1.0,
 	"glow_part": "blade",
+	"height": 300.0,
+	"id": "duelist",
 	"parts": [
 		{
-			"name": "cloak",
-			"tex": "parts/cloak.png",
-			"mode": "deform",
 			"anchor": [
 				0.78,
 				0.12
 			],
 			"at": [
-				8,
-				-240
+				-32.0,
+				-249.0
 			],
-			"sway": 7
+			"mode": "deform",
+			"name": "cloak",
+			"sway": 7.0,
+			"tex": "parts/cloak.png"
 		},
 		{
-			"name": "legs",
-			"tex": "parts/legs.png",
 			"anchor": [
 				0.5,
 				1.0
 			],
 			"at": [
-				0,
-				0
-			]
+				-27.0,
+				0.0
+			],
+			"name": "legs",
+			"tex": "parts/legs.png"
 		},
 		{
-			"name": "torso",
-			"tex": "parts/torso.png",
 			"anchor": [
 				0.6,
 				1.0
 			],
 			"at": [
-				2,
-				-112
-			]
+				0.0,
+				-112.0
+			],
+			"name": "torso",
+			"tex": "parts/torso.png"
 		},
 		{
-			"name": "head",
-			"tex": "parts/head.png",
 			"anchor": [
 				0.45,
 				0.98
 			],
-			"parent": "torso",
 			"at": [
-				7,
-				-116
-			]
+				20.0,
+				-122.0
+			],
+			"name": "head",
+			"parent": "torso",
+			"rot": -1.0,
+			"tex": "parts/head.png"
 		},
 		{
-			"name": "arm",
-			"tex": "parts/arm.png",
 			"anchor": [
 				0.12,
 				0.5
 			],
-			"parent": "torso",
 			"at": [
-				56,
-				-107
+				63.0,
+				-98.0
 			],
-			"rot": 18
+			"name": "arm",
+			"parent": "torso",
+			"rot": 18.0,
+			"tex": "parts/arm.png"
 		},
 		{
-			"name": "blade",
-			"tex": "parts/blade.png",
 			"anchor": [
 				0.15,
 				0.5
 			],
-			"parent": "arm",
 			"at": [
-				90,
-				2
+				90.0,
+				5.0
 			],
-			"rot": -8
+			"name": "blade",
+			"parent": "arm",
+			"rot": -8.0,
+			"tex": "parts/blade.png"
 		}
 	],
-	"frames": {
-		"windup_heavy": "frames/windup_heavy.png",
-		"swing_heavy": "frames/swing_heavy.png"
-	},
 	"poses": {
-		"windup": {
-			"torso": -12,
-			"arm": -88,
-			"head": 13
-		},
-		"swing": {
-			"torso": 6,
-			"arm": -14
+		"lunge": {
+			"torso": 6.0
 		},
 		"parry": {
-			"torso": -4,
-			"arm": -55
+			"arm": -55.0,
+			"torso": -4.0
 		},
-		"lunge": {
-			"torso": 6
+		"swing": {
+			"arm": -14.0,
+			"torso": 6.0
+		},
+		"windup": {
+			"arm": -88.0,
+			"head": 13.0,
+			"torso": -12.0
 		}
 	},
-	"frames_scale": 1.0
+	"scale": 1.0,
+	"version": 2.0,
+	"flourish_part": "arm"
 }

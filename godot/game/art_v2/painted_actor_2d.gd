@@ -55,6 +55,7 @@ var _frames: Dictionary = {}           ## "windup_heavy" etc -> Texture2D (resol
 var _swap: Sprite2D                    ## the replacement-frame display
 var _gaze: Polygon2D                   ## the boss-gaze diamond (set_highlight)
 var _glow_part: Node2D = null          ## optional part that reads power_glow
+var _flourish_part: Node2D = null      ## optional part the BULLSEYE moulinet spins (json flourish_part)
 var _height := 300.0                   ## figure height (gaze placement, swap anchor)
 var _poses: Dictionary = {}            ## C5: pose name -> {part: radians DELTA from base} ("root" = the rig)
 var _base_rot: Dictionary = {}         ## part name -> authored base rotation (rad)
@@ -71,7 +72,7 @@ var _react_t := 0.0                    ## a react OWNS the silhouette while >0 �
 ## Bill 2026-07-13: "animations are too fast" — ONE pacing dial for every react
 ## tween. Cosmetic only: grades/payoffs resolve in the kit at the press; only
 ## the LOOK lingers. Windup scrub is engine-fed and untouched.
-const PACE := 1.35
+const PACE := 1.15   # 1.35 was a shade too slow in-hand (Bill 2026-07-13)
 
 func _dur(d: float) -> float:
 	return d * PACE
@@ -123,6 +124,8 @@ func _build(dir: String, meta: Dictionary) -> bool:
 		_poses[String(pose_name)] = conv
 	if meta.has("glow_part"):
 		_glow_part = _parts.get(String(meta["glow_part"]))
+	if meta.has("flourish_part"):
+		_flourish_part = _parts.get(String(meta["flourish_part"]))
 	var frames: Dictionary = meta.get("frames", {})
 	for k in frames:
 		var fp := "%s/%s" % [dir, String(frames[k])]
@@ -292,8 +295,16 @@ func _dodge_slip(off: Vector2, hold: float, col: Color, flourish: bool) -> void:
 	if hold > 0.0:
 		tw.tween_interval(_dur(hold))
 	tw.tween_property(_rig, "position", Vector2.ZERO, _dur(0.20)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	if flourish:   # THE BULLSEYE: blade sweeps up mid-slip, second gold flash, size pop
-		_pose_flash("parry", _dur(0.18), _dur(0.16))
+	if flourish:   # THE BULLSEYE: the moulinet — its OWN signature, never the parry
+		# pose (Bill: a bullseye dodge read as a parry). The flourish part (the
+		# sword arm) sweeps one full backward circle around the shoulder while
+		# the slip runs, plus size pop + a second gold flash.
+		if _flourish_part != null:
+			var base := float(_base_rot.get("arm", _flourish_part.rotation))
+			var tm := create_tween()
+			tm.tween_property(_flourish_part, "rotation", base - TAU, _dur(0.34)) \
+				.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+			tm.tween_callback(func(): _flourish_part.rotation = base)
 		_pop_t = _dur(0.30)
 		var sp := create_tween()
 		sp.tween_property(_rig, "scale", Vector2.ONE * _scale_base * 1.07, _dur(0.10))
