@@ -976,7 +976,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   redeploy, then stop for Bill's final P5 verdict before I4/C7. **Bill explicitly declined this
   packet and will hand-edit the remaining scale/inset pixels later; it no longer gates P6.**
 
-- ☐ 2026-07-13 · Codex image packet `I4` · §GRAPHICS — **CLAIM: FULL-BUDGET SIGNATURE VFX,
+- ☑ 2026-07-13 · Codex image packet `I4` · §GRAPHICS — **DELIVERED `2baf3fe`: FULL-BUDGET SIGNATURE VFX,
   GL COMPATIBILITY/WEBGL2-SAFE WITHOUT A CHEAP BROWSER LOOK.** Bill explicitly moved on from UI
   polish and authorized maximum-quality juice. Deliver project-bound chroma+alpha flipbook sources:
   I4-A parry+dodge · I4-B Dump+En Garde · I4-C light/heavy/crush impacts. Author crisp painted
@@ -984,6 +984,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   pooling, density, shake/hit-stop, and the audited 13/13 `tempo-art` transplant. High-Flow law:
   immediate one-frame read, peak ~50–100 ms, interruptible recovery, never cover the AnswerChannel's
   timing gate/nail or next shape. No renderer switch; one rich Compatibility-safe visual target.
+  **DONE:** 8 untouched chroma + 8 visually checked alpha sheets, source layout manifest, and C7
+  contract at `art-source/graphics-v2/p6-vfx/`: parry · dodge · Dump · En Garde activation/hold ·
+  light/heavy/crush impacts. Corrected no-grid Heavy source only; rejected generation not committed.
+
+- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY FOR CLAUDE CLAIM: VFX FLIPBOOK
+  RUNTIME + FULL JUICE SALVAGE.** Start from current `main`; consume only approved I4 alpha sheets
+  under their README/source-layout contract. Own deterministic cell prep + registered pivots,
+  reusable interruptible flipbook pooling, one Compatibility-safe additive layer system, grade/size
+  intensity, event binding, performance/readability budgets, and the audited 13/13 `tempo-art`
+  transplant with both recorded fixes (`_post=null` on clear; player-gate finisher wash). Presentation
+  never gates combat; plain strikes keep no hit-stop; the AnswerChannel never freezes or gets covered.
+  No new image generation/substitution. Stop and ask Bill if an approved source is genuinely unusable.
 
 - ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
   §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·

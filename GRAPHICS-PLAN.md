@@ -9,8 +9,8 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P5 ACCEPTED AT SYSTEM LEVEL — C6B `28e9b15`; SMALL MANUAL SCALE/INSET POLISH
-PARKED BY BILL · P6/I4 FULL-BUDGET VFX ACTIVE.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
+**Status:** 🟡 **P5 ACCEPTED — C6B `28e9b15`; MANUAL PIXEL POLISH PARKED · P6 I4 SOURCES
+DELIVERED `2baf3fe` · CLAUDE C7 READY.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
 `5bb532c`; C6A graybox `2b407c4` passed Bill's rectangle/speed gate; I3-A/B delivered the
 approved component family (`801d713`); **C6B bound it**: deterministic crops → `res://game/
 art_v2/dash/`, painted answer frame/comet icons/Wind+sockets/HP+Flow bars/slots/party rows/
@@ -385,7 +385,7 @@ First prove the reaction-first anatomy with live controls and plain graybox surf
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
 family and skin the accepted layout. Test at 1080p/720p/ultrawide and in both scene profiles.
 
-### P6 · SIGNATURE VFX — **CODEX I4 ACTIVE (FULL-BUDGET COMPATIBILITY-SAFE)** → Claude C7
+### P6 · SIGNATURE VFX — **CODEX I4 ✅ `2baf3fe` (FULL-BUDGET COMPATIBILITY-SAFE)** → **CLAUDE C7 READY**
 
 Flipbook FX + En Garde/Dump/parry/dodge polish, current juice salvage, effect budget/readability.
 
@@ -583,14 +583,17 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   `art-source/graphics-v2/p5-dashboard/`: four untouched chroma sheets + four visually checked RGBA
   alpha sheets + the production contract/contents README. The dedicated empty-window utility tab
   supersedes the wide sheet's baked sample. C6B may now claim from current `main`.
-- **I4:** 🟡 **AUTHORIZED/ACTIVE 2026-07-13 — FULL-BUDGET VFX, ONE COMPATIBILITY-SAFE LOOK.**
+- **I4:** ✅ **DELIVERED `2baf3fe` — FULL-BUDGET VFX, ONE COMPATIBILITY-SAFE LOOK.**
   Produce project-bound chroma+alpha flipbook sources in three gameplay-priority groups:
   **I4-A core reaction** = parry + dodge; **I4-B signatures** = Dump + En Garde activation/hold;
   **I4-C contacts** = light + heavy + crush impact families. Sources use crisp painted/cel-edged
   shapes rather than baked fuzzy bloom; C7 supplies additive duplicates, modulation, shake,
   hit-stop, and bounded particles. Each action reads in one frame, peaks within ~50–100 ms, and
   clears/interrupts before the next high-Flow decision. Maximum spectacle is allowed outside the
-  AnswerChannel, but no effect may obscure the timing nail/gate or next incoming shape.
+  AnswerChannel, but no effect may obscure the timing nail/gate or next incoming shape. Delivered
+  at `art-source/graphics-v2/p6-vfx/`: 8 untouched chroma sheets + 8 visually checked RGBA alpha
+  sheets + README + deterministic source-grid manifest. Families: parry, dodge, Dump, En Garde
+  activation/hold, and light/heavy/crush impacts. C7 may now claim from current `main`.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.
 
