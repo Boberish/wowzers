@@ -111,6 +111,33 @@ func _initialize() -> void:
 	ArtV2.actors = false
 	_chk(fails, "flag OFF: make_actor null even when delivered", ArtV2.make_actor("duelist") == null)
 
+	# [8] C6A: the ONE layout contract + dash-host gating (view-only laws)
+	for vp in [Vector2(1280, 720), Vector2(1920, 1080), Vector2(2560, 1080)]:
+		var L := DashHostC6A.layout(vp)
+		var rs: Rect2 = L["status"]
+		var rt: Rect2 = L["theater"]
+		var ra: Rect2 = L["answer"]
+		var rd: Rect2 = L["dash"]
+		var rh: Rect2 = L["hint"]
+		_chk(fails, "%s bands tile the height" % vp,
+			absf(rs.size.y + rt.size.y + ra.size.y + rd.size.y + rh.size.y - vp.y) < 1.5)
+		_chk(fails, "%s theater clear of persistent UI" % vp,
+			not rt.intersects(rs) and not rt.intersects(ra) and not rt.intersects(rd))
+		_chk(fails, "%s answer readable (>=150px tall, >=800 wide)" % vp,
+			ra.size.y >= 150.0 and ra.size.x >= 800.0)
+		_chk(fails, "%s theater positive" % vp, rt.size.y > 200.0)
+		_chk(fails, "%s stage_scale sane" % vp,
+			float(L["stage_scale"]) >= 0.55 and float(L["stage_scale"]) <= 1.0)
+	_chk(fails, "720p collapses the hint gutter first",
+		(DashHostC6A.layout(Vector2(1280, 720))["hint"] as Rect2).size.y == 0.0)
+	_chk(fails, "ultrawide caps the answer width",
+		(DashHostC6A.layout(Vector2(2560, 1080))["answer"] as Rect2).size.x <= 1240.0)
+	_chk(fails, "ultrawide theater gains the side canvas",
+		(DashHostC6A.layout(Vector2(2560, 1080))["theater"] as Rect2).size.x == 2560.0)
+	ArtV2.dash = true
+	_chk(fails, "make_dash: null hud => null (fallback)", ArtV2.make_dash(null) == null)
+	ArtV2.dash = false
+
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
 	print("ARTV2 PROBE: %s (%d checks)" % ["ALL OK" if fails.is_empty() else "FAIL", _n])

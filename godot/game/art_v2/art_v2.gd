@@ -16,7 +16,8 @@ extends RefCounted
 static var actors := false   ## ON: V2 actor art may answer Actor2D.make()
 static var scene := ""       ## scene profile id — "" = legacy StageBackdrop
 static var dash := false     ## ON: a V2 dashboard host may replace the widgets
-static var hud_low := false  ## DEV/test: duck + fade the answer channel so the actor reads (temp until C6 dashboard)
+static var hud_low := false  ## DEV/test (LEGACY inspection only): duck+fade the channel — unnecessary under the C6A host
+static var dash_debug := false  ## C6A dev overlay: label the contract rectangles on screen
 
 ## The non-canonical V2 namespace (§3): runtime assets live here until approved.
 const ACTOR_DIR := "res://game/art_v2/actors"
@@ -35,6 +36,8 @@ static func boot(args: PackedStringArray) -> void:
 				dash = true
 			elif t == "hudlow":
 				hud_low = true
+			elif t == "dashdebug":
+				dash_debug = true
 			elif t.begins_with("scene:"):
 				scene = t.substr("scene:".length()).strip_edges()
 			elif t != "":
@@ -66,11 +69,14 @@ static func make_actor(id: String, aspect := "") -> Actor2D:
 static func make_scene() -> Control:
 	return SceneKit.make(scene)
 
-## DASHBOARD seam — consumed in raid_hud._build_combat. C1 ships the selector +
-## fall-back ONLY: no V2 dashboard host exists until Packet C6 registers one
-## here, so this always returns null today and the current fixed widgets + class
-## band build untouched (that null path IS the --artv2=dash fail-safe). When C6
-## lands a host it also owns null-guarding the HUD render feed (_render_dial /
-## _band.render) for the replaced widgets — C1 deliberately leaves render alone.
-static func make_dash(_hud: Control) -> Control:
-	return null
+## DASHBOARD seam — consumed in raid_hud._build_combat. C6A: the reaction-first
+## graybox host answers for the DUELIST seat only (this proof); every other
+## class returns null and receives the complete legacy HUD unchanged — the same
+## missing-host fail-safe C1 shipped. The host satisfies the render feed by
+## creating the REAL boss widgets + band synchronously (no null seams).
+static func make_dash(hud: Control) -> Control:
+	if not dash or hud == null:
+		return null
+	if not hud.has_method("_seat_cls_now") or String(hud.call("_seat_cls_now")) != "duelist":
+		return null
+	return DashHostC6A.new(hud)

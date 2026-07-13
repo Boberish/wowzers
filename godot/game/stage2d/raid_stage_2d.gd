@@ -36,6 +36,8 @@ var _over_done := false
 var _seat_keys: Array = []
 var _cast: Array = []             # explicit actor specs (gate exams); [] = raid roster
 var _enc_id := "riftmaw"          # to restore the boss body after an add wave
+var dash_scale := 1.0             ## C6A theater fit (view-only): SLOTS stay the LOCAL
+                                  ## spacing grammar; the whole cast scales to the rect
 
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -84,6 +86,7 @@ func _layout() -> void:
 	if boss_actor == null:
 		return
 	boss_actor.position = size * BOSS_AT
+	boss_actor.scale = Vector2(-dash_scale, dash_scale)
 	for i in actors.size():
 		var slot: Dictionary = SLOTS.get(_seat_keys[i], SLOTS["tank"])
 		var a: Actor2D = actors[i]
@@ -91,16 +94,16 @@ func _layout() -> void:
 		if i < _cast.size() and (_cast[i] as Dictionary).has("at"):
 			at = (_cast[i] as Dictionary)["at"]
 		a.position = size * at
-		a.scale = Vector2.ONE * float(slot["scale"])
+		a.scale = Vector2.ONE * float(slot["scale"]) * dash_scale
 		var d := float(slot["dim"])
 		a.modulate = Color(d, d, d)
 
 func _draw() -> void:
 	if boss_actor == null:
 		return
-	var shadows: Array = [[boss_actor.position, 190.0]]
+	var shadows: Array = [[boss_actor.position, 190.0 * dash_scale]]
 	for a in actors:
-		shadows.append([(a as Node2D).position, 80.0])
+		shadows.append([(a as Node2D).position, 80.0 * dash_scale])
 	for e in shadows:
 		draw_set_transform(e[0], 0.0, Vector2(1.0, 0.26))
 		draw_circle(Vector2.ZERO, float(e[1]), Color(0, 0, 0, 0.32))

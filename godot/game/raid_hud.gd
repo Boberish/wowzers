@@ -233,6 +233,7 @@ var _party_ctx := ""               ## "" = raid flow (DESCEND) · "bastion" = th
 var _oath_lbl: Label = null
 
 var _stage: Control   ## the ONE environment node — legacy StageBackdrop, or an ART-V2 scene profile (C1 selector; C2 owns the host)
+var _hint_lbl: Label = null   ## the band's hint line (C6A gutter handle)
 var _stage2d: RaidStage2D = null
 var _ui: Control
 var _fx: Control
@@ -302,6 +303,10 @@ func _clear() -> void:
 		_shell._clear_shell_ui()   # instance screens replace shell screens (leaf call)
 	TransitionVeil.flash_on(self)   # screens settle in, never snap
 	_band = null                    # its widgets die with _ui below
+	_hint_lbl = null
+	if _stage is SceneKit:          # C6A: the dash-theater floor dies with the fight
+		(_stage as SceneKit).dash_floor_px = -1.0
+		(_stage as SceneKit)._relayout()
 	_hover_seat = null
 	_focus_seat = null
 	_stage2d = null
@@ -2783,6 +2788,7 @@ func _rune_row(off_l: float, off_r: float) -> HBoxContainer:
 
 func _hint_line(text: String) -> void:
 	var hint := Label.new()
+	_hint_lbl = hint   # C6A: the dash host re-places/collapses the gutter
 	hint.text = text
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 13)

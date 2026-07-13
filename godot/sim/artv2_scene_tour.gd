@@ -26,6 +26,10 @@ func _initialize() -> void:
 			ArtV2.actors = true   # C4: painted adapters answer Actor2D.make
 		elif a == "--hudlow":
 			ArtV2.hud_low = true
+		elif a == "--dash":
+			ArtV2.dash = true    # C6A: the reaction-first graybox host
+		elif a == "--dashdebug":
+			ArtV2.dash_debug = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	# the seam under test: set the selector BEFORE the HUD instances — its
 	# _ready builds the backdrop through ArtV2.make_scene() -> SceneKit.make()

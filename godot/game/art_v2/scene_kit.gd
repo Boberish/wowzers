@@ -113,6 +113,13 @@ static func layer_tex(profile_spec: Dictionary, layer: String) -> Texture2D:
 
 var profile_id := ""
 var spec: Dictionary = {}
+## C6A theater contract: when >0, the combat floor rides THIS screen line (the
+## dash host sets it to the theater's floor; raid_hud._clear resets to -1).
+## Default -1 ⇒ the legacy h*FLOOR_Y line — default-off renders byte-identical.
+var dash_floor_px := -1.0
+
+func _floor_line(h: float) -> float:
+	return dash_floor_px if dash_floor_px > 0.0 else h * FLOOR_Y
 
 var _distant_l: Control
 var _atmos: CPUParticles2D
@@ -175,7 +182,7 @@ func _layer(painter: Callable) -> Control:
 
 func _relayout() -> void:
 	if _atmos != null:
-		_atmos.position = Vector2(size.x * 0.5, size.y * (FLOOR_Y - 0.05))
+		_atmos.position = Vector2(size.x * 0.5, _floor_line(size.y) - size.y * 0.05)
 		_atmos.emission_rect_extents = Vector2(size.x * 0.45, size.y * 0.30)
 	for c in get_children():
 		if c is Control:
@@ -265,7 +272,7 @@ func _paint_midground(ci: Control) -> void:
 	var h := ci.size.y
 	if w <= 0.0 or h <= 0.0:
 		return
-	var floor_y := h * FLOOR_Y
+	var floor_y := _floor_line(h)
 	var tex: Texture2D = _tex.get("midground")
 	if tex != null:
 		# transparent framing tile, feet on the floor line, tiled across width
@@ -300,7 +307,7 @@ func _paint_floor(ci: Control) -> void:
 	if w <= 0.0 or h <= 0.0:
 		return
 	var d: Dictionary = spec.get("floor", {})
-	var floor_y := h * FLOOR_Y
+	var floor_y := _floor_line(h)
 	var tex: Texture2D = _tex.get("floor")
 	if tex != null:
 		_tile(ci, tex, floor_y, h - floor_y)
@@ -321,7 +328,7 @@ func _paint_dressing(ci: Control) -> void:
 	var h := ci.size.y
 	if w <= 0.0 or h <= 0.0:
 		return
-	var floor_y := h * FLOOR_Y
+	var floor_y := _floor_line(h)
 	var tex: Texture2D = _tex.get("dressing")
 	if tex != null:
 		# flank props: drawn once per side, right side mirrored — never tiled
