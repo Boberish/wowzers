@@ -7,7 +7,8 @@
 ## judged INSTANTLY, symmetric around gate-touch (verdict + payoffs fire AT the press — the
 ## Twinfang model, Bill: "the twinfang is super good, do that"); resolve applies the stored
 ## grade. Telegraph busters/globals keep the open-window model (big slow reads):
-##   PARRY (main)      — BINARY: land within ±parry_land of gate-touch = mit .95 + COUNTER
+##   PARRY (main)      — BINARY: land within the perfect/bullseye zone (answer_claim ×
+##                       parry_grade_frac — PARRY LAW, coherent with the dodge grades) = mit .95 + COUNTER
 ##                       hit-back + ◆ + flow spike; pressed-but-out = the miss (.18 token mit,
 ##                       wind gone). 3.5 wind. Answers AUTO / HEAVY / BUSTER — never a GLOBAL.
 ##   DODGE (secondary) — GRADED on the one game-wide ladder GRAZE<GOOD<PERFECT<BULLSEYE
@@ -219,7 +220,8 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 	var size := CombatCore._stream_size(bk)
 	var grade := StrikeRes.Grade.MISS
 	if kind == "parry":
-		grade = StrikeRes.Grade.BULLSEYE if best_d <= _tt(s, cfg.parry_land) else StrikeRes.Grade.MISS
+		# PARRY LAW: lands iff inside the perfect/bullseye zone (answer_claim × parry_grade_frac)
+		grade = StrikeRes.Grade.BULLSEYE if best_d <= _tt(s, cfg.answer_claim * cfg.parry_grade_frac) else StrikeRes.Grade.MISS
 	else:
 		var p := float(best_d) / maxf(1.0, float(claim))  # 0 at the gate line … 1 at the edge
 		if p <= cfg.grade_bull_frac:
@@ -260,9 +262,10 @@ func _claim_tg(s: CombatState, seat: Seat, kind: String, cand: Dictionary, off_t
 	var claim := _tt(s, cfg.answer_claim)
 	var grade := StrikeRes.Grade.MISS
 	if kind == "parry":
-		# you don't parry a room-wide blast (DEC-15); on a personal hit it's the binary land
+		# you don't parry a room-wide blast (DEC-15); on a personal hit it's the binary land,
+		# tied to the perfect/bullseye zone (PARRY LAW — coherent with the dodge grades)
 		if not aoe:
-			grade = StrikeRes.Grade.BULLSEYE if d <= _tt(s, cfg.parry_land) else StrikeRes.Grade.MISS
+			grade = StrikeRes.Grade.BULLSEYE if d <= _tt(s, cfg.answer_claim * cfg.parry_grade_frac) else StrikeRes.Grade.MISS
 	else:
 		var p := float(d) / maxf(1.0, float(claim))       # 0 at the gate line … 1 at the edge
 		if p <= cfg.grade_bull_frac:
@@ -539,7 +542,7 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"win_perfect": cfg.answer_claim * cfg.grade_perfect_frac,
 		"win_good": cfg.answer_claim * cfg.grade_good_frac,
 		"win_graze": cfg.answer_claim,
-		"parry_window": cfg.parry_land,
+		"parry_window": cfg.answer_claim * cfg.parry_grade_frac,   # PARRY LAW: the gate draws the real zone
 	}
 
 func recap_spec(_s: CombatState, seat: Seat) -> Array:

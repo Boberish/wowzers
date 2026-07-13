@@ -208,11 +208,13 @@ crossed the line → red ✗ husk, flows to the bar's end · `duel_fumble {}` = 
 
 **D · THE GRADING LADDER (game-wide, identical to Twinfang):** GRAZE (steel) < GOOD (gold) <
 PERFECT (mint) < BULLSEYE (bright gold) — same names + colors in every class. **⚠ PARRY LAW
-(Bill, LOCKED — "all parries still need perfect/bullseye"): a PARRY is never graded on this
-ladder. It is BINARY — a tight `±parry_land` (~2 ticks, perfect/bullseye tier) press LANDS
-(shown as `BULLSEYE` / "PARRY!" + COUNTER + ◆ + flow spike), anything looser MISSES (a small
-`mit_parry_miss` token cut, none of the payoffs). No graze/good parry exists; a global can
-never be parried.** DODGE keeps the full four-grade ladder.
+(Bill 2026-07-13, LOCKED — "all parries need perfect/bullseye, tied to the zone so it's always
+coherent"): a PARRY is never graded on this ladder. It is BINARY — a press inside the
+perfect/bullseye zone (window = `answer_claim × parry_grade_frac`, default 0.55 = the PERFECT
+boundary; so it SCALES with the grades and can't drift) LANDS (shown as `BULLSEYE` / "PARRY!" +
+COUNTER + ◆ + flow spike), anything looser MISSES (a small `mit_parry_miss` token cut, none of
+the payoffs). No graze/good parry exists; a global can never be parried.** DODGE keeps the full
+four-grade ladder. The gate draws the parry window from `parry_window` in obs (= the real zone).
 
 **E · BEHAVIORS the dashboard must honor (recent, LOCKED — build against them).**
 **ONE BAR** — casts (heal/empower/kick/brace) ride the BossCastBar under boss HP; the big dial +
