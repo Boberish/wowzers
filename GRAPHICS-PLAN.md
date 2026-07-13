@@ -374,7 +374,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → **Codex I3 ACTIVE** → C6B skin/binding
+### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → ✅ I3-A BOARD APPROVED → **I3-B PRODUCTION ASSETS (PERMISSION GATE)** → C6B skin/binding
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -484,7 +484,7 @@ compact frames · meter defaults collapsed but remains reachable · real fonts a
 busy Duelist stream + boss cast + low HP/aggro screenshots · live tank speed test. Stop for Bill's
 rectangle verdict before I3 image generation.
 
-### C6B · PAINTED DASHBOARD SKIN + DUELIST BINDING — AFTER I3
+### C6B · PAINTED DASHBOARD SKIN + DUELIST BINDING — AFTER APPROVED I3-B ALPHA SOURCES
 
 **Goal:** consume Codex's Bill-approved I3 component family as replaceable 9-slice frames/caps,
 masks/fills, sockets, buttons, and effect frames over the C6A host. Bind every existing
@@ -515,7 +515,7 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
 - **I1:** approved interior/exterior contrast pair, delivered as separable scene layers.
 - **I2:** 🔨 `11bcd4a` + `567adea` — approved Duelist anchor + separated chroma/alpha part sources +
   windup/contact replacements; lower-level runtime preparation delegated to C5 by Bill.
-- **I3:** 🟡 **FIRST VISUAL BOARD AUTHORIZED 2026-07-13** after Bill approved C6A's live
+- **I3-A:** ✅ **MATERIAL + ANATOMY BOARD APPROVED BY BILL 2026-07-13** after Bill approved C6A's live
   rectangles and smaller ability band: modular component family for frame/caps/masks/fills/
   sockets/repeatable 4–6-button slots/effect frames. Timing nail, gate, labels, numbers, fills,
   and answer-shape geometry remain code-owned; the first image is a visual-material direction
@@ -526,7 +526,15 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   central primary bar above the smaller combo bank; HP and Flow/Aggro stay as side bars; remove
   the accidental baked diamond/lock marker from Aggro; combo sockets lose their tiny top bubbles;
   show clean purple feint versions of diamond+hexagon+octagon only; replace skull with the muted
-  barred-disc BRACE token; expand party rows for HP/resource/cast/debuff information.
+  barred-disc BRACE token; expand party rows for HP/resource/cast/debuff information. Bill's
+  verdict on revision 2: **“okay thats good, lets move on.”** This flattened board approves the
+  family and hierarchy; it is not an extraction-ready runtime atlas.
+- **I3-B:** ⏳ **WAITING FOR BILL'S EXPLICIT IMAGE-GENERATION APPROVAL.** Derive the approved I3-A
+  family into isolated transparent production sources: 9-slice-capable frame/bar shells, party
+  row shell, five-socket combo strip or repeatable socket, repeatable ability slot, utility tab,
+  and the normal/feint/BRACE icon set. Preserve code-owned holes/masks and avoid baking labels,
+  values, fills, timing gates, cooldowns, or lock markers. Claude must not scrape the flattened
+  dark-backed board into shipping textures; after I3-B exists, C6B owns trim/slice/import/binding.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.

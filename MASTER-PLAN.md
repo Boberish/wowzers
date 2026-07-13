@@ -902,7 +902,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   shot = landed PARRY! + wider gate window. **Deployed to `C:\Games\v3Tank`.** ⚠ OWED (flagged):
   Twinfang **boon description text** still says "Bullseye" (a content pass, not the verdict layer).
 
-- ☐ 2026-07-13 · Codex image packet `I3-A` · §GRAPHICS — **CLAIM: FIRST DUELIST DASHBOARD
+- ☑ 2026-07-13 · Codex image packet `I3-A` · §GRAPHICS — **APPROVED: FIRST DUELIST DASHBOARD
   COMPONENT BOARD (Bill explicitly authorized image generation).** C6A's reaction-first layout
   and smaller ability band are approved. Generate one SUNPRINT CEL visual-material direction
   board against the live anatomy: broad answer-frame family · connected lower dashboard · HP /
@@ -921,6 +921,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   feint versions of all three pressable shapes (diamond/hexagon/octagon) but none for BRACE;
   replace the skull with a muted barred-disc BRACE/no-action seal; flesh out four party rows with
   HP/resource/cast/debuff reservations. Preserve the accepted material family and code-owned truth.
+  **Bill verdict on revision 2: “okay thats good, lets move on.”** I3-A is now the approved visual
+  family/anatomy reference. It remains a flattened concept board, not a shipping atlas.
+
+- ⏳ 2026-07-13 · Codex image packet `I3-B` · §GRAPHICS — **WAITING FOR BILL'S EXPLICIT NEW-
+  IMAGE-GENERATION APPROVAL: PRODUCTION ALPHA SOURCES.** Derive isolated transparent, 9-slice-
+  capable shells/caps, party rows, socket/button pieces, utility tab, and normal/feint/BRACE icons
+  from the approved I3-A family. Do not bake text, numbers, fill truth, timing gates, cooldowns, or
+  lock markers. The flattened dark-backed board is not suitable for direct shipping extraction.
+  After the sources are approved, hand all trim/slice/import/binding/fallback/test work to Claude
+  as C6B; no further Codex image generation is implied without another Bill approval.
 
 - ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
   §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·
