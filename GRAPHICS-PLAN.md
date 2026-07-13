@@ -9,14 +9,16 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P5 SKIN BUILT — C6B 🔨 MERGED `28e9b15` (2026-07-13) · BILL CONDITIONAL PASS ·
-C6B.1 SCALE/REGISTRATION POLISH READY.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
+**Status:** 🟡 **P5 ACCEPTED AT SYSTEM LEVEL — C6B `28e9b15`; SMALL MANUAL SCALE/INSET POLISH
+PARKED BY BILL · P6/I4 FULL-BUDGET VFX ACTIVE.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
 `5bb532c`; C6A graybox `2b407c4` passed Bill's rectangle/speed gate; I3-A/B delivered the
 approved component family (`801d713`); **C6B bound it**: deterministic crops → `res://game/
 art_v2/dash/`, painted answer frame/comet icons/Wind+sockets/HP+Flow bars/slots/party rows/
 boss+cast shells/utility tab over the SAME truth widgets, default-off behind `--artv2=…,dash`,
-missing-asset ⇒ C6A graybox. `art-Test` boots it. Bill's live verdict: **“the basics are solid”**;
-some component scaling and bar-edge pixel registration still need a narrow C6B.1 pass before P6.
+missing-asset ⇒ C6A graybox. `art-Test` boots it. Bill's live verdict: **“the basics are solid.”**
+He explicitly skipped C6B.1 and will hand-tune the remaining scale/bar-inset pixels later; they do
+not gate P6. VFX target = maximum-quality authored 2D flipbooks/layering while retaining the one
+GL Compatibility/WebGL2 path—no intentionally cheap browser edition.
 C2's deferred tour/smoke/A-B matrix remains release-default debt. Generated boards remain
 visual references, not runtime assets or a locked pixel layout.
 
@@ -377,13 +379,13 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ → I3-A/B ✅ → C6B `28e9b15` ✅ BASIC SYSTEM → **C6B.1 SCALE/PIXEL POLISH READY · P6 WAITS**
+### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ → I3-A/B ✅ → C6B `28e9b15` ✅ **SYSTEM ACCEPTED; MANUAL PIXEL POLISH PARKED**
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
 family and skin the accepted layout. Test at 1080p/720p/ultrawide and in both scene profiles.
 
-### P6 · SIGNATURE VFX — Codex I4 + Claude C7
+### P6 · SIGNATURE VFX — **CODEX I4 ACTIVE (FULL-BUDGET COMPATIBILITY-SAFE)** → Claude C7
 
 Flipbook FX + En Garde/Dump/parry/dodge polish, current juice salvage, effect budget/readability.
 
@@ -516,7 +518,7 @@ Flow/Wind/combo/ability/HP/party/boss/cast/effect truth without changing the acc
 gameplay smoothing of timing truth · any missing/unusable visual source is an image-generation
 stop: ask Bill before Codex generates or edits it.
 
-### C6B.1 · PAINTED DASHBOARD SCALE + BAR REGISTRATION POLISH — READY FOR CLAUDE
+### C6B.1 · PAINTED DASHBOARD SCALE + BAR REGISTRATION POLISH — 💡 PARKED FOR BILL'S MANUAL PASS
 
 **Bill's live verdict (2026-07-13):** “the basics are solid”; preserve the C6B architecture,
 material family, hierarchy, controls, and live bindings. This is not a layout redesign or image
@@ -534,7 +536,8 @@ misregistration; do not change the accepted screen anatomy.
 **Hard boundary:** no new image generation/redesign · no gameplay/state/protocol/checksum/timing
 changes · no new smoothing · no baked values · default-off/missing-asset fallback remains complete.
 Gate with the C6B state strip plus 1280×720, 1920×1080, and 2560×1080 tours in both scene profiles,
-then stop for Bill's final P5 polish verdict before I4/C7.
+Bill explicitly skipped this Claude packet on 2026-07-13 and will make the small scale/inset edits
+by hand later. This debt does not gate I4/C7; reclaim only if Bill asks.
 
 ### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE
 
@@ -580,7 +583,14 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   `art-source/graphics-v2/p5-dashboard/`: four untouched chroma sheets + four visually checked RGBA
   alpha sheets + the production contract/contents README. The dedicated empty-window utility tab
   supersedes the wide sheet's baked sample. C6B may now claim from current `main`.
-- **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
+- **I4:** 🟡 **AUTHORIZED/ACTIVE 2026-07-13 — FULL-BUDGET VFX, ONE COMPATIBILITY-SAFE LOOK.**
+  Produce project-bound chroma+alpha flipbook sources in three gameplay-priority groups:
+  **I4-A core reaction** = parry + dodge; **I4-B signatures** = Dump + En Garde activation/hold;
+  **I4-C contacts** = light + heavy + crush impact families. Sources use crisp painted/cel-edged
+  shapes rather than baked fuzzy bloom; C7 supplies additive duplicates, modulation, shake,
+  hit-stop, and bounded particles. Each action reads in one frame, peaks within ~50–100 ms, and
+  clears/interrupts before the next high-Flow decision. Maximum spectacle is allowed outside the
+  AnswerChannel, but no effect may obscure the timing nail/gate or next incoming shape.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.
 
