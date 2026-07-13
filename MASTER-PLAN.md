@@ -877,8 +877,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-13 · worktree `../wow-artv2-c6a` (branch `artv2-c6a`, from `4dbac71`) · §GRAPHICS —
-  **CLAIM: GRAPHICS PACKET C6A — REACTION-FIRST GRAYBOX HOST + THEATER CONTRACT** (GRAPHICS-
+- ☑ 2026-07-13 · `artv2-c6a` → **MERGED to `main` (ff `2b407c4`)** · §GRAPHICS — **C6A
+  COMPLETE — THE REACTION-FIRST SCREEN IS LIVE IN GRAYBOX; ⚠ STOPPED AT BILL'S RECTANGLE/
+  SPEED VERDICT (I3 images + C6B skin wait).** Dash band HALVED mid-build on Bill's live
+  call — the theater got the space (stage_scale 1.0, full-size actors). One layout contract
+  (`DashHostC6A.layout`) owns status/theater/answer/dashboard/hint; THE LAW (no persistent
+  UI in the theater) enforced by placement + the labeled `dashdebug` overlay; the REAL
+  channel/band/boss widgets re-placed (zero second implementations); stage SLOTS local-
+  grammar placed into the theater; SceneKit floor on the same line; legacy default-off
+  byte-untouched (`ui_smoke_raid` ALL OK, probe 96, matrix + overlay + legacy shots).
+  Note for the record: under `canvas_items+expand` a 720p WINDOW renders the 1080-design
+  canvas uniformly downscaled — 16:9 layouts identical by construction; the 1280×720
+  contract is probe-proven. Deployed to `C:\Games\art-Test` (shortcut now boots dash).
+  ORIGINAL CLAIM: **GRAPHICS PACKET C6A — REACTION-FIRST GRAYBOX HOST + THEATER CONTRACT** (GRAPHICS-
   PLAN §2.3/P5/C6A; Bill's spec; ART-FREE — graybox only, any image need ⇒ stop and ask).
   Behind `ArtV2.dash` (default OFF), Duelist-only: NEW `game/art_v2/dash_host_c6a.gd` =
   ONE responsive layout contract (status 0-150 · theater 150-560 · answer 560-750 · dash

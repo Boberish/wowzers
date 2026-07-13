@@ -293,7 +293,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A graybox → Bill speed gate → Codex I3 → C6B skin/binding
+### P5 · DUELIST DASHBOARD — 🟡 C6A graybox 🔨 `2b407c4` → **BILL SPEED GATE (now)** → Codex I3 → C6B skin/binding
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -381,7 +381,7 @@ ask Bill before handing an explicit image request back to Codex.
 **Gates:** automated pose/contact tour · live `raid:tank` playtest build · missing-assets fallback ·
 determinism/raid integration check.
 
-### C6A · REACTION-FIRST GRAYBOX HOST + THEATER CONTRACT — NEXT
+### C6A · REACTION-FIRST GRAYBOX HOST + THEATER CONTRACT — 🔨 BUILT+MERGED `2b407c4` (2026-07-13; dash band halved live per Bill; ⚠ AT BILL'S RECTANGLE/SPEED VERDICT — I3/C6B wait)
 
 **Goal:** behind `--artv2=...,dash`, prove §2.3's permanent screen anatomy using plain code-drawn
 surfaces and the existing live controls/data: compact party/boss/utility top rail; a UI-free upper
