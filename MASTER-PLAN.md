@@ -876,21 +876,33 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-13 · worktree `../wow-artv2-c5-align` (branch `artv2-c5-align`, from `b3bc4c2`) ·
-  §GRAPHICS — **CLAIM: C5.1 — DUELIST VISUAL REGISTRATION FIX (P4 reopened: Bill REJECTED the
-  C5 visual assembly; functional merge `f91f1b0` stands).** Deliverables: dev-only ALIGNMENT
-  LAB (`sim/artv2_align_lab.gd` — large zoom · part bounding boxes + pivot markers · approved
-  anchor as optional ghost · idle/windup .5+1.0/parry/hit/death poses · live-editable
-  at/anchor/rot/per-part scale · save-back into actor.json + R reload) + the registration
-  pass itself: arm shoulder seats ON the torso's circular socket and rotates about the
-  anatomical shoulder gap-free · grip centered in the fist through every pose · head/collar
-  overlap · torso/hip overlap without duplicated skirt edge · scarf loop behind the neck,
-  tails behind the body · feet on the baseline · death visible in the pose tour · layered vs
-  replacement-frame scale parity (new per-part `scale` + root `frames_scale` json fields).
-  IMAGE STOP: no regeneration/repaint/substitution — an unhideable seam ⇒ stop, name the PNG
-  + missing pixels + marked screenshot for Bill. Verify: close-up pose sheet + one live Stack
-  shot. ⚠ CLOSURE GATED ON BILL: no P5, and MASTER/GRAPHICS/LEDGER flip ONLY after his visual
-  approval — work stays on the branch until then. *(Claude session)*
+- ☑ 2026-07-13 · `artv2-c5-align` → **MERGED to `main` (ff `5bb532c`)** · §GRAPHICS —
+  **C5.1 COMPLETE — DUELIST VISUAL REGISTRATION + LIVE ANIMATION + GRADING (Bill: "solid,
+  call it good").** Bill rejected the C5 assembly; this pass fixed it and made the character
+  playable-legible on his Windows playtests. **Registration** (all via `sim/artv2_align_lab.gd`,
+  the new dev alignment lab — zoom · part boxes + pivots · anchor ghost · live at/rot/scale
+  edit → save-back to actor.json): arm pivot seated ON the torso cuff socket (the C5
+  "dislocated shoulder"), grip centered in the fist, head/collar + torso/hip overlaps,
+  coil moved into the torso chain (legs planted), frames_scale parity. **Animation bridge**:
+  the tank-v3 event vocabulary (`duel_answer`/`duel_dodge`/…) was firing into a stage
+  animation map that only knew the pre-rework names — wired `Actor2D.graded_react(kind,grade)`
+  so play actually animates (was the "no movement for dodging"). **Grading vocabulary**
+  (Bill's ask — every grade unique, bullseye the showpiece): BULLSEYE = the moulinet (sword
+  arm full circle, `flourish_part` json field) + pop + star + punch · PERFECT/GOOD mint/gold
+  slips · GRAZE scrappy wobble · MISS/BAITED stumble · parry = held blade-up deflection ·
+  WEAVE stays snappy. `PACE=1.15` dial (cosmetic only — grades/payoffs resolve at the press).
+  **Root-caused two real bugs live**: (1) the parry was invisible because `sync()` reset every
+  idle raider's pose EVERY FRAME and stomped held poses ~1 frame after they struck → `_react_t`
+  guard (a react owns the silhouette for its window; `clear_windup`/`channel`-stance yield);
+  (2) the bullseye "did a parry" because it literally reused the parry pose → the moulinet.
+  **hudlow** dev flag (`--artv2=…,hudlow`) ducks+fades the answer channel so the actor reads —
+  a stopgap; the real fix is C6. Gates (view-only): import 0 · `artv2_probe` ALL OK (77) ·
+  raid determinism PASS (riftmaw checksum unchanged) · `ui_smoke_raid` ALL OK. Deployed to
+  the **`C:\Games\art-Test`** Windows install throughout (per Bill's always-push rule).
+  **Open follow-ups (the "more details" list):** scarf front/back split (needs a Codex
+  two-piece asset — image-stop) · authored idle guard-sway · authored dump/counter swing ·
+  per-boss scene profiles · **C6 dashboard = the real layout fix** (retires hudlow). Next per
+  Bill: bank the base (done) → UI/dashboard first-pass → bosses → art detail on top. *(Claude session)*
 
 - ☑ 2026-07-13 · `artv2-c5` → **MERGED to `main` (ff `f91f1b0`)** · §GRAPHICS — **GRAPHICS
   PACKET C5 COMPLETE — THE REAL DUELIST IS ASSEMBLED AND POSED.** Verified minimal: import 0

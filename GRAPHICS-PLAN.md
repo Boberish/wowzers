@@ -248,7 +248,7 @@ cooling midground, cool access-panel floor, and dehumidifier flank dressing. The
 remain untouched. The full resolution/legacy A-B matrix remains recorded debt before release
 default, per Bill's explicit move-on instruction.
 
-### P4 · DUELIST ANCHOR + RIG — 🟢 CHAIN COMPLETE: C4 adapter `05d9952` · I2 source art `11bcd4a`+`567adea` · **C5 rig 🔨 `f91f1b0`** — real Duelist assembled + posed behind the flag; Bill's eye + playtest = the P7-side gate
+### P4 · DUELIST ANCHOR + RIG — ✅ DONE: C4 `05d9952` · I2 `11bcd4a`+`567adea` · C5 rig `f91f1b0` · **C5.1 registration+animation+grading 🔨 `5bb532c`** (Bill playtested → "solid"). Real Duelist assembled, posed, animating live per grade, default-off. Next = P5 dashboard (C6).
 
 Approve the canonical character → derive/extract runtime layers → native rig → core animations →
 deforming garment → contact replacement. Old actor remains default until the complete tour passes.
@@ -338,6 +338,8 @@ satisfying `Actor2D` verbs and failing back to the current actor.
 windup scrub · no engine state · no Spine dependency.
 
 ### C5 · DUELIST RIG + CORE ANIMATIONS — 🔨 BUILT+MERGED `f91f1b0` (2026-07-13; `sim/artv2_part_prep.gd` crops/normalizes approved alpha — never repaints; actor.json v2 real rig + data-driven `poses` vocabulary; pose sheet `sim/artv2_pose_tour.gd`; live playtest + full matrix = debt)
+
+**C5.1 🔨 `5bb532c` (the playtest-driven finish):** alignment lab (`sim/artv2_align_lab.gd`) · registration pass (arm→cuff socket, grip-in-fist, overlaps, torso-chain coil) · `Actor2D.graded_react(kind,grade)` bridge so play animates · per-grade vocabulary (BULLSEYE moulinet via `flourish_part` · perfect/good slips · graze wobble · parry deflection hold · weave snappy) · `PACE` + `_react_t` frame-ownership guard (fixed the invisible parry — `sync()` was stomping held poses every frame) · `hudlow` dev flag (channel duck+fade — stopgap for C6). **Owed:** scarf front/back split (Codex two-piece asset) · authored idle/dump swings · per-boss scenes.
 
 **Goal:** map Codex's approved Duelist layer set onto C4 and implement the P4 vocabulary.
 
