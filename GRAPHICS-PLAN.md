@@ -194,8 +194,9 @@ status · SIZE = damage.** A player reads the shape to know which key, glances a
 (diamond warm-gold · hexagon cool-steel · octagon bronze-amber · skull muted-grey). Status
 **overrides** the tint: **RED = peeled** (the boss hunts another seat — a crimson hunt-chevron +
 "→ VICTIM"; the tank still answers it, damage stays the victim's) · **BLUE = flurry** (WEAVE
-mode) · **PURPLE = feint** (a lie wearing a real shape + word + a breathing purple ring — press
-it and you're BAITED). Red no longer means "boss attack"; it means peeled.
+mode) · **PURPLE = feint** (a lie wearing a real shape + word; **purple alone is the complete
+tell—no breathing ring or second animation**; press it and you're BAITED). Red no longer means
+"boss attack"; it means peeled.
 
 **A·· SIZE = damage.** The shape scales with the strike's `size` (`LIGHT < HEAVY < CRUSH`): small
 pokes draw small, the big commits draw large with a heavier glow. Size is read-only flavor +
@@ -363,7 +364,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — 🟡 C6A graybox 🔨 `2b407c4` → **BILL SPEED GATE (now)** → Codex I3 → C6B skin/binding
+### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → **Codex I3 ACTIVE** → C6B skin/binding
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -504,8 +505,11 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
 - **I1:** approved interior/exterior contrast pair, delivered as separable scene layers.
 - **I2:** 🔨 `11bcd4a` + `567adea` — approved Duelist anchor + separated chroma/alpha part sources +
   windup/contact replacements; lower-level runtime preparation delegated to C5 by Bill.
-- **I3:** after Bill approves C6A's live rectangles, dashboard component family:
-  frame/caps/masks/fills/sockets/buttons/effect frames/icons.
+- **I3:** 🟡 **FIRST VISUAL BOARD AUTHORIZED 2026-07-13** after Bill approved C6A's live
+  rectangles and smaller ability band: modular component family for frame/caps/masks/fills/
+  sockets/repeatable 4–6-button slots/effect frames. Timing nail, gate, labels, numbers, fills,
+  and answer-shape geometry remain code-owned; the first image is a visual-material direction
+  board, not a baked runtime HUD or final atlas.
 - **I4:** short transparent FX sheets for dodge/parry/dump/En Garde/impact.
 - **I5:** inspect tours, compare against anchor/style laws, request targeted edits, report visual
   acceptance evidence for the coordination log.

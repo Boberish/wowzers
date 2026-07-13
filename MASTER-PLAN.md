@@ -877,6 +877,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · Codex image packet `I3-A` · §GRAPHICS — **CLAIM: FIRST DUELIST DASHBOARD
+  COMPONENT BOARD (Bill explicitly authorized image generation).** C6A's reaction-first layout
+  and smaller ability band are approved. Generate one SUNPRINT CEL visual-material direction
+  board against the live anatomy: broad answer-frame family · connected lower dashboard · HP /
+  Flow-Aggro / Wind shells · five combo sockets · repeatable individual ability slots that can
+  host 4–6 buttons · compact top-island frame fragments. This is a PREVIEW/approval image, not a
+  baked full HUD and not a runtime atlas. Exact timing nail/gate, answer shapes, labels, numbers,
+  fills, and cooldown truth stay code-owned. Answer-shape amendment from Bill: **PURPLE ALONE is
+  the complete feint tell; remove the breathing-ring requirement.** No code/runtime import/C6B
+  until Bill approves the visual family. *(Codex)*
+
 - ☐ 2026-07-13 · `tank-icons` (worktree `../wow-tank-icons`) · §CLASSES/Duelist + §GRAPHICS —
   **CLAIM: THE ANSWER-SHAPE LAW — shape=answer · color=status · size=damage · parry graded
   good/bullseye.** Bill's call (this chat), **taking over** the work that was assigned to the
