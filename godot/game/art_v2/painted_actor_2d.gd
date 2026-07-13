@@ -64,6 +64,9 @@ var _scrub := 0.0                      ## windup amt, fed by the engine every fr
 var _swing_t := 0.0                    ## replacement swing-frame time left
 var _enraged := false
 var _pop_t := 0.0                      ## scale-pop timer (breath yields while >0)
+var _react_t := 0.0                    ## a react OWNS the silhouette while >0 — the stage's
+                                       ## per-frame clear_windup()/channel-stance yield to it
+                                       ## (they stomped held poses 16ms after they struck)
 
 ## Bill 2026-07-13: "animations are too fast" — ONE pacing dial for every react
 ## tween. Cosmetic only: grades/payoffs resolve in the kit at the press; only
@@ -174,6 +177,7 @@ func _process(delta: float) -> void:
 		if _swing_t <= 0.0 and _scrub <= 0.0:
 			_hide_swap()
 	_pop_t = maxf(0.0, _pop_t - delta)
+	_react_t = maxf(0.0, _react_t - delta)
 	# idle breath — suspended while a windup scrub or a bullseye pop owns the frame
 	if _scrub <= 0.0 and _pop_t <= 0.0 and _rig.visible:
 		_rig.scale.y = _scale_base * (1.0 + 0.014 * sin(_t * 2.3))
@@ -256,6 +260,7 @@ func _pose_flash(pose_name: String, hold: float, back: float) -> bool:
 ## WEAVE (flurry) stays snappy — rapid beats can't wear slow reacts.
 func graded_react(kind: String, grade: int) -> void:
 	if kind == "weave":
+		_react_t = maxf(_react_t, 0.15)
 		var tw := create_tween()
 		tw.tween_property(_rig, "position:x", -14.0, 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw.tween_property(_rig, "position:x", 0.0, 0.09)
@@ -280,6 +285,7 @@ func graded_react(kind: String, grade: int) -> void:
 			stumble_react()
 
 func _dodge_slip(off: Vector2, hold: float, col: Color, flourish: bool) -> void:
+	_react_t = maxf(_react_t, _dur(0.09 + hold + 0.20) + (0.25 if flourish else 0.0))
 	_flash(col)
 	var tw := create_tween()
 	tw.tween_property(_rig, "position", off, _dur(0.09)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -295,6 +301,7 @@ func _dodge_slip(off: Vector2, hold: float, col: Color, flourish: bool) -> void:
 		sp.tween_callback(func(): _flash(col))
 
 func _graze_slip() -> void:
+	_react_t = maxf(_react_t, _dur(0.44))
 	_flash(Color(0.8, 0.82, 0.88))
 	var tw := create_tween()
 	tw.tween_property(_rig, "position", Vector2(-16, -4), _dur(0.08)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -313,6 +320,13 @@ func act(_id: String, flourish := false) -> Dictionary:
 ## SCRUBBED: called EVERY FRAME with amt 0..1 — the pose is a pure function of
 ## amt (same amt in ⇒ same silhouette out; timing truth stays the engine's).
 func windup(kind: String, amt: float) -> void:
+	if kind == "channel":
+		# the stage's per-frame ready/dodge stance (tank recovery, cast bars) —
+		# a SUBTLE set, never the full authored coil; reacts own their frames
+		if _react_t > 0.0:
+			return
+		_pose_lerp("windup", 0.30 * clampf(amt, 0.0, 1.0))
+		return
 	_scrub = clampf(amt, 0.0, 1.0)
 	var fk := "windup_" + kind
 	if _frames.has(fk):
@@ -330,6 +344,8 @@ func clear_windup() -> void:
 	_scrub = 0.0
 	if _swing_t <= 0.0:
 		_hide_swap()
+	if _react_t > 0.0:
+		return   # a react owns the frame — the sync's per-frame reset must not stomp it
 	_pose_reset()
 	_rig.position = Vector2.ZERO
 
@@ -356,6 +372,7 @@ func curse_release() -> void:
 ## is cosmetic; the mechanical parry still resolves instantly — only the look
 ## lingers (~0.44s: snap up, hold the blade, ease home).
 func evade_react() -> void:
+	_react_t = maxf(_react_t, _dur(0.24 + 0.20) + 0.10)   # the held deflection must SURVIVE the sync
 	_pose_flash("parry", _dur(0.24), _dur(0.20))
 	var tw := create_tween()
 	tw.tween_property(_rig, "position:x", -24.0, _dur(0.08)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -365,6 +382,7 @@ func evade_react() -> void:
 ## lift, then a snap home. Bigger than the old vertical-only hop so it reads at
 ## stage scale (Bill: "not much movement for dodging").
 func hop_react(clean: bool) -> void:
+	_react_t = maxf(_react_t, _dur(0.27))
 	var back := Vector2(-38.0 if clean else -24.0, -12.0 if clean else -7.0)
 	var tw := create_tween()
 	tw.tween_property(_rig, "position", back, _dur(0.08)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -374,16 +392,19 @@ func graze_react() -> void:
 	_flash(Color(0.85, 0.85, 0.9))
 
 func stumble_react() -> void:
+	_react_t = maxf(_react_t, _dur(0.34))
 	var tw := create_tween()
 	tw.tween_property(_rig, "rotation", 0.16, _dur(0.10))
 	tw.tween_property(_rig, "rotation", 0.0, _dur(0.22))
 
 func brace_react() -> void:
+	_react_t = maxf(_react_t, _dur(0.26))
 	var tw := create_tween()
 	tw.tween_property(_rig, "scale:y", _scale_base * 0.93, _dur(0.08))
 	tw.tween_property(_rig, "scale:y", _scale_base, _dur(0.16))
 
 func hit_react(big: bool) -> void:
+	_react_t = maxf(_react_t, _dur(0.22))
 	_flash(Color(1.0, 0.35, 0.35) if big else Color(1.0, 0.6, 0.6))
 	var tw := create_tween()
 	tw.tween_property(_rig, "position:x", -14.0 if big else -8.0, _dur(0.05))
