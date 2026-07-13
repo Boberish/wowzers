@@ -207,7 +207,12 @@ crossed the line → red ✗ husk, flows to the bar's end · `duel_fumble {}` = 
 `stream_guard_shatter {ids}` = THE GUARD's rear-up (shard the **named ids** off the track).
 
 **D · THE GRADING LADDER (game-wide, identical to Twinfang):** GRAZE (steel) < GOOD (gold) <
-PERFECT (mint) < BULLSEYE (bright gold) — same names + colors in every class.
+PERFECT (mint) < BULLSEYE (bright gold) — same names + colors in every class. **⚠ PARRY LAW
+(Bill, LOCKED — "all parries still need perfect/bullseye"): a PARRY is never graded on this
+ladder. It is BINARY — a tight `±parry_land` (~2 ticks, perfect/bullseye tier) press LANDS
+(shown as `BULLSEYE` / "PARRY!" + COUNTER + ◆ + flow spike), anything looser MISSES (a small
+`mit_parry_miss` token cut, none of the payoffs). No graze/good parry exists; a global can
+never be parried.** DODGE keeps the full four-grade ladder.
 
 **E · BEHAVIORS the dashboard must honor (recent, LOCKED — build against them).**
 **ONE BAR** — casts (heal/empower/kick/brace) ride the BossCastBar under boss HP; the big dial +
