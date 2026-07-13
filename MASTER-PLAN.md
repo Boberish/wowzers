@@ -876,6 +876,24 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · worktree `../wow-artv2-c4` (branch `artv2-c4`, from `b744571`) · §GRAPHICS —
+  **CLAIM: GRAPHICS PACKET C4 — PAINTED ACTOR ADAPTER** (GRAPHICS-PLAN §5·C4; Bill's spec).
+  Class-agnostic native layered-actor adapter (`game/art_v2/painted_actor_2d.gd`,
+  `PaintedActor2D extends Actor2D`) behind `ArtV2.make_actor` (C1 seam, default OFF):
+  consumes a documented folder/metadata contract (`game/art_v2/actors/<id>/actor.json` +
+  `parts/*.png` + `frames/*.png` — new `ACTORS.md`, SCENES.md's sibling) · three part modes
+  (RIGID sprite · DEFORM warp quad · REPLACEMENT/contact frames) · render-rate idle motion ·
+  `windup(kind, amt)` scrubbed deterministically from amt · full Actor2D verb surface · zero
+  combat/gameplay state · textures resolved AT CONSTRUCTION (SCENES.md §3½ law) · missing/
+  invalid json or folder ⇒ null ⇒ legacy puppet (fail-safe; legacy factory + its locked
+  duelist→RiftmawRig2D fallthrough UNTOUCHED — V2-side id mapping only) · no Spine.
+  Placeholder flat-color debug parts ONLY (generated; clearly not final art) prove the
+  adapter on the duelist id. NOT C5 (no real rig/animation vocabulary), no dashboard/VFX/
+  gameplay. Verify (minimal per Bill): import/parse · `artv2_probe` (made actor-delivery-
+  agnostic) · ONE tour shot (painted duelist + undelivered seats staying puppets = live
+  fallback in-shot) · fallback checks; full pose/contact matrix + live playtest = DEFERRED
+  DEBT on the ledger row. *(Claude session)*
+
 - ☑ 2026-07-12 · `main` (`516e1b0` hotfix · `ebd7242` delivery) · §GRAPHICS — **C3
   TEXTURE-VISIBILITY HOTFIX — FIXED; root cause was NOT the tint blend.** (Claim opened by
   the Codex graphics-v2 session; taken over + diagnosed by Claude.) **Root cause:** on the
