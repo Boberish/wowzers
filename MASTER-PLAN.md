@@ -877,30 +877,6 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☑ 2026-07-13 · main (docs) · **PARRY LAW reaffirmed + LOCKED (Bill: "one thing we keep — all
-  parries still need perfect/bullseye").** Verified intact in the ONE CLAIM code: every parry
-  path (`_claim` + `_claim_tg`) grades BINARY — a tight `±parry_land` (0.07s ≈ 2 ticks,
-  perfect/bullseye tier, TIGHTER than a perfect dodge's 0.165s) LANDS (BULLSEYE + COUNTER + ◆ +
-  flow spike); looser MISSES (only the `mit_parry_miss` token, no payoffs). No graze/good parry;
-  a global can't be parried. **ONE CLAIM actually STRENGTHENED this** — it retired the old
-  telegraph parry's doubled/looser window (`parry_window×2`), so stream + boss-move parries now
-  share the one tight window. Locked as an explicit invariant in the combat contract
-  (GRAPHICS-PLAN §2.3.1 §D PARRY LAW). No code change — the rule was already held. *(this session)*
-- ☑ 2026-07-13 · main (docs) · **THE COMBAT ⇄ DASHBOARD CONTRACT — the frozen seam for the
-  ART-V2 / C6 team (Bill: "so codex and other claudes can see the change while I implement, so
-  they build the UI in parallel").** The tank answer-channel combat system (ONE BAR · ONE CLAIM ·
-  THE GUARD · miss-afterlife · peel · add songbooks) is now spelled out as a buildable spec in
-  **GRAPHICS-PLAN §2.3.1**: the comet vocabulary (shape/color/word per kind), the per-frame OBS
-  state fields, every `duel_*`/`stream_*` event with its fields (incl. `duel_answer` id-sign =
-  stream vs telegraph comet, and `stream_guard_shatter {ids}`), the grade ladder, the locked
-  behaviors, and a STABLE-vs-TUNING split so the C6 dashboard builds against A–F without
-  chasing my number tuning. Any change to A–F ships a note there + here in the same commit.
-  **⚠ BRANCH HEALTH (Bill's drift worry, checked):** current **main `6daa437` boots clean and
-  contains EVERYTHING** — all tank combat (THE GUARD `d03dbfa`, ONE CLAIM, add songbooks
-  `63080a1`, my scene_kit boot fix `949d4e7`) AND all art-v2 work (C5.1, C6A `2b407c4`),
-  cleanly integrated. The `artv2-i2` branch is fully MERGED and **18 commits behind main** — if
-  the running agent is pinned to it, it's stale (missing C6A/C5.1/the boot fix); it should work
-  off **main HEAD**. *(this session)*
 - ☑ 2026-07-13 · `artv2-c6a` → **MERGED to `main` (ff `2b407c4`)** · §GRAPHICS — **C6A
   COMPLETE — THE REACTION-FIRST SCREEN IS LIVE IN GRAYBOX; ⚠ STOPPED AT BILL'S RECTANGLE/
   SPEED VERDICT (I3 images + C6B skin wait).** Dash band HALVED mid-build on Bill's live

@@ -30,16 +30,11 @@ extends Resource
 @export var answer_claim: float = 0.30     ## DEC-14 claim range: a press answers a bar within
                                            ## ±this of now; among several, the tie-break picks nearest
                                            ## |impact−now| → earliest impact → lowest id (deterministic)
-@export var grade_bull_frac: float = 0.18  ## the DODGE ladder: |press−impact|/answer_claim
+@export var parry_land: float = 0.07       ## stream-claim PARRY: lands within ±this of gate-touch
+                                           ## (~2 ticks symmetric — tick-native, never float-ms)
+@export var grade_bull_frac: float = 0.18  ## stream-claim DODGE ladder: |press−impact|/answer_claim
 @export var grade_perfect_frac: float = 0.55
 @export var grade_good_frac: float = 0.80  ## …beyond = GRAZE, out to the claim edge
-## PARRY LAW (Bill 2026-07-13, LOCKED — "all parries need perfect/bullseye, tied to the zone so
-## it's always coherent"): a PARRY lands iff the press is inside this GRADE TIER of the dodge
-## ladder — the window is answer_claim × parry_grade_frac, so it SCALES with the zone and can
-## never drift apart from the grades. 0.55 = PERFECT-or-tighter (perfect/bullseye both land);
-## set to grade_bull_frac's 0.18 for BULLSEYE-only. Binary always: this tier lands, looser misses.
-@export var parry_grade_frac: float = 0.55
-@export var parry_land: float = 0.07       ## RETIRED (2026-07-13): parry is tied to parry_grade_frac now
 @export var parry_window: float = 0.10     ## RETIRED (ONE CLAIM 2026-07-12): telegraph parries use ±parry_land now
 @export var dodge_bullseye: float = 0.07   ## RETIRED (ONE CLAIM 2026-07-12): telegraph dodges grade on the claim fracs
 @export var dodge_perfect: float = 0.14
