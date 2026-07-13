@@ -877,6 +877,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · `tank-icons` (worktree `../wow-tank-icons`) · §CLASSES/Duelist + §GRAPHICS —
+  **CLAIM: THE ANSWER-SHAPE LAW — shape=answer · color=status · size=damage · parry graded
+  good/bullseye.** Bill's call (this chat), **taking over** the work that was assigned to the
+  separate *tank-icons-rework* agent at 16:39 and reverted out of `main` as "wrong chat"
+  (`d15f76b` undid `b1ccf0f`/`cc5ad30`/`0950f1f`) — the design was actually hammered out here
+  (the red-diamond investigation). **THE LAW:** the comet's SHAPE is its button —
+  **◇ diamond = DODGE *or* PARRY** (autos + light personal beats) · **⬡ hexagon = DODGE-only**
+  (globals + flurry) · **⯃ spiked octagon = PARRY-only** (heavies + busters + HEAVY personal
+  beats — *this is the fix for the invisible-heavy-beat*) · **☠ skull = BRACE** (eat). COLOR is
+  STATUS, not answer — **red = peeled** (still yours) · **blue = flurry** · **purple = feint**;
+  a normal comet wears its shape's base tint. SIZE = damage (small hits small, big hits big).
+  **Bullseye-dodge on heavy/buster is DELETED** (octagon = parry only). **PARRY is graded
+  good/bullseye** (lands inside the perfect zone → GOOD, dead-centre → BULLSEYE, looser → miss;
+  `parry_grade_frac` ties it to the one grade ladder — the coherence Bill wanted in `b1ccf0f`,
+  now with the good/bullseye split). Docs (this log + GRAPHICS-PLAN §2.3.1 vocabulary +
+  BUILD-LEDGER) land on `main` NOW so the image-makers build against the final vocabulary while
+  the code goes up on the worktree. Files: `answer_channel.gd` · `bands/duelist_band.gd` ·
+  `duelist_kit.gd` · `duelist_config.gd` · `policies/duelist_policy.gd`. Guarded/Duelist-only —
+  non-Duelist byte-identical; `duelist_sim` re-baselines (behaviour changes by design).
+
 - ☑ 2026-07-13 · `artv2-c6a` → **MERGED to `main` (ff `2b407c4`)** · §GRAPHICS — **C6A
   COMPLETE — THE REACTION-FIRST SCREEN IS LIVE IN GRAYBOX; ⚠ STOPPED AT BILL'S RECTANGLE/
   SPEED VERDICT (I3 images + C6B skin wait).** Dash band HALVED mid-build on Bill's live

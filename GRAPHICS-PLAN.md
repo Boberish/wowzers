@@ -163,6 +163,76 @@ input/event semantics, tick truth, and same-frame feedback—not the obsolete li
 The game remains fully playable from the instruments alone. Characters and environments are a
 high-quality performance of combat truth, never a prerequisite for reading or answering it.
 
+#### 2.3.1 THE COMBAT ⇄ DASHBOARD CONTRACT (Duelist — the C6 build spec, 2026-07-13)
+
+**Why this exists (Bill): the combat engine and the painted dashboard are built in parallel by
+different agents — this is the frozen seam so the UI/image team builds while the combat team
+implements.** Live surface = `game/ui/answer_channel.gd` + `game/ui/bands/duelist_band.gd`; C6
+re-homes them into the painted theater without changing this data. **Draw only what these two
+surfaces carry — never invent, predict, or re-grade** (LAW 1).
+
+**THE ONE READING LAW (2026-07-13 — the answer-shape rework): SHAPE = the button · COLOR =
+status · SIZE = damage.** A player reads the shape to know which key, glances at color only for
+"is something off," and reads size as "how much it hurts." Nothing else encodes the answer.
+
+**A · THE ANSWER CHANNEL — comet vocabulary.**
+
+| shape | the answer | what rides it |
+|---|---|---|
+| **◇ diamond** | **DODGE** (graded) *or* **PARRY** (the greed line) | `auto` (ambient rhythm) · `beat` (a personal boss strike aimed at you, LIGHT) |
+| **⬡ hexagon** | **DODGE only** — parry is illegal | `global` (room-wide aoe, every seat) · `flurry` beats (a rapid WEAVE cluster) |
+| **⯃ spiked octagon** | **PARRY only** — dodge is illegal | `heavy` · `buster` · a HEAVY/CRUSH personal `beat` |
+| **☠ skull / ✗** | **BRACE** — do not press | `eat` (unavoidable) |
+
+- **The printed WORD under the comet is the answer** (`DODGE` / `PARRY` / `WEAVE` / `EAT`). On a
+  diamond the word is **DODGE** (the safe default); *parry-the-diamond* is the greed play taught
+  by the rune tooltip, not a second word.
+- **Bullseye-dodge on a heavy/buster is GONE.** An octagon is a pure parry check — you cannot
+  dodge your way out of it. (Old law let a perfect dodge answer a heavy; deleted for clarity.)
+
+**A· COLOR = STATUS (never the answer).** A normal comet wears its shape's quiet base tint
+(diamond warm-gold · hexagon cool-steel · octagon bronze-amber · skull muted-grey). Status
+**overrides** the tint: **RED = peeled** (the boss hunts another seat — a crimson hunt-chevron +
+"→ VICTIM"; the tank still answers it, damage stays the victim's) · **BLUE = flurry** (WEAVE
+mode) · **PURPLE = feint** (a lie wearing a real shape + word + a breathing purple ring — press
+it and you're BAITED). Red no longer means "boss attack"; it means peeled.
+
+**A·· SIZE = damage.** The shape scales with the strike's `size` (`LIGHT < HEAVY < CRUSH`): small
+pokes draw small, the big commits draw large with a heavier glow. Size is read-only flavor +
+the octagon/diamond split (a personal beat that's HEAVY+ *is* an octagon, because its answer
+changed to parry-only).
+
+**B · OBS (per frame — `duelist_kit.observe`).** `stream.bars[]` =
+`{id, kind, purple, eta`(sec)`, late, peeled, victim, answered, flurry_i, flurry_n}` ·
+`telegraph.strikes[]` = `{remaining, size, aoe, mine, feint, resolved, answered}` (the band maps
+`aoe`→hexagon, non-aoe LIGHT→diamond, non-aoe HEAVY+→octagon) · `flow` (0..1 aggro %) ·
+`flow_lock` (the 30% line) · `wind`/`wind_max` · `combo`/`combo_max` · `engarde_live/ready` ·
+`fumbling` · `dodge_ready`/`parry_ready` · gate fractions `win_bullseye/perfect/good/graze`
+(SYMMETRIC around gate-touch) + `parry_window`. The UI reads these — it never bakes numbers.
+
+**C · EVENTS (the moments — drained each frame, never checksummed).** `duel_dodge`/`duel_parry`
+= the PRESS echo (gate + rune kick the frame you press) · `duel_answer {kind, grade, size,
+off_ms, id}` = the graded verdict — **`id ≥ 0` = stream bar, `id < 0` = telegraph comet**;
+resolve THAT comet with a burst at its frozen pixel + ±ms · `duel_bar_missed {id, size}` = an
+unpressed damage comet crossed the line → red ✗ husk that flows to the bar's end · `duel_fumble`
+= winded/dry press · `duel_counter`/`duel_riposte` = parry counter (+◆)/flurry riposte ·
+`duel_eat` = brace · `duel_engarde`/`duel_engarde_break` · `duel_dump {amt}` · `stream_shatter`
+= body-death shatter · `stream_guard_shatter {ids}` = THE GUARD rear-up.
+
+**D · THE GRADING LADDER (game-wide, identical to Twinfang):** GRAZE (steel) < GOOD (gold) <
+PERFECT (mint) < BULLSEYE (bright-gold). **PARRY grades to only GOOD or BULLSEYE** — land inside
+the perfect zone = a solid GOOD, dead-centre = BULLSEYE, looser = a miss (wind gone). DODGE uses
+the full ladder. Same names + colors in every class.
+
+**E · DASHBOARD INSTRUMENTS (`y 750–1040`):** HP orb · Flow/Aggro orb (% + the 30% lock line) ·
+Wind bubble (fast-recharge leash) · five ◆ combo sockets (banked by a LANDED PARRY, spent by
+⚡ DUMP) · four ability runes (1 Dodge · 2 Parry · 3 ⚡Dump · 4 ⏱En Garde) that KICK on press.
+
+**F · STABLE vs IN-FLIGHT:** A–E (vocabulary · events · obs · grading) are **LOCKED** — safe to
+draw against. Still TUNING (numbers only, no shape/field change): guard windows, per-Seal
+songbooks, grade fractions, the parry landing zone (`parry_grade_frac`). Any change to A–E ships
+a note here + the MASTER-PLAN log in the SAME commit.
+
 **Reaction-first contract:**
 
 - A valid press responds in the same rendered frame: button depression/pulse, exact press mark,
