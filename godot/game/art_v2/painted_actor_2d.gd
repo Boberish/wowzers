@@ -292,10 +292,14 @@ func evade_react() -> void:
 	tw.tween_property(_rig, "position:x", -22.0, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_rig, "position:x", 0.0, 0.16)
 
+## THE DODGE: a readable back-slip away from the boss (he faces right) + a small
+## lift, then a snap home. Bigger than the old vertical-only hop so it reads at
+## stage scale (Bill: "not much movement for dodging").
 func hop_react(clean: bool) -> void:
+	var back := Vector2(-38.0 if clean else -24.0, -12.0 if clean else -7.0)
 	var tw := create_tween()
-	tw.tween_property(_rig, "position:y", -26.0 if clean else -16.0, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(_rig, "position:y", 0.0, 0.14).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_rig, "position", back, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_rig, "position", Vector2.ZERO, 0.17).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 func graze_react() -> void:
 	_flash(Color(0.85, 0.85, 0.9))

@@ -227,6 +227,25 @@ func on_event(ev: Dictionary) -> void:
 		"dodge_whiff":
 			if a != null:
 				a.stumble_react()
+		# TANK-V3 vocabulary → actor verbs (the pre-rework stage only knew
+		# negate/strike_graded; the Duelist's stream/claim model emits these).
+		# Additive: other classes keep firing negate/strike_graded above.
+		"duel_dodge":
+			if a != null:
+				a.hop_react(true)
+				_ghost(a.position)
+		"duel_parry":
+			if a != null:
+				a.evade_react()
+		"duel_fumble", "duel_weave_blown":
+			if a != null:
+				a.stumble_react()
+		"duel_eat":
+			if a != null:
+				a.brace_react()
+		"duel_dump", "duel_counter", "duel_riposte":
+			if a != null:
+				_fire(a, "strike")
 		"strike_landed":
 			boss_actor.swing("cut_hi" if int(ev.get("idx", 0)) % 2 == 0 else "cut_lo")
 		"hurt":
