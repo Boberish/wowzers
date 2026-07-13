@@ -1,19 +1,110 @@
 {
-	"version": 1,
+	"version": 2,
 	"id": "duelist",
 	"scale": 1.0,
 	"height": 300,
 	"glow_part": "blade",
 	"parts": [
-		{"name": "cloak", "tex": "parts/cloak.png", "mode": "deform", "anchor": [0.5, 0.0], "at": [-10, -282], "sway": 8},
-		{"name": "legs", "tex": "parts/legs.png", "anchor": [0.5, 1.0], "at": [0, 0]},
-		{"name": "torso", "tex": "parts/torso.png", "anchor": [0.5, 1.0], "at": [0, -116]},
-		{"name": "head", "tex": "parts/head.png", "anchor": [0.5, 1.0], "parent": "torso", "at": [4, -108]},
-		{"name": "arm", "tex": "parts/arm.png", "anchor": [0.5, 0.08], "parent": "torso", "at": [16, -96], "rot": -38},
-		{"name": "blade", "tex": "parts/blade.png", "anchor": [0.5, 0.94], "parent": "arm", "at": [0, 82], "rot": -55}
+		{
+			"name": "cloak",
+			"tex": "parts/cloak.png",
+			"mode": "deform",
+			"anchor": [
+				0.78,
+				0.12
+			],
+			"at": [
+				12,
+				-232
+			],
+			"sway": 7
+		},
+		{
+			"name": "legs",
+			"tex": "parts/legs.png",
+			"anchor": [
+				0.5,
+				1.0
+			],
+			"at": [
+				0,
+				0
+			]
+		},
+		{
+			"name": "torso",
+			"tex": "parts/torso.png",
+			"anchor": [
+				0.6,
+				1.0
+			],
+			"at": [
+				2,
+				-118
+			]
+		},
+		{
+			"name": "head",
+			"tex": "parts/head.png",
+			"anchor": [
+				0.45,
+				0.98
+			],
+			"parent": "torso",
+			"at": [
+				8,
+				-120
+			]
+		},
+		{
+			"name": "arm",
+			"tex": "parts/arm.png",
+			"anchor": [
+				0.05,
+				0.5
+			],
+			"parent": "torso",
+			"at": [
+				16,
+				-110
+			],
+			"rot": 18
+		},
+		{
+			"name": "blade",
+			"tex": "parts/blade.png",
+			"anchor": [
+				0.15,
+				0.5
+			],
+			"parent": "arm",
+			"at": [
+				97,
+				2
+			],
+			"rot": -8
+		}
 	],
 	"frames": {
 		"windup_heavy": "frames/windup_heavy.png",
 		"swing_heavy": "frames/swing_heavy.png"
+	},
+	"poses": {
+		"windup": {
+			"root": -10,
+			"arm": -95,
+			"head": 6
+		},
+		"swing": {
+			"root": 6,
+			"arm": -14
+		},
+		"parry": {
+			"root": -4,
+			"arm": -55
+		},
+		"lunge": {
+			"root": 6
+		}
 	}
 }

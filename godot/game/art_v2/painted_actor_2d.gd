@@ -56,6 +56,8 @@ var _swap: Sprite2D                    ## the replacement-frame display
 var _gaze: Polygon2D                   ## the boss-gaze diamond (set_highlight)
 var _glow_part: Node2D = null          ## optional part that reads power_glow
 var _height := 300.0                   ## figure height (gaze placement, swap anchor)
+var _poses: Dictionary = {}            ## C5: pose name -> {part: radians DELTA from base} ("root" = the rig)
+var _base_rot: Dictionary = {}         ## part name -> authored base rotation (rad)
 var _scale_base := 1.0
 var _t := 0.0                          ## cosmetic clock (idle only — never gameplay)
 var _scrub := 0.0                      ## windup amt, fed by the engine every frame
@@ -97,6 +99,15 @@ func _build(dir: String, meta: Dictionary) -> bool:
 		built += 1
 	if built == 0:
 		return false
+	for pname in _parts:
+		_base_rot[pname] = (_parts[pname] as Node2D).rotation
+	var poses: Dictionary = meta.get("poses", {})
+	for pose_name in poses:
+		var src: Dictionary = poses[pose_name]
+		var conv: Dictionary = {}
+		for part in src:
+			conv[String(part)] = deg_to_rad(float(src[part]))
+		_poses[String(pose_name)] = conv
 	if meta.has("glow_part"):
 		_glow_part = _parts.get(String(meta["glow_part"]))
 	var frames: Dictionary = meta.get("frames", {})
@@ -179,6 +190,50 @@ func _flash(col: Color) -> void:
 	var tw := create_tween()
 	tw.tween_property(self, "modulate", (Color(1.0, 0.82, 0.82) if _enraged else Color.WHITE), 0.28)
 
+# ------------------------------------------------- C5: the data-driven poses
+## Apply a named pose at weight w (0..1): every listed part rotates base+delta*w;
+## "root" tilts the whole rig. Returns false when the actor has no such pose —
+## callers fall back to the C4 generic motion (class-agnostic law).
+func _pose_lerp(pose_name: String, w: float) -> bool:
+	if not _poses.has(pose_name):
+		return false
+	var pose: Dictionary = _poses[pose_name]
+	for part in pose:
+		var d := float(pose[part]) * w
+		if String(part) == "root":
+			_rig.rotation = d
+		else:
+			var n: Node2D = _parts.get(String(part))
+			if n != null:
+				n.rotation = float(_base_rot.get(String(part), 0.0)) + d
+	return true
+
+func _pose_reset() -> void:
+	_rig.rotation = 0.0
+	for part in _base_rot:
+		var n: Node2D = _parts.get(String(part))
+		if n != null:
+			n.rotation = float(_base_rot[part])
+
+## Snap a pose on, hold it a beat, then ease every affected part home.
+func _pose_flash(pose_name: String, hold: float, back: float) -> bool:
+	if not _pose_lerp(pose_name, 1.0):
+		return false
+	var pose: Dictionary = _poses[pose_name]
+	var tw := create_tween()
+	tw.tween_interval(hold)
+	tw.tween_callback(func():
+		var tb := create_tween()
+		tb.set_parallel(true)
+		for part in pose:
+			if String(part) == "root":
+				tb.tween_property(_rig, "rotation", 0.0, back)
+			else:
+				var n: Node2D = _parts.get(String(part))
+				if n != null:
+					tb.tween_property(n, "rotation", float(_base_rot.get(String(part), 0.0)), back))
+	return true
+
 # ============================================================ the Actor2D verbs
 func act(_id: String, flourish := false) -> Dictionary:
 	var tw := create_tween()
@@ -196,6 +251,9 @@ func windup(kind: String, amt: float) -> void:
 		_swap.rotation = -0.10 * _scrub
 		_swap.position = Vector2(-6.0 * _scrub, 5.0 * _scrub)
 		return
+	if _pose_lerp("windup", _scrub):        # C5 authored coil (arm raises, head tracks)
+		_rig.position = Vector2(-7.0 * _scrub, 6.0 * _scrub)
+		return
 	_rig.rotation = -0.30 * _scrub          # coil back…
 	_rig.position = Vector2(-7.0 * _scrub, 6.0 * _scrub)   # …and crouch
 
@@ -203,18 +261,20 @@ func clear_windup() -> void:
 	_scrub = 0.0
 	if _swing_t <= 0.0:
 		_hide_swap()
-	_rig.rotation = 0.0
+	_pose_reset()
 	_rig.position = Vector2.ZERO
 
 func swing(kind: String) -> void:
 	_scrub = 0.0
-	_rig.rotation = 0.0
+	_pose_reset()
 	_rig.position = Vector2.ZERO
 	var fk := "swing_" + kind
 	if _frames.has(fk):
 		_show_swap(_frames[fk])
 		_swing_t = 0.16
+		_pose_flash("swing", 0.05, 0.18)   # the rig un-hides already easing home
 		return
+	_pose_flash("swing", 0.05, 0.20)       # authored thrust (falls through silently if absent)
 	var tw := create_tween()
 	tw.tween_property(_rig, "position:x", 26.0, 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_rig, "position:x", 0.0, 0.18)
@@ -224,6 +284,7 @@ func curse_release() -> void:
 
 # --- reacts ---
 func evade_react() -> void:
+	_pose_flash("parry", 0.06, 0.22)       # the deflection flick (blade up, weight back)
 	var tw := create_tween()
 	tw.tween_property(_rig, "position:x", -22.0, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_rig, "position:x", 0.0, 0.16)

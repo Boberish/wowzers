@@ -54,6 +54,22 @@ res://game/art_v2/actors/<id>_<aspect>/   optional aspect variant — wins over 
 }
 ```
 
+Optional **`"poses"` block (C5)** — the data-driven verb vocabulary:
+
+```jsonc
+"poses": {                       // pose name -> {part: DELTA degrees from its base rot}
+  "windup": {"root": -10, "arm": -95, "head": 6},   // scrubbed by the engine's amt
+  "swing":  {"root": 6, "arm": -14},                // snapped at release, eased home
+  "parry":  {"root": -4, "arm": -55},               // the deflection flick (evade_react)
+  "lunge":  {"root": 6}
+}
+```
+
+`"root"` tilts the whole rig; other keys rotate named parts. A missing pose falls
+back to the C4 generic motion — the adapter stays class-agnostic; the vocabulary
+is data. Windup precedence: `frames/windup_<kind>` replacement first, then the
+`windup` pose lerp, then the generic coil.
+
 Part modes: **rigid** = Sprite2D (weapon/plate/limb — offset/rotation only) ·
 **deform** = Polygon2D warp quad (cloth/cloak — shoulders pinned, hem sways at
 render rate). **Replacement frames** are the third mode: keys are
@@ -78,13 +94,11 @@ are authored FACING RIGHT (the stage mirrors the boss by flipping scale.x).
 
 ## 4. Debug proof art (what ships in-repo today)
 
-`actors/duelist/` holds GENERATED flat-color slabs (2px-border rectangles) +
-hazard-striped replacement frames — regenerate with
-`godot --headless --path godot --script res://sim/artv2_actor_gen.gd -- --id=<id>`.
-They prove the adapter (3 part modes · parenting · scrub · frame swap ·
-fallback) and are self-evidently not final art. Codex's real Duelist layers
-(I2, after Bill's P4 anchor approval) replace these files 1:1 under the same
-contract; C5 then owes the real pose/animation vocabulary.
+`actors/duelist/` now holds the REAL approved Duelist layers (C5, 2026-07-13):
+cropped/normalized from `art-source/graphics-v2/p4-duelist/alpha/` by
+`sim/artv2_part_prep.gd` (crop-to-used-rect + contract sizing — the tool never
+generates or repaints; re-run it when Codex re-delivers a source). The old
+flat-slab generator (`sim/artv2_actor_gen.gd`) remains for stubbing OTHER ids.
 
 ## 5. Verification pointers
 
