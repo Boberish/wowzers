@@ -67,6 +67,8 @@ func _initialize() -> void:
 	_load_actor()
 	root.add_child(overlay)
 	root.add_child(hud)
+	# a SceneTree script has no Node input virtuals — keys arrive via the window
+	root.window_input.connect(_on_input)
 
 func _floor_y() -> float:
 	return root.get_visible_rect().size.y * 0.86
@@ -205,7 +207,7 @@ func _process(_delta: float) -> bool:
 		quit(0)
 	return false
 
-func _unhandled_input(ev: InputEvent) -> void:
+func _on_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey) or not ev.is_pressed():
 		return
 	var k := (ev as InputEventKey).keycode
