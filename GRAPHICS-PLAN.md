@@ -9,13 +9,15 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P5 ACTIVE · C6A REACTION-FIRST GRAYBOX NEXT.** Bill approved **SUNPRINT CEL** on
-2026-07-12: bright, playful, detailed screen-print/cel adventure art with controlled authored
-texture rather than generic dark-fantasy micro-detail. P4 is complete through C5.1 `5bb532c`:
-the real Duelist is registered, animating, and graded in live play. P5 is deliberately split into
-an art-free layout proof (C6A) before Codex generates the I3 component family, then a skinned
-binding pass (C6B). C2's deferred tour/smoke/A-B matrix remains release-default debt.
-Generated boards remain visual references, not runtime assets or a locked pixel layout.
+**Status:** 🟡 **P5 SKIN BUILT — C6B 🔨 MERGED `28e9b15` (2026-07-13) · ⚠ AT BILL'S LIVE PAINTED-
+DASHBOARD VERDICT.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
+`5bb532c`; C6A graybox `2b407c4` passed Bill's rectangle/speed gate; I3-A/B delivered the
+approved component family (`801d713`); **C6B bound it**: deterministic crops → `res://game/
+art_v2/dash/`, painted answer frame/comet icons/Wind+sockets/HP+Flow bars/slots/party rows/
+boss+cast shells/utility tab over the SAME truth widgets, default-off behind `--artv2=…,dash`,
+missing-asset ⇒ C6A graybox. `art-Test` boots it. Bill's verdict gates P6 (I4 VFX / C7).
+C2's deferred tour/smoke/A-B matrix remains release-default debt. Generated boards remain
+visual references, not runtime assets or a locked pixel layout.
 
 ---
 
@@ -374,7 +376,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → ✅ I3-A BOARD APPROVED → ✅ I3-B SOURCES `801d713` → **CLAUDE C6B READY**
+### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ gate → I3-A ✅ → I3-B `801d713` ✅ → **C6B 🔨 `28e9b15` · ⚠ BILL'S LIVE PAINTED VERDICT GATES P6**
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -484,7 +486,26 @@ compact frames · meter defaults collapsed but remains reachable · real fonts a
 busy Duelist stream + boss cast + low HP/aggro screenshots · live tank speed test. Stop for Bill's
 rectangle verdict before I3 image generation.
 
-### C6B · PAINTED DASHBOARD SKIN + DUELIST BINDING — AFTER APPROVED I3-B ALPHA SOURCES
+### C6B · PAINTED DASHBOARD SKIN + DUELIST BINDING — 🔨 BUILT+MERGED `28e9b15` (2026-07-13; ⚠ AT BILL'S LIVE VERDICT)
+
+**As built:** `sim/artv2_dash_prep.gd` deterministically cuts the four I3-B alpha sheets into 15
+runtime pieces + `manifest.json` provenance (fixed boxes + alpha trim; icon nail cut by measured
+nail width so pointed tops survive; connected-component column assignment so octagon spikes stay
+whole; the wide sheet's baked utility sample is never cut — the dedicated tab source rules).
+`DashSkin` resolves everything at construction (§3½) and returns null on ANY missing piece → the
+host stays C6A graybox, widgets keep legacy chrome (proven live). Skin flags all default OFF, set
+only by the dash host: painted ◇⬡⯃ comets + purple feints + the ⊘ BRACE disc (skull/X retired in
+V2; **purple alone is the tell — no ring**; never a purple BRACE) at the channel's exact live
+geometry · 9-slice answer frame housing a naked channel · Wind central primary bar + exactly five
+smaller painted combo sockets · painted horizontal HP/Flow-Aggro bars with the code-drawn 30%
+lock · modular painted ability slots (4–6) · four painted party rows (portrait/HP/resource/cast/
+3 sockets) repainting the REAL fed RaidFrames (hover/click preserved) · medallion boss shell +
+a cast bar wearing the resource shell that fades with the cast · the utility tab with a live
+code-drawn DPS spark, click-expands the real meter. Values/fills/timing stay code-owned.
+Gates: probe 117 ALL OK · ui_smoke_raid ALL OK · raid_sim ×4 determinism PASS · state strip +
+legacy A/B strip · 1080/720/2560×1080 × atrium/cold-aisle tours · missing-asset fallback shot.
+
+*(original packet spec below)*
 
 **Goal:** consume Codex's Bill-approved I3 component family as replaceable 9-slice frames/caps,
 masks/fills, sockets, buttons, and effect frames over the C6A host. Bind every existing
