@@ -888,7 +888,17 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   the complete feint tell; remove the breathing-ring requirement.** No code/runtime import/C6B
   until Bill approves the visual family. *(Codex)*
 
-- ☐ 2026-07-13 · `tank-icons` (worktree `../wow-tank-icons`) · §CLASSES/Duelist + §GRAPHICS —
+- ☑ 2026-07-13 · `tank-icons` → **MERGED to `main` (`01f14fd`; feat `666fba4`; docs `f2ef738`)** ·
+  §CLASSES/Duelist + §GRAPHICS — **THE ANSWER-SHAPE LAW — shape=answer · color=status ·
+  size=damage · parry graded good/bullseye. DONE.** Verify: import parse-clean · duelist_sim
+  determinism PASS (re-baselines by design) · **alchemist_sim byte-identical to main** (guarded /
+  non-Duelist) · ui_smoke_raid ALL OK · **WSLg shape-showcase confirms all four shapes + peel-red /
+  flurry-blue / feint-purple + size scaling** (the CRUSH buster octagon reads bigger than the HEAVY
+  one). Bullseye-dodge on heavy/buster DELETED; the once-invisible HEAVY personal beat now draws as
+  an ⯃ octagon (parry-only). Image-makers: build against GRAPHICS-PLAN §2.3.1. **Owed:** Bill's
+  playtest feel-check (parry good/bullseye forgiveness + the wind cost of all-parry octagon strings
+  is a tuning knob, not a rule). Original claim ↓
+- ☑ 2026-07-13 · `tank-icons` (worktree `../wow-tank-icons`) · §CLASSES/Duelist + §GRAPHICS —
   **CLAIM: THE ANSWER-SHAPE LAW — shape=answer · color=status · size=damage · parry graded
   good/bullseye.** Bill's call (this chat), **taking over** the work that was assigned to the
   separate *tank-icons-rework* agent at 16:39 and reverted out of `main` as "wrong chat"
