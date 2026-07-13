@@ -876,6 +876,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-13 · `artv2-i2` · §GRAPHICS — **CODEX I2 — DUELIST CANONICAL ART.** Generate one
+  SUNPRINT CEL Duelist anchor against the approved Stack visual language; stop at Bill's visual
+  gate before deriving the approved figure into C4's transparent `parts/` and replacement
+  `frames/` contract. Source/chroma/prepared assets stay under `art-source/graphics-v2/p4-duelist/`;
+  only approved processed runtime PNGs may replace the debug slabs under `res://game/art_v2/`.
+  No adapter/code, dashboard, VFX, gameplay, or legacy-default changes. After approval: deliver
+  anchor + runtime layers + heavy contact replacement, run import/probe/one actor tour, merge,
+  and hand C5 rig/pose vocabulary back to Claude. *(Codex graphics-v2 session)*
+
 - ☑ 2026-07-13 · `artv2-c4` → **MERGED to `main` (ff `05d9952`)** · §GRAPHICS — **GRAPHICS
   PACKET C4 COMPLETE — PAINTED ACTOR ADAPTER** (GRAPHICS-PLAN §5·C4; Bill's spec). Verified
   minimal: import 0 errors · `artv2_probe` ALL OK (77 — [7] adapter contract + delivery-
