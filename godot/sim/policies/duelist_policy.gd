@@ -4,13 +4,14 @@
 ## the policy reads the COMMITTED STREAM — exactly the comets a human sees on the channel,
 ## including the purple tell (never the true feint flag) and LATE bars only once they pop.
 ##
-## THE BRAIN is the v3 matrix, verbatim:
-##   AUTO (diamond)        → DODGE (cheap bread; parry when the bank is hungry and wind is fat)
-##   HEAVY / BUSTER        → PARRY (the commit; a land hits back + banks ◆)
-##   GLOBAL (aoe beat)     → DODGE (every seat's answer; never parry)
-##   PURPLE (the tell)     → hold — only a sloppy tank flinches
-##   FLURRY MODE           → DODGE every beat (wind-free, don't miss one)
-##   nothing incoming + ◆  → ⚡ DUMP
+## THE BRAIN is the SHAPE-LAW matrix (2026-07-13):
+##   ◇ AUTO / light beat    → DODGE (cheap bread; parry when the bank is hungry and wind is fat)
+##   ⯃ HEAVY / BUSTER       → PARRY ONLY (the commit; a land hits back + banks ◆ — dodge is illegal,
+##                            so a too-winded tank just holds and eats it)
+##   ⬡ GLOBAL (aoe beat)    → DODGE (every seat's answer; never parry)
+##   ⬡ FLURRY MODE          → DODGE every beat (wind-free, don't miss one)
+##   PURPLE (the tell)      → hold — only a sloppy tank flinches
+##   nothing incoming + ◆   → ⚡ DUMP
 ## Skill tiers ride `latency_ticks` (expert 0 / good 6 / sloppy 14–18): reaction delay pushes
 ## presses later → BULLSEYEs become GOODs → flow thins → the boss peels — a visible gradient.
 ## `rng` is a SEPARATE per-policy stream (never state.rng); null = a human seat.
@@ -85,10 +86,9 @@ func act(obs: Dictionary) -> Dictionary:
 					if dodge_ready:
 						return {"type": "dodge"}           # wind-free in the mode
 				"heavy", "buster":
+					# ⯃ octagon = PARRY ONLY; too winded to parry → hold and eat it (dodge is illegal)
 					if parry_ready and wind >= parry_cost:
 						return {"type": "defense"}         # the commit
-					if dodge_ready and wind >= dodge_cost:
-						return {"type": "dodge"}           # wind-tight: thread the bullseye
 				_:
 					# AUTO: dodge is the bread; parry instead when the bank is hungry + wind is fat
 					if combo < combo_max and wind >= parry_cost + dodge_cost * 2.0 and parry_ready:
@@ -108,14 +108,21 @@ func act(obs: Dictionary) -> Dictionary:
 			return {"type": "defense"}
 		return {}                                          # hold — wait for the window
 
-	# 2) a GLOBAL beat (aoe, single since the barrage retirement) → DODGE like every seat.
+	# 2) telegraph beats: ⬡ GLOBAL (aoe) + ◇ light personal beat → DODGE · ⯃ HEAVY personal
+	#    beat → PARRY (octagon; dodge is illegal).
 	var beats: Array = tg.get("strikes", [])
 	for bt in beats:
 		if bool(bt.get("resolved", false)) or not (bool(bt.get("mine", false)) or bool(bt.get("aoe", false))):
 			continue
-		if float(bt.get("remaining", 99.0)) <= _react_for(int(tg.get("tick", -1))) \
-				and dodge_ready and answering == "":
-			return {"type": "dodge"}
+		var bt_heavy := not bool(bt.get("aoe", false)) \
+			and int(bt.get("size", AbilityRes.Size.LIGHT)) >= AbilityRes.Size.HEAVY
+		if float(bt.get("remaining", 99.0)) <= _react_for(int(tg.get("tick", -1)), bt_heavy) \
+				and answering == "":
+			if bt_heavy:
+				if parry_ready and wind >= parry_cost:
+					return {"type": "defense"}     # ⯃ parry the heavy beat
+			elif dodge_ready:
+				return {"type": "dodge"}           # ◇/⬡ dodge the light beat / global
 
 	# 3) ⚡ DUMP a full ◆ bank when nothing is incoming
 	if not in_flurry and combo >= combo_max and answering == "":
