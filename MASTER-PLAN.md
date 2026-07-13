@@ -924,8 +924,8 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   **Bill verdict on revision 2: “okay thats good, lets move on.”** I3-A is now the approved visual
   family/anatomy reference. It remains a flattened concept board, not a shipping atlas.
 
-- ⏳ 2026-07-13 · Codex image packet `I3-B` · §GRAPHICS — **WAITING FOR BILL'S EXPLICIT NEW-
-  IMAGE-GENERATION APPROVAL: PRODUCTION ALPHA SOURCES.** Derive isolated transparent, 9-slice-
+- ☐ 2026-07-13 · Codex image packet `I3-B` · §GRAPHICS — **CLAIM: PRODUCTION ALPHA SOURCES;
+  BILL EXPLICITLY AUTHORIZED NEW IMAGE GENERATION.** Derive isolated transparent, 9-slice-
   capable shells/caps, party rows, socket/button pieces, utility tab, and normal/feint/BRACE icons
   from the approved I3-A family. Do not bake text, numbers, fill truth, timing gates, cooldowns, or
   lock markers. The flattened dark-backed board is not suitable for direct shipping extraction.

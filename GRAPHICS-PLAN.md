@@ -374,7 +374,7 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → ✅ I3-A BOARD APPROVED → **I3-B PRODUCTION ASSETS (PERMISSION GATE)** → C6B skin/binding
+### P5 · DUELIST DASHBOARD — C6A graybox 🔨 `2b407c4` → ✅ BILL SPEED/LAYOUT GATE → ✅ I3-A BOARD APPROVED → **I3-B PRODUCTION ASSETS ACTIVE** → C6B skin/binding
 
 First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
@@ -529,7 +529,7 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   barred-disc BRACE token; expand party rows for HP/resource/cast/debuff information. Bill's
   verdict on revision 2: **“okay thats good, lets move on.”** This flattened board approves the
   family and hierarchy; it is not an extraction-ready runtime atlas.
-- **I3-B:** ⏳ **WAITING FOR BILL'S EXPLICIT IMAGE-GENERATION APPROVAL.** Derive the approved I3-A
+- **I3-B:** 🟡 **AUTHORIZED BY BILL 2026-07-13; CODEX ACTIVE.** Derive the approved I3-A
   family into isolated transparent production sources: 9-slice-capable frame/bar shells, party
   row shell, five-socket combo strip or repeatable socket, repeatable ability slot, utility tab,
   and the normal/feint/BRACE icon set. Preserve code-owned holes/masks and avoid baking labels,
