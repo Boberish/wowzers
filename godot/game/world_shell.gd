@@ -33,6 +33,7 @@ func _ready() -> void:
 	# below — its _ready builds the backdrop through the scene seam. View-only,
 	# defaults OFF; probes/smokes that load raid_main directly stay on defaults.
 	ArtV2.boot(OS.get_cmdline_user_args())
+	_maybe_artv2_web()   # web has no cmdline args — enable ArtV2 from ?art (see below), BEFORE the HUD instances
 	hud = (load("res://game/raid_main.tscn") as PackedScene).instantiate() as RaidHud
 	add_child(hud)                      # child _ready runs here (blank until we route)
 	hud._shell = self                   # the delegators (home/select/zone) route UP
@@ -61,6 +62,23 @@ func _maybe_boot_spike_web() -> void:
 	var q := str(JavaScriptBridge.eval("window.location.search", true))
 	if q.findn("spike") >= 0:
 		_boot_mobile_spike()
+
+## Web has no cmdline args; enable the ArtV2 stack from the page URL the same way ?spike works.
+## ?art        → the desktop art-Test set (actors + scene:stack_atrium + dash + vfx)
+## ?artv2=<t>  → explicit tokens, '+'-separated (URL-safe), e.g. ?artv2=vfx+dash — same parser as --artv2=
+func _maybe_artv2_web() -> void:
+	if not OS.has_feature("web"):
+		return
+	var q := str(JavaScriptBridge.eval("window.location.search", true))
+	var k := q.findn("artv2=")
+	if k >= 0:
+		var raw := q.substr(k + 6)
+		var amp := raw.find("&")
+		if amp >= 0:
+			raw = raw.substr(0, amp)
+		ArtV2.boot(PackedStringArray(["--artv2=" + raw.replace("+", ",")]))
+	elif q.findn("art") >= 0:
+		ArtV2.boot(PackedStringArray(["--artv2=actors,scene:stack_atrium,dash,vfx"]))
 
 ## Clear the shell surface AND blank the instance surface under it (a shell screen
 ## replaces whatever the HUD showed). hud._clear() calls back to _clear_shell_ui —
