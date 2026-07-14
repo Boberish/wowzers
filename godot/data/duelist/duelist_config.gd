@@ -67,10 +67,15 @@ extends Resource
 @export var dump_per_combo: float = 70.0
 @export var counter_dmg: float = 30.0      ## a LANDED PARRY hits back for this (+ banks a ◆)
 
-# --- RECOVERY: DODGE fast, PARRY slow (even on a land); a fumble (no wind / mis-press) is worse.
-#     FLURRY MODE presses recover on their own fast clock (beats come ~0.35s apart). ---
+# --- RECOVERY: WIND is the leash on back-to-back answers, NOT a hidden per-press timer.
+#     PARRY carries only a debounce now (Bill 2026-07-14): a landed — or missed — parry no
+#     longer locks you out of the next note, because the boss owns the tempo and an un-plannable
+#     cd punished correct play. Mashing is still capped: each parry burns 3.5 wind, and running
+#     dry FUMBLES (fumble_recover) — the real, visible-on-the-bar punish. DODGE keeps its 0.35
+#     (wind is too cheap on dodge — 1.0 — for wind to leash it, so the timer stays its leash).
+#     FLURRY presses recover on their own fast clock (beats come ~0.35s apart). ---
 @export var dodge_recover: float = 0.35
-@export var parry_recover: float = 0.60
+@export var parry_recover: float = 0.12    ## debounce only — wind + fumble cap back-to-back parries
 @export var flurry_recover: float = 0.15
 @export var fumble_recover: float = 1.30
 @export var gcd: float = 0.60              ## the DUMP GCD (defensive presses are NOT on the GCD)
