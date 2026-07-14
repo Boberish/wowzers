@@ -811,6 +811,11 @@ flags default off ⇒ smokes/sims byte-identical. (GDScript gotcha: `static var`
 
 ### 10.5 `tempo-art` Slice 1 (`e4589a6`) — hunk-by-hunk classification
 
+> **✅ TRANSPLANT PAID — C7 landed all 13 hunks on main 2026-07-14** (branch `artv2-c7`),
+> both recorded fixes applied (H5 `_post = null` in `_clear` · H9 finisher wash player-gated
+> via the one-blade-seat law), everything behind `ArtV2.vfx` (default OFF ⇒ byte-identical).
+> `tempo-art` is fully absorbed — frozen for deletion. The table below is the historical audit.
+
 The branch is ONE commit ahead of `0ad2ac8`; since then main's touched files drifted only in
 `raid_hud.gd` (massively — tank-v2/v3, castbar split, event-map growth; all anchors survive
 under new line numbers) and `raid_stage_2d.gd` (purge id-swap + `BulwarkRig2D` guard removal

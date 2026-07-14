@@ -927,21 +927,41 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   leash). Do NOT re-add an on-land parry cd. duelist_sim clean (det PASS · expert 100% win ·
   fumbles ~0 · windFloor ~0.5). Deployed to `C:\Games\v3Tank`. Config-value only — no ledger /
   card scope change.
-- ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: GRAPHICS
-  PACKET C7 — VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE** (GRAPHICS-PLAN §5·C7 + §10.5; Bill's
-  spec). Consume the eight approved I4 alpha sheets (`art-source/graphics-v2/p6-vfx/`) under
-  their README/source-layout contract: deterministic cell prep + registered pivots + manifest →
-  `res://game/art_v2/vfx/` · reusable pooled interruptible flipbook player (Compatibility-safe
-  Sprite2D layers, bounded additive duplicates/glints, idle ≈ zero) · grade/size intensity ladder
-  (Light < Heavy < Crush; PERFECT gets the full treatment) · binding at existing visual events
-  (parry/dodge/dump/En Garde/impacts) · the audited 13/13 `tempo-art` `e4589a6` hunk transplant
-  with both recorded fixes (`_post = null` in `_clear`; player-gate the `finisher` wash) ·
-  display-grade rename respected · plain strikes keep NO hit-stop · AnswerChannel never freezes
-  or gets covered. Gates: import clean · prep determinism · artv2_probe extension · ui_smoke_raid
-  · raid/duelist determinism byte-identical · legacy/default-off A/B · fallback · teardown/re-entry
-  · synthetic VFX tour ×3 resolutions ×2 scenes · deploy `C:\Games\art-Test`. Touches: `raid_hud.gd`
-  (event map + `_post`) · `raid_stage_2d.gd` · `pose_rig_2d.gd` · new `game/art_v2/vfx/*` +
-  `ui/screen_post_fx.gd` · `sim/artv2_*`.
+- ☑ 2026-07-14 · `artv2-c7` → **MERGED to `main` (ff `288a86e`)** · §GRAPHICS — **C7 VFX
+  FLIPBOOK RUNTIME + FULL JUICE SALVAGE BUILT. ⚠ AT BILL'S LIVE VERDICT; `art-Test` boots it
+  (`--artv2=actors,scene:stack_atrium,dash,vfx`).** The eight approved I4 alpha sheets became
+  8 per-family atlases + manifest via deterministic `sim/artv2_vfx_prep.gd` (explicit
+  source-layout edges — odd 941 height honored, never vframes=2 · full registration cells +
+  recorded trim offsets · per-ROW pivots: contact/release = alpha-weighted centroid,
+  engarde/crush = floor line — row drift probed at ~80px · byte-identical across runs).
+  Runtime `game/art_v2/vfx/`: VfxBook (§3½ resolve-at-make, null on ANY missing piece ⇒ no
+  pool, legacy sparks stay) · VfxPlayer (base + bounded additive dup + glint on ONE shared ADD
+  material; idle hidden+process-off ≈ zero) · VfxPool (14 voices, slot-replace = the interrupt
+  law — a new committed answer scrubs a stale tail; steal-oldest-unkeyed; named slots
+  unstealable). Bindings at EXISTING events only: duel_answer parry/dodge/weave (grade ladder =
+  scale+layers only; + `charge` landings CRUSH-sized, added with the v19 charged-parry merge) ·
+  duel_dump rotated at the boss · duel_engarde activation→2s-cycle hold loop→clean stop
+  (break event + natural expiry off committed state) · `hurt` impacts by strike-size truth
+  (LIGHT<HEAVY<CRUSH strict ladder). 13/13 `tempo-art` hunks transplanted (GRAPHICS-PLAN §10.5
+  now marked PAID): ScreenPostFx + washes/vignette/shock + stage hitstop/lunge/smear/ghosts +
+  `flash_all`; fixes = `_post=null` in `_clear` · finisher wash player-gated (one-blade-seat
+  law) · display-grade rename respected · plain strikes keep NO hit-stop · NEW answer-read
+  SHIELD: shader protect rect attenuates wash/aberr/shock inside the live channel rect
+  (default no-op). ALL behind `ArtV2.vfx`, default OFF. VERIFY: import clean · prep
+  determinism byte-identical ×2 · artv2_probe 155 ALL OK (+38 C7: families/frames/registration/
+  fallback/pool-bounds/interrupt/loop-stop/teardown) · ab-gate raid/duelist/twinfang sims
+  BYTE-IDENTICAL (flag off) · ui_smoke_raid ALL OK · synthetic `artv2_vfx_tour` (10 checks:
+  parry GREAT/PERFECT · 4-grade dodge ladder · dump · engarde chain · light/heavy/crush ·
+  overlap+coup+forced cast+low-HP · interrupt scrub · teardown/re-entry) ALL OK at
+  1080p/720p/2560×1080 × atrium+cold-aisle + legacy-HUD leg + novfx A/B leg + live
+  missing-asset fallback (png+import hidden ⇒ pool refuses, legacy FX only) + 8 pivot
+  registration sheets · full `verify-all` (forced past the pause flag): only 2 FAILs
+  (`map_advance_probe` · `pack_probe`) — **both reproduce on pre-C7 baseline `247db00` =
+  pre-existing main breakage, not C7's**. Deployed to `C:\Games\art-Test` (incl. `.godot`,
+  shortcut refreshed). OWED (visual-only): tour re-run after the I3-C layout-copy lands (VFX
+  ride live geometry by construction) · dump travel angle + per-family base scales are
+  manifest knobs for Bill's feel pass · engarde-activate pivot sits a hair low-left on two
+  frames (registration sheet on file; override table ready if it reads off in play).
 
 - ☑ 2026-07-13 · `main` (docs) · §GRAPHICS/I3 + ANSWER-SHAPE visual amendment —
   **WIND TAKES THE CENTER; BRACE RETIRES THE SKULL.** Bill's second component-board revision:
