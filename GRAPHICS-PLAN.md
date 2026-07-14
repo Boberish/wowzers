@@ -196,6 +196,7 @@ status · SIZE = damage.** A player reads the shape to know which key, glances a
 | **◇ diamond** | **DODGE** (graded) *or* **PARRY** (the greed line) | `auto` (ambient rhythm) · `beat` (a personal boss strike aimed at you, LIGHT) |
 | **⬡ hexagon** | **DODGE only** — parry is illegal | `global` (room-wide aoe, every seat) · `flurry` beats (a rapid WEAVE cluster) |
 | **⯃ spiked octagon** | **PARRY only** — dodge is illegal | `heavy` · `buster` · a HEAVY/CRUSH personal `beat` |
+| **⯃ octagon + CHARGE MODE** | **HOLD the PARRY, RELEASE on the hit** (the charged parry, TANK §11.1) | a CRUSH strikeless `buster` aimed at you — see §2.3.2 |
 | **⊘ barred disc / sealed impact** | **BRACE** — no action is legal; take the hit | `eat` (unavoidable) |
 
 - **The printed WORD under the comet is the answer** (`DODGE` / `PARRY` / `WEAVE` / `BRACE`). On a
@@ -224,7 +225,11 @@ changed to parry-only).
 `aoe`→hexagon, non-aoe LIGHT→diamond, non-aoe HEAVY+→octagon) · `flow` (0..1 aggro %) ·
 `flow_lock` (the 30% line) · `wind`/`wind_max` · `combo`/`combo_max` · `engarde_live/ready` ·
 `fumbling` · `dodge_ready`/`parry_ready` · gate fractions `win_bullseye/perfect/good/graze`
-(SYMMETRIC around gate-touch) + `parry_window`. The UI reads these — it never bakes numbers.
+(SYMMETRIC around gate-touch) + `parry_window` · **CHARGE (TANK §11.1): `charging` (the hold is
+live) · `charge_frac` (0..1 held fraction of the wind-up) · `charge_eligible` (a CRUSH swing is
+askable NOW) · `charge_min` (the COMMIT-law threshold to land) · `charge_full` (the FULL-GATHER
+line) — the band also derives `charge_tid`, the tagged buster comet.** The UI reads these — it
+never bakes numbers.
 
 **C · EVENTS (the moments — drained each frame, never checksummed).** `duel_dodge`/`duel_parry`
 = the PRESS echo (gate + rune kick the frame you press) · `duel_answer {kind, grade, size,
@@ -233,7 +238,9 @@ resolve THAT comet with a burst at its frozen pixel + ±ms · `duel_bar_missed {
 unpressed damage comet crossed the line → red ✗ husk that flows to the bar's end · `duel_fumble`
 = winded/dry press · `duel_counter`/`duel_riposte` = parry counter (+◆)/flurry riposte ·
 `duel_eat` = brace · `duel_engarde`/`duel_engarde_break` · `duel_dump {amt}` · `stream_shatter`
-= body-death shatter · `stream_guard_shatter {ids}` = THE GUARD rear-up.
+= body-death shatter · `stream_guard_shatter {ids}` = THE GUARD rear-up · **`duel_charge` = the
+GATHER begins (the hold committed) · `duel_answer {kind:"charge", grade, off_ms, id, charge_frac,
+full}` = the RELEASE verdict (MISS = FLINCHED; land = PARRY!, `full`=true = CHARGED! full-gather).**
 
 **D · THE DISPLAY GRADING LADDER (game-wide, identical to Twinfang):** GRAZE (steel) < GOOD
 (gold) < GREAT (mint) < PERFECT (bright-gold). **PARRY lands only on GREAT or PERFECT** — land
@@ -278,6 +285,60 @@ accent tint/ornament, never swap the information grammar.
 The current Gilded Reliquary UI remains the fallback and supplies proven readability rules. Art
 V2 may simplify the mock-up's ornament, reshape the sword silhouette, move islands, and reduce
 material density after Bill's boards/playtest.
+
+#### 2.3.2 THE CHARGED PARRY + THE REWORKED WEAVE — art-pass readiness (Bill, 2026-07-14)
+
+**Why this exists:** the CHARGED PARRY (hold-the-gather / release-on-the-hit) and the denser
+random WEAVE shipped to combat + the answer channel (`TANK §11`, protocol v19, MERGED `d91bb8d`;
+the visible CHARGE-MODE treatment lives on `artv2-c7` `1141908`). They are NEW combat moments the
+actor / VFX / dashboard art pass had not accounted for. This is the frozen brief for when the art
+line and the combat line **meet up** so nothing about these two moves gets left as flat graybox.
+
+**What already shipped (don't rebuild — extend):**
+- **Channel (view):** CHARGE MODE is a full style shift like the weave's blue wash — an **amber
+  wash over the glass + pulsing amber border + a big dynamic plaque** (`THE BIG ONE — HOLD THE
+  PARRY` → `HOLD… KEEP HOLDING` → `RELEASE ON THE HIT!`) + a **fat fill BAR** along the bottom
+  (dark track · shaded GO-ZONE from the COMMIT notch to full · amber→gold→white-hot fill · the
+  bright COMMIT notch the fill must cross to land · a pulsing ready-frame past it). The tagged
+  buster comet rides ×1.45 with an amber halo. Amber = charge's own color family (vs flurry
+  crimson / weave blue). All in `answer_channel.gd`, view-only, deterministic-neutral.
+- **VFX (C7):** charge LANDINGS already bind the parry flipbook CRUSH-sized (`288a86e`); full
+  gather = the full additive treatment.
+
+**A · ACTOR ANIMATION STATES the pass must add (Duelist rig, `ACTORS.md` poses vocabulary):**
+| state | trigger (event/obs) | the pose |
+|---|---|---|
+| **GATHER / HOLD** | `duel_charge`, sustained while `charging` | a braced wind-up that *loads* — weight back, blade cocked, tension **building with `charge_frac`** (deeper crouch / brighter edge as the bar fills). Loops until release; must scrub to the boss's wind-up truth. |
+| **CHARGED RELEASE** | `duel_answer kind:"charge"`, grade≠MISS | an explosive counter-lunge — bigger than the tap-parry counter; `full`=true earns the maximum (the marquee swing of the fight). |
+| **FLINCH** | `duel_answer kind:"charge"`, grade=MISS | a short stagger/whiff — released too early or off the beat; reads as "blew the big one," never as a normal parry. |
+| **WEAVE (denser)** | existing flurry state, now 6–7 beats | the rapid multi-parry footwork must sustain **6–7 quick beats at random spacing** (was a flat 4) and land a **scaling RIPOSTE** (`duel_riposte`) that reads bigger the longer the weave. |
+
+**B · BOSS TELEGRAPH POSE:** the CRUSH wind-up that keys the charged parry (Riftmaw Crush /
+Model Compression / Benchmark Hammer / Alignment Hammer) must read as **THE BIG ONE** — a long,
+unmistakable rear-back/over-charge distinct from the quick HEAVY swing, so the player's eye
+commits to the hold. This is the actor half of the channel's CHARGE MODE.
+
+**C · VFX CUES (C7 flipbook + motion layer):**
+- **Gather build-up:** an amber charge-up on the tank that **grows with `charge_frac`** (particle
+  density / rim glow), peaking white-hot at `charge_full` — the world-space twin of the bar.
+- **Release land:** the bound CRUSH parry flipbook; scale its intensity by the landed
+  `charge_frac` (already CRUSH-sized — add the frac ramp so a full gather is visibly the biggest).
+- **Flinch:** a small amber fizzle/sputter (the gather collapses) — never the crimson leak X.
+- **Weave:** the flurry cluster VFX must handle 6–7 rapid contacts without queuing (high-flow
+  law) + a **riposte burst that scales with beat count**.
+
+**D · THE CHARGE BAR'S HOME IN THE DASHBOARD (C6 / dream-dashboard, §2.3.1.E):** the CHARGE-MODE
+wash + fill bar are part of **THE ANSWER CHANNEL surface** (the reaction instrument), NOT a
+separate island — so they **re-home WITH the channel** when C6/the dream dashboard restructures
+the theater. The dashboard contract only needs to (1) reserve the channel's lower strip so the
+fat bar isn't clipped, and (2) let the amber CHARGE-MODE wash + plaque override the channel's
+frame the way the flurry crimson wash already does. No new obs/fields beyond §2.3.1.B/C above.
+
+**E · BRANCH-MERGE CONTRACT:** the charge channel rendering is **additive** on `artv2-c7`
+(`answer_channel.gd` only) and touches none of the LOCKED A–E fields except the documented
+additions here. It flows to `main` + `dash-c6c` at their next merge with no expected conflict
+beyond trivial (the dream-dashboard layout owns the channel's *placement*, this owns its
+*charge-mode content*). Deployed to `C:\Games\art-Test`.
 
 ### 2.4 VFX + motion
 

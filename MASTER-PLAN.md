@@ -877,6 +877,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-14 · `artv2-c7` · §DUELIST / §GRAPHICS — **THE CHARGED PARRY MADE VISIBLE + art-pass
+  brief (Bill: "the hold i can't see — make it a very obvious style shift like the weave, big
+  charge bar; put it on the art branch; plan the layout/animations for the art pass").**
+  `answer_channel.gd` `1141908`: CHARGE MODE = full channel style shift (amber wash · pulsing
+  border · big HOLD→RELEASE plaque · **fat fill BAR** w/ COMMIT notch · ×1.45 comet+halo) — the
+  weave-level treatment; view-only, `charge_probe` checksums unchanged; WSLg tour confirms
+  hold_invite + gather render; deployed `C:\Games\art-Test`. Frozen art-pass brief (actor
+  GATHER/RELEASE/FLINCH · boss BIG-ONE telegraph · VFX cues · charge-bar dashboard home ·
+  branch-merge contract) in **`GRAPHICS-PLAN §2.3.2`** + `TANK-PLAN §11` pointer. Flows to
+  `main`/`dash-c6c` at their next merge (additive, no LOCKED-field change beyond documented).
 - ☑ 2026-07-14 · main (docs only) · BOSS-PLAN §1½ + BOSS-BRIEF §0 reconcile (`923cb8d`) —
   **SEAL REWORK RE-GROUNDING after the pause (Bill: "get grounded, make sure all is good, keep
   going").** Verified HEALTH on current main: **S0+S1 (E1–E9 addenda) still MERGED + GREEN**

@@ -1296,6 +1296,13 @@ deck layers in §4 step 3 (kit-local, guarded, byte-identical unpicked — same 
 > Vorathek (20→0%) and Gemini (80→40%) at 5 seeds — the intended "big swings bite" direction,
 > ⚠ **playtest flag for Bill**: if the AI-backfill (good-ish) tank dies too much, the dials are
 > `charge_min_frac` (0.5), the release ladder (`parry_grade_frac`), `flurry_gap`/`flurry_jig`.
+>
+> **VISIBILITY FIX (Bill 2026-07-14, `artv2-c7` `1141908`):** the hold was invisible (a 24px arc).
+> Now CHARGE MODE is a full channel style shift like the weave — amber wash + pulsing border + big
+> HOLD→RELEASE plaque + a **fat fill BAR** with the COMMIT notch, ×1.45 comet + halo. **Art-pass
+> layout & animation readiness (actor GATHER/RELEASE/FLINCH poses · boss BIG-ONE telegraph · VFX
+> cues · the charge bar's dashboard home · branch-merge contract) is specced in `GRAPHICS-PLAN
+> §2.3.2`** — the frozen brief for when the art line meets the combat line. Deployed `art-Test`.
 
 **Bill's read (playtest):** the Seals' big wind-up swings ("big wait up and charge") resolve as
 a NORMAL parry — the long castbar makes them *easier and slower* than the stream, the opposite
