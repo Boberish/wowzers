@@ -1288,7 +1288,14 @@ All on surfaces the tank policy already reads.
 **Next:** verdicts → CARD-CATALOG flips (rows landed 🟡 this commit) → transforms build with the
 deck layers in §4 step 3 (kit-local, guarded, byte-identical unpicked — same bar as everything).
 
-## §11 · THE BIG-SWING ANSWER — CHARGED PARRY + THE WEAVE REWORK (Bill, 2026-07-14) 🔨 BUILDING
+## §11 · THE BIG-SWING ANSWER — CHARGED PARRY + THE WEAVE REWORK (Bill, 2026-07-14) 🔨 BUILT + MERGED `d91bb8d`
+
+> **As-built (2026-07-14):** everything below shipped as specced (protocol v19; `charge_enabled`
+> A/B on DuelistConfig; `sim/charge_probe.gd` certifies gather/release + weave rhythm + det).
+> raid_sim vs the pre-merge baseline: **expert unchanged on all 4 Seals**; good-tier dipped on
+> Vorathek (20→0%) and Gemini (80→40%) at 5 seeds — the intended "big swings bite" direction,
+> ⚠ **playtest flag for Bill**: if the AI-backfill (good-ish) tank dies too much, the dials are
+> `charge_min_frac` (0.5), the release ladder (`parry_grade_frac`), `flurry_gap`/`flurry_jig`.
 
 **Bill's read (playtest):** the Seals' big wind-up swings ("big wait up and charge") resolve as
 a NORMAL parry — the long castbar makes them *easier and slower* than the stream, the opposite
