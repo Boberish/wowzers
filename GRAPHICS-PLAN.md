@@ -10,8 +10,9 @@
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
 **Status:** 🟡 **P5/P6 BUILT — C6C DREAM DASHBOARD RUNTIME COPY MERGED `ccc35e8`; C7 VFX
-FLIPBOOK RUNTIME + 13/13 JUICE TRANSPLANT MERGED (2026-07-14); ⚠ AT BILL'S LIVE
-HIERARCHY/SPEED + VFX VERDICT — P7/default-on waits.** `art-Test` boots the complete slice
+FLIPBOOK RUNTIME + 13/13 JUICE TRANSPLANT MERGED (2026-07-14); ✅ BILL LIVE VERDICT:
+“FOR NOW IT'S SOLID” — MERGE/CONSOLIDATE. P7/default-on remains a separate explicit ship
+decision.** `art-Test` boots the complete slice
 (`--artv2=actors,scene:stack_atrium,dash,vfx`). C6B `28e9b15` proved component binding but
 preserved too much graybox anatomy; I3-C approved the replacement hierarchy and C6C copied it into
 the live controls. C7 anchors to live actor/channel geometry per frame, and its atrium + cold-aisle
@@ -392,8 +393,9 @@ another image.
 
 C6A proved the reaction-first live controls; I3-A/B and C6B proved the modular painted family; I3-C
 reset the full-screen hierarchy; and C6C copied that dream anatomy into the live Art-V2 dashboard.
-The automated 720p/1080p/ultrawide and two-profile gates pass. Bill's live high-Flow hierarchy and
-speed verdict remains the only gate before P7; small hand pixel polish remains parked.
+The automated 720p/1080p/ultrawide and two-profile gates pass. Bill's live high-Flow hierarchy/VFX
+verdict is “for now it's solid”; small hand pixel polish remains parked and P7/default-on still
+requires its own explicit ship decision.
 
 ### P6 · SIGNATURE VFX — **CODEX I4 ✅ `2baf3fe`** → **CLAUDE C7 🔨 BUILT+MERGED 2026-07-14 (⚠ Bill's live verdict owed)**
 
@@ -579,7 +581,8 @@ captures across 1280×720, 1920×1080, 2560×1080 × atrium/cold aisle × six st
 tours on moved geometry · missing-asset scratch fallback · native default-off legacy strip.
 Focused two-seed Riftmaw A/B is byte-identical (MD5 `317ce86c5e5aa4087248b149842073e6`);
 the long full A/B was stopped after ~21m48s while still matching and is not called a full pass.
-Stop for Bill's live hierarchy/speed verdict before P7/default-on discussion.
+Bill's live hierarchy/speed verdict is “for now it's solid”; P7/default-on remains a separate
+explicit ship decision.
 
 ### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE — 🔨 BUILT+MERGED 2026-07-14 (branch `artv2-c7`)
 

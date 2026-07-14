@@ -786,8 +786,9 @@ contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-
 - **GRAPHICS V2 — P5/P6 BUILT; LIVE VERDICT NEXT:** P0/P1 SUNPRINT CEL + C0–C3
   foundation/environment pair are done; P4 Duelist anchor+hybrid rig is done through C5.1
   `5bb532c`; P5's approved dream hierarchy is live through C6C `ccc35e8`; and P6/C7's full-budget
-  VFX remains bound to the moved live geometry. **P7/default-on now waits on Bill's live
-  hierarchy/speed + VFX verdict.** Old renderer/HUD remains selectable and default until then.
+  VFX remains bound to the moved live geometry. **Bill's 2026-07-14 live verdict: “for now it's
+  solid”; merge/consolidate. P7/default-on remains a separate explicit ship decision.** Old
+  renderer/HUD remains selectable and default until that decision.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -1085,7 +1086,8 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   a modular layout target, never one baked HUD image or a gameplay-state replacement.
 
 - ☑ 2026-07-14 · `dash-c6c` → **BUILT+MERGED `ccc35e8` — C6C DREAM DASHBOARD RUNTIME
-  COPY. ⚠ AT BILL'S LIVE HIERARCHY/SPEED VERDICT; P7/default-on still waits.** The approved I3-C
+  COPY. ✅ BILL LIVE VERDICT: “FOR NOW IT'S SOLID”; P7/default-on remains an explicit ship
+  decision.** The approved I3-C
   hierarchy now drives the existing live widgets: one substantial four-row party/healing island;
   authored boss/cast + quiet utility; dominant 72–88px answer lane with a compact nested precision
   gate; central-primary Wind above five combo sockets; side Health and Flow/Aggro rails; and a
