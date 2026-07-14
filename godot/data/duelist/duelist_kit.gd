@@ -423,7 +423,8 @@ func on_defense_release(s: CombatState, seat: Seat) -> void:
 	CombatCore._bump_diag(s, seat, "land")
 	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
 		"kind": "charge", "grade": grade, "size": AbilityRes.Size.CRUSH,
-		"off_ms": off * 33, "id": cid, "charge_frac": frac})
+		"off_ms": off * 33, "id": cid, "charge_frac": frac,
+		"full": frac >= cfg.charge_full_frac})
 
 # --- the mitigation funnel. EVERY comet was judged AT THE PRESS (ONE CLAIM, 2026-07-12):
 #     stream bars via stream_answers, telegraph events via tg_claims — resolution just

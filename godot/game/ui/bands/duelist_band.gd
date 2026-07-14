@@ -60,7 +60,7 @@ func build() -> void:
 	parry_rune.key_num = 2
 	parry_rune.icon_id = "guard"
 	parry_rune.accent = Palette.STEEL
-	parry_rune.tooltip_text = "PARRY — 2 / RIGHT CLICK. Lands on the perfect area — GREAT, or PERFECT dead-centre = best mit + COUNTER + ◆ + flow spike; loose = wind gone. Answers ◇ diamonds and ⯃ octagons aimed at YOU — never a ⬡ global / flurry."
+	parry_rune.tooltip_text = "PARRY — 2 / RIGHT CLICK. Lands on the perfect area — GREAT, or PERFECT dead-centre = best mit + COUNTER + ◆ + flow spike; loose = wind gone. Answers ◇ diamonds and ⯃ octagons aimed at YOU — never a ⬡ global / flurry. THE BIG ONE (a crushing wind-up): press-and-HOLD through at least half the charge, RELEASE on the hit — the CHARGED counter scales with the hold, a full gather banks ◆◆."
 	parry_rune.pressed.connect(func(): hud._ctrl.human({"type": "defense"}))
 	row.add_child(parry_rune)
 	var sep := Control.new()
@@ -82,7 +82,7 @@ func build() -> void:
 	engarde_rune.tooltip_text = "⏱ EN GARDE (~1-min CD) — CALL IT OUT: the stream quickens +25%, leaks HALVED, clean answers pay DOUBLE flow. Two slips break it. An amplifier — pays nothing if you don't answer."
 	engarde_rune.pressed.connect(func(): hud._ctrl.human({"type": "ability", "id": "engarde"}))
 	row.add_child(engarde_rune)
-	hud._hint_line("◇ DODGE-or-PARRY   ·   ⬡ DODGE-only   ·   ⯃ PARRY-only   ·   ☠ BRACE       —       1 / SPACE / LMB DODGE   ·   2 / RMB PARRY (land = counter + ◆)   ·   3 ⚡ DUMP   ·   4 ⏱ EN GARDE       —       PURPLE = A FAKE, DON'T PRESS   ·   RED = PEELED (still yours)")
+	hud._hint_line("◇ DODGE-or-PARRY   ·   ⬡ DODGE-only   ·   ⯃ PARRY-only (BIG ONE = HOLD, RELEASE ON THE HIT)   ·   ☠ BRACE       —       1 / SPACE / LMB DODGE   ·   2 / RMB PARRY (land = counter + ◆)   ·   3 ⚡ DUMP   ·   4 ⏱ EN GARDE       —       PURPLE = A FAKE, DON'T PRESS   ·   RED = PEELED (still yours)")
 
 func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	hp_orb.set_values(p.hp, p.hp_max)
@@ -106,6 +106,11 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	# them apart from stream bars (and clear of the -1 sentinel).
 	var tbars: Array = []
 	var tg: Dictionary = obs.get("telegraph", {})
+	channel.charge_tid = 0
+	channel.charging = bool(obs.get("charging", false))
+	channel.charge_frac = float(obs.get("charge_frac", 0.0))
+	channel.charge_min = float(obs.get("charge_min_frac", 0.5))
+	channel.charge_full = float(obs.get("charge_full_frac", 0.9))
 	if not tg.is_empty():
 		var tgid := int(tg.get("tick", 0))
 		var is_cast: bool = bool(tg.get("heal", false)) or bool(tg.get("empower", false)) \
@@ -114,10 +119,14 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 			var beats: Array = tg.get("strikes", [])
 			if beats.is_empty():
 				if bool(tg.get("targets_me", false)) and bool(tg.get("defensible", false)):
-					tbars.append({"id": -(1000 + tgid * 8), "kind": "buster",
+					var bid := -(1000 + tgid * 8)
+					tbars.append({"id": bid, "kind": "buster",
 						"size": int(tg.get("size", AbilityRes.Size.CRUSH)),
 						"eta": float(tg.get("remaining", 0.0)),
 						"purple": bool(tg.get("feint", false)), "answered": false})
+					# §11.1: this swing takes the HOLD — the channel dresses it
+					if bool(obs.get("charge_eligible", false)) or channel.charging:
+						channel.charge_tid = bid
 			else:
 				for i in beats.size():
 					var bt: Dictionary = beats[i]
@@ -166,6 +175,14 @@ func render(s: CombatState, p: Seat, obs: Dictionary) -> void:
 	var eg := int(p.cooldowns.get("engarde", 0))
 	engarde_rune.cd_frac = clampf(float(eg - s.tick) / float(CombatCore.to_ticks(60.0, s.config.fixed_hz)), 0.0, 1.0)
 
+## §11.1 the release grammar: parry key-up ends THE GATHER (a stray key-up is free —
+## the kit ignores it when no gather is live).
+func key_released(event: InputEventKey) -> bool:
+	if event.keycode == KEY_2 or event.keycode == KEY_F:
+		hud._ctrl.human({"type": "defense_release"})
+		return true
+	return false
+
 func key_pressed(code: int) -> void:
 	match code:
 		KEY_1, KEY_SPACE:
@@ -182,7 +199,11 @@ func key_pressed(code: int) -> void:
 ## Mouse grammar: LEFT CLICK = DODGE · RIGHT CLICK = PARRY. Clicks on real buttons keep
 ## their click (the hovered-control check stops the double-fire).
 func mouse(event: InputEventMouseButton) -> void:
-	if not event.pressed or event.button_index > MOUSE_BUTTON_RIGHT:
+	if not event.pressed:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			hud._ctrl.human({"type": "defense_release"})   # §11.1: RMB-up = the release
+		return
+	if event.button_index > MOUSE_BUTTON_RIGHT:
 		return
 	var hov: Control = hud.get_viewport().gui_get_hovered_control()
 	if hov is BaseButton:
@@ -210,8 +231,11 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 			# and the miss-afterlife can never red an answered comet.
 			if int(ev.get("id", 1)) < 0:
 				_tg_answered[int(ev.get("id", -1))] = true
-			_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)),
-				ev.has("id"), int(ev.get("id", -1)), ev.has("off_ms"), int(ev.get("off_ms", 0)))
+			if String(ev.get("kind", "")) == "charge":
+				_charge_verdict(ev)                    # §11.1: its own verdict family
+			else:
+				_verdict(String(ev.get("kind", "")), int(ev.get("grade", 0)), int(ev.get("size", 1)),
+					ev.has("id"), int(ev.get("id", -1)), ev.has("off_ms"), int(ev.get("off_ms", 0)))
 		"duel_dodge":
 			channel.press_tick("dodge")            # the frame-you-press echo (§0 pass 2)
 			dodge_rune.kick()                      # the bind rail animates too (key/mouse bypass _gui_input)
@@ -223,6 +247,8 @@ func on_event(ev: Dictionary, mine: bool) -> void:
 		"duel_engarde":
 			engarde_rune.kick()
 			channel.stamp("EN GARDE!", "bullseye")
+		"duel_charge":
+			channel.stamp("GATHER…", "good")           # the hold is on — the arc takes it from here
 		"duel_counter":
 			channel.stamp("COUNTER +◆", "bullseye")
 		"duel_riposte":
@@ -304,6 +330,29 @@ func _verdict(kind: String, grade: int, size: int, has_id: bool, id: int,
 			else:
 				channel.stamp(mtxt, "hit")   # defensive only — every tank answer carries an id now
 			hud._shake_amt = maxf(hud._shake_amt, 7.0)
+
+## §11.1 the charge verdicts: FLINCHED (short hold / off the beat — an early bail keeps
+## the comet live to re-gather) · PARRY! (landed) · CHARGED! (the FULL GATHER owns the room).
+func _charge_verdict(ev: Dictionary) -> void:
+	var grade := int(ev.get("grade", -1))
+	var ms := "%+d ms" % int(ev.get("off_ms", 0))
+	if grade == StrikeRes.Grade.MISS:
+		if ev.has("id"):
+			channel.resolve(int(ev["id"]), "hit", "FLINCHED", ms)
+		else:
+			channel.stamp("FLINCHED — RE-GATHER", "hit")
+		slam.slam("FLINCHED", "hit")
+		hud._shake_amt = maxf(hud._shake_amt, 5.0)
+		return
+	if bool(ev.get("full", false)):
+		channel.resolve(int(ev.get("id", -1)), "bullseye", "CHARGED!", ms)
+		slam.slam("CHARGED PARRY!", "perfect")
+		hud._shake_amt = maxf(hud._shake_amt, 4.0)
+	else:
+		channel.resolve(int(ev.get("id", -1)),
+			"bullseye" if grade == StrikeRes.Grade.BULLSEYE else "perfect", "PARRY!", ms)
+		slam.slam("PARRY!", "perfect")
+		hud._shake_amt = maxf(hud._shake_amt, 2.0)
 
 ## THE STREAM TUNER (dev-only): live-tune the ACTIVE body's texture profile mid-fight.
 func _toggle_tuner() -> void:
