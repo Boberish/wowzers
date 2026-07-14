@@ -11,8 +11,8 @@
 
 **Status:** 🟡 **P6 BUILT — C7 VFX FLIPBOOK RUNTIME + 13/13 JUICE TRANSPLANT MERGED
 (2026-07-14, branch `artv2-c7`, Bill-directed); ⚠ AT BILL'S LIVE VERDICT — `art-Test` boots it
-(`--artv2=actors,scene:stack_atrium,dash,vfx`) · P5 FULL-ANATOMY REOPENED IN PARALLEL — I3-C
-DREAM DASHBOARD ACTIVE** (C6B `28e9b15` proved binding but preserved too much graybox
+(`--artv2=actors,scene:stack_atrium,dash,vfx`) · P5 FULL-ANATOMY REOPENED — I3-C DREAM
+DASHBOARD APPROVED, C6C CODEX RUNTIME COPY CLAIMED** (C6B `28e9b15` proved binding but preserved too much graybox
 anatomy). The C7 hold is RESOLVED by construction: VFX anchor to live actor positions and the
 live channel rect per frame (nothing binds C6B's literal rectangles), so the I3-C layout-copy
 packet inherits them — re-run `sim/artv2_vfx_tour.gd` after that layout lands as the re-proof.
@@ -26,8 +26,9 @@ He explicitly skipped C6B.1 and will hand-tune the remaining scale/bar-inset pix
 not gate P6. VFX target = maximum-quality authored 2D flipbooks/layering while retaining the one
 GL Compatibility/WebGL2 path—no intentionally cheap browser edition.
 On 2026-07-14 Bill clarified that C6B mostly placed painted pieces around the existing HUD instead
-of adopting the dream hierarchy. I3-C now produces one implementable full-screen target; Claude's
-layout-copy packet follows before C7 so VFX bind to the intended final theater/dashboard geometry.
+of adopting the dream hierarchy. I3-C produced the approved full-screen anchor; Bill then assigned
+the runtime copy to Codex as C6C. C7 has already merged and rides live geometry, so C6C preserves it
+and re-runs its tour after the new layout lands.
 C2's deferred tour/smoke/A-B matrix remains release-default debt. Generated boards remain
 visual references, not runtime assets or a locked pixel layout.
 
@@ -548,6 +549,28 @@ Gate with the C6B state strip plus 1280×720, 1920×1080, and 2560×1080 tours i
 Bill explicitly skipped this Claude packet on 2026-07-13 and will make the small scale/inset edits
 by hand later. This debt does not gate I4/C7; reclaim only if Bill asks.
 
+### C6C · DREAM DASHBOARD RUNTIME COPY — ☐ CLAIMED BY CODEX (`dash-c6c`, 2026-07-14)
+
+**Anchor:** `art-source/graphics-v2/p5-dashboard/anchors/dream-dashboard-full-v1.png` is the
+approved hierarchy/scale target, not a runtime texture. Recompose the Art-V2 Duelist HUD from the
+existing live widgets and approved modular C6B pieces: a large four-row party/healing island at
+left; top boss HP plus cast; quiet utility tab; large 72–88px answer shapes on the dominant lane;
+a compact precision gate with nested grade marks; central Wind above exactly five combo sockets;
+large horizontal Health and Flow/Aggro rails; four current abilities in a modular dock that can
+accept a fifth without reflowing the whole screen. Preserve a clear theater and C7's live anchors.
+
+**Implementation boundary:** one responsive layout authority; code-owned values/fills/timing/
+input/hover/click truth; no CombatCore, protocol, or 30 Hz changes; no baked full-screen HUD; no
+legacy/default-off HUD edits. Primary surfaces are `dash_host_c6a.gd`, `dash_party_row.gd`,
+`answer_channel.gd`, `duelist_gauge.gd`, existing bar/rune scale paths only where necessary, and
+a fast deterministic visual tour. The class name/file may remain C6A for compatibility—the packet
+changes the V2 host's anatomy, not the selector contract.
+
+**Gate:** clean import/parse · `ui_smoke_raid` · Art-V2 probes · deterministic dashboard capture at
+1280×720, 1920×1080, and 2560×1080 in atrium + cold aisle · busy/feint/claim/charge/low-HP states ·
+C7 VFX tour after geometry moves · default-off and missing-asset fallback unchanged. Stop for Bill's
+live hierarchy verdict before P7/default-on discussion.
+
 ### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE — 🔨 BUILT+MERGED 2026-07-14 (branch `artv2-c7`)
 
 **As built:** `sim/artv2_vfx_prep.gd` deterministically cuts the eight I4 alpha sheets by
@@ -618,7 +641,7 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   `art-source/graphics-v2/p5-dashboard/`: four untouched chroma sheets + four visually checked RGBA
   alpha sheets + the production contract/contents README. The dedicated empty-window utility tab
   supersedes the wide sheet's baked sample. C6B may now claim from current `main`.
-- **I3-C:** 🟡 **AUTHORIZED/ACTIVE 2026-07-14 — DREAM FULL DASHBOARD, NOT ANOTHER RESKIN.** Use
+- **I3-C:** ✅ **APPROVED/DELIVERED 2026-07-14 — DREAM FULL DASHBOARD, NOT ANOTHER RESKIN.** Used
   the live C6B gameplay capture as the functional-state reference plus the approved I3 assets/icons
   as the material reference. Produce one 1920×1080-style in-game target that changes the anatomy:
   2–3× larger moving diamond/hexagon/octagon/BRACE shapes · a compact artful timing gate with precise
@@ -626,8 +649,9 @@ Bill gate where specified → merge-back → MASTER log/status + ledger SHA in s
   HP/resource/cast/debuff space · horizontal HP and Flow/Aggro rails flanking central-primary Wind
   above exactly five combo sockets · modular 4–6 abilities · boss HP/cast and collapsed utility.
   Preserve a large uncluttered theater, healer click-target truth, current icon law, and code-owned
-  values/timing/fills. The screenshot is a layout/scale/visual target for Claude to reproduce with
-  modular runtime pieces; it is not a baked HUD texture. C7 waits until this layout-copy gate lands.
+  values/timing/fills. The approved screenshot is project-bound at
+  `art-source/graphics-v2/p5-dashboard/anchors/dream-dashboard-full-v1.png`; it is the C6C
+  layout/scale/visual target, not a baked HUD texture.
 - **I4:** ✅ **DELIVERED `2baf3fe` — FULL-BUDGET VFX, ONE COMPATIBILITY-SAFE LOOK.**
   Produce project-bound chroma+alpha flipbook sources in three gameplay-priority groups:
   **I4-A core reaction** = parry + dodge; **I4-B signatures** = Dump + En Garde activation/hold;

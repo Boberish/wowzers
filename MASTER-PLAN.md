@@ -1074,19 +1074,30 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   contract at `art-source/graphics-v2/p6-vfx/`: parry · dodge · Dump · En Garde activation/hold ·
   light/heavy/crush impacts. Corrected no-grid Heavy source only; rejected generation not committed.
 
-- ☐ 2026-07-14 · Codex image packet `I3-C` · §GRAPHICS — **CLAIM: DREAM FULL DASHBOARD TARGET;
-  C7 TEMPORARILY HELD.** Bill's live verdict after C6B: it mostly added painted borders around the
-  existing HUD. Produce one implementable full-screen target from the actual live C6B capture plus
-  approved dashboard/icon sources. Reverse the weak hierarchy: 2–3× larger moving answer shapes;
+- ☑ 2026-07-14 · Codex image packet `I3-C` · §GRAPHICS — **DREAM FULL DASHBOARD TARGET APPROVED;
+  PROJECT ANCHOR LANDED.** Bill's live verdict after C6B: it mostly added painted borders around the
+  existing HUD. The approved target reverses that weak hierarchy: 2–3× larger moving answer shapes;
   compact artistic timing gate with precise nested grade marks instead of the oversized striped
   block; substantially larger coherent party HP/resource/cast/debuff rows; horizontal HP and
   Flow/Aggro rails around central Wind + exactly five combo sockets; modular 4–6 abilities; preserve
-  boss/cast/utility and a clear theater. Current shape/color/size law remains exact. Screenshot is
-  a modular layout target for Claude, never one baked HUD image or a gameplay-state replacement.
+  boss/cast/utility and a clear theater. Current shape/color/size law remains exact. The screenshot
+  is now preserved at `art-source/graphics-v2/p5-dashboard/anchors/dream-dashboard-full-v1.png` as
+  a modular layout target, never one baked HUD image or a gameplay-state replacement.
 
-- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY BUT HELD FOR I3-C + LAYOUT-COPY GATE:
-  VFX FLIPBOOK
-  RUNTIME + FULL JUICE SALVAGE.** Start from current `main`; consume only approved I4 alpha sheets
+- ☐ 2026-07-14 · `dash-c6c` (worktree `../wow-dash-c6c`) · §GRAPHICS — **CLAIM: C6C DREAM
+  DASHBOARD RUNTIME COPY — CODEX OWNS THE IMPLEMENTATION.** Start from post-C7 `main`. Rebuild the
+  Art-V2 Duelist dashboard's responsive anatomy around the approved I3-C anchor while reusing every
+  live control: one large four-row party/healing island; top boss HP + cast; quiet utility tab; large
+  72–88px answer shapes; compact precision gate; central Wind + exactly five combo sockets; large
+  horizontal Health and Flow/Aggro rails; four current abilities in a dock that can accept a fifth.
+  Primary scope: `dash_host_c6a.gd`, `dash_party_row.gd`, `answer_channel.gd`, `duelist_gauge.gd`,
+  the existing bar/rune presentation only where scale requires it, plus a fast deterministic visual
+  tour. Do not change combat/input/tick/protocol truth, do not bake the anchor, and do not touch the
+  legacy/default-off HUD. Verify import + `ui_smoke_raid` + Art-V2 probes + 720p/1080p/ultrawide
+  screenshots + C7 VFX tour, then merge and close this line before P7.
+
+- ☑ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **BUILT/MERGED 2026-07-14 (`artv2-c7`);
+  ORIGINAL VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE PACKET BELOW.** Start from current `main`; consume only approved I4 alpha sheets
   under their README/source-layout contract. Own deterministic cell prep + registered pivots,
   reusable interruptible flipbook pooling, one Compatibility-safe additive layer system, grade/size
   intensity, event binding, performance/readability budgets, and the audited 13/13 `tempo-art`

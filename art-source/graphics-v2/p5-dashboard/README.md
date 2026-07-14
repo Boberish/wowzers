@@ -4,6 +4,18 @@ Bill approved the I3-A material family and revision-2 hierarchy on 2026-07-13. T
 the production-source handoff for Claude's C6B trim/slice/import/binding work. They are not a
 baked HUD and must remain outside `res://` until C6B prepares the selected runtime pieces.
 
+## Approved full-dashboard anchor (I3-C)
+
+`anchors/dream-dashboard-full-v1.png` is Bill's approved 2026-07-14 composition/scale target for
+the C6C runtime layout pass. It owns the intended information hierarchy: large answer shapes,
+compact precision gate, four readable party rows, boss HP/cast, central Wind plus five combo
+sockets, flanking Health and Flow rails, and a modular ability dock. It is a **visual contract**,
+not a texture to import into `res://`, crop into a background, or use as gameplay truth.
+
+C6C must reproduce that hierarchy from the live controls and the modular I3-B pieces below. The
+target is directional rather than a literal pixel trace: values, fills, timing geometry, input,
+hover/click targeting, responsiveness, and C7 VFX anchors remain code-owned.
+
 ## Source files
 
 | Sheet | Alpha production source | Contents / order |
