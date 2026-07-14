@@ -79,7 +79,8 @@ func _save(name: String) -> void:
 	print("  shot[", name, "]: ", path)
 
 func _all_core() -> bool:
-	return shots.has("claim_good") and shots.has("miss") and shots.has("feint") and shots.has("busy")
+	return shots.has("claim_good") and shots.has("miss") and shots.has("feint") \
+		and shots.has("busy") and shots.has("gather")
 
 func _drive(ctrl: Object, forced) -> void:
 	if ctrl == null or ctrl.state == null or ctrl.state.over:
@@ -188,7 +189,15 @@ func _process(_d: float) -> bool:
 				if _fresh_death(ch, "burst"): dbg["burst"] = int(dbg["burst"]) + 1
 				if _fresh_verdict(ch, ["READ"]): dbg["read"] = int(dbg["read"]) + 1
 				if _fresh_verdict(ch, ["BAITED!"]): dbg["baited"] = int(dbg["baited"]) + 1
-				if not shots.has("busy") and ch.bars.size() >= 3:
+				# §11.1 the charge moments: the HOLD! invite, the mid-gather arc, the verdict
+				if not shots.has("hold_invite") and int(ch.charge_tid) != 0 and not bool(ch.charging):
+					_cap("hold_invite")
+				elif not shots.has("gather") and bool(ch.charging) \
+						and float(ch.charge_frac) >= 0.35 and float(ch.charge_frac) <= 0.85:
+					_cap("gather")
+				elif not shots.has("charged") and _fresh_verdict(ch, ["CHARGED!", "FLINCHED"]):
+					_cap("charged")
+				elif not shots.has("busy") and ch.bars.size() >= 3:
 					_cap("busy")
 				elif not shots.has("feint") and (_fresh_death(ch, "puff") \
 						or _fresh_verdict(ch, ["READ", "BAITED!"])):
