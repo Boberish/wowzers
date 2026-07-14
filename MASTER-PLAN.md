@@ -878,6 +878,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: CONSOLIDATE
+  the 5 stranded artv2-c7 commits into main** (Bill's direct ask): charged-parry CHARGE MODE
+  presentation + big charge bar (`1141908`) · §2.3.2 art brief (`7bcc06c`) · web-preview boss
+  test (`074cd24`) · `?art` web param + JSON export (`4539fb1`) · whole-screen mobile touch
+  parry/dodge (`215cf4c`). Merge current main (C6C dream dashboard `ccc35e8`, verdict
+  `f2b2560`) into the branch; ONE content conflict expected in `ui/answer_channel.gd` —
+  resolve semantically (keep C6C's responsive lane/nested gate/72–88px icons/_pps()/V2
+  trails + the branch's CHARGE MODE + mobile touch). Focused verify only; no push/deploy;
+  no image generation.
+
 - ☑ 2026-07-14 · main (docs only) · BOSS-PLAN §1½ + BOSS-BRIEF §0 reconcile (`923cb8d`) —
   **SEAL REWORK RE-GROUNDING after the pause (Bill: "get grounded, make sure all is good, keep
   going").** Verified HEALTH on current main: **S0+S1 (E1–E9 addenda) still MERGED + GREEN**
