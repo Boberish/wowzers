@@ -877,6 +877,22 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: GRAPHICS
+  PACKET C7 — VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE** (GRAPHICS-PLAN §5·C7 + §10.5; Bill's
+  spec). Consume the eight approved I4 alpha sheets (`art-source/graphics-v2/p6-vfx/`) under
+  their README/source-layout contract: deterministic cell prep + registered pivots + manifest →
+  `res://game/art_v2/vfx/` · reusable pooled interruptible flipbook player (Compatibility-safe
+  Sprite2D layers, bounded additive duplicates/glints, idle ≈ zero) · grade/size intensity ladder
+  (Light < Heavy < Crush; PERFECT gets the full treatment) · binding at existing visual events
+  (parry/dodge/dump/En Garde/impacts) · the audited 13/13 `tempo-art` `e4589a6` hunk transplant
+  with both recorded fixes (`_post = null` in `_clear`; player-gate the `finisher` wash) ·
+  display-grade rename respected · plain strikes keep NO hit-stop · AnswerChannel never freezes
+  or gets covered. Gates: import clean · prep determinism · artv2_probe extension · ui_smoke_raid
+  · raid/duelist determinism byte-identical · legacy/default-off A/B · fallback · teardown/re-entry
+  · synthetic VFX tour ×3 resolutions ×2 scenes · deploy `C:\Games\art-Test`. Touches: `raid_hud.gd`
+  (event map + `_post`) · `raid_stage_2d.gd` · `pose_rig_2d.gd` · new `game/art_v2/vfx/*` +
+  `ui/screen_post_fx.gd` · `sim/artv2_*`.
+
 - ☑ 2026-07-13 · `main` (docs) · §GRAPHICS/I3 + ANSWER-SHAPE visual amendment —
   **WIND TAKES THE CENTER; BRACE RETIRES THE SKULL.** Bill's second component-board revision:
   Wind is the primary central bar above five smaller clean combo sockets; HP stays on the left
