@@ -42,6 +42,14 @@ func act(obs: Dictionary) -> Dictionary:
 	if bool(obs.get("fumbling", false)):
 		return {}
 	var tg: Dictionary = obs.get("telegraph", {})
+	var charging := bool(obs.get("charging", false))
+	# §11.1 THE GATHER owns the parry hand: release on the impact beat before anything else
+	# (a distinct smear key from the press — release timing is its own roll); if the swing
+	# vanished under the hold, let go — the hand is worth more than the husk.
+	if charging:
+		var rem0 := float(tg.get("remaining", 99.0))
+		if tg.is_empty() or rem0 <= _react_for(int(tg.get("tick", -1)) + 500000, true):
+			return {"type": "defense_release"}
 	var wind := float(obs.get("wind", 10.0))
 	var parry_cost := float(obs.get("parry_cost", 3.5))
 	var dodge_cost := float(obs.get("dodge_cost", 1.0))
@@ -86,23 +94,39 @@ func act(obs: Dictionary) -> Dictionary:
 					if dodge_ready:
 						return {"type": "dodge"}           # wind-free in the mode
 				"heavy", "buster":
-					# ⯃ octagon = PARRY ONLY; too winded to parry → hold and eat it (dodge is illegal)
-					if parry_ready and wind >= parry_cost:
+					# ⯃ octagon = PARRY ONLY; too winded to parry → hold and eat it (dodge is
+					# illegal) — EXCEPT mid-GATHER (§11.1): the parry hand is occupied, footwork
+					# answers with the size leak.
+					if charging:
+						if dodge_ready:
+							return {"type": "dodge"}
+					elif parry_ready and wind >= parry_cost:
 						return {"type": "defense"}         # the commit
 				_:
 					# AUTO: dodge is the bread; parry instead when the bank is hungry + wind is fat
-					if combo < combo_max and wind >= parry_cost + dodge_cost * 2.0 and parry_ready:
+					# (never a parry mid-gather — the hand is held)
+					if not charging and combo < combo_max \
+							and wind >= parry_cost + dodge_cost * 2.0 and parry_ready:
 						return {"type": "defense"}
 					if dodge_ready and wind >= dodge_cost:
 						return {"type": "dodge"}
-					if parry_ready and wind >= parry_cost:
+					if not charging and parry_ready and wind >= parry_cost:
 						return {"type": "defense"}
 			return {}
 
-	# 1) a telegraph BUSTER aimed at me (no beats) → PARRY at the impact window.
+	# 1) a telegraph BUSTER aimed at me (no beats): §11.1 a CRUSH one takes THE GATHER —
+	#    press-and-hold as soon as the read lands (reaction latency delays the press, so a
+	#    sloppy tank gathers late and pays in charge_frac); a HEAVY one keeps the tap at the
+	#    impact window. A mid-gather tick already returned at the top.
 	if not tg.is_empty() and bool(tg.get("targets_me", false)) and bool(tg.get("defensible", false)) \
 			and (tg.get("strikes", []) as Array).is_empty():
 		var rem := float(tg.get("remaining", 99.0))
+		if bool(obs.get("charge_eligible", false)):
+			var dur := maxf(0.1, float(tg.get("dur", rem)))
+			if dur - rem >= _react_for(int(tg.get("tick", -1)), true) \
+					and parry_ready and wind >= parry_cost:
+				return {"type": "defense"}                 # the commit — hold starts here
+			return {}                                      # the read is still landing
 		if rem <= _react_for(int(tg.get("tick", -1)), true) and parry_ready and wind >= parry_cost \
 				and answering != "parry":
 			return {"type": "defense"}

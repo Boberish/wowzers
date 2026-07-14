@@ -190,9 +190,9 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			"targets_me": s.telegraph.target == seat,
 			"remaining": dur - elapsed,
 			"tick": s.telegraph.start_tick,   # stable per-swing id (AI feint-read model)
+			"dur": dur,                       # full wind-up length (the gather policy reads it)
 		}
 		if not s.telegraph.ability.strikes.is_empty():
-			tg["dur"] = dur
 			var beats: Array = []
 			for i in s.telegraph.ability.strikes.size():
 				var st: StrikeRes = s.telegraph.ability.strikes[i]
