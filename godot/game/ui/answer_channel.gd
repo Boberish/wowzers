@@ -57,6 +57,12 @@ var win_perfect: float = 0.14
 var win_good: float = 0.30
 var win_graze: float = 0.50
 var parry_window: float = 0.10
+# §11.1 THE CHARGED PARRY — the band tags the CRUSH buster comet that takes the HOLD:
+var charge_tid: int = 0                    ## the tbar id wearing the gather dressing (0 = none)
+var charging: bool = false                 ## the hold is live
+var charge_frac: float = 0.0               ## held fraction of the wind-up (the arc fill)
+var charge_min: float = 0.5                ## THE COMMIT LAW's half-mark (the notch)
+var charge_full: float = 0.9               ## the FULL GATHER threshold (white-hot)
 
 var late_grace: float = 0.04               ## the true post-line press window (sec) — the right-side
                                            ## bands draw ONLY this wide (everything visible is pressable)
@@ -430,7 +436,17 @@ func _draw() -> void:
 		var tage := float(_seen.get(tid, 1.0))
 		var tsc := (1.0 + 0.45 * maxf(0.0, 1.0 - tage / 0.22)) \
 			* (1.0 + 0.10 * clampf(1.0 - teta / 0.55, 0.0, 1.0))
-		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc, int(tb.get("size", -1)))
+		# §11.1: the charge-tagged buster wears its own word — HOLD! until the hand commits,
+		# HOLD… through the gather, RELEASE! once the comet reaches the parry zone
+		var cword := ""
+		if tid == charge_tid:
+			if charging:
+				cword = "RELEASE!" if teta <= parry_window + 0.06 else "HOLD…"
+			else:
+				cword = "HOLD!"
+		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc, int(tb.get("size", -1)), cword)
+		if tid == charge_tid and not bool(tb.get("answered", false)):
+			_charge_dress(tx2, cy)
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()/missed(). A TELEGRAPH comet
 	# (negative id) that expires unconsumed at the gate = an unanswered big move — it gets
@@ -657,7 +673,7 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 ## its victim's name — the tank still answers it (the comeback); the damage is the victim's.
 func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
 		answered: bool = false, peeled: bool = false, victim: String = "", sc: float = 1.0,
-		size: int = -1) -> void:
+		size: int = -1, word: String = "") -> void:
 	if answered:
 		var hc := (PURPLE if purple else _comet_col(kind))
 		hc.a = 0.3
@@ -704,7 +720,8 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 				false, Color(0, 0, 0, 0.45))            # seated shadow (one virtual light)
 			draw_texture_rect(itex, Rect2(x - iw * 0.5, cy - ih * 0.5, iw, ih), false, mod)
 			if kind != "flurry" or flurry_i == 0:
-				_word(font, x, cy, _v2_word(kind), _stat_col(_comet_col(kind), purple, peeled))
+				_word(font, x, cy, (word if word != "" else _v2_word(kind)),
+					_stat_col(_comet_col(kind), purple, peeled))
 			return
 	match kind:
 		"heavy", "buster":
@@ -712,7 +729,7 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 			var oc := _stat_col(Palette.HEAVY, purple, peeled)
 			_glow(x, cy, r + 3.0, oc)
 			_octagon(x, cy, r, oc, oc.lightened(0.4))
-			_word(font, x, cy, "PARRY", oc)
+			_word(font, x, cy, (word if word != "" else "PARRY"), oc)
 		"global":
 			# ⬡ DODGE-ONLY hexagon — the boss's room-wide move, cool steel; every seat dodges
 			var gc := _stat_col(Palette.STEEL.lightened(0.2), purple, peeled)
@@ -858,6 +875,32 @@ func _hexagon(x: float, cy: float, r: float, col: Color) -> void:
 	draw_colored_polygon(pts, col)
 	draw_polyline(pts + PackedVector2Array([pts[0]]), col.lightened(0.4), 1.8, true)
 	_specular(x, cy, r)
+
+## §11.1 the gather dressing on the charge-tagged buster: unpressed = a breathing HOLD
+## ring (the invitation); gathering = the charge arc filling clockwise from 12 — dim until
+## THE COMMIT LAW's half-mark (the notch), gold past it, white-hot + glow at the FULL GATHER.
+func _charge_dress(x: float, cy: float) -> void:
+	var r := 24.0
+	var c := Vector2(x, cy)
+	if not charging:
+		var hc := Palette.HEAVY.lightened(0.2)
+		hc.a = 0.35 + 0.25 * sin(_spin * 4.0)
+		draw_arc(c, r, 0, TAU, 28, hc, 2.0, true)
+		return
+	draw_arc(c, r, 0, TAU, 28, Color(1, 1, 1, 0.10), 3.0, true)   # the track
+	var col := Palette.TEXT_DIM
+	if charge_frac >= charge_full:
+		col = Color(1.0, 0.95, 0.7)
+		UiKit.glow(self, c, r + 10.0, Color(1.0, 0.85, 0.4, 0.25))
+	elif charge_frac >= charge_min:
+		col = Palette.GOLD_BRIGHT
+	col.a = 0.95
+	if charge_frac > 0.01:
+		draw_arc(c, r, -PI / 2.0, -PI / 2.0 + TAU * charge_frac, 28, col, 3.2, true)
+	# THE COMMIT LAW's half-mark: the notch the fill must cross before the release counts
+	var na := -PI / 2.0 + TAU * charge_min
+	var dirv := Vector2(cos(na), sin(na))
+	draw_line(c + dirv * (r - 4.0), c + dirv * (r + 4.0), Color(1, 1, 1, 0.6), 2.0, true)
 
 ## The spiked spinning octagon — the biggest-baddest shape (BUSTER in tank colors /
 ## GLOBAL in boss colors; the word carries the answer).

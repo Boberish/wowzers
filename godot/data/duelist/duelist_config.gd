@@ -84,6 +84,20 @@ extends Resource
 #     Miss a beat and the group is BLOWN (the rest land unmitigated); weave it clean and the
 #     free RIPOSTE pays out. ---
 @export var flurry_riposte_mult: float = 1.2   ## the clean-weave riposte ≈ counter × this
+                                               ## (×  n/4 — a longer weave pays more, §11.2)
+
+# --- THE CHARGED PARRY (TANK-PLAN §11.1): the big single hit's answer. A CRUSH strikeless
+#     DEFENSIBLE swing aimed at you takes a HOLD, not a tap: press-and-hold parry during the
+#     wind-up (the GATHER — parry_cost at press-down), RELEASE on the claim ladder at impact.
+#     THE COMMIT LAW: the hold must cover charge_min_frac of the wind-up or the release can't
+#     land — the lazy tap at the gate is a FLINCH (token mit_parry_miss). A landed release =
+#     mit .95 + counter × (1 + charge_frac × charge_counter_mult) + ◆ (2 pips at
+#     charge_full_frac — the FULL GATHER). Dodge stays live mid-hold; ⯃ HEAVY stream bars are
+#     dodge-legal (with the size leak) ONLY while charging — the parry hand is occupied. ---
+@export var charge_enabled: bool = true      ## the playtest A/B — false = the old tap-parry
+@export var charge_min_frac: float = 0.5     ## hold ≥ this fraction of the wind-up to land
+@export var charge_full_frac: float = 0.9    ## held ≥ this = FULL GATHER (◆◆ + the slam)
+@export var charge_counter_mult: float = 2.0 ## charged counter = counter_dmg × (1 + frac × this)
 
 # --- FLOW start: the pull opens ON the tank (aggro ≥ the lock floor); slip and it drifts.
 #     The shared flow economy knobs (gain/slip/decay/spike/lock-floor) live on TuningConfig. ---

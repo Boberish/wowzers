@@ -35,6 +35,17 @@ static func _global(id: StringName, name: String, amount: float,
 	a.strikes.append(st)
 	return a
 
+## A tank SWING: a strikeless DEFENSIBLE wind-up aimed at the threat target. At CRUSH size
+## this is THE CHARGED PARRY's trainer (§11.1 — hold the gather, release on the hit).
+static func _swing(id: StringName, name: String, size: AbilityRes.Size, amount: float,
+		cast: float, cd: float, jitter: float) -> AbilityRes:
+	var a := AbilityRes.new()
+	a.id = id; a.name = name; a.tag = "Tank Swing"
+	a.effect = AbilityRes.Effect.DMG_TARGET; a.amount = amount
+	a.response = AbilityRes.Response.DEFENSIBLE
+	a.cast = cast; a.cd = cd; a.jitter = jitter; a.danger = true; a.size = size
+	return a
+
 ## DENSE fight: the full-vocabulary stream — trains the read (feints/lates) + the weave.
 static func make_dense() -> EncounterRes:
 	var e := EncounterRes.new()
@@ -52,7 +63,9 @@ static func make_dense() -> EncounterRes:
 			{"name": "the_lie", "weight": 0.8, "rest": 1.7,
 				"steps": [{"kind": "auto"}, {"gap": 0.6, "kind": "feint"}]},
 			{"name": "the_weave", "weight": 0.5, "rest": 2.0,
-				"steps": [{"kind": "flurry"}]},
+				"steps": [{"kind": "flurry"}]},   # §11.2: seeded-random 6-note rhythm
+			{"name": "stutter_weave", "weight": 0.35, "rest": 2.0,
+				"steps": [{"kind": "flurry", "n": 6, "gaps": [0.3, 0.2, 0.2, 0.45, 0.2]}]},
 			{"name": "brace_bell", "weight": 0.45, "rest": 1.9,
 				"steps": [{"kind": "auto"}, {"gap": 0.85, "kind": "eat"}]},
 			{"name": "late_jab", "weight": 0.5, "rest": 1.7,
@@ -73,7 +86,7 @@ static func make_dense() -> EncounterRes:
 static func make_spike() -> EncounterRes:
 	var e := EncounterRes.new()
 	e.id = &"spike"; e.name = "The Siege Ram"; e.hp = 8400
-	e.intro = "Big, slow, telegraphed. Commit the parry, hit back — or thread the bullseye."
+	e.intro = "Big, slow, telegraphed. Tap-parry the tall bars — and when the Ram rears up, HOLD the parry through the charge and release on the hit."
 	e.melee = {"every": 1.5, "min": 12.0, "max": 18.0, "rhythm": 0.6, "jig": 0.35,
 		"heavy_odds": 0.25, "crush_odds": 0.08, "feint_odds": 0.10, "late_odds": 0.05}
 	e.enrage_at = 165.0
@@ -82,6 +95,8 @@ static func make_spike() -> EncounterRes:
 	e.phases = [p0, p1]
 	e.abilities = [
 		_global(&"quake", "Quake", 42.0, 2.6, 20.0, 2.0),
+		# §11.1 the charge trainer: the big single wind-up — HOLD the gather, RELEASE on the hit
+		_swing(&"ram_charge", "Battering Charge", AbilityRes.Size.CRUSH, 120.0, 2.6, 14.0, 2.0),
 	]
 	return e
 

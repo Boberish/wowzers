@@ -37,6 +37,12 @@ func upkeep(_s: CombatState, _seat: Seat) -> void:
 func on_defense_press(_s: CombatState, _seat: Seat) -> void:
 	pass
 
+## The defensive verb was RELEASED (TANK-PLAN §11.1 — the charged parry's release). Only
+## the Duelist reads it; the default no-op keeps every other class byte-identical (a stray
+## key-up costs nothing).
+func on_defense_release(_s: CombatState, _seat: Seat) -> void:
+	pass
+
 ## THE ONE DODGE (DODGE-PLAN.md): opt in so a single SPACE press answers both a
 ## DEFENSIBLE swing (negate) and barrage beats, on one cooldown. Default false keeps
 ## the split "defense"/"dodge" verbs byte-identical for every class that hasn't moved.

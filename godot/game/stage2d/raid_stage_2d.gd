@@ -283,11 +283,17 @@ func on_event(ev: Dictionary) -> void:
 				# One :act slot per seat: a new committed answer REPLACES a stale tail.
 				if _vfx != null:
 					var slot := "s%d:act" % _seat_i(ev.get("seat"))
-					if kind == "parry" and (g == StrikeRes.Grade.PERFECT or g == StrikeRes.Grade.BULLSEYE):
-						# landed parry at the REAL contact point (guard, boss side)
-						_vfx.spawn("parry", _guard_of(a), {
-							"scale": 1.18 if g == StrikeRes.Grade.BULLSEYE else 1.0,
-							"layers": 2 if g == StrikeRes.Grade.BULLSEYE else 1}, slot)
+					if (kind == "parry" or kind == "charge") \
+							and (g == StrikeRes.Grade.PERFECT or g == StrikeRes.Grade.BULLSEYE):
+						# landed parry at the REAL contact point (guard, boss side).
+						# CHARGE = the hold/release CHARGED PARRY (d91bb8d) — the same
+						# landing, CRUSH-sized: biggest scale, full treatment when full.
+						var full := kind == "charge" and bool(ev.get("full", false))
+						var sc := 1.18 if g == StrikeRes.Grade.BULLSEYE else 1.0
+						if kind == "charge":
+							sc = 1.4 if full else 1.25
+						_vfx.spawn("parry", _guard_of(a), {"scale": sc,
+							"layers": 2 if g == StrikeRes.Grade.BULLSEYE or full else 1}, slot)
 					elif kind == "dodge" and (g != StrikeRes.Grade.MISS and g != StrikeRes.Grade.BAITED):
 						var dsc := {StrikeRes.Grade.GRAZE: 0.78, StrikeRes.Grade.GOOD: 0.9,
 							StrikeRes.Grade.PERFECT: 1.0, StrikeRes.Grade.BULLSEYE: 1.15}

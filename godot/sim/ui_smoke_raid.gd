@@ -406,7 +406,14 @@ func _drive(s: CombatState, seat_key: String) -> int:
 			var tg: Dictionary = obs.get("telegraph", {})
 			match seat_key:
 				"tank":
-					if not bool(obs.get("aggro_me", true)) and s.tick >= int(p.cooldowns.get("challenge", 0)):
+					if bool(obs.get("charging", false)):
+						# §11.1 THE CHARGED PARRY: ride the hold, release on the beat (the 8-tick
+						# poll cadence lands the release inside the parry zone at <= 0.15s out)
+						if tg.is_empty() or float(tg.get("remaining", 9.0)) <= 0.15:
+							hud._ctrl.human({"type": "defense_release"})
+					elif bool(obs.get("charge_eligible", false)) and bool(obs.get("defense_ready", false)):
+						hud._ctrl.human({"type": "defense"})   # commit the gather EARLY (the full hold)
+					elif not bool(obs.get("aggro_me", true)) and s.tick >= int(p.cooldowns.get("challenge", 0)):
 						hud._ctrl.human({"type": "ability", "id": "challenge"})
 					elif not tg.is_empty() and bool(tg.get("defensible", false)) \
 							and bool(tg.get("targets_me", false)) and bool(obs.get("defense_ready", false)) \

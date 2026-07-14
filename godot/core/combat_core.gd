@@ -118,6 +118,11 @@ static func perform(s: CombatState, seat: Seat, action: Dictionary) -> void:
 						_emit(s, {"t": "negate", "player": seat.is_player, "seat": seat,
 							"size": s.telegraph.ability.size, "feint": s.telegraph.ability.feint})
 						s.telegraph = null
+		"defense_release":
+			# TANK-PLAN §11.1: the charged parry's release (key-up). Kit hook only — a
+			# no-op for every class but the Duelist (byte-identical elsewhere).
+			if seat.kit != null:
+				seat.kit.on_defense_release(s, seat)
 		"dodge":
 			# M7 universal dodge — every class has it, separate from the class
 			# defensive verb (guard/kick untouched). Short recovery between presses;
@@ -185,9 +190,9 @@ static func observe(s: CombatState, seat: Seat) -> Dictionary:
 			"targets_me": s.telegraph.target == seat,
 			"remaining": dur - elapsed,
 			"tick": s.telegraph.start_tick,   # stable per-swing id (AI feint-read model)
+			"dur": dur,                       # full wind-up length (the gather policy reads it)
 		}
 		if not s.telegraph.ability.strikes.is_empty():
-			tg["dur"] = dur
 			var beats: Array = []
 			for i in s.telegraph.ability.strikes.size():
 				var st: StrikeRes = s.telegraph.ability.strikes[i]
@@ -538,8 +543,16 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 			kind = "buster"
 		elif roll < fl_odds + fe_odds + ea_odds + cr_odds + he_odds:
 			kind = "heavy"
-		var flurry_n := maxi(2, int(melee.get("flurry_n", 4)))
-		var flurry_gap := to_ticks(float(melee.get("flurry_gap", 0.35)) / maxf(0.25, tempo), hz)
+		var flurry_n := maxi(2, int(melee.get("flurry_n", 6)))
+		# THE WEAVE RHYTHM (§11.2): gaps come before the guards so the span guard sees the
+		# true burst length; a degraded draw is spent rng (the DEC-11 unconditional-draw
+		# idiom — byte-stable either way).
+		var fl_gaps: Array = []
+		var fl_span := 0
+		if kind == "flurry":
+			fl_gaps = _flurry_gaps(s, melee, {}, flurry_n, tempo, hz)
+			for g_v in fl_gaps:
+				fl_span += int(g_v)
 		# grammar guards (each failure degrades to the plain auto):
 		if s.boss.stream_after_cast and s.boss.stream.is_empty():
 			kind = "auto"                               # the bar after a global stays plain
@@ -547,7 +560,7 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 			# the burst may run past the HORIZON — bars just enter the mouth later; the
 			# horizon is a visibility guarantee, not a cap
 			kind = "auto"
-		elif kind == "flurry" and _guard_adjust(s, imp, flurry_gap * (flurry_n - 1)) != imp:
+		elif kind == "flurry" and _guard_adjust(s, imp, fl_span) != imp:
 			kind = "auto"                               # THE GUARD: a burst never crosses a quiet window
 		elif kind == "feint" and s.boss.stream_seq == 0:
 			kind = "auto"                               # never the fight's opener
@@ -558,9 +571,12 @@ static func _stream_publish(s: CombatState, melee: Dictionary) -> void:
 		if kind == "flurry":
 			s.boss.stream_flurry_cd_until = s.tick + to_ticks(s.config.stream_flurry_cd, hz)
 			var group := s.boss.stream_seq
+			var fat := imp
 			for i in range(flurry_n):
-				_stream_push(s, melee, "flurry", imp + flurry_gap * i, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
-			s.boss.stream_next_impact = imp + flurry_gap * (flurry_n - 1) + period
+				_stream_push(s, melee, "flurry", fat, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
+				if i < fl_gaps.size():
+					fat += int(fl_gaps[i])
+			s.boss.stream_next_impact = fat + period
 		else:
 			# LATE roll (DEC-11): the rng draw is UNCONDITIONAL on late_odds>0 so the draw order
 			# is cap-independent (byte-stable replay); the cap only gates the *outcome*. Guards:
@@ -620,14 +636,22 @@ static func _publish_phrases(s: CombatState, melee: Dictionary, horizon: int, te
 			s.boss.stream_phrase_q = steps
 		var step: Dictionary = s.boss.stream_phrase_q.pop_front()
 		var kind := String(step.get("kind", "auto"))
-		var flurry_n := maxi(2, int(melee.get("flurry_n", 4)))
-		var flurry_gap := to_ticks(float(melee.get("flurry_gap", 0.35)) / maxf(0.25, tempo), hz)
+		# THE WEAVE RHYTHM (§11.2): a flurry step may size its own burst (`n`) and author its
+		# own syncopation (`gaps`); otherwise the seeded draw. Gaps come before the guards so
+		# the span guard sees the true burst length (a degraded draw is spent rng — byte-stable).
+		var flurry_n := maxi(2, int(step.get("n", melee.get("flurry_n", 6))))
+		var fl_gaps: Array = []
+		var fl_span := 0
+		if kind == "flurry":
+			fl_gaps = _flurry_gaps(s, melee, step, flurry_n, tempo, hz)
+			for g_v in fl_gaps:
+				fl_span += int(g_v)
 		# grammar guards (a blocked step DEGRADES to the plain auto — the laws hold):
 		if s.boss.stream_after_cast and s.boss.stream.is_empty():
 			kind = "auto"                               # the bar after a global stays plain
 		elif kind == "flurry" and s.tick < s.boss.stream_flurry_cd_until:
 			kind = "auto"
-		elif kind == "flurry" and _guard_adjust(s, imp, flurry_gap * (flurry_n - 1)) != imp:
+		elif kind == "flurry" and _guard_adjust(s, imp, fl_span) != imp:
 			kind = "auto"                               # THE GUARD: a burst never crosses a quiet window
 		elif kind == "feint" and s.boss.stream_seq == 0:
 			kind = "auto"                               # never the fight's opener
@@ -639,9 +663,12 @@ static func _publish_phrases(s: CombatState, melee: Dictionary, horizon: int, te
 		if kind == "flurry":
 			s.boss.stream_flurry_cd_until = s.tick + to_ticks(s.config.stream_flurry_cd, hz)
 			var group := s.boss.stream_seq
+			var fat := imp
 			for i in range(flurry_n):
-				_stream_push(s, melee, "flurry", imp + flurry_gap * i, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
-			base = imp + flurry_gap * (flurry_n - 1)
+				_stream_push(s, melee, "flurry", fat, float(melee.get("flurry_frac", 0.45)), false, group, i, flurry_n)
+				if i < fl_gaps.size():
+					fat += int(fl_gaps[i])
+			base = fat
 		else:
 			var late := bool(step.get("late", false)) \
 				and s.boss.stream_late_count < int(melee.get("late_cap", s.config.stream_late_cap))
@@ -658,6 +685,27 @@ static func _publish_phrases(s: CombatState, melee: Dictionary, horizon: int, te
 		else:
 			var gap := to_ticks(float((s.boss.stream_phrase_q[0] as Dictionary).get("gap", every)) / maxf(0.25, tempo), hz)
 			s.boss.stream_next_impact = base + maxi(2, gap)
+
+## THE WEAVE RHYTHM (TANK-PLAN §11.2): a flurry burst's per-note gap ticks. Authored `gaps`
+## on the phrase step win (syncopation as content — cycled if short); otherwise each gap is
+## drawn from the stream's seeded rng in fixed note order: flurry_gap × (1 ± flurry_jig) —
+## the weave is never straight twice. Tempo-compressed like every stream gap, then floored
+## at 6 ticks (0.20s — the 30 Hz wall + flurry_recover 0.15 headroom): EN GARDE can quicken
+## the weave but never past a human's fingers.
+static func _flurry_gaps(s: CombatState, melee: Dictionary, step: Dictionary,
+		n: int, tempo: float, hz: int) -> Array:
+	var gaps: Array = []
+	var base := float(melee.get("flurry_gap", 0.26))
+	var jig := float(melee.get("flurry_jig", 0.45))
+	var authored: Array = step.get("gaps", [])
+	for i in range(n - 1):
+		var g: float
+		if authored.is_empty():
+			g = base * (1.0 + (s.rng.next_float() - 0.5) * 2.0 * jig)
+		else:
+			g = float(authored[i % authored.size()])
+		gaps.append(maxi(6, to_ticks(g / maxf(0.25, tempo), hz)))
+	return gaps
 
 ## Append ONE committed bar. Damage + disguise + victim are all final here (LAW 1).
 static func _stream_push(s: CombatState, melee: Dictionary, kind: String, impact: int,

@@ -877,6 +877,47 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-14 · main (docs only) · BOSS-PLAN §1½ + BOSS-BRIEF §0 reconcile (`923cb8d`) —
+  **SEAL REWORK RE-GROUNDING after the pause (Bill: "get grounded, make sure all is good, keep
+  going").** Verified HEALTH on current main: **S0+S1 (E1–E9 addenda) still MERGED + GREEN**
+  (`raid_probe ALL OK`, imports clean, flow APIs `_flow_aggro`/`_aggro_peel`/`flow_lock_floor`
+  intact). Reconciled the pause deltas into the docs: **① INTERRUPT went SIMPLE** (press-anytime,
+  Twinfang `eviscerate` + Duelist `dump`, `3126437`) → §1½ tight-window/`kick_window` SUPERSEDED,
+  E8 = dead schema, verse consequence-ladder still stands · **② the 4 Seals already got
+  rhythm/SONGBOOK profiles + re-tuned melee** for tank-v3 THE STREAM (e.g. Vorathek Volley cd
+  13→22 to fit the 3–8 beat budget) — S2–S5 must PRESERVE these · **③ Duelist balance** improved
+  (Mistral 100 %, Gemini ~67 % good) but STILL dies to Vorathek/Mythos.
+  **⚠ SEQUENCING READ (my recommendation):** S2–S5 = adding STRUCTURE that re-baselines each
+  fight — but Bill is *actively tuning these same fights for tank-stream FEEL* and the
+  Duelist/Seal balance is unsettled (fights the Duelist currently loses). Building length-structure
+  onto that = re-baselining his fresh tuning + can't validate (all would read 0 % — structure-bug
+  vs balance indistinguishable). **Best sequenced AFTER the tank/Duelist balance settles.** Docs
+  are reconciled + ready; the moment Bill says go (or the balance lands), S2 (Vorathek v2) picks
+  up from the current builders. *(re-grounding session)*
+
+- ☑ 2026-07-14 · `duel-charge` → **MERGED to `main` (ff `d91bb8d`)** · §DUELIST / tank feel —
+  **THE BIG-SWING ANSWER — CHARGED PARRY + THE WEAVE REWORK, BUILT (spec `TANK-PLAN §11`).**
+  Gates: duelist_sim det PASS (spike byte-identical pre-trainer · expert 100% both golems) ·
+  **NEW `sim/charge_probe.gd` ALL PASS** (riftmaw @ expert: 7 gathers/fight, ~91% landed at
+  frac ~0.9; weave n=6, gaps ≥ 6 ticks, rhythm varies per group; same-seed det) ·
+  ui_smoke_raid ALL OK (driver taught the hold/release grammar — it was dying to unreleased
+  gathers) · WSLg duelist tour 7 shots incl. hold_invite/gather (charge arc + HOLD word render) ·
+  raid_sim 4 Seals vs main baseline: **expert UNCHANGED (100/100/100/80)**; good-tier dips
+  Vorathek 20→0% + Gemini 80→40% (5 seeds — the intended "big swings bite now" direction;
+  ⚠ flag for Bill's playtest, knobs = charge_min_frac/charge_counter_mult/flurry_gap/jig) ·
+  verify-all PAUSED repo-wide (`~/.rift-verify-paused`, building-not-gating) — respected,
+  targeted gates above are the bar. Protocol v19. Deployed to `C:\Games\v3Tank`. ① The Seals' CRUSH wind-up swings (Riftmaw Crush / Model Compression /
+  Benchmark Hammer / Alignment Hammer) stop resolving as a lazy tap-parry: **press-and-HOLD
+  the parry through ≥half the wind-up (the GATHER), RELEASE on impact** — landed release =
+  mit .95 + charged counter (scales with held fraction) + up to ◆◆; short-hold/early/late =
+  FLINCH (token mit). Dodge stays live mid-hold (heavies dodge-legal w/ leak ONLY while
+  charging). New `defense_release` action + `ClassKit.on_defense_release` no-op hook
+  (byte-identical other classes) + protocol bump. ② THE WEAVE: n 4→6 default, gap 0.35→0.26
+  with seeded per-note jig (never straight twice), authored `gaps` on phrase steps, riposte
+  scales ×(n/4); per-Seal weave phrases + SPIKE-golem charge trainer. Touches: combat_core
+  (perform/stream) · duelist kit/config/policy/content · duelist_band/answer_channel ·
+  raid_content songbooks · net_protocol. ⚠ Deliberate fight-checksum re-baseline (stream rng
+  order). Gates: duelist_sim/raid_sim det PASS · ui_smoke_raid · WSLg channel screenshot.
 - ☑ 2026-07-14 · `parry-recover` (merged `f3a642a`, ff → main) · §DUELIST / tank feel —
   **parry recovery 0.60 → 0.12 (debounce only).** Bill playtest: a landed parry's 0.6s lockout
   ate back-to-back notes the boss authored closer than that — un-plannable, punished correct
@@ -1013,7 +1054,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   contract at `art-source/graphics-v2/p6-vfx/`: parry · dodge · Dump · En Garde activation/hold ·
   light/heavy/crush impacts. Corrected no-grid Heavy source only; rejected generation not committed.
 
-- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY FOR CLAUDE CLAIM: VFX FLIPBOOK
+- ☐ 2026-07-14 · Codex image packet `I3-C` · §GRAPHICS — **CLAIM: DREAM FULL DASHBOARD TARGET;
+  C7 TEMPORARILY HELD.** Bill's live verdict after C6B: it mostly added painted borders around the
+  existing HUD. Produce one implementable full-screen target from the actual live C6B capture plus
+  approved dashboard/icon sources. Reverse the weak hierarchy: 2–3× larger moving answer shapes;
+  compact artistic timing gate with precise nested grade marks instead of the oversized striped
+  block; substantially larger coherent party HP/resource/cast/debuff rows; horizontal HP and
+  Flow/Aggro rails around central Wind + exactly five combo sockets; modular 4–6 abilities; preserve
+  boss/cast/utility and a clear theater. Current shape/color/size law remains exact. Screenshot is
+  a modular layout target for Claude, never one baked HUD image or a gameplay-state replacement.
+
+- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY BUT HELD FOR I3-C + LAYOUT-COPY GATE:
+  VFX FLIPBOOK
   RUNTIME + FULL JUICE SALVAGE.** Start from current `main`; consume only approved I4 alpha sheets
   under their README/source-layout contract. Own deterministic cell prep + registered pivots,
   reusable interruptible flipbook pooling, one Compatibility-safe additive layer system, grade/size

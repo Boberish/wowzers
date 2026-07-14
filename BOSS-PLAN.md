@@ -182,6 +182,18 @@ override" log entry stands as history; this doc + the 2026-07-10 log entry gover
 
 ## 1½ · THE KICK CONTRACT (Bill, 2026-07-10 — the interrupt spec the fights author against)
 
+> **⚠ SUPERSEDED IN PART 2026-07-12 — INTERRUPT WENT SIMPLE (Bill, MERGED `3126437`/`916e9c2`;
+> MASTER log + [[interrupt-simple-steer]]).** Bill's steer: *"no tight window, no early-press
+> whiff, no interrupt tax — DPS already juggle dodge + interrupt."* **DEAD from this section:**
+> the warn-early/**window-small ~0.6 s**/`kick_window` slice + the per-Seal window mults + the
+> "press free but TIMING is everything" framing. **STILL LIVE:** carriers are dump abilities
+> (as-built: **Twinfang→`eviscerate` · Duelist→`dump`**; healers never kick), a kick skips ONE
+> chain verse (chains still need a rotation), and the **consequence ladder below** — what a verse
+> DOES when it lands uncontested (Mistral blast → Gemini EMPOWER stacks → Mythos boss-HEAL) — is
+> independent of the press mechanism and remains the design. **For the build:** S2–S5 verses are
+> plain `INTERRUPTIBLE` casts; **do NOT author `kick_window`** (E8 is now dead schema, harmless).
+> The S7 "kick re-tune" collapses to "confirm verse consequences land right in sim."
+
 **The carrier amendment (supersedes pillar-3's "2/1/0 comp texture"):** **every class except
 healers carries a kick**, bolted onto its DUMP (Twinfang: Evis proposal 🟡 TEMPO §17.10 ·
 Alchemist: the Spitfire carrier · Duelist/Warden: ⚡ DUMP). Healers never kick. The standard
