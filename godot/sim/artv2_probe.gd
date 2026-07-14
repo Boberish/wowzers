@@ -127,7 +127,31 @@ func _initialize() -> void:
 			ra.size.y >= 150.0 and ra.size.x >= 800.0)
 		_chk(fails, "%s theater positive" % vp, rt.size.y > 200.0)
 		_chk(fails, "%s stage_scale sane" % vp,
-			float(L["stage_scale"]) >= 0.55 and float(L["stage_scale"]) <= 1.0)
+			float(L["stage_scale"]) >= 0.65 and float(L["stage_scale"]) <= 1.0)
+		var bounds := Rect2(Vector2.ZERO, vp)
+		for key in ["party", "boss_shell", "boss_cast", "utility", "answer",
+				"health", "wind", "flow", "abilities"]:
+			_chk(fails, "%s C6C %s stays on canvas" % [vp, key],
+				bounds.encloses(L[key] as Rect2))
+		var rp: Rect2 = L["party"]
+		var rb: Rect2 = L["boss_shell"]
+		var rbc: Rect2 = L["boss_cast"]
+		var ru: Rect2 = L["utility"]
+		var rhp: Rect2 = L["health"]
+		var rw: Rect2 = L["wind"]
+		var rf: Rect2 = L["flow"]
+		var rab: Rect2 = L["abilities"]
+		_chk(fails, "%s C6C four-row party island is substantial" % vp,
+			rp.size.y >= 320.0 and rp.size.x >= 330.0)
+		_chk(fails, "%s C6C upper islands stay mutually clear" % vp,
+			not rp.intersects(rb) and not rp.intersects(rbc) and not rp.intersects(ru)
+			and not rb.intersects(ru))
+		_chk(fails, "%s C6C three resource instruments stay distinct" % vp,
+			not rhp.intersects(rw) and not rw.intersects(rf) and not rhp.intersects(rf))
+		_chk(fails, "%s C6C reaction stack has no overlap" % vp,
+			not ra.intersects(rhp) and not ra.intersects(rw) and not ra.intersects(rf)
+			and not rw.intersects(rab) and not rhp.intersects(rab) and not rf.intersects(rab))
+		_chk(fails, "%s C6C ability dock reserves fifth-slot width" % vp, rab.size.x >= 434.0)
 	_chk(fails, "720p collapses the hint gutter first",
 		(DashHostC6A.layout(Vector2(1280, 720))["hint"] as Rect2).size.y == 0.0)
 	_chk(fails, "ultrawide caps the answer width",
@@ -164,6 +188,17 @@ func _initialize() -> void:
 		_chk(fails, "C6B opening inside its shell", rr.encloses(op) and op.size.x > 0.0 and op.size.y > 0.0)
 		var prow := sk.sliced_opening("party_row", Rect2(0, 0, 320, 30), DashSkin.CAPS_ROW, DashSkin.ROW_HP)
 		_chk(fails, "C6B party HP opening sane", prow.size.x > 150.0 and prow.size.y > 4.0)
+		# C6C's dominant-read targets: the live size helper (not a second table)
+		# produces 72–88px textures in the 1080 answer opening.
+		var c6c_chan := AnswerChannel.new()
+		c6c_chan.v2_skin = sk
+		c6c_chan.size = Vector2(1160.0, 126.0)
+		var light_h := c6c_chan._size_r("auto", AbilityRes.Size.LIGHT) * 2.6
+		var heavy_h := c6c_chan._size_r("heavy", AbilityRes.Size.HEAVY) * 2.6
+		var crush_h := c6c_chan._size_r("buster", AbilityRes.Size.CRUSH) * 2.6
+		_chk(fails, "C6C answer icons hit 72–88px target",
+			light_h >= 72.0 and heavy_h >= 80.0 and crush_h >= 88.0 and crush_h <= 89.0)
+		c6c_chan.free()
 	# default-off fail-safe: every C6B widget flag ships dark until the host sets it
 	var ac := AnswerChannel.new()
 	_chk(fails, "C6B default-off: channel unskinned", ac.v2_skin == null and not ac.v2_naked)

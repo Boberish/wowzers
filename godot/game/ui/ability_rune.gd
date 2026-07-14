@@ -52,7 +52,10 @@ const CHAMFER := 9.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = Vector2(76, 76)
+	# 76px is the legacy floor, not a command to erase a host/gallery's authored
+	# allocation. This lets a modular dashboard size a rune before it enters tree.
+	custom_minimum_size = Vector2(maxf(76.0, custom_minimum_size.x),
+		maxf(76.0, custom_minimum_size.y))
 	# charged-socket under-glow: additive, on only when castable
 	_glow = GlowCore.new()
 	_glow.setup(16.0, accent, 0.42, 0.30, 1.0)
@@ -96,11 +99,12 @@ func _face() -> Rect2:
 		return DashSkin.uniform_opening(_v2_slot_rect(), DashSkin.OPEN_SLOT)
 	return Rect2(size.x * 0.5 - 31.0, 1.0, 62.0, 62.0)
 
-## The painted slot's dest rect: fitted to the classic 76px socket width, top-anchored
-## so the engraved name keeps its line under the socket.
+## The painted slot's dest rect: the dream dock allocates 76px at the 720 stress
+## size and 92px at 1080p. The source art scales uniformly; a future fifth rune
+## fits the host's reserved width without changing this widget.
 func _v2_slot_rect() -> Rect2:
 	var tex: Texture2D = v2_skin.t["slot_ability"]
-	var sw := 76.0
+	var sw := clampf(size.x, 76.0, 92.0)
 	var sh := sw * float(tex.get_height()) / float(tex.get_width())
 	return Rect2(size.x * 0.5 - sw * 0.5, 0.0, sw, sh)
 
@@ -152,7 +156,10 @@ func _draw() -> void:
 
 	# ---- the glyph (big — the face belongs to it) ----
 	if _tex != null:
-		var isz := 40.0 + 2.0 * _hover
+		var glyph_base := 40.0
+		if v2_skin != null:
+			glyph_base *= _v2_slot_rect().size.x / 76.0
+		var isz := glyph_base + 2.0 * _hover
 		var irect := Rect2(c.x - isz * 0.5, c.y - isz * 0.5, isz, isz)
 		# on cooldown/GCD the glyph stays clearly readable — just unlit
 		var itint := accent if on else Palette.TEXT_DIM

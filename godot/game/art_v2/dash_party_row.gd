@@ -23,7 +23,14 @@ func setup(h, st, frame: RaidFrame, sk: DashSkin) -> void:
 	skin = sk
 	mouse_filter = Control.MOUSE_FILTER_IGNORE       # the frame child owns the mouse
 	fr.modulate = Color(1, 1, 1, 0.0)                # fed + clickable, painted by US
-	fr.position = Vector2.ZERO
+	# RaidFrame's legacy 240×102 minimum used to overlap several of the old 30px
+	# painted rows. The real click target now fills exactly this substantial row.
+	fr.custom_minimum_size = Vector2.ZERO
+	fr.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fr.offset_left = 0.0
+	fr.offset_top = 0.0
+	fr.offset_right = 0.0
+	fr.offset_bottom = 0.0
 	add_child(fr)
 
 func _process(delta: float) -> void:
@@ -43,6 +50,8 @@ func _draw() -> void:
 		return
 	var rect := _row_rect()
 	var dead := fr.dead
+	var read_fs := int(clampf(roundf(size.y * 0.12), float(UiKit.SIZE["MICRO"]), float(UiKit.SIZE["LABEL"])))
+	var role_fs := int(clampf(roundf(size.y * 0.20), float(UiKit.SIZE["LABEL"]), 22.0))
 	# --- state edge BEHIND the shell (bloodied pulse / hovered-target gold) ---
 	if fr.is_target:
 		draw_rect(rect.grow(2.0), Color(Palette.GOLD_BRIGHT.r, Palette.GOLD_BRIGHT.g,
@@ -64,7 +73,7 @@ func _draw() -> void:
 		"tank": letter = "T"
 		"healer": letter = "H"
 	UiKit.text_shadowed(self, UiKit.display(800), Vector2(pc.x - prr, pc.y + prr * 0.42),
-		letter, HORIZONTAL_ALIGNMENT_CENTER, prr * 2.0, UiKit.SIZE["LABEL"],
+		letter, HORIZONTAL_ALIGNMENT_CENTER, prr * 2.0, role_fs,
 		rc.lightened(0.25) if not dead else Palette.TEXT_DIM)
 	if fr.glint and not dead:
 		var gc := Palette.GOLD_BRIGHT
@@ -75,7 +84,7 @@ func _draw() -> void:
 	draw_rect(hpo, Palette.BG0)
 	if dead:
 		UiKit.text_shadowed(self, UiKit.display(650, 2), Vector2(hpo.position.x, hpo.get_center().y + 4.0),
-			"FALLEN", HORIZONTAL_ALIGNMENT_CENTER, hpo.size.x, UiKit.SIZE["MICRO"], Palette.LOSE)
+			"FALLEN", HORIZONTAL_ALIGNMENT_CENTER, hpo.size.x, read_fs, Palette.LOSE)
 	else:
 		var frac := clampf(fr._disp_frac, 0.0, 1.0)
 		var fw := hpo.size.x * frac
@@ -97,10 +106,10 @@ func _draw() -> void:
 					Color(Palette.GOLD.r, Palette.GOLD.g, Palette.GOLD.b, 0.42 * sh))
 		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(hpo.position.x + 4.0, hpo.get_center().y + 4.0),
 			fr.unit_name.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, hpo.size.x * 0.62,
-			UiKit.SIZE["MICRO"], Palette.GOLD_BRIGHT if fr.is_you else Palette.TEXT)
+			read_fs, Palette.GOLD_BRIGHT if fr.is_you else Palette.TEXT)
 		UiKit.text_shadowed(self, UiKit.display(600), Vector2(hpo.position.x, hpo.get_center().y + 4.0),
 			str(int(round(fr._disp_frac * 100.0))) + "%", HORIZONTAL_ALIGNMENT_RIGHT,
-			hpo.size.x - 4.0, UiKit.SIZE["MICRO"], fr._hp_color().lightened(0.25))
+			hpo.size.x - 4.0, read_fs, fr._hp_color().lightened(0.25))
 	# --- class resource (the second opening): the seat's live resource pool ---
 	var reo := _open(DashSkin.ROW_RESOURCE)
 	draw_rect(reo, Palette.BG0)

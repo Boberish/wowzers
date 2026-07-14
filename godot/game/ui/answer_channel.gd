@@ -146,10 +146,11 @@ func missed(id: int) -> void:
 	if bool(rec["purple"]):
 		# belt-and-braces: a fake NEVER wears the red ✗ — it dissolves purple
 		_deaths.append({"x": float(rec["x"]), "kind": String(rec["kind"]), "purple": true,
-			"col": PURPLE, "shape": "puff", "t": 0.0, "seed": float(absi(id) % 211)})
+			"size": int(rec.get("size", -1)), "col": PURPLE, "shape": "puff", "t": 0.0,
+			"seed": float(absi(id) % 211)})
 	else:
 		_missed.append({"x0": float(rec["x"]), "kind": String(rec["kind"]),
-			"purple": false, "t": 0.0})
+			"purple": false, "size": int(rec.get("size", -1)), "t": 0.0})
 	_last_x.erase(id)
 
 ## A secondary callout landed (COUNTER / RIPOSTE / EN GARDE …): a light floating tag over the
@@ -168,6 +169,7 @@ func resolve(id: int, family: String, txt: String, ms_txt: String) -> void:
 	var x := _gate_x()
 	var kind := "auto"
 	var purple := false
+	var hit_size := -1
 	var key := id
 	var rec = _last_x.get(id)                 # untyped: .get() into := is a parse error
 	if rec == null:
@@ -177,6 +179,7 @@ func resolve(id: int, family: String, txt: String, ms_txt: String) -> void:
 		x = float(rec["x"])
 		kind = String(rec["kind"])
 		purple = bool(rec["purple"])
+		hit_size = int(rec.get("size", -1))
 		_last_x.erase(key)                     # consume so a second claim can't re-anchor here
 	var col := _family_col(family)
 	var shape := "ghost"
@@ -187,7 +190,7 @@ func resolve(id: int, family: String, txt: String, ms_txt: String) -> void:
 		shape = "puff"
 	elif kind == "heavy" or kind == "buster":
 		shape = "shatter"
-	_deaths.append({"x": x, "kind": kind, "purple": purple, "col": col, "shape": shape,
+	_deaths.append({"x": x, "kind": kind, "purple": purple, "size": hit_size, "col": col, "shape": shape,
 		"t": 0.0, "seed": float(absi(id) % 211)})
 	_verdicts.append({"x": x, "col": col, "txt": txt, "ms": ms_txt, "t": 0.0,
 		"rays": family == "bullseye"})
@@ -219,7 +222,8 @@ func shatter_ids(ids: Array) -> void:
 	for id_v in ids:
 		var rec = _last_x.get(int(id_v))          # untyped: .get() into := is a parse error
 		if rec != null:
-			_shards.append({"x": float(rec["x"]), "kind": String(rec["kind"]), "t": 0.0})
+			_shards.append({"x": float(rec["x"]), "kind": String(rec["kind"]),
+				"size": int(rec.get("size", -1)), "t": 0.0})
 			_last_x.erase(int(id_v))
 
 ## The publisher's body died — its committed bars SHATTER (visible: killing the attacker
@@ -227,7 +231,8 @@ func shatter_ids(ids: Array) -> void:
 func shatter() -> void:
 	for b_v in bars:
 		var b: Dictionary = b_v
-		_shards.append({"x": _bar_x(float(b.get("eta", 0.0))), "kind": String(b.get("kind", "auto")), "t": 0.0})
+		_shards.append({"x": _bar_x(float(b.get("eta", 0.0))), "kind": String(b.get("kind", "auto")),
+			"size": int(b.get("size", -1)), "t": 0.0})
 	_seen.clear()
 	_last_x.clear()
 
@@ -242,6 +247,10 @@ func _family_col(family: String) -> Color:
 		_: return Palette.CRIMSON
 
 func _gate_x() -> float:
+	if v2_skin != null:
+		# Leave a readable catch-tail after impact: the eye sees the target before
+		# the comet reaches it, while every boundary still shares the same _pps().
+		return size.x - clampf(size.x * 0.16, 118.0, 190.0)
 	return size.x - 78.0
 
 func _pps() -> float:
@@ -302,11 +311,22 @@ func _draw() -> void:
 	var gx := _gate_x()
 	var pps := _pps()
 	var bh := h - 26.0
+	if v2_skin != null:
+		bh = minf(bh, 92.0 * clampf(h / 126.0, 0.86, 1.0))
 	var ty := cy - bh * 0.5
-	_gate_band(gx, cy, bh, win_graze * pps, Palette.STEEL.darkened(0.55), 0.14)
-	_gate_band(gx, cy, bh, win_good * pps, Palette.GOLD.darkened(0.25), 0.16)
+	if v2_skin != null:
+		# A compact precision seat focuses the eye at impact. The true grade edges
+		# remain outside it as exact caliper marks; no timing width is compressed.
+		var seat_w := clampf(size.x * 0.075, 76.0, 94.0)
+		var seat := Rect2(gx - seat_w * 0.5, ty - 4.0, seat_w, bh + 8.0)
+		draw_rect(seat, Color(0.025, 0.032, 0.052, 0.58))
+		draw_rect(seat, Color(Palette.GOLD_DIM, 0.42), false, 1.2)
+		draw_line(Vector2(seat.position.x + 8.0, seat.position.y + 5.0),
+			Vector2(seat.end.x - 8.0, seat.position.y + 5.0), Color(Palette.GOLD_BRIGHT, 0.32), 1.0, true)
+	_gate_band(gx, cy, bh, win_graze * pps, Palette.STEEL.darkened(0.55), 0.14, bh)
+	_gate_band(gx, cy, bh, win_good * pps, Palette.GOLD.darkened(0.25), 0.16, bh * 0.76)
 	var core := Palette.PERFECT.lightened(0.1)
-	_gate_band(gx, cy, bh, win_perfect * pps, core, 0.20)
+	_gate_band(gx, cy, bh, win_perfect * pps, core, 0.20, bh * 0.54)
 	# BULLSEYE centre band — blooms bright on a landed bullseye
 	var bull_col := Palette.GOLD_BRIGHT
 	var bull_a := 0.45
@@ -316,10 +336,14 @@ func _draw() -> void:
 		bull_a = 0.55 + 0.35 * bf
 		var bloom := Palette.GOLD_BRIGHT
 		bloom.a = 0.4 * bf
-		draw_rect(Rect2(gx - win_perfect * pps, ty,
-			win_perfect * pps + minf(win_perfect, late_grace) * pps, bh), bloom)
+		var bloom_rect := Rect2(gx - win_perfect * pps, ty,
+			win_perfect * pps + minf(win_perfect, late_grace) * pps, bh)
+		if v2_skin != null:
+			bloom_rect.position.y = cy - 10.0
+			bloom_rect.size.y = 20.0
+		draw_rect(bloom_rect, bloom)
 		UiKit.glow(self, Vector2(gx, cy), 46.0 + 30.0 * bf, Color(bull_col.r, bull_col.g, bull_col.b, 0.35 * bf))
-	_gate_band(gx, cy, bh, win_bullseye * pps, bull_col, bull_a)
+	_gate_band(gx, cy, bh, win_bullseye * pps, bull_col, bull_a, bh * 0.34)
 	# gem-set mullion at the band's CLOSE (the true late edge — the hard stop line). The
 	# OPEN/approach edge is deliberately UNMARKED (Bill 2026-07-12): where you can start
 	# clicking is implied by the grading bands lighting up, not a printed blue line.
@@ -403,14 +427,17 @@ func _draw() -> void:
 		var purple := bool(b.get("purple", false))
 		var answered := bool(b.get("answered", false))
 		present[id] = true
-		_last_x[id] = {"x": x, "kind": kind, "purple": purple, "answered": answered, "absent": 0}   # claim anchor, verbatim
+		_last_x[id] = {"x": x, "kind": kind, "purple": purple,
+			"size": int(b.get("size", -1)), "answered": answered, "absent": 0}   # claim anchor, verbatim
 		if not _seen.has(id):
 			_seen[id] = 0.0
 			if bool(b.get("late", false)):
 				_flashes.append({"x": x, "t": 0.0})   # the LATE pop — flash where it appears
 		var age := float(_seen.get(id, 1.0))
-		var sc := (1.0 + 0.45 * maxf(0.0, 1.0 - age / 0.22)) \
-			* (1.0 + 0.10 * clampf(1.0 - eta / 0.55, 0.0, 1.0))
+		var spawn_k := 0.12 if v2_skin != null else 0.45
+		var close_k := 0.05 if v2_skin != null else 0.10
+		var sc := (1.0 + spawn_k * maxf(0.0, 1.0 - age / 0.22)) \
+			* (1.0 + close_k * clampf(1.0 - eta / 0.55, 0.0, 1.0))
 		if age < 0.2 and not bool(b.get("late", false)):
 			var bc := Color(1, 1, 1, 0.5 * (1.0 - age / 0.2))
 			draw_arc(Vector2(x, cy), 10.0 + age * 90.0, 0, TAU, 20, bc, 1.6, true)
@@ -429,13 +456,15 @@ func _draw() -> void:
 		var tpurple := bool(tb.get("purple", false))
 		present[tid] = true
 		_last_x[tid] = {"x": tx2, "kind": tkind, "purple": tpurple,
-			"answered": bool(tb.get("answered", false)), "absent": 0}
+			"size": int(tb.get("size", -1)), "answered": bool(tb.get("answered", false)), "absent": 0}
 		if not _seen.has(tid):
 			_seen[tid] = 0.0
 			_flashes.append({"x": tx2, "t": 0.0})     # big moves announce themselves
 		var tage := float(_seen.get(tid, 1.0))
-		var tsc := (1.0 + 0.45 * maxf(0.0, 1.0 - tage / 0.22)) \
-			* (1.0 + 0.10 * clampf(1.0 - teta / 0.55, 0.0, 1.0))
+		var tspawn_k := 0.12 if v2_skin != null else 0.45
+		var tclose_k := 0.05 if v2_skin != null else 0.10
+		var tsc := (1.0 + tspawn_k * maxf(0.0, 1.0 - tage / 0.22)) \
+			* (1.0 + tclose_k * clampf(1.0 - teta / 0.55, 0.0, 1.0))
 		# §11.1: the charge-tagged buster wears its own word — HOLD! until the hand commits,
 		# HOLD… through the gather, RELEASE! once the comet reaches the parry zone
 		var cword := ""
@@ -444,8 +473,14 @@ func _draw() -> void:
 				cword = "RELEASE!" if teta <= parry_window + 0.06 else "HOLD…"
 			else:
 				cword = "HOLD!"
+		var charge_live := tid == charge_tid and not bool(tb.get("answered", false))
+		# In V2 the large charge ring used to be painted after (and across) HOLD /
+		# RELEASE. Seat it behind the painted token and its instruction instead.
+		# Legacy keeps its historical draw order exactly.
+		if charge_live and v2_skin != null:
+			_charge_dress(tx2, cy)
 		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc, int(tb.get("size", -1)), cword)
-		if tid == charge_tid and not bool(tb.get("answered", false)):
+		if charge_live and v2_skin == null:
 			_charge_dress(tx2, cy)
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()/missed(). A TELEGRAPH comet
@@ -466,11 +501,12 @@ func _draw() -> void:
 			if was_purple:
 				# a held FAKE dissolves purple — success feedback, never the red ✗
 				_deaths.append({"x": float(_last_x[k]["x"]), "kind": String(_last_x[k]["kind"]),
-					"purple": true, "col": PURPLE, "shape": "puff", "t": 0.0,
+					"purple": true, "size": int(_last_x[k].get("size", -1)),
+					"col": PURPLE, "shape": "puff", "t": 0.0,
 					"seed": float(absi(int(k)) % 211)})
 			else:
 				_missed.append({"x0": float(_last_x[k]["x"]), "kind": String(_last_x[k]["kind"]),
-					"purple": false, "t": 0.0})
+					"purple": false, "size": int(_last_x[k].get("size", -1)), "t": 0.0})
 		_last_x.erase(k)
 	# --- THE MISS AFTERLIFE: red ✗ husks keep flowing past the line to the bar's end ---
 	for m_v in _missed:
@@ -482,7 +518,8 @@ func _draw() -> void:
 		var ma := clampf(1.0 - mt / 0.9, 0.0, 1.0)
 		var mc := Palette.CRIMSON
 		mc.a = 0.85 * ma
-		var mr := 16.0 if String(m["kind"]) == "buster" or String(m["kind"]) == "global" else 12.0
+		var mr := _size_r(String(m["kind"]), int(m.get("size", -1))) if v2_skin != null \
+			else (16.0 if String(m["kind"]) == "buster" or String(m["kind"]) == "global" else 12.0)
 		var mpts := _shape_pts(String(m["kind"]), mx, cy, mr)
 		draw_polyline(mpts + PackedVector2Array([mpts[0]]), mc, 2.0, true)
 		var xg := mr * 0.55
@@ -529,12 +566,29 @@ func _draw() -> void:
 		UiKit.text_shadowed(self, UiKit.display(600, 3), Vector2(w * 0.5 - 60, cy + 4),
 			"— HOLD —", HORIZONTAL_ALIGNMENT_CENTER, 120, UiKit.SIZE["LABEL"], Palette.TEXT_DIM)
 
-## One grading band at the gate — full width on the approach side, but the far side draws
-## ONLY as wide as the true post-line press window (late_grace): everything visible is
-## pressable, nothing more (Bill 2026-07-12 — no dead target past the stop line).
-func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color, a: float = 0.5) -> void:
-	col.a = a
+## One grading band at the gate — every x coordinate is still the true timing
+## geometry. V2 replaces the old full-height stripe with nested caliper marks and
+## a thin coloured rail; visually compact, mathematically identical.
+func _gate_band(gx: float, cy: float, bh: float, wpx: float, col: Color,
+		a: float = 0.5, caliper_h: float = -1.0) -> void:
 	var right := minf(wpx, late_grace * _pps())
+	if v2_skin != null:
+		var mh := bh if caliper_h < 0.0 else minf(caliper_h, bh)
+		var x0 := gx - wpx
+		var x1 := gx + right
+		var rail_col := col
+		rail_col.a = a * 0.62
+		draw_rect(Rect2(x0, cy - 4.0, x1 - x0, 8.0), rail_col)
+		var mark_col := col.lightened(0.16)
+		mark_col.a = minf(0.82, a * 2.4)
+		var y0 := cy - mh * 0.5
+		var y1 := cy + mh * 0.5
+		draw_line(Vector2(x0, y0), Vector2(x0, y1), mark_col, 1.5, true)
+		draw_line(Vector2(x1, y0), Vector2(x1, y1), mark_col, 1.2, true)
+		draw_line(Vector2(x0, y0), Vector2(x1, y0), Color(mark_col, mark_col.a * 0.55), 1.0, true)
+		draw_line(Vector2(x0, y1), Vector2(x1, y1), Color(mark_col, mark_col.a * 0.55), 1.0, true)
+		return
+	col.a = a
 	draw_rect(Rect2(gx - wpx, cy - bh * 0.5, wpx + right, bh), col)
 
 ## The shape polygon for a kind (shared by comet / ghost / shatter so a death looks like the
@@ -565,20 +619,26 @@ func _draw_death(d: Dictionary, cy: float) -> void:
 	var x := float(d["x"])
 	var col: Color = d["col"]
 	var seed := float(d["seed"])
+	var life_scale := 1.0
+	var death_r := 12.0
+	if v2_skin != null:
+		death_r = _size_r(String(d["kind"]), int(d.get("size", -1)))
+		life_scale = clampf(death_r / 18.0, 1.0, 1.65)
 	match String(d["shape"]):
 		"shatter":
 			var n := 8 if String(d["kind"]) == "buster" else 6
 			for i in n:
 				var ang := TAU * float(i) / float(n) - PI / 2.0 + sin(seed + float(i)) * 0.2
-				var reach := (16.0 + 30.0 * ease) * (0.75 + 0.45 * absf(sin(seed * 1.7 + float(i))))
+				var reach := (16.0 + 30.0 * ease) * life_scale * (0.75 + 0.45 * absf(sin(seed * 1.7 + float(i))))
 				var c := col
 				c.a = (1.0 - e) * 0.95
-				var p0 := Vector2(x + cos(ang) * (5.0 + 9.0 * ease), cy + sin(ang) * (5.0 + 9.0 * ease))
+				var p0 := Vector2(x + cos(ang) * (5.0 + 9.0 * ease) * life_scale,
+					cy + sin(ang) * (5.0 + 9.0 * ease) * life_scale)
 				var p1 := Vector2(x + cos(ang) * reach, cy + sin(ang) * reach)
 				draw_line(p0, p1, c, 2.4 * (1.0 - e * 0.6), true)
 			var rc := col.lightened(0.4)
 			rc.a = (1.0 - e) * 0.85
-			draw_arc(Vector2(x, cy), 8.0 + 42.0 * ease, 0, TAU, 30, rc, 2.6 * (1.0 - e), true)
+			draw_arc(Vector2(x, cy), (8.0 + 42.0 * ease) * life_scale, 0, TAU, 30, rc, 2.6 * (1.0 - e), true)
 			if e < 0.3:
 				draw_circle(Vector2(x, cy), 5.0, Color(1, 1, 1, (1.0 - e / 0.3) * 0.7))
 		"ghost":
@@ -590,7 +650,8 @@ func _draw_death(d: Dictionary, cy: float) -> void:
 				var gyk := sy - float(k) * 7.0
 				var c := col
 				c.a = a * (0.55 - 0.16 * float(k))
-				var pts := _shape_pts(String(d["kind"]), x, gyk, 12.0 + 2.0 * e)
+				var ghost_r := death_r * (1.0 + 0.12 * e) if v2_skin != null else 12.0 + 2.0 * e
+				var pts := _shape_pts(String(d["kind"]), x, gyk, ghost_r)
 				draw_polyline(pts + PackedVector2Array([pts[0]]), c, 1.6, true)
 		"burst":
 			var g := 7.0 + 15.0 * ease
@@ -674,10 +735,12 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
 		answered: bool = false, peeled: bool = false, victim: String = "", sc: float = 1.0,
 		size: int = -1, word: String = "") -> void:
+	# SHAPE = the button · COLOR = status (_stat_col) · SIZE = damage (the radius).
+	var r := _size_r(kind, size) * sc
 	if answered:
 		var hc := (PURPLE if purple else _comet_col(kind))
 		hc.a = 0.3
-		var hr := 18.0 if kind == "buster" else (15.0 if kind == "heavy" else 11.0)
+		var hr := r if v2_skin != null else (18.0 if kind == "buster" else (15.0 if kind == "heavy" else 11.0))
 		var hpts := _shape_pts(kind, x, cy, hr)
 		draw_polyline(hpts + PackedVector2Array([hpts[0]]), hc, 1.6, true)
 		return
@@ -685,7 +748,7 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		# the hunt-tick: a crimson chevron over the comet + the hunted raider's name
 		var pk := Palette.CRIMSON
 		pk.a = 0.85 + 0.15 * sin(_spin * 3.0)
-		var py := cy - 24.0
+		var py := cy - (r + 10.0 if v2_skin != null else 24.0)
 		draw_line(Vector2(x - 5, py - 4), Vector2(x, py + 2), pk, 2.2, true)
 		draw_line(Vector2(x + 5, py - 4), Vector2(x, py + 2), pk, 2.2, true)
 		if victim != "":
@@ -694,9 +757,7 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 			UiKit.text_shadowed(self, UiKit.body(500), Vector2(x - 50, py - 8), "→ " + victim,
 				HORIZONTAL_ALIGNMENT_CENTER, 100, UiKit.SIZE["MICRO"], vc)
 	if kind != "eat":
-		_trail(x, cy, kind, purple)
-	# SHAPE = the button · COLOR = status (_stat_col) · SIZE = damage (the radius).
-	var r := _size_r(kind, size) * sc
+		_trail(x, cy, kind, purple, r)
 	# --- C6B: the painted icon set (◇⬡⯃ + purple feints + the ⊘ BRACE disc that
 	# retires the skull/X). SAME live geometry — x/cy/r come from the committed
 	# feed exactly as the polygons did; the texture only changes the costume.
@@ -720,8 +781,11 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 				false, Color(0, 0, 0, 0.45))            # seated shadow (one virtual light)
 			draw_texture_rect(itex, Rect2(x - iw * 0.5, cy - ih * 0.5, iw, ih), false, mod)
 			if kind != "flurry" or flurry_i == 0:
-				_word(font, x, cy, (word if word != "" else _v2_word(kind)),
-					_stat_col(_comet_col(kind), purple, peeled))
+				var read_col := _stat_col(_comet_col(kind), purple, peeled)
+				if word != "":
+					_charge_word(x, cy, r, word, read_col)
+				else:
+					_word(font, x, cy, _v2_word(kind), read_col)
 			return
 	match kind:
 		"heavy", "buster":
@@ -775,17 +839,20 @@ func _v2_word(kind: String) -> String:
 ## Motion trail: layered afterimages BEHIND the comet (toward the mouth it came from — comets
 ## travel left→right into the gate) + a soft glow streak. Pure function of position — no
 ## stored history. Alphas ramped so the motion reads at a glance while the track stays legible.
-func _trail(x: float, cy: float, kind: String, purple: bool) -> void:
+func _trail(x: float, cy: float, kind: String, purple: bool, r: float) -> void:
 	var base := PURPLE if purple else _comet_col(kind)
-	UiKit.glow(self, Vector2(x - 8.0, cy), 16.0, Color(base.r, base.g, base.b, 0.10))
+	var trail_step := maxf(8.0, r * 0.46) if v2_skin != null else 8.0
+	var glow_r := maxf(16.0, r * 1.35) if v2_skin != null else 16.0
+	UiKit.glow(self, Vector2(x - trail_step, cy), glow_r,
+		Color(base.r, base.g, base.b, 0.10))
 	if v2_skin != null:                    # C6B: the afterimages wear the painted icon too
 		var itex := v2_skin.icon(kind, purple)
 		if itex != null:
 			for k in range(1, 4):
-				var tx := x - float(k) * 8.0
+				var tx := x - float(k) * trail_step
 				if tx < 12.0:
 					continue
-				var ih := ((26.0 if kind != "buster" else 38.0) - float(k) * 4.0)
+				var ih := maxf(12.0, r * 2.6 - float(k) * maxf(4.0, r * 0.15))
 				var iw := ih * float(itex.get_width()) / float(itex.get_height())
 				draw_texture_rect(itex, Rect2(tx - iw * 0.5, cy - ih * 0.5, iw, ih),
 					false, Color(1, 1, 1, 0.16 - 0.05 * float(k - 1)))
@@ -812,6 +879,15 @@ func _stat_col(base: Color, purple: bool, peeled: bool) -> Color:
 ## AbilityRes.Size (or -1 to derive from the kind for committed bars that carry no size field).
 func _size_r(kind: String, size: int) -> float:
 	var sz := size if size >= 0 else _kind_size(kind)
+	if v2_skin != null:
+		# 1080 target texture heights (radius×2.6): 73 / 81 / 88px.
+		# A true logical-720 stress viewport scales these to ~63 / 69 / 76px;
+		# normal 720 windows retain the project's 1080 design canvas and downscale.
+		var vs := clampf(self.size.y / 126.0, 0.86, 1.0)
+		match sz:
+			AbilityRes.Size.CRUSH: return 34.0 * vs
+			AbilityRes.Size.HEAVY: return 31.0 * vs
+			_: return 28.0 * vs
 	match sz:
 		AbilityRes.Size.CRUSH: return 18.0
 		AbilityRes.Size.HEAVY: return 15.0
@@ -843,8 +919,25 @@ func _glow(x: float, cy: float, r: float, col: Color) -> void:
 ## default-font glyphs; the word is the read, it must land at a glance).
 func _word(_font: Font, x: float, cy: float, txt: String, col: Color) -> void:
 	col.a = 0.98
-	UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(x - 40, cy + 31), txt,
-		HORIZONTAL_ALIGNMENT_CENTER, 80, UiKit.SIZE["LABEL"], col)
+	var off := clampf(size.y * 0.38, 39.0, 47.0) if v2_skin != null else 31.0
+	var tw := 96.0 if v2_skin != null else 80.0
+	UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(x - tw * 0.5, cy + off), txt,
+		HORIZONTAL_ALIGNMENT_CENTER, tw, UiKit.SIZE["LABEL"], col)
+
+## The hold/release instruction is an interaction state, not the shape's ordinary
+## answer label. Seat it in a compact plaque above the large charged token so the
+## icon/ring can never cover the word at either C6C stress scale.
+func _charge_word(x: float, cy: float, r: float, txt: String, col: Color) -> void:
+	var tw := 104.0
+	var baseline := cy - r - 8.0
+	var plate := Rect2(x - tw * 0.5, baseline - 14.0, tw, 18.0)
+	draw_rect(plate, Color(0.025, 0.03, 0.045, 0.88))
+	var edge := col.lightened(0.15)
+	edge.a = 0.72
+	draw_rect(plate, edge, false, 1.0)
+	col.a = 1.0
+	UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(x - tw * 0.5, baseline), txt,
+		HORIZONTAL_ALIGNMENT_CENTER, tw, UiKit.SIZE["LABEL"], col)
 
 ## Shape drop shadow — every comet sits ON the glass, not IN it (one virtual light).
 func _shape_shadow(pts: PackedVector2Array) -> void:
@@ -880,7 +973,7 @@ func _hexagon(x: float, cy: float, r: float, col: Color) -> void:
 ## ring (the invitation); gathering = the charge arc filling clockwise from 12 — dim until
 ## THE COMMIT LAW's half-mark (the notch), gold past it, white-hot + glow at the FULL GATHER.
 func _charge_dress(x: float, cy: float) -> void:
-	var r := 24.0
+	var r := _size_r("buster", AbilityRes.Size.CRUSH) + 9.0 if v2_skin != null else 24.0
 	var c := Vector2(x, cy)
 	if not charging:
 		var hc := Palette.HEAVY.lightened(0.2)

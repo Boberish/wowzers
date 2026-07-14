@@ -26,13 +26,13 @@ func _draw() -> void:
 	var v2 := v2_skin != null
 	# --- WIND: a slim GLASS bubble bar (AAA pass: seated, gradient fill, sheen, gold frame);
 	#     C6B: the painted resource shell hosts it as THE central primary bar ---
-	var bw := size.x * (0.78 if v2 else 0.62)
+	var bw := size.x * (0.92 if v2 else 0.62)
 	var bx := size.x * 0.5 - bw * 0.5
-	var by := size.y * (0.16 if v2 else 0.34)
+	var by := size.y * (0.05 if v2 else 0.34)
 	var wh := 10.0
 	var well := Rect2(bx, by, bw, wh)
 	if v2:
-		var srect := Rect2(bx, by, bw, maxf(24.0, size.y * 0.42))
+		var srect := Rect2(bx, by, bw, maxf(36.0, size.y * 0.48))
 		v2_skin.hshell(self, "shell_resource", srect, DashSkin.CAPS_RESOURCE)
 		well = v2_skin.sliced_opening("shell_resource", srect, DashSkin.CAPS_RESOURCE, DashSkin.OPEN_RESOURCE)
 		bx = well.position.x
@@ -64,9 +64,10 @@ func _draw() -> void:
 	# --- ◆ COMBO pips (banked by perfect parries) — gem-set now; the newest banks with a PUNCH.
 	#     C6B: each pip sits in its painted octagon socket, ~25% smaller (I3-A revision) ---
 	_pop = maxf(0.0, _pop - 0.05)
-	var y2 := size.y * (0.80 if v2 else 0.72)
+	var y2 := size.y * (0.76 if v2 else 0.72)
 	var n := maxi(1, combo_max)
-	var spacing := minf(size.x / float(n + 1), 30.0)
+	var spacing := minf(size.x / float(n + 1),
+		clampf(size.y * 0.43, 35.0, 52.0) if v2 else 30.0)
 	for i in range(n):
 		var x := size.x * 0.5 + (float(i) - float(n - 1) / 2.0) * spacing
 		var lit := i < combo
@@ -76,9 +77,10 @@ func _draw() -> void:
 		var r := 6.5 if v2 else 9.0
 		if v2:
 			var stex: Texture2D = v2_skin.t["socket_combo"]
-			var ssw := minf(24.0, spacing * 0.86)
+			var ssw := minf(clampf(size.y * 0.34, 28.0, 42.0), spacing * 0.86)
 			var ssh := ssw * float(stex.get_height()) / float(stex.get_width())
 			draw_texture_rect(stex, Rect2(x - ssw * 0.5, y2 - ssh * 0.5, ssw, ssh), false)
+			r = ssw * 0.23
 		if lit and i == combo - 1 and _pop > 0.0:
 			r += 7.0 * _pop                          # the fresh ◆ lands big and settles
 			var halo := Palette.GOLD_BRIGHT
@@ -92,8 +94,16 @@ func _draw() -> void:
 	if not fumbling and wind < 2.6:
 		var wcol := Palette.CRIMSON
 		wcol.a = 0.55 + 0.4 * sin(pulse * 3.0)
-		UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(0.0, (size.y * 0.16 if v2 else size.y * 0.34) - 16.0),
-			"WINDED — BREATHE", HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"], wcol)
+		if v2:
+			# Keep the warning inside the Wind instrument. Painting above the node
+			# crossed the answer frame once C6C joined the two islands closely.
+			UiKit.text_shadowed(self, UiKit.display(650, 1),
+				Vector2(bx + 90.0, by + wh * 0.5 + 4.0), "WINDED — BREATHE",
+				HORIZONTAL_ALIGNMENT_RIGHT, maxf(80.0, bw - 96.0), UiKit.SIZE["CAPTION"], wcol)
+		else:
+			# Default-off/legacy placement stays byte-identical.
+			UiKit.text_shadowed(self, UiKit.display(650, 1), Vector2(0.0, size.y * 0.34 - 16.0),
+				"WINDED — BREATHE", HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["CAPTION"], wcol)
 
 func _diamond(c: Vector2, r: float, col: Color, lit: bool = false) -> void:
 	var pts := PackedVector2Array([

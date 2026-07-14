@@ -5,10 +5,10 @@
 ## rectangle verdict + Codex I3).
 ##
 ## THE ONE LAYOUT CONTRACT — `DashHostC6A.layout(vp)` owns every rectangle:
-##   STATUS RAIL   (party island · boss HP/cast island · utility/meter island)
-##   COMBAT THEATER (scene + actors + transient FX/numbers — NO persistent UI, ever)
+##   UPPER ISLANDS (large party island · boss HP/cast · quiet utility/meter)
+##   COMBAT THEATER (scene + actors + transient FX; player/boss centreline stays clear)
 ##   ANSWER        (the dominant AnswerChannel — broad, unmistakably primary)
-##   DASHBOARD     (HP · Flow/Aggro+30% lock · Wind · 5 combo sockets · 4 abilities)
+##   DASHBOARD     (HP · Flow/Aggro · Wind · 5 combo sockets · modular abilities)
 ##   HINT GUTTER   (collapses first at 720p)
 ## Responsive: 720p collapses hint/ornament but NEVER shrinks the answer
 ## instrument into unreadability; ultrawide grows the theater sideways while the
@@ -22,7 +22,9 @@
 ## same instance the legacy HUD builds, at a new size. RaidStage2D keeps SLOTS as
 ## its LOCAL spacing grammar and is placed INTO the theater (view-only
 ## `dash_scale`); SceneKit's floor reflows to the same line (`dash_floor_px`).
-## View-only throughout: no CombatState/spec/protocol/checksum contact.
+## The large party island may overlay the theater's safe west edge like the anchor;
+## it never covers the player/boss reaction line. View-only throughout: no
+## CombatState/spec/protocol/checksum contact.
 class_name DashHostC6A
 extends Control
 
@@ -41,28 +43,79 @@ var _skin: DashSkin = null
 var _rows: Array = []              ## DashPartyRow[] (skinned party island)
 var _tab = null                    ## DashUtilTab (untyped: inner class, dynamic .host)
 
-## THE CONTRACT. Reference anatomy @1920×1080: status 0-150 · theater 150-560 ·
-## answer 560-750 · dashboard 750-1040 · hint 1040-1080. Everything scales from
-## vp; hint and ornament collapse first; the answer floor is 150px.
+## THE CONTRACT. C6C rebuilds the old full-width rails as modular islands matching
+## the approved dream-dashboard anchor. Reference anatomy @1920×1080: party
+## 459×450 at the west edge · boss 789×138 top-centre · theater 120-610 · answer
+## 1240×176 · three large resource instruments + a five-slot-capable ability dock.
+## All numbers derive from this function; the live widgets only consume its rects.
 static func layout(vp: Vector2) -> Dictionary:
-	var s := vp.y / 1080.0
-	var status_h := roundf(150.0 * s)
-	var hint_h := roundf(40.0 * s) if vp.y >= 900.0 else 0.0
-	var answer_h := maxf(150.0, roundf(190.0 * s))
-	var dash_h := maxf(120.0, roundf(150.0 * s))   # Bill (live, 2026-07-13): halve it — the theater gets the space
-	var theater_top := status_h
-	var theater_bot := vp.y - hint_h - dash_h - answer_h
+	var s := clampf(vp.y / 1080.0, 2.0 / 3.0, 1.0)
+	var status_h := roundf(120.0 * s)
+	var hint_h := 40.0 if vp.y >= 900.0 else 0.0
+	var answer_h := maxf(150.0, roundf(176.0 * s))
+	var dash_h := maxf(172.0, roundf(254.0 * s))
+	var answer_y := vp.y - hint_h - dash_h - answer_h
 	var answer_w := minf(vp.x * 0.66, 1240.0)
-	var cluster_w := minf(vp.x * 0.62, 1000.0)   # the dashboard instrument cluster
+	var answer := Rect2(vp.x * 0.5 - answer_w * 0.5, answer_y, answer_w, answer_h)
+	var theater := Rect2(0.0, status_h, vp.x, answer_y - status_h)
+
+	# Party rows keep the source art's ~4.38:1 shape instead of being crushed into
+	# the former 30px rail. Four rows plus three gaps are one deliberate island.
+	var row_h := clampf(roundf(108.0 * s), 78.0, 108.0)
+	var row_gap := clampf(roundf(6.0 * s), 4.0, 6.0)
+	var party_w := clampf(vp.x * 0.26, 332.0, 459.0)
+	var party := Rect2(roundf(14.0 * s), roundf(12.0 * s), party_w,
+		row_h * 4.0 + row_gap * 3.0)
+
+	# Authored shells are scaled uniformly by height; their medallions/corners never
+	# stretch. The cast overlaps the boss shell by a few pixels as one joined island.
+	var boss_sz := Vector2(789.0, 138.0) * s
+	var boss_shell := Rect2(Vector2(vp.x * 0.5 - boss_sz.x * 0.5, roundf(10.0 * s)), boss_sz)
+	var cast_sz := Vector2(560.0 * s, maxf(34.0, 44.0 * s))
+	var boss_cast := Rect2(vp.x * 0.5 - cast_sz.x * 0.5,
+		boss_shell.end.y - 6.0 * s, cast_sz.x, cast_sz.y)
+	var util_sz := Vector2(259.0, 66.0) * s
+	var utility := Rect2(vp.x - util_sz.x - 16.0 * s, 16.0 * s, util_sz.x, util_sz.y)
+	var meter_top := utility.end.y + 8.0 * s
+	var meter_h := minf(420.0 * s, maxf(220.0, answer.position.y - meter_top - 12.0 * s))
+	var meter := Rect2(vp.x - 370.0 * s - 16.0 * s, meter_top, 370.0 * s, meter_h)
+
+	# Three large live resource instruments form the lower backbone. The arithmetic
+	# deliberately reserves exact room for a fifth 92px rune at 1080p (76px at 720).
+	var gauge_sz := Vector2(560.0 * s, maxf(76.0, 114.0 * s))
+	var bar_sz := Vector2(520.0 * s, maxf(44.0, 62.0 * s))
+	var rail_gap := 35.0 * s
+	var cluster_w := bar_sz.x * 2.0 + gauge_sz.x + rail_gap * 2.0
+	var cluster_x := vp.x * 0.5 - cluster_w * 0.5
+	var rail_y := answer.end.y + 26.0 * s
+	var wind := Rect2(vp.x * 0.5 - gauge_sz.x * 0.5, answer.end.y + 2.0 * s,
+		gauge_sz.x, gauge_sz.y)
+	var health := Rect2(cluster_x, rail_y, bar_sz.x, bar_sz.y)
+	var flow := Rect2(cluster_x + bar_sz.x + rail_gap + gauge_sz.x + rail_gap,
+		rail_y, bar_sz.x, bar_sz.y)
+	var ability_sz := Vector2(maxf(434.0, 534.0 * s), maxf(94.0, 110.0 * s))
+	var abilities := Rect2(vp.x * 0.5 - ability_sz.x * 0.5,
+		vp.y - hint_h - ability_sz.y, ability_sz.x, ability_sz.y)
 	return {
 		"status": Rect2(0, 0, vp.x, status_h),
-		"theater": Rect2(0, theater_top, vp.x, theater_bot - theater_top),
-		"answer": Rect2(vp.x * 0.5 - answer_w * 0.5, theater_bot, answer_w, answer_h),
-		"dash": Rect2(0, theater_bot + answer_h, vp.x, dash_h),
+		"theater": theater,
+		"answer": answer,
+		"dash": Rect2(0, answer.end.y, vp.x, dash_h),
 		"hint": Rect2(0, vp.y - hint_h, vp.x, hint_h),
+		"party": party,
+		"party_gap": row_gap,
+		"boss_shell": boss_shell,
+		"boss_cast": boss_cast,
+		"utility": utility,
+		"meter": meter,
+		"health": health,
+		"wind": wind,
+		"flow": flow,
+		"abilities": abilities,
 		"cluster_w": cluster_w,
-		"floor_px": theater_top + (theater_bot - theater_top) * 0.80,
-		"stage_scale": clampf((theater_bot - theater_top) / 520.0, 0.55, 1.0),
+		"scale": s,
+		"floor_px": theater.position.y + theater.size.y * 0.80,
+		"stage_scale": clampf(theater.size.y / 490.0, 0.65, 1.0),
 	}
 
 func _init(h) -> void:
@@ -103,14 +156,18 @@ func _init(h) -> void:
 			db.channel.v2_skin = _skin        # painted ◇⬡⯃⊘ comets + purple feints
 			db.channel.v2_naked = true        # the painted answer frame owns the housing
 			db.gauge.v2_skin = _skin          # Wind = central primary bar · 5 sockets below
-			for rn in [db.dodge_rune, db.parry_rune, db.dump_rune, db.engarde_rune]:
-				(rn as AbilityRune).v2_skin = _skin
+			# Discover the live rail rather than naming today's four verbs. A future
+			# fifth AbilityRune inherits the same painted slot without host surgery.
+			for rn in _ability_runes():
+				rn.v2_skin = _skin
 		if band.hp_orb != null:               # horizontal safety bars (§2.3.1 E)
 			band.hp_orb.v2_bar = _skin
 		if band.res_orb != null:
 			band.res_orb.v2_bar = _skin
 			band.res_orb.v2_pct = true
-			band.res_orb.v2_lock = 0.30       # the 30% Flow lock — code-drawn, by law
+			# C6C anchor verdict: keep the Flow read clean; no fixed diamond/threshold
+			# marker. The percentage and all underlying aggro truth remain live.
+			band.res_orb.v2_lock = -1.0
 
 func _ready() -> void:
 	# the host paints the graybox panels UNDER the band widgets it re-places —
@@ -119,6 +176,21 @@ func _ready() -> void:
 	resized.connect(_relayout_all)
 	_relayout_all()
 	call_deferred("_late_adopt")   # frames/meter/aggro/stage build after make_dash
+
+## The Duelist owns one semantic spacer inside its HBox; every other child that is
+## an AbilityRune is a real current/future verb. Keeping this discovery local makes
+## the C6C dock genuinely 4–5-slot modular without changing DuelistBand's API.
+func _ability_runes() -> Array[AbilityRune]:
+	var out: Array[AbilityRune] = []
+	if band == null or band.get("dodge_rune") == null:
+		return out
+	var row: Node = band.dodge_rune.get_parent()
+	if row == null:
+		return out
+	for child in row.get_children():
+		if child is AbilityRune:
+			out.append(child as AbilityRune)
+	return out
 
 ## Adopt the widgets _build_combat creates after the v2dash guard: the party
 ## frames become a compact top-left grid, the meter a clipped top-right island,
@@ -194,47 +266,51 @@ func _relayout_all() -> void:
 	var dash: Rect2 = _r["dash"]
 	var hint: Rect2 = _r["hint"]
 	var theater: Rect2 = _r["theater"]
-	var cw: float = _r["cluster_w"]
-	var cx := vp.x * 0.5
-	# --- status rail islands ---
-	var bw := minf(560.0, vp.x * 0.36)
+	var party: Rect2 = _r["party"]
+	var boss_shell: Rect2 = _r["boss_shell"]
+	var boss_cast: Rect2 = _r["boss_cast"]
+	var utility: Rect2 = _r["utility"]
+	var meter: Rect2 = _r["meter"]
+	var health: Rect2 = _r["health"]
+	var wind: Rect2 = _r["wind"]
+	var flow: Rect2 = _r["flow"]
+	var abilities: Rect2 = _r["abilities"]
+	var s: float = _r["scale"]
+	# --- independent upper islands (party deliberately overlaps only the safe west
+	#     edge of the theater, matching the approved anchor) ---
 	if _skin != null:
-		# the painted boss shell: uniform scale (the medallion never stretches);
-		# the REAL BossBar's fill lands in the shell's recessed window
-		bw = minf(500.0, vp.x * 0.32)
-		var sh_h := minf(bw * 0.175, status.size.y * 0.56)
-		var sh_w := sh_h / 0.175
-		var shell := Rect2(vp.x * 0.5 - sh_w * 0.5, status.size.y * 0.03, sh_w, sh_h)
-		_r["boss_shell"] = shell
-		var win := DashSkin.uniform_opening(shell, DashSkin.OPEN_BOSS)
-		UiKit.place(hud._bar, 0, 0, 0, 0, win.position.x + 4.0, maxf(2.0, win.end.y - 72.0),
-			win.end.x - 4.0, win.end.y - 6.0)
-		UiKit.place(hud._castbar, 0, 0, 0, 0, win.position.x + 10.0, shell.end.y + 2.0,
-			win.end.x - 10.0, minf(shell.end.y + 44.0, status.size.y * 0.93))
+		# The shell stays at its authored 720:126 aspect; the live BossBar occupies
+		# the recessed window and the live cast bar joins beneath it.
+		var win := DashSkin.uniform_opening(boss_shell, DashSkin.OPEN_BOSS)
+		UiKit.place(hud._bar, 0, 0, 0, 0, win.position.x + 4.0, win.position.y - 4.0,
+			win.end.x - 4.0, win.end.y - 3.0)
+		UiKit.place(hud._castbar, 0, 0, 0, 0, boss_cast.position.x, boss_cast.position.y,
+			boss_cast.end.x, boss_cast.end.y)
 	else:
+		var bw := minf(560.0, vp.x * 0.36)
 		UiKit.place(hud._bar, 0.5, 0, 0.5, 0, -bw * 0.5, status.size.y * 0.16, bw * 0.5, status.size.y * 0.52)
 		UiKit.place(hud._castbar, 0.5, 0, 0.5, 0, -bw * 0.42, status.size.y * 0.56, bw * 0.42, status.size.y * 0.88)
 	if hud._aggro_warn != null:
-		UiKit.place(hud._aggro_warn, 0.5, 0, 0.5, 0, -360, status.size.y * 0.88, 360, status.size.y + 2.0)
+		var warn_w := minf(720.0 * s, vp.x * 0.60)
+		UiKit.place(hud._aggro_warn, 0.5, 0, 0.5, 0, -warn_w * 0.5,
+			boss_cast.end.y + 3.0 * s, warn_w * 0.5, boss_cast.end.y + maxf(22.0, 25.0 * s))
 	if _party_grid != null:
-		_party_grid.scale = Vector2.ONE * clampf(status.size.y / 220.0, 0.55, 0.75)
-		_party_grid.position = Vector2(10, 8)
-	if not _rows.is_empty():                # C6B: four painted rows, stacked in the rail
-		var row_h := clampf((status.size.y - 16.0) / 4.0 - 3.0, 22.0, 40.0)
-		var row_w := minf(row_h * 4.38 * 2.4, minf(340.0, vp.x * 0.18))
+		_party_grid.scale = Vector2.ONE * clampf(s, 0.67, 1.0)
+		_party_grid.position = party.position
+	if not _rows.is_empty():                # C6C: four substantial, readable painted rows
+		var gap := float(_r["party_gap"])
+		var row_h := (party.size.y - gap * 3.0) / 4.0
 		for i in _rows.size():
 			var pr: Control = _rows[i]
-			pr.position = Vector2(10, 6.0 + float(i) * (row_h + 3.0))
-			pr.size = Vector2(row_w, row_h)
+			pr.position = party.position + Vector2(0.0, float(i) * (row_h + gap))
+			pr.size = Vector2(party.size.x, row_h)
 	if _tab != null:                        # the collapsed utility tab, top-right
-		var tab_h := clampf(status.size.y * 0.36, 34.0, 64.0)
-		var tex: Texture2D = _skin.t["utility_tab"]
-		var tab_w := tab_h * float(tex.get_width()) / float(tex.get_height())
-		_tab.position = Vector2(vp.x - tab_w - 10.0, 6.0)
-		_tab.size = Vector2(tab_w, tab_h)
+		_tab.position = utility.position
+		_tab.size = utility.size
 	if _meter_clip != null:
 		if _tab != null:                    # expanded meter drops in UNDER the tab, rail-clipped
-			UiKit.place(_meter_clip, 1, 0, 1, 0, -330, _tab.size.y + 10.0, -8, status.size.y - 4.0)
+			UiKit.place(_meter_clip, 0, 0, 0, 0, meter.position.x, meter.position.y,
+				meter.end.x, meter.end.y)
 		else:
 			UiKit.place(_meter_clip, 1, 0, 1, 0, -330, 6, -8, status.size.y - 6.0)
 		if hud._meter != null:
@@ -245,32 +321,40 @@ func _relayout_all() -> void:
 	#     rect, the frame just wears it. ---
 	if band != null and band.get("channel") != null:
 		if _skin != null:
-			var frect := answer.grow_individual(12.0, 8.0, 12.0, 12.0)
-			_r["answer_frame"] = frect
-			var op := _skin.sliced_opening("frame_answer", frect, DashSkin.CAPS_ANSWER, DashSkin.OPEN_ANSWER)
+			_r["answer_frame"] = answer
+			var op := _skin.sliced_opening("frame_answer", answer, DashSkin.CAPS_ANSWER, DashSkin.OPEN_ANSWER)
 			UiKit.place(band.channel, 0, 0, 0, 0, op.position.x, op.position.y, op.end.x, op.end.y)
 		else:
 			UiKit.place(band.channel, 0, 0, 0, 0, answer.position.x, answer.position.y + 4.0,
 				answer.end.x, answer.end.y - 4.0)
 	# --- the connected dashboard cluster ---
 	if band != null:
-		var dh := dash.size.y
 		if _skin != null:
-			# Wind = the central primary bar with the socket bank under it (taller
-			# gauge row); bars flank at the cluster edges as horizontal safety rails
+			# Wind = the central primary read; the live Health and Flow/Aggro bars
+			# flank it. Their authored resource shells now get room to read as art.
 			if band.get("gauge") != null:
-				UiKit.place(band.gauge, 0.5, 0, 0.5, 0, -240, dash.position.y + dh * 0.02, 240, dash.position.y + dh * 0.40)
+				UiKit.place(band.gauge, 0, 0, 0, 0, wind.position.x, wind.position.y,
+					wind.end.x, wind.end.y)
 			var vrow: Control = band.dodge_rune.get_parent() if band.get("dodge_rune") != null else null
 			if vrow != null:
-				UiKit.place(vrow, 0.5, 0, 0.5, 0, -220, dash.position.y + dh * 0.42, 220, dash.position.y + dh * 0.98)
-			var bar_w := minf(300.0, cw * 0.5 - 245.0)
-			var bar_h := clampf(dh * 0.24, 24.0, 34.0)
-			var bar_y := dash.position.y + dh * 0.30
+				UiKit.place(vrow, 0, 0, 0, 0, abilities.position.x, abilities.position.y,
+					abilities.end.x, abilities.end.y)
+				# At either scale the reserved dock fits exactly one future fifth rune:
+				# 5×slot + the existing semantic spacer + all HBox gaps.
+				var sep_px := lerpf(8.0, 12.0, clampf((s - 2.0 / 3.0) * 3.0, 0.0, 1.0))
+				(vrow as HBoxContainer).add_theme_constant_override("separation", int(round(sep_px)))
+				var rune_min := Vector2(maxf(76.0, 92.0 * s), maxf(94.0, 110.0 * s))
+				for rn in _ability_runes():
+					rn.custom_minimum_size = rune_min
 			if band.hp_orb != null:
-				UiKit.place(band.hp_orb, 0.5, 0, 0.5, 0, -cw * 0.5, bar_y, -cw * 0.5 + bar_w, bar_y + bar_h)
-			if band.res_orb != null:    # the 30% lock line rides the bar itself (code-drawn)
-				UiKit.place(band.res_orb, 0.5, 0, 0.5, 0, cw * 0.5 - bar_w, bar_y, cw * 0.5, bar_y + bar_h)
+				UiKit.place(band.hp_orb, 0, 0, 0, 0, health.position.x, health.position.y,
+					health.end.x, health.end.y)
+			if band.res_orb != null:
+				UiKit.place(band.res_orb, 0, 0, 0, 0, flow.position.x, flow.position.y,
+					flow.end.x, flow.end.y)
 		else:
+			var dh := dash.size.y
+			var cw: float = _r["cluster_w"]
 			if band.get("gauge") != null:   # Wind bubble + the 5 combo sockets
 				UiKit.place(band.gauge, 0.5, 0, 0.5, 0, -230, dash.position.y + dh * 0.05, 230, dash.position.y + dh * 0.33)
 			var row: Control = band.dodge_rune.get_parent() if band.get("dodge_rune") != null else null
@@ -282,9 +366,9 @@ func _relayout_all() -> void:
 				UiKit.place(band.hp_orb, 0.5, 0, 0.5, 0, -cw * 0.5, dash.position.y + dh * 0.08, -cw * 0.5 + 120.0, dash.position.y + dh * 0.90)
 			if band.res_orb != null:        # FLOW/AGGRO east — the 30% lock tick rides _draw
 				UiKit.place(band.res_orb, 0.5, 0, 0.5, 0, cw * 0.5 - 120.0, dash.position.y + dh * 0.08, cw * 0.5, dash.position.y + dh * 0.90)
-	if hud._hint_lbl != null:           # the hint gutter collapses FIRST at 720p
-		hud._hint_lbl.visible = hint.size.y > 0.0
-		if hint.size.y > 0.0:
+	if hud._hint_lbl != null:           # the dream HUD is learned through the large icons/buttons
+		hud._hint_lbl.visible = _skin == null and hint.size.y > 0.0
+		if hud._hint_lbl.visible:
 			UiKit.place(hud._hint_lbl, 0.5, 1, 0.5, 1, -430, -hint.size.y, 430, -6)
 	# --- THE THEATER: stage INTO the rect (SLOTS stay the local grammar) ---
 	if hud._stage2d != null:
@@ -310,14 +394,31 @@ func _draw() -> void:
 	var hint: Rect2 = _r["hint"]
 	var panel := Color(0.055, 0.065, 0.095, 0.86)
 	var edge := Color(0.75, 0.62, 0.32, 0.30)
-	draw_rect(status, panel)
-	draw_line(Vector2(0, status.end.y), Vector2(size.x, status.end.y), edge, 1.5)
-	draw_rect(dash, panel)
-	draw_line(Vector2(0, dash.position.y), Vector2(size.x, dash.position.y), edge, 1.5)
-	if hint.size.y > 0.0:
-		draw_rect(hint, Color(0.04, 0.05, 0.075, 0.9))
-	# a quiet backing so the broad channel reads as THE primary instrument
-	draw_rect(answer.grow_individual(10, 4, 10, 4), Color(0.05, 0.06, 0.09, 0.62))
+	if _skin == null:
+		# The fallback remains an explicit graybox: full rails make missing art
+		# obvious without ever producing a hole or a broken HUD.
+		draw_rect(status, panel)
+		draw_line(Vector2(0, status.end.y), Vector2(size.x, status.end.y), edge, 1.5)
+		draw_rect(dash, panel)
+		draw_line(Vector2(0, dash.position.y), Vector2(size.x, dash.position.y), edge, 1.5)
+		if hint.size.y > 0.0:
+			draw_rect(hint, Color(0.04, 0.05, 0.075, 0.9))
+		draw_rect(answer.grow_individual(10, 4, 10, 4), Color(0.05, 0.06, 0.09, 0.62))
+	else:
+		# C6C: authored islands float over the scene instead of sitting on two
+		# opaque footer/header slabs. Reuse the approved answer-frame caps as quiet
+		# sliced backbones; this keeps the lower cluster painted (not gray rectangles)
+		# while every value, fill, socket and button remains a separate live widget.
+		var hp: Rect2 = _r["health"]
+		var fl: Rect2 = _r["flow"]
+		var ab: Rect2 = _r["abilities"]
+		var rail := Rect2(hp.position - Vector2(12.0, 7.0),
+			Vector2(fl.end.x - hp.position.x + 24.0, maxf(hp.size.y, fl.size.y) + 14.0))
+		_skin.hshell(self, "frame_answer", rail, DashSkin.CAPS_ANSWER,
+			Color(0.78, 0.86, 0.90, 0.62))
+		var dock := ab.grow_individual(10.0, 5.0, 10.0, 4.0)
+		_skin.hshell(self, "frame_answer", dock, DashSkin.CAPS_ANSWER,
+			Color(0.72, 0.80, 0.84, 0.68))
 	# --- C6B: the painted shells (drawn UNDER the truth widgets — host is child 0).
 	# Modular authored components only, never one baked HUD image. ---
 	if _skin != null:
@@ -329,10 +430,10 @@ func _draw() -> void:
 			var win := DashSkin.uniform_opening(sh, DashSkin.OPEN_BOSS)
 			draw_rect(win.grow(2.0), Color(0.03, 0.035, 0.055, 0.85))   # the recessed well
 			draw_texture_rect(stex, sh, false)
-	# island backings (party / meter) — kept inside the rail
+	# fallback island backing (the painted rows carry their own authored bodies)
 	if _party_grid != null:
 		var pr := Rect2(_party_grid.position - Vector2(4, 4), _party_grid.size * _party_grid.scale + Vector2(8, 8))
-		draw_rect(pr.intersection(status), Color(0.05, 0.06, 0.09, 0.5))
+		draw_rect(pr, Color(0.05, 0.06, 0.09, 0.5))
 	# the 30% AGGRO LOCK tick on the Flow orb (graybox: hairline + label; the C6B
 	# bar draws its own code-owned lock line — LiquidOrb.v2_lock)
 	if _skin == null and band != null and band.res_orb != null:
@@ -414,7 +515,12 @@ func _paint_overlay() -> void:
 	if _r.is_empty():
 		return
 	var names := {"status": Color(0.4, 0.8, 1.0), "theater": Color(0.4, 1.0, 0.5),
-		"answer": Color(1.0, 0.85, 0.3), "dash": Color(1.0, 0.5, 0.7), "hint": Color(0.8, 0.6, 1.0)}
+		"answer": Color(1.0, 0.85, 0.3), "dash": Color(1.0, 0.5, 0.7),
+		"hint": Color(0.8, 0.6, 1.0), "party": Color(0.3, 0.9, 0.9),
+		"boss_shell": Color(1.0, 0.35, 0.35), "boss_cast": Color(1.0, 0.55, 0.25),
+		"utility": Color(0.7, 0.7, 1.0), "health": Color(0.95, 0.25, 0.35),
+		"wind": Color(0.55, 0.85, 1.0), "flow": Color(0.35, 0.75, 1.0),
+		"abilities": Color(1.0, 0.75, 0.25)}
 	for key in names:
 		var r: Rect2 = _r[key]
 		if r.size.y <= 0.0:
