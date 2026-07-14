@@ -9,8 +9,10 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P5 ACCEPTED — C6B `28e9b15`; MANUAL PIXEL POLISH PARKED · P6 I4 SOURCES
-DELIVERED `2baf3fe` · CLAUDE C7 READY.** Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
+**Status:** 🟡 **P6 BUILT — C7 VFX FLIPBOOK RUNTIME + 13/13 JUICE TRANSPLANT MERGED
+(2026-07-14, branch `artv2-c7`); ⚠ AT BILL'S LIVE VERDICT — P7 side-by-side is the next gate.
+`art-Test` boots it (`--artv2=actors,scene:stack_atrium,dash,vfx`).** P5 accepted — C6B
+`28e9b15`; manual pixel polish parked. I4 sources `2baf3fe`. Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
 `5bb532c`; C6A graybox `2b407c4` passed Bill's rectangle/speed gate; I3-A/B delivered the
 approved component family (`801d713`); **C6B bound it**: deterministic crops → `res://game/
 art_v2/dash/`, painted answer frame/comet icons/Wind+sockets/HP+Flow bars/slots/party rows/
@@ -385,7 +387,7 @@ First prove the reaction-first anatomy with live controls and plain graybox surf
 at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
 family and skin the accepted layout. Test at 1080p/720p/ultrawide and in both scene profiles.
 
-### P6 · SIGNATURE VFX — **CODEX I4 ✅ `2baf3fe` (FULL-BUDGET COMPATIBILITY-SAFE)** → **CLAUDE C7 READY**
+### P6 · SIGNATURE VFX — **CODEX I4 ✅ `2baf3fe`** → **CLAUDE C7 🔨 BUILT+MERGED 2026-07-14 (⚠ Bill's live verdict owed)**
 
 Flipbook FX + En Garde/Dump/parry/dodge polish, current juice salvage, effect budget/readability.
 
@@ -539,7 +541,33 @@ Gate with the C6B state strip plus 1280×720, 1920×1080, and 2560×1080 tours i
 Bill explicitly skipped this Claude packet on 2026-07-13 and will make the small scale/inset edits
 by hand later. This debt does not gate I4/C7; reclaim only if Bill asks.
 
-### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE
+### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE — 🔨 BUILT+MERGED 2026-07-14 (branch `artv2-c7`)
+
+**As built:** `sim/artv2_vfx_prep.gd` deterministically cuts the eight I4 alpha sheets by
+`source-layout.json`'s explicit edges (odd 941 height honored — never `vframes=2`), preserves
+full registration cells, alpha-trims with recorded offsets, computes **per-row pivots**
+(contact/release = row alpha centroid · body_and_floor/ground = row floor line; row-to-row
+drift probed at ~80 px), packs per-family atlases → `res://game/art_v2/vfx/` + `manifest.json`
+(sha256 provenance; byte-identical across runs). Runtime = `VfxBook` (resolves ALL families at
+make(), any missing piece ⇒ null ⇒ the stage builds no pool — legacy sparks only, proven live
+with a hidden atlas) · `VfxPlayer` (base + bounded additive duplicate + glint on ONE shared ADD
+material; Sprite2D regions only — Compatibility/WebGL2-safe; idle voices hidden + process off)
+· `VfxPool` (14 voices; named slots REPLACE their live playback — the interrupt law; un-keyed
+saturation steals oldest un-keyed, never a named slot). Bindings at EXISTING events only:
+`duel_answer` parry (landed = internal perfect/bullseye at the guard contact; grade tunes
+scale+layers ONLY — PERFECT gets glint) · dodge/weave ladder · `duel_dump` rotated onto the
+boss line · `duel_engarde`/break/natural-expiry → activation→low-rate hold loop→fade stop ·
+`hurt` impacts by strike-size truth (LIGHT<HEAVY<CRUSH strict ladder). Transplant: all 13
+§10.5 hunks re-anchored + both fixes (H5 `_post=null` in `_clear` · H9 finisher wash gated by
+the one-blade-seat law) + **the answer-read shield**: `screen_post.gdshader` gained a
+protect-rect (default no-op) — the HUD feeds the live channel/judge rect per frame and
+wash/aberration/shock attenuate inside it. Plain strikes keep NO hit-stop. Gates: artv2_probe
+155 ALL OK (+38 C7) · prep determinism byte-identical · ab-gate raid/duelist/twinfang
+byte-identical · ui_smoke_raid · `sim/artv2_vfx_tour.gd` (fight timeline + `--sheet` pivot
+registration record + `--novfx` A/B + `--missing` live fallback) ×{1080p, 720p, 2560×1080} ×
+{atrium, cold aisle} + legacy-HUD leg — all ALL OK, AnswerChannel unobscured throughout.
+
+*(original packet spec below)*
 
 **Goal:** reusable one-shot flipbook host, effect pooling/budget, and audited transplant of good
 `tempo-art` Slice-1 pieces onto current main.
@@ -793,3 +821,11 @@ fresh C7 cherry-pick with re-anchors + the noted fixes, never a branch merge.**
 Cherry-pick from `e4589a6` hunk-wise onto a fresh current-main branch, apply the H5/H9 fixes,
 then the standard C7 gates. After transplant, freeze `tempo-art` for deletion (its only commit
 is then fully absorbed).
+
+**✅ TRANSPLANTED 2026-07-14 (C7, branch `artv2-c7`): all 13 hunks re-anchored onto current
+main with both fixes applied** — H5's `_post = null` lives in `_clear`; H9's finisher wash is
+player-gated via the one-blade-seat law (the event still carries no flag; `_seat_key ==
+"blade"` IS the player test since the warband fields exactly one blade). Everything rides the
+new `ArtV2.vfx` selector token (default OFF ⇒ byte-identical legacy — ab-gate proven). The
+`tempo-art` branch/worktree (`../wow-tempo-art`, `e4589a6`) is now FULLY ABSORBED — frozen for
+deletion (`git worktree remove ../wow-tempo-art && git branch -D tempo-art` when convenient).
