@@ -123,7 +123,10 @@ func act(obs: Dictionary) -> Dictionary:
 		var rem := float(tg.get("remaining", 99.0))
 		if bool(obs.get("charge_eligible", false)):
 			var dur := maxf(0.1, float(tg.get("dur", rem)))
-			if dur - rem >= _react_for(int(tg.get("tick", -1)), true) \
+			# a CLEAN press only: inside ±claim of a live bar the press would claim THAT
+			# (the gather never steals a stream answer) — wait out the overlap window
+			var bar_near: bool = not b.is_empty() and float(b.get("eta", 99.0)) <= 0.32
+			if not bar_near and dur - rem >= _react_for(int(tg.get("tick", -1)), true) \
 					and parry_ready and wind >= parry_cost:
 				return {"type": "defense"}                 # the commit — hold starts here
 			return {}                                      # the read is still landing

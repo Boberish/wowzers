@@ -120,6 +120,9 @@ static func make_riftmaw() -> EncounterRes:
 				"steps": [{"kind": "auto"}]},
 			{"name": "rake", "weight": 0.7, "rest": 1.9,
 				"steps": [{"kind": "auto"}, {"gap": 0.55, "kind": "auto"}, {"gap": 0.55, "kind": "auto"}]},
+			# §11.2 the teaching weave — authored, unhurried, learnable (the Seal that shows the move)
+			{"name": "maw_weave", "weight": 0.45, "rest": 2.1,
+				"steps": [{"kind": "flurry", "n": 4, "gaps": [0.4, 0.3, 0.3]}]},
 		]}
 	e.enrage_at = 225.0                           # BASELEN: enrage tracks the ×2.5 pool
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
@@ -265,6 +268,9 @@ static func make_mistral() -> EncounterRes:
 				"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
 			{"name": "footnote", "weight": 0.5, "rest": 1.5,
 				"steps": [{"kind": "auto"}, {"gap": 0.9, "kind": "auto", "late": true}]},
+			# §11.2 the efficient weave — quick 5-note with the long-short stutter
+			{"name": "mixture_of_knives", "weight": 0.45, "rest": 1.8,
+				"steps": [{"kind": "flurry", "n": 5, "gaps": [0.24, 0.24, 0.45, 0.24]}]},
 		]}
 	e.enrage_at = 237.5                           # FREE TIER EXCEEDED (BASELEN ×2.5)
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
@@ -309,6 +315,9 @@ static func make_gemini() -> EncounterRes:
 				"steps": [{"kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.95, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}]},
 			{"name": "second_opinion", "weight": 0.5, "rest": 1.7,
 				"steps": [{"kind": "auto", "late": true}, {"gap": 0.65, "kind": "auto", "late": true}]},
+			# §11.2 the twin weave — 2+2, even the flurry arrives in pairs
+			{"name": "twin_weave", "weight": 0.45, "rest": 1.8,
+				"steps": [{"kind": "flurry", "n": 4, "gaps": [0.22, 0.55, 0.22]}]},
 		]}
 	e.enrage_at = 270.0                           # BASELEN ×2.5
 	var p0 := PhaseRes.new(); p0.at = 1.0; p0.mult = 1.0; p0.speed = 1.0
@@ -379,7 +388,8 @@ static func make_mythos() -> EncounterRes:
 			{"name": "hammer_verse", "weight": 0.7, "rest": 2.0,
 				"steps": [{"kind": "heavy"}, {"gap": 0.8, "kind": "auto"}, {"gap": 0.5, "kind": "auto"}, {"gap": 0.8, "kind": "heavy"}]},
 			{"name": "the_weave", "weight": 0.5, "rest": 2.0,
-				"steps": [{"kind": "flurry"}]},
+				"steps": [{"kind": "flurry", "n": 7}]},   # §11.2: 7 notes, seeded-random rhythm — the finale
+
 			{"name": "cold_read", "weight": 0.6, "rest": 1.6,
 				"steps": [{"kind": "feint"}, {"gap": 0.7, "kind": "auto", "late": true}]},
 			{"name": "brace_bell", "weight": 0.4, "rest": 1.9,
