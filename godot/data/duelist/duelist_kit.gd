@@ -84,9 +84,17 @@ func upkeep(s: CombatState, seat: Seat) -> void:
 	if s.telegraph == null and seat.vars.has("tg_claims") \
 			and not (seat.vars["tg_claims"] as Dictionary).is_empty():
 		seat.vars["tg_claims"] = {}                       # the swing is gone — stale claims die with it
+	# THE GATHER (§11.1) dies with its swing + the late slack (a hair-late release still grades);
+	# a never-released hold ends silently — the unanswered damage already slipped it.
+	if int(seat.vars.get("charge_id", 0)) != 0:
+		var late := CombatCore.to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
+		if s.tick > int(seat.vars.get("charge_imp", 0)) + late:
+			_clear_gather(seat)
 
 # --- input: the two answer buttons (binds: 1/SPACE/LMB = DODGE · 2/RMB = PARRY) --
 func on_defense_press(s: CombatState, seat: Seat) -> void:
+	if _charging(seat):
+		return                                            # the button is already held — an echo press is free
 	# FLURRY MODE seals the parry button — the press is ignored (no cost, no lockout), the
 	# channel yells; mid-weave a fumble lockout would be run-ending harshness for a mis-key.
 	if CombatCore.stream_flurry_active(s, seat):
@@ -123,6 +131,8 @@ func _press(s: CombatState, seat: Seat, kind: String, cost: float, recover: floa
 		"player": seat.is_player, "seat": seat})
 	if _claim(s, seat, kind):
 		return                                            # the press was consumed by its comet
+	if kind == "parry" and _arm_gather(s, seat):
+		return                                            # §11.1: the big swing takes the HOLD
 	# nothing in claim range — a whiff (the wind was the price, same as any dry press)
 
 ## PARRY lands on the top TWO timing tiers (Bill 2026-07-13): dead-centre (grade_bull_frac) =
@@ -180,8 +190,10 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 		var tgc: Dictionary = seat.vars.get("tg_claims", {})
 		var strikes: Array = tg.ability.strikes
 		if strikes.is_empty():
-			# a BUSTER: DEFENSIBLE swing aimed at me, no beats — lands at the wind-up's end
-			if tg.ability.response == AbilityRes.Response.DEFENSIBLE and tg.target == seat:
+			# a BUSTER: DEFENSIBLE swing aimed at me, no beats — lands at the wind-up's end.
+			# §11.1: a CRUSH one takes the HOLD (the charged parry) — never a tap-claim.
+			if tg.ability.response == AbilityRes.Response.DEFENSIBLE and tg.target == seat \
+					and not (cfg.charge_enabled and int(tg.ability.size) >= AbilityRes.Size.CRUSH):
 				var tid := -(1000 + tg.start_tick * 8)
 				var timp := tg.start_tick + tg.dur_ticks
 				var tdelta := s.tick - timp
@@ -244,8 +256,10 @@ func _claim(s: CombatState, seat: Seat, kind: String) -> bool:
 			grade = StrikeRes.Grade.GOOD
 		else:
 			grade = StrikeRes.Grade.GRAZE
-		if size >= AbilityRes.Size.HEAVY:
+		if size >= AbilityRes.Size.HEAVY and not _charging(seat):
 			grade = StrikeRes.Grade.MISS                  # SHAPE LAW: ⯃ octagon = PARRY ONLY (dodge illegal)
+			                                              # …except mid-GATHER (§11.1): the parry hand is
+			                                              # occupied — footwork answers, the size leak stands
 	s.boss.stream_answers[best_id] = {"kind": kind, "grade": grade}
 	# the payoffs land NOW — instant feedback is the whole point
 	if grade == StrikeRes.Grade.MISS:
@@ -316,6 +330,100 @@ func _claim_tg(s: CombatState, seat: Seat, kind: String, cand: Dictionary, off_t
 		"kind": kind, "grade": grade, "size": size,
 		"off_ms": off_ticks * 33, "id": int(cand["id"])})
 	return true
+
+# --- THE CHARGED PARRY (TANK-PLAN §11.1): the big single hit's answer -------------------
+func _charging(seat: Seat) -> bool:
+	return int(seat.vars.get("charge_id", 0)) != 0
+
+func _clear_gather(seat: Seat) -> void:
+	seat.vars["charge_id"] = 0
+
+## The live held fraction of the wind-up (0 when not gathering) — the charge arc + policy.
+func _charge_frac(s: CombatState, seat: Seat) -> float:
+	if not _charging(seat):
+		return 0.0
+	var held := s.tick - int(seat.vars.get("charge_start", s.tick))
+	return clampf(float(held) / float(maxi(1, int(seat.vars.get("charge_dur", 1)))), 0.0, 1.0)
+
+## A live CRUSH strikeless DEFENSIBLE swing aimed at me that takes the HOLD — the HUD word
+## and the policy read this; _arm_gather is this predicate + the press.
+func _charge_eligible(s: CombatState, seat: Seat) -> bool:
+	if not cfg.charge_enabled or _charging(seat):
+		return false
+	var tg := s.telegraph
+	if tg == null or tg.ability.feint or not tg.ability.strikes.is_empty():
+		return false
+	if tg.ability.response != AbilityRes.Response.DEFENSIBLE or tg.target != seat:
+		return false
+	if int(tg.ability.size) < AbilityRes.Size.CRUSH:
+		return false
+	var tgc: Dictionary = seat.vars.get("tg_claims", {})
+	return not tgc.has(-(1000 + tg.start_tick * 8))
+
+## THE GATHER: a clean parry press during the big wind-up commits the hold (the wind was
+## paid in _press). State is plain vars — deterministic, RefCounted-safe (ticks only).
+func _arm_gather(s: CombatState, seat: Seat) -> bool:
+	if not _charge_eligible(s, seat):
+		return false
+	var tg := s.telegraph
+	var imp := tg.start_tick + tg.dur_ticks
+	if s.tick > imp + CombatCore.to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz):
+		return false                                      # the swing is already past
+	seat.vars["charge_id"] = -(1000 + tg.start_tick * 8)
+	seat.vars["charge_start"] = s.tick
+	seat.vars["charge_imp"] = imp
+	seat.vars["charge_dur"] = maxi(1, tg.dur_ticks)
+	CombatCore._emit(s, {"t": "duel_charge", "player": seat.is_player, "seat": seat})
+	return true
+
+## THE RELEASE (§11.1): graded on the one claim ladder around the swing's impact (parry law
+## — top two tiers), gated by THE COMMIT LAW (hold ≥ charge_min_frac of the wind-up). Landed
+## = mit .95 + the CHARGED COUNTER (scales with the held fraction) + ◆ (2 at the FULL
+## GATHER) + the flow spike. Inside the window anything else = FLINCH: token mit, slip, the
+## swing is spent. An EARLY bail (before the window opens) flinches but leaves the swing
+## re-gatherable — wind is the leash, a mis-key is never run-ending. A stray key-up is free.
+func on_defense_release(s: CombatState, seat: Seat) -> void:
+	var cid := int(seat.vars.get("charge_id", 0))
+	if cid == 0:
+		return
+	var imp := int(seat.vars.get("charge_imp", 0))
+	var dur := maxi(1, int(seat.vars.get("charge_dur", 1)))
+	var held := s.tick - int(seat.vars.get("charge_start", s.tick))
+	_clear_gather(seat)
+	var claim := _tt(s, cfg.answer_claim)
+	var late := CombatCore.to_ticks(s.config.stream_resolve_slack, s.config.fixed_hz)
+	var off := s.tick - imp                               # signed: − = early, + = late
+	var frac := clampf(float(held) / float(dur), 0.0, 1.0)
+	var early := -off > claim                             # bailed before the window opened
+	var grade := StrikeRes.Grade.MISS
+	if off <= late and not early and frac >= cfg.charge_min_frac:
+		grade = _parry_grade(absi(off), claim)            # the parry law: top two tiers land
+	var tgc: Dictionary = seat.vars.get("tg_claims", {})
+	if grade == StrikeRes.Grade.MISS:
+		_slip(s, seat)
+		CombatCore._bump_diag(s, seat, "flinch")
+		if not early:
+			tgc[cid] = {"mit": clampf(cfg.mit_parry_miss, 0.0, cfg.mit_cap)}
+			seat.vars["tg_claims"] = tgc
+		# the early bail carries NO id — the comet stays live on the channel (re-gatherable)
+		var ev := {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+			"kind": "charge", "grade": StrikeRes.Grade.MISS, "size": AbilityRes.Size.CRUSH,
+			"off_ms": off * 33, "charge_frac": frac}
+		if not early:
+			ev["id"] = cid
+		CombatCore._emit(s, ev)
+		return
+	tgc[cid] = {"mit": minf(cfg.mit_parry_land, 0.99)}    # DEC-6: the one above-cap payout
+	seat.vars["tg_claims"] = tgc
+	CombatCore.damage_boss(s, seat,
+		cfg.counter_dmg * (1.0 + frac * cfg.charge_counter_mult), &"counter")
+	_bank(seat, 2 if frac >= cfg.charge_full_frac else 1)
+	_add_flow(s, seat, s.config.flow_spike)
+	CombatCore._bump_diag(s, seat, "charge")
+	CombatCore._bump_diag(s, seat, "land")
+	CombatCore._emit(s, {"t": "duel_answer", "player": seat.is_player, "seat": seat,
+		"kind": "charge", "grade": grade, "size": AbilityRes.Size.CRUSH,
+		"off_ms": off * 33, "id": cid, "charge_frac": frac})
 
 # --- the mitigation funnel. EVERY comet was judged AT THE PRESS (ONE CLAIM, 2026-07-12):
 #     stream bars via stream_answers, telegraph events via tg_claims — resolution just
@@ -437,7 +545,9 @@ func _flurry_settle(s: CombatState, seat: Seat, bar: Dictionary) -> float:
 			CombatCore._emit(s, {"t": "duel_weave_blown", "player": seat.is_player, "seat": seat})
 		return 0.0                                        # eat it all
 	if int(bar.get("flurry_i", 0)) == int(bar.get("flurry_n", 1)) - 1:
-		CombatCore.damage_boss(s, seat, cfg.counter_dmg * cfg.flurry_riposte_mult, &"riposte")
+		# §11.2: the riposte scales with the dance — a 6-note weave pays 1.5× the old 4-note
+		var fn := float(maxi(1, int(bar.get("flurry_n", 4))))
+		CombatCore.damage_boss(s, seat, cfg.counter_dmg * cfg.flurry_riposte_mult * (fn / 4.0), &"riposte")
 		_bank(seat, 1)
 		_add_flow(s, seat, s.config.flow_gain_perfect)
 		CombatCore._bump_diag(s, seat, "riposte")
@@ -548,6 +658,12 @@ func observe(s: CombatState, seat: Seat) -> Dictionary:
 		"engarde_ready": s.tick >= int(seat.cooldowns.get("engarde", 0)),
 		"engarde_live": _engarde_live(s, seat),
 		"flurry": CombatCore.stream_flurry_active(s, seat),
+		# THE CHARGED PARRY (§11.1) surface — the HUD word + the policy read these
+		"charging": _charging(seat),
+		"charge_frac": _charge_frac(s, seat),
+		"charge_eligible": _charge_eligible(s, seat),
+		"charge_min_frac": cfg.charge_min_frac,
+		"charge_full_frac": cfg.charge_full_frac,
 		# the gate's grading geometry (THE CHANNEL draws exactly these — one source of truth):
 		# claim fractions of ±answer_claim, SYMMETRIC around gate-touch (§0 THE PRESS)
 		"win_bullseye": cfg.answer_claim * cfg.grade_bull_frac,
@@ -577,6 +693,12 @@ func recap_spec(_s: CombatState, seat: Seat) -> Array:
 	var reads := int(d.get("read", 0))
 	if reads > 0:
 		rows.append({"label": "Reads", "value": str(reads), "hint": "held through a fake"})
+	var charges := int(d.get("charge", 0))
+	if charges > 0:
+		rows.append({"label": "Charged", "value": str(charges), "hint": "big swings answered with the gather"})
+	var flinch := int(d.get("flinch", 0))
+	if flinch > 0:
+		rows.append({"label": "Flinched", "value": str(flinch), "hint": "gathers released short / off the beat"})
 	var fum := int(d.get("fumble", 0))
 	if fum > 0:
 		rows.append({"label": "Fumbles", "value": str(fum), "hint": "dry / mis-pressed"})
