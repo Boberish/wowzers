@@ -1027,7 +1027,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   contract at `art-source/graphics-v2/p6-vfx/`: parry · dodge · Dump · En Garde activation/hold ·
   light/heavy/crush impacts. Corrected no-grid Heavy source only; rejected generation not committed.
 
-- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY FOR CLAUDE CLAIM: VFX FLIPBOOK
+- ☐ 2026-07-14 · Codex image packet `I3-C` · §GRAPHICS — **CLAIM: DREAM FULL DASHBOARD TARGET;
+  C7 TEMPORARILY HELD.** Bill's live verdict after C6B: it mostly added painted borders around the
+  existing HUD. Produce one implementable full-screen target from the actual live C6B capture plus
+  approved dashboard/icon sources. Reverse the weak hierarchy: 2–3× larger moving answer shapes;
+  compact artistic timing gate with precise nested grade marks instead of the oversized striped
+  block; substantially larger coherent party HP/resource/cast/debuff rows; horizontal HP and
+  Flow/Aggro rails around central Wind + exactly five combo sockets; modular 4–6 abilities; preserve
+  boss/cast/utility and a clear theater. Current shape/color/size law remains exact. Screenshot is
+  a modular layout target for Claude, never one baked HUD image or a gameplay-state replacement.
+
+- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY BUT HELD FOR I3-C + LAYOUT-COPY GATE:
+  VFX FLIPBOOK
   RUNTIME + FULL JUICE SALVAGE.** Start from current `main`; consume only approved I4 alpha sheets
   under their README/source-layout contract. Own deterministic cell prep + registered pivots,
   reusable interruptible flipbook pooling, one Compatibility-safe additive layer system, grade/size
