@@ -91,13 +91,20 @@ func _process(_delta: float) -> bool:
 		return false
 	# tour stabilizer: on slow software GL a frame is ~150 ms, so 540 frames can be
 	# 70+ wall-seconds of real combat — pin HP floors so neither side ends the fight
-	# under the timeline (skipped around the deliberate low-HP window at f430).
-	if frame > 1 and (frame < 425 or frame > 460) and hud._screen == "combat":
+	# under the timeline. Only SEAT 0 is exempt during the deliberate low-HP window
+	# at f430 (the vignette read), and even it keeps a 15% no-death floor — a wipe
+	# mid-window flaked the cold-aisle leg (probed 2026-07-14).
+	if frame > 1 and hud._screen == "combat":
 		var cs: CombatState = hud._ctrl.state
+		var low_win := frame >= 425 and frame <= 460
 		if not cs.over:
-			for st_seat in cs.seats:
-				if (st_seat as Seat).hp < (st_seat as Seat).hp_max * 0.4:
-					(st_seat as Seat).hp = (st_seat as Seat).hp_max * 0.9
+			for si in cs.seats.size():
+				var st_seat: Seat = cs.seats[si]
+				if si == 0 and low_win:
+					if st_seat.hp < st_seat.hp_max * 0.10:
+						st_seat.hp = st_seat.hp_max * 0.15
+				elif st_seat.hp < st_seat.hp_max * 0.4:
+					st_seat.hp = st_seat.hp_max * 0.9
 			if cs.boss.hp < cs.boss.hp_max * 0.3:
 				cs.boss.hp = cs.boss.hp_max * 0.9
 	match frame:

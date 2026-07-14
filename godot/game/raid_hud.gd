@@ -316,6 +316,8 @@ func _clear() -> void:
 	_stage2d = null
 	_post = null                    # a _ui child — freed below; NEVER dangle it (C7 fix:
 	                                # the tempo-art branch skipped this and left a freed ref)
+	_pause_btn = null               # ditto — the touch carve-out must never test a freed rect
+	_touch_side.clear()             # MOBILE: no held-parry release may survive a screen change
 	_pause = null                   # the overlay is a _ui child — freed below; drop the freeze
 	_armor_modal = null             # ditto — the modal lives under _ui
 	if _ctrl != null:
