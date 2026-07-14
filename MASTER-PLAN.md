@@ -878,6 +878,18 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-14 · `artv2-c7` → **MERGED to `main` (ff `300acbe`)** · §GRAPHICS — **THE FOCUS
+  ZOOM (Bill live: "icons too big, hard to see the perfect window — zoom the end, shrink the
+  icons, cut the left").** `answer_channel.gd`: the lane is TWO linear zones sharing the gate —
+  the judging tail (eta ≤ 0.85 s, every grade window + press) owns 55% of the width at ~1.9×
+  the px/s (constant-speed WHERE JUDGING HAPPENS — the NG2 law holds in the zone that matters);
+  the approach compresses the remaining lead; beyond the 2.4 s view comets PARK at the mouth as
+  dim outlines (no trail/word) and wake on entry. V2 icons trimmed ~13% (77/70/62 px). Probe
+  re-tuned to the new spec + 3 focus-zoom contracts (the perfect window now out-reads a CRUSH
+  icon — the exact complaint) — **201 ALL OK** · ui_smoke_raid · dash tour busy/gather re-shot
+  (labels clean, windows visible) · ab-gate riftmaw BYTE-IDENTICAL. Feel knobs if Bill wants
+  more/less: `FOCUS_ETA`/`FOCUS_FRAC`/`VIEW_HORIZON` consts + `_size_r` radii.
+
 - ☑ 2026-07-14 · `artv2-c7` → **MERGED to `main` (ff `731f2a3`)** · §GRAPHICS — **CONSOLIDATION
   DONE: the stranded artv2-c7 commits are on main** (Bill's direct ask): charged-parry CHARGE
   MODE presentation + big charge bar (`1141908`) · §2.3.2 art brief (`7bcc06c`) · web-preview
