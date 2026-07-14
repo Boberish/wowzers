@@ -9,13 +9,13 @@
 > until Art V2 proves and replaces individual actors. `godot/UI-OVERHAUL.md` remains the current
 > functional/readability baseline. This plan owns what the final authored art becomes.
 
-**Status:** 🟡 **P6 BUILT — C7 VFX FLIPBOOK RUNTIME + 13/13 JUICE TRANSPLANT MERGED
-(2026-07-14, branch `artv2-c7`, Bill-directed); ⚠ AT BILL'S LIVE VERDICT — `art-Test` boots it
-(`--artv2=actors,scene:stack_atrium,dash,vfx`) · P5 FULL-ANATOMY REOPENED — I3-C DREAM
-DASHBOARD APPROVED, C6C CODEX RUNTIME COPY CLAIMED** (C6B `28e9b15` proved binding but preserved too much graybox
-anatomy). The C7 hold is RESOLVED by construction: VFX anchor to live actor positions and the
-live channel rect per frame (nothing binds C6B's literal rectangles), so the I3-C layout-copy
-packet inherits them — re-run `sim/artv2_vfx_tour.gd` after that layout lands as the re-proof.
+**Status:** 🟡 **P5/P6 BUILT — C6C DREAM DASHBOARD RUNTIME COPY MERGED `ccc35e8`; C7 VFX
+FLIPBOOK RUNTIME + 13/13 JUICE TRANSPLANT MERGED (2026-07-14); ⚠ AT BILL'S LIVE
+HIERARCHY/SPEED + VFX VERDICT — P7/default-on waits.** `art-Test` boots the complete slice
+(`--artv2=actors,scene:stack_atrium,dash,vfx`). C6B `28e9b15` proved component binding but
+preserved too much graybox anatomy; I3-C approved the replacement hierarchy and C6C copied it into
+the live controls. C7 anchors to live actor/channel geometry per frame, and its atrium + cold-aisle
+tours have now been re-proved after the layout move.
 P5 detail: manual pixel polish parked. I4 sources `2baf3fe`. Bill approved **SUNPRINT CEL** on 2026-07-12. P4 complete through C5.1
 `5bb532c`; C6A graybox `2b407c4` passed Bill's rectangle/speed gate; I3-A/B delivered the
 approved component family (`801d713`); **C6B bound it**: deterministic crops → `res://game/
@@ -26,9 +26,8 @@ He explicitly skipped C6B.1 and will hand-tune the remaining scale/bar-inset pix
 not gate P6. VFX target = maximum-quality authored 2D flipbooks/layering while retaining the one
 GL Compatibility/WebGL2 path—no intentionally cheap browser edition.
 On 2026-07-14 Bill clarified that C6B mostly placed painted pieces around the existing HUD instead
-of adopting the dream hierarchy. I3-C produced the approved full-screen anchor; Bill then assigned
-the runtime copy to Codex as C6C. C7 has already merged and rides live geometry, so C6C preserves it
-and re-runs its tour after the new layout lands.
+of adopting the dream hierarchy. I3-C produced the approved full-screen anchor; C6C `ccc35e8` then
+landed its responsive runtime copy without new image generation or gameplay-truth changes.
 C2's deferred tour/smoke/A-B matrix remains release-default debt. Generated boards remain
 visual references, not runtime assets or a locked pixel layout.
 
@@ -389,11 +388,12 @@ not generate, redesign, or silently substitute any image.** If the delivered sou
 the runtime need, Claude stops and asks Bill; only after Bill approves does Codex generate or edit
 another image.
 
-### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ → I3-A/B ✅ → C6B `28e9b15` ✅ **SYSTEM ACCEPTED; MANUAL PIXEL POLISH PARKED**
+### P5 · DUELIST DASHBOARD — C6A `2b407c4` ✅ → I3-A/B ✅ → C6B `28e9b15` ✅ → I3-C ✅ → **C6C `ccc35e8` 🔨 BUILT+MERGED; MANUAL PIXEL POLISH PARKED**
 
-First prove the reaction-first anatomy with live controls and plain graybox surfaces. Bill tests it
-at Duelist/Twin Fang speed and approves the rectangles. Only then generate the modular component
-family and skin the accepted layout. Test at 1080p/720p/ultrawide and in both scene profiles.
+C6A proved the reaction-first live controls; I3-A/B and C6B proved the modular painted family; I3-C
+reset the full-screen hierarchy; and C6C copied that dream anatomy into the live Art-V2 dashboard.
+The automated 720p/1080p/ultrawide and two-profile gates pass. Bill's live high-Flow hierarchy and
+speed verdict remains the only gate before P7; small hand pixel polish remains parked.
 
 ### P6 · SIGNATURE VFX — **CODEX I4 ✅ `2baf3fe`** → **CLAUDE C7 🔨 BUILT+MERGED 2026-07-14 (⚠ Bill's live verdict owed)**
 
@@ -549,7 +549,7 @@ Gate with the C6B state strip plus 1280×720, 1920×1080, and 2560×1080 tours i
 Bill explicitly skipped this Claude packet on 2026-07-13 and will make the small scale/inset edits
 by hand later. This debt does not gate I4/C7; reclaim only if Bill asks.
 
-### C6C · DREAM DASHBOARD RUNTIME COPY — ☐ CLAIMED BY CODEX (`dash-c6c`, 2026-07-14)
+### C6C · DREAM DASHBOARD RUNTIME COPY — 🔨 BUILT+MERGED `ccc35e8` (`dash-c6c`, 2026-07-14)
 
 **Anchor:** `art-source/graphics-v2/p5-dashboard/anchors/dream-dashboard-full-v1.png` is the
 approved hierarchy/scale target, not a runtime texture. Recompose the Art-V2 Duelist HUD from the
@@ -566,10 +566,20 @@ legacy/default-off HUD edits. Primary surfaces are `dash_host_c6a.gd`, `dash_par
 a fast deterministic visual tour. The class name/file may remain C6A for compatibility—the packet
 changes the V2 host's anatomy, not the selector contract.
 
-**Gate:** clean import/parse · `ui_smoke_raid` · Art-V2 probes · deterministic dashboard capture at
-1280×720, 1920×1080, and 2560×1080 in atrium + cold aisle · busy/feint/claim/charge/low-HP states ·
-C7 VFX tour after geometry moves · default-off and missing-asset fallback unchanged. Stop for Bill's
-live hierarchy verdict before P7/default-on discussion.
+**As built:** the one responsive host now lays out the substantial four-row party island, joined
+boss/cast shell, quiet utility, dominant answer lane, compact nested gate, central Wind/five-socket
+bank, side Health/Flow rails, and a four-rune dock sized for a fifth. The answer icons, trails,
+charge plaque, precision marks, party hit targets, Wind warning, and approved three-slice backings
+scale with that anatomy; legacy behavior remains behind the existing V2 guard. The deterministic
+`sim/artv2_dash_tour.gd` boots the real raid HUD, stages six states without changing CombatState
+truth, captures after frame draw, retries corrupt tiles, and rejects bad dimensions/PNGs.
+
+**Gates passed:** clean import/parse · `artv2_probe` 198/198 · `ui_smoke_raid` · 36 exact-size
+captures across 1280×720, 1920×1080, 2560×1080 × atrium/cold aisle × six states · both C7 VFX
+tours on moved geometry · missing-asset scratch fallback · native default-off legacy strip.
+Focused two-seed Riftmaw A/B is byte-identical (MD5 `317ce86c5e5aa4087248b149842073e6`);
+the long full A/B was stopped after ~21m48s while still matching and is not called a full pass.
+Stop for Bill's live hierarchy/speed verdict before P7/default-on discussion.
 
 ### C7 · VFX / FLIPBOOK RUNTIME + JUICE SALVAGE — 🔨 BUILT+MERGED 2026-07-14 (branch `artv2-c7`)
 
@@ -825,6 +835,10 @@ flags default off ⇒ smokes/sims byte-identical. (GDScript gotcha: `static var`
 - **C6A:** `artv2_probe` + `ui_smoke_raid` · labeled safe-rect overlay · resolution matrix · both
   scene profiles · busy stream/cast/low-HP shots · tank speed playtest; Bill layout verdict before I3.
 - **C6B:** repeat C6A matrix with approved component assets + missing-assets fallback.
+- **C6C:** `artv2_probe` 198/198 + `ui_smoke_raid` · deterministic `artv2_dash_tour` at
+  1280×720/1920×1080/2560×1080 × atrium/cold aisle × six states (36 exact-size images; post-draw
+  integrity/retry checks) · both C7 VFX tours after geometry move · native legacy strip + scratch
+  missing-assets fallback · focused Riftmaw A/B byte-identical.
 - **C7:** tour + `ab-gate raid_sim`; budget check = `ScreenPostFx` hidden at rest (idle pays
   zero — its own contract), one-shot FX all `queue_free` ≤ ~1.2 s.
 - **Budget baseline (C0 measurement):** today's stage is 100% vector `_draw` + CPUParticles

@@ -783,11 +783,11 @@ contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-
   4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
   trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
   `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
-- **GRAPHICS V2 — P5 DASHBOARD ACTIVE:** P0/P1 SUNPRINT CEL + C0–C3 foundation/environment pair
-  are done; P4 Duelist anchor+hybrid rig is done through C5.1 `5bb532c`. The dashboard order is now
-  **C6A art-free reaction-first graybox + theater-safe layout → Bill live speed/rectangle verdict →
-  Codex I3 component generation → Claude C6B skin/binding** → signature VFX → side-by-side playtest.
-  Old renderer/HUD remains selectable and default until every replacement slice passes.
+- **GRAPHICS V2 — P5/P6 BUILT; LIVE VERDICT NEXT:** P0/P1 SUNPRINT CEL + C0–C3
+  foundation/environment pair are done; P4 Duelist anchor+hybrid rig is done through C5.1
+  `5bb532c`; P5's approved dream hierarchy is live through C6C `ccc35e8`; and P6/C7's full-budget
+  VFX remains bound to the moved live geometry. **P7/default-on now waits on Bill's live
+  hierarchy/speed + VFX verdict.** Old renderer/HUD remains selectable and default until then.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -1084,17 +1084,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   is now preserved at `art-source/graphics-v2/p5-dashboard/anchors/dream-dashboard-full-v1.png` as
   a modular layout target, never one baked HUD image or a gameplay-state replacement.
 
-- ☐ 2026-07-14 · `dash-c6c` (worktree `../wow-dash-c6c`) · §GRAPHICS — **CLAIM: C6C DREAM
-  DASHBOARD RUNTIME COPY — CODEX OWNS THE IMPLEMENTATION.** Start from post-C7 `main`. Rebuild the
-  Art-V2 Duelist dashboard's responsive anatomy around the approved I3-C anchor while reusing every
-  live control: one large four-row party/healing island; top boss HP + cast; quiet utility tab; large
-  72–88px answer shapes; compact precision gate; central Wind + exactly five combo sockets; large
-  horizontal Health and Flow/Aggro rails; four current abilities in a dock that can accept a fifth.
-  Primary scope: `dash_host_c6a.gd`, `dash_party_row.gd`, `answer_channel.gd`, `duelist_gauge.gd`,
-  the existing bar/rune presentation only where scale requires it, plus a fast deterministic visual
-  tour. Do not change combat/input/tick/protocol truth, do not bake the anchor, and do not touch the
-  legacy/default-off HUD. Verify import + `ui_smoke_raid` + Art-V2 probes + 720p/1080p/ultrawide
-  screenshots + C7 VFX tour, then merge and close this line before P7.
+- ☑ 2026-07-14 · `dash-c6c` → **BUILT+MERGED `ccc35e8` — C6C DREAM DASHBOARD RUNTIME
+  COPY. ⚠ AT BILL'S LIVE HIERARCHY/SPEED VERDICT; P7/default-on still waits.** The approved I3-C
+  hierarchy now drives the existing live widgets: one substantial four-row party/healing island;
+  authored boss/cast + quiet utility; dominant 72–88px answer lane with a compact nested precision
+  gate; central-primary Wind above five combo sockets; side Health and Flow/Aggro rails; and a
+  four-rune dock whose responsive arithmetic already accepts a fifth. No combat/input/30 Hz/
+  protocol truth changed, no full-screen anchor was baked, and legacy/default-off remains intact.
+  Gates: clean import/parse · `artv2_probe` **198/198** · `ui_smoke_raid` · **36** exact-size
+  post-draw captures (six states × atrium/cold-aisle × 1280×720/1920×1080/2560×1080) · both C7
+  VFX tours on moved geometry · scratch-copy missing-asset fallback · native 1920×1080 legacy
+  state strip. Focused Riftmaw A/B (`--seeds=2`) was byte-identical (stdout/CSV MD5
+  `317ce86c5e5aa4087248b149842073e6`). The long full A/B was stopped after ~21m48s while still
+  matching through all Riftmaw and part of Mistral; that is **not** recorded as a full pass. Normal
+  play retains the 1920×1080 design canvas and `canvas_items/expand` downscale at physical 720p;
+  the tour's explicit `--vp=1280x720` path proves the true logical 720 branch.
 
 - ☑ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **BUILT/MERGED 2026-07-14 (`artv2-c7`);
   ORIGINAL VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE PACKET BELOW.** Start from current `main`; consume only approved I4 alpha sheets
