@@ -16,6 +16,7 @@ extends RefCounted
 static var actors := false   ## ON: V2 actor art may answer Actor2D.make()
 static var scene := ""       ## scene profile id — "" = legacy StageBackdrop
 static var dash := false     ## ON: a V2 dashboard host may replace the widgets
+static var vfx := false      ## ON (C7): flipbook VFX pool + ScreenPostFx + stage juice
 static var hud_low := false  ## DEV/test (LEGACY inspection only): duck+fade the channel — unnecessary under the C6A host
 static var dash_debug := false  ## C6A dev overlay: label the contract rectangles on screen
 
@@ -34,6 +35,8 @@ static func boot(args: PackedStringArray) -> void:
 				actors = true
 			elif t == "dash":
 				dash = true
+			elif t == "vfx":
+				vfx = true
 			elif t == "hudlow":
 				hud_low = true
 			elif t == "dashdebug":
@@ -42,8 +45,8 @@ static func boot(args: PackedStringArray) -> void:
 				scene = t.substr("scene:".length()).strip_edges()
 			elif t != "":
 				push_warning("ArtV2: unknown --artv2 token '%s' (ignored)" % t)
-	if actors or dash or scene != "":
-		print("ART V2 selector ON — actors:%s scene:'%s' dash:%s (view-only; missing V2 assets fall back to the current graphics)" % [actors, scene, dash])
+	if actors or dash or scene != "" or vfx:
+		print("ART V2 selector ON — actors:%s scene:'%s' dash:%s vfx:%s (view-only; missing V2 assets fall back to the current graphics)" % [actors, scene, dash, vfx])
 
 ## ACTOR seam — consumed at the head of Actor2D.make(). A V2 actor wins only
 ## when the flag is ON and its scene exists under art_v2/actors/; it rides the

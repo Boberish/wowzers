@@ -184,10 +184,92 @@ func _initialize() -> void:
 	_chk(fails, "C6B default-off: gauge unskinned", dg.v2_skin == null)
 	dg.free()
 
+	# [10] C7: the VFX flipbook runtime — book resolve · registration math · missing-
+	# asset fallback · pool bounds · slot interruption · loop stop · default-off flag
+	_chk(fails, "C7 default: vfx OFF", ArtV2.vfx == false)
+	ArtV2.boot(PackedStringArray(["--artv2=vfx"]))
+	_chk(fails, "C7 boot parses vfx", ArtV2.vfx == true)
+	ArtV2.vfx = false
+	var book := VfxBook.make()
+	_chk(fails, "C7 book resolves (assets delivered)", book != null)
+	if book != null:
+		var want_frames := {"parry": 8, "dodge": 8, "dump": 8, "engarde_activate": 8,
+			"engarde_hold": 4, "impact_light": 6, "impact_heavy": 8, "impact_crush": 8}
+		for f in VfxBook.FAMILIES:
+			_chk(fails, "C7 %s frames = %d (README contract)" % [f, want_frames[f]],
+				book.frame_count(String(f)) == int(want_frames[f]))
+			_chk(fails, "C7 %s atlas loaded" % f, book.tex.get(f) != null)
+			# registration: every atlas rect inside its texture; every pivot inside its cell
+			var rec: Dictionary = book.fam[f]
+			var tex_sz: Vector2 = (book.tex[f] as Texture2D).get_size()
+			var reg_ok := true
+			for fr in (rec["frames"] as Array):
+				var r: Array = (fr as Dictionary)["rect"]
+				var pv: Array = (fr as Dictionary)["pivot"]
+				var cell: Array = (fr as Dictionary)["cell"]
+				if float(r[0]) + float(r[2]) > tex_sz.x + 0.5 or float(r[1]) + float(r[3]) > tex_sz.y + 0.5:
+					reg_ok = false
+				if float(pv[0]) < 0.0 or float(pv[0]) > float(cell[0]) \
+						or float(pv[1]) < 0.0 or float(pv[1]) > float(cell[1]):
+					reg_ok = false
+			_chk(fails, "C7 %s registration sane (rects in atlas, pivot in cell)" % f, reg_ok)
+		_chk(fails, "C7 only the hold loops", book.loops("engarde_hold")
+			and not book.loops("parry") and not book.loops("impact_crush"))
+		_chk(fails, "C7 frame() pivot math: offset = trim − pivot",
+			_pivot_math_ok(book, "parry"))
+	_chk(fails, "C7 book missing dir => null (fallback law)",
+		VfxBook.make("res://game/art_v2/zzz_no_such_dir") == null)
+	var pool := VfxPool.make()
+	_chk(fails, "C7 pool resolves with delivered book", pool != null)
+	if pool != null:
+		# slot interruption: a same-slot spawn REUSES the voice (replace, never queue)
+		var v1 := pool.spawn("parry", Vector2.ZERO, {}, "s0:act")
+		var v2 := pool.spawn("dodge", Vector2.ZERO, {}, "s0:act")
+		_chk(fails, "C7 same slot replaces (one voice)", v1 == v2 and v2.family == "dodge")
+		# saturation: un-keyed spam stays bounded and never steals a named slot
+		var eg := pool.spawn("engarde_hold", Vector2.ZERO, {}, "s0:eg")
+		for i in 40:
+			pool.spawn("impact_light", Vector2.ZERO, {})
+		_chk(fails, "C7 pool bounded at %d voices" % VfxPool.MAX_VOICES,
+			pool.live_count() <= VfxPool.MAX_VOICES
+			and pool.get_child_count() == VfxPool.MAX_VOICES)
+		_chk(fails, "C7 steal never takes a named slot", eg.busy() and eg.slot == "s0:eg"
+			and eg.family == "engarde_hold")
+		# one-shot lifecycle: ticks to the end, then the voice frees itself
+		var vt := pool.spawn("impact_light", Vector2.ZERO, {}, "s9:test")
+		for i in 40:
+			vt.tick(0.016)
+		_chk(fails, "C7 one-shot releases on finish", not vt.busy())
+		# loop lifecycle: survives many ticks, stop() fades it out clean
+		for i in 200:
+			eg.tick(0.016)
+		_chk(fails, "C7 hold loop persists", eg.busy())
+		eg.stop()
+		for i in 20:
+			eg.tick(0.016)
+		_chk(fails, "C7 stop() fades the loop out", not eg.busy())
+		# teardown: clear() silences everything instantly (fight re-entry)
+		pool.spawn("impact_crush", Vector2.ZERO, {}, "s0:act")
+		pool.clear()
+		_chk(fails, "C7 clear() silences the pool", pool.live_count() == 0)
+		pool.free()
+
 	for f in fails:
 		print("  CHECK FAIL: %s" % f)
 	print("ARTV2 PROBE: %s (%d checks)" % ["ALL OK" if fails.is_empty() else "FAIL", _n])
 	quit(0 if fails.is_empty() else 1)
+
+## frame(i).offset must equal trim − pivot for every frame (the registration law).
+func _pivot_math_ok(book: VfxBook, f: String) -> bool:
+	var frames: Array = (book.fam[f] as Dictionary)["frames"]
+	for i in frames.size():
+		var fr: Dictionary = frames[i]
+		var got: Vector2 = book.frame(f, i)["offset"]
+		var want := Vector2(float(fr["trim"][0]) - float(fr["pivot"][0]),
+			float(fr["trim"][1]) - float(fr["pivot"][1]))
+		if (got - want).length() > 0.01:
+			return false
+	return true
 
 ## The legacy factory contract, checked with the flags in a given state: every
 ## id must yield its current placeholder class (user art dir is empty in-repo).

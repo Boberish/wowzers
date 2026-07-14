@@ -214,6 +214,11 @@ func set_highlight(on: bool) -> void:
 		_hl.queue_free()
 		_hl = null
 
+## Impact white-out: flash EVERY tagged part at once (the big-hit read).
+func flash_all(col: Color, amt := 1.0) -> void:
+	for part in _parts:
+		flash_part(part, col, amt)
+
 func flash_part(part: String, col: Color, amt := 1.0) -> void:
 	var l: Limb = _parts.get(part)
 	if l != null:

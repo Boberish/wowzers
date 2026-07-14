@@ -8,7 +8,7 @@ extends Control
 
 const SEAT_IDX := {"tank": 0, "blade": 1, "caster": 2, "healer": 3}
 const SEAT_CLASS := {"tank": "duelist", "blade": "twinfang", "caster": "alchemist", "healer": "well"}
-const BUILD_STAMP := "build 2026-07-13 · SHAPE LAW + PARRY·PERFECT (v18)"
+const BUILD_STAMP := "build 2026-07-14 · C7 SIGNATURE VFX + JUICE (v18)"
 const SEAT_NAMES := {"tank": "THE DUELIST", "blade": "THE TWINFANG", "caster": "THE ALCHEMIST", "healer": "THE WELL-TENDER"}
 const ALLY_LATENCY := 5            ## AI raiders play at "good-ish" (ticks of reaction)
 
@@ -237,6 +237,7 @@ var _hint_lbl: Label = null   ## the band's hint line (C6A gutter handle)
 var _stage2d: RaidStage2D = null
 var _ui: Control
 var _fx: Control
+var _post: ScreenPostFx = null   # the full-screen feel pass (shockwave/wash/vignette) — C7, ArtV2.vfx only
 
 # shared combat widgets
 var _bar: BossBar
@@ -310,6 +311,8 @@ func _clear() -> void:
 	_hover_seat = null
 	_focus_seat = null
 	_stage2d = null
+	_post = null                    # a _ui child — freed below; NEVER dangle it (C7 fix:
+	                                # the tempo-art branch skipped this and left a freed ref)
 	_pause = null                   # the overlay is a _ui child — freed below; drop the freeze
 	_armor_modal = null             # ditto — the modal lives under _ui
 	if _ctrl != null:
@@ -2751,6 +2754,9 @@ func _build_combat(s: CombatState) -> void:
 	_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(_fx)
+	if ArtV2.vfx:   # C7: the one back-buffer feel pass — topmost, it reads the finished screen
+		_post = ScreenPostFx.new()
+		_ui.add_child(_post)
 	_add_pause_button()
 
 ## The PAUSE button (top-right). Always available in real play (offline freezes the
@@ -3217,6 +3223,24 @@ func _process(delta: float) -> void:
 	var p := _ctrl.player()
 	var obs := CombatCore.observe(s, p)
 
+	if _post != null:
+		if p != null:
+			# crimson creep from 35% HP down; full bleed only at death's door
+			_post.set_vignette(clampf((0.35 - p.hp / maxf(p.hp_max, 1.0)) / 0.35, 0.0, 1.0) * 0.85)
+		# THE ANSWER-READ SHIELD: hand the live timing instrument's rect to the
+		# shader — washes/aberration attenuate there, the next shape stays true
+		var prot: Control = null
+		if _band != null and "channel" in _band and _band.channel != null:
+			prot = _band.channel
+		elif _judge != null and _judge.visible:
+			prot = _judge
+		if prot != null and prot.is_inside_tree():
+			var vs := get_viewport_rect().size
+			var pr := prot.get_global_rect().grow(8.0)
+			_post.set_protect(Rect2(pr.position / vs, pr.size / vs))
+		else:
+			_post.set_protect(Rect2())
+
 	# GEAR-2: the oath tracker turns the moment a monotone deed becomes unkeepable
 	if _oath_lbl != null and not _d.oath_broken and not _d.sworn.is_empty() and p != null \
 			and Oaths.broken_live(_d.sworn.get("deed", {}), s, p):
@@ -3566,6 +3590,9 @@ func _handle_event(ev: Dictionary) -> void:
 				var a := float(ev.get("amt", 0))
 				_add_shake(clampf(a / 9.0, 3.0, 17.0))
 				_float_num("-%d" % int(a), _fx.size * Vector2(0.14, 0.66), Palette.CRIMSON, 30.0)
+				if _post != null and a >= 30.0:
+					_post.flash(Palette.CRIMSON, clampf(a / 250.0, 0.06, 0.14))
+					_post.aberr(clampf(a / 120.0, 0.2, 0.6))
 			_flash_frame(seat, Palette.CRIMSON)
 		"heal":
 			_flash_frame(ev.get("seat", null), Palette.WIN)
@@ -3599,6 +3626,8 @@ func _handle_event(ev: Dictionary) -> void:
 				_big_text("STAGGERED!", Palette.STEEL, 34, 0.6)
 			_dial.react("stagger")
 			_add_shake(5.0)
+			if _post != null:
+				_post.flash(Palette.WIN, 0.08)   # the green "deny" wash
 		"curio":
 			# GEAR-1: a curio proc — pop the item's name so the fortune reads
 			if mine:
@@ -3652,12 +3681,18 @@ func _handle_event(ev: Dictionary) -> void:
 		"strike":
 			# GRADED WINDOW (§2c): the band flashes the rhythm bar; the HUD pops the verdict.
 			if mine:
+				# internal result keys (bullseye/perfect/good) are load-bearing and
+				# UNCHANGED; the display rename (PERFECT!/GREAT!) is text-only (Bill 2026-07-13)
 				match String(ev.get("result", "")):
 					"bullseye":
 						_big_text("PERFECT!", Palette.GOLD_BRIGHT, 38)
 						_add_shake(5.0)
+						if _post != null:
+							_post.flash(Palette.PERFECT, 0.07)
 					"perfect":
 						_big_text("GREAT!", Palette.PERFECT, 34)
+						if _post != null:
+							_post.flash(Palette.PERFECT, 0.045)
 					"good":
 						_big_text("good", Palette.TEXT_DIM, 22, 0.42)
 		"snap":
@@ -3673,9 +3708,22 @@ func _handle_event(ev: Dictionary) -> void:
 		"rupture":
 			_big_text("RUPTURE!", Palette.POISON, 36)
 			_add_shake(7.0)
+		"finisher":
+			# a big eviscerate (4+ combo points) earns a gold wash on its impact.
+			# PLAYER-GATED (C7 fix): the event carries no player flag, but the warband
+			# fields exactly ONE blade seat — if I'm not the blade, this is an AI's
+			# finisher and it must not wash MY screen.
+			if _post != null and _seat_key == "blade" and int(ev.get("cp", 0)) >= 4:
+				_post.flash(Palette.GOLD_BRIGHT, 0.09, 0.13)
+				_post.aberr(0.35, 0.13)
 		"coup":
 			_big_text("COUP DE GRÂCE!", Palette.PERFECT, 34)
 			_add_shake(7.0)
+			if _post != null:
+				# press = wash; the stage's plunge lands ~0.26s later = shock + RGB split
+				_post.flash(Palette.PERFECT, 0.12)
+				_post.shock(Vector2(0.72, 0.55), 1.0, 0.26)
+				_post.aberr(0.7, 0.26)
 		# ---- the Brew (Alchemist) — the ALEMBIC owns the banners; the HUD adds body ----
 		"brew_rupture":
 			if mine:
@@ -3705,6 +3753,8 @@ func _handle_event(ev: Dictionary) -> void:
 			if mine and String(ev.get("grade", "")) == "peak":
 				_big_text("PUNISH!", Palette.GOLD_BRIGHT, 30, 0.5)
 				_add_shake(4.0)
+				if _post != null:
+					_post.flash(Palette.GOLD_BRIGHT, 0.07)
 		"kick_whiff", "int_whiff":
 			if mine:
 				_big_text("whiff", Palette.TEXT_DIM, 20, 0.5)
