@@ -253,16 +253,36 @@ func _gate_x() -> float:
 		return size.x - clampf(size.x * 0.16, 118.0, 190.0)
 	return size.x - 78.0
 
+# THE FOCUS ZOOM (Bill 2026-07-14 live: "zoom in on the end with the windows, shrink the
+# icons, cut a bit off the left — scale up the important part"). The lane is TWO linear
+# zones sharing the gate: the judging TAIL (eta ≤ FOCUS_ETA — every grade window and every
+# press lives here) owns FOCUS_FRAC of the width at high px/s; the APPROACH compresses the
+# rest of the lead into what's left, and anything beyond VIEW_HORIZON parks at the mouth
+# until it enters (the parked-comet precedent). x stays a pure function of eta.
+const VIEW_HORIZON := 2.4         ## sec of lead SHOWN (the engine publishes ~3.0; queue parks)
+const FOCUS_ETA := 0.85           ## the zoomed tail — win_perfect/bullseye/parry all live inside
+const FOCUS_FRAC := 0.55          ## fraction of the lane the tail owns (~1.9× the old zoom)
+const MOUTH_X := 26.0
+
 func _pps() -> float:
-	# CONSTANT px/s (TANK-V3, NG2): x is a pure function of eta — no global rescale can shift
-	# comets relative to each other. Whole-flow tempo is already baked into impact_tick at
-	# publish, so denser tempo shows as closer etas, never a render-side stretch.
-	return (_gate_x() - 26.0) / maxf(0.5, horizon)
+	# CONSTANT px/s (TANK-V3, NG2) — inside the FOCUS zone, where judging happens: x is a
+	# pure function of eta and every gate-neighborhood consumer (grade bands, late grace,
+	# husk drift) shares THIS value. Whole-flow tempo is baked into impact_tick at publish.
+	return (_gate_x() - MOUTH_X) * FOCUS_FRAC / FOCUS_ETA
+
+func _pps_far() -> float:
+	# the compressed APPROACH zone's px/s (situational awareness, never a press read)
+	var vh := minf(maxf(horizon, FOCUS_ETA + 0.25), VIEW_HORIZON)
+	return (_gate_x() - MOUTH_X) * (1.0 - FOCUS_FRAC) / (vh - FOCUS_ETA)
 
 func _bar_x(eta: float) -> float:
 	# eta is tick-quantized (30 Hz); tick_frac carries the render frame's position INSIDE the
 	# current tick, so comets slide smoothly at 60+ fps instead of stair-stepping (§0 pass 2).
-	return _gate_x() - (eta - tick_frac * TICK_DT) * _pps()
+	var e := eta - tick_frac * TICK_DT
+	if e <= FOCUS_ETA:
+		return _gate_x() - e * _pps()
+	var x := _gate_x() - FOCUS_ETA * _pps() - (e - FOCUS_ETA) * _pps_far()
+	return maxf(x, MOUTH_X)          # beyond the view: park at the mouth until it enters
 
 func _draw() -> void:
 	var w := size.x
@@ -459,7 +479,8 @@ func _draw() -> void:
 			var bc := Color(1, 1, 1, 0.5 * (1.0 - age / 0.2))
 			draw_arc(Vector2(x, cy), 10.0 + age * 90.0, 0, TAU, 20, bc, 1.6, true)
 		_comet(x, cy, kind, purple, int(b.get("flurry_i", 0)), font, answered,
-			bool(b.get("peeled", false)), String(b.get("victim", "")), sc, int(b.get("size", -1)))
+			bool(b.get("peeled", false)), String(b.get("victim", "")), sc, int(b.get("size", -1)),
+			"", x <= MOUTH_X + 1.0)
 	# --- ONE BAR: telegraph comets (GLOBALS / targeted BUSTERS / my beats) on the same
 	#     track — committed times off the live telegraph, same gate, same press ---
 	for tb_v in tbars:
@@ -496,10 +517,12 @@ func _draw() -> void:
 		# In V2 the large charge ring used to be painted after (and across) HOLD /
 		# RELEASE. Seat it behind the painted token and its instruction instead.
 		# Legacy keeps its historical draw order exactly.
-		if charge_live and v2_skin != null:
+		var tparked := tx2 <= MOUTH_X + 1.0
+		if charge_live and v2_skin != null and not tparked:
 			_charge_dress(tx2, cy)
-		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc, int(tb.get("size", -1)), cword)
-		if charge_live and v2_skin == null:
+		_comet(tx2, cy, tkind, tpurple, 0, font, bool(tb.get("answered", false)), false, "", tsc,
+			int(tb.get("size", -1)), cword, tparked)
+		if charge_live and v2_skin == null and not tparked:
 			_charge_dress(tx2, cy)
 	# prune anchors for comets long gone (claims fire within a frame of disappearance, so keep
 	# a short grace); consumed anchors are erased in resolve()/missed(). A TELEGRAPH comet
@@ -756,7 +779,7 @@ func _draw_verdict(v: Dictionary, cy: float, font: Font) -> void:
 ## its victim's name — the tank still answers it (the comeback); the damage is the victim's.
 func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font: Font,
 		answered: bool = false, peeled: bool = false, victim: String = "", sc: float = 1.0,
-		size: int = -1, word: String = "") -> void:
+		size: int = -1, word: String = "", parked: bool = false) -> void:
 	# SHAPE = the button · COLOR = status (_stat_col) · SIZE = damage (the radius).
 	var r := _size_r(kind, size) * sc
 	if answered:
@@ -765,6 +788,14 @@ func _comet(x: float, cy: float, kind: String, purple: bool, flurry_i: int, font
 		var hr := r if v2_skin != null else (18.0 if kind == "buster" else (15.0 if kind == "heavy" else 11.0))
 		var hpts := _shape_pts(kind, x, cy, hr)
 		draw_polyline(hpts + PackedVector2Array([hpts[0]]), hc, 1.6, true)
+		return
+	if parked:
+		# FOCUS ZOOM: queued beyond the view — a dim outline at the mouth, no trail,
+		# no word, no glow. It wakes to the full costume the moment it enters.
+		var qc := (PURPLE if purple else _comet_col(kind))
+		qc.a = 0.38
+		var qpts := _shape_pts(kind, x, cy, r * 0.9)
+		draw_polyline(qpts + PackedVector2Array([qpts[0]]), qc, 1.6, true)
 		return
 	if peeled:
 		# the hunt-tick: a crimson chevron over the comet + the hunted raider's name
@@ -902,14 +933,15 @@ func _stat_col(base: Color, purple: bool, peeled: bool) -> Color:
 func _size_r(kind: String, size: int) -> float:
 	var sz := size if size >= 0 else _kind_size(kind)
 	if v2_skin != null:
-		# 1080 target texture heights (radius×2.6): 73 / 81 / 88px.
-		# A true logical-720 stress viewport scales these to ~63 / 69 / 76px;
-		# normal 720 windows retain the project's 1080 design canvas and downscale.
+		# 1080 target texture heights (radius×2.6): 62 / 70 / 77px — trimmed ~13% from the
+		# first C6C cut (Bill 2026-07-14: "icons a bit too big, hard to see the perfect
+		# window"; the FOCUS ZOOM gives the windows the pixels the icons gave back).
+		# A true logical-720 stress viewport scales these by ×0.86.
 		var vs := clampf(self.size.y / 126.0, 0.86, 1.0)
 		match sz:
-			AbilityRes.Size.CRUSH: return 34.0 * vs
-			AbilityRes.Size.HEAVY: return 31.0 * vs
-			_: return 28.0 * vs
+			AbilityRes.Size.CRUSH: return 29.5 * vs
+			AbilityRes.Size.HEAVY: return 27.0 * vs
+			_: return 24.0 * vs
 	match sz:
 		AbilityRes.Size.CRUSH: return 18.0
 		AbilityRes.Size.HEAVY: return 15.0

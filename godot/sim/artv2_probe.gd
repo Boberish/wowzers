@@ -188,16 +188,33 @@ func _initialize() -> void:
 		_chk(fails, "C6B opening inside its shell", rr.encloses(op) and op.size.x > 0.0 and op.size.y > 0.0)
 		var prow := sk.sliced_opening("party_row", Rect2(0, 0, 320, 30), DashSkin.CAPS_ROW, DashSkin.ROW_HP)
 		_chk(fails, "C6B party HP opening sane", prow.size.x > 150.0 and prow.size.y > 4.0)
-		# C6C's dominant-read targets: the live size helper (not a second table)
-		# produces 72–88px textures in the 1080 answer opening.
+		# C6C dominant-read targets, re-tuned by Bill live 2026-07-14 ("icons a bit too
+		# big, hard to see the perfect window"): 62–77px in the 1080 answer opening —
+		# the FOCUS ZOOM hands the freed pixels to the grade windows. Ladder holds.
 		var c6c_chan := AnswerChannel.new()
 		c6c_chan.v2_skin = sk
 		c6c_chan.size = Vector2(1160.0, 126.0)
 		var light_h := c6c_chan._size_r("auto", AbilityRes.Size.LIGHT) * 2.6
 		var heavy_h := c6c_chan._size_r("heavy", AbilityRes.Size.HEAVY) * 2.6
 		var crush_h := c6c_chan._size_r("buster", AbilityRes.Size.CRUSH) * 2.6
-		_chk(fails, "C6C answer icons hit 72–88px target",
-			light_h >= 72.0 and heavy_h >= 80.0 and crush_h >= 88.0 and crush_h <= 89.0)
+		_chk(fails, "C6C answer icons hit the 62–77px focus-zoom target",
+			light_h >= 60.0 and light_h < heavy_h and heavy_h < crush_h
+			and crush_h >= 75.0 and crush_h <= 78.0)
+		# THE FOCUS ZOOM contract: the whole perfect window renders wider than one CRUSH
+		# icon (the exact complaint), and the tail owns most of the lane.
+		var zoom_chan := AnswerChannel.new()
+		zoom_chan.v2_skin = sk
+		zoom_chan.size = Vector2(1160.0, 126.0)
+		var win_px := zoom_chan.win_perfect * 2.0 * zoom_chan._pps()
+		_chk(fails, "focus zoom: perfect window (±%.2fs) out-reads a CRUSH icon" % zoom_chan.win_perfect,
+			win_px > crush_h)
+		_chk(fails, "focus zoom: gate-zone px/s beats the approach px/s",
+			zoom_chan._pps() > zoom_chan._pps_far() * 1.5)
+		_chk(fails, "focus zoom: x is monotonic to the mouth clamp",
+			zoom_chan._bar_x(0.1) > zoom_chan._bar_x(0.84) and zoom_chan._bar_x(0.84) > zoom_chan._bar_x(1.6)
+			and zoom_chan._bar_x(1.6) > zoom_chan._bar_x(2.39)
+			and zoom_chan._bar_x(3.0) == zoom_chan._bar_x(5.0))   # parked at the mouth
+		zoom_chan.free()
 		c6c_chan.free()
 	# default-off fail-safe: every C6B widget flag ships dark until the host sets it
 	var ac := AnswerChannel.new()
