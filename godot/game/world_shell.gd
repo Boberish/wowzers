@@ -151,7 +151,7 @@ func _show_home() -> void:
 	box.add_child(_menu_button("🌐    PLAY ONLINE", Palette.FLOW, hud._show_online))
 	if hud.WORLD_PREVIEW:   # W1: the world door (PLAY → ATLAS becomes the front door at W3)
 		box.add_child(_menu_button("⟐    THE WORLD — preview", Palette.VERDANCE, _start_world_pick))
-	if OS.is_debug_build():   # DEV · BOSS TEST — jump straight into any Seal (never in a release build)
+	if OS.is_debug_build() or OS.has_feature("web"):   # DEV · BOSS TEST — jump straight into any Seal (debug builds + the web preview channel)
 		box.add_child(_menu_button("🐞    DEV · BOSS TEST", Palette.REACT, _show_boss_test))
 	box.add_child(_menu_button("QUIT", Palette.TEXT_DIM, func(): get_tree().quit()))
 
