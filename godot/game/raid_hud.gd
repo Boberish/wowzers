@@ -262,6 +262,7 @@ var _dmg_i: int = 0                 # rotating spawn-lane counter for damage num
 # problem now (game/ui/bands/*.gd; ClassBand.for_hud picks by _seat_cls_now()).
 var _band: ClassBand = null
 var _touch_mode := false           ## MOBILE: a touchscreen has driven at least once (suppress its emulated mouse)
+var _pause_btn: Button = null      ## MOBILE: the touch grammar carves this rect out (pause stays tappable)
 var _touch_side: Dictionary = {}   ## MOBILE: touch index -> true if it started on the RIGHT half (a parry that owes a release)
 var _pcast: PlayerCastBar          ## caster
 var _bcfg: BloomweaverConfig       ## healer (Bloomweaver) — read by _hspells/_cast_on + the band
@@ -2774,6 +2775,7 @@ func _add_pause_button() -> void:
 	pb.pressed.connect(_toggle_pause)
 	UiKit.place(pb, 1, 0, 1, 0, -150, 14, -18, 46)
 	_ui.add_child(pb)
+	_pause_btn = pb   # MOBILE: the touch grammar carves this rect out (pause stays tappable)
 
 func _orb(fill: Color, caption: String, right: bool) -> LiquidOrb:
 	var o := LiquidOrb.new()
@@ -3080,6 +3082,14 @@ func _on_frame_unhover(fr) -> void:
 			return
 
 func _input(event: InputEvent) -> void:
+	# MOBILE web: a pointer press OUTSIDE combat drops the browser chrome (Firefox/Chrome
+	# address bar) via the Fullscreen API — needs a user gesture, so it rides the tap.
+	# Never during combat, so a parry/dodge tap can't yank fullscreen mid-fight.
+	if OS.has_feature("web") and _screen != "combat" \
+			and get_window().mode != Window.MODE_FULLSCREEN \
+			and ((event is InputEventScreenTouch and event.pressed) \
+				or (event is InputEventMouseButton and event.pressed)):
+		get_window().mode = Window.MODE_FULLSCREEN
 	if event is InputEventKey and event.pressed and not event.echo:
 		# pause menu open: Esc / P resume, everything else is swallowed (fight frozen)
 		if _pause != null:
@@ -3123,8 +3133,14 @@ func _input(event: InputEvent) -> void:
 	# synthesized mouse here (mobile_spike's _active_touches guard) to stop a double-fire.
 	if _screen == "combat" and _pause == null and _band is DuelistBand:
 		if event is InputEventScreenTouch:
-			_touch_mode = true
 			var tp := event as InputEventScreenTouch
+			# UI carve-out (consolidation contract): a tap on the PAUSE button or the
+			# party column is UI, not footwork — fall through to the emulated mouse.
+			if tp.pressed and _touch_on_ui(tp.position):
+				return
+			if not tp.pressed and not _touch_side.has(tp.index):
+				return               # release of a carved-out (or pre-combat) touch
+			_touch_mode = true
 			if tp.pressed:
 				var right := tp.position.x > get_viewport_rect().size.x * 0.5
 				_touch_side[tp.index] = right
@@ -3135,7 +3151,8 @@ func _input(event: InputEvent) -> void:
 				_touch_side.erase(tp.index)
 			get_viewport().set_input_as_handled()
 			return
-		if _touch_mode and event is InputEventMouseButton:
+		if _touch_mode and event is InputEventMouseButton \
+				and not _touch_on_ui((event as InputEventMouseButton).position):
 			get_viewport().set_input_as_handled()   # synthesized from the touch above — already acted
 			return
 	# mouse grammar (healer click-cast, the Well/DRAW release styles) — band-owned.
@@ -3832,6 +3849,17 @@ func _handle_event(ev: Dictionary) -> void:
 		"cast_cancelled":
 			if _seat_key == "healer":
 				_big_text("cast cancelled", Palette.TEXT_DIM, 16, 0.5)
+
+## MOBILE: is this screen point on carved-out UI (pause button / party column)?
+## Touches there stay CLICKS — the whole-screen footwork grammar skips them.
+func _touch_on_ui(p: Vector2) -> bool:
+	if _pause_btn != null and is_instance_valid(_pause_btn) \
+			and _pause_btn.get_global_rect().grow(8.0).has_point(p):
+		return true
+	if _raid_col != null and is_instance_valid(_raid_col) \
+			and _raid_col.get_global_rect().grow(4.0).has_point(p):
+		return true
+	return false
 
 func _flash_frame(seat: Seat, col: Color) -> void:
 	if seat == null:
