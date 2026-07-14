@@ -783,11 +783,12 @@ contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-
   4–8-frame slash/impact sheets as AnimatedSprite2D one-shots — the StS2/DD2 "hand-drawn FX"
   trick) + signature retiming. All view-layer, never checksummed; gates = WSLg
   `raid_stage_tour` + `verify-all` + `ab-gate raid_sim` byte-identical.
-- **GRAPHICS V2 — P5 DASHBOARD ACTIVE:** P0/P1 SUNPRINT CEL + C0–C3 foundation/environment pair
-  are done; P4 Duelist anchor+hybrid rig is done through C5.1 `5bb532c`. The dashboard order is now
-  **C6A art-free reaction-first graybox + theater-safe layout → Bill live speed/rectangle verdict →
-  Codex I3 component generation → Claude C6B skin/binding** → signature VFX → side-by-side playtest.
-  Old renderer/HUD remains selectable and default until every replacement slice passes.
+- **GRAPHICS V2 — P5/P6 BUILT; LIVE VERDICT NEXT:** P0/P1 SUNPRINT CEL + C0–C3
+  foundation/environment pair are done; P4 Duelist anchor+hybrid rig is done through C5.1
+  `5bb532c`; P5's approved dream hierarchy is live through C6C `ccc35e8`; and P6/C7's full-budget
+  VFX remains bound to the moved live geometry. **Bill's 2026-07-14 live verdict: “for now it's
+  solid”; merge/consolidate. P7/default-on remains a separate explicit ship decision.** Old
+  renderer/HUD remains selectable and default until that decision.
 **Open ideas:** screen transitions; binds/spellbook art pass; theme the Gilded Reliquary gold → circuit-board copper/emerald-terminal accents (light touch, don't redo).
 **Acceptance:** `sim/stage3d_tour.gd` / `screenshot_tour.gd` render clean (WSLg), determinism ×3 untouched.
 
@@ -877,6 +878,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: CONSOLIDATE
+  the 5 stranded artv2-c7 commits into main** (Bill's direct ask): charged-parry CHARGE MODE
+  presentation + big charge bar (`1141908`) · §2.3.2 art brief (`7bcc06c`) · web-preview boss
+  test (`074cd24`) · `?art` web param + JSON export (`4539fb1`) · whole-screen mobile touch
+  parry/dodge (`215cf4c`). Merge current main (C6C dream dashboard `ccc35e8`, verdict
+  `f2b2560`) into the branch; ONE content conflict expected in `ui/answer_channel.gd` —
+  resolve semantically (keep C6C's responsive lane/nested gate/72–88px icons/_pps()/V2
+  trails + the branch's CHARGE MODE + mobile touch). Focused verify only; no push/deploy;
+  no image generation.
+
 - ☑ 2026-07-14 · `artv2-c7` · §DUELIST / §GRAPHICS — **THE CHARGED PARRY MADE VISIBLE + art-pass
   brief (Bill: "the hold i can't see — make it a very obvious style shift like the weave, big
   charge bar; put it on the art branch; plan the layout/animations for the art pass").**
@@ -887,6 +898,7 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   GATHER/RELEASE/FLINCH · boss BIG-ONE telegraph · VFX cues · charge-bar dashboard home ·
   branch-merge contract) in **`GRAPHICS-PLAN §2.3.2`** + `TANK-PLAN §11` pointer. Flows to
   `main`/`dash-c6c` at their next merge (additive, no LOCKED-field change beyond documented).
+
 - ☑ 2026-07-14 · main (docs only) · BOSS-PLAN §1½ + BOSS-BRIEF §0 reconcile (`923cb8d`) —
   **SEAL REWORK RE-GROUNDING after the pause (Bill: "get grounded, make sure all is good, keep
   going").** Verified HEALTH on current main: **S0+S1 (E1–E9 addenda) still MERGED + GREEN**
@@ -937,21 +949,41 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   leash). Do NOT re-add an on-land parry cd. duelist_sim clean (det PASS · expert 100% win ·
   fumbles ~0 · windFloor ~0.5). Deployed to `C:\Games\v3Tank`. Config-value only — no ledger /
   card scope change.
-- ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: GRAPHICS
-  PACKET C7 — VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE** (GRAPHICS-PLAN §5·C7 + §10.5; Bill's
-  spec). Consume the eight approved I4 alpha sheets (`art-source/graphics-v2/p6-vfx/`) under
-  their README/source-layout contract: deterministic cell prep + registered pivots + manifest →
-  `res://game/art_v2/vfx/` · reusable pooled interruptible flipbook player (Compatibility-safe
-  Sprite2D layers, bounded additive duplicates/glints, idle ≈ zero) · grade/size intensity ladder
-  (Light < Heavy < Crush; PERFECT gets the full treatment) · binding at existing visual events
-  (parry/dodge/dump/En Garde/impacts) · the audited 13/13 `tempo-art` `e4589a6` hunk transplant
-  with both recorded fixes (`_post = null` in `_clear`; player-gate the `finisher` wash) ·
-  display-grade rename respected · plain strikes keep NO hit-stop · AnswerChannel never freezes
-  or gets covered. Gates: import clean · prep determinism · artv2_probe extension · ui_smoke_raid
-  · raid/duelist determinism byte-identical · legacy/default-off A/B · fallback · teardown/re-entry
-  · synthetic VFX tour ×3 resolutions ×2 scenes · deploy `C:\Games\art-Test`. Touches: `raid_hud.gd`
-  (event map + `_post`) · `raid_stage_2d.gd` · `pose_rig_2d.gd` · new `game/art_v2/vfx/*` +
-  `ui/screen_post_fx.gd` · `sim/artv2_*`.
+- ☑ 2026-07-14 · `artv2-c7` → **MERGED to `main` (ff `288a86e`)** · §GRAPHICS — **C7 VFX
+  FLIPBOOK RUNTIME + FULL JUICE SALVAGE BUILT. ⚠ AT BILL'S LIVE VERDICT; `art-Test` boots it
+  (`--artv2=actors,scene:stack_atrium,dash,vfx`).** The eight approved I4 alpha sheets became
+  8 per-family atlases + manifest via deterministic `sim/artv2_vfx_prep.gd` (explicit
+  source-layout edges — odd 941 height honored, never vframes=2 · full registration cells +
+  recorded trim offsets · per-ROW pivots: contact/release = alpha-weighted centroid,
+  engarde/crush = floor line — row drift probed at ~80px · byte-identical across runs).
+  Runtime `game/art_v2/vfx/`: VfxBook (§3½ resolve-at-make, null on ANY missing piece ⇒ no
+  pool, legacy sparks stay) · VfxPlayer (base + bounded additive dup + glint on ONE shared ADD
+  material; idle hidden+process-off ≈ zero) · VfxPool (14 voices, slot-replace = the interrupt
+  law — a new committed answer scrubs a stale tail; steal-oldest-unkeyed; named slots
+  unstealable). Bindings at EXISTING events only: duel_answer parry/dodge/weave (grade ladder =
+  scale+layers only; + `charge` landings CRUSH-sized, added with the v19 charged-parry merge) ·
+  duel_dump rotated at the boss · duel_engarde activation→2s-cycle hold loop→clean stop
+  (break event + natural expiry off committed state) · `hurt` impacts by strike-size truth
+  (LIGHT<HEAVY<CRUSH strict ladder). 13/13 `tempo-art` hunks transplanted (GRAPHICS-PLAN §10.5
+  now marked PAID): ScreenPostFx + washes/vignette/shock + stage hitstop/lunge/smear/ghosts +
+  `flash_all`; fixes = `_post=null` in `_clear` · finisher wash player-gated (one-blade-seat
+  law) · display-grade rename respected · plain strikes keep NO hit-stop · NEW answer-read
+  SHIELD: shader protect rect attenuates wash/aberr/shock inside the live channel rect
+  (default no-op). ALL behind `ArtV2.vfx`, default OFF. VERIFY: import clean · prep
+  determinism byte-identical ×2 · artv2_probe 155 ALL OK (+38 C7: families/frames/registration/
+  fallback/pool-bounds/interrupt/loop-stop/teardown) · ab-gate raid/duelist/twinfang sims
+  BYTE-IDENTICAL (flag off) · ui_smoke_raid ALL OK · synthetic `artv2_vfx_tour` (10 checks:
+  parry GREAT/PERFECT · 4-grade dodge ladder · dump · engarde chain · light/heavy/crush ·
+  overlap+coup+forced cast+low-HP · interrupt scrub · teardown/re-entry) ALL OK at
+  1080p/720p/2560×1080 × atrium+cold-aisle + legacy-HUD leg + novfx A/B leg + live
+  missing-asset fallback (png+import hidden ⇒ pool refuses, legacy FX only) + 8 pivot
+  registration sheets · full `verify-all` (forced past the pause flag): only 2 FAILs
+  (`map_advance_probe` · `pack_probe`) — **both reproduce on pre-C7 baseline `247db00` =
+  pre-existing main breakage, not C7's**. Deployed to `C:\Games\art-Test` (incl. `.godot`,
+  shortcut refreshed). OWED (visual-only): tour re-run after the I3-C layout-copy lands (VFX
+  ride live geometry by construction) · dump travel angle + per-family base scales are
+  manifest knobs for Bill's feel pass · engarde-activate pivot sits a hair low-left on two
+  frames (registration sheet on file; override table ready if it reads off in play).
 
 - ☑ 2026-07-13 · `main` (docs) · §GRAPHICS/I3 + ANSWER-SHAPE visual amendment —
   **WIND TAKES THE CENTER; BRACE RETIRES THE SKULL.** Bill's second component-board revision:
@@ -1064,19 +1096,35 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   contract at `art-source/graphics-v2/p6-vfx/`: parry · dodge · Dump · En Garde activation/hold ·
   light/heavy/crush impacts. Corrected no-grid Heavy source only; rejected generation not committed.
 
-- ☐ 2026-07-14 · Codex image packet `I3-C` · §GRAPHICS — **CLAIM: DREAM FULL DASHBOARD TARGET;
-  C7 TEMPORARILY HELD.** Bill's live verdict after C6B: it mostly added painted borders around the
-  existing HUD. Produce one implementable full-screen target from the actual live C6B capture plus
-  approved dashboard/icon sources. Reverse the weak hierarchy: 2–3× larger moving answer shapes;
+- ☑ 2026-07-14 · Codex image packet `I3-C` · §GRAPHICS — **DREAM FULL DASHBOARD TARGET APPROVED;
+  PROJECT ANCHOR LANDED.** Bill's live verdict after C6B: it mostly added painted borders around the
+  existing HUD. The approved target reverses that weak hierarchy: 2–3× larger moving answer shapes;
   compact artistic timing gate with precise nested grade marks instead of the oversized striped
   block; substantially larger coherent party HP/resource/cast/debuff rows; horizontal HP and
   Flow/Aggro rails around central Wind + exactly five combo sockets; modular 4–6 abilities; preserve
-  boss/cast/utility and a clear theater. Current shape/color/size law remains exact. Screenshot is
-  a modular layout target for Claude, never one baked HUD image or a gameplay-state replacement.
+  boss/cast/utility and a clear theater. Current shape/color/size law remains exact. The screenshot
+  is now preserved at `art-source/graphics-v2/p5-dashboard/anchors/dream-dashboard-full-v1.png` as
+  a modular layout target, never one baked HUD image or a gameplay-state replacement.
 
-- ⏳ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **READY BUT HELD FOR I3-C + LAYOUT-COPY GATE:
-  VFX FLIPBOOK
-  RUNTIME + FULL JUICE SALVAGE.** Start from current `main`; consume only approved I4 alpha sheets
+- ☑ 2026-07-14 · `dash-c6c` → **BUILT+MERGED `ccc35e8` — C6C DREAM DASHBOARD RUNTIME
+  COPY. ✅ BILL LIVE VERDICT: “FOR NOW IT'S SOLID”; P7/default-on remains an explicit ship
+  decision.** The approved I3-C
+  hierarchy now drives the existing live widgets: one substantial four-row party/healing island;
+  authored boss/cast + quiet utility; dominant 72–88px answer lane with a compact nested precision
+  gate; central-primary Wind above five combo sockets; side Health and Flow/Aggro rails; and a
+  four-rune dock whose responsive arithmetic already accepts a fifth. No combat/input/30 Hz/
+  protocol truth changed, no full-screen anchor was baked, and legacy/default-off remains intact.
+  Gates: clean import/parse · `artv2_probe` **198/198** · `ui_smoke_raid` · **36** exact-size
+  post-draw captures (six states × atrium/cold-aisle × 1280×720/1920×1080/2560×1080) · both C7
+  VFX tours on moved geometry · scratch-copy missing-asset fallback · native 1920×1080 legacy
+  state strip. Focused Riftmaw A/B (`--seeds=2`) was byte-identical (stdout/CSV MD5
+  `317ce86c5e5aa4087248b149842073e6`). The long full A/B was stopped after ~21m48s while still
+  matching through all Riftmaw and part of Mistral; that is **not** recorded as a full pass. Normal
+  play retains the 1920×1080 design canvas and `canvas_items/expand` downscale at physical 720p;
+  the tour's explicit `--vp=1280x720` path proves the true logical 720 branch.
+
+- ☑ 2026-07-13 · Claude packet `C7` · §GRAPHICS — **BUILT/MERGED 2026-07-14 (`artv2-c7`);
+  ORIGINAL VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE PACKET BELOW.** Start from current `main`; consume only approved I4 alpha sheets
   under their README/source-layout contract. Own deterministic cell prep + registered pivots,
   reusable interruptible flipbook pooling, one Compatibility-safe additive layer system, grade/size
   intensity, event binding, performance/readability budgets, and the audited 13/13 `tempo-art`

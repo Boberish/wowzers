@@ -1,10 +1,11 @@
-## artv2_dash_states.gd — C6B state-matrix gate: every required dashboard state on
+## artv2_dash_states.gd — C6B/C6C state-matrix gate: every required dashboard state on
 ## one deterministic sheet, no fight needed (pure view widgets, hand-fed exactly the
 ## fields the band feeds them). Proves: all four comet shapes + the three purple
 ## feints (never a purple BRACE) + peeled/flurry status + answered/missed husks ·
-## the claim moment · Wind bar + all combo states + fumbling · low HP + the 30%
-## Flow lock · ability ready/cooldown/unaffordable · party rows (hots/debuff/dead/
-## shield/cast/resource) · skinned castbar kick window · the collapsed utility tab.
+## the claim moment · Wind bar + all combo states + fumbling · low HP + clean
+## Flow/Aggro percentage · ability ready/cooldown/unaffordable · party rows (hots/debuff/dead/
+## shield/cast/resource) at production C6C scale · skinned castbar kick window ·
+## the collapsed utility tab. The real-host responsive tour lives in artv2_dash_tour.gd.
 ## Run under WSLg (custom _draw ⇒ NOT --headless):
 ##   godot --path godot --rendering-driver opengl3 --resolution 1920x1080 \
 ##     --script res://sim/artv2_dash_states.gd -- --out=/abs/dir [--legacy]
@@ -47,11 +48,11 @@ func _initialize() -> void:
 		chan.v2_skin = skin
 		chan.v2_naked = true
 	if skin != null:                       # the channel sits IN the frame's opening (host law)
-		var opn := skin.sliced_opening("frame_answer", Rect2(40, 44, 1220, 222),
+		var opn := skin.sliced_opening("frame_answer", Rect2(40, 32, 1220, 176),
 			DashSkin.CAPS_ANSWER, DashSkin.OPEN_ANSWER)
 		UiKit.place(chan, 0, 0, 0, 0, opn.position.x, opn.position.y, opn.end.x, opn.end.y)
 	else:
-		UiKit.place(chan, 0, 0, 0, 0, 60, 60, 1240, 250)
+		UiKit.place(chan, 0, 0, 0, 0, 60, 44, 1240, 196)
 	bg.add_child(chan)
 	chan.horizon = 3.0
 	chan.bars = [
@@ -68,16 +69,16 @@ func _initialize() -> void:
 	if skin != null:                       # the painted frame around the naked channel
 		var fra := FrameHost.new()
 		fra.skin = skin
-		UiKit.place(fra, 0, 0, 0, 0, 40, 44, 1260, 266)
+		UiKit.place(fra, 0, 0, 0, 0, 40, 32, 1260, 208)
 		bg.add_child(fra)
 		bg.move_child(fra, bg.get_children().find(chan))
-		fra.size = Vector2(1220, 222)      # place-then-add sizing for the _draw shell
+		fra.size = Vector2(1220, 176)      # place-then-add sizing for the _draw shell
 	# --- [2] flurry mode + the claim moment (resolve fires just before the shot) ---
 	chan2 = AnswerChannel.new()
 	if skin != null:
 		chan2.v2_skin = skin
 		chan2.v2_naked = true
-	UiKit.place(chan2, 0, 0, 0, 0, 60, 300, 1240, 470)
+	UiKit.place(chan2, 0, 0, 0, 0, 60, 230, 1240, 390)
 	bg.add_child(chan2)
 	chan2.horizon = 3.0
 	chan2.flurry = true
@@ -97,7 +98,7 @@ func _initialize() -> void:
 		g.fumbling = i == 3
 		UiKit.place(g, 0, 0, 0, 0, 1300 + (i % 2) * 300, 60 + (i / 2) * 110, 1580 + (i % 2) * 300, 160 + (i / 2) * 110)
 		bg.add_child(g)
-	# --- [4] HP low + Flow with the code-drawn 30% lock ---
+	# --- [4] HP low + clean Flow/Aggro percentage (C6C removed the fixed marker) ---
 	var hp := LiquidOrb.new()
 	hp.fill = Palette.BLOOD
 	hp.caption = "HEALTH"
@@ -110,20 +111,21 @@ func _initialize() -> void:
 		hp.v2_bar = skin
 		fl.v2_bar = skin
 		fl.v2_pct = true
-		fl.v2_lock = 0.30
-	UiKit.place(hp, 0, 0, 0, 0, 1300, 290, 1600, 324)
-	UiKit.place(fl, 0, 0, 0, 0, 1300, 334, 1600, 368)
+		fl.v2_lock = -1.0
+	UiKit.place(hp, 0, 0, 0, 0, 1320, 280, 1840, 342)
+	UiKit.place(fl, 0, 0, 0, 0, 1320, 350, 1840, 412)
 	bg.add_child(hp)
 	bg.add_child(fl)
 	# --- [5] ability slots: ready · cooldown · out-of-resource · En Garde live ---
 	var rowbox := HBoxContainer.new()
 	rowbox.add_theme_constant_override("separation", 12)
-	UiKit.place(rowbox, 0, 0, 0, 0, 1300, 390, 1780, 480)
+	UiKit.place(rowbox, 0, 0, 0, 0, 1320, 430, 1854, 540)
 	bg.add_child(rowbox)
 	var labels := ["Dodge", "Parry", "Dump", "En Garde"]
 	var icons := ["dodge", "guard", "avalanche", "shockwave"]
 	for i in 4:
 		var rn := AbilityRune.new()
+		rn.custom_minimum_size = Vector2(92, 110)
 		rn.v2_skin = skin
 		rn.label = labels[i]
 		rn.key_num = i + 1
@@ -158,14 +160,14 @@ func _initialize() -> void:
 		if i == 2:
 			seat.casting = {"start_tick": 70, "dur_ticks": 60}
 		if legacy:
-			fr.position = Vector2(60, 520 + i * 112)
+			fr.position = Vector2(60, 480 + i * 112)
 			fr.size = Vector2(320, 102)
 			bg.add_child(fr)
 		else:
 			var row := DashPartyRow.new()
 			row.setup(FakeHud.new(), seat, fr, skin)
-			row.position = Vector2(60, 520 + i * 40)
-			row.size = Vector2(340, 34)
+			row.position = Vector2(60, 480 + i * 114)
+			row.size = Vector2(459, 108)
 			bg.add_child(row)
 	# --- [7] the skinned castbar, kick window open ---
 	var cb := BossCastBar.new()
@@ -179,15 +181,15 @@ func _initialize() -> void:
 	cb.window = 0.6
 	cb.in_zone = true
 	cb.kickable_seat = true
-	UiKit.place(cb, 0, 0, 0, 0, 480, 530, 940, 574)
+	UiKit.place(cb, 0, 0, 0, 0, 560, 500, 1120, 544)
 	bg.add_child(cb)
 	# --- [8] the collapsed utility tab, spark pre-fed ---
 	if skin != null:
 		var tab := DashHostC6A.DashUtilTab.new()
 		tab.skin = skin
 		tab._samples = [40.0, 90.0, 70.0, 120.0, 100.0, 160.0, 130.0, 90.0, 140.0, 180.0, 150.0, 170.0]
-		tab.position = Vector2(480, 610)
-		tab.size = Vector2(236, 60)
+		tab.position = Vector2(560, 580)
+		tab.size = Vector2(259, 66)
 		bg.add_child(tab)
 	print("DASH STATES: staged (%s)" % ("LEGACY" if legacy else "SKINNED"))
 
