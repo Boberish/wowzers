@@ -877,6 +877,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-14 · `duel-charge` (worktree `../wow-charge`) · §DUELIST / tank feel — **CLAIM:
+  THE BIG-SWING ANSWER — CHARGED PARRY + THE WEAVE REWORK (Bill's playtest steer, spec
+  `TANK-PLAN §11`).** ① The Seals' CRUSH wind-up swings (Riftmaw Crush / Model Compression /
+  Benchmark Hammer / Alignment Hammer) stop resolving as a lazy tap-parry: **press-and-HOLD
+  the parry through ≥half the wind-up (the GATHER), RELEASE on impact** — landed release =
+  mit .95 + charged counter (scales with held fraction) + up to ◆◆; short-hold/early/late =
+  FLINCH (token mit). Dodge stays live mid-hold (heavies dodge-legal w/ leak ONLY while
+  charging). New `defense_release` action + `ClassKit.on_defense_release` no-op hook
+  (byte-identical other classes) + protocol bump. ② THE WEAVE: n 4→6 default, gap 0.35→0.26
+  with seeded per-note jig (never straight twice), authored `gaps` on phrase steps, riposte
+  scales ×(n/4); per-Seal weave phrases + SPIKE-golem charge trainer. Touches: combat_core
+  (perform/stream) · duelist kit/config/policy/content · duelist_band/answer_channel ·
+  raid_content songbooks · net_protocol. ⚠ Deliberate fight-checksum re-baseline (stream rng
+  order). Gates: duelist_sim/raid_sim det PASS · ui_smoke_raid · WSLg channel screenshot.
 - ☑ 2026-07-14 · `parry-recover` (merged `f3a642a`, ff → main) · §DUELIST / tank feel —
   **parry recovery 0.60 → 0.12 (debounce only).** Bill playtest: a landed parry's 0.6s lockout
   ate back-to-back notes the boss authored closer than that — un-plannable, punished correct

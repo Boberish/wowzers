@@ -1287,3 +1287,85 @@ All on surfaces the tank policy already reads.
 
 **Next:** verdicts → CARD-CATALOG flips (rows landed 🟡 this commit) → transforms build with the
 deck layers in §4 step 3 (kit-local, guarded, byte-identical unpicked — same bar as everything).
+
+## §11 · THE BIG-SWING ANSWER — CHARGED PARRY + THE WEAVE REWORK (Bill, 2026-07-14) 🔨 BUILDING
+
+**Bill's read (playtest):** the Seals' big wind-up swings ("big wait up and charge") resolve as
+a NORMAL parry — the long castbar makes them *easier and slower* than the stream, the opposite
+of a marquee moment. And the weave is "way too slow … always straight": 4 notes, one constant
+0.35 gap, no rhythm to read. His steer: **a hold/charge answer for the true single big hit; the
+weave — faster, more notes, random rhythms — for everything multi-hit.**
+
+### 11.1 THE CHARGED PARRY (the gather → the release)
+
+The boss charges up — **so do you.** Applies to every **strikeless DEFENSIBLE telegraph aimed
+at the tank with size = CRUSH** (keyed off size — zero boss-data edits):
+
+| Seal | The big swing (cast) | Answer now |
+|---|---|---|
+| Vorathek | Riftmaw Crush (2.5s) | **CHARGE** |
+| Mistral | Model Compression (2.4s) | **CHARGE** |
+| Gemini | Benchmark Hammer (2.4s) | **CHARGE** |
+| Mythos | Alignment Hammer (2.4s) | **CHARGE** |
+
+HEAVY quick swings (Rending Talon 1.8 · Efficient Backhand 1.7 · Red-Team Probe 1.6 · the add
+swings) stay tap-parries — they're not "wait-up" offenders. Gemini's Double-Check keeps its
+read-string (it's a feint test, not a charge-up). Stream `buster` bars stay tap-parries (they
+ride the rhythm).
+
+**The mechanic (two axes: COMMIT + TIMING):**
+- **PRESS AND HOLD parry** during the wind-up = the GATHER. Press-down pays `parry_cost` wind
+  (the commit). If a claimable stream bar is in ±claim range at press-down, the normal claim
+  wins (you wanted that bar) — the gather only arms on a clean press.
+- **RELEASE at impact** — graded on the one claim ladder, parry law (top two tiers land).
+- **THE COMMIT LAW:** the hold must reach **`charge_min_frac` (0.5) of the wind-up** for the
+  release to land at all. A late tap-parry = FLINCH (token `mit_parry_miss`, slip) — the lazy
+  "wait and tap" answer is dead. Early release / holding past the late slack = FLINCH too.
+- **Payoff on a land:** mit .95 (the one above-cap payout, unchanged) + **CHARGED COUNTER** =
+  `counter_dmg × (1 + charge_frac × charge_counter_mult)` + ◆ (**2 pips** at
+  `charge_full_frac` ≥ 0.9 — the FULL GATHER — else 1) + the flow spike.
+- **The tension:** the stream NEVER pauses (§2 law). While your parry hand is committed,
+  **DODGE stays live — and ⯃ HEAVY stream bars become dodge-legal (with the size leak) only
+  while charging** (the one SHAPE-LAW relaxation: your parry hand is occupied, footwork is all
+  you have). Hold with one finger, weave with the other — that's the fight.
+- Unanswered (never pressed) = today's law: full damage + slip.
+- `charge_enabled` config bool (default ON) = the playtest A/B.
+
+**New DuelistConfig knobs:** `charge_enabled` · `charge_min_frac 0.5` · `charge_full_frac 0.9`
+· `charge_counter_mult 2.0`. First-cut numbers — Bill's playtest supersedes.
+
+**HUD:** the CRUSH buster comet reads **HOLD!**; while gathering, a charge arc fills around the
+octagon (obs `charge_frac`); the word flips to **RELEASE** inside the claim window; a full-gather
+land slams **CHARGED!**. Flinch = the MISSED treatment + "FLINCHED" stamp.
+
+**Input:** new action `{"type": "defense_release"}` → `ClassKit.on_defense_release` (default
+no-op — byte-identical for every other class). Band sends it on key-up/mouse-up of the parry
+binds (raid_hud already routes key-ups — the Alchemist pour idiom). Protocol version bumps.
+
+### 11.2 THE WEAVE REWORK (faster · more notes · random rhythm)
+
+Engine (`_stream_push` flurry branch, both the odds + phrase paths):
+- **`flurry_n` default 4 → 6**; a phrase step may carry its own `n`.
+- **`flurry_gap` default 0.35 → 0.26**, and each gap is drawn per-note from the stream's
+  seeded rng: `gap × (1 ± flurry_jig)` (`flurry_jig` default 0.45), **floored at 0.20s**
+  (6 ticks — the 30 Hz wall + `flurry_recover` 0.15 headroom). The weave is never straight
+  twice.
+- **Authored rhythm wins:** a phrase step may carry explicit `gaps` (e.g. `{"kind": "flurry",
+  "n": 6, "gaps": [0.3, 0.2, 0.2, 0.45, 0.2]}`) — syncopation as content, cycled if short.
+- **The riposte scales with the dance:** `counter_dmg × flurry_riposte_mult × (n / 4)` — a
+  6-note weave pays 1.5× the old 4-note. Blown-weave law unchanged (miss one = eat it all).
+- Grading/claim unchanged; FLURRY MODE stays wind-free, parry sealed.
+
+**Content:** each Seal gets a weave phrase in its songbook (the "multi-hit big move" seat) —
+Vorathek a gentle 4-note teach (authored, slowish) · Mistral a quick 5-note syncopated ·
+Gemini twin-pairs (2+2 echo) · Mythos the full 6–7-note seeded-random weave. The training
+golem's `the_weave` gets authored syncopation + a random variant; the SPIKE golem gains a CRUSH
+telegraph ("Battering Charge") so the trainer teaches the gather.
+
+### 11.3 Build slices (branch `duel-charge`)
+
+S1 engine (release action + flurry rhythm + protocol) → S2 kit (gather state machine) → S3
+policy (hold/release AI) → S4 HUD (band input + channel rendering) → S5 content (trainer +
+Seal weaves) → S6 verify (duelist_sim/raid_sim low-seed + same-seed det + ui_smoke_raid +
+WSLg screenshot) → merge, ledger flip, `C:\Games\v3Tank` deploy. ⚠ Deliberate re-baseline:
+every fight checksum shifts (stream rng order) — do NOT chase the diff.
