@@ -877,6 +877,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-14 · `parry-recover` (merged `f3a642a`, ff → main) · §DUELIST / tank feel —
+  **parry recovery 0.60 → 0.12 (debounce only).** Bill playtest: a landed parry's 0.6s lockout
+  ate back-to-back notes the boss authored closer than that — un-plannable, punished correct
+  play. **WIND** (3.5/parry · pool 10 · regen 2.2/s) + **FUMBLE** (1.3s on dry) is now the sole
+  leash on back-to-back parries — a visible-on-the-bar cap, not a hidden timer. **DODGE kept at
+  0.35** on purpose (its 1.0 wind cost is too cheap for wind to leash it, so the timer stays its
+  leash). Do NOT re-add an on-land parry cd. duelist_sim clean (det PASS · expert 100% win ·
+  fumbles ~0 · windFloor ~0.5). Deployed to `C:\Games\v3Tank`. Config-value only — no ledger /
+  card scope change.
 - ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: GRAPHICS
   PACKET C7 — VFX FLIPBOOK RUNTIME + FULL JUICE SALVAGE** (GRAPHICS-PLAN §5·C7 + §10.5; Bill's
   spec). Consume the eight approved I4 alpha sheets (`art-source/graphics-v2/p6-vfx/`) under
