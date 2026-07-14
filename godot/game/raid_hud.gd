@@ -261,6 +261,8 @@ var _dmg_i: int = 0                 # rotating spawn-lane counter for damage num
 # members and the 4-way match per surface that used to live here are the band's
 # problem now (game/ui/bands/*.gd; ClassBand.for_hud picks by _seat_cls_now()).
 var _band: ClassBand = null
+var _touch_mode := false           ## MOBILE: a touchscreen has driven at least once (suppress its emulated mouse)
+var _touch_side: Dictionary = {}   ## MOBILE: touch index -> true if it started on the RIGHT half (a parry that owes a release)
 var _pcast: PlayerCastBar          ## caster
 var _bcfg: BloomweaverConfig       ## healer (Bloomweaver) — read by _hspells/_cast_on + the band
 var _wcfg: WellConfig              ## healer (the Well) — read by _hspells/_cast_on + the band
@@ -3113,6 +3115,28 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and not event.pressed and _pause == null \
 			and _screen == "combat" and _band != null:
 		if _band.key_released(event):
+			return
+	# TOUCH combat (mobile web): the whole screen is two zones — LEFT half = dodge,
+	# RIGHT half = parry (press-and-HOLD the right to gather the CHARGED counter, lift
+	# to release it). Duelist only — the one seat with a parry. emulate_mouse_from_touch
+	# is on (the menus need it), so once a real touch drives we ALSO swallow the
+	# synthesized mouse here (mobile_spike's _active_touches guard) to stop a double-fire.
+	if _screen == "combat" and _pause == null and _band is DuelistBand:
+		if event is InputEventScreenTouch:
+			_touch_mode = true
+			var tp := event as InputEventScreenTouch
+			if tp.pressed:
+				var right := tp.position.x > get_viewport_rect().size.x * 0.5
+				_touch_side[tp.index] = right
+				_ctrl.human({"type": "defense"} if right else {"type": "dodge"})
+			else:
+				if bool(_touch_side.get(tp.index, false)):
+					_ctrl.human({"type": "defense_release"})
+				_touch_side.erase(tp.index)
+			get_viewport().set_input_as_handled()
+			return
+		if _touch_mode and event is InputEventMouseButton:
+			get_viewport().set_input_as_handled()   # synthesized from the touch above — already acted
 			return
 	# mouse grammar (healer click-cast, the Well/DRAW release styles) — band-owned.
 	if _pause == null and _screen == "combat" and _band != null \
