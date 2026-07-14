@@ -878,15 +878,28 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-14 · `artv2-c7` (worktree `../wow-artv2-c7`) · §GRAPHICS — **CLAIM: CONSOLIDATE
-  the 5 stranded artv2-c7 commits into main** (Bill's direct ask): charged-parry CHARGE MODE
-  presentation + big charge bar (`1141908`) · §2.3.2 art brief (`7bcc06c`) · web-preview boss
-  test (`074cd24`) · `?art` web param + JSON export (`4539fb1`) · whole-screen mobile touch
-  parry/dodge (`215cf4c`). Merge current main (C6C dream dashboard `ccc35e8`, verdict
-  `f2b2560`) into the branch; ONE content conflict expected in `ui/answer_channel.gd` —
-  resolve semantically (keep C6C's responsive lane/nested gate/72–88px icons/_pps()/V2
-  trails + the branch's CHARGE MODE + mobile touch). Focused verify only; no push/deploy;
-  no image generation.
+- ☑ 2026-07-14 · `artv2-c7` → **MERGED to `main` (ff `731f2a3`)** · §GRAPHICS — **CONSOLIDATION
+  DONE: the stranded artv2-c7 commits are on main** (Bill's direct ask): charged-parry CHARGE
+  MODE presentation + big charge bar (`1141908`) · §2.3.2 art brief (`7bcc06c`) · web-preview
+  boss test (`074cd24`) · `?art` web param + `*.json` export (`4539fb1`) · whole-screen mobile
+  touch parry/dodge (`215cf4c`) · tap-to-fullscreen web (`7bcc46d`-era follow-up `7bff46d`).
+  Merge commit `3411a57` took C6C `ccc35e8` into the branch with ONE semantic resolve in
+  `answer_channel.gd`: the charge halo tracks the shared V2 icon geometry
+  (`_size_r(buster,CRUSH)+9`) with the §11.1 legacy readability bump (32px) as fallback;
+  auto-merge composed cword→`_charge_word`, dress-behind-V2-token ordering, CHARGE MODE
+  wash/plaque/bar on C6C geometry (dash-tour `gather` shot confirms). Consolidation fix
+  `731f2a3`: **UI carve-outs for the touch grammar** (PAUSE button + party column stay
+  clicks; unmatched releases pass; `_clear` drops the ledger + `_pause_btn`) + NEW
+  `sim/touch_probe.gd` (9/9: zones/hold-release · pause-rect · party-column · paused ·
+  non-Duelist · teardown) + VFX-tour stabilizer fix (cold-aisle wipe flake). VERIFY: import
+  clean · `artv2_probe` 198/198 (no regression) · `ui_smoke_raid` · `charge_probe` ALL PASS ·
+  dash tour 6-state ALL OK ×{1080, logical-720} ×{atrium, cold-aisle} · C7 VFX tour ALL OK ×
+  both scenes · touch probe 9/9 · `ab-gate raid_sim --seeds=2 --boss=riftmaw` BYTE-IDENTICAL
+  (MD5 `317ce86c…` = C6C's recorded gate). Docs auto-merges inspected: C6C `ccc35e8` + "for
+  now it's solid" + §2.3.2 all retained; no stale claims; Art V2 stays default-OFF (P7 is
+  its own decision). NOT pushed, NOT deployed (per ask). ⚠ `?art`/fullscreen are web-only
+  paths (JavaScriptBridge) — native-verified statically + parser probe-covered; first web
+  export smoke owed when a web build next ships.
 
 - ☑ 2026-07-14 · `artv2-c7` · §DUELIST / §GRAPHICS — **THE CHARGED PARRY MADE VISIBLE + art-pass
   brief (Bill: "the hold i can't see — make it a very obvious style shift like the weave, big
