@@ -20,6 +20,7 @@ var out_dir := "user://shots_vfx"
 var profile := ""
 var label := ""
 var novfx := false
+var missing := false
 var sheet := false
 var hud: Node = null
 var frame := -1
@@ -41,6 +42,8 @@ func _initialize() -> void:
 			ArtV2.actors = true
 		elif a == "--novfx":
 			novfx = true
+		elif a == "--missing":
+			missing = true   # a runtime asset was hidden: vfx ON must still fall back
 		elif a == "--sheet":
 			sheet = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -86,10 +89,22 @@ func _process(_delta: float) -> bool:
 		hud._ctrl.state.seats[0].policy = RaidNet.make_policy("tank", 20260702)
 	if hud == null or hud._ctrl == null or hud._ctrl.state == null:
 		return false
+	# tour stabilizer: on slow software GL a frame is ~150 ms, so 540 frames can be
+	# 70+ wall-seconds of real combat — pin HP floors so neither side ends the fight
+	# under the timeline (skipped around the deliberate low-HP window at f430).
+	if frame > 1 and (frame < 425 or frame > 460) and hud._screen == "combat":
+		var cs: CombatState = hud._ctrl.state
+		if not cs.over:
+			for st_seat in cs.seats:
+				if (st_seat as Seat).hp < (st_seat as Seat).hp_max * 0.4:
+					(st_seat as Seat).hp = (st_seat as Seat).hp_max * 0.9
+			if cs.boss.hp < cs.boss.hp_max * 0.3:
+				cs.boss.hp = cs.boss.hp_max * 0.9
 	match frame:
 		30:
 			_shot("00_baseline")
-			_chk("pool exists iff vfx on", (_pool() != null) == (not novfx))
+			_chk("pool exists iff vfx on + assets delivered",
+				(_pool() != null) == (not novfx and not missing))
 			# capture insurance: software GL (llvmpipe) can render <15 fps, so a
 			# fixed +N-frame snap would outrun a 110–260 ms flipbook. Slow every
 			# playback through the pool's dev knob; bindings stay untouched.
@@ -203,7 +218,8 @@ func _process(_delta: float) -> bool:
 			_chk("teardown nulls the stage", hud._stage2d == null)
 			hud._build_combat(hud._ctrl.state)
 			_chk("re-entry rebuilds _post iff vfx on", (hud._post != null) == (not novfx))
-			_chk("re-entry rebuilds the pool iff vfx on", (_pool() != null) == (not novfx))
+			_chk("re-entry rebuilds the pool iff vfx on + assets",
+				(_pool() != null) == (not novfx and not missing))
 		515:
 			_ev({"t": "duel_answer", "player": true, "seat": _seat(0), "kind": "parry",
 				"grade": StrikeRes.Grade.BULLSEYE, "size": 2, "off_ms": 4, "id": 40})
