@@ -259,12 +259,20 @@ func _draw() -> void:
 	var w := size.x
 	var h := size.y
 	var cy := h * 0.46
+	# §11.1 CHARGE MODE: a live CRUSH swing takes the HOLD — the whole channel changes style
+	# (an amber wash, its own big bar + plaque) so the gather is IMPOSSIBLE to miss, exactly
+	# like the weave turns the channel blue. Distinct color family (HEAVY amber) from flurry.
+	var charge_on := charge_tid != 0
 	# --- the gilded glass channel + the mode skin (AAA pass: grad glass, bevel, filigree) ---
 	var bg0 := Palette.FILL_TOP
 	var bg1 := Palette.FILL_BOT
 	if flurry:
 		bg0 = bg0.lerp(Palette.CRIMSON_DEEP, 0.45)
 		bg1 = bg1.lerp(Palette.CRIMSON_DEEP, 0.3)
+	elif charge_on:
+		var cwash := 0.30 + 0.14 * (0.5 + 0.5 * sin(_spin * 3.0))
+		bg0 = bg0.lerp(Palette.HEAVY, cwash)
+		bg1 = bg1.lerp(Palette.HEAVY.darkened(0.35), cwash * 0.7)
 	UiKit.grad_rect(self, Rect2(0, 0, w, h), bg0, bg1)
 	if not v2_naked:
 		draw_rect(Rect2(0, h - 3.0, w, 3.0), Color(0, 0, 0, 0.35))   # seated base shadow
@@ -279,14 +287,23 @@ func _draw() -> void:
 		var shim := Palette.CRIMSON.lightened(0.4)
 		shim.a = 0.20
 		draw_rect(Rect2(sx2, 4.0, 9.0, h - 8.0), shim)
+	elif charge_on:
+		# §11.1: the border burns amber and a BIG plaque calls the state (HOLD → RELEASE!)
+		var cpulse := 0.5 + 0.5 * sin(_spin * 5.0)
+		edge = Palette.HEAVY.lightened(0.3).lerp(Palette.GOLD_BRIGHT, cpulse)
+		var ctxt := "THE BIG ONE — HOLD THE PARRY"
+		if charging:
+			ctxt = "RELEASE ON THE HIT!" if charge_frac >= charge_min else "HOLD…  KEEP HOLDING"
+		UiKit.engraved_plaque(self, Vector2(w * 0.5, 11.0), ctxt, true, 13)
+	var mode_edge := flurry or charge_on
 	if not v2_naked:                       # C6B: the painted frame IS the housing
 		draw_rect(Rect2(0, 0, w, h), Color(0, 0, 0, 0.5), false, 3.0)    # dark outer seat
-		draw_rect(Rect2(1, 1, w - 2, h - 2), edge if flurry else Palette.GOLD_DIM.darkened(0.2), false, 1.5)
+		draw_rect(Rect2(1, 1, w - 2, h - 2), edge if mode_edge else Palette.GOLD_DIM.darkened(0.2), false, 1.5)
 		UiKit.filigree_corner(self, Vector2(0, 0), Vector2(1, 1))
 		UiKit.filigree_corner(self, Vector2(w, 0), Vector2(-1, 1))
 		UiKit.filigree_corner(self, Vector2(0, h), Vector2(1, -1))
 		UiKit.filigree_corner(self, Vector2(w, h), Vector2(-1, -1))
-	elif flurry:                           # the mode edge still reads on the naked glass
+	elif mode_edge:                        # the mode edge still reads on the naked glass
 		draw_rect(Rect2(1, 1, w - 2, h - 2), edge, false, 1.5)
 	# a leak bleeds crimson at the channel border (complements the slam's full-screen vignette)
 	if _edge_flash > 0.0:
@@ -437,9 +454,11 @@ func _draw() -> void:
 		var tsc := (1.0 + 0.45 * maxf(0.0, 1.0 - tage / 0.22)) \
 			* (1.0 + 0.10 * clampf(1.0 - teta / 0.55, 0.0, 1.0))
 		# §11.1: the charge-tagged buster wears its own word — HOLD! until the hand commits,
-		# HOLD… through the gather, RELEASE! once the comet reaches the parry zone
+		# HOLD… through the gather, RELEASE! once the comet reaches the parry zone — and it
+		# rides BIGGER than a normal buster (it is THE moment; the meter below carries the fill)
 		var cword := ""
 		if tid == charge_tid:
+			tsc *= 1.45
 			if charging:
 				cword = "RELEASE!" if teta <= parry_window + 0.06 else "HOLD…"
 			else:
@@ -515,6 +534,9 @@ func _draw() -> void:
 		col.a = 1.0 - t / 0.9
 		UiKit.text_shadowed(self, UiKit.display(600, 1), Vector2(gx - 236, cy - 30 - t * 22.0),
 			String(st["txt"]), HORIZONTAL_ALIGNMENT_CENTER, 150, UiKit.SIZE["LABEL"], col)
+	# --- §11.1 THE BIG CHARGE METER: the fat fill bar Bill couldn't see (drawn on top) ---
+	if charge_on:
+		_charge_bar(w, h, cy, font)
 	# --- position-anchored graded verdicts (the readability core) ---
 	for v_v in _verdicts:
 		_draw_verdict(v_v, cy, font)
@@ -876,31 +898,72 @@ func _hexagon(x: float, cy: float, r: float, col: Color) -> void:
 	draw_polyline(pts + PackedVector2Array([pts[0]]), col.lightened(0.4), 1.8, true)
 	_specular(x, cy, r)
 
-## §11.1 the gather dressing on the charge-tagged buster: unpressed = a breathing HOLD
-## ring (the invitation); gathering = the charge arc filling clockwise from 12 — dim until
-## THE COMMIT LAW's half-mark (the notch), gold past it, white-hot + glow at the FULL GATHER.
+## §11.1 the gather HALO on the charge-tagged buster comet (the fill lives on the big BAR
+## now — this is the comet's own glow so the eye stays on the octagon): a fat breathing amber
+## ring, filling clockwise as you hold, white-hot + a wide glow at the FULL GATHER.
 func _charge_dress(x: float, cy: float) -> void:
-	var r := 24.0
+	var r := 32.0
 	var c := Vector2(x, cy)
+	var halo := Palette.HEAVY.lightened(0.25)
+	halo.a = 0.30 + 0.22 * sin(_spin * 4.0)
+	UiKit.glow(self, c, r + 14.0, Color(halo.r, halo.g, halo.b, 0.16))
 	if not charging:
-		var hc := Palette.HEAVY.lightened(0.2)
-		hc.a = 0.35 + 0.25 * sin(_spin * 4.0)
-		draw_arc(c, r, 0, TAU, 28, hc, 2.0, true)
+		draw_arc(c, r, 0, TAU, 30, halo, 2.6, true)
 		return
-	draw_arc(c, r, 0, TAU, 28, Color(1, 1, 1, 0.10), 3.0, true)   # the track
-	var col := Palette.TEXT_DIM
+	draw_arc(c, r, 0, TAU, 30, Color(1, 1, 1, 0.10), 3.4, true)   # the track
+	var col := Palette.HEAVY.lightened(0.25)
 	if charge_frac >= charge_full:
 		col = Color(1.0, 0.95, 0.7)
-		UiKit.glow(self, c, r + 10.0, Color(1.0, 0.85, 0.4, 0.25))
+		UiKit.glow(self, c, r + 16.0, Color(1.0, 0.85, 0.4, 0.30))
 	elif charge_frac >= charge_min:
 		col = Palette.GOLD_BRIGHT
 	col.a = 0.95
 	if charge_frac > 0.01:
-		draw_arc(c, r, -PI / 2.0, -PI / 2.0 + TAU * charge_frac, 28, col, 3.2, true)
+		draw_arc(c, r, -PI / 2.0, -PI / 2.0 + TAU * charge_frac, 30, col, 3.6, true)
 	# THE COMMIT LAW's half-mark: the notch the fill must cross before the release counts
 	var na := -PI / 2.0 + TAU * charge_min
 	var dirv := Vector2(cos(na), sin(na))
-	draw_line(c + dirv * (r - 4.0), c + dirv * (r + 4.0), Color(1, 1, 1, 0.6), 2.0, true)
+	draw_line(c + dirv * (r - 5.0), c + dirv * (r + 5.0), Color(1, 1, 1, 0.7), 2.4, true)
+
+## §11.1 THE BIG CHARGE METER — the fat fill bar along the bottom of the channel: the whole
+## point Bill couldn't see. A dark track spanning most of the width; a shaded GO-ZONE from the
+## COMMIT notch to full (the target); the fill fattens amber as you hold, GOLD once past the
+## notch, WHITE-HOT at the FULL GATHER; the COMMIT notch is the bright line the fill must
+## cross to land (below it = a flinch). Past the notch the whole bar pulses a ready frame.
+func _charge_bar(w: float, h: float, _cy: float, _font: Font) -> void:
+	var bw := minf(520.0, w - 60.0)
+	var bx := (w - bw) * 0.5
+	var bhh := 16.0
+	var by := h - 20.0 - bhh                      # near the bottom, clear of the comet line
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(0.05, 0.05, 0.07, 0.92)
+	track.border_color = Palette.GOLD_DIM
+	track.set_border_width_all(2)
+	track.set_corner_radius_all(6)
+	draw_style_box(track, Rect2(bx, by, bw, bhh))
+	# the GO-ZONE (commit..full) — the target the eye aims the fill into
+	var gzx := bx + bw * charge_min
+	var gz := Palette.HEAVY.lightened(0.1)
+	gz.a = 0.20
+	draw_rect(Rect2(gzx, by + 2.0, bx + bw - gzx - 2.0, bhh - 4.0), gz)
+	# the fill
+	var f := clampf(charge_frac, 0.0, 1.0)
+	if f > 0.001:
+		var fill := Palette.HEAVY.lightened(0.18)
+		if charge_frac >= charge_full:
+			fill = Color(1.0, 0.95, 0.72)
+			UiKit.glow(self, Vector2(bx + bw * f, by + bhh * 0.5), 26.0, Color(1.0, 0.85, 0.4, 0.35))
+		elif charge_frac >= charge_min:
+			fill = Palette.GOLD_BRIGHT
+		draw_rect(Rect2(bx + 2.0, by + 2.0, (bw - 4.0) * f, bhh - 4.0), fill)
+	# the COMMIT notch — the bright line the fill must cross before the release counts
+	var nx := bx + bw * charge_min
+	draw_line(Vector2(nx, by - 4.0), Vector2(nx, by + bhh + 4.0), Color(1, 1, 1, 0.9), 2.6, true)
+	# past the notch = ready: a pulsing ready-frame around the whole bar
+	if charging and charge_frac >= charge_min:
+		var pr := Palette.GOLD_BRIGHT
+		pr.a = 0.45 + 0.40 * sin(_spin * 8.0)
+		draw_rect(Rect2(bx - 3.0, by - 3.0, bw + 6.0, bhh + 6.0), pr, false, 3.0)
 
 ## The spiked spinning octagon — the biggest-baddest shape (BUSTER in tank colors /
 ## GLOBAL in boss colors; the word carries the answer).
