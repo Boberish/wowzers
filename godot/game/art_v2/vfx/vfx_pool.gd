@@ -16,6 +16,7 @@ extends Node2D
 const MAX_VOICES := 14
 
 var book: VfxBook = null
+var slowmo := 1.0             ## DEV/tour knob: scales every playback (capture on slow GL)
 var _voices: Array = []       ## all VfxPlayer children, fixed at MAX_VOICES
 var _age := 0                 ## monotonically increasing spawn stamp (steal = oldest)
 
@@ -41,6 +42,9 @@ func spawn(family: String, pos: Vector2, opts: Dictionary = {}, slot := "") -> V
 	var v := _claim(slot)
 	if v == null:
 		return null
+	if slowmo != 1.0:
+		opts = opts.duplicate()
+		opts["speed"] = float(opts.get("speed", 1.0)) * slowmo
 	v.slot = slot if slot != "" else "~"      # "~" = live un-keyed (steal candidate)
 	v.set_meta("age", _age)
 	_age += 1

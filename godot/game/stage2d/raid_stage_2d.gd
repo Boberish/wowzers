@@ -196,6 +196,7 @@ func sync(s: CombatState) -> void:
 		# C7: En Garde's NATURAL expiry emits no event — end the hold loop off the
 		# committed state (duel_engarde_break also stops it, in on_event below)
 		if _vfx != null and _engarde_on.get(i, false) \
+				and seat.vars.has("engarde_until") \
 				and int(seat.vars.get("engarde_until", 0)) <= s.tick:
 			_engarde_on[i] = false
 			_vfx.stop_slot("s%d:eg" % i)
