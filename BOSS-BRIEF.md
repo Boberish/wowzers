@@ -15,6 +15,25 @@ the number.** Fresh worktree: `godot --headless --path godot --import` FIRST.
 
 ## 0 · SCOPE GATE — what's OPEN vs what BLOCKS (state as of 2026-07-10 · pass 5 — tank-w1 recon)
 
+> **⚠ PAUSE-ERA RECONCILE (2026-07-14, re-grounding after a few days).** The repo moved a lot;
+> the boss thread stays valid, with these deltas:
+> - **✅ S0 + S1 (E1–E9 addenda) are MERGED to main** (`07a5e9b`) and STILL GREEN on current main
+>   (`raid_probe ALL OK`, imports clean, flow APIs `_flow_aggro`/`_aggro_peel`/`flow_lock_floor`
+>   intact). Build S2–S5 on current main.
+> - **INTERRUPT WENT SIMPLE** (press-anytime; Twinfang→`eviscerate`, Duelist→`dump`; MERGED
+>   `3126437`). Verses = plain `INTERRUPTIBLE`; **do NOT author `kick_window`** (E8 dead schema).
+>   §1½'s tight-window is superseded (banner there); its *consequence ladder* still stands.
+> - **⚠ THE SEALS ALREADY CARRY RHYTHM/SONGBOOK PROFILES** (tank-v3 THE STREAM/SONGBOOK, DEC-4):
+>   every Seal's `e.melee` now has `rhythm`+`jig`+motif keys, and every ADD melee has a MANDATORY
+>   `rhythm` key (Bill 2026-07-12 — a rhythm-less add "just HOLDs and hits, no notes"). **S2–S5
+>   must PRESERVE these + give any NEW add a `rhythm` key** (copy the format from a sibling add).
+>   The main-melee numbers also shifted (e.g. riftmaw 1.05→1.25 every). Author against the CURRENT
+>   builders, not this brief's original numbers.
+> - **Duelist balance:** tank-v3 helped (Mistral 100%, Gemini ~67% good) but the Duelist still
+>   DIES to Vorathek/Mythos — the rework's Seal-tank-damage rebalance (SealTune) still applies.
+> - **MISS-TAX idea** parked in BOSS-PLAN §10 (Bill 2026-07-13) — a stacking debuff on a blown
+>   answer; not built, watch death-spiral. Not part of S2–S5 unless Bill promotes it.
+
 **✅ GATE ③ CLEARED — ALL 11 VERDICTS DECIDED** (Bill, 2026-07-10: *"v1–10 is build with your
 recs"* + V11(b)). The RECOMMENDED option of every verdict is now the build spec (BOSS-PLAN §V
 record). S2–S5 author the recs directly — no per-slice verdict lookups needed.
