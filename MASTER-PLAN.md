@@ -889,6 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST SWORD-CENTER
+  MICRO-CORRECTION IN PROGRESS.** Bill selected his attached `almsot-swordproblem.png` as the
+  locked best candidate. Change only the visible rapier blade so its centerline begins at and
+  crosses the exact geometric center of the existing gold ring guard; preserve the guard, grip,
+  hands, arms, character, pose, framing, palette, texture, and background unchanged. Static
+  approval concept only; no animation, runtime, gameplay, or default change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **AUTHORITATIVE USER-REFERENCE
   DUELIST COMPOSITE v6 GENERATED; BILL'S VERDICT OWED.** Bill supplied `goodhands.png` and
   `goodsword.png` as the source-of-truth pair after the earlier generated revisions drifted; exact
