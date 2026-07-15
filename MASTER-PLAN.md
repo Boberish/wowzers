@@ -890,6 +890,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **BILL FEEL REVISION IN
+  FLIGHT: READABLE DUCK + CLEAN THEATER.** Bill's first Windows verdict: promising, but the
+  six-tick pass is jerky/too fast to read as a duck and the top/side HUD obscures the actor.
+  GOOD-only presentation revision: lengthen the deepest-clearance read, soften card transitions
+  and root motion in the view layer, and make the isolated scene default to a clean-theater HUD
+  while preserving the timing lane and manual controls. No new pose/smear, gameplay, protocol,
+  production actor, default-on, or `main` change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `dc5dedb`, PUSHED, NOT
   merged** · §GRAPHICS — **APPROVED GOOD-DODGE PRODUCTIONIZATION COMPLETE; BILL'S RUNTIME
   VERDICT NEXT.** The separately approved READY anchor plus the four approved V2 active poses are
