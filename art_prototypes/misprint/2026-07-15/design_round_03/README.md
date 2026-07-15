@@ -8,7 +8,9 @@ Authoritative character/hands reference: `user_refs/goodhands.png`.
 
 Authoritative sword/arm-length reference: `user_refs/goodsword.png`.
 
-Latest composite candidate: `duelist_defensive_guard_v6_authoritative_composite.png`.
+Current locked whole-image base: `user_refs/almsot-swordproblem.png`.
+
+Latest composite candidate: `duelist_defensive_guard_v7_centered_sword.png`.
 
 The built-in image-generation tool combined Round-2 A's angular high ponytail
 and simple cropped costume with Round-2 B's cleaner circular-guard rapier and
@@ -61,4 +63,16 @@ user references are byte-identical copies of the Downloads attachments:
   `5b5a2c620dc9063f4c44720c34b6dd6516945d21ec6e35330a43718c24b93c59`
 
 V2–V5 remain only as generation/correction history; none supersedes the two
-explicit user references or V6 as the current approval candidate.
+explicit user references or V6 at this stage of the review.
+
+## Sword-center micro-correction
+
+Bill selected his attached `almsot-swordproblem.png` as the best whole-image
+candidate and locked everything except the blade alignment. Its byte-identical
+archive copy has SHA-256
+`3d40b51d56d97feb2fa4f42814dbdd9c99a9450cd1d6d2bcb4cbab6320ee9974`.
+
+V7 redraws the one visible blade from the geometric center of the existing gold
+ring toward the same upper-right endpoint. The blade centerline now bisects the
+ring's open interior rather than meeting its upper rim. The attached image—not
+V6—is the base for this correction; V6 is retained as prior iteration history.
