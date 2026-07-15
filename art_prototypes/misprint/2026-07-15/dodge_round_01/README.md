@@ -5,6 +5,8 @@ Date: 2026-07-15
 Status: static silhouette/consistency approval gate only. No runtime frame set,
 smear, GREAT/PERFECT/parry art, gameplay, or default decision.
 
+Latest pose gate: `good_duck_four_pose_gate_v2_sword_foreground.png`.
+
 ## Locked anchor
 
 `user_refs/newSwordGaurd.png` is Bill's explicitly selected current Duelist
@@ -34,4 +36,12 @@ to derive production-size fixed-canvas cards and test the proposed 30 Hz holds:
 1 / 2 / 1 / 2 ticks, then return to the shared ready anchor. Root translation
 and any echo treatment remain Godot-owned. Do not import this composition board
 as runtime frames.
+
+## Sword-layer correction
+
+Bill approved the four poses and caught a foreground-order error in panels 2
+and 3: their blades crossed behind the wielding teal arms. V2 preserves the
+pose sequence and redraws those overlap regions with the existing straight
+blade/cup assembly in front of the sleeve. V1 remains beside it as the audit
+source; V2 is the current silhouette gate.
 

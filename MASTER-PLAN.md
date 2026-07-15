@@ -889,12 +889,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOOD-DODGE POSE-GATE SWORD
-  OCCLUSION CORRECTION IN PROGRESS.** Bill approves the four poses but caught one layer-order
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOOD-DODGE POSE-GATE SWORD
+  OCCLUSION v2 CORRECTED; BILL'S FINAL GATE VERDICT OWED.** Bill approves the four poses but caught one layer-order
   error: in panels 2 (top-right) and 3 (bottom-left), the sword crosses behind its wielding arm.
   Preserve all four poses, geometry, character detail, layout, and panels 1/4; change only those
-  two crossings so the existing blade/cup assembly renders in front of the sword arm. Static gate
-  only; no new pose, smear, runtime, gameplay, protocol, or default change.
+  two crossings so the existing blade/cup assembly renders in front of the sword arm. Result:
+  `dodge_round_01/good_duck_four_pose_gate_v2_sword_foreground.png`; both blades now remain visibly
+  continuous over the teal sleeves. Static gate only; no new pose, smear, runtime, gameplay,
+  protocol, or default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT GOOD-DODGE FOUR-POSE
   GATE GENERATED; BILL'S POSE VERDICT OWED.** Bill selected his attached `newSwordGaurd.png` as the definitive current
