@@ -889,12 +889,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST CUP-GUARD REVISION IN
-  PROGRESS.** Bill likes the v8 character/hands/sword result but correctly flagged that its ring
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST CUP-GUARD v9 GENERATED;
+  BILL'S VERDICT OWED.** Bill likes the v8 character/hands/sword result but correctly flagged that its ring
   guard floats without believable support. Lock v8 everywhere except the guard; replace the ring
   with a simple shallow brass cup/dome anchored at the blade→grip junction, opening toward the
   wrist and covering most of the sword hand so finger construction is no longer a production
-  burden. Static approval concept only; no animation, runtime, gameplay, or default change.
+  burden. Result: `duelist_defensive_guard_v9_cup_guard.png` uses a compact D-profile brass shell
+  from cuff to blade apex and leaves no individual sword-hand finger construction to animate. Two
+  intermediate cup passes were discarded for exposed fingers / oversized-orb silhouette. Static
+  approval concept only; no animation, runtime, gameplay, or default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOODSWORD-BASE / GOODHANDS-ONLY
   COMPOSITE v8 GENERATED; SELECTED AS THE CUP-GUARD BASE.** Bill rejected v7's redrawn guard and made `user_refs/goodsword.png`
@@ -906,12 +909,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   ring's weapon logic now the one explicit correction owed.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST SWORD-CENTER
-  MICRO-CORRECTION v7 GENERATED; BILL'S VERDICT OWED.** Bill selected his attached
+  MICRO-CORRECTION v7 GENERATED; SUPERSEDED BY v8/v9.** Bill selected his attached
   `almsot-swordproblem.png` as the locked best candidate; a byte-identical archive copy now lives
   under `design_round_03/user_refs/`. `duelist_defensive_guard_v7_centered_sword.png` redraws the
   one visible rapier blade from the exact geometric center of the gold ring's open interior to the
-  same upper-right endpoint, removing the prior upper-rim attachment. Static approval concept
-  only; no animation, runtime, gameplay, or default change.
+  same upper-right endpoint, removing the prior upper-rim attachment. Bill rejected the redrawn
+  guard logic and returned to `goodsword.png` as the v8 base. Static approval concept only; no
+  animation, runtime, gameplay, or default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **AUTHORITATIVE USER-REFERENCE
   DUELIST COMPOSITE v6 GENERATED; BILL'S VERDICT OWED.** Bill supplied `goodhands.png` and

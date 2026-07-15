@@ -8,9 +8,11 @@ Authoritative character/hands reference: `user_refs/goodhands.png`.
 
 Authoritative sword/arm-length reference: `user_refs/goodsword.png`.
 
-Current locked whole-image base: `user_refs/almsot-swordproblem.png`.
+V7 source archive: `user_refs/almsot-swordproblem.png`.
 
-Latest composite candidate: `duelist_defensive_guard_v7_centered_sword.png`.
+Selected character/sword base: `duelist_defensive_guard_v8_goodsword_goodhands.png`.
+
+Latest guard candidate: `duelist_defensive_guard_v9_cup_guard.png`.
 
 The built-in image-generation tool combined Round-2 A's angular high ponytail
 and simple cropped costume with Round-2 B's cleaner circular-guard rapier and
@@ -76,3 +78,18 @@ V7 redraws the one visible blade from the geometric center of the existing gold
 ring toward the same upper-right endpoint. The blade centerline now bisects the
 ring's open interior rather than meeting its upper rim. The attached image—not
 V6—is the base for this correction; V6 is retained as prior iteration history.
+
+## Goodsword base and cup guard
+
+V8 reverses the edit hierarchy after v7's guard drift: `user_refs/goodsword.png`
+is the locked whole-image base, while `user_refs/goodhands.png` contributes only
+the detailed closed-glove construction. Bill's verdict was “wow, looks great,”
+followed by the correct observation that the ring itself still floated without
+a believable structural connection.
+
+V9 replaces that ring with a compact shallow brass cup guard. The rear rim sits
+at the cuff, the shell wraps over the sword fist, and the blade exits the front
+apex on the same weapon axis. Only a small dark grip transition remains visible,
+so animation no longer depends on individual sword-hand finger construction.
+The first cup pass exposed too much glove and the second became an oversized
+oval shell; both were discarded. V8 remains the locked pre-guard comparison.
