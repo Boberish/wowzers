@@ -759,6 +759,15 @@ secondary abilities, and fast cancelable actor payoff. C0 + C1 are complete (sel
 `3da278f`); C2 SceneKit merged `da314e9` under Bill's assume-pass instruction. P3 environment
 contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-default debt.
 
+**⚠ 2026-07-15 — MISPRINT MASQUERADE + the dodge proof are IN THE REPO but NOT APPROVED.** The
+Codex art handoff is imported at `art_prototypes/misprint/2026-07-15/` (doc of record:
+`docs/ART_HANDOFF_2026-07-15.md` inside that folder) — the selected direction board, the 3 screen
+bounds, and six transparent dodge pose cards. It is **available for an isolated Godot proof only**
+(pose-card texture swaps off the 30 Hz tick — no Spine/rig needed) and is **NOT a production
+replacement**: the current playable art stays default and untouched until that proof is accepted.
+Branch `art/misprint-dodge-proof` (pushed, unmerged). See the Coordination Log for the full spec,
+cadence, and acceptance questions.
+
 **Now:** Gilded Reliquary 2D UI + PoseRig stage are playable and stay default throughout V2 work.
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
 **Next up:**
@@ -877,6 +886,45 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 - Mender's own draft pool (currently continue-screen only) — subsumed by Draft parity above.
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
+
+- ☑ 2026-07-15 · `art/misprint-dodge-proof` → **PUSHED, NOT merged** · §GRAPHICS — **CODEX ART
+  HANDOFF IMPORTED: the MISPRINT MASQUERADE direction + the first dodge animation proof —
+  AVAILABLE FOR AN ISOLATED GODOT TEST, ⚠ NOT APPROVED FOR PRODUCTION REPLACEMENT.** Bill picked
+  the Misprint Masquerade exploration (favoured screen: the middle-ground
+  `misprint_gameplay_02_middle_selected.png`) as the direction worth *testing* — an intentional
+  hand-pulled screenprint language that makes whole-pose animation, limited in-betweens, and
+  small registration errors read as authored rather than cheap. Bundle landed **verbatim** under
+  `art_prototypes/misprint/2026-07-15/` (deliberately OUTSIDE `godot/`, so Godot never imports it
+  and **no `.import` files are generated**): `concepts/` direction board · `screenshots/` the 3
+  bounds (restrained / **selected middle** / full commitment) · `dodge_test/` six 553×466 fixed-
+  canvas transparent pose cards (ready→duck→shift→clearance→settle→recover) + the 3×2 magenta
+  source sheet + a warm-paper looping GIF preview · `tools/build_dodge_animation.ps1` ·
+  `docs/ART_HANDOFF_2026-07-15.md` (**the doc of record for this exploration** — direction
+  decisions, UI requirements carried forward, cadence table, acceptance questions).
+  **⚠ THE CURRENT PLAYABLE ART IS UNTOUCHED AND STAYS DEFAULT** — this import is purely additive:
+  zero gameplay code, zero `godot/` files, nothing wired to a production encounter.
+  **Direction decisions recorded in the handoff** (Bill's, from the exploration): brighter/happier/
+  playful tone with dark dungeons as *contrast* not identity (consistent with the 2026-07-12
+  SUNPRINT CEL V1 approval, §GRAPHICS) · Duelist is **a woman**, athletic/practical/not sexualized,
+  **one slender rapier only** · the healer is **a man**, normally proportioned · the animation test
+  is a **duck/side-step dodge**, not a parry. Misprint animation = complete pose cards + Godot
+  transforms + brief coloured echo sprites — **no Spine, no skeletal rig, no new graphics package**.
+  **NEXT (unclaimed, needs Bill's go):** the isolated Godot proof — one `Sprite2D` swapping the six
+  textures **off the real 30 Hz combat tick** at ~1/1/2/2/4 ticks for poses 02–06 then back to 01
+  (~10 ticks / 330 ms active; the GIF's long ready-hold is a legibility artefact, and the GIF is
+  **not** Godot output — it only proves the sequence reads), + a 70–100 px sideways root
+  translation (do NOT bake screen travel into the frame art) + one-tick coral/cobalt echo sprites
+  at departure/clearance, WebGL-safe, tested behind the real HUD against a Mistral attack line at
+  normal AND high-flow cadence. Acceptance questions are listed in the handoff §Acceptance.
+  ⚠ **If that proof needs NEW generated art, STOP and ask Bill** (explicit constraint).
+  VERIFY (import-integrity only — no sims/probes run; nothing executable or gameplay-facing
+  changed): bundle SHA-256 `ef07f2e8…3693` matches Bill's expected hash · zip integrity OK ·
+  all 15 files byte-identical after extraction · the 6 dodge PNGs decode as true **RGBA, 8-bit,
+  min_alpha=0, ~85–87 % fully-transparent** (real cutouts, alpha retained) · the GIF parses as
+  **exactly 6 frames** (delays 30/3/3/7/7/13 cs) · the selected middle-ground screenshot present ·
+  no LFS in this repo (no `.gitattributes`, `git lfs` not installed) so assets are **plain binary
+  blobs, ~14.7 MB total** — if the art line grows, LFS is a decision owed. NOT merged to `main`,
+  NOT deployed.
 
 - ☑ 2026-07-14 · `artv2-c7` → **MERGED to `main` (ff `300acbe`)** · §GRAPHICS — **THE FOCUS
   ZOOM (Bill live: "icons too big, hard to see the perfect window — zoom the end, shrink the
