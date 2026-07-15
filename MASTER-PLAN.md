@@ -889,6 +889,15 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST DESIGN ROUND 2.**
+  Generate three static, side-on character concepts from the selected Misprint direction before
+  any further animation work: one deliberately simpler/flat design and two detailed-but-repeatable
+  variants. Preserve the athletic practical woman + single slender rapier core; use closed
+  glove/fist shapes (no finger anatomy), flatter color blocking with restrained print texture,
+  animation-friendly silhouettes, and a neutral low/resting weapon posture rather than the sword
+  thrust forward. This is an approval board only: no runtime replacement, animation generation,
+  gameplay/code, or production-default decision. *(Codex image-generation session; in progress.)*
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `fc64636`, NOT merged or
   pushed** · §GRAPHICS — **MISPRINT DODGE ISOLATED GODOT PROOF COMPLETE; AWAITS BILL'S FEEL
   VERDICT, STILL NOT APPROVED FOR PRODUCTION.** `godot/prototypes/misprint_dodge/` supplies the
