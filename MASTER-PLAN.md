@@ -890,6 +890,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **APPROVED GOOD-DODGE
+  PRODUCTIONIZATION IN FLIGHT.** Derive the shared READY anchor plus four transparent fixed-canvas
+  active cards losslessly from the approved V2 gate, preserving its corrected sword layering;
+  retime the isolated/default-off Godot proof to **1/2/1/2 ticks at 30 Hz** and restrained
+  **25–35 display-pixel** Godot-owned root travel. GOOD only: no smear, GREAT/PERFECT/parry,
+  gameplay, protocol, production actor replacement, main merge, or default-on change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CROSS-COMPUTER
   HANDOFF COMPLETE + FEATURE BRANCH PUSHED.** Bill's approval of the corrected GOOD-dodge
   four-pose V2 gate, the locked anchor/V2 hashes, the exact GOOD-only next task, stop boundaries,
