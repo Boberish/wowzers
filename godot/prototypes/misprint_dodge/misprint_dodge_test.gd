@@ -6,7 +6,9 @@ var _hud: Control
 var _panel: PanelContainer
 var _mode_label: Label
 var _auto_button: Button
+var _view_button: Button
 var _auto := true
+var _clean_view := true
 var _policy: DuelistPolicy
 var _last_policy_tick := -1
 var _mode := "normal"
@@ -18,7 +20,7 @@ func _ready() -> void:
 	# from the older Duelist actor and full-screen flipbook stack.
 	ArtV2.actors = false
 	ArtV2.scene = "stack_atrium"
-	ArtV2.dash = true
+	ArtV2.dash = false
 	ArtV2.vfx = false
 	_hud = (load("res://game/raid_main.tscn") as PackedScene).instantiate()
 	add_child(_hud)
@@ -32,7 +34,7 @@ func _build_controls() -> void:
 	_panel = PanelContainer.new()
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_panel.position = Vector2(-346, 166)
-	_panel.size = Vector2(330, 180)
+	_panel.size = Vector2(330, 220)
 	_panel.z_index = 100
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.055, 0.07, 0.08, 0.94)
@@ -70,15 +72,22 @@ func _build_controls() -> void:
 	_auto_button.text = "AUTO: ON"
 	_auto_button.pressed.connect(_toggle_auto)
 	row.add_child(_auto_button)
+	_view_button = Button.new()
+	_view_button.text = "VIEW: CLEAN"
+	_view_button.pressed.connect(_toggle_view)
+	box.add_child(_view_button)
 	var help := Label.new()
-	help.text = "AUTO uses the real policy/input queue.\nTurn it off to answer with 1/Space + 2."
+	help.text = "CLEAN hides the combat HUD and verdicts.\nAUTO OFF: answer with 1/Space + 2."
 	help.add_theme_font_size_override("font_size", 12)
 	help.add_theme_color_override("font_color", Color(0.78, 0.82, 0.82))
 	box.add_child(help)
 
 func _restart(mode: String) -> void:
 	_mode = mode
+	ArtV2.dash = not _clean_view
 	_hud.call("_launch", "tank", "", "mistral")
+	if _clean_view:
+		_apply_clean_view()
 	var ctrl: CombatController = _hud.get("_ctrl")
 	var state: CombatState = ctrl.state
 	if mode == "high_flow":
@@ -106,6 +115,23 @@ func _apply_high_flow(state: CombatState) -> void:
 func _toggle_auto() -> void:
 	_auto = not _auto
 	_auto_button.text = "AUTO: ON" if _auto else "AUTO: OFF"
+
+func _toggle_view() -> void:
+	_clean_view = not _clean_view
+	_view_button.text = "VIEW: CLEAN" if _clean_view else "VIEW: FULL HUD"
+	_restart(_mode)
+
+func _apply_clean_view() -> void:
+	var ui: Control = _hud.get("_ui") as Control
+	var stage: RaidStage2D = _hud.get("_stage2d") as RaidStage2D
+	if ui == null:
+		return
+	# The proof is for the actor silhouette, so CLEAN means exactly that: retain
+	# the live combat stage and suppress every HUD child, including the central
+	# judgment channel, class band, raid frames, dev controls, and verdicts.
+	for child in ui.get_children():
+		if child is CanvasItem and child != stage:
+			(child as CanvasItem).visible = false
 
 func _process(_delta: float) -> void:
 	if not _auto or _hud == null:

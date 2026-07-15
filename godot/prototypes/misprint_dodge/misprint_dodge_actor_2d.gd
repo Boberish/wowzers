@@ -2,8 +2,9 @@
 ##
 ## The real reducer emits `duel_answer`; RaidStage2D forwards that committed
 ## event through Actor2D.graded_react(), and sync_tick() advances the pixels from
-## CombatState.tick. No wall-clock tween owns pose timing. The four active cards
-## therefore hold for exactly 1/2/1/2 simulation ticks at every render rate.
+## CombatState.tick owns pose timing. The four active cards hold for exactly
+## 2/4/2/2 simulation ticks; render-only root easing softens their travel without
+## changing which committed tick owns each silhouette.
 class_name MisprintDodgeActor2D
 extends Actor2D
 
@@ -17,13 +18,14 @@ const FRAME_PATHS := [
 const LOGICAL_CANVAS := Vector2(768.0, 768.0)
 const ART_SCALE := 0.66
 const TRAVEL_PX := 30.0
-const ACTIVE_TICKS := 6
+const ACTIVE_TICKS := 10
+const ROOT_EASE_S := 0.05
 const CORAL := Color(0.96, 0.33, 0.25, 0.42)
 const COBALT := Color(0.12, 0.34, 0.86, 0.38)
 
 ## Root travel by active age. The card art supplies the body deformation; this
 ## supplies the restrained 25–35 px screen move kept out of the approved art.
-const TRAVEL := [0.0, 0.46, 1.0, 0.72, 0.38, 0.14, 0.0]
+const TRAVEL := [0.0, 0.10, 0.28, 0.52, 0.76, 1.0, 0.84, 0.64, 0.40, 0.18, 0.0]
 
 var _frames: Array[Texture2D] = []
 var _visual: Node2D
@@ -35,6 +37,8 @@ var _start_tick := -1
 var _frame_i := 0
 var _age := -1
 var _start_count := 0
+var _travel_target := 0.0
+var _travel_tween: Tween = null
 
 static func try_make() -> MisprintDodgeActor2D:
 	var actor := MisprintDodgeActor2D.new()
@@ -95,24 +99,35 @@ func _apply_age(age: int) -> void:
 	if age < 0 or age >= ACTIVE_TICKS:
 		_start_tick = -1
 		_age = -1
-		_visual.position.x = 0.0
+		_move_root(0.0)
 		_set_frame(0)
 		_set_echo(false)
 		return
 	var next_frame := 1
-	if age == 0:
-		next_frame = 1 # COMPRESS — 1 tick
-	elif age <= 2:
-		next_frame = 2 # DEEPEST CLEARANCE — 2 ticks
-	elif age == 3:
-		next_frame = 3 # LOW SETTLE / OVERSHOOT — 1 tick
+	if age <= 1:
+		next_frame = 1 # COMPRESS — 2 ticks
+	elif age <= 5:
+		next_frame = 2 # DEEPEST CLEARANCE — 4 ticks
+	elif age <= 7:
+		next_frame = 3 # LOW SETTLE / OVERSHOOT — 2 ticks
 	else:
 		next_frame = 4 # NEAR-READY RECOVERY — 2 ticks
 	_set_frame(next_frame)
-	_visual.position.x = TRAVEL_PX * float(TRAVEL[age])
+	_move_root(TRAVEL_PX * float(TRAVEL[age]))
 	# Departure and first clearance only. Visibility is tick-owned, so a slow
 	# renderer cannot accidentally stretch the echoes into gameplay timing.
-	_set_echo(age == 1 or age == 2)
+	_set_echo(age == 2 or age == 3)
+
+func _move_root(target_x: float) -> void:
+	_travel_target = target_x
+	if _travel_tween != null and _travel_tween.is_valid():
+		_travel_tween.kill()
+	if not is_inside_tree():
+		_visual.position.x = target_x
+		return
+	_travel_tween = create_tween()
+	_travel_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_travel_tween.tween_property(_visual, "position:x", target_x, ROOT_EASE_S)
 
 func _set_frame(frame_i: int) -> void:
 	_frame_i = clampi(frame_i, 0, _frames.size() - 1)
@@ -140,7 +155,8 @@ func debug_snapshot() -> Dictionary:
 		"start_tick": _start_tick,
 		"age": _age,
 		"frame": _frame_i,
-		"travel": _visual.position.x,
+		"travel": _travel_target,
+		"render_travel": _visual.position.x,
 		"echo": _coral.visible and _cobalt.visible,
 		"starts": _start_count,
 		"sizes": sizes,

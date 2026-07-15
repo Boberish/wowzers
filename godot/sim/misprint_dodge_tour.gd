@@ -9,7 +9,7 @@ var actor: MisprintDodgeActor2D
 var phase := 0
 var render_wait := 0
 var pending_name := ""
-var normal_targets := [0, 1, 2, 3, 4, 5]
+var normal_targets := [0, 1, 2, 4, 6, 8, 9]
 var normal_i := 0
 var normal_start_tick := -1
 var stress_starts: Array[int] = []
@@ -24,7 +24,7 @@ func _initialize() -> void:
 	MisprintDodgeProof.enabled = true
 	ArtV2.actors = false
 	ArtV2.scene = "stack_atrium"
-	ArtV2.dash = true
+	ArtV2.dash = false
 	ArtV2.vfx = false
 	hud = (load("res://game/raid_main.tscn") as PackedScene).instantiate()
 	root.add_child(hud)
@@ -46,6 +46,7 @@ func _queue_shot(name: String) -> void:
 
 func _start(mode: String) -> void:
 	hud.call("_launch", "tank", "", "mistral")
+	_apply_clean_view()
 	hud.set_process(false)
 	var ctrl: CombatController = hud.get("_ctrl")
 	ctrl.set_process(false)
@@ -65,6 +66,15 @@ func _start(mode: String) -> void:
 	ctrl.state.seats[0].policy = policy
 	actor = hud._stage2d.actors[0] as MisprintDodgeActor2D
 	ticks_in_phase = 0
+
+func _apply_clean_view() -> void:
+	var ui: Control = hud.get("_ui") as Control
+	var stage: RaidStage2D = hud.get("_stage2d") as RaidStage2D
+	if ui == null:
+		return
+	for child in ui.get_children():
+		if child is CanvasItem and child != stage:
+			(child as CanvasItem).visible = false
 
 func _step_tick() -> void:
 	var ctrl: CombatController = hud.get("_ctrl")
@@ -125,7 +135,7 @@ func _process(_delta: float) -> bool:
 			if stress_starts.size() >= 3:
 				var gap1 := stress_starts[1] - stress_starts[0]
 				var gap2 := stress_starts[2] - stress_starts[1]
-				_chk("high-flow cadence exercises the six-tick sequence", gap1 >= 6 and gap2 >= 6)
+				_chk("high-flow cadence overlaps ten-tick recovery", gap1 < 10 or gap2 < 10)
 				_chk("high-flow restart is immediate pose 02", snap["age"] == 0 and snap["frame"] == 1)
 				phase = 5
 				_queue_shot("04_high_flow_live")

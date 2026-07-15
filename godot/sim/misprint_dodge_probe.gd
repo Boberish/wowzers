@@ -29,18 +29,18 @@ func _initialize() -> void:
 	_chk("landed dodge starts immediately", actor.debug_snapshot()["frame"] == 1 \
 		and actor.debug_snapshot()["age"] == 0 and actor.debug_snapshot()["starts"] == 1)
 
-	var expected_frames := [1, 2, 2, 3, 4, 4]
-	var expected_echo := [false, true, true, false, false, false]
-	for age in 6:
+	var expected_frames := [1, 1, 2, 2, 2, 2, 3, 3, 4, 4]
+	var expected_echo := [false, false, true, true, false, false, false, false, false, false]
+	for age in 10:
 		actor.sync_tick(100 + age)
 		snap = actor.debug_snapshot()
 		_chk("age %d frame %d" % [age, expected_frames[age]], int(snap["frame"]) == expected_frames[age])
 		_chk("age %d echo one-tick gate" % age, bool(snap["echo"]) == expected_echo[age])
 	_chk("travel stays inside brief", float(actor.debug_snapshot()["travel"]) >= 0.0 \
 		and float(actor.debug_snapshot()["travel"]) <= MisprintDodgeActor2D.TRAVEL_PX * 1.06)
-	actor.sync_tick(106)
+	actor.sync_tick(110)
 	snap = actor.debug_snapshot()
-	_chk("six active ticks return to ready", snap["frame"] == 0 and snap["age"] == -1 \
+	_chk("ten active ticks return to ready", snap["frame"] == 0 and snap["age"] == -1 \
 		and is_zero_approx(float(snap["travel"])) and not bool(snap["echo"]))
 
 	actor.sync_tick(120)
