@@ -77,7 +77,14 @@ func setup(s: CombatState, aspects: Dictionary, cast: Array = [],
 				"healer": "well"}.get(key, "duelist")
 			aspect = String(aspects.get(key, ""))
 		_seat_keys.append(key)
-		var a := Actor2D.make(id, aspect)
+		# MISPRINT MASQUERADE (2026-07-15): the isolated dodge proof may replace
+		# only the Duelist body inside its dedicated test scene/tour. Default OFF,
+		# missing prototype assets fall through to the production actor untouched.
+		var a: Actor2D = null
+		if MisprintDodgeProof.enabled and id == "duelist":
+			a = MisprintDodgeActor2D.try_make()
+		if a == null:
+			a = Actor2D.make(id, aspect)
 		_world.add_child(a)
 		actors.append(a)
 	_fxl = Node2D.new()
@@ -124,6 +131,12 @@ func _draw() -> void:
 func sync(s: CombatState) -> void:
 	if s == null or boss_actor == null:
 		return
+	# Tick-stamp the prototype BEFORE this frame's event drain. A committed
+	# duel_answer can then begin at the exact reducer tick that produced it.
+	if MisprintDodgeProof.enabled:
+		for actor in actors:
+			if actor is MisprintDodgeActor2D:
+				(actor as MisprintDodgeActor2D).sync_tick(s.tick)
 	if s.over and not _over_done:
 		_over_done = true
 		if s.won:
