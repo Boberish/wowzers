@@ -889,6 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **AUTHORITATIVE USER-REFERENCE
+  DUELIST COMPOSITE IN PROGRESS.** Bill supplied `goodhands.png` and `goodsword.png` as the
+  source-of-truth pair after the earlier generated revisions drifted. The new candidate locks the
+  entire character and both detailed closed-glove hands to `goodhands.png`, importing only the
+  centered rapier geometry and corrected viewer-left / her-right non-sword arm length from
+  `goodsword.png`. Static approval concept only; no animation, runtime, gameplay, or default change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CORRECT-HAND-SOURCE
   RETRY v5 GENERATED; BILL'S VERDICT OWED.** `duelist_defensive_guard_v5_good_hands.png` restarts
   from Round-3 v2 — the focused revision generated second and the correct solid-hand source — as
