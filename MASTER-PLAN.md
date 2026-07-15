@@ -889,13 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST GEOMETRY
-  CORRECTION GENERATED; BILL'S VERDICT OWED.** Round-3 v2 remains the approved-hands reference;
-  `duelist_defensive_guard_v3_geometry.png` preserves its solid fingerless mitten/fist treatment
-  while correcting the rapier to one collinear tip→blade→guard-center→grip axis and lengthening/
-  re-articulating the viewer-right sword arm into a proportionate shoulder→elbow→wrist chain.
-  The elbow remains bent and the stance remains defensive rather than a thrust. Built-in precise
-  image edit; static concept only, no animation/runtime/gameplay/default change.
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST GEOMETRY
+  CORRECTION — SIDE INTERPRETATION FIX.** Round-3 v2 remains the approved-hands reference and v3
+  correctly routes the rapier through the guard, but “her right arm” meant the **viewer-left,
+  non-sword arm**; v3 lengthened the wrong side. Preserve the blade/guard correction + both solid
+  hands, restore the viewer-right sword arm to v2's proportions, and modestly lengthen only the
+  viewer-left non-sword shoulder→elbow→wrist chain. Static concept edit only; no animation/runtime/
+  gameplay/default change. *(Codex image-generation correction in progress.)*
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST FOCUSED REVISION
   GENERATED; BILL'S VERDICT OWED.** `design_round_03/duelist_defensive_guard_v2.png` combines
