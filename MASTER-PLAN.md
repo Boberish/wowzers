@@ -890,6 +890,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **BILL MOTION
+  EXAGGERATION TEST IN FLIGHT.** Bill approves the revised 333 ms timing and wants to push
+  smoothing/blur deliberately too far, then back down to the best midpoint. Add an isolated
+  runtime toggle between the current baseline and an overcooked treatment: longer render-only
+  root easing plus layered directional soft trails, using the same approved cards and tick-owned
+  2/4/2/2 cadence. Default the test wrapper/tour to PUSHED for judgment; keep the selector and
+  production game default-off. No new art, gameplay, protocol, production actor, or `main` change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `f0bc5a2`, NOT
   MERGED** · §GRAPHICS — **BILL FEEL REVISION COMPLETE: READABLE DUCK + CLEAN
   THEATER; REVISED VERDICT NEXT.** Bill's first Windows verdict: promising, but the six-tick
