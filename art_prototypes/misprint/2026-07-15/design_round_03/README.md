@@ -6,7 +6,7 @@ Status: static approval concept only. No animation/runtime/default decision.
 
 Approved-hands reference: `duelist_defensive_guard_v2.png`.
 
-Latest geometry-corrected candidate: `duelist_defensive_guard_v4_correct_arm.png`.
+Latest geometry-corrected candidate: `duelist_defensive_guard_v5_good_hands.png`.
 
 The built-in image-generation tool combined Round-2 A's angular high ponytail
 and simple cropped costume with Round-2 B's cleaner circular-guard rapier and
@@ -32,3 +32,9 @@ balanced bend, and modestly lengthens the correct limb: her anatomical right,
 the viewer-left non-sword shoulder→elbow→wrist chain. The solid fingerless
 mitten/fist treatment remains intact. V2 stays alongside it as the locked
 hand-shape comparison source; V3 is retained as the side-interpretation audit.
+
+V4 fixed the correct arm but was derived from the geometry pass, so its fists
+drifted away from the approved rounded solid-mitten treatment. V5 restarts from
+v2 as the locked edit target, keeps its smooth featureless hand design, redraws
+the blade through the center of the guard, and modestly lengthens the viewer-left
+non-sword arm. V4 remains only as a correction-history artifact.

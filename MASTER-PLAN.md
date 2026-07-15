@@ -889,13 +889,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CORRECT-HAND-SOURCE
-  RETRY.** The good solid hand design is the focused revision generated second, saved as Round-3
-  `duelist_defensive_guard_v2.png`; prior geometry edits used it only as a reference and let the
-  model reinterpret the fists. Retry from **v2 as the locked edit target**, borrowing only v4's
-  blade-through-guard axis and corrected viewer-left/non-sword arm length. Preserve both v2 hand
-  silhouettes without redesign. Static concept edit only; no animation/runtime/gameplay/default
-  change. *(Codex image-generation correction in progress.)*
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CORRECT-HAND-SOURCE
+  RETRY v5 GENERATED; BILL'S VERDICT OWED.** `duelist_defensive_guard_v5_good_hands.png` restarts
+  from Round-3 v2 — the focused revision generated second and the correct solid-hand source — as
+  the locked edit target, rather than using a later geometry pass as its base. It retains the
+  smooth rounded featureless mitten/fist silhouettes, redraws the blade through the exact center
+  of the circular guard, and modestly lengthens her anatomical right / viewer-left non-sword arm.
+  V4 is retained only as correction history. Built-in precise image edit; static concept only,
+  no animation/runtime/gameplay/default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST GEOMETRY
   CORRECTION v4 GENERATED; BILL'S VERDICT OWED.** `duelist_defensive_guard_v4_correct_arm.png`
