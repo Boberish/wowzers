@@ -889,6 +889,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CORRECT-HAND-SOURCE
+  RETRY.** The good solid hand design is the focused revision generated second, saved as Round-3
+  `duelist_defensive_guard_v2.png`; prior geometry edits used it only as a reference and let the
+  model reinterpret the fists. Retry from **v2 as the locked edit target**, borrowing only v4's
+  blade-through-guard axis and corrected viewer-left/non-sword arm length. Preserve both v2 hand
+  silhouettes without redesign. Static concept edit only; no animation/runtime/gameplay/default
+  change. *(Codex image-generation correction in progress.)*
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST GEOMETRY
   CORRECTION v4 GENERATED; BILL'S VERDICT OWED.** `duelist_defensive_guard_v4_correct_arm.png`
   preserves the v2 solid fingerless hands and v3's corrected collinear blade→guard-center→grip,
