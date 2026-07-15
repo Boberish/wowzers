@@ -759,14 +759,16 @@ secondary abilities, and fast cancelable actor payoff. C0 + C1 are complete (sel
 `3da278f`); C2 SceneKit merged `da314e9` under Bill's assume-pass instruction. P3 environment
 contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-default debt.
 
-**⚠ 2026-07-15 — MISPRINT MASQUERADE + the dodge proof are IN THE REPO but NOT APPROVED.** The
-Codex art handoff is imported at `art_prototypes/misprint/2026-07-15/` (doc of record:
-`docs/ART_HANDOFF_2026-07-15.md` inside that folder) — the selected direction board, the 3 screen
-bounds, and six transparent dodge pose cards. It is **available for an isolated Godot proof only**
-(pose-card texture swaps off the 30 Hz tick — no Spine/rig needed) and is **NOT a production
-replacement**: the current playable art stays default and untouched until that proof is accepted.
-Branch `art/misprint-dodge-proof` (pushed, unmerged). See the Coordination Log for the full spec,
-cadence, and acceptance questions.
+**⚠ 2026-07-15 — MISPRINT MASQUERADE + its isolated Godot dodge proof are BUILT but NOT
+APPROVED.** The Codex art handoff is imported at `art_prototypes/misprint/2026-07-15/` (doc of
+record: `docs/ART_HANDOFF_2026-07-15.md` inside that folder) — the selected direction board, the
+3 screen bounds, and six transparent dodge pose cards. The executable proof is isolated under
+`godot/prototypes/misprint_dodge/` on `codex/misprint-dodge-test` (`fc64636`): real 30 Hz
+pose-card swaps, root travel/echoes, actual Mistral HUD, and normal/high-flow replay controls.
+It is **NOT a production replacement**: the proof selector defaults OFF, the current playable art
+stays default, and no encounter/content/protocol was changed. Handoff branch
+`art/misprint-dodge-proof` is pushed/unmerged; proof branch is local/unmerged/unpushed pending
+Bill's feel verdict. See the Coordination Log for measurements and verification.
 
 **Now:** Gilded Reliquary 2D UI + PoseRig stage are playable and stay default throughout V2 work.
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
@@ -887,15 +889,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DODGE
-  ISOLATED GODOT PROOF.** Build the approved test only: import the six transparent pose cards
-  outside the production actor path; drive ready→duck→shift→clearance→settle→recover from
-  the real 30 Hz combat tick at 1/1/2/2/4 active ticks; add 70–100 px root travel plus compact
-  one-tick coral/cobalt departure/clearance echoes; present it behind the real Duelist HUD against
-  Mistral at normal and high-flow cadence. Current playable art stays default and untouched; no
-  production encounter wiring, no Spine/new graphics package, and STOP if new generated art is
-  required. Verify import geometry, headless probe/smoke, WebGL-safe primitives, and non-headless
-  visual captures. *(Codex session; in progress.)*
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `fc64636`, NOT merged or
+  pushed** · §GRAPHICS — **MISPRINT DODGE ISOLATED GODOT PROOF COMPLETE; AWAITS BILL'S FEEL
+  VERDICT, STILL NOT APPROVED FOR PRODUCTION.** `godot/prototypes/misprint_dodge/` supplies the
+  unreachable-from-front-door test scene with real Mistral HUD/input, NORMAL/HIGH-FLOW/AUTO
+  controls, and a proof-only selector defaulting OFF; the only shared seam is a guarded Duelist
+  factory/sync branch in `raid_stage_2d.gd`, with missing assets and default-OFF both falling back
+  to the current actor. A reducer-emitted landed dodge/weave begins immediately and holds cards
+  02–06 for exactly **1/1/2/2/4 ticks**, with 91.16 px peak root travel and coral/cobalt echoes
+  only at ages 1–2; rapid successes cancel/restart immediately at compression. No CombatCore,
+  encounter/content, HUD, protocol, shader, particle, or library change. The runtime PNGs are
+  SHA-256-identical to the handoff; the handoff's “all 553×466” claim was false (actual range
+  553–554 × 466–467), so the unedited pixels register inside a 554×467 logical card. Godot import:
+  lossless mode 0, mipmaps OFF, alpha-border repair ON, premultiply OFF. 1920×1080 normal +
+  six-beat/0.26 s high-flow captures show stable baselines, readable single rapier/lowered head/
+  coat tails/legs, compact echoes, and an unobstructed timing instrument; no new/redrawn art was
+  needed. VERIFY: `misprint_dodge_probe` ALL OK · `artv2_probe` 201 checks · `ui_smoke_raid` ALL
+  OK · `ab-gate raid_sim --seeds=30 --boss=mistral` BYTE-IDENTICAL (CSV MD5 `45dabf2d…`) ·
+  non-headless `misprint_dodge_tour` ALL OK · interactive scene booted 240 rendered frames.
+  `README.md` in the prototype records commands/results. No `BUILD-LEDGER.md` row: the work only
+  realizes the already-recorded unapproved experiment and creates no approved production slate.
 
 - ☑ 2026-07-15 · `art/misprint-dodge-proof` → **PUSHED, NOT merged** · §GRAPHICS — **CODEX ART
   HANDOFF IMPORTED: the MISPRINT MASQUERADE direction + the first dodge animation proof —
