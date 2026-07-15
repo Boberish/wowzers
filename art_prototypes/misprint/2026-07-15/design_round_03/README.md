@@ -12,7 +12,9 @@ V7 source archive: `user_refs/almsot-swordproblem.png`.
 
 Selected character/sword base: `duelist_defensive_guard_v8_goodsword_goodhands.png`.
 
-Latest guard candidate: `duelist_defensive_guard_v9_cup_guard.png`.
+Latest generated guard candidate: `duelist_defensive_guard_v9_cup_guard.png`.
+
+Bill's selected current anchor: `../dodge_round_01/user_refs/newSwordGaurd.png`.
 
 The built-in image-generation tool combined Round-2 A's angular high ponytail
 and simple cropped costume with Round-2 B's cleaner circular-guard rapier and
@@ -93,3 +95,8 @@ apex on the same weapon axis. Only a small dark grip transition remains visible,
 so animation no longer depends on individual sword-hand finger construction.
 The first cup pass exposed too much glove and the second became an oversized
 oval shell; both were discarded. V8 remains the locked pre-guard comparison.
+
+Bill subsequently selected the attached `newSwordGaurd.png`—the earlier,
+broader cup treatment—as the best whole character. That byte-identical file is
+now the animation anchor under `dodge_round_01/user_refs/`; it supersedes v9 as
+the selected design without deleting the iteration history here.
