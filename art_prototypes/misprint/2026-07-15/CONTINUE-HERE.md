@@ -61,19 +61,34 @@ The branch now productionizes **only this approved GOOD dodge**:
    Its small test controls remain available; `VIEW: FULL HUD` restores the
    complete play surface.
 
-Initial implementation commit: `dc5dedb`; readability revision: `f0bc5a2`.
+Initial implementation commit: `dc5dedb`; readability revision: `f0bc5a2`;
+live motion lab: `987e1cf`.
 The source cards are under
 `dodge_round_01/production_cards/`; the byte-identical runtime copies are under
 `godot/prototypes/misprint_dodge/frames_good_v2/`. The exact build and
 verification record is in `godot/prototypes/misprint_dodge/README.md`.
 
-## Stop here — Bill's revised verdict next
+## Live motion lab — tune here next
+
+The isolated wrapper defaults to an intentionally excessive `MOTION: PUSHED`
+pass and provides live EASE, TRAILS, SPREAD, OPACITY, and BLUR sliders. Use
+`MOTION: BASELINE` for an instant comparison; neither side changes the fixed
+2/4/2/2 tick pose cadence. Slider changes affect the active actor without a
+fight restart. The exaggerated defaults are 120 ms / 4 / 1.00× / 1.00× / 6 px.
+
+An early implementation bug placed the effect children at negative z, behind
+the stage environment. Commit `987e1cf` fixes the actor-local stack and the
+non-headless tour visibly confirms all four direction-aware trails. The next
+useful verdict is the five slider values at the best midpoint.
+
+## Stop here — Bill's tuned verdict next
 
 Do **not** add a smear frame yet. Do **not** begin GREAT, PERFECT, or parry art
-until Bill has seen and judged this slower, uncluttered GOOD-only runtime pass.
+until Bill has tuned and judged this slower, uncluttered GOOD-only runtime pass.
 Do not merge this branch to `main`. The next action is an interactive/visual
-verdict on the 333 ms clean-view revision: does the deep duck now read clearly
-and move smoothly enough before expanding the animation set?
+verdict on the 333 ms clean-view revision plus the chosen motion-lab values:
+does the deep duck now read clearly and move smoothly enough before expanding
+the animation set?
 
 The display result `GOOD` maps to the existing internal
 `StrikeRes.Grade.GOOD`; this task does not change grading logic.
@@ -120,6 +135,7 @@ computers simultaneously without first pushing one side.
 > approved GOOD-dodge runtime verdict described there: four transparent
 > fixed-canvas active cards from the V2 pose gate, 2/4/2/2 ticks at 30 Hz,
 > shared READY anchor, eased 30 px Godot-owned root motion, stage-only CLEAN
-> view by default, isolated/default-off.
+> view by default, and the isolated live motion sliders. Ask Bill for the five
+> selected values before promoting any treatment; keep it isolated/default-off.
 > Do not start GREAT/PERFECT/parry, change gameplay, replace production art, or
 > merge to main. Claim the work in the Coordination Log before editing.

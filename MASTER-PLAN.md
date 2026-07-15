@@ -890,13 +890,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **BILL MOTION
-  EXAGGERATION TEST IN FLIGHT.** Bill approves the revised 333 ms timing and wants to push
-  smoothing/blur deliberately too far, then back down to the best midpoint. Add an isolated
-  runtime toggle between the current baseline and an overcooked treatment: longer render-only
-  root easing plus layered directional soft trails, using the same approved cards and tick-owned
-  2/4/2/2 cadence. Default the test wrapper/tour to PUSHED for judgment; keep the selector and
-  production game default-off. No new art, gameplay, protocol, production actor, or `main` change.
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `987e1cf`, NOT
+  MERGED** · §GRAPHICS — **LIVE GOOD-DODGE MOTION LAB COMPLETE; BILL'S FIVE VALUES
+  NEXT.** Bill approves the revised 333 ms timing and wants to push smoothing/blur deliberately
+  too far, then back down to the best midpoint. The isolated wrapper now A/B toggles BASELINE
+  against an intentionally overcooked PUSHED treatment and exposes live EASE (20–200 ms), TRAILS
+  (0–4), SPREAD (0–1.50×), OPACITY (0–1.50×), and BLUR (0–12 px) sliders. Slider changes reach the
+  active actor without a restart; pose timing remains tick-owned 2/4/2/2. A visual-only z-order bug
+  initially hid active trails behind the environment; the committed non-negative actor stack keeps
+  all four direction-aware shader-softened trails visible behind the main card. Default wrapper/tour
+  = PUSHED; selector and production game remain default-off. No new art, gameplay, protocol,
+  production actor, or `main` change. VERIFY: interactive scene boot clean · `misprint_dodge_probe`
+  ALL OK including live knob mutation · `artv2_probe` 201 checks · `ui_smoke_raid` ALL OK · pinned
+  Mistral 30-seed A/B BYTE-IDENTICAL (CSV MD5 `45dabf2d00346bd184cdf6324918f9a6`) · non-headless
+  clean-view tour ALL OK with visible trails manually confirmed at COMPRESS/CLEARANCE/RECOVERY.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `f0bc5a2`, NOT
   MERGED** · §GRAPHICS — **BILL FEEL REVISION COMPLETE: READABLE DUCK + CLEAN

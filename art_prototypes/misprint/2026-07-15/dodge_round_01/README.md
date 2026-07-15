@@ -80,6 +80,20 @@ visually inspected at READY, COMPRESS, DEEPEST CLEARANCE, SETTLE, and RECOVERY.
 The full raid UI smoke and pinned Mistral A/B gate also pass; the reducer output
 remains byte-identical. Stop for Bill's verdict on this slower clean-view pass.
 
+## Live motion lab
+
+Commit `987e1cf` adds an isolated, presentation-only A/B lab around the same
+approved cards and fixed 333 ms cadence. `MOTION: PUSHED` defaults to a visibly
+excessive four-trail treatment; `MOTION: BASELINE` retains the readability
+revision without trails. EASE (20–200 ms), TRAILS (0–4), SPREAD (0–1.50×),
+OPACITY (0–1.50×), and BLUR (0–12 px) update the active actor live.
+
+The initial effect nodes were active but hidden behind the stage because their
+local z values were negative. The committed version uses a non-negative local
+stack, keeps the main silhouette above every trail, and has been visually
+confirmed in the real non-headless Mistral stage. Stop for Bill to report the
+five preferred slider values; do not promote the exaggerated defaults.
+
 ## Sword-layer correction
 
 Bill approved the four poses and caught a foreground-order error in panels 2

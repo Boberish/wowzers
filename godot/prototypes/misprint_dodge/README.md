@@ -17,7 +17,8 @@ gaps. `AUTO` routes real `DuelistPolicy` actions through the controller input
 queue; turn it off to use the normal gameplay keys. The wrapper opens in
 `VIEW: CLEAN`, which retains the live stage and actors while hiding the combat
 HUD. Toggle it to `VIEW: FULL HUD` to inspect the same proof in the complete
-play surface.
+play surface. It also opens in `MOTION: PUSHED`; toggle to `MOTION: BASELINE`
+for the approved uncluttered comparison.
 
 ## Approved V2 cards
 
@@ -51,8 +52,8 @@ checked by the build/verification workflow.
 - Holds are exactly **2 / 4 / 2 / 2 ticks** at 30 Hz; READY returns at age 10
   (333 ms total). DEEPEST CLEARANCE therefore reads for 133 ms.
 - Godot owns root motion: `30 px` peak, inside the approved 25–35 px range.
-  Tick-owned targets remain deterministic; a render-only 50 ms sine ease
-  softens the visible translation between those targets.
+  Tick-owned targets remain deterministic. BASELINE uses a render-only 50 ms
+  sine ease; PUSHED exposes its render easing as a live slider.
 - The historical compact coral/cobalt duplicates remain behind CLEARANCE at
   ages 2–3. No smear frame, particles, shader, or new runtime library exists.
 - Repeated successes cancel/restart immediately at COMPRESS.
@@ -61,6 +62,26 @@ checked by the build/verification workflow.
 - CLEAN view is stage-only by default: the judgment channel, class band,
   top/side rails, dev widgets, and verdict overlays are suppressed. The test
   wrapper's controls remain available, and FULL HUD rebuilds the unhidden HUD.
+
+## Live motion lab
+
+The isolated wrapper exposes five presentation-only sliders. They update the
+active actor on its next tick without restarting the fight, and never enter
+combat state:
+
+| Knob | Range | Exaggerated default |
+|---|---:|---:|
+| EASE | 20–200 ms | 120 ms |
+| TRAILS | 0–4 | 4 |
+| SPREAD | 0–1.50× | 1.00× |
+| OPACITY | 0–1.50× | 1.00× |
+| BLUR | 0–12 px | 6 px |
+
+PUSHED uses four direction-aware tinted silhouettes, each shader-softened and
+kept behind the main card. The local actor stack uses non-negative z-order;
+the first implementation's negative effect z values put the trails behind the
+stage environment even though the nodes reported visible. The visual tour—not
+the visibility boolean—is the acceptance proof for this effect.
 
 The older six-card proof remains in `frames/` only as historical evidence; it
 is no longer the active card set.
@@ -74,13 +95,14 @@ godot --headless --path godot --script res://sim/ui_smoke_raid.gd
 scripts/ab-gate.sh raid_sim --seeds=30 --boss=mistral
 godot --path godot --rendering-driver opengl3 --resolution 1920x1080 \
   --script res://sim/misprint_dodge_tour.gd \
-  -- --out=/tmp/misprint-good-readable-clean
+  -- --out=/tmp/misprint-good-live-sliders
 ```
 
 Results: `misprint_dodge_probe` ALL OK · `artv2_probe` 201 checks ·
 `ui_smoke_raid` ALL OK · A/B BYTE-IDENTICAL (CSV MD5
 `45dabf2d00346bd184cdf6324918f9a6`) · non-headless tour ALL OK. The visual
 tour confirmed shared ground contact, readable single rapier/cup guard, a
-sustained deep-clearance silhouette, stage-only clean framing, smooth root
-progression, and stable high-flow restart behavior. The task stops here for
-Bill's revised GOOD-runtime verdict.
+sustained deep-clearance silhouette, stage-only clean framing, visibly rendered
+directional trails, and stable high-flow restart behavior. The probe also
+changes the live knobs on an active actor without restart. The task stops here
+for Bill to tune the motion lab and report the preferred values.
