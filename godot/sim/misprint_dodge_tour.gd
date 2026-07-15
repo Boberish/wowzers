@@ -22,6 +22,7 @@ func _initialize() -> void:
 			out_dir = arg.substr("--out=".length())
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	MisprintDodgeProof.enabled = true
+	MisprintDodgeProof.pushed_motion = true
 	ArtV2.actors = false
 	ArtV2.scene = "stack_atrium"
 	ArtV2.dash = false
@@ -115,6 +116,9 @@ func _process(_delta: float) -> bool:
 				_step_tick()
 				return false
 			_chk("normal pose age %d reached exactly" % target, age == target)
+			if target == 1:
+				_chk("pushed tour renders four motion trails", bool(snap["pushed"]) \
+					and int(snap["trails"]) == 4)
 			_queue_shot("01_normal_age_%02d" % target)
 			normal_i += 1
 			if normal_i >= normal_targets.size():
@@ -149,6 +153,7 @@ func _process(_delta: float) -> bool:
 			_chk("prototype never enables production ArtV2 actor", not ArtV2.actors)
 			print("MISPRINT DODGE TOUR: %s -> %s" % ["ALL OK" if fails == 0 else "FAIL — %d" % fails, out_dir])
 			MisprintDodgeProof.enabled = false
+			MisprintDodgeProof.pushed_motion = false
 			quit(0 if fails == 0 else 1)
 			return true
 	return false
