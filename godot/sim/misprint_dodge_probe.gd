@@ -10,16 +10,15 @@ func _chk(name: String, ok: bool) -> void:
 
 func _initialize() -> void:
 	var actor := MisprintDodgeActor2D.try_make()
-	_chk("six runtime cards load", actor != null)
+	_chk("five runtime cards load", actor != null)
 	if actor == null:
 		quit(1)
 		return
 	root.add_child(actor)
 	var snap: Dictionary = actor.debug_snapshot()
 	var sizes: Array = snap["sizes"]
-	_chk("six source sizes reported", sizes.size() == 6)
-	_chk("source-size discrepancy preserved", sizes == [Vector2i(553, 466), Vector2i(554, 466),
-		Vector2i(553, 466), Vector2i(553, 467), Vector2i(554, 467), Vector2i(553, 467)])
+	_chk("fixed production canvas", sizes == [Vector2i(768, 768), Vector2i(768, 768),
+		Vector2i(768, 768), Vector2i(768, 768), Vector2i(768, 768)])
 
 	actor.sync_tick(100)
 	actor.graded_react("parry", StrikeRes.Grade.PERFECT)
@@ -30,27 +29,27 @@ func _initialize() -> void:
 	_chk("landed dodge starts immediately", actor.debug_snapshot()["frame"] == 1 \
 		and actor.debug_snapshot()["age"] == 0 and actor.debug_snapshot()["starts"] == 1)
 
-	var expected_frames := [1, 2, 3, 3, 4, 4, 5, 5, 5, 5]
-	var expected_echo := [false, true, true, false, false, false, false, false, false, false]
-	for age in 10:
+	var expected_frames := [1, 2, 2, 3, 4, 4]
+	var expected_echo := [false, true, true, false, false, false]
+	for age in 6:
 		actor.sync_tick(100 + age)
 		snap = actor.debug_snapshot()
 		_chk("age %d frame %d" % [age, expected_frames[age]], int(snap["frame"]) == expected_frames[age])
 		_chk("age %d echo one-tick gate" % age, bool(snap["echo"]) == expected_echo[age])
 	_chk("travel stays inside brief", float(actor.debug_snapshot()["travel"]) >= 0.0 \
 		and float(actor.debug_snapshot()["travel"]) <= MisprintDodgeActor2D.TRAVEL_PX * 1.06)
-	actor.sync_tick(110)
+	actor.sync_tick(106)
 	snap = actor.debug_snapshot()
-	_chk("ten active ticks return to ready", snap["frame"] == 0 and snap["age"] == -1 \
+	_chk("six active ticks return to ready", snap["frame"] == 0 and snap["age"] == -1 \
 		and is_zero_approx(float(snap["travel"])) and not bool(snap["echo"]))
 
 	actor.sync_tick(120)
 	actor.graded_react("weave", StrikeRes.Grade.PERFECT)
-	actor.sync_tick(128)
+	actor.sync_tick(124)
 	actor.graded_react("weave", StrikeRes.Grade.PERFECT)
 	snap = actor.debug_snapshot()
 	_chk("high-flow success cancels into immediate new pose", snap["starts"] == 3 \
-		and snap["start_tick"] == 128 and snap["age"] == 0 and snap["frame"] == 1)
+		and snap["start_tick"] == 124 and snap["age"] == 0 and snap["frame"] == 1)
 
 	# The stage seam is guarded and fail-safe: OFF gets the current actor; ON gets
 	# the prototype for duelist only. No production factory priority is changed.

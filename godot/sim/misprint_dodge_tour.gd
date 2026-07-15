@@ -9,7 +9,7 @@ var actor: MisprintDodgeActor2D
 var phase := 0
 var render_wait := 0
 var pending_name := ""
-var normal_targets := [0, 1, 2, 4, 6, 9]
+var normal_targets := [0, 1, 2, 3, 4, 5]
 var normal_i := 0
 var normal_start_tick := -1
 var stress_starts: Array[int] = []
@@ -121,11 +121,11 @@ func _process(_delta: float) -> bool:
 			if int(snap["starts"]) > before:
 				stress_starts.append(int(snap["start_tick"]))
 				if stress_starts.size() == 2:
-					_queue_shot("03_high_flow_cancel_restart")
+					_queue_shot("03_high_flow_next_success")
 			if stress_starts.size() >= 3:
 				var gap1 := stress_starts[1] - stress_starts[0]
 				var gap2 := stress_starts[2] - stress_starts[1]
-				_chk("high-flow successes overlap ten-tick recovery", gap1 < 10 or gap2 < 10)
+				_chk("high-flow cadence exercises the six-tick sequence", gap1 >= 6 and gap2 >= 6)
 				_chk("high-flow restart is immediate pose 02", snap["age"] == 0 and snap["frame"] == 1)
 				phase = 5
 				_queue_shot("04_high_flow_live")

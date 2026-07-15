@@ -2,29 +2,28 @@
 ##
 ## The real reducer emits `duel_answer`; RaidStage2D forwards that committed
 ## event through Actor2D.graded_react(), and sync_tick() advances the pixels from
-## CombatState.tick. No wall-clock tween owns pose timing. The five active cards
-## therefore hold for exactly 1/1/2/2/4 simulation ticks at every render rate.
+## CombatState.tick. No wall-clock tween owns pose timing. The four active cards
+## therefore hold for exactly 1/2/1/2 simulation ticks at every render rate.
 class_name MisprintDodgeActor2D
 extends Actor2D
 
 const FRAME_PATHS := [
-	"res://prototypes/misprint_dodge/frames/dodge_frame_01.png",
-	"res://prototypes/misprint_dodge/frames/dodge_frame_02.png",
-	"res://prototypes/misprint_dodge/frames/dodge_frame_03.png",
-	"res://prototypes/misprint_dodge/frames/dodge_frame_04.png",
-	"res://prototypes/misprint_dodge/frames/dodge_frame_05.png",
-	"res://prototypes/misprint_dodge/frames/dodge_frame_06.png",
+	"res://prototypes/misprint_dodge/frames_good_v2/good_ready.png",
+	"res://prototypes/misprint_dodge/frames_good_v2/good_compress.png",
+	"res://prototypes/misprint_dodge/frames_good_v2/good_clearance.png",
+	"res://prototypes/misprint_dodge/frames_good_v2/good_settle.png",
+	"res://prototypes/misprint_dodge/frames_good_v2/good_recover.png",
 ]
-const LOGICAL_CANVAS := Vector2(554.0, 467.0)
+const LOGICAL_CANVAS := Vector2(768.0, 768.0)
 const ART_SCALE := 0.66
-const TRAVEL_PX := 86.0
-const ACTIVE_TICKS := 10
+const TRAVEL_PX := 30.0
+const ACTIVE_TICKS := 6
 const CORAL := Color(0.96, 0.33, 0.25, 0.42)
 const COBALT := Color(0.12, 0.34, 0.86, 0.38)
 
 ## Root travel by active age. The card art supplies the body deformation; this
-## supplies the 70–100 px screen move the handoff explicitly keeps out of art.
-const TRAVEL := [0.0, 0.28, 0.68, 1.0, 1.06, 1.0, 0.82, 0.58, 0.32, 0.12, 0.0]
+## supplies the restrained 25–35 px screen move kept out of the approved art.
+const TRAVEL := [0.0, 0.46, 1.0, 0.72, 0.38, 0.14, 0.0]
 
 var _frames: Array[Texture2D] = []
 var _visual: Node2D
@@ -66,9 +65,7 @@ func _build() -> bool:
 func _make_card(tint: Color, z: int) -> Sprite2D:
 	var card := Sprite2D.new()
 	card.centered = false
-	# The handed-off files differ by one pixel (553–554 × 466–467). Keep every
-	# source byte untouched and register all six into one 554×467 logical card.
-	# Top-left registration preserves the generated sheet's shared baseline.
+	# Production cards share one fixed 768x768 canvas and Godot-owned root.
 	card.position = Vector2(-LOGICAL_CANVAS.x * 0.5, -LOGICAL_CANVAS.y)
 	card.self_modulate = tint
 	card.z_index = z
@@ -104,15 +101,13 @@ func _apply_age(age: int) -> void:
 		return
 	var next_frame := 1
 	if age == 0:
-		next_frame = 1
-	elif age == 1:
-		next_frame = 2
-	elif age <= 3:
-		next_frame = 3
-	elif age <= 5:
-		next_frame = 4
+		next_frame = 1 # COMPRESS — 1 tick
+	elif age <= 2:
+		next_frame = 2 # DEEPEST CLEARANCE — 2 ticks
+	elif age == 3:
+		next_frame = 3 # LOW SETTLE / OVERSHOOT — 1 tick
 	else:
-		next_frame = 5
+		next_frame = 4 # NEAR-READY RECOVERY — 2 ticks
 	_set_frame(next_frame)
 	_visual.position.x = TRAVEL_PX * float(TRAVEL[age])
 	# Departure and first clearance only. Visibility is tick-owned, so a slow
