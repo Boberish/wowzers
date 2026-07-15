@@ -889,6 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CROSS-COMPUTER
+  HANDOFF + BRANCH PUSH IN PROGRESS.** Record Bill's approval of the corrected GOOD-dodge
+  four-pose gate, add one explicit continuation entry point for a fresh chat/computer, verify
+  that every referenced source/proof image is committed, and push the complete experimental
+  branch to `origin/codex/misprint-dodge-test`. Documentation/coordination only: no merge to
+  `main`, runtime replacement, gameplay, protocol, or default change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOOD-DODGE POSE-GATE SWORD
   OCCLUSION v2 CORRECTED; BILL'S FINAL GATE VERDICT OWED.** Bill approves the four poses but caught one layer-order
   error: in panels 2 (top-right) and 3 (bottom-left), the sword crosses behind its wielding arm.
