@@ -889,6 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOODSWORD-BASE / GOODHANDS-ONLY
+  COMPOSITE IN PROGRESS.** Bill rejected v7's redrawn guard and made `user_refs/goodsword.png`
+  the locked whole-image base. Preserve its sword, circular guard, hilt, arm geometry, character,
+  pose, framing, palette, texture, and background; replace only its two simplified black gloves
+  with the detailed closed-glove construction from `user_refs/goodhands.png`. Static approval
+  concept only; no animation, runtime, gameplay, or default change.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST SWORD-CENTER
   MICRO-CORRECTION v7 GENERATED; BILL'S VERDICT OWED.** Bill selected his attached
   `almsot-swordproblem.png` as the locked best candidate; a byte-identical archive copy now lives
