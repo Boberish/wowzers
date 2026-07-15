@@ -890,13 +890,19 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **BILL FEEL REVISION IN
-  FLIGHT: READABLE DUCK + CLEAN THEATER.** Bill's first Windows verdict: promising, but the
-  six-tick pass is jerky/too fast to read as a duck and the top/side HUD obscures the actor.
-  GOOD-only presentation revision: lengthen the deepest-clearance read, soften card transitions
-  and root motion in the view layer, and make the isolated scene default to a clean-theater HUD
-  while preserving the timing lane and manual controls. No new pose/smear, gameplay, protocol,
-  production actor, default-on, or `main` change.
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `f0bc5a2`, NOT
+  MERGED** · §GRAPHICS — **BILL FEEL REVISION COMPLETE: READABLE DUCK + CLEAN
+  THEATER; REVISED VERDICT NEXT.** Bill's first Windows verdict: promising, but the six-tick
+  pass was jerky/too fast to read as a duck and the combat HUD obscured the actor. The same
+  approved GOOD-only cards now hold **2/4/2/2 ticks at 30 Hz** (ten ticks / 333 ms total), with
+  DEEPEST CLEARANCE visible for four ticks / 133 ms. Tick-owned root targets remain inside the
+  approved 30 px range; a render-only 50 ms sine ease softens visible translation. The isolated
+  wrapper now defaults to stage-only CLEAN view, suppressing every combat overlay while retaining
+  its small test controls; FULL HUD remains a toggle. No new pose/smear, gameplay, protocol,
+  production actor, default-on, or `main` change. VERIFY: `misprint_dodge_probe` ALL OK ·
+  `artv2_probe` 201 checks · `ui_smoke_raid` ALL OK · pinned Mistral 30-seed A/B BYTE-IDENTICAL
+  (CSV MD5 `45dabf2d00346bd184cdf6324918f9a6`) · non-headless clean-view tour ALL OK and READY /
+  COMPRESS / DEEPEST CLEARANCE / SETTLE / RECOVERY screenshots visually inspected.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `dc5dedb`, PUSHED, NOT
   merged** · §GRAPHICS — **APPROVED GOOD-DODGE PRODUCTIONIZATION COMPLETE; BILL'S RUNTIME

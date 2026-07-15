@@ -14,7 +14,10 @@ godot --path godot --rendering-driver opengl3 \
 The scene launches the real Duelist HUD against Mistral. `NORMAL` preserves the
 live songbook. `HIGH-FLOW` installs a test-only six-beat weave at 0.26-second
 gaps. `AUTO` routes real `DuelistPolicy` actions through the controller input
-queue; turn it off to use the normal gameplay keys.
+queue; turn it off to use the normal gameplay keys. The wrapper opens in
+`VIEW: CLEAN`, which retains the live stage and actors while hiding the combat
+HUD. Toggle it to `VIEW: FULL HUD` to inspect the same proof in the complete
+play surface.
 
 ## Approved V2 cards
 
@@ -45,14 +48,19 @@ checked by the build/verification workflow.
 ## Runtime contract
 
 - A landed dodge/weave starts COMPRESS on the reducer event's tick.
-- Holds are exactly **1 / 2 / 1 / 2 ticks** at 30 Hz; READY returns at age 6
-  (200 ms total).
+- Holds are exactly **2 / 4 / 2 / 2 ticks** at 30 Hz; READY returns at age 10
+  (333 ms total). DEEPEST CLEARANCE therefore reads for 133 ms.
 - Godot owns root motion: `30 px` peak, inside the approved 25–35 px range.
+  Tick-owned targets remain deterministic; a render-only 50 ms sine ease
+  softens the visible translation between those targets.
 - The historical compact coral/cobalt duplicates remain behind CLEARANCE at
-  ages 1–2. No smear frame, particles, shader, or new runtime library exists.
+  ages 2–3. No smear frame, particles, shader, or new runtime library exists.
 - Repeated successes cancel/restart immediately at COMPRESS.
 - The selector remains default-off and missing cards fall back to the current
   production actor.
+- CLEAN view is stage-only by default: the judgment channel, class band,
+  top/side rails, dev widgets, and verdict overlays are suppressed. The test
+  wrapper's controls remain available, and FULL HUD rebuilds the unhidden HUD.
 
 The older six-card proof remains in `frames/` only as historical evidence; it
 is no longer the active card set.
@@ -65,12 +73,14 @@ godot --headless --path godot --script res://sim/artv2_probe.gd
 godot --headless --path godot --script res://sim/ui_smoke_raid.gd
 scripts/ab-gate.sh raid_sim --seeds=30 --boss=mistral
 godot --path godot --rendering-driver opengl3 --resolution 1920x1080 \
-  --script res://sim/misprint_dodge_tour.gd -- --out=/tmp/misprint-good-v2b
+  --script res://sim/misprint_dodge_tour.gd \
+  -- --out=/tmp/misprint-good-readable-clean
 ```
 
 Results: `misprint_dodge_probe` ALL OK · `artv2_probe` 201 checks ·
 `ui_smoke_raid` ALL OK · A/B BYTE-IDENTICAL (CSV MD5
 `45dabf2d00346bd184cdf6324918f9a6`) · non-headless tour ALL OK. The visual
-tour confirmed shared ground contact, readable single rapier/cup guard, lowered
-clearance silhouette, unobstructed timing instrument, and stable high-flow
-cadence. The task stops here for Bill's GOOD-runtime verdict.
+tour confirmed shared ground contact, readable single rapier/cup guard, a
+sustained deep-clearance silhouette, stage-only clean framing, smooth root
+progression, and stable high-flow restart behavior. The task stops here for
+Bill's revised GOOD-runtime verdict.

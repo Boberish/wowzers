@@ -2,9 +2,10 @@
 
 Date: 2026-07-15
 
-Status: V2 static silhouette/consistency gate approved by Bill. Production
-cards/runtime are next; no smear, GREAT/PERFECT/parry art, gameplay, or default
-decision has been made.
+Status: V2 static silhouette/consistency gate approved by Bill; production
+cards and the slower clean-view runtime revision are complete on the isolated
+feature branch. Bill's revised runtime verdict is next. No smear,
+GREAT/PERFECT/parry art, gameplay, or production-default decision has been made.
 
 Latest pose gate: `good_duck_four_pose_gate_v2_sword_foreground.png`.
 
@@ -36,12 +37,13 @@ The board deliberately tests only four active authored silhouettes. It has no
 smear, afterimage, motion line, colored echo, or baked root travel. The weapon
 stays tucked during the low poses and returns toward guard only in pose 4.
 
-Bill approved the V2 pose language and consistency. The next isolated step is
-to derive production-size fixed-canvas cards and test the proposed 30 Hz holds:
-1 / 2 / 1 / 2 ticks, then return to the shared ready anchor. Start GOOD root
-translation at a restrained 25–35 display pixels and keep it Godot-owned. Do
-not import this composition board as runtime frames, and do not begin smear,
-GREAT, PERFECT, or parry art before the GOOD-only runtime verdict.
+Bill approved the V2 pose language and consistency. The initial isolated test
+used the proposed 30 Hz holds of 1 / 2 / 1 / 2 ticks, then returned to the
+shared ready anchor. Bill's first Windows runtime verdict superseded that
+cadence; see **Readable runtime revision** below. GOOD root translation remains
+within 25–35 display pixels and Godot-owned. Do not import this composition
+board as runtime frames, and do not begin smear, GREAT, PERFECT, or parry art
+before the revised GOOD-only runtime verdict.
 
 ## Production-card result
 
@@ -53,12 +55,30 @@ transparent 768×768 canvas with a shared foot/root anchor. Source cards live in
 `production_cards/`; byte-identical Godot copies live under
 `godot/prototypes/misprint_dodge/frames_good_v2/`.
 
-The isolated/default-off proof holds the active cards for **1 / 2 / 1 / 2
-ticks** at 30 Hz, returns to READY at tick 6, and uses `30 px` Godot-owned root
-travel. The 1920×1080 real-HUD tour passed at normal and six-beat/0.26-second
-high-flow cadence. No smear, GREAT/PERFECT/parry art, gameplay, protocol,
-production actor replacement, or default change was added. Stop for Bill's
-GOOD-runtime verdict.
+The first isolated/default-off proof held the active cards for **1 / 2 / 1 / 2
+ticks** at 30 Hz, returned to READY at tick 6, and used `30 px` Godot-owned root
+travel. That first 1920×1080 real-HUD tour passed at normal and
+six-beat/0.26-second high-flow cadence. No smear, GREAT/PERFECT/parry art,
+gameplay, protocol, production actor replacement, or default change was added.
+
+## Readable runtime revision
+
+Bill's first Windows verdict was that the six-tick pass was promising but
+jerky, too fast to read as a duck, and obscured by the combat UI. Commit
+`f0bc5a2` keeps the same five approved cards and changes only the isolated view
+presentation:
+
+- holds are **2 / 4 / 2 / 2 ticks** at 30 Hz, returning to READY at tick 10
+  (333 ms total);
+- DEEPEST CLEARANCE remains visible for four ticks / 133 ms;
+- the tick-owned 30 px root targets receive a render-only 50 ms sine ease;
+- `VIEW: CLEAN` is now stage-only by default, with all combat overlays hidden;
+- `VIEW: FULL HUD` remains available from the wrapper controls.
+
+The revised non-headless tour passed at normal and high-flow cadence and was
+visually inspected at READY, COMPRESS, DEEPEST CLEARANCE, SETTLE, and RECOVERY.
+The full raid UI smoke and pinned Mistral A/B gate also pass; the reducer output
+remains byte-identical. Stop for Bill's verdict on this slower clean-view pass.
 
 ## Sword-layer correction
 

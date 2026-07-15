@@ -47,24 +47,33 @@ The branch now productionizes **only this approved GOOD dodge**:
    gate while keeping the selected READY anchor consistent.
 2. Preserve the single slender sword, brass cup guard, closed/gloved hands,
    outfit, proportions, ponytail, and the corrected foreground sword layering.
-3. The active cards run at 30 Hz with holds of **1 / 2 / 1 / 2 ticks**, then
-   return to the shared READY anchor: six ticks / 200 ms total.
+3. Bill's first Windows pass found the six-tick sequence jerky and too fast to
+   read as a duck. The revised active holds are **2 / 4 / 2 / 2 ticks**, then
+   return to READY: ten ticks / 333 ms total, with DEEPEST CLEARANCE held for
+   four ticks / 133 ms.
 4. Root motion remains Godot-owned at **30 display pixels**, rather than baked
-   into the cards.
+   into the cards. Tick ownership is unchanged; a render-only 50 ms sine ease
+   softens the visible translation.
 5. The proof remains isolated and default-off. It does not replace the playable actor,
    change combat/gameplay, change protocol, or merge this branch to `main`.
+6. The isolated wrapper now defaults to stage-only `VIEW: CLEAN`, hiding all
+   combat HUD children and verdict overlays so no panel crosses the actor.
+   Its small test controls remain available; `VIEW: FULL HUD` restores the
+   complete play surface.
 
-Implementation commit: `dc5dedb`. The source cards are under
+Initial implementation commit: `dc5dedb`; readability revision: `f0bc5a2`.
+The source cards are under
 `dodge_round_01/production_cards/`; the byte-identical runtime copies are under
 `godot/prototypes/misprint_dodge/frames_good_v2/`. The exact build and
 verification record is in `godot/prototypes/misprint_dodge/README.md`.
 
-## Stop here — Bill's verdict next
+## Stop here — Bill's revised verdict next
 
 Do **not** add a smear frame yet. Do **not** begin GREAT, PERFECT, or parry art
-until Bill has seen and judged this GOOD-only runtime pass. Do not merge this
-branch to `main`. The next action is an interactive/visual GOOD-runtime verdict:
-are four authored active poses enough before expanding the animation set?
+until Bill has seen and judged this slower, uncluttered GOOD-only runtime pass.
+Do not merge this branch to `main`. The next action is an interactive/visual
+verdict on the 333 ms clean-view revision: does the deep duck now read clearly
+and move smoothly enough before expanding the animation set?
 
 The display result `GOOD` maps to the existing internal
 `StrikeRes.Grade.GOOD`; this task does not change grading logic.
@@ -108,8 +117,9 @@ computers simultaneously without first pushing one side.
 > Work in the `codex/misprint-dodge-test` worktree. Read `AGENTS.md`,
 > `MASTER-PLAN.md`, and
 > `art_prototypes/misprint/2026-07-15/CONTINUE-HERE.md` first. Continue only the
-> approved GOOD-dodge productionization described there: four transparent
-> fixed-canvas active cards from the V2 pose gate, 1/2/1/2 ticks at 30 Hz,
-> shared READY anchor, restrained Godot-owned root motion, isolated/default-off.
+> approved GOOD-dodge runtime verdict described there: four transparent
+> fixed-canvas active cards from the V2 pose gate, 2/4/2/2 ticks at 30 Hz,
+> shared READY anchor, eased 30 px Godot-owned root motion, stage-only CLEAN
+> view by default, isolated/default-off.
 > Do not start GREAT/PERFECT/parry, change gameplay, replace production art, or
 > merge to main. Claim the work in the Coordination Log before editing.
