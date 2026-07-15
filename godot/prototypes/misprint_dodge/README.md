@@ -1,9 +1,8 @@
-# Misprint dodge — isolated Godot proof
+# Misprint GOOD dodge — isolated Godot proof
 
-This is the executable test requested by
-`art_prototypes/misprint/2026-07-15/docs/ART_HANDOFF_2026-07-15.md`.
-It does not replace the production Duelist actor and is not reachable from the
-game's front door.
+This is the executable GOOD-only test requested by
+`art_prototypes/misprint/2026-07-15/CONTINUE-HERE.md`. It does not replace the
+production Duelist actor and is not reachable from the game's front door.
 
 Run the interactive test with a display:
 
@@ -14,43 +13,64 @@ godot --path godot --rendering-driver opengl3 \
 
 The scene launches the real Duelist HUD against Mistral. `NORMAL` preserves the
 live songbook. `HIGH-FLOW` installs a test-only six-beat weave at 0.26-second
-gaps. `AUTO` routes a real `DuelistPolicy` action through the controller input
+gaps. `AUTO` routes real `DuelistPolicy` actions through the controller input
 queue; turn it off to use the normal gameplay keys.
 
-The six source PNGs are byte-identical copies of the handoff. They actually vary
-between 553–554 × 466–467 despite the handoff's fixed 553×466 claim, so the
-adapter registers them into a 554×467 logical card without resampling or editing
-the source pixels.
+## Approved V2 cards
 
-Verification:
+The current proof uses five fixed 768×768 transparent cards:
+
+1. the separately approved READY anchor;
+2. COMPRESS;
+3. DEEPEST CLEARANCE;
+4. LOW SETTLE / OVERSHOOT;
+5. NEAR-READY RECOVERY.
+
+Source cards live in
+`art_prototypes/misprint/2026-07-15/dodge_round_01/production_cards/`; byte-
+identical runtime copies live in `frames_good_v2/`. Rebuild both sets with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
+  art_prototypes/misprint/2026-07-15/tools/build_good_dodge_cards.ps1
+```
+
+The builder flood-fills only paper-like pixels connected to source edges and
+keeps the largest continuous inked figure. It does not redraw active poses or
+alter their surviving RGB pixels. The READY anchor alone is normalized to the
+pose-gate scale (`0.57`); all cards share a foot/root registration at canvas
+`x=384`, `y=768`. Transparent corners and source/runtime hash equality are
+checked by the build/verification workflow.
+
+## Runtime contract
+
+- A landed dodge/weave starts COMPRESS on the reducer event's tick.
+- Holds are exactly **1 / 2 / 1 / 2 ticks** at 30 Hz; READY returns at age 6
+  (200 ms total).
+- Godot owns root motion: `30 px` peak, inside the approved 25–35 px range.
+- The historical compact coral/cobalt duplicates remain behind CLEARANCE at
+  ages 1–2. No smear frame, particles, shader, or new runtime library exists.
+- Repeated successes cancel/restart immediately at COMPRESS.
+- The selector remains default-off and missing cards fall back to the current
+  production actor.
+
+The older six-card proof remains in `frames/` only as historical evidence; it
+is no longer the active card set.
+
+## Verification — 2026-07-15
 
 ```bash
 godot --headless --path godot --script res://sim/misprint_dodge_probe.gd
+godot --headless --path godot --script res://sim/artv2_probe.gd
+godot --headless --path godot --script res://sim/ui_smoke_raid.gd
+scripts/ab-gate.sh raid_sim --seeds=30 --boss=mistral
 godot --path godot --rendering-driver opengl3 --resolution 1920x1080 \
-  --script res://sim/misprint_dodge_tour.gd -- --out=/tmp/misprint-dodge
+  --script res://sim/misprint_dodge_tour.gd -- --out=/tmp/misprint-good-v2b
 ```
 
-## Proof result — 2026-07-15
-
-- The runtime copies match all six handoff PNGs byte-for-byte (SHA-256).
-- Godot imports them losslessly (`compress/mode=0`), with mipmaps off, alpha
-  border repair on, and premultiplication off. The adapter does not resample or
-  rewrite the one-pixel source-size variations.
-- A landed dodge/weave begins on the reducer event's tick. Active texture holds
-  measure exactly 1 / 1 / 2 / 2 / 4 ticks, then ready returns at age 10.
-- Root travel peaks at 91.16 display pixels. Coral/cobalt echoes are visible
-  behind the active card only at ages 1 and 2.
-- The 1920x1080 tour produced ready plus exact ages 0, 1, 2, 4, 6, and 9 for
-  normal Mistral cadence, followed by high-flow ready, cancel/restart, and live
-  flurry captures. Baselines stayed visually registered; the single rapier,
-  lowered head, coat tails, and legs remained readable behind the actual HUD.
-  No pose redraw was needed for this proof.
-- The high-flow tour observed successive successful answers less than the
-  ten-tick recovery apart; each success immediately restarted at pose 02.
-
-Targeted gates passed: `misprint_dodge_probe`, `artv2_probe` (201 checks),
-`ui_smoke_raid`, a 30-seed Mistral `raid_sim` A/B with byte-identical stdout and
-CSV (`45dabf2d00346bd184cdf6324918f9a6`), the non-headless tour, and a 240-frame
-interactive-scene boot. The proof uses only texture swaps, `Node2D` transforms,
-and modulated `Sprite2D` duplicates; no particles, shaders, runtime libraries,
-or renderer-specific calls were added.
+Results: `misprint_dodge_probe` ALL OK · `artv2_probe` 201 checks ·
+`ui_smoke_raid` ALL OK · A/B BYTE-IDENTICAL (CSV MD5
+`45dabf2d00346bd184cdf6324918f9a6`) · non-headless tour ALL OK. The visual
+tour confirmed shared ground contact, readable single rapier/cup guard, lowered
+clearance silhouette, unobstructed timing instrument, and stable high-flow
+cadence. The task stops here for Bill's GOOD-runtime verdict.

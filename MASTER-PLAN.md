@@ -890,12 +890,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **APPROVED GOOD-DODGE
-  PRODUCTIONIZATION IN FLIGHT.** Derive the shared READY anchor plus four transparent fixed-canvas
-  active cards losslessly from the approved V2 gate, preserving its corrected sword layering;
-  retime the isolated/default-off Godot proof to **1/2/1/2 ticks at 30 Hz** and restrained
-  **25–35 display-pixel** Godot-owned root travel. GOOD only: no smear, GREAT/PERFECT/parry,
-  gameplay, protocol, production actor replacement, main merge, or default-on change.
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `dc5dedb`, PUSHED, NOT
+  merged** · §GRAPHICS — **APPROVED GOOD-DODGE PRODUCTIONIZATION COMPLETE; BILL'S RUNTIME
+  VERDICT NEXT.** The separately approved READY anchor plus the four approved V2 active poses are
+  now transparent fixed-canvas 768×768 cards with shared foot/root registration; source and
+  runtime copies are byte-identical. The deterministic extractor preserves the active-pose RGB
+  pixels and corrected foreground sword layering, normalizing only READY to the gate scale.
+  The isolated/default-off proof now holds **1/2/1/2 ticks at 30 Hz**, returns to READY at tick 6
+  (200 ms), and uses **30 display-pixel** Godot-owned travel. The real 1920×1080 Mistral HUD tour
+  shows grounded feet, one readable rapier/cup guard, lowered clearance, stable normal/high-flow
+  cadence, and an unobstructed timing instrument. VERIFY: card rebuild is reproducible/clean ·
+  `misprint_dodge_probe` ALL OK · `artv2_probe` 201 checks · `ui_smoke_raid` ALL OK · `ab-gate
+  raid_sim --seeds=30 --boss=mistral` BYTE-IDENTICAL (CSV MD5 `45dabf2d…`) · non-headless
+  `misprint_dodge_tour` ALL OK. GOOD only: no smear, GREAT/PERFECT/parry, gameplay, protocol,
+  production actor replacement, main merge, or default-on change. Stop for Bill's verdict; no
+  `BUILD-LEDGER.md` row because this remains the already-recorded unapproved isolated experiment.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CROSS-COMPUTER
   HANDOFF COMPLETE + FEATURE BRANCH PUSHED.** Bill's approval of the corrected GOOD-dodge

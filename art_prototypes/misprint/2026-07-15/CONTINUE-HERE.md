@@ -39,25 +39,32 @@ The four active authored poses, read left-to-right and top-to-bottom, are:
 
 The READY anchor is shared separately and is not one of those four poses.
 
-## Next isolated task
+## Completed isolated task
 
-Productionize **only this approved GOOD dodge**:
+The branch now productionizes **only this approved GOOD dodge**:
 
-1. Derive four transparent, fixed-canvas production cards from the approved V2
+1. Four transparent, fixed-canvas production cards derive from the approved V2
    gate while keeping the selected READY anchor consistent.
 2. Preserve the single slender sword, brass cup guard, closed/gloved hands,
    outfit, proportions, ponytail, and the corrected foreground sword layering.
-3. Test the active cards at 30 Hz with holds of **1 / 2 / 1 / 2 ticks**, then
+3. The active cards run at 30 Hz with holds of **1 / 2 / 1 / 2 ticks**, then
    return to the shared READY anchor: six ticks / 200 ms total.
-4. Keep root motion Godot-owned. Start with a restrained **25–35 display-pixel**
-   GOOD-dodge translation rather than baking travel into the cards.
-5. Keep the proof isolated and default-off. Do not replace the playable actor,
+4. Root motion remains Godot-owned at **30 display pixels**, rather than baked
+   into the cards.
+5. The proof remains isolated and default-off. It does not replace the playable actor,
    change combat/gameplay, change protocol, or merge this branch to `main`.
 
+Implementation commit: `dc5dedb`. The source cards are under
+`dodge_round_01/production_cards/`; the byte-identical runtime copies are under
+`godot/prototypes/misprint_dodge/frames_good_v2/`. The exact build and
+verification record is in `godot/prototypes/misprint_dodge/README.md`.
+
+## Stop here — Bill's verdict next
+
 Do **not** add a smear frame yet. Do **not** begin GREAT, PERFECT, or parry art
-until Bill has seen and judged this GOOD-only runtime pass. The goal is to test
-whether four authored active poses are enough before expanding the animation
-set.
+until Bill has seen and judged this GOOD-only runtime pass. Do not merge this
+branch to `main`. The next action is an interactive/visual GOOD-runtime verdict:
+are four authored active poses enough before expanding the animation set?
 
 The display result `GOOD` maps to the existing internal
 `StrikeRes.Grade.GOOD`; this task does not change grading logic.
