@@ -889,14 +889,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST DESIGN ROUND 2.**
-  Generate three static, side-on character concepts from the selected Misprint direction before
-  any further animation work: one deliberately simpler/flat design and two detailed-but-repeatable
-  variants. Preserve the athletic practical woman + single slender rapier core; use closed
-  glove/fist shapes (no finger anatomy), flatter color blocking with restrained print texture,
-  animation-friendly silhouettes, and a neutral low/resting weapon posture rather than the sword
-  thrust forward. This is an approval board only: no runtime replacement, animation generation,
-  gameplay/code, or production-default decision. *(Codex image-generation session; in progress.)*
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST DESIGN ROUND 2
+  GENERATED; BILL'S DESIGN VERDICT OWED.** Three static side-on options live under
+  `art_prototypes/misprint/2026-07-15/design_round_02/`: A = deliberately simple/cropped flat
+  silhouette · B = tailored split-coat fencer with the flattest fills · C = detailed playful
+  asymmetrical Masquerade runner. All preserve the practical athletic woman + one slender rapier,
+  close the gloves/fists to avoid finger anatomy, keep the blade down/back in a neutral pose, and
+  use large repeatable shapes rather than animation-hostile micro-detail. The first B output was
+  rejected/discarded for segmented fingers/action stance; B v2 is the option.
+  Built-in image generation used the existing direction board + ready card + selected gameplay
+  screen as references. Static approval board only: no animation/runtime/gameplay/default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `fc64636`, NOT merged or
   pushed** · §GRAPHICS — **MISPRINT DODGE ISOLATED GODOT PROOF COMPLETE; AWAITS BILL'S FEEL
