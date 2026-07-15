@@ -889,12 +889,21 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOODSWORD-BASE / GOODHANDS-ONLY
-  COMPOSITE IN PROGRESS.** Bill rejected v7's redrawn guard and made `user_refs/goodsword.png`
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST CUP-GUARD REVISION IN
+  PROGRESS.** Bill likes the v8 character/hands/sword result but correctly flagged that its ring
+  guard floats without believable support. Lock v8 everywhere except the guard; replace the ring
+  with a simple shallow brass cup/dome anchored at the blade→grip junction, opening toward the
+  wrist and covering most of the sword hand so finger construction is no longer a production
+  burden. Static approval concept only; no animation, runtime, gameplay, or default change.
+
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOODSWORD-BASE / GOODHANDS-ONLY
+  COMPOSITE v8 GENERATED; SELECTED AS THE CUP-GUARD BASE.** Bill rejected v7's redrawn guard and made `user_refs/goodsword.png`
   the locked whole-image base. Preserve its sword, circular guard, hilt, arm geometry, character,
   pose, framing, palette, texture, and background; replace only its two simplified black gloves
   with the detailed closed-glove construction from `user_refs/goodhands.png`. Static approval
-  concept only; no animation, runtime, gameplay, or default change.
+  concept only; no animation, runtime, gameplay, or default change. Result:
+  `duelist_defensive_guard_v8_goodsword_goodhands.png`; Bill: “wow, looks great,” with the floating
+  ring's weapon logic now the one explicit correction owed.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST SWORD-CENTER
   MICRO-CORRECTION v7 GENERATED; BILL'S VERDICT OWED.** Bill selected his attached
