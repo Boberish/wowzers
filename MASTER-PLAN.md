@@ -889,6 +889,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST FOCUSED REVISION.**
+  Combine Round-2 A's angular ponytail + simple clothing with B's cleaner rapier, increase the
+  adult feminine/full-bust read under the still-practical closed jacket, preserve closed glove
+  shapes/no finger anatomy, and replace the neutral rest pose with a grounded default defensive
+  rapier guard (bent elbow/centered weight, not a lunge, dodge, attack, or parry contact). Keep
+  costume colors flatter for repeatable pose-card animation. One static approval concept only;
+  no animation/runtime/gameplay/default change. *(Codex image-generation session; in progress.)*
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST DESIGN ROUND 2
   GENERATED; BILL'S DESIGN VERDICT OWED.** Three static side-on options live under
   `art_prototypes/misprint/2026-07-15/design_round_02/`: A = deliberately simple/cropped flat
