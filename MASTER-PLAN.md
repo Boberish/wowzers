@@ -890,12 +890,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CROSS-COMPUTER
-  HANDOFF + BRANCH PUSH IN PROGRESS.** Record Bill's approval of the corrected GOOD-dodge
-  four-pose gate, add one explicit continuation entry point for a fresh chat/computer, verify
-  that every referenced source/proof image is committed, and push the complete experimental
-  branch to `origin/codex/misprint-dodge-test`. Documentation/coordination only: no merge to
-  `main`, runtime replacement, gameplay, protocol, or default change.
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT CROSS-COMPUTER
+  HANDOFF COMPLETE + FEATURE BRANCH PUSHED.** Bill's approval of the corrected GOOD-dodge
+  four-pose V2 gate, the locked anchor/V2 hashes, the exact GOOD-only next task, stop boundaries,
+  other-computer worktree commands, and a fresh-chat prompt now live in
+  `art_prototypes/misprint/2026-07-15/CONTINUE-HERE.md`. Every file under the 2026-07-15
+  Misprint handoff is tracked, and the complete experimental branch is pushed to
+  `origin/codex/misprint-dodge-test`. Documentation/coordination only: no merge to `main`,
+  runtime replacement, gameplay, protocol, or default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOOD-DODGE POSE-GATE SWORD
   OCCLUSION v2 CORRECTED AND APPROVED BY BILL; PRODUCTION CARDS/RUNTIME NEXT.** Bill approved
