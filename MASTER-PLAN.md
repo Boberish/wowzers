@@ -887,6 +887,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DODGE
+  ISOLATED GODOT PROOF.** Build the approved test only: import the six transparent pose cards
+  outside the production actor path; drive ready→duck→shift→clearance→settle→recover from
+  the real 30 Hz combat tick at 1/1/2/2/4 active ticks; add 70–100 px root travel plus compact
+  one-tick coral/cobalt departure/clearance echoes; present it behind the real Duelist HUD against
+  Mistral at normal and high-flow cadence. Current playable art stays default and untouched; no
+  production encounter wiring, no Spine/new graphics package, and STOP if new generated art is
+  required. Verify import geometry, headless probe/smoke, WebGL-safe primitives, and non-headless
+  visual captures. *(Codex session; in progress.)*
+
 - ☑ 2026-07-15 · `art/misprint-dodge-proof` → **PUSHED, NOT merged** · §GRAPHICS — **CODEX ART
   HANDOFF IMPORTED: the MISPRINT MASQUERADE direction + the first dodge animation proof —
   AVAILABLE FOR AN ISOLATED GODOT TEST, ⚠ NOT APPROVED FOR PRODUCTION REPLACEMENT.** Bill picked
