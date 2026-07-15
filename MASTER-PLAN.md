@@ -889,6 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT GOOD-DODGE FOUR-POSE
+  GATE IN PROGRESS.** Bill selected his attached `newSwordGaurd.png` as the definitive current
+  Duelist anchor and asked to proceed one animation experiment at a time. Generate only the GOOD
+  duck's four active silhouettes—compress, deepest clearance, settle, near-ready recovery—plus the
+  separately shared ready anchor; no smear, GREAT/PERFECT/parry art, runtime replacement, gameplay,
+  protocol, or default change. Planned cadence after pose approval: 1/2/1/2 ticks at 30 Hz.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **DUELIST CUP-GUARD v9 GENERATED;
   BILL'S VERDICT OWED.** Bill likes the v8 character/hands/sword result but correctly flagged that its ring
   guard floats without believable support. Lock v8 everywhere except the guard; replace the ring
