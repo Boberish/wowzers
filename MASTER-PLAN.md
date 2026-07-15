@@ -759,16 +759,17 @@ secondary abilities, and fast cancelable actor payoff. C0 + C1 are complete (sel
 `3da278f`); C2 SceneKit merged `da314e9` under Bill's assume-pass instruction. P3 environment
 contrast art is active; C2's final tour/smoke/A-B matrix is retained as release-default debt.
 
-**⚠ 2026-07-15 — MISPRINT MASQUERADE + its isolated Godot dodge proof are BUILT but NOT
-APPROVED.** The Codex art handoff is imported at `art_prototypes/misprint/2026-07-15/` (doc of
-record: `docs/ART_HANDOFF_2026-07-15.md` inside that folder) — the selected direction board, the
-3 screen bounds, and six transparent dodge pose cards. The executable proof is isolated under
-`godot/prototypes/misprint_dodge/` on `codex/misprint-dodge-test` (`fc64636`): real 30 Hz
-pose-card swaps, root travel/echoes, actual Mistral HUD, and normal/high-flow replay controls.
-It is **NOT a production replacement**: the proof selector defaults OFF, the current playable art
-stays default, and no encounter/content/protocol was changed. Handoff branch
-`art/misprint-dodge-proof` is pushed/unmerged; proof branch is local/unmerged/unpushed pending
-Bill's feel verdict. See the Coordination Log for measurements and verification.
+**⚠ 2026-07-15 — MISPRINT MASQUERADE remains an isolated prototype, not a production
+replacement.** The Codex art bundle is at `art_prototypes/misprint/2026-07-15/`; its current
+restart record is `CONTINUE-HERE.md`. The original six-card executable proof remains isolated
+under `godot/prototypes/misprint_dodge/` (`fc64636`): real 30 Hz pose-card swaps, root
+travel/echoes, actual Mistral HUD, and normal/high-flow replay controls. Bill has since selected
+the cup-guard Duelist anchor and **approved the corrected four-active-pose GOOD-dodge V2 gate**
+(`dodge_round_01/good_duck_four_pose_gate_v2_sword_foreground.png`; “looks great”). Next is a
+GOOD-only fixed-canvas/runtime pass at 1/2/1/2 ticks; smear, GREAT, PERFECT, and parry explicitly
+wait for that feel verdict. The proof stays default-OFF, current playable art stays default, and
+no encounter/content/protocol was changed. Branch `codex/misprint-dodge-test` remains unmerged.
+See the Coordination Log for measurements and verification.
 
 **Now:** Gilded Reliquary 2D UI + PoseRig stage are playable and stay default throughout V2 work.
 - **Telegraph timing UI overhaul ("the Judgment Channel") — DONE, merged 2026-07-02.** Bill's brief: the circle-sweep timing UI read too vague — needed a narrow "aim here" mark, graded feedback around it, verdict satisfaction, and quick-succession clarity, at paid-game quality. Shipped `game/ui/strike_judge.gd` (**StrikeJudge**): a linear precision instrument under every dial that fuses the ENEMY CAST BAR with a fixed gilded **IMPACT GATE** — hairline aim mark, stained-glass graded bands (mint PERFECT / gold GOOD or true parry window / steel GRAZE / violet clean-kick), incoming swings & string beats as comet-gems approaching at **constant px/sec (PPS 250)** so timing muscle-memory transfers across attacks and HUDs, per-press **verdict stamps** (ghost needle + burst + gold rays at your exact press spot), a **grade-history gem rail** (last 8 judgments — the quick-succession answer), feint DON'T-PRESS hatch veil, dodge-lockout LOCKED veil, heal/empower channel fill, parked-comet countdown for long winds (ULTRATHINK-ready). Compact mode (name inside the channel) for the healer HUDs. Classic parries get a cosmetic proximity grade ("PERFECT PARRY!" ≤0.14s) — negation stays binary engine-truth. Dial kept as boss presence; gained a 12-o'clock impact hairline + classic perfect sliver. Wired into ALL SIX HUDs; twinfang/raid rhythm bar and raid/voidcaller player cast bar moved to the player's column (your instrument under you, theirs under the boss). **Fixed a pre-existing feedback bug:** string dodges pop twice ("PARRY!"+"PERFECT!" overlapping garbage) — echo negates (no `seat` key) no longer pop. View-only, ZERO engine files touched. Verified: all 6 UI smokes + map smoke green ×2, bulwark sim determinism PASS, screenshot probes (strings/3D/2D/raid/full tour) eyeballed at 1080p — layouts clean in every HUD. **Next (unclaimed):** classic-parry perfect could earn a real payoff (engine change, needs byte-identical gate + retune); judge could render add-wave/chain-verse counters for Seals II–IV.
@@ -897,13 +898,14 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   `main`, runtime replacement, gameplay, protocol, or default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **GOOD-DODGE POSE-GATE SWORD
-  OCCLUSION v2 CORRECTED; BILL'S FINAL GATE VERDICT OWED.** Bill approves the four poses but caught one layer-order
-  error: in panels 2 (top-right) and 3 (bottom-left), the sword crosses behind its wielding arm.
+  OCCLUSION v2 CORRECTED AND APPROVED BY BILL; PRODUCTION CARDS/RUNTIME NEXT.** Bill approved
+  the four poses, then caught one layer-order error: in panels 2 (top-right) and 3 (bottom-left),
+  the sword crossed behind its wielding arm.
   Preserve all four poses, geometry, character detail, layout, and panels 1/4; change only those
   two crossings so the existing blade/cup assembly renders in front of the sword arm. Result:
   `dodge_round_01/good_duck_four_pose_gate_v2_sword_foreground.png`; both blades now remain visibly
-  continuous over the teal sleeves. Static gate only; no new pose, smear, runtime, gameplay,
-  protocol, or default change.
+  continuous over the teal sleeves. Bill's corrected-V2 verdict: “looks great.” Static gate only;
+  no new pose, smear, runtime, gameplay, protocol, or default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT GOOD-DODGE FOUR-POSE
   GATE GENERATED; BILL'S POSE VERDICT OWED.** Bill selected his attached `newSwordGaurd.png` as the definitive current

@@ -1,11 +1,14 @@
 # Wowzers art-direction handoff — 2026-07-15
 
-This bundle contains the selected Misprint Masquerade exploration and the first
-duck/side-step animation proof for the Dodge Tank/Duelist.
+This bundle contains the selected Misprint Masquerade exploration, the original
+duck/side-step proof, the selected cup-guard Duelist anchor, and the approved
+four-pose GOOD-dodge gate.
 
-Start with [docs/ART_HANDOFF_2026-07-15.md](docs/ART_HANDOFF_2026-07-15.md).
+For current work, start with [CONTINUE-HERE.md](CONTINUE-HERE.md). The older
+[art handoff](docs/ART_HANDOFF_2026-07-15.md) records the historical six-frame
+proof that preceded the current character and pose decisions.
 
 Important: these are isolated prototype assets. Do not replace or delete the
-currently playable character art. The next step is a separate Godot test scene
-using the six transparent PNG pose cards.
-
+currently playable character art. The next step is the GOOD-only production-card
+and runtime pass defined in `CONTINUE-HERE.md`; GREAT, PERFECT, and parry remain
+deliberately unstarted.
