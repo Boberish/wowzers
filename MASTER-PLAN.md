@@ -889,12 +889,13 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- 🔨 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST GEOMETRY
-  CORRECTION.** Preserve Round-3 v2's two approved solid mitten/fist hands exactly; correct only
-  the rapier so its blade centerline passes through the exact center of the circular guard/grip,
-  and lengthen/re-articulate the viewer-right sword arm so shoulder→elbow→wrist proportions match
-  the other arm without changing the defensive stance. Static concept edit only; no redesign,
-  animation/runtime/gameplay/default change. *(Codex image-generation session; in progress.)*
+- ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST GEOMETRY
+  CORRECTION GENERATED; BILL'S VERDICT OWED.** Round-3 v2 remains the approved-hands reference;
+  `duelist_defensive_guard_v3_geometry.png` preserves its solid fingerless mitten/fist treatment
+  while correcting the rapier to one collinear tip→blade→guard-center→grip axis and lengthening/
+  re-articulating the viewer-right sword arm into a proportionate shoulder→elbow→wrist chain.
+  The elbow remains bent and the stance remains defensive rather than a thrust. Built-in precise
+  image edit; static concept only, no animation/runtime/gameplay/default change.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` · §GRAPHICS — **MISPRINT DUELIST FOCUSED REVISION
   GENERATED; BILL'S VERDICT OWED.** `design_round_03/duelist_defensive_guard_v2.png` combines

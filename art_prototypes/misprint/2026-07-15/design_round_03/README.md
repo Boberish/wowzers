@@ -4,7 +4,9 @@ Date: 2026-07-15
 
 Status: static approval concept only. No animation/runtime/default decision.
 
-Final asset: `duelist_defensive_guard_v2.png`.
+Approved-hands reference: `duelist_defensive_guard_v2.png`.
+
+Latest geometry-corrected candidate: `duelist_defensive_guard_v3_geometry.png`.
 
 The built-in image-generation tool combined Round-2 A's angular high ponytail
 and simple cropped costume with Round-2 B's cleaner circular-guard rapier and
@@ -20,3 +22,11 @@ closed mitten/fist silhouettes while preserving the character, pose, sword,
 flat palette, framing, and background. The first output was discarded.
 
 References: Round-2 A and B plus the selected Misprint gameplay screen.
+
+## Geometry correction
+
+The v3 candidate keeps the solid, fingerless mitten/fist treatment while fixing
+two reads from v2: the rapier blade/tang now form one axis through the geometric
+center of the circular guard, and the viewer-right sword arm has a longer,
+better-proportioned shoulder→elbow→wrist chain while retaining a bent defensive
+guard. V2 remains alongside it as the locked hand-shape comparison source.
