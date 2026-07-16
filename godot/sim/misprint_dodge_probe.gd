@@ -20,20 +20,30 @@ func _initialize() -> void:
 	var sizes: Array = snap["sizes"]
 	_chk("fixed production canvas", sizes == [Vector2i(768, 768), Vector2i(768, 768),
 		Vector2i(768, 768), Vector2i(768, 768), Vector2i(768, 768)])
+	_chk("five fixed parry cards load", snap["parry_sizes"] == sizes)
 
 	actor.sync_tick(100)
 	actor.graded_react("parry", StrikeRes.Grade.PERFECT)
-	_chk("parry cannot start dodge proof", int(actor.debug_snapshot()["starts"]) == 0)
+	_chk("landed parry starts its own sequence", actor.debug_snapshot()["kind"] == "parry" \
+		and actor.debug_snapshot()["frame"] == 1 and actor.debug_snapshot()["starts"] == 1)
+	var parry_frames := [1, 1, 2, 2, 3, 3, 4, 4]
+	for age in 8:
+		actor.sync_tick(100 + age)
+		_chk("parry age %d frame %d" % [age, parry_frames[age]],
+			int(actor.debug_snapshot()["frame"]) == parry_frames[age])
+	actor.sync_tick(108)
+	_chk("eight parry ticks return to ready", actor.debug_snapshot()["age"] == -1 \
+		and actor.debug_snapshot()["frame"] == 0)
 	actor.graded_react("dodge", StrikeRes.Grade.MISS)
-	_chk("miss cannot start dodge proof", int(actor.debug_snapshot()["starts"]) == 0)
+	_chk("miss cannot start pose proof", int(actor.debug_snapshot()["starts"]) == 1)
 	actor.graded_react("dodge", StrikeRes.Grade.GOOD)
 	_chk("landed dodge starts immediately", actor.debug_snapshot()["frame"] == 1 \
-		and actor.debug_snapshot()["age"] == 0 and actor.debug_snapshot()["starts"] == 1)
+		and actor.debug_snapshot()["age"] == 0 and actor.debug_snapshot()["starts"] == 2)
 
 	var expected_frames := [1, 1, 2, 2, 2, 2, 3, 3, 4, 4]
 	var expected_echo := [false, false, true, true, false, false, false, false, false, false]
 	for age in 10:
-		actor.sync_tick(100 + age)
+		actor.sync_tick(108 + age)
 		snap = actor.debug_snapshot()
 		_chk("age %d frame %d" % [age, expected_frames[age]], int(snap["frame"]) == expected_frames[age])
 		_chk("age %d echo one-tick gate" % age, bool(snap["echo"]) == expected_echo[age])
@@ -42,7 +52,7 @@ func _initialize() -> void:
 				and int(snap["trails"]) == 0)
 	_chk("travel stays inside brief", float(actor.debug_snapshot()["travel"]) >= 0.0 \
 		and float(actor.debug_snapshot()["travel"]) <= MisprintDodgeActor2D.TRAVEL_PX * 1.06)
-	actor.sync_tick(110)
+	actor.sync_tick(118)
 	snap = actor.debug_snapshot()
 	_chk("ten active ticks return to ready", snap["frame"] == 0 and snap["age"] == -1 \
 		and is_zero_approx(float(snap["travel"])) and not bool(snap["echo"]))
@@ -52,7 +62,7 @@ func _initialize() -> void:
 	actor.sync_tick(124)
 	actor.graded_react("weave", StrikeRes.Grade.PERFECT)
 	snap = actor.debug_snapshot()
-	_chk("high-flow success cancels into immediate new pose", snap["starts"] == 3 \
+	_chk("high-flow success cancels into immediate new pose", snap["starts"] == 4 \
 		and snap["start_tick"] == 124 and snap["age"] == 0 and snap["frame"] == 1)
 
 	MisprintDodgeProof.pushed_motion = true

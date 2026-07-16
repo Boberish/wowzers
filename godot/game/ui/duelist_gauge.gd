@@ -21,6 +21,7 @@ var _pop: float = 0.0          ## pip-bank punch, decays per frame
 # WIND becomes the CENTRAL PRIMARY painted bar with EXACTLY the five smaller combo
 # sockets directly below it (§2.3.1 E / I3-A revision 2). Fills/pips stay code-drawn.
 var v2_skin: DashSkin = null
+var v2_compact_stack := false ## isolated C6 compact anatomy: sockets top, Wind bottom
 
 func _draw() -> void:
 	var v2 := v2_skin != null
@@ -28,11 +29,12 @@ func _draw() -> void:
 	#     C6B: the painted resource shell hosts it as THE central primary bar ---
 	var bw := size.x * (0.92 if v2 else 0.62)
 	var bx := size.x * 0.5 - bw * 0.5
-	var by := size.y * (0.05 if v2 else 0.34)
+	var by := (size.y - 52.0) if v2 and v2_compact_stack else size.y * (0.05 if v2 else 0.34)
 	var wh := 10.0
 	var well := Rect2(bx, by, bw, wh)
 	if v2:
-		var srect := Rect2(bx, by, bw, maxf(36.0, size.y * 0.48))
+		var srect := Rect2(bx, by, bw,
+			48.0 if v2_compact_stack else maxf(36.0, size.y * 0.48))
 		v2_skin.hshell(self, "shell_resource", srect, DashSkin.CAPS_RESOURCE)
 		well = v2_skin.sliced_opening("shell_resource", srect, DashSkin.CAPS_RESOURCE, DashSkin.OPEN_RESOURCE)
 		bx = well.position.x
@@ -64,10 +66,10 @@ func _draw() -> void:
 	# --- ◆ COMBO pips (banked by perfect parries) — gem-set now; the newest banks with a PUNCH.
 	#     C6B: each pip sits in its painted octagon socket, ~25% smaller (I3-A revision) ---
 	_pop = maxf(0.0, _pop - 0.05)
-	var y2 := size.y * (0.76 if v2 else 0.72)
+	var y2 := (20.0 if v2_compact_stack else size.y * 0.76) if v2 else size.y * 0.72
 	var n := maxi(1, combo_max)
 	var spacing := minf(size.x / float(n + 1),
-		clampf(size.y * 0.43, 35.0, 52.0) if v2 else 30.0)
+		(46.0 if v2_compact_stack else clampf(size.y * 0.43, 35.0, 52.0)) if v2 else 30.0)
 	for i in range(n):
 		var x := size.x * 0.5 + (float(i) - float(n - 1) / 2.0) * spacing
 		var lit := i < combo
@@ -77,7 +79,7 @@ func _draw() -> void:
 		var r := 6.5 if v2 else 9.0
 		if v2:
 			var stex: Texture2D = v2_skin.t["socket_combo"]
-			var ssw := minf(clampf(size.y * 0.34, 28.0, 42.0), spacing * 0.86)
+			var ssw := minf((30.0 if v2_compact_stack else clampf(size.y * 0.34, 28.0, 42.0)), spacing * 0.86)
 			var ssh := ssw * float(stex.get_height()) / float(stex.get_width())
 			draw_texture_rect(stex, Rect2(x - ssw * 0.5, y2 - ssh * 0.5, ssw, ssh), false)
 			r = ssw * 0.23

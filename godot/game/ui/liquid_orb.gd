@@ -16,6 +16,7 @@ var caption: String = "HP"
 # Flow/Aggro right). Fills, numerals, captions, warnings stay code-drawn; the I3-B
 # resource shell supplies only the housing.
 var v2_bar: DashSkin = null
+var v2_vertical := false         ## compact dash side-rail presentation
 var v2_pct: bool = false          ## print the numeral as a percentage (the Flow/Aggro bar)
 var v2_lock: float = -1.0         ## 0..1 threshold marker (the Duelist's 30% Flow lock);
                                   ## < 0 = none. Always code-drawn — never baked (README law).
@@ -91,6 +92,9 @@ func _process(delta: float) -> void:
 ## uniform scale), well/fill/chip/numeral/caption all code-drawn from the SAME eased
 ## feed the orb uses. The host draws the 30% Flow lock on top (code-owned by law).
 func _draw_v2_bar() -> void:
+	if v2_vertical:
+		_draw_v2_vertical()
+		return
 	var rect := Rect2(Vector2.ZERO, size)
 	v2_bar.hshell(self, "shell_resource", rect, DashSkin.CAPS_RESOURCE)
 	var well := v2_bar.sliced_opening("shell_resource", rect, DashSkin.CAPS_RESOURCE, DashSkin.OPEN_RESOURCE)
@@ -128,6 +132,40 @@ func _draw_v2_bar() -> void:
 	UiKit.text_shadowed(self, UiKit.display(600, 2), Vector2(well.position.x + 8.0, well.get_center().y + 4.5),
 		caption.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, well.size.x - 60.0,
 		UiKit.SIZE["MICRO"], Palette.GOLD_DIM.lightened(0.25))
+
+## Compact timing-cluster rail. The value climbs from the Answer Channel's base;
+## labels sit at the ends so neither side widens the dominant timing instrument.
+func _draw_v2_vertical() -> void:
+	var outer := Rect2(Vector2(3.0, 0.0), Vector2(size.x - 6.0, size.y))
+	var shell := StyleBoxFlat.new()
+	shell.bg_color = Color(0.035, 0.045, 0.065, 0.92)
+	shell.border_color = Palette.GOLD_DIM
+	shell.set_border_width_all(2)
+	shell.set_corner_radius_all(6)
+	draw_style_box(shell, outer)
+	var well := Rect2(size.x * 0.5 - 8.0, 30.0, 16.0, maxf(20.0, size.y - 62.0))
+	draw_rect(well, Palette.BG0)
+	var frac := clampf(_disp, 0.0, 1.0)
+	var fh := well.size.y * frac
+	var fc := fill.lerp(Palette.CRIMSON, 0.5 * UiKit.crit_throb(_frac(), _phase))
+	if _flash > 0.0:
+		fc = fc.lightened(0.30 * _flash)
+	if fh > 1.0:
+		UiKit.grad_rect(self, Rect2(well.position.x, well.end.y - fh, well.size.x, fh),
+			fc.lightened(0.22), fc.darkened(0.22))
+		draw_rect(Rect2(well.position.x + 1.0, well.end.y - fh, well.size.x * 0.32, fh),
+			Color(1, 1, 1, 0.10))
+	if _chip > frac + 0.003:
+		var chip_h := well.size.y * (_chip - frac)
+		draw_rect(Rect2(well.position.x, well.end.y - well.size.y * _chip, well.size.x, chip_h),
+			Color(0.95, 0.85, 0.8, 0.30))
+	UiKit.text_shadowed(self, UiKit.display(700), Vector2(0.0, 17.0),
+		(str(int(round(value))) + "%") if v2_pct else str(int(round(value))),
+		HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["MICRO"], Palette.GOLD_BRIGHT)
+	UiKit.text_shadowed(self, UiKit.display(600, 2), Vector2(0.0, size.y - 10.0),
+		("HP" if caption.to_upper() == "HEALTH" else "AGGRO" if v2_pct else caption.to_upper()),
+		HORIZONTAL_ALIGNMENT_CENTER, size.x, UiKit.SIZE["MICRO"],
+		Palette.GOLD_DIM.lightened(0.25))
 
 func _draw() -> void:
 	if v2_bar != null:

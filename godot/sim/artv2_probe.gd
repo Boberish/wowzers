@@ -127,7 +127,7 @@ func _initialize() -> void:
 			ra.size.y >= 150.0 and ra.size.x >= 800.0)
 		_chk(fails, "%s theater positive" % vp, rt.size.y > 200.0)
 		_chk(fails, "%s stage_scale sane" % vp,
-			float(L["stage_scale"]) >= 0.65 and float(L["stage_scale"]) <= 1.0)
+			float(L["stage_scale"]) >= 0.65 and float(L["stage_scale"]) <= 1.1)
 		var bounds := Rect2(Vector2.ZERO, vp)
 		for key in ["party", "boss_shell", "boss_cast", "utility", "answer",
 				"health", "wind", "flow", "abilities"]:
@@ -141,17 +141,20 @@ func _initialize() -> void:
 		var rw: Rect2 = L["wind"]
 		var rf: Rect2 = L["flow"]
 		var rab: Rect2 = L["abilities"]
-		_chk(fails, "%s C6C four-row party island is substantial" % vp,
-			rp.size.y >= 320.0 and rp.size.x >= 330.0)
+		_chk(fails, "%s compact four-row party island stays readable" % vp,
+			rp.size.y >= 190.0 and rp.size.x >= 300.0)
 		_chk(fails, "%s C6C upper islands stay mutually clear" % vp,
 			not rp.intersects(rb) and not rp.intersects(rbc) and not rp.intersects(ru)
 			and not rb.intersects(ru))
-		_chk(fails, "%s C6C three resource instruments stay distinct" % vp,
-			not rhp.intersects(rw) and not rw.intersects(rf) and not rhp.intersects(rf))
-		_chk(fails, "%s C6C reaction stack has no overlap" % vp,
-			not ra.intersects(rhp) and not ra.intersects(rw) and not ra.intersects(rf)
-			and not rw.intersects(rab) and not rhp.intersects(rab) and not rf.intersects(rab))
-		_chk(fails, "%s C6C ability dock reserves fifth-slot width" % vp, rab.size.x >= 434.0)
+		_chk(fails, "%s compact safety rails flank Answer" % vp,
+			rhp.end.x < ra.position.x and rf.position.x > ra.end.x and not rhp.intersects(rf))
+		_chk(fails, "%s combo/Wind instrument attaches across Answer" % vp,
+			is_equal_approx(rw.position.x, ra.position.x) and rw.position.y < ra.position.y
+			and rw.end.y > ra.end.y and is_equal_approx(rw.size.x, ra.size.x))
+		_chk(fails, "%s ability dock sits directly below connected cluster" % vp,
+			rab.position.y > ra.end.y and rab.position.y - rw.end.y <= 10.0
+			and not rhp.intersects(rab) and not rf.intersects(rab))
+		_chk(fails, "%s C6C ability dock reserves fifth-slot width" % vp, rab.size.x >= 420.0)
 	_chk(fails, "720p collapses the hint gutter first",
 		(DashHostC6A.layout(Vector2(1280, 720))["hint"] as Rect2).size.y == 0.0)
 	_chk(fails, "ultrawide caps the answer width",

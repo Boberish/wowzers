@@ -88,6 +88,11 @@ const PROFILES := {
 		"atmosphere": {"particles": Color(0.55, 0.90, 1.0), "rise": true,
 			"tint": Color(0.55, 0.80, 1.0, 0.04)},
 	},
+	"misprint_biocooling": {   # isolated parry/layout lab — bright maintained AI facility
+		"dir": "res://game/art_v2/scenes/misprint_biocooling",
+		"plate_only": true,
+		"backdrop": {"top": Color(0.08, 0.10, 0.13), "bottom": Color(0.05, 0.06, 0.08)},
+	},
 }
 
 ## THE ONE DOOR (wired behind ArtV2.make_scene): known profile ⇒ a SceneKit
@@ -151,6 +156,17 @@ func _ready() -> void:
 			_tex[l] = t
 	# six layers, back to front — each a full-rect draw surface fed by its spec
 	_layer(_paint_backdrop)
+	if bool(spec.get("plate_only", false)):
+		var tag := Label.new()
+		tag.text = "MISPRINT LAB · BIOCOOLING ATRIUM"
+		tag.add_theme_font_size_override("font_size", 10)
+		tag.add_theme_color_override("font_color", Color(1, 1, 1, 0.18))
+		tag.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+		tag.position = Vector2(10, -22)
+		add_child(tag)
+		resized.connect(_relayout)
+		_relayout()
+		return
 	_distant_l = _layer(_paint_distant)
 	_layer(_paint_midground)
 	_layer(_paint_floor)

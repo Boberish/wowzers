@@ -1,16 +1,18 @@
 param(
-    [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).ProviderPath
+    [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).ProviderPath,
+    [ValidateSet("Good", "Parry")]
+    [string]$Set = "Good"
 )
 
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
 
-$sourceDir = Join-Path $Root "dodge_round_01"
-$gatePath = Join-Path $sourceDir "good_duck_four_pose_gate_v2_sword_foreground.png"
-$readyPath = Join-Path $sourceDir "user_refs/newSwordGaurd.png"
+$sourceDir = Join-Path $Root $(if ($Set -eq "Parry") { "parry_round_01" } else { "dodge_round_01" })
+$gatePath = Join-Path $sourceDir $(if ($Set -eq "Parry") { "parry_four_pose_gate_v1.png" } else { "good_duck_four_pose_gate_v2_sword_foreground.png" })
+$readyPath = Join-Path $Root "dodge_round_01/user_refs/newSwordGaurd.png"
 $cardDir = Join-Path $sourceDir "production_cards"
 $runtimeBase = (Resolve-Path (Join-Path $Root "../../../godot/prototypes/misprint_dodge")).ProviderPath
-$runtimeDir = Join-Path $runtimeBase "frames_good_v2"
+$runtimeDir = Join-Path $runtimeBase $(if ($Set -eq "Parry") { "frames_parry_v1" } else { "frames_good_v2" })
 [System.IO.Directory]::CreateDirectory($cardDir) | Out-Null
 [System.IO.Directory]::CreateDirectory($runtimeDir) | Out-Null
 
@@ -182,13 +184,23 @@ try {
     if (($gate.Width % 2) -ne 0 -or ($gate.Height % 2) -ne 0 -or $half -ne [int]($gate.Height / 2)) {
         throw "Expected an even square 2x2 pose gate; got $($gate.Width)x$($gate.Height)"
     }
-    $specs = @(
-        @{ Name = "good_ready"; Source = $ready; Crop = [Drawing.Rectangle]::new(0, 0, $ready.Width, $ready.Height); Scale = 0.57 },
-        @{ Name = "good_compress"; Source = $gate; Crop = [Drawing.Rectangle]::new(0, 0, $half, $half); Scale = 1.0 },
-        @{ Name = "good_clearance"; Source = $gate; Crop = [Drawing.Rectangle]::new($half, 0, $half, $half); Scale = 1.0 },
-        @{ Name = "good_settle"; Source = $gate; Crop = [Drawing.Rectangle]::new(0, $half, $half, $half); Scale = 1.0 },
-        @{ Name = "good_recover"; Source = $gate; Crop = [Drawing.Rectangle]::new($half, $half, $half, $half); Scale = 1.0 }
-    )
+    if ($Set -eq "Parry") {
+        $specs = @(
+            @{ Name = "parry_ready"; Source = $ready; Crop = [Drawing.Rectangle]::new(0, 0, $ready.Width, $ready.Height); Scale = 0.57 },
+            @{ Name = "parry_load"; Source = $gate; Crop = [Drawing.Rectangle]::new(0, 0, $half, $half); Scale = 1.0 },
+            @{ Name = "parry_contact"; Source = $gate; Crop = [Drawing.Rectangle]::new($half, 0, $half, $half); Scale = 1.0 },
+            @{ Name = "parry_riposte"; Source = $gate; Crop = [Drawing.Rectangle]::new(0, $half, $half, $half); Scale = 1.0 },
+            @{ Name = "parry_recover"; Source = $gate; Crop = [Drawing.Rectangle]::new($half, $half, $half, $half); Scale = 1.0 }
+        )
+    } else {
+        $specs = @(
+            @{ Name = "good_ready"; Source = $ready; Crop = [Drawing.Rectangle]::new(0, 0, $ready.Width, $ready.Height); Scale = 0.57 },
+            @{ Name = "good_compress"; Source = $gate; Crop = [Drawing.Rectangle]::new(0, 0, $half, $half); Scale = 1.0 },
+            @{ Name = "good_clearance"; Source = $gate; Crop = [Drawing.Rectangle]::new($half, 0, $half, $half); Scale = 1.0 },
+            @{ Name = "good_settle"; Source = $gate; Crop = [Drawing.Rectangle]::new(0, $half, $half, $half); Scale = 1.0 },
+            @{ Name = "good_recover"; Source = $gate; Crop = [Drawing.Rectangle]::new($half, $half, $half, $half); Scale = 1.0 }
+        )
+    }
     foreach ($spec in $specs) {
         $cutout = [MisprintCutout]::Extract($spec.Source, $spec.Crop)
         try {

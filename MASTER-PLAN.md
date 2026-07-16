@@ -890,15 +890,26 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
-- ☐ 2026-07-16 · `codex/misprint-dodge-test` · §GRAPHICS — **BILL ACCEPTED THE
-  GOOD-DODGE PROOF; PARRY + COMPACT TIMING-CLUSTER STUDY CLAIMED.** Freeze the approved
+- ☑ 2026-07-16 · `codex/misprint-dodge-test` → **BUILT, NOT MERGED; BILL'S TWO-IMAGE
+  STYLE VERDICT NEXT** · §GRAPHICS — **GOOD-DODGE WIN FROZEN; PARRY + COMPACT TIMING
+  CLUSTER + BRIGHT STYLE SPLIT BUILT.** Freeze the approved
   GOOD cards and 2/4/2/2 cadence as the proof-of-concept win; park GREAT/PERFECT and the other
-  dodge grades. Continue only inside the isolated/default-off ArtV2 experiment: author a first
-  parry key-pose/runtime sequence, replace the distracting test backdrop with a quieter combat
-  theater, and remove the wasted vertical air in the 1920×1080 dashboard. The new anatomy keeps
+  dodge grades. The isolated/default-off ArtV2 experiment now has a first four-pose parry runtime
+  (2/2/2/2 ticks), and removes the wasted vertical air in the 1920×1080 dashboard. The anatomy keeps
   the Answer Channel large and central, attaches combo sockets to its top edge, Wind to its bottom
   edge, makes Health and Flow/Aggro vertical side rails, and docks smaller ability buttons directly
-  below. No gameplay/reducer/protocol changes, no production actor replacement, no `main` merge.
+  below. Bill rejected the first dark-fantasy plate and supplied the NEW style references:
+  `mainStyle.png` owns the bright editorial-screenprint language; `secondaryStyle.png` contributes
+  only restrained poster geometry. The replacement is split correctly: a pure bright AI-operated
+  biocooling data-center environment and a separate modular UI-only sheet. Plants are maintained
+  cooling/filtration infrastructure (continuous beds, condensation channels, pruned trellises),
+  never random pots or abandoned overgrowth. Audit locked the implementation seam: painted shells,
+  caps, sockets, connectors, cards and static icons; code owns moving targets/windows/press marks,
+  fills, text/numbers, cooldowns, lit states, verdicts, feints, charge and flurry. VERIFY:
+  `misprint_dodge_probe` ALL OK · `artv2_probe` 204 checks ALL OK · non-headless 1920×1080 parry
+  tour ALL OK with READY/LOAD/CONTACT/RIPOSTE/RECOVER inspected against the bright plate. No
+  gameplay/reducer/protocol changes, no production actor replacement, no baked-HUD runtime swap,
+  no `main` merge. Stop for Bill's two-image style verdict before cutting new HUD runtime assets.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `987e1cf`, NOT
   MERGED** · §GRAPHICS — **LIVE GOOD-DODGE MOTION LAB COMPLETE; BILL'S FIVE VALUES

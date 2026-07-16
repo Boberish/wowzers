@@ -9,7 +9,7 @@ var _auto_button: Button
 var _view_button: Button
 var _motion_button: Button
 var _auto := true
-var _clean_view := true
+var _clean_view := false
 var _pushed_motion := true
 var _policy: DuelistPolicy
 var _last_policy_tick := -1
@@ -22,8 +22,8 @@ func _ready() -> void:
 	# Use the real approved dashboard/theater layout, but isolate this animation
 	# from the older Duelist actor and full-screen flipbook stack.
 	ArtV2.actors = false
-	ArtV2.scene = "stack_atrium"
-	ArtV2.dash = false
+	ArtV2.scene = "misprint_biocooling"
+	ArtV2.dash = true
 	ArtV2.vfx = false
 	_hud = (load("res://game/raid_main.tscn") as PackedScene).instantiate()
 	add_child(_hud)
@@ -55,7 +55,7 @@ func _build_controls() -> void:
 	box.add_theme_constant_override("separation", 7)
 	_panel.add_child(box)
 	var title := Label.new()
-	title.text = "MISPRINT · DODGE PROOF"
+	title.text = "MISPRINT · PARRY + DASH LAB"
 	title.add_theme_font_size_override("font_size", 18)
 	title.add_theme_color_override("font_color", Color("f1c46b"))
 	box.add_child(title)
@@ -77,7 +77,7 @@ func _build_controls() -> void:
 	_auto_button.pressed.connect(_toggle_auto)
 	row.add_child(_auto_button)
 	_view_button = Button.new()
-	_view_button.text = "VIEW: CLEAN"
+	_view_button.text = "VIEW: FULL HUD"
 	_view_button.pressed.connect(_toggle_view)
 	box.add_child(_view_button)
 	_motion_button = Button.new()
@@ -100,7 +100,7 @@ func _build_controls() -> void:
 	_add_motion_slider(box, "BLUR", 0.0, 12.0, 0.5, 6.0, " px",
 		func(value: float): MisprintDodgeProof.blur_px = value)
 	var help := Label.new()
-	help.text = "Sliders update live; pose timing stays 333 ms.\nAUTO OFF: answer with 1/Space + 2."
+	help.text = "Parry: 4 poses / 267 ms. Dodge stays 333 ms.\nSliders affect dodge only; AUTO drives both live."
 	help.add_theme_font_size_override("font_size", 12)
 	help.add_theme_color_override("font_color", Color(0.78, 0.82, 0.82))
 	box.add_child(help)

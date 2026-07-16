@@ -50,20 +50,20 @@ var _tab = null                    ## DashUtilTab (untyped: inner class, dynamic
 ## All numbers derive from this function; the live widgets only consume its rects.
 static func layout(vp: Vector2) -> Dictionary:
 	var s := clampf(vp.y / 1080.0, 2.0 / 3.0, 1.0)
-	var status_h := roundf(120.0 * s)
-	var hint_h := 40.0 if vp.y >= 900.0 else 0.0
+	var status_h := roundf(104.0 * s)
+	var hint_h := 22.0 if vp.y >= 900.0 else 0.0
 	var answer_h := maxf(150.0, roundf(176.0 * s))
-	var dash_h := maxf(172.0, roundf(254.0 * s))
-	var answer_y := vp.y - hint_h - dash_h - answer_h
+	var answer_y := roundf(vp.y * 0.555)
+	var dash_h := vp.y - answer_y - answer_h - hint_h
 	var answer_w := minf(vp.x * 0.66, 1240.0)
 	var answer := Rect2(vp.x * 0.5 - answer_w * 0.5, answer_y, answer_w, answer_h)
 	var theater := Rect2(0.0, status_h, vp.x, answer_y - status_h)
 
 	# Party rows keep the source art's ~4.38:1 shape instead of being crushed into
 	# the former 30px rail. Four rows plus three gaps are one deliberate island.
-	var row_h := clampf(roundf(108.0 * s), 78.0, 108.0)
-	var row_gap := clampf(roundf(6.0 * s), 4.0, 6.0)
-	var party_w := clampf(vp.x * 0.26, 332.0, 459.0)
+	var row_h := clampf(roundf(66.0 * s), 48.0, 66.0)
+	var row_gap := clampf(roundf(4.0 * s), 3.0, 4.0)
+	var party_w := clampf(vp.x * 0.22, 300.0, 390.0)
 	var party := Rect2(roundf(14.0 * s), roundf(12.0 * s), party_w,
 		row_h * 4.0 + row_gap * 3.0)
 
@@ -80,22 +80,20 @@ static func layout(vp: Vector2) -> Dictionary:
 	var meter_h := minf(420.0 * s, maxf(220.0, answer.position.y - meter_top - 12.0 * s))
 	var meter := Rect2(vp.x - 370.0 * s - 16.0 * s, meter_top, 370.0 * s, meter_h)
 
-	# Three large live resource instruments form the lower backbone. The arithmetic
-	# deliberately reserves exact room for a fifth 92px rune at 1080p (76px at 720).
-	var gauge_sz := Vector2(560.0 * s, maxf(76.0, 114.0 * s))
-	var bar_sz := Vector2(520.0 * s, maxf(44.0, 62.0 * s))
-	var rail_gap := 35.0 * s
-	var cluster_w := bar_sz.x * 2.0 + gauge_sz.x + rail_gap * 2.0
-	var cluster_x := vp.x * 0.5 - cluster_w * 0.5
-	var rail_y := answer.end.y + 26.0 * s
-	var wind := Rect2(vp.x * 0.5 - gauge_sz.x * 0.5, answer.end.y + 2.0 * s,
-		gauge_sz.x, gauge_sz.y)
-	var health := Rect2(cluster_x, rail_y, bar_sz.x, bar_sz.y)
-	var flow := Rect2(cluster_x + bar_sz.x + rail_gap + gauge_sz.x + rail_gap,
-		rail_y, bar_sz.x, bar_sz.y)
-	var ability_sz := Vector2(maxf(434.0, 534.0 * s), maxf(94.0, 110.0 * s))
+	# One connected timing instrument: combo kisses the top edge, Wind the bottom,
+	# and the safety rails read vertically without widening the footer.
+	var side_w := maxf(48.0, 58.0 * s)
+	var side_gap := maxf(8.0, 12.0 * s)
+	var combo_h := maxf(34.0, 42.0 * s)
+	var wind_h := maxf(46.0, 54.0 * s)
+	var health := Rect2(answer.position.x - side_gap - side_w, answer.position.y - combo_h,
+		side_w, answer_h + combo_h + wind_h)
+	var flow := Rect2(answer.end.x + side_gap, health.position.y, side_w, health.size.y)
+	var wind := Rect2(answer.position.x, answer.position.y - combo_h, answer.size.x,
+		combo_h + answer_h + wind_h)
+	var ability_sz := Vector2(maxf(420.0, 500.0 * s), maxf(92.0, 112.0 * s))
 	var abilities := Rect2(vp.x * 0.5 - ability_sz.x * 0.5,
-		vp.y - hint_h - ability_sz.y, ability_sz.x, ability_sz.y)
+		answer.end.y + wind_h + 8.0 * s, ability_sz.x, ability_sz.y)
 	return {
 		"status": Rect2(0, 0, vp.x, status_h),
 		"theater": theater,
@@ -112,10 +110,10 @@ static func layout(vp: Vector2) -> Dictionary:
 		"wind": wind,
 		"flow": flow,
 		"abilities": abilities,
-		"cluster_w": cluster_w,
+		"cluster_w": flow.end.x - health.position.x,
 		"scale": s,
-		"floor_px": theater.position.y + theater.size.y * 0.80,
-		"stage_scale": clampf(theater.size.y / 490.0, 0.65, 1.0),
+		"floor_px": answer.position.y - maxf(12.0, 18.0 * s),
+		"stage_scale": clampf((answer.position.y - status_h) / 470.0, 0.72, 1.08),
 	}
 
 func _init(h) -> void:
@@ -156,14 +154,17 @@ func _init(h) -> void:
 			db.channel.v2_skin = _skin        # painted ◇⬡⯃⊘ comets + purple feints
 			db.channel.v2_naked = true        # the painted answer frame owns the housing
 			db.gauge.v2_skin = _skin          # Wind = central primary bar · 5 sockets below
+			db.gauge.v2_compact_stack = true  # combo above Answer; Wind below it
 			# Discover the live rail rather than naming today's four verbs. A future
 			# fifth AbilityRune inherits the same painted slot without host surgery.
 			for rn in _ability_runes():
 				rn.v2_skin = _skin
 		if band.hp_orb != null:               # horizontal safety bars (§2.3.1 E)
 			band.hp_orb.v2_bar = _skin
+			band.hp_orb.v2_vertical = true
 		if band.res_orb != null:
 			band.res_orb.v2_bar = _skin
+			band.res_orb.v2_vertical = true
 			band.res_orb.v2_pct = true
 			# C6C anchor verdict: keep the Flow read clean; no fixed diamond/threshold
 			# marker. The percentage and all underlying aggro truth remain live.
@@ -409,13 +410,7 @@ func _draw() -> void:
 		# opaque footer/header slabs. Reuse the approved answer-frame caps as quiet
 		# sliced backbones; this keeps the lower cluster painted (not gray rectangles)
 		# while every value, fill, socket and button remains a separate live widget.
-		var hp: Rect2 = _r["health"]
-		var fl: Rect2 = _r["flow"]
 		var ab: Rect2 = _r["abilities"]
-		var rail := Rect2(hp.position - Vector2(12.0, 7.0),
-			Vector2(fl.end.x - hp.position.x + 24.0, maxf(hp.size.y, fl.size.y) + 14.0))
-		_skin.hshell(self, "frame_answer", rail, DashSkin.CAPS_ANSWER,
-			Color(0.78, 0.86, 0.90, 0.62))
 		var dock := ab.grow_individual(10.0, 5.0, 10.0, 4.0)
 		_skin.hshell(self, "frame_answer", dock, DashSkin.CAPS_ANSWER,
 			Color(0.72, 0.80, 0.84, 0.68))

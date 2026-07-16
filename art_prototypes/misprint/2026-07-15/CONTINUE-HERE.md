@@ -8,6 +8,23 @@ This is the restart point for another computer or a fresh chat. Read
 `AGENTS.md` and `MASTER-PLAN.md` first, then use this file as the decision
 record for the current art task.
 
+## 2026-07-16 continuation amendment — latest verdict wins
+
+Bill accepted the slower GOOD dodge as the proof-of-concept win and explicitly
+superseded the stop-parry instruction below. GREAT/PERFECT and other dodge grades
+remain parked. The current experiment now includes a four-pose parry runtime
+study plus a compact timing-centered dashboard layout.
+
+Bill then rejected the dark-fantasy test background/style. The current visual
+direction is the bright editorial screenprint blend documented in
+`background_round_02/` and `ui_round_01/`: `mainStyle.png` is the primary
+reference, `secondaryStyle.png` contributes only restrained poster geometry.
+Environment and HUD are deliberately separate images. The environment uses
+maintained, infrastructure-integrated biocooling plants—no arbitrary pots and no
+abandoned overgrowth. The HUD sheet is a modular component target; live timing,
+fills, text, cooldowns, and state remain code-drawn. Stop for Bill's verdict on
+these two new images before cutting/replacing the existing runtime HUD assets.
+
 ## Approved now
 
 The current character/READY anchor is:

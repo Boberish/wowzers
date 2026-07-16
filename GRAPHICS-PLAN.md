@@ -122,6 +122,16 @@ Scene profiles may change art, palette, light, and ambience but never actor scal
 combat geometry, input, or UI truth. They support 16:9 and wider aspects without stretching key
 art; sides grow through repeatable/extendable layers.
 
+**2026-07-16 STYLE AMENDMENT (Bill; `mainStyle.png` owns, `secondaryStyle.png` spices):** the
+world must stay lively, happy, bright, and approachable even when the warband is fighting an AI
+inside an operating data center. The primary language is warm editorial screenprint—cream paper,
+sky blue, teal, coral, mustard, cobalt, rough black ink—with only restrained poster-scale wedges,
+sunburst ticks, and sharper geometry from the more extreme secondary reference. Dark-fantasy
+metal, gothic ornament, neon cyberpunk, and “one dungeon forever” gloom are rejected. Organic
+material inside AI infrastructure must have an operational reason: condensation-fed trellises,
+continuous biocooling/filtration beds, pruned trees, and maintained vines integrated with ducts
+and heat exchangers. No arbitrary plant pots; no abandoned overgrowth while the facility works.
+
 **Mandatory contrast-pair proof:**
 
 - **Interior:** a dark bound chamber / undercroft / machine hall.
@@ -148,6 +158,15 @@ The durable layout insight remains **one connected class instrument**:
   timing target.
 - Player/party survivability and current target form a left island.
 - Boss HP/cast/effects form an enemy island away from the timing instrument.
+
+**2026-07-16 COMPACT ANATOMY AMENDMENT (Bill):** preserve the large Answer Channel but remove
+the empty 15–20% vertical gap and oversized footer. Five combo sockets connect to the channel's
+top edge; Wind connects to its bottom edge; Health and Aggro become narrow vertical side rails;
+five ability cards dock directly below. Party/boss/utility islands stay compact and out of the
+theater. Painted art owns housings, caps, sockets, connectors, cards, and static icons. Moving
+targets, windows, press marks, fills, numbers, cooldowns, lit states, verdicts, feints, charge,
+and flurry remain code-generated. This amendment supersedes the older horizontal HP/Flow layout
+described later in §2.3.1.E without changing its gameplay/event contract.
 
 **The permanent screen anatomy (Bill, 2026-07-13): theater above, instruments below.** The
 legacy HUD grew around a full-screen stage, so its answer channel currently crosses the Duelist's

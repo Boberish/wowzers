@@ -15,6 +15,13 @@ const FRAME_PATHS := [
 	"res://prototypes/misprint_dodge/frames_good_v2/good_settle.png",
 	"res://prototypes/misprint_dodge/frames_good_v2/good_recover.png",
 ]
+const PARRY_FRAME_PATHS := [
+	"res://prototypes/misprint_dodge/frames_parry_v1/parry_ready.png",
+	"res://prototypes/misprint_dodge/frames_parry_v1/parry_load.png",
+	"res://prototypes/misprint_dodge/frames_parry_v1/parry_contact.png",
+	"res://prototypes/misprint_dodge/frames_parry_v1/parry_riposte.png",
+	"res://prototypes/misprint_dodge/frames_parry_v1/parry_recover.png",
+]
 const LOGICAL_CANVAS := Vector2(768.0, 768.0)
 const ART_SCALE := 0.66
 const TRAVEL_PX := 30.0
@@ -50,6 +57,7 @@ void fragment() {
 const TRAVEL := [0.0, 0.10, 0.28, 0.52, 0.76, 1.0, 0.84, 0.64, 0.40, 0.18, 0.0]
 
 var _frames: Array[Texture2D] = []
+var _parry_frames: Array[Texture2D] = []
 var _visual: Node2D
 var _main: Sprite2D
 var _coral: Sprite2D
@@ -63,6 +71,7 @@ var _start_count := 0
 var _travel_target := 0.0
 var _travel_tween: Tween = null
 var _trail_direction := 1.0
+var _kind := "dodge"
 
 static func try_make() -> MisprintDodgeActor2D:
 	var actor := MisprintDodgeActor2D.new()
@@ -80,6 +89,14 @@ func _build() -> bool:
 		if tex == null:
 			return false
 		_frames.append(tex)
+	for path in PARRY_FRAME_PATHS:
+		if not ResourceLoader.exists(path, "Texture2D"):
+			push_warning("Misprint parry proof: missing frame %s; keeping dodge-only proof" % path)
+			return false
+		var tex := load(path) as Texture2D
+		if tex == null:
+			return false
+		_parry_frames.append(tex)
 	_visual = Node2D.new()
 	_visual.scale = Vector2.ONE * ART_SCALE
 	add_child(_visual)
@@ -125,17 +142,19 @@ func sync_tick(tick: int) -> void:
 ## Only a LANDED dodge/weave starts this proof. A miss, bait, parry, raw key
 ## press, or cosmetic event cannot fake the animation gate.
 func graded_react(kind: String, grade: int) -> void:
-	if kind != "dodge" and kind != "weave":
+	if kind != "dodge" and kind != "weave" and kind != "parry" and kind != "charge":
 		return
 	if grade == StrikeRes.Grade.MISS or grade == StrikeRes.Grade.BAITED:
 		return
 	_start_tick = _tick
 	_start_count += 1
+	_kind = "parry" if kind == "parry" or kind == "charge" else "dodge"
 	_apply_age(0) # immediate: compression card owns the success frame
 
 func _apply_age(age: int) -> void:
 	_age = age
-	if age < 0 or age >= ACTIVE_TICKS:
+	var active_ticks := 8 if _kind == "parry" else ACTIVE_TICKS
+	if age < 0 or age >= active_ticks:
 		_start_tick = -1
 		_age = -1
 		_move_root(0.0)
@@ -144,7 +163,9 @@ func _apply_age(age: int) -> void:
 		_set_trails(-1)
 		return
 	var next_frame := 1
-	if age <= 1:
+	if _kind == "parry":
+		next_frame = clampi(1 + age / 2, 1, 4) # LOAD / CONTACT / RIPOSTE / RECOVER: 2 ticks each
+	elif age <= 1:
 		next_frame = 1 # COMPRESS — 2 ticks
 	elif age <= 5:
 		next_frame = 2 # DEEPEST CLEARANCE — 4 ticks
@@ -153,15 +174,15 @@ func _apply_age(age: int) -> void:
 	else:
 		next_frame = 4 # NEAR-READY RECOVERY — 2 ticks
 	_set_frame(next_frame)
-	var next_travel := TRAVEL_PX * float(TRAVEL[age])
+	var next_travel := (8.0 * sin(PI * float(age) / 7.0)) if _kind == "parry" else TRAVEL_PX * float(TRAVEL[age])
 	var travel_delta := next_travel - _travel_target
 	if absf(travel_delta) > 0.01:
 		_trail_direction = signf(travel_delta)
 	_move_root(next_travel)
 	# Departure and first clearance only. Visibility is tick-owned, so a slow
 	# renderer cannot accidentally stretch the echoes into gameplay timing.
-	_set_echo(age == 2 or age == 3)
-	_set_trails(age)
+	_set_echo((age == 2 or age == 3) if _kind == "dodge" else age == 2)
+	_set_trails(age if _kind == "dodge" else -1)
 
 func _move_root(target_x: float) -> void:
 	_travel_target = target_x
@@ -176,8 +197,9 @@ func _move_root(target_x: float) -> void:
 	_travel_tween.tween_property(_visual, "position:x", target_x, duration)
 
 func _set_frame(frame_i: int) -> void:
-	_frame_i = clampi(frame_i, 0, _frames.size() - 1)
-	var tex := _frames[_frame_i]
+	var active_frames: Array[Texture2D] = _parry_frames if _kind == "parry" else _frames
+	_frame_i = clampi(frame_i, 0, active_frames.size() - 1)
+	var tex := active_frames[_frame_i]
 	_main.texture = tex
 	_coral.texture = tex
 	_cobalt.texture = tex
@@ -219,11 +241,15 @@ func debug_snapshot() -> Dictionary:
 	var sizes: Array = []
 	for tex in _frames:
 		sizes.append(Vector2i(tex.get_width(), tex.get_height()))
+	var parry_sizes: Array = []
+	for tex in _parry_frames:
+		parry_sizes.append(Vector2i(tex.get_width(), tex.get_height()))
 	var visible_trails := 0
 	for trail in _trails:
 		if trail.visible:
 			visible_trails += 1
 	return {
+		"kind": _kind,
 		"tick": _tick,
 		"start_tick": _start_tick,
 		"age": _age,
@@ -239,4 +265,5 @@ func debug_snapshot() -> Dictionary:
 		"blur_px": MisprintDodgeProof.blur_px,
 		"starts": _start_count,
 		"sizes": sizes,
+		"parry_sizes": parry_sizes,
 	}
