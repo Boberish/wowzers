@@ -890,6 +890,16 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☐ 2026-07-16 · `codex/misprint-dodge-test` · §GRAPHICS — **BILL ACCEPTED THE
+  GOOD-DODGE PROOF; PARRY + COMPACT TIMING-CLUSTER STUDY CLAIMED.** Freeze the approved
+  GOOD cards and 2/4/2/2 cadence as the proof-of-concept win; park GREAT/PERFECT and the other
+  dodge grades. Continue only inside the isolated/default-off ArtV2 experiment: author a first
+  parry key-pose/runtime sequence, replace the distracting test backdrop with a quieter combat
+  theater, and remove the wasted vertical air in the 1920×1080 dashboard. The new anatomy keeps
+  the Answer Channel large and central, attaches combo sockets to its top edge, Wind to its bottom
+  edge, makes Health and Flow/Aggro vertical side rails, and docks smaller ability buttons directly
+  below. No gameplay/reducer/protocol changes, no production actor replacement, no `main` merge.
+
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `987e1cf`, NOT
   MERGED** · §GRAPHICS — **LIVE GOOD-DODGE MOTION LAB COMPLETE; BILL'S FIVE VALUES
   NEXT.** Bill approves the revised 333 ms timing and wants to push smoothing/blur deliberately
