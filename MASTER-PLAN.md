@@ -890,6 +890,20 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
 
 ## COORDINATION LOG (claim before you start, tick when merged + plan updated)
 
+- ☑ 2026-07-16 · `codex/misprint-dodge-test` → **ART CHECKPOINT BUILT; OWNERSHIP
+  RELEASED** · §GRAPHICS — **UI-CONCEPT-ONLY REFINEMENT COMPLETE; NO PARRY OR RUNTIME HUD
+  OWNERSHIP.** Preserve the parked images in git.
+  Generate one replacement modular HUD concept aligned to the selected character art and bright
+  biocooling screenprint background: more layered/material depth, smaller combo sockets, and the
+  Answer Channel raised as close to the theater/characters as readability permits. Art sheet and
+  documentation only; no parry files, actor code, dash-host code, `raid_hud.gd`, or runtime assets.
+  Result: `ui_round_02/compact_layered_screenprint_hud_v3_raised.png`. The sheet replaces flat
+  rectangles with tactile layered paper/fiberboard, painted laminations, inset color wells,
+  stitched tabs, ink registration, and shallow contact shadows that belong beside the selected
+  Duelist/background. The connected cluster begins immediately below the reserved theater; five
+  combo pips are a tiny low crown and Wind contains no duplicate pip motif. Stop for Bill's visual
+  verdict. This entry is released; it claims no implementation or follow-up surface.
+
 - ☑ 2026-07-16 · `codex/misprint-dodge-test` → **BUILT, NOT MERGED; BILL'S TWO-IMAGE
   STYLE VERDICT NEXT** · §GRAPHICS — **GOOD-DODGE WIN FROZEN; PARRY + COMPACT TIMING
   CLUSTER + BRIGHT STYLE SPLIT BUILT.** Freeze the approved
