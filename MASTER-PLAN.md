@@ -910,6 +910,9 @@ Coordination Log). These **13 are confirmed real but change gameplay/checksums o
   tour ALL OK with READY/LOAD/CONTACT/RIPOSTE/RECOVER inspected against the bright plate. No
   gameplay/reducer/protocol changes, no production actor replacement, no baked-HUD runtime swap,
   no `main` merge. Stop for Bill's two-image style verdict before cutting new HUD runtime assets.
+  **OWNERSHIP RELEASED 2026-07-16:** another agent owns the new parry direction. This branch and
+  its generated parry/background/HUD artifacts are parked reference material only; Codex claims
+  no parry, actor-runtime, dashboard-runtime, or shared HUD surface from this entry.
 
 - ☑ 2026-07-15 · `codex/misprint-dodge-test` → **BUILT/COMMITTED `987e1cf`, NOT
   MERGED** · §GRAPHICS — **LIVE GOOD-DODGE MOTION LAB COMPLETE; BILL'S FIVE VALUES
